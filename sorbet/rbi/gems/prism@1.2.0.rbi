@@ -137,28 +137,44 @@ end
 
 # Specialized version of Prism::Source for source code that includes ASCII
 # characters only. This class is used to apply performance optimizations that
-# cannot be applied to sources that include multibyte characters. Sources that
-# include multibyte characters are represented by the Prism::Source class.
+# cannot be applied to sources that include multibyte characters.
 #
-# source://prism//lib/prism/parse_result.rb#135
+# In the extremely rare case that a source includes multi-byte characters but
+# is marked as binary because of a magic encoding comment and it cannot be
+# eagerly converted to UTF-8, this class will be used as well. This is because
+# at that point we will treat everything as single-byte characters.
+#
+# source://prism//lib/prism/parse_result.rb#236
 class Prism::ASCIISource < ::Prism::Source
   # Return the column number in characters for the given byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#142
+  # source://prism//lib/prism/parse_result.rb#243
   sig { params(byte_offset: Integer).returns(Integer) }
   def character_column(byte_offset); end
 
   # Return the character offset for the given byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#137
+  # source://prism//lib/prism/parse_result.rb#238
   sig { params(byte_offset: Integer).returns(Integer) }
   def character_offset(byte_offset); end
+
+  # Returns a cache that is the identity function in order to maintain the
+  # same interface. We can do this because code units are always equivalent to
+  # byte offsets for ASCII-only sources.
+  #
+  # source://prism//lib/prism/parse_result.rb#260
+  sig do
+    params(
+      encoding: Encoding
+    ).returns(T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer)))
+  end
+  def code_units_cache(encoding); end
 
   # Specialized version of `code_units_column` that does not depend on
   # `code_units_offset`, which is a more expensive operation. This is
   # essentially the same as `Prism::Source#column`.
   #
-  # source://prism//lib/prism/parse_result.rb#159
+  # source://prism//lib/prism/parse_result.rb#267
   sig { params(byte_offset: Integer, encoding: Encoding).returns(Integer) }
   def code_units_column(byte_offset, encoding); end
 
@@ -169,7 +185,7 @@ class Prism::ASCIISource < ::Prism::Source
   # concept of code units that differs from the number of characters in other
   # encodings, it is not captured here.
   #
-  # source://prism//lib/prism/parse_result.rb#152
+  # source://prism//lib/prism/parse_result.rb#253
   sig { params(byte_offset: Integer, encoding: Encoding).returns(Integer) }
   def code_units_offset(byte_offset, encoding); end
 end
@@ -186,6 +202,17 @@ class Prism::AliasGlobalVariableNode < ::Prism::Node
   # @return [AliasGlobalVariableNode] a new instance of AliasGlobalVariableNode
   #
   # source://prism//lib/prism/node.rb#229
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      new_name: T.any(Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode),
+      old_name: T.any(Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::SymbolNode, Prism::MissingNode),
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, new_name, old_name, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -197,37 +224,53 @@ class Prism::AliasGlobalVariableNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#240
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#245
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#255
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#250
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?new_name: GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode, ?old_name: GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode | SymbolNode | MissingNode, ?keyword_loc: Location) -> AliasGlobalVariableNode
   #
   # source://prism//lib/prism/node.rb#260
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      new_name: T.any(Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode),
+      old_name: T.any(Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::SymbolNode, Prism::MissingNode),
+      keyword_loc: Prism::Location
+    ).returns(Prism::AliasGlobalVariableNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), new_name: T.unsafe(nil), old_name: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#245
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, new_name: GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode, old_name: GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode | SymbolNode | MissingNode, keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#268
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -242,6 +285,7 @@ class Prism::AliasGlobalVariableNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#295
+  sig { returns(String) }
   def keyword; end
 
   # The location of the `alias` keyword.
@@ -250,6 +294,7 @@ class Prism::AliasGlobalVariableNode < ::Prism::Node
   #     ^^^^^
   #
   # source://prism//lib/prism/node.rb#288
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # Represents the new name of the global variable that can be used after aliasing.
@@ -258,6 +303,7 @@ class Prism::AliasGlobalVariableNode < ::Prism::Node
   #           ^^^^
   #
   # source://prism//lib/prism/node.rb#276
+  sig { returns(T.any(Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)) }
   def new_name; end
 
   # Represents the old name of the global variable that can be used before aliasing.
@@ -266,6 +312,9 @@ class Prism::AliasGlobalVariableNode < ::Prism::Node
   #                ^^^^
   #
   # source://prism//lib/prism/node.rb#282
+  sig do
+    returns(T.any(Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::SymbolNode, Prism::MissingNode))
+  end
   def old_name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -294,6 +343,17 @@ class Prism::AliasMethodNode < ::Prism::Node
   # @return [AliasMethodNode] a new instance of AliasMethodNode
   #
   # source://prism//lib/prism/node.rb#330
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      new_name: T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode),
+      old_name: T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode, Prism::GlobalVariableReadNode, Prism::MissingNode),
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, new_name, old_name, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -305,37 +365,53 @@ class Prism::AliasMethodNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#341
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#346
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#356
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#351
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?new_name: SymbolNode | InterpolatedSymbolNode, ?old_name: SymbolNode | InterpolatedSymbolNode | GlobalVariableReadNode | MissingNode, ?keyword_loc: Location) -> AliasMethodNode
   #
   # source://prism//lib/prism/node.rb#361
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      new_name: T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode),
+      old_name: T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode, Prism::GlobalVariableReadNode, Prism::MissingNode),
+      keyword_loc: Prism::Location
+    ).returns(Prism::AliasMethodNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), new_name: T.unsafe(nil), old_name: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#346
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, new_name: SymbolNode | InterpolatedSymbolNode, old_name: SymbolNode | InterpolatedSymbolNode | GlobalVariableReadNode | MissingNode, keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#369
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -350,11 +426,13 @@ class Prism::AliasMethodNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#405
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#398
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # Represents the new name of the method that will be aliased.
@@ -369,6 +447,7 @@ class Prism::AliasMethodNode < ::Prism::Node
   #           ^^^^^^^^^
   #
   # source://prism//lib/prism/node.rb#383
+  sig { returns(T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode)) }
   def new_name; end
 
   # Represents the old name of the method that will be aliased.
@@ -383,6 +462,9 @@ class Prism::AliasMethodNode < ::Prism::Node
   #                     ^^^^^^^^^
   #
   # source://prism//lib/prism/node.rb#395
+  sig do
+    returns(T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode, Prism::GlobalVariableReadNode, Prism::MissingNode))
+  end
   def old_name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -411,6 +493,17 @@ class Prism::AlternationPatternNode < ::Prism::Node
   # @return [AlternationPatternNode] a new instance of AlternationPatternNode
   #
   # source://prism//lib/prism/node.rb#440
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      left: Prism::Node,
+      right: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, left, right, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -422,37 +515,53 @@ class Prism::AlternationPatternNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#451
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#456
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#466
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#461
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?left: Prism::node, ?right: Prism::node, ?operator_loc: Location) -> AlternationPatternNode
   #
   # source://prism//lib/prism/node.rb#471
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      left: Prism::Node,
+      right: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::AlternationPatternNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), left: T.unsafe(nil), right: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#456
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, left: Prism::node, right: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#479
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -470,11 +579,13 @@ class Prism::AlternationPatternNode < ::Prism::Node
   #            ^^^
   #
   # source://prism//lib/prism/node.rb#487
+  sig { returns(Prism::Node) }
   def left; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#506
+  sig { returns(String) }
   def operator; end
 
   # Represents the alternation operator location.
@@ -483,6 +594,7 @@ class Prism::AlternationPatternNode < ::Prism::Node
   #                ^
   #
   # source://prism//lib/prism/node.rb#499
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Represents the right side of the expression.
@@ -491,6 +603,7 @@ class Prism::AlternationPatternNode < ::Prism::Node
   #                  ^^^
   #
   # source://prism//lib/prism/node.rb#493
+  sig { returns(Prism::Node) }
   def right; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -519,6 +632,17 @@ class Prism::AndNode < ::Prism::Node
   # @return [AndNode] a new instance of AndNode
   #
   # source://prism//lib/prism/node.rb#541
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      left: Prism::Node,
+      right: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, left, right, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -530,37 +654,53 @@ class Prism::AndNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#552
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#557
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#567
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#562
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?left: Prism::node, ?right: Prism::node, ?operator_loc: Location) -> AndNode
   #
   # source://prism//lib/prism/node.rb#572
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      left: Prism::Node,
+      right: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::AndNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), left: T.unsafe(nil), right: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#557
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, left: Prism::node, right: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#580
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -581,11 +721,13 @@ class Prism::AndNode < ::Prism::Node
   #     ^
   #
   # source://prism//lib/prism/node.rb#591
+  sig { returns(Prism::Node) }
   def left; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#613
+  sig { returns(String) }
   def operator; end
 
   # The location of the `and` keyword or the `&&` operator.
@@ -594,6 +736,7 @@ class Prism::AndNode < ::Prism::Node
   #          ^^^
   #
   # source://prism//lib/prism/node.rb#606
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Represents the right side of the expression.
@@ -605,6 +748,7 @@ class Prism::AndNode < ::Prism::Node
   #           ^
   #
   # source://prism//lib/prism/node.rb#600
+  sig { returns(Prism::Node) }
   def right; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -987,6 +1131,20 @@ class Prism::ArrayPatternNode < ::Prism::Node
   # @return [ArrayPatternNode] a new instance of ArrayPatternNode
   #
   # source://prism//lib/prism/node.rb#890
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      requireds: T::Array[Prism::Node],
+      rest: T.nilable(Prism::Node),
+      posts: T::Array[Prism::Node],
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, constant, requireds, rest, posts, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -998,52 +1156,74 @@ class Prism::ArrayPatternNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#904
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#909
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String?
   #
   # source://prism//lib/prism/node.rb#985
+  sig { returns(T.nilable(String)) }
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
   # source://prism//lib/prism/node.rb#967
+  sig { returns(T.nilable(Prism::Location)) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#924
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#914
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader constant: ConstantReadNode | ConstantPathNode | nil
   #
   # source://prism//lib/prism/node.rb#942
+  sig { returns(T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode))) }
   def constant; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?constant: ConstantReadNode | ConstantPathNode | nil, ?requireds: Array[Prism::node], ?rest: Prism::node?, ?posts: Array[Prism::node], ?opening_loc: Location?, ?closing_loc: Location?) -> ArrayPatternNode
   #
   # source://prism//lib/prism/node.rb#929
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      requireds: T::Array[Prism::Node],
+      rest: T.nilable(Prism::Node),
+      posts: T::Array[Prism::Node],
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).returns(Prism::ArrayPatternNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), constant: T.unsafe(nil), requireds: T.unsafe(nil), rest: T.unsafe(nil), posts: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#909
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, constant: ConstantReadNode | ConstantPathNode | nil, requireds: Array[Prism::node], rest: Prism::node?, posts: Array[Prism::node], opening_loc: Location?, closing_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#937
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1058,26 +1238,31 @@ class Prism::ArrayPatternNode < ::Prism::Node
   # def opening: () -> String?
   #
   # source://prism//lib/prism/node.rb#980
+  sig { returns(T.nilable(String)) }
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
   # source://prism//lib/prism/node.rb#954
+  sig { returns(T.nilable(Prism::Location)) }
   def opening_loc; end
 
   # attr_reader posts: Array[Prism::node]
   #
   # source://prism//lib/prism/node.rb#951
+  sig { returns(T::Array[Prism::Node]) }
   def posts; end
 
   # attr_reader requireds: Array[Prism::node]
   #
   # source://prism//lib/prism/node.rb#945
+  sig { returns(T::Array[Prism::Node]) }
   def requireds; end
 
   # attr_reader rest: Prism::node?
   #
   # source://prism//lib/prism/node.rb#948
+  sig { returns(T.nilable(Prism::Node)) }
   def rest; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -1106,6 +1291,17 @@ class Prism::AssocNode < ::Prism::Node
   # @return [AssocNode] a new instance of AssocNode
   #
   # source://prism//lib/prism/node.rb#1025
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      key: Prism::Node,
+      value: Prism::Node,
+      operator_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, key, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -1117,37 +1313,53 @@ class Prism::AssocNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1036
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1041
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1051
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1046
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?key: Prism::node, ?value: Prism::node, ?operator_loc: Location?) -> AssocNode
   #
   # source://prism//lib/prism/node.rb#1056
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      key: Prism::Node,
+      value: Prism::Node,
+      operator_loc: T.nilable(Prism::Location)
+    ).returns(Prism::AssocNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), key: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1041
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, key: Prism::node, value: Prism::node, operator_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#1064
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1171,11 +1383,13 @@ class Prism::AssocNode < ::Prism::Node
   #       ^^^^^^^^^^
   #
   # source://prism//lib/prism/node.rb#1078
+  sig { returns(Prism::Node) }
   def key; end
 
   # def operator: () -> String?
   #
   # source://prism//lib/prism/node.rb#1106
+  sig { returns(T.nilable(String)) }
   def operator; end
 
   # The location of the `=>` operator, if present.
@@ -1184,6 +1398,7 @@ class Prism::AssocNode < ::Prism::Node
   #           ^^
   #
   # source://prism//lib/prism/node.rb#1093
+  sig { returns(T.nilable(Prism::Location)) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -1201,6 +1416,7 @@ class Prism::AssocNode < ::Prism::Node
   #          ^
   #
   # source://prism//lib/prism/node.rb#1087
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -1223,6 +1439,16 @@ class Prism::AssocSplatNode < ::Prism::Node
   # @return [AssocSplatNode] a new instance of AssocSplatNode
   #
   # source://prism//lib/prism/node.rb#1141
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: T.nilable(Prism::Node),
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -1234,37 +1460,52 @@ class Prism::AssocSplatNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1151
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1156
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1168
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1161
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?value: Prism::node?, ?operator_loc: Location) -> AssocSplatNode
   #
   # source://prism//lib/prism/node.rb#1173
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: T.nilable(Prism::Node),
+      operator_loc: Prism::Location
+    ).returns(Prism::AssocSplatNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1156
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, value: Prism::node?, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#1181
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1279,6 +1520,7 @@ class Prism::AssocSplatNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#1202
+  sig { returns(String) }
   def operator; end
 
   # The location of the `**` operator.
@@ -1287,6 +1529,7 @@ class Prism::AssocSplatNode < ::Prism::Node
   #       ^^
   #
   # source://prism//lib/prism/node.rb#1195
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -1301,6 +1544,7 @@ class Prism::AssocSplatNode < ::Prism::Node
   #         ^^^
   #
   # source://prism//lib/prism/node.rb#1189
+  sig { returns(T.nilable(Prism::Node)) }
   def value; end
 
   class << self
@@ -1328,6 +1572,7 @@ class Prism::BackReferenceReadNode < ::Prism::Node
   # @return [BackReferenceReadNode] a new instance of BackReferenceReadNode
   #
   # source://prism//lib/prism/node.rb#1236
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -1339,37 +1584,51 @@ class Prism::BackReferenceReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1245
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1250
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1260
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1255
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> BackReferenceReadNode
   #
   # source://prism//lib/prism/node.rb#1265
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::BackReferenceReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1250
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#1273
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1388,6 +1647,7 @@ class Prism::BackReferenceReadNode < ::Prism::Node
   #     $+ # name `:$+`
   #
   # source://prism//lib/prism/node.rb#1282
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -1445,6 +1705,20 @@ class Prism::BeginNode < ::Prism::Node
   # @return [BeginNode] a new instance of BeginNode
   #
   # source://prism//lib/prism/node.rb#1315
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      begin_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode),
+      rescue_clause: T.nilable(Prism::RescueNode),
+      else_clause: T.nilable(Prism::ElseNode),
+      ensure_clause: T.nilable(Prism::EnsureNode),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, begin_keyword_loc, statements, rescue_clause, else_clause, ensure_clause, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -1456,67 +1730,92 @@ class Prism::BeginNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1329
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def begin_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#1405
+  sig { returns(T.nilable(String)) }
   def begin_keyword; end
 
   # attr_reader begin_keyword_loc: Location?
   #
   # source://prism//lib/prism/node.rb#1367
+  sig { returns(T.nilable(Prism::Location)) }
   def begin_keyword_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1334
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1349
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1339
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?begin_keyword_loc: Location?, ?statements: StatementsNode?, ?rescue_clause: RescueNode?, ?else_clause: ElseNode?, ?ensure_clause: EnsureNode?, ?end_keyword_loc: Location?) -> BeginNode
   #
   # source://prism//lib/prism/node.rb#1354
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      begin_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode),
+      rescue_clause: T.nilable(Prism::RescueNode),
+      else_clause: T.nilable(Prism::ElseNode),
+      ensure_clause: T.nilable(Prism::EnsureNode),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).returns(Prism::BeginNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), begin_keyword_loc: T.unsafe(nil), statements: T.unsafe(nil), rescue_clause: T.unsafe(nil), else_clause: T.unsafe(nil), ensure_clause: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1334
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, begin_keyword_loc: Location?, statements: StatementsNode?, rescue_clause: RescueNode?, else_clause: ElseNode?, ensure_clause: EnsureNode?, end_keyword_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#1362
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader else_clause: ElseNode?
   #
   # source://prism//lib/prism/node.rb#1386
+  sig { returns(T.nilable(Prism::ElseNode)) }
   def else_clause; end
 
   # def end_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#1410
+  sig { returns(T.nilable(String)) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
   # source://prism//lib/prism/node.rb#1392
+  sig { returns(T.nilable(Prism::Location)) }
   def end_keyword_loc; end
 
   # attr_reader ensure_clause: EnsureNode?
   #
   # source://prism//lib/prism/node.rb#1389
+  sig { returns(T.nilable(Prism::EnsureNode)) }
   def ensure_clause; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1534,11 +1833,13 @@ class Prism::BeginNode < ::Prism::Node
   # attr_reader rescue_clause: RescueNode?
   #
   # source://prism//lib/prism/node.rb#1383
+  sig { returns(T.nilable(Prism::RescueNode)) }
   def rescue_clause; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#1380
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -1567,6 +1868,16 @@ class Prism::BlockArgumentNode < ::Prism::Node
   # @return [BlockArgumentNode] a new instance of BlockArgumentNode
   #
   # source://prism//lib/prism/node.rb#1448
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      expression: T.nilable(Prism::Node),
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, expression, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -1578,42 +1889,58 @@ class Prism::BlockArgumentNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1458
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1463
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1475
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1468
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?expression: Prism::node?, ?operator_loc: Location) -> BlockArgumentNode
   #
   # source://prism//lib/prism/node.rb#1480
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      expression: T.nilable(Prism::Node),
+      operator_loc: Prism::Location
+    ).returns(Prism::BlockArgumentNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), expression: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1463
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, expression: Prism::node?, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#1488
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Prism::node?
   #
   # source://prism//lib/prism/node.rb#1493
+  sig { returns(T.nilable(Prism::Node)) }
   def expression; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1628,11 +1955,13 @@ class Prism::BlockArgumentNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#1503
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#1496
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -1769,6 +2098,19 @@ class Prism::BlockNode < ::Prism::Node
   # @return [BlockNode] a new instance of BlockNode
   #
   # source://prism//lib/prism/node.rb#1616
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      parameters: T.nilable(T.any(Prism::BlockParametersNode, Prism::NumberedParametersNode, Prism::ItParametersNode)),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, locals, parameters, body, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -1780,52 +2122,73 @@ class Prism::BlockNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1629
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: StatementsNode | BeginNode | nil
   #
   # source://prism//lib/prism/node.rb#1671
+  sig { returns(T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1634
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#1693
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#1681
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1647
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1639
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?locals: Array[Symbol], ?parameters: BlockParametersNode | NumberedParametersNode | ItParametersNode | nil, ?body: StatementsNode | BeginNode | nil, ?opening_loc: Location, ?closing_loc: Location) -> BlockNode
   #
   # source://prism//lib/prism/node.rb#1652
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      parameters: T.nilable(T.any(Prism::BlockParametersNode, Prism::NumberedParametersNode, Prism::ItParametersNode)),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).returns(Prism::BlockNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), locals: T.unsafe(nil), parameters: T.unsafe(nil), body: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1634
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, locals: Array[Symbol], parameters: BlockParametersNode | NumberedParametersNode | ItParametersNode | nil, body: StatementsNode | BeginNode | nil, opening_loc: Location, closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#1660
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -1840,21 +2203,25 @@ class Prism::BlockNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#1665
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#1688
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#1674
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # attr_reader parameters: BlockParametersNode | NumberedParametersNode | ItParametersNode | nil
   #
   # source://prism//lib/prism/node.rb#1668
+  sig { returns(T.nilable(T.any(Prism::BlockParametersNode, Prism::NumberedParametersNode, Prism::ItParametersNode))) }
   def parameters; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -2026,6 +2393,18 @@ class Prism::BlockParametersNode < ::Prism::Node
   # @return [BlockParametersNode] a new instance of BlockParametersNode
   #
   # source://prism//lib/prism/node.rb#1844
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      parameters: T.nilable(Prism::ParametersNode),
+      locals: T::Array[Prism::BlockLocalVariableNode],
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, parameters, locals, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -2037,47 +2416,66 @@ class Prism::BlockParametersNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1856
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1861
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String?
   #
   # source://prism//lib/prism/node.rb#1929
+  sig { returns(T.nilable(String)) }
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
   # source://prism//lib/prism/node.rb#1911
+  sig { returns(T.nilable(Prism::Location)) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1874
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1866
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?parameters: ParametersNode?, ?locals: Array[BlockLocalVariableNode], ?opening_loc: Location?, ?closing_loc: Location?) -> BlockParametersNode
   #
   # source://prism//lib/prism/node.rb#1879
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      parameters: T.nilable(Prism::ParametersNode),
+      locals: T::Array[Prism::BlockLocalVariableNode],
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).returns(Prism::BlockParametersNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), parameters: T.unsafe(nil), locals: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1861
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, parameters: ParametersNode?, locals: Array[BlockLocalVariableNode], opening_loc: Location?, closing_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#1887
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -2092,21 +2490,25 @@ class Prism::BlockParametersNode < ::Prism::Node
   # attr_reader locals: Array[BlockLocalVariableNode]
   #
   # source://prism//lib/prism/node.rb#1895
+  sig { returns(T::Array[Prism::BlockLocalVariableNode]) }
   def locals; end
 
   # def opening: () -> String?
   #
   # source://prism//lib/prism/node.rb#1924
+  sig { returns(T.nilable(String)) }
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
   # source://prism//lib/prism/node.rb#1898
+  sig { returns(T.nilable(Prism::Location)) }
   def opening_loc; end
 
   # attr_reader parameters: ParametersNode?
   #
   # source://prism//lib/prism/node.rb#1892
+  sig { returns(T.nilable(Prism::ParametersNode)) }
   def parameters; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -2135,6 +2537,16 @@ class Prism::BreakNode < ::Prism::Node
   # @return [BreakNode] a new instance of BreakNode
   #
   # source://prism//lib/prism/node.rb#1966
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      arguments: T.nilable(Prism::ArgumentsNode),
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, arguments, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -2146,6 +2558,7 @@ class Prism::BreakNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#1976
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # The arguments to the break statement, if present. These can be any [non-void expressions](https://github.com/ruby/prism/blob/main/docs/parsing_rules.md#non-void-expression).
@@ -2154,37 +2567,52 @@ class Prism::BreakNode < ::Prism::Node
   #           ^^^
   #
   # source://prism//lib/prism/node.rb#2014
+  sig { returns(T.nilable(Prism::ArgumentsNode)) }
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1981
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#1993
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#1986
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?arguments: ArgumentsNode?, ?keyword_loc: Location) -> BreakNode
   #
   # source://prism//lib/prism/node.rb#1998
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      arguments: T.nilable(Prism::ArgumentsNode),
+      keyword_loc: Prism::Location
+    ).returns(Prism::BreakNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), arguments: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#1981
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, arguments: ArgumentsNode?, keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#2006
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -2199,6 +2627,7 @@ class Prism::BreakNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#2027
+  sig { returns(String) }
   def keyword; end
 
   # The location of the `break` keyword.
@@ -2207,6 +2636,7 @@ class Prism::BreakNode < ::Prism::Node
   #     ^^^^^
   #
   # source://prism//lib/prism/node.rb#2020
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -3334,6 +3764,17 @@ class Prism::CapturePatternNode < ::Prism::Node
   # @return [CapturePatternNode] a new instance of CapturePatternNode
   #
   # source://prism//lib/prism/node.rb#2911
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: Prism::Node,
+      target: Prism::LocalVariableTargetNode,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, value, target, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -3345,37 +3786,53 @@ class Prism::CapturePatternNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#2922
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#2927
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#2937
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#2932
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?value: Prism::node, ?target: LocalVariableTargetNode, ?operator_loc: Location) -> CapturePatternNode
   #
   # source://prism//lib/prism/node.rb#2942
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: Prism::Node,
+      target: Prism::LocalVariableTargetNode,
+      operator_loc: Prism::Location
+    ).returns(Prism::CapturePatternNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), value: T.unsafe(nil), target: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#2927
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, value: Prism::node, target: LocalVariableTargetNode, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#2950
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -3390,16 +3847,19 @@ class Prism::CapturePatternNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#2968
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#2961
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # attr_reader target: LocalVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#2958
+  sig { returns(Prism::LocalVariableTargetNode) }
   def target; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -3411,6 +3871,7 @@ class Prism::CapturePatternNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#2955
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -3435,6 +3896,19 @@ class Prism::CaseMatchNode < ::Prism::Node
   # @return [CaseMatchNode] a new instance of CaseMatchNode
   #
   # source://prism//lib/prism/node.rb#3005
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      predicate: T.nilable(Prism::Node),
+      conditions: T::Array[Prism::InNode],
+      else_clause: T.nilable(Prism::ElseNode),
+      case_keyword_loc: Prism::Location,
+      end_keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, predicate, conditions, else_clause, case_keyword_loc, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -3446,36 +3920,43 @@ class Prism::CaseMatchNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3018
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def case_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#3078
+  sig { returns(String) }
   def case_keyword; end
 
   # attr_reader case_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#3064
+  sig { returns(Prism::Location) }
   def case_keyword_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3023
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3037
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3028
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader conditions: Array[InNode]
   #
   # source://prism//lib/prism/node.rb#3058
+  sig { returns(T::Array[Prism::InNode]) }
   def conditions; end
 
   # Returns the else clause of the case match node. This method is deprecated
@@ -3487,32 +3968,49 @@ class Prism::CaseMatchNode < ::Prism::Node
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?predicate: Prism::node?, ?conditions: Array[InNode], ?else_clause: ElseNode?, ?case_keyword_loc: Location, ?end_keyword_loc: Location) -> CaseMatchNode
   #
   # source://prism//lib/prism/node.rb#3042
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      predicate: T.nilable(Prism::Node),
+      conditions: T::Array[Prism::InNode],
+      else_clause: T.nilable(Prism::ElseNode),
+      case_keyword_loc: Prism::Location,
+      end_keyword_loc: Prism::Location
+    ).returns(Prism::CaseMatchNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), predicate: T.unsafe(nil), conditions: T.unsafe(nil), else_clause: T.unsafe(nil), case_keyword_loc: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3023
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, predicate: Prism::node?, conditions: Array[InNode], else_clause: ElseNode?, case_keyword_loc: Location, end_keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#3050
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader else_clause: ElseNode?
   #
   # source://prism//lib/prism/node.rb#3061
+  sig { returns(T.nilable(Prism::ElseNode)) }
   def else_clause; end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#3083
+  sig { returns(String) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#3071
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -3527,6 +4025,7 @@ class Prism::CaseMatchNode < ::Prism::Node
   # attr_reader predicate: Prism::node?
   #
   # source://prism//lib/prism/node.rb#3055
+  sig { returns(T.nilable(Prism::Node)) }
   def predicate; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -3557,6 +4056,19 @@ class Prism::CaseNode < ::Prism::Node
   # @return [CaseNode] a new instance of CaseNode
   #
   # source://prism//lib/prism/node.rb#3123
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      predicate: T.nilable(Prism::Node),
+      conditions: T::Array[Prism::WhenNode],
+      else_clause: T.nilable(Prism::ElseNode),
+      case_keyword_loc: Prism::Location,
+      end_keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, predicate, conditions, else_clause, case_keyword_loc, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -3568,36 +4080,43 @@ class Prism::CaseNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3136
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def case_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#3196
+  sig { returns(String) }
   def case_keyword; end
 
   # attr_reader case_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#3182
+  sig { returns(Prism::Location) }
   def case_keyword_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3141
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3155
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3146
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader conditions: Array[WhenNode]
   #
   # source://prism//lib/prism/node.rb#3176
+  sig { returns(T::Array[Prism::WhenNode]) }
   def conditions; end
 
   # Returns the else clause of the case node. This method is deprecated in
@@ -3609,32 +4128,49 @@ class Prism::CaseNode < ::Prism::Node
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?predicate: Prism::node?, ?conditions: Array[WhenNode], ?else_clause: ElseNode?, ?case_keyword_loc: Location, ?end_keyword_loc: Location) -> CaseNode
   #
   # source://prism//lib/prism/node.rb#3160
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      predicate: T.nilable(Prism::Node),
+      conditions: T::Array[Prism::WhenNode],
+      else_clause: T.nilable(Prism::ElseNode),
+      case_keyword_loc: Prism::Location,
+      end_keyword_loc: Prism::Location
+    ).returns(Prism::CaseNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), predicate: T.unsafe(nil), conditions: T.unsafe(nil), else_clause: T.unsafe(nil), case_keyword_loc: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3141
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, predicate: Prism::node?, conditions: Array[WhenNode], else_clause: ElseNode?, case_keyword_loc: Location, end_keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#3168
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader else_clause: ElseNode?
   #
   # source://prism//lib/prism/node.rb#3179
+  sig { returns(T.nilable(Prism::ElseNode)) }
   def else_clause; end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#3201
+  sig { returns(String) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#3189
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -3649,6 +4185,7 @@ class Prism::CaseNode < ::Prism::Node
   # attr_reader predicate: Prism::node?
   #
   # source://prism//lib/prism/node.rb#3173
+  sig { returns(T.nilable(Prism::Node)) }
   def predicate; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -3677,6 +4214,22 @@ class Prism::ClassNode < ::Prism::Node
   # @return [ClassNode] a new instance of ClassNode
   #
   # source://prism//lib/prism/node.rb#3239
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      class_keyword_loc: Prism::Location,
+      constant_path: T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::CallNode),
+      inheritance_operator_loc: T.nilable(Prism::Location),
+      superclass: T.nilable(Prism::Node),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      end_keyword_loc: Prism::Location,
+      name: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, locals, class_keyword_loc, constant_path, inheritance_operator_loc, superclass, body, end_keyword_loc, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -3688,67 +4241,94 @@ class Prism::ClassNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3255
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: StatementsNode | BeginNode | nil
   #
   # source://prism//lib/prism/node.rb#3321
+  sig { returns(T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3260
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def class_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#3334
+  sig { returns(String) }
   def class_keyword; end
 
   # attr_reader class_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#3295
+  sig { returns(Prism::Location) }
   def class_keyword_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3274
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3265
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader constant_path: ConstantReadNode | ConstantPathNode | CallNode
   #
   # source://prism//lib/prism/node.rb#3302
+  sig { returns(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::CallNode)) }
   def constant_path; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?locals: Array[Symbol], ?class_keyword_loc: Location, ?constant_path: ConstantReadNode | ConstantPathNode | CallNode, ?inheritance_operator_loc: Location?, ?superclass: Prism::node?, ?body: StatementsNode | BeginNode | nil, ?end_keyword_loc: Location, ?name: Symbol) -> ClassNode
   #
   # source://prism//lib/prism/node.rb#3279
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      class_keyword_loc: Prism::Location,
+      constant_path: T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::CallNode),
+      inheritance_operator_loc: T.nilable(Prism::Location),
+      superclass: T.nilable(Prism::Node),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      end_keyword_loc: Prism::Location,
+      name: Symbol
+    ).returns(Prism::ClassNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), locals: T.unsafe(nil), class_keyword_loc: T.unsafe(nil), constant_path: T.unsafe(nil), inheritance_operator_loc: T.unsafe(nil), superclass: T.unsafe(nil), body: T.unsafe(nil), end_keyword_loc: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3260
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, locals: Array[Symbol], class_keyword_loc: Location, constant_path: ConstantReadNode | ConstantPathNode | CallNode, inheritance_operator_loc: Location?, superclass: Prism::node?, body: StatementsNode | BeginNode | nil, end_keyword_loc: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#3287
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#3344
+  sig { returns(String) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#3324
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -3757,11 +4337,13 @@ class Prism::ClassNode < ::Prism::Node
   # def inheritance_operator: () -> String?
   #
   # source://prism//lib/prism/node.rb#3339
+  sig { returns(T.nilable(String)) }
   def inheritance_operator; end
 
   # attr_reader inheritance_operator_loc: Location?
   #
   # source://prism//lib/prism/node.rb#3305
+  sig { returns(T.nilable(Prism::Location)) }
   def inheritance_operator_loc; end
 
   # def inspect -> String
@@ -3773,16 +4355,19 @@ class Prism::ClassNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#3292
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#3331
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader superclass: Prism::node?
   #
   # source://prism//lib/prism/node.rb#3318
+  sig { returns(T.nilable(Prism::Node)) }
   def superclass; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -3811,6 +4396,18 @@ class Prism::ClassVariableAndWriteNode < ::Prism::Node
   # @return [ClassVariableAndWriteNode] a new instance of ClassVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#3385
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -3822,37 +4419,54 @@ class Prism::ClassVariableAndWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3397
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3402
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3412
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3407
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> ClassVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#3417
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ClassVariableAndWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3402
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#3425
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#164
@@ -3870,21 +4484,25 @@ class Prism::ClassVariableAndWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#3430
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#3433
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#3450
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#3440
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -3896,6 +4514,7 @@ class Prism::ClassVariableAndWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#3447
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -3918,6 +4537,19 @@ class Prism::ClassVariableOperatorWriteNode < ::Prism::Node
   # @return [ClassVariableOperatorWriteNode] a new instance of ClassVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#3486
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, binary_operator_loc, value, binary_operator); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -3929,47 +4561,67 @@ class Prism::ClassVariableOperatorWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3499
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader binary_operator: Symbol
   #
   # source://prism//lib/prism/node.rb#3552
+  sig { returns(Symbol) }
   def binary_operator; end
 
   # attr_reader binary_operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#3542
+  sig { returns(Prism::Location) }
   def binary_operator_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3504
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3514
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3509
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?binary_operator_loc: Location, ?value: Prism::node, ?binary_operator: Symbol) -> ClassVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#3519
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).returns(Prism::ClassVariableOperatorWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), binary_operator_loc: T.unsafe(nil), value: T.unsafe(nil), binary_operator: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3504
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, binary_operator_loc: Location, value: Prism::node, binary_operator: Symbol }
   #
   # source://prism//lib/prism/node.rb#3527
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#176
@@ -3987,11 +4639,13 @@ class Prism::ClassVariableOperatorWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#3532
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#3535
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # Returns the binary operator used to modify the receiver. This method is
@@ -4015,6 +4669,7 @@ class Prism::ClassVariableOperatorWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#3549
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -4037,6 +4692,18 @@ class Prism::ClassVariableOrWriteNode < ::Prism::Node
   # @return [ClassVariableOrWriteNode] a new instance of ClassVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#3587
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -4048,37 +4715,54 @@ class Prism::ClassVariableOrWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3599
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3604
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3614
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3609
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> ClassVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#3619
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ClassVariableOrWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3604
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#3627
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#170
@@ -4096,21 +4780,25 @@ class Prism::ClassVariableOrWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#3632
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#3635
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#3652
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#3642
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -4122,6 +4810,7 @@ class Prism::ClassVariableOrWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#3649
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -4144,6 +4833,7 @@ class Prism::ClassVariableReadNode < ::Prism::Node
   # @return [ClassVariableReadNode] a new instance of ClassVariableReadNode
   #
   # source://prism//lib/prism/node.rb#3688
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -4155,37 +4845,51 @@ class Prism::ClassVariableReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3697
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3702
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3712
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3707
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> ClassVariableReadNode
   #
   # source://prism//lib/prism/node.rb#3717
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::ClassVariableReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3702
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#3725
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -4204,6 +4908,7 @@ class Prism::ClassVariableReadNode < ::Prism::Node
   #     @@_test # name `:@@_test`
   #
   # source://prism//lib/prism/node.rb#3734
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -4232,6 +4937,7 @@ class Prism::ClassVariableTargetNode < ::Prism::Node
   # @return [ClassVariableTargetNode] a new instance of ClassVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#3765
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -4243,37 +4949,51 @@ class Prism::ClassVariableTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3774
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3779
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3789
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3784
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> ClassVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#3794
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::ClassVariableTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3779
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#3802
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -4288,6 +5008,7 @@ class Prism::ClassVariableTargetNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#3807
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -4316,6 +5037,18 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   # @return [ClassVariableWriteNode] a new instance of ClassVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#3838
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -4327,37 +5060,54 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3850
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3855
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3865
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3860
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?value: Prism::node, ?operator_loc: Location) -> ClassVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#3870
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::ClassVariableWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3855
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, value: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#3878
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -4376,6 +5126,7 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   #     @@_test = :test # name `@@_test`
   #
   # source://prism//lib/prism/node.rb#3887
+  sig { returns(Symbol) }
   def name; end
 
   # The location of the variable name.
@@ -4384,11 +5135,13 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   #     ^^^^^
   #
   # source://prism//lib/prism/node.rb#3893
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#3919
+  sig { returns(String) }
   def operator; end
 
   # The location of the `=` operator.
@@ -4397,6 +5150,7 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   #           ^
   #
   # source://prism//lib/prism/node.rb#3912
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -4414,6 +5168,7 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   #              ^^^
   #
   # source://prism//lib/prism/node.rb#3906
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -4424,10 +5179,63 @@ class Prism::ClassVariableWriteNode < ::Prism::Node
   end
 end
 
+# A cache that can be used to quickly compute code unit offsets from byte
+# offsets. It purposefully provides only a single #[] method to access the
+# cache in order to minimize surface area.
+#
+# Note that there are some known issues here that may or may not be addressed
+# in the future:
+#
+# * The first is that there are issues when the cache computes values that are
+#   not on character boundaries. This can result in subsequent computations
+#   being off by one or more code units.
+# * The second is that this cache is currently unbounded. In theory we could
+#   introduce some kind of LRU cache to limit the number of entries, but this
+#   has not yet been implemented.
+#
+# source://prism//lib/prism/parse_result.rb#172
+class Prism::CodeUnitsCache
+  # Initialize a new cache with the given source and encoding.
+  #
+  # @return [CodeUnitsCache] a new instance of CodeUnitsCache
+  #
+  # source://prism//lib/prism/parse_result.rb#198
+  sig { params(source: String, encoding: Encoding).void }
+  def initialize(source, encoding); end
+
+  # Retrieve the code units offset from the given byte offset.
+  #
+  # source://prism//lib/prism/parse_result.rb#212
+  sig { params(byte_offset: Integer).returns(Integer) }
+  def [](byte_offset); end
+end
+
+# source://prism//lib/prism/parse_result.rb#184
+class Prism::CodeUnitsCache::LengthCounter
+  # @return [LengthCounter] a new instance of LengthCounter
+  #
+  # source://prism//lib/prism/parse_result.rb#185
+  def initialize(source, encoding); end
+
+  # source://prism//lib/prism/parse_result.rb#190
+  def count(byte_offset, byte_length); end
+end
+
+# source://prism//lib/prism/parse_result.rb#173
+class Prism::CodeUnitsCache::UTF16Counter
+  # @return [UTF16Counter] a new instance of UTF16Counter
+  #
+  # source://prism//lib/prism/parse_result.rb#174
+  def initialize(source, encoding); end
+
+  # source://prism//lib/prism/parse_result.rb#179
+  def count(byte_offset, byte_length); end
+end
+
 # This represents a comment that was encountered during parsing. It is the
 # base class for all comment types.
 #
-# source://prism//lib/prism/parse_result.rb#375
+# source://prism//lib/prism/parse_result.rb#507
 class Prism::Comment
   abstract!
 
@@ -4435,25 +5243,25 @@ class Prism::Comment
   #
   # @return [Comment] a new instance of Comment
   #
-  # source://prism//lib/prism/parse_result.rb#380
+  # source://prism//lib/prism/parse_result.rb#512
   sig { params(location: Prism::Location).void }
   def initialize(location); end
 
   # Implement the hash pattern matching interface for Comment.
   #
-  # source://prism//lib/prism/parse_result.rb#385
+  # source://prism//lib/prism/parse_result.rb#517
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The location of this comment in the source.
   #
-  # source://prism//lib/prism/parse_result.rb#377
+  # source://prism//lib/prism/parse_result.rb#509
   sig { returns(Prism::Location) }
   def location; end
 
   # Returns the content of the comment by slicing it from the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#390
+  # source://prism//lib/prism/parse_result.rb#522
   sig { returns(String) }
   def slice; end
 
@@ -5417,6 +6225,18 @@ class Prism::ConstantAndWriteNode < ::Prism::Node
   # @return [ConstantAndWriteNode] a new instance of ConstantAndWriteNode
   #
   # source://prism//lib/prism/node.rb#3955
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -5428,37 +6248,54 @@ class Prism::ConstantAndWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#3967
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3972
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#3982
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#3977
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> ConstantAndWriteNode
   #
   # source://prism//lib/prism/node.rb#3987
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ConstantAndWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#3972
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#3995
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#182
@@ -5476,21 +6313,25 @@ class Prism::ConstantAndWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#4000
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#4003
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#4020
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#4010
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -5502,6 +6343,7 @@ class Prism::ConstantAndWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#4017
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -5524,6 +6366,19 @@ class Prism::ConstantOperatorWriteNode < ::Prism::Node
   # @return [ConstantOperatorWriteNode] a new instance of ConstantOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#4056
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, binary_operator_loc, value, binary_operator); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -5535,47 +6390,67 @@ class Prism::ConstantOperatorWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4069
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader binary_operator: Symbol
   #
   # source://prism//lib/prism/node.rb#4122
+  sig { returns(Symbol) }
   def binary_operator; end
 
   # attr_reader binary_operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#4112
+  sig { returns(Prism::Location) }
   def binary_operator_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4074
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4084
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4079
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?binary_operator_loc: Location, ?value: Prism::node, ?binary_operator: Symbol) -> ConstantOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#4089
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).returns(Prism::ConstantOperatorWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), binary_operator_loc: T.unsafe(nil), value: T.unsafe(nil), binary_operator: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4074
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, binary_operator_loc: Location, value: Prism::node, binary_operator: Symbol }
   #
   # source://prism//lib/prism/node.rb#4097
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#194
@@ -5593,11 +6468,13 @@ class Prism::ConstantOperatorWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#4102
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#4105
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # Returns the binary operator used to modify the receiver. This method is
@@ -5621,6 +6498,7 @@ class Prism::ConstantOperatorWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#4119
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -5643,6 +6521,18 @@ class Prism::ConstantOrWriteNode < ::Prism::Node
   # @return [ConstantOrWriteNode] a new instance of ConstantOrWriteNode
   #
   # source://prism//lib/prism/node.rb#4157
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -5654,37 +6544,54 @@ class Prism::ConstantOrWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4169
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4174
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4184
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4179
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> ConstantOrWriteNode
   #
   # source://prism//lib/prism/node.rb#4189
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ConstantOrWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4174
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#4197
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#188
@@ -5702,21 +6609,25 @@ class Prism::ConstantOrWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#4202
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#4205
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#4222
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#4212
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -5728,6 +6639,7 @@ class Prism::ConstantOrWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#4219
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -5750,6 +6662,17 @@ class Prism::ConstantPathAndWriteNode < ::Prism::Node
   # @return [ConstantPathAndWriteNode] a new instance of ConstantPathAndWriteNode
   #
   # source://prism//lib/prism/node.rb#4258
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, target, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -5761,37 +6684,53 @@ class Prism::ConstantPathAndWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4269
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4274
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4284
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4279
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?target: ConstantPathNode, ?operator_loc: Location, ?value: Prism::node) -> ConstantPathAndWriteNode
   #
   # source://prism//lib/prism/node.rb#4289
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ConstantPathAndWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), target: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4274
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, target: ConstantPathNode, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#4297
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -5806,16 +6745,19 @@ class Prism::ConstantPathAndWriteNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#4315
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#4305
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # attr_reader target: ConstantPathNode
   #
   # source://prism//lib/prism/node.rb#4302
+  sig { returns(Prism::ConstantPathNode) }
   def target; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -5827,6 +6769,7 @@ class Prism::ConstantPathAndWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#4312
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -5849,6 +6792,18 @@ class Prism::ConstantPathNode < ::Prism::Node
   # @return [ConstantPathNode] a new instance of ConstantPathNode
   #
   # source://prism//lib/prism/node.rb#4350
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      parent: T.nilable(Prism::Node),
+      name: T.nilable(Symbol),
+      delimiter_loc: Prism::Location,
+      name_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, parent, name, delimiter_loc, name_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -5860,6 +6815,7 @@ class Prism::ConstantPathNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4362
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # Previously, we had a child node on this class that contained either a
@@ -5872,37 +6828,54 @@ class Prism::ConstantPathNode < ::Prism::Node
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4367
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4379
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4372
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?parent: Prism::node?, ?name: Symbol?, ?delimiter_loc: Location, ?name_loc: Location) -> ConstantPathNode
   #
   # source://prism//lib/prism/node.rb#4384
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      parent: T.nilable(Prism::Node),
+      name: T.nilable(Symbol),
+      delimiter_loc: Prism::Location,
+      name_loc: Prism::Location
+    ).returns(Prism::ConstantPathNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), parent: T.unsafe(nil), name: T.unsafe(nil), delimiter_loc: T.unsafe(nil), name_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4367
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, parent: Prism::node?, name: Symbol?, delimiter_loc: Location, name_loc: Location }
   #
   # source://prism//lib/prism/node.rb#4392
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def delimiter: () -> String
   #
   # source://prism//lib/prism/node.rb#4438
+  sig { returns(String) }
   def delimiter; end
 
   # The location of the `::` delimiter.
@@ -5914,6 +6887,7 @@ class Prism::ConstantPathNode < ::Prism::Node
   #        ^^
   #
   # source://prism//lib/prism/node.rb#4418
+  sig { returns(Prism::Location) }
   def delimiter_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -5941,6 +6915,7 @@ class Prism::ConstantPathNode < ::Prism::Node
   # The name of the constant being accessed. This could be `nil` in the event of a syntax error.
   #
   # source://prism//lib/prism/node.rb#4409
+  sig { returns(T.nilable(Symbol)) }
   def name; end
 
   # The location of the name of the constant.
@@ -5952,6 +6927,7 @@ class Prism::ConstantPathNode < ::Prism::Node
   #          ^^^
   #
   # source://prism//lib/prism/node.rb#4431
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # The left-hand node of the path, if present. It can be `nil` or any [non-void expression](https://github.com/ruby/prism/blob/main/docs/parsing_rules.md#non-void-expression). It will be `nil` when the constant lookup is at the root of the module tree.
@@ -5966,6 +6942,7 @@ class Prism::ConstantPathNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#4406
+  sig { returns(T.nilable(Prism::Node)) }
   def parent; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6011,6 +6988,18 @@ class Prism::ConstantPathOperatorWriteNode < ::Prism::Node
   # @return [ConstantPathOperatorWriteNode] a new instance of ConstantPathOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#4474
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, target, binary_operator_loc, value, binary_operator); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6022,47 +7011,66 @@ class Prism::ConstantPathOperatorWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4486
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader binary_operator: Symbol
   #
   # source://prism//lib/prism/node.rb#4532
+  sig { returns(Symbol) }
   def binary_operator; end
 
   # attr_reader binary_operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#4522
+  sig { returns(Prism::Location) }
   def binary_operator_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4491
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4501
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4496
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?target: ConstantPathNode, ?binary_operator_loc: Location, ?value: Prism::node, ?binary_operator: Symbol) -> ConstantPathOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#4506
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).returns(Prism::ConstantPathOperatorWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), target: T.unsafe(nil), binary_operator_loc: T.unsafe(nil), value: T.unsafe(nil), binary_operator: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4491
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, target: ConstantPathNode, binary_operator_loc: Location, value: Prism::node, binary_operator: Symbol }
   #
   # source://prism//lib/prism/node.rb#4514
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6089,6 +7097,7 @@ class Prism::ConstantPathOperatorWriteNode < ::Prism::Node
   # attr_reader target: ConstantPathNode
   #
   # source://prism//lib/prism/node.rb#4519
+  sig { returns(Prism::ConstantPathNode) }
   def target; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6100,6 +7109,7 @@ class Prism::ConstantPathOperatorWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#4529
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -6122,6 +7132,17 @@ class Prism::ConstantPathOrWriteNode < ::Prism::Node
   # @return [ConstantPathOrWriteNode] a new instance of ConstantPathOrWriteNode
   #
   # source://prism//lib/prism/node.rb#4566
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, target, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6133,37 +7154,53 @@ class Prism::ConstantPathOrWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4577
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4582
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4592
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4587
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?target: ConstantPathNode, ?operator_loc: Location, ?value: Prism::node) -> ConstantPathOrWriteNode
   #
   # source://prism//lib/prism/node.rb#4597
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ConstantPathOrWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), target: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4582
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, target: ConstantPathNode, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#4605
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6178,16 +7215,19 @@ class Prism::ConstantPathOrWriteNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#4623
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#4613
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # attr_reader target: ConstantPathNode
   #
   # source://prism//lib/prism/node.rb#4610
+  sig { returns(Prism::ConstantPathNode) }
   def target; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6199,6 +7239,7 @@ class Prism::ConstantPathOrWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#4620
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -6221,6 +7262,18 @@ class Prism::ConstantPathTargetNode < ::Prism::Node
   # @return [ConstantPathTargetNode] a new instance of ConstantPathTargetNode
   #
   # source://prism//lib/prism/node.rb#4658
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      parent: T.nilable(Prism::Node),
+      name: T.nilable(Symbol),
+      delimiter_loc: Prism::Location,
+      name_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, parent, name, delimiter_loc, name_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6232,6 +7285,7 @@ class Prism::ConstantPathTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4670
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # Previously, we had a child node on this class that contained either a
@@ -6244,42 +7298,60 @@ class Prism::ConstantPathTargetNode < ::Prism::Node
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4675
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4687
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4680
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?parent: Prism::node?, ?name: Symbol?, ?delimiter_loc: Location, ?name_loc: Location) -> ConstantPathTargetNode
   #
   # source://prism//lib/prism/node.rb#4692
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      parent: T.nilable(Prism::Node),
+      name: T.nilable(Symbol),
+      delimiter_loc: Prism::Location,
+      name_loc: Prism::Location
+    ).returns(Prism::ConstantPathTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), parent: T.unsafe(nil), name: T.unsafe(nil), delimiter_loc: T.unsafe(nil), name_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4675
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, parent: Prism::node?, name: Symbol?, delimiter_loc: Location, name_loc: Location }
   #
   # source://prism//lib/prism/node.rb#4700
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def delimiter: () -> String
   #
   # source://prism//lib/prism/node.rb#4725
+  sig { returns(String) }
   def delimiter; end
 
   # attr_reader delimiter_loc: Location
   #
   # source://prism//lib/prism/node.rb#4711
+  sig { returns(Prism::Location) }
   def delimiter_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6307,16 +7379,19 @@ class Prism::ConstantPathTargetNode < ::Prism::Node
   # attr_reader name: Symbol?
   #
   # source://prism//lib/prism/node.rb#4708
+  sig { returns(T.nilable(Symbol)) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#4718
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # attr_reader parent: Prism::node?
   #
   # source://prism//lib/prism/node.rb#4705
+  sig { returns(T.nilable(Prism::Node)) }
   def parent; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6351,6 +7426,17 @@ class Prism::ConstantPathWriteNode < ::Prism::Node
   # @return [ConstantPathWriteNode] a new instance of ConstantPathWriteNode
   #
   # source://prism//lib/prism/node.rb#4767
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, target, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6362,37 +7448,53 @@ class Prism::ConstantPathWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4778
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4783
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4793
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4788
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?target: ConstantPathNode, ?operator_loc: Location, ?value: Prism::node) -> ConstantPathWriteNode
   #
   # source://prism//lib/prism/node.rb#4798
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      target: Prism::ConstantPathNode,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::ConstantPathWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), target: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4783
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, target: ConstantPathNode, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#4806
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6407,6 +7509,7 @@ class Prism::ConstantPathWriteNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#4836
+  sig { returns(String) }
   def operator; end
 
   # The location of the `=` operator.
@@ -6415,6 +7518,7 @@ class Prism::ConstantPathWriteNode < ::Prism::Node
   #           ^
   #
   # source://prism//lib/prism/node.rb#4823
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # A node representing the constant path being written to.
@@ -6426,6 +7530,7 @@ class Prism::ConstantPathWriteNode < ::Prism::Node
   #     ^^^^^
   #
   # source://prism//lib/prism/node.rb#4817
+  sig { returns(Prism::ConstantPathNode) }
   def target; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6440,6 +7545,7 @@ class Prism::ConstantPathWriteNode < ::Prism::Node
   #                ^^^^
   #
   # source://prism//lib/prism/node.rb#4833
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -6462,6 +7568,7 @@ class Prism::ConstantReadNode < ::Prism::Node
   # @return [ConstantReadNode] a new instance of ConstantReadNode
   #
   # source://prism//lib/prism/node.rb#4871
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6473,37 +7580,51 @@ class Prism::ConstantReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4880
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4885
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4895
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4890
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> ConstantReadNode
   #
   # source://prism//lib/prism/node.rb#4900
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::ConstantReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4885
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#4908
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6535,6 +7656,7 @@ class Prism::ConstantReadNode < ::Prism::Node
   #     SOME_CONSTANT  # name `:SOME_CONSTANT`
   #
   # source://prism//lib/prism/node.rb#4917
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6563,6 +7685,7 @@ class Prism::ConstantTargetNode < ::Prism::Node
   # @return [ConstantTargetNode] a new instance of ConstantTargetNode
   #
   # source://prism//lib/prism/node.rb#4948
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6574,37 +7697,51 @@ class Prism::ConstantTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#4957
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4962
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#4972
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#4967
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> ConstantTargetNode
   #
   # source://prism//lib/prism/node.rb#4977
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::ConstantTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#4962
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#4985
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6632,6 +7769,7 @@ class Prism::ConstantTargetNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#4990
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6660,6 +7798,18 @@ class Prism::ConstantWriteNode < ::Prism::Node
   # @return [ConstantWriteNode] a new instance of ConstantWriteNode
   #
   # source://prism//lib/prism/node.rb#5021
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -6671,37 +7821,54 @@ class Prism::ConstantWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5033
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5038
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5048
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5043
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?value: Prism::node, ?operator_loc: Location) -> ConstantWriteNode
   #
   # source://prism//lib/prism/node.rb#5053
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::ConstantWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5038
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, value: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#5061
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -6733,6 +7900,7 @@ class Prism::ConstantWriteNode < ::Prism::Node
   #     XYZ = 1    # name `:XYZ`
   #
   # source://prism//lib/prism/node.rb#5070
+  sig { returns(Symbol) }
   def name; end
 
   # The location of the constant name.
@@ -6741,11 +7909,13 @@ class Prism::ConstantWriteNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#5076
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#5102
+  sig { returns(String) }
   def operator; end
 
   # The location of the `=` operator.
@@ -6754,6 +7924,7 @@ class Prism::ConstantWriteNode < ::Prism::Node
   #         ^
   #
   # source://prism//lib/prism/node.rb#5095
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -6771,6 +7942,7 @@ class Prism::ConstantWriteNode < ::Prism::Node
   #               ^^^^^^^^^
   #
   # source://prism//lib/prism/node.rb#5089
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -9432,6 +10604,26 @@ class Prism::DefNode < ::Prism::Node
   # @return [DefNode] a new instance of DefNode
   #
   # source://prism//lib/prism/node.rb#5139
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      receiver: T.nilable(Prism::Node),
+      parameters: T.nilable(Prism::ParametersNode),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      locals: T::Array[Symbol],
+      def_keyword_loc: Prism::Location,
+      operator_loc: T.nilable(Prism::Location),
+      lparen_loc: T.nilable(Prism::Location),
+      rparen_loc: T.nilable(Prism::Location),
+      equal_loc: T.nilable(Prism::Location),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, receiver, parameters, body, locals, def_keyword_loc, operator_loc, lparen_loc, rparen_loc, equal_loc, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -9443,72 +10635,104 @@ class Prism::DefNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5159
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: StatementsNode | BeginNode | nil
   #
   # source://prism//lib/prism/node.rb#5212
+  sig { returns(T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5164
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5178
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5169
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?receiver: Prism::node?, ?parameters: ParametersNode?, ?body: StatementsNode | BeginNode | nil, ?locals: Array[Symbol], ?def_keyword_loc: Location, ?operator_loc: Location?, ?lparen_loc: Location?, ?rparen_loc: Location?, ?equal_loc: Location?, ?end_keyword_loc: Location?) -> DefNode
   #
   # source://prism//lib/prism/node.rb#5183
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      receiver: T.nilable(Prism::Node),
+      parameters: T.nilable(Prism::ParametersNode),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      locals: T::Array[Symbol],
+      def_keyword_loc: Prism::Location,
+      operator_loc: T.nilable(Prism::Location),
+      lparen_loc: T.nilable(Prism::Location),
+      rparen_loc: T.nilable(Prism::Location),
+      equal_loc: T.nilable(Prism::Location),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).returns(Prism::DefNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), receiver: T.unsafe(nil), parameters: T.unsafe(nil), body: T.unsafe(nil), locals: T.unsafe(nil), def_keyword_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), lparen_loc: T.unsafe(nil), rparen_loc: T.unsafe(nil), equal_loc: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5164
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, receiver: Prism::node?, parameters: ParametersNode?, body: StatementsNode | BeginNode | nil, locals: Array[Symbol], def_keyword_loc: Location, operator_loc: Location?, lparen_loc: Location?, rparen_loc: Location?, equal_loc: Location?, end_keyword_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#5191
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def def_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#5290
+  sig { returns(String) }
   def def_keyword; end
 
   # attr_reader def_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#5218
+  sig { returns(Prism::Location) }
   def def_keyword_loc; end
 
   # def end_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#5315
+  sig { returns(T.nilable(String)) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5277
+  sig { returns(T.nilable(Prism::Location)) }
   def end_keyword_loc; end
 
   # def equal: () -> String?
   #
   # source://prism//lib/prism/node.rb#5310
+  sig { returns(T.nilable(String)) }
   def equal; end
 
   # attr_reader equal_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5264
+  sig { returns(T.nilable(Prism::Location)) }
   def equal_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -9523,56 +10747,67 @@ class Prism::DefNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#5215
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # def lparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#5300
+  sig { returns(T.nilable(String)) }
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5238
+  sig { returns(T.nilable(Prism::Location)) }
   def lparen_loc; end
 
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#5196
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#5199
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String?
   #
   # source://prism//lib/prism/node.rb#5295
+  sig { returns(T.nilable(String)) }
   def operator; end
 
   # attr_reader operator_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5225
+  sig { returns(T.nilable(Prism::Location)) }
   def operator_loc; end
 
   # attr_reader parameters: ParametersNode?
   #
   # source://prism//lib/prism/node.rb#5209
+  sig { returns(T.nilable(Prism::ParametersNode)) }
   def parameters; end
 
   # attr_reader receiver: Prism::node?
   #
   # source://prism//lib/prism/node.rb#5206
+  sig { returns(T.nilable(Prism::Node)) }
   def receiver; end
 
   # def rparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#5305
+  sig { returns(T.nilable(String)) }
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5251
+  sig { returns(T.nilable(Prism::Location)) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -9601,6 +10836,18 @@ class Prism::DefinedNode < ::Prism::Node
   # @return [DefinedNode] a new instance of DefinedNode
   #
   # source://prism//lib/prism/node.rb#5360
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      lparen_loc: T.nilable(Prism::Location),
+      value: Prism::Node,
+      rparen_loc: T.nilable(Prism::Location),
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, lparen_loc, value, rparen_loc, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -9612,37 +10859,54 @@ class Prism::DefinedNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5372
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5377
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5387
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5382
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?lparen_loc: Location?, ?value: Prism::node, ?rparen_loc: Location?, ?keyword_loc: Location) -> DefinedNode
   #
   # source://prism//lib/prism/node.rb#5392
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      lparen_loc: T.nilable(Prism::Location),
+      value: Prism::Node,
+      rparen_loc: T.nilable(Prism::Location),
+      keyword_loc: Prism::Location
+    ).returns(Prism::DefinedNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), lparen_loc: T.unsafe(nil), value: T.unsafe(nil), rparen_loc: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5377
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, lparen_loc: Location?, value: Prism::node, rparen_loc: Location?, keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#5400
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -9657,31 +10921,37 @@ class Prism::DefinedNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#5451
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#5434
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def lparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#5441
+  sig { returns(T.nilable(String)) }
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5405
+  sig { returns(T.nilable(Prism::Location)) }
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#5446
+  sig { returns(T.nilable(String)) }
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5421
+  sig { returns(T.nilable(Prism::Location)) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -9693,6 +10963,7 @@ class Prism::DefinedNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#5418
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -12705,6 +13976,17 @@ class Prism::ElseNode < ::Prism::Node
   # @return [ElseNode] a new instance of ElseNode
   #
   # source://prism//lib/prism/node.rb#5487
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      else_keyword_loc: Prism::Location,
+      statements: T.nilable(Prism::StatementsNode),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, else_keyword_loc, statements, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -12716,57 +13998,77 @@ class Prism::ElseNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5498
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5503
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5515
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5508
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?else_keyword_loc: Location, ?statements: StatementsNode?, ?end_keyword_loc: Location?) -> ElseNode
   #
   # source://prism//lib/prism/node.rb#5520
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      else_keyword_loc: Prism::Location,
+      statements: T.nilable(Prism::StatementsNode),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).returns(Prism::ElseNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), else_keyword_loc: T.unsafe(nil), statements: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5503
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, else_keyword_loc: Location, statements: StatementsNode?, end_keyword_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#5528
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def else_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#5556
+  sig { returns(String) }
   def else_keyword; end
 
   # attr_reader else_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#5533
+  sig { returns(Prism::Location) }
   def else_keyword_loc; end
 
   # def end_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#5561
+  sig { returns(T.nilable(String)) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location?
   #
   # source://prism//lib/prism/node.rb#5543
+  sig { returns(T.nilable(Prism::Location)) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -12781,6 +14083,7 @@ class Prism::ElseNode < ::Prism::Node
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#5540
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -12800,11 +14103,11 @@ end
 # EmbDocComment objects correspond to comments that are surrounded by =begin
 # and =end.
 #
-# source://prism//lib/prism/parse_result.rb#412
+# source://prism//lib/prism/parse_result.rb#544
 class Prism::EmbDocComment < ::Prism::Comment
   # Returns a string representation of this comment.
   #
-  # source://prism//lib/prism/parse_result.rb#419
+  # source://prism//lib/prism/parse_result.rb#551
   sig { returns(String) }
   def inspect; end
 
@@ -12812,7 +14115,7 @@ class Prism::EmbDocComment < ::Prism::Comment
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/parse_result.rb#414
+  # source://prism//lib/prism/parse_result.rb#546
   sig { override.returns(T::Boolean) }
   def trailing?; end
 end
@@ -12829,6 +14132,17 @@ class Prism::EmbeddedStatementsNode < ::Prism::Node
   # @return [EmbeddedStatementsNode] a new instance of EmbeddedStatementsNode
   #
   # source://prism//lib/prism/node.rb#5596
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: Prism::Location,
+      statements: T.nilable(Prism::StatementsNode),
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, opening_loc, statements, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -12840,47 +14154,65 @@ class Prism::EmbeddedStatementsNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5607
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5612
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#5664
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#5652
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5624
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5617
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?opening_loc: Location, ?statements: StatementsNode?, ?closing_loc: Location) -> EmbeddedStatementsNode
   #
   # source://prism//lib/prism/node.rb#5629
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: Prism::Location,
+      statements: T.nilable(Prism::StatementsNode),
+      closing_loc: Prism::Location
+    ).returns(Prism::EmbeddedStatementsNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), opening_loc: T.unsafe(nil), statements: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5612
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, opening_loc: Location, statements: StatementsNode?, closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#5637
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -12895,16 +14227,19 @@ class Prism::EmbeddedStatementsNode < ::Prism::Node
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#5659
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#5642
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#5649
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -12933,6 +14268,16 @@ class Prism::EmbeddedVariableNode < ::Prism::Node
   # @return [EmbeddedVariableNode] a new instance of EmbeddedVariableNode
   #
   # source://prism//lib/prism/node.rb#5699
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      operator_loc: Prism::Location,
+      variable: T.any(Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, operator_loc, variable); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -12944,37 +14289,52 @@ class Prism::EmbeddedVariableNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5709
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5714
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5724
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5719
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?operator_loc: Location, ?variable: InstanceVariableReadNode | ClassVariableReadNode | GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode) -> EmbeddedVariableNode
   #
   # source://prism//lib/prism/node.rb#5729
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      operator_loc: Prism::Location,
+      variable: T.any(Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)
+    ).returns(Prism::EmbeddedVariableNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), operator_loc: T.unsafe(nil), variable: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5714
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, operator_loc: Location, variable: InstanceVariableReadNode | ClassVariableReadNode | GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode }
   #
   # source://prism//lib/prism/node.rb#5737
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -12989,11 +14349,13 @@ class Prism::EmbeddedVariableNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#5752
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#5742
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -13005,6 +14367,9 @@ class Prism::EmbeddedVariableNode < ::Prism::Node
   # attr_reader variable: InstanceVariableReadNode | ClassVariableReadNode | GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode
   #
   # source://prism//lib/prism/node.rb#5749
+  sig do
+    returns(T.any(Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode))
+  end
   def variable; end
 
   class << self
@@ -13046,6 +14411,17 @@ class Prism::EnsureNode < ::Prism::Node
   # @return [EnsureNode] a new instance of EnsureNode
   #
   # source://prism//lib/prism/node.rb#5790
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      ensure_keyword_loc: Prism::Location,
+      statements: T.nilable(Prism::StatementsNode),
+      end_keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, ensure_keyword_loc, statements, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13057,57 +14433,77 @@ class Prism::EnsureNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5801
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5806
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5818
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5811
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?ensure_keyword_loc: Location, ?statements: StatementsNode?, ?end_keyword_loc: Location) -> EnsureNode
   #
   # source://prism//lib/prism/node.rb#5823
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      ensure_keyword_loc: Prism::Location,
+      statements: T.nilable(Prism::StatementsNode),
+      end_keyword_loc: Prism::Location
+    ).returns(Prism::EnsureNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), ensure_keyword_loc: T.unsafe(nil), statements: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5806
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, ensure_keyword_loc: Location, statements: StatementsNode?, end_keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#5831
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#5858
+  sig { returns(String) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#5846
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   # def ensure_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#5853
+  sig { returns(String) }
   def ensure_keyword; end
 
   # attr_reader ensure_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#5836
+  sig { returns(Prism::Location) }
   def ensure_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13122,6 +14518,7 @@ class Prism::EnsureNode < ::Prism::Node
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#5843
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -13150,6 +14547,7 @@ class Prism::FalseNode < ::Prism::Node
   # @return [FalseNode] a new instance of FalseNode
   #
   # source://prism//lib/prism/node.rb#5893
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13161,37 +14559,44 @@ class Prism::FalseNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5901
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5906
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#5916
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5911
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> FalseNode
   #
   # source://prism//lib/prism/node.rb#5921
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::FalseNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5906
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#5929
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13235,6 +14640,20 @@ class Prism::FindPatternNode < ::Prism::Node
   # @return [FindPatternNode] a new instance of FindPatternNode
   #
   # source://prism//lib/prism/node.rb#5967
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      left: Prism::SplatNode,
+      requireds: T::Array[Prism::Node],
+      right: T.any(Prism::SplatNode, Prism::MissingNode),
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, constant, left, requireds, right, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13246,52 +14665,74 @@ class Prism::FindPatternNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#5981
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5986
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String?
   #
   # source://prism//lib/prism/node.rb#6062
+  sig { returns(T.nilable(String)) }
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
   # source://prism//lib/prism/node.rb#6044
+  sig { returns(T.nilable(Prism::Location)) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6001
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#5991
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader constant: ConstantReadNode | ConstantPathNode | nil
   #
   # source://prism//lib/prism/node.rb#6019
+  sig { returns(T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode))) }
   def constant; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?constant: ConstantReadNode | ConstantPathNode | nil, ?left: SplatNode, ?requireds: Array[Prism::node], ?right: SplatNode | MissingNode, ?opening_loc: Location?, ?closing_loc: Location?) -> FindPatternNode
   #
   # source://prism//lib/prism/node.rb#6006
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      left: Prism::SplatNode,
+      requireds: T::Array[Prism::Node],
+      right: T.any(Prism::SplatNode, Prism::MissingNode),
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).returns(Prism::FindPatternNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), constant: T.unsafe(nil), left: T.unsafe(nil), requireds: T.unsafe(nil), right: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#5986
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, constant: ConstantReadNode | ConstantPathNode | nil, left: SplatNode, requireds: Array[Prism::node], right: SplatNode | MissingNode, opening_loc: Location?, closing_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#6014
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13306,26 +14747,31 @@ class Prism::FindPatternNode < ::Prism::Node
   # attr_reader left: SplatNode
   #
   # source://prism//lib/prism/node.rb#6022
+  sig { returns(Prism::SplatNode) }
   def left; end
 
   # def opening: () -> String?
   #
   # source://prism//lib/prism/node.rb#6057
+  sig { returns(T.nilable(String)) }
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
   # source://prism//lib/prism/node.rb#6031
+  sig { returns(T.nilable(Prism::Location)) }
   def opening_loc; end
 
   # attr_reader requireds: Array[Prism::node]
   #
   # source://prism//lib/prism/node.rb#6025
+  sig { returns(T::Array[Prism::Node]) }
   def requireds; end
 
   # attr_reader right: SplatNode | MissingNode
   #
   # source://prism//lib/prism/node.rb#6028
+  sig { returns(T.any(Prism::SplatNode, Prism::MissingNode)) }
   def right; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -13492,6 +14938,7 @@ class Prism::FloatNode < ::Prism::Node
   # @return [FloatNode] a new instance of FloatNode
   #
   # source://prism//lib/prism/node.rb#6202
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, value: Float).void }
   def initialize(source, node_id, location, flags, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13503,37 +14950,44 @@ class Prism::FloatNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6211
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6216
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6226
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6221
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?value: Float) -> FloatNode
   #
   # source://prism//lib/prism/node.rb#6231
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer, value: Float).returns(Prism::FloatNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6216
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, value: Float }
   #
   # source://prism//lib/prism/node.rb#6239
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13554,6 +15008,7 @@ class Prism::FloatNode < ::Prism::Node
   # The value of the floating point number as a Float.
   #
   # source://prism//lib/prism/node.rb#6244
+  sig { returns(Float) }
   def value; end
 
   class << self
@@ -13576,6 +15031,21 @@ class Prism::ForNode < ::Prism::Node
   # @return [ForNode] a new instance of ForNode
   #
   # source://prism//lib/prism/node.rb#6275
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      index: T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::MissingNode),
+      collection: Prism::Node,
+      statements: T.nilable(Prism::StatementsNode),
+      for_keyword_loc: Prism::Location,
+      in_keyword_loc: Prism::Location,
+      do_keyword_loc: T.nilable(Prism::Location),
+      end_keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, index, collection, statements, for_keyword_loc, in_keyword_loc, do_keyword_loc, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13587,11 +15057,13 @@ class Prism::ForNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6290
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6295
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # The collection to iterate over.
@@ -13600,37 +15072,57 @@ class Prism::ForNode < ::Prism::Node
   #              ^
   #
   # source://prism//lib/prism/node.rb#6336
+  sig { returns(Prism::Node) }
   def collection; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6309
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6300
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?index: LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | BackReferenceReadNode | NumberedReferenceReadNode | MissingNode, ?collection: Prism::node, ?statements: StatementsNode?, ?for_keyword_loc: Location, ?in_keyword_loc: Location, ?do_keyword_loc: Location?, ?end_keyword_loc: Location) -> ForNode
   #
   # source://prism//lib/prism/node.rb#6314
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      index: T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::MissingNode),
+      collection: Prism::Node,
+      statements: T.nilable(Prism::StatementsNode),
+      for_keyword_loc: Prism::Location,
+      in_keyword_loc: Prism::Location,
+      do_keyword_loc: T.nilable(Prism::Location),
+      end_keyword_loc: Prism::Location
+    ).returns(Prism::ForNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), index: T.unsafe(nil), collection: T.unsafe(nil), statements: T.unsafe(nil), for_keyword_loc: T.unsafe(nil), in_keyword_loc: T.unsafe(nil), do_keyword_loc: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6295
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, index: LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | BackReferenceReadNode | NumberedReferenceReadNode | MissingNode, collection: Prism::node, statements: StatementsNode?, for_keyword_loc: Location, in_keyword_loc: Location, do_keyword_loc: Location?, end_keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#6322
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def do_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#6403
+  sig { returns(T.nilable(String)) }
   def do_keyword; end
 
   # The location of the `do` keyword, if present.
@@ -13639,11 +15131,13 @@ class Prism::ForNode < ::Prism::Node
   #                ^^
   #
   # source://prism//lib/prism/node.rb#6370
+  sig { returns(T.nilable(Prism::Location)) }
   def do_keyword_loc; end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#6408
+  sig { returns(String) }
   def end_keyword; end
 
   # The location of the `end` keyword.
@@ -13652,6 +15146,7 @@ class Prism::ForNode < ::Prism::Node
   #                ^^^
   #
   # source://prism//lib/prism/node.rb#6386
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13660,6 +15155,7 @@ class Prism::ForNode < ::Prism::Node
   # def for_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#6393
+  sig { returns(String) }
   def for_keyword; end
 
   # The location of the `for` keyword.
@@ -13668,11 +15164,13 @@ class Prism::ForNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#6350
+  sig { returns(Prism::Location) }
   def for_keyword_loc; end
 
   # def in_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#6398
+  sig { returns(String) }
   def in_keyword; end
 
   # The location of the `in` keyword.
@@ -13681,6 +15179,7 @@ class Prism::ForNode < ::Prism::Node
   #           ^^
   #
   # source://prism//lib/prism/node.rb#6360
+  sig { returns(Prism::Location) }
   def in_keyword_loc; end
 
   # The index expression for `for` loops.
@@ -13689,6 +15188,9 @@ class Prism::ForNode < ::Prism::Node
   #         ^
   #
   # source://prism//lib/prism/node.rb#6330
+  sig do
+    returns(T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::MissingNode))
+  end
   def index; end
 
   # def inspect -> String
@@ -13705,6 +15207,7 @@ class Prism::ForNode < ::Prism::Node
   #     end
   #
   # source://prism//lib/prism/node.rb#6344
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -13735,6 +15238,7 @@ class Prism::ForwardingArgumentsNode < ::Prism::Node
   # @return [ForwardingArgumentsNode] a new instance of ForwardingArgumentsNode
   #
   # source://prism//lib/prism/node.rb#6449
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13746,37 +15250,44 @@ class Prism::ForwardingArgumentsNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6457
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6462
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6472
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6467
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> ForwardingArgumentsNode
   #
   # source://prism//lib/prism/node.rb#6477
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::ForwardingArgumentsNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6462
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#6485
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13815,6 +15326,7 @@ class Prism::ForwardingParameterNode < ::Prism::Node
   # @return [ForwardingParameterNode] a new instance of ForwardingParameterNode
   #
   # source://prism//lib/prism/node.rb#6518
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13826,37 +15338,44 @@ class Prism::ForwardingParameterNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6526
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6531
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6541
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6536
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> ForwardingParameterNode
   #
   # source://prism//lib/prism/node.rb#6546
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::ForwardingParameterNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6531
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#6554
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13894,6 +15413,15 @@ class Prism::ForwardingSuperNode < ::Prism::Node
   # @return [ForwardingSuperNode] a new instance of ForwardingSuperNode
   #
   # source://prism//lib/prism/node.rb#6586
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      block: T.nilable(Prism::BlockNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, block); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13905,42 +15433,57 @@ class Prism::ForwardingSuperNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6595
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader block: BlockNode?
   #
   # source://prism//lib/prism/node.rb#6630
+  sig { returns(T.nilable(Prism::BlockNode)) }
   def block; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6600
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6612
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6605
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?block: BlockNode?) -> ForwardingSuperNode
   #
   # source://prism//lib/prism/node.rb#6617
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      block: T.nilable(Prism::BlockNode)
+    ).returns(Prism::ForwardingSuperNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), block: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6600
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, block: BlockNode? }
   #
   # source://prism//lib/prism/node.rb#6625
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -13978,6 +15521,18 @@ class Prism::GlobalVariableAndWriteNode < ::Prism::Node
   # @return [GlobalVariableAndWriteNode] a new instance of GlobalVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#6661
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -13989,37 +15544,54 @@ class Prism::GlobalVariableAndWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6673
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6678
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6688
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6683
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> GlobalVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#6693
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::GlobalVariableAndWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6678
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#6701
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#200
@@ -14037,21 +15609,25 @@ class Prism::GlobalVariableAndWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#6706
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#6709
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#6726
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#6716
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14063,6 +15639,7 @@ class Prism::GlobalVariableAndWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#6723
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -14085,6 +15662,19 @@ class Prism::GlobalVariableOperatorWriteNode < ::Prism::Node
   # @return [GlobalVariableOperatorWriteNode] a new instance of GlobalVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#6762
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, binary_operator_loc, value, binary_operator); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14096,47 +15686,67 @@ class Prism::GlobalVariableOperatorWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6775
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader binary_operator: Symbol
   #
   # source://prism//lib/prism/node.rb#6828
+  sig { returns(Symbol) }
   def binary_operator; end
 
   # attr_reader binary_operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#6818
+  sig { returns(Prism::Location) }
   def binary_operator_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6780
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6790
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6785
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?binary_operator_loc: Location, ?value: Prism::node, ?binary_operator: Symbol) -> GlobalVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#6795
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).returns(Prism::GlobalVariableOperatorWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), binary_operator_loc: T.unsafe(nil), value: T.unsafe(nil), binary_operator: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6780
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, binary_operator_loc: Location, value: Prism::node, binary_operator: Symbol }
   #
   # source://prism//lib/prism/node.rb#6803
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#212
@@ -14154,11 +15764,13 @@ class Prism::GlobalVariableOperatorWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#6808
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#6811
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # Returns the binary operator used to modify the receiver. This method is
@@ -14182,6 +15794,7 @@ class Prism::GlobalVariableOperatorWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#6825
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -14204,6 +15817,18 @@ class Prism::GlobalVariableOrWriteNode < ::Prism::Node
   # @return [GlobalVariableOrWriteNode] a new instance of GlobalVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#6863
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14215,37 +15840,54 @@ class Prism::GlobalVariableOrWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6875
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6880
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6890
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6885
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> GlobalVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#6895
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::GlobalVariableOrWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6880
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#6903
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#206
@@ -14263,21 +15905,25 @@ class Prism::GlobalVariableOrWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#6908
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#6911
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#6928
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#6918
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14289,6 +15935,7 @@ class Prism::GlobalVariableOrWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#6925
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -14311,6 +15958,7 @@ class Prism::GlobalVariableReadNode < ::Prism::Node
   # @return [GlobalVariableReadNode] a new instance of GlobalVariableReadNode
   #
   # source://prism//lib/prism/node.rb#6964
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14322,37 +15970,51 @@ class Prism::GlobalVariableReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#6973
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6978
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#6988
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#6983
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> GlobalVariableReadNode
   #
   # source://prism//lib/prism/node.rb#6993
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::GlobalVariableReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#6978
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#7001
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -14371,6 +16033,7 @@ class Prism::GlobalVariableReadNode < ::Prism::Node
   #     $_Test # name `:$_Test`
   #
   # source://prism//lib/prism/node.rb#7010
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14399,6 +16062,7 @@ class Prism::GlobalVariableTargetNode < ::Prism::Node
   # @return [GlobalVariableTargetNode] a new instance of GlobalVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#7041
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14410,37 +16074,51 @@ class Prism::GlobalVariableTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7050
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7055
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7065
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7060
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> GlobalVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#7070
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::GlobalVariableTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7055
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#7078
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -14455,6 +16133,7 @@ class Prism::GlobalVariableTargetNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#7083
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14483,6 +16162,18 @@ class Prism::GlobalVariableWriteNode < ::Prism::Node
   # @return [GlobalVariableWriteNode] a new instance of GlobalVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#7114
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14494,37 +16185,54 @@ class Prism::GlobalVariableWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7126
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7131
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7141
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7136
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?value: Prism::node, ?operator_loc: Location) -> GlobalVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#7146
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::GlobalVariableWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7131
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, value: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#7154
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -14543,6 +16251,7 @@ class Prism::GlobalVariableWriteNode < ::Prism::Node
   #     $_Test = 123 # name `:$_Test`
   #
   # source://prism//lib/prism/node.rb#7163
+  sig { returns(Symbol) }
   def name; end
 
   # The location of the global variable's name.
@@ -14551,11 +16260,13 @@ class Prism::GlobalVariableWriteNode < ::Prism::Node
   #     ^^^^
   #
   # source://prism//lib/prism/node.rb#7169
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#7195
+  sig { returns(String) }
   def operator; end
 
   # The location of the `=` operator.
@@ -14564,6 +16275,7 @@ class Prism::GlobalVariableWriteNode < ::Prism::Node
   #          ^
   #
   # source://prism//lib/prism/node.rb#7188
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14581,6 +16293,7 @@ class Prism::GlobalVariableWriteNode < ::Prism::Node
   #             ^^^
   #
   # source://prism//lib/prism/node.rb#7182
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -14603,6 +16316,17 @@ class Prism::HashNode < ::Prism::Node
   # @return [HashNode] a new instance of HashNode
   #
   # source://prism//lib/prism/node.rb#7231
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: Prism::Location,
+      elements: T::Array[T.any(Prism::AssocNode, Prism::AssocSplatNode)],
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, opening_loc, elements, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14614,16 +16338,19 @@ class Prism::HashNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7242
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7247
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#7309
+  sig { returns(String) }
   def closing; end
 
   # The location of the closing brace.
@@ -14632,32 +16359,47 @@ class Prism::HashNode < ::Prism::Node
   #              ^
   #
   # source://prism//lib/prism/node.rb#7297
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7257
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7252
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?opening_loc: Location, ?elements: Array[AssocNode | AssocSplatNode], ?closing_loc: Location) -> HashNode
   #
   # source://prism//lib/prism/node.rb#7262
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: Prism::Location,
+      elements: T::Array[T.any(Prism::AssocNode, Prism::AssocSplatNode)],
+      closing_loc: Prism::Location
+    ).returns(Prism::HashNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), opening_loc: T.unsafe(nil), elements: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7247
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, opening_loc: Location, elements: Array[AssocNode | AssocSplatNode], closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#7270
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The elements of the hash. These can be either `AssocNode`s or `AssocSplatNode`s.
@@ -14669,6 +16411,7 @@ class Prism::HashNode < ::Prism::Node
   #       ^^^^^
   #
   # source://prism//lib/prism/node.rb#7291
+  sig { returns(T::Array[T.any(Prism::AssocNode, Prism::AssocSplatNode)]) }
   def elements; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -14683,6 +16426,7 @@ class Prism::HashNode < ::Prism::Node
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#7304
+  sig { returns(String) }
   def opening; end
 
   # The location of the opening brace.
@@ -14691,6 +16435,7 @@ class Prism::HashNode < ::Prism::Node
   #     ^
   #
   # source://prism//lib/prism/node.rb#7278
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14722,6 +16467,19 @@ class Prism::HashPatternNode < ::Prism::Node
   # @return [HashPatternNode] a new instance of HashPatternNode
   #
   # source://prism//lib/prism/node.rb#7348
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      elements: T::Array[Prism::AssocNode],
+      rest: T.nilable(T.any(Prism::AssocSplatNode, Prism::NoKeywordsParameterNode)),
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, constant, elements, rest, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14733,57 +16491,79 @@ class Prism::HashPatternNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7361
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7366
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String?
   #
   # source://prism//lib/prism/node.rb#7438
+  sig { returns(T.nilable(String)) }
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
   # source://prism//lib/prism/node.rb#7420
+  sig { returns(T.nilable(Prism::Location)) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7380
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7371
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader constant: ConstantReadNode | ConstantPathNode | nil
   #
   # source://prism//lib/prism/node.rb#7398
+  sig { returns(T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode))) }
   def constant; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?constant: ConstantReadNode | ConstantPathNode | nil, ?elements: Array[AssocNode], ?rest: AssocSplatNode | NoKeywordsParameterNode | nil, ?opening_loc: Location?, ?closing_loc: Location?) -> HashPatternNode
   #
   # source://prism//lib/prism/node.rb#7385
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      elements: T::Array[Prism::AssocNode],
+      rest: T.nilable(T.any(Prism::AssocSplatNode, Prism::NoKeywordsParameterNode)),
+      opening_loc: T.nilable(Prism::Location),
+      closing_loc: T.nilable(Prism::Location)
+    ).returns(Prism::HashPatternNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), constant: T.unsafe(nil), elements: T.unsafe(nil), rest: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7366
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, constant: ConstantReadNode | ConstantPathNode | nil, elements: Array[AssocNode], rest: AssocSplatNode | NoKeywordsParameterNode | nil, opening_loc: Location?, closing_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#7393
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader elements: Array[AssocNode]
   #
   # source://prism//lib/prism/node.rb#7401
+  sig { returns(T::Array[Prism::AssocNode]) }
   def elements; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -14798,16 +16578,19 @@ class Prism::HashPatternNode < ::Prism::Node
   # def opening: () -> String?
   #
   # source://prism//lib/prism/node.rb#7433
+  sig { returns(T.nilable(String)) }
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
   # source://prism//lib/prism/node.rb#7407
+  sig { returns(T.nilable(Prism::Location)) }
   def opening_loc; end
 
   # attr_reader rest: AssocSplatNode | NoKeywordsParameterNode | nil
   #
   # source://prism//lib/prism/node.rb#7404
+  sig { returns(T.nilable(T.any(Prism::AssocSplatNode, Prism::NoKeywordsParameterNode))) }
   def rest; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -14852,6 +16635,20 @@ class Prism::IfNode < ::Prism::Node
   # @return [IfNode] a new instance of IfNode
   #
   # source://prism//lib/prism/node.rb#7482
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      if_keyword_loc: T.nilable(Prism::Location),
+      predicate: Prism::Node,
+      then_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode),
+      subsequent: T.nilable(T.any(Prism::ElseNode, Prism::IfNode)),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, if_keyword_loc, predicate, then_keyword_loc, statements, subsequent, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -14863,21 +16660,25 @@ class Prism::IfNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7496
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7501
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7515
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7506
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # Returns the subsequent if/elsif/else clause of the if node. This method is
@@ -14889,22 +16690,38 @@ class Prism::IfNode < ::Prism::Node
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?if_keyword_loc: Location?, ?predicate: Prism::node, ?then_keyword_loc: Location?, ?statements: StatementsNode?, ?subsequent: ElseNode | IfNode | nil, ?end_keyword_loc: Location?) -> IfNode
   #
   # source://prism//lib/prism/node.rb#7520
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      if_keyword_loc: T.nilable(Prism::Location),
+      predicate: Prism::Node,
+      then_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode),
+      subsequent: T.nilable(T.any(Prism::ElseNode, Prism::IfNode)),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).returns(Prism::IfNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), if_keyword_loc: T.unsafe(nil), predicate: T.unsafe(nil), then_keyword_loc: T.unsafe(nil), statements: T.unsafe(nil), subsequent: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7501
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, if_keyword_loc: Location?, predicate: Prism::node, then_keyword_loc: Location?, statements: StatementsNode?, subsequent: ElseNode | IfNode | nil, end_keyword_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#7528
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#7637
+  sig { returns(T.nilable(String)) }
   def end_keyword; end
 
   # The location of the `end` keyword if present, `nil` otherwise.
@@ -14915,6 +16732,7 @@ class Prism::IfNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#7614
+  sig { returns(T.nilable(Prism::Location)) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -14923,6 +16741,7 @@ class Prism::IfNode < ::Prism::Node
   # def if_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#7627
+  sig { returns(T.nilable(String)) }
   def if_keyword; end
 
   # The location of the `if` keyword if present.
@@ -14933,6 +16752,7 @@ class Prism::IfNode < ::Prism::Node
   # The `if_keyword_loc` field will be `nil` when the `IfNode` represents a ternary expression.
   #
   # source://prism//lib/prism/node.rb#7538
+  sig { returns(T.nilable(Prism::Location)) }
   def if_keyword_loc; end
 
   # def inspect -> String
@@ -14958,6 +16778,7 @@ class Prism::IfNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#7562
+  sig { returns(Prism::Node) }
   def predicate; end
 
   # Represents the body of statements that will be executed when the predicate is evaluated as truthy. Will be `nil` when no body is provided.
@@ -14970,6 +16791,7 @@ class Prism::IfNode < ::Prism::Node
   #     end
   #
   # source://prism//lib/prism/node.rb#7591
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Represents an `ElseNode` or an `IfNode` when there is an `else` or an `elsif` in the `if` statement.
@@ -14987,11 +16809,13 @@ class Prism::IfNode < ::Prism::Node
   #                     ^^^^^^^^^^^^
   #
   # source://prism//lib/prism/node.rb#7606
+  sig { returns(T.nilable(T.any(Prism::ElseNode, Prism::IfNode))) }
   def subsequent; end
 
   # def then_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#7632
+  sig { returns(T.nilable(String)) }
   def then_keyword; end
 
   # The location of the `then` keyword (if present) or the `?` in a ternary expression, `nil` otherwise.
@@ -15003,6 +16827,7 @@ class Prism::IfNode < ::Prism::Node
   #       ^
   #
   # source://prism//lib/prism/node.rb#7571
+  sig { returns(T.nilable(Prism::Location)) }
   def then_keyword_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -15031,6 +16856,15 @@ class Prism::ImaginaryNode < ::Prism::Node
   # @return [ImaginaryNode] a new instance of ImaginaryNode
   #
   # source://prism//lib/prism/node.rb#7675
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      numeric: T.any(Prism::FloatNode, Prism::IntegerNode, Prism::RationalNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, numeric); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -15042,37 +16876,51 @@ class Prism::ImaginaryNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7684
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7689
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7699
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7694
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?numeric: FloatNode | IntegerNode | RationalNode) -> ImaginaryNode
   #
   # source://prism//lib/prism/node.rb#7704
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      numeric: T.any(Prism::FloatNode, Prism::IntegerNode, Prism::RationalNode)
+    ).returns(Prism::ImaginaryNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), numeric: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7689
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, numeric: FloatNode | IntegerNode | RationalNode }
   #
   # source://prism//lib/prism/node.rb#7712
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -15087,6 +16935,7 @@ class Prism::ImaginaryNode < ::Prism::Node
   # attr_reader numeric: FloatNode | IntegerNode | RationalNode
   #
   # source://prism//lib/prism/node.rb#7717
+  sig { returns(T.any(Prism::FloatNode, Prism::IntegerNode, Prism::RationalNode)) }
   def numeric; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -15127,6 +16976,15 @@ class Prism::ImplicitNode < ::Prism::Node
   # @return [ImplicitNode] a new instance of ImplicitNode
   #
   # source://prism//lib/prism/node.rb#7754
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: T.any(Prism::LocalVariableReadNode, Prism::CallNode, Prism::ConstantReadNode, Prism::LocalVariableTargetNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -15138,37 +16996,51 @@ class Prism::ImplicitNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7763
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7768
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7778
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7773
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?value: LocalVariableReadNode | CallNode | ConstantReadNode | LocalVariableTargetNode) -> ImplicitNode
   #
   # source://prism//lib/prism/node.rb#7783
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: T.any(Prism::LocalVariableReadNode, Prism::CallNode, Prism::ConstantReadNode, Prism::LocalVariableTargetNode)
+    ).returns(Prism::ImplicitNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7768
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, value: LocalVariableReadNode | CallNode | ConstantReadNode | LocalVariableTargetNode }
   #
   # source://prism//lib/prism/node.rb#7791
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -15189,6 +17061,9 @@ class Prism::ImplicitNode < ::Prism::Node
   # attr_reader value: LocalVariableReadNode | CallNode | ConstantReadNode | LocalVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#7796
+  sig do
+    returns(T.any(Prism::LocalVariableReadNode, Prism::CallNode, Prism::ConstantReadNode, Prism::LocalVariableTargetNode))
+  end
   def value; end
 
   class << self
@@ -15220,6 +17095,7 @@ class Prism::ImplicitRestNode < ::Prism::Node
   # @return [ImplicitRestNode] a new instance of ImplicitRestNode
   #
   # source://prism//lib/prism/node.rb#7836
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -15231,37 +17107,44 @@ class Prism::ImplicitRestNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7844
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7849
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7859
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7854
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> ImplicitRestNode
   #
   # source://prism//lib/prism/node.rb#7864
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::ImplicitRestNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7849
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#7872
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -15299,6 +17182,18 @@ class Prism::InNode < ::Prism::Node
   # @return [InNode] a new instance of InNode
   #
   # source://prism//lib/prism/node.rb#7904
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      pattern: Prism::Node,
+      statements: T.nilable(Prism::StatementsNode),
+      in_loc: Prism::Location,
+      then_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, pattern, statements, in_loc, then_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -15310,37 +17205,54 @@ class Prism::InNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#7916
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7921
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#7934
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#7926
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?pattern: Prism::node, ?statements: StatementsNode?, ?in_loc: Location, ?then_loc: Location?) -> InNode
   #
   # source://prism//lib/prism/node.rb#7939
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      pattern: Prism::Node,
+      statements: T.nilable(Prism::StatementsNode),
+      in_loc: Prism::Location,
+      then_loc: T.nilable(Prism::Location)
+    ).returns(Prism::InNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), pattern: T.unsafe(nil), statements: T.unsafe(nil), in_loc: T.unsafe(nil), then_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#7921
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, pattern: Prism::node, statements: StatementsNode?, in_loc: Location, then_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#7947
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -15349,11 +17261,13 @@ class Prism::InNode < ::Prism::Node
   # def in: () -> String
   #
   # source://prism//lib/prism/node.rb#7978
+  sig { returns(String) }
   def in; end
 
   # attr_reader in_loc: Location
   #
   # source://prism//lib/prism/node.rb#7958
+  sig { returns(Prism::Location) }
   def in_loc; end
 
   # def inspect -> String
@@ -15365,21 +17279,25 @@ class Prism::InNode < ::Prism::Node
   # attr_reader pattern: Prism::node
   #
   # source://prism//lib/prism/node.rb#7952
+  sig { returns(Prism::Node) }
   def pattern; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#7955
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # def then: () -> String?
   #
   # source://prism//lib/prism/node.rb#7983
+  sig { returns(T.nilable(String)) }
   def then; end
 
   # attr_reader then_loc: Location?
   #
   # source://prism//lib/prism/node.rb#7965
+  sig { returns(T.nilable(Prism::Location)) }
   def then_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -16265,11 +18183,11 @@ end
 # InlineComment objects are the most common. They correspond to comments in
 # the source file like this one that start with #.
 #
-# source://prism//lib/prism/parse_result.rb#397
+# source://prism//lib/prism/parse_result.rb#529
 class Prism::InlineComment < ::Prism::Comment
   # Returns a string representation of this comment.
   #
-  # source://prism//lib/prism/parse_result.rb#405
+  # source://prism//lib/prism/parse_result.rb#537
   sig { returns(String) }
   def inspect; end
 
@@ -16278,7 +18196,7 @@ class Prism::InlineComment < ::Prism::Comment
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/parse_result.rb#400
+  # source://prism//lib/prism/parse_result.rb#532
   sig { override.returns(T::Boolean) }
   def trailing?; end
 end
@@ -17117,6 +19035,18 @@ class Prism::InstanceVariableAndWriteNode < ::Prism::Node
   # @return [InstanceVariableAndWriteNode] a new instance of InstanceVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#8691
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -17128,37 +19058,54 @@ class Prism::InstanceVariableAndWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#8703
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#8708
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#8718
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#8713
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> InstanceVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#8723
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::InstanceVariableAndWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#8708
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#8731
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#218
@@ -17176,21 +19123,25 @@ class Prism::InstanceVariableAndWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#8736
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#8739
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#8756
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#8746
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -17202,6 +19153,7 @@ class Prism::InstanceVariableAndWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#8753
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -17224,6 +19176,19 @@ class Prism::InstanceVariableOperatorWriteNode < ::Prism::Node
   # @return [InstanceVariableOperatorWriteNode] a new instance of InstanceVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#8792
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, binary_operator_loc, value, binary_operator); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -17235,47 +19200,67 @@ class Prism::InstanceVariableOperatorWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#8805
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader binary_operator: Symbol
   #
   # source://prism//lib/prism/node.rb#8858
+  sig { returns(Symbol) }
   def binary_operator; end
 
   # attr_reader binary_operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#8848
+  sig { returns(Prism::Location) }
   def binary_operator_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#8810
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#8820
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#8815
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?binary_operator_loc: Location, ?value: Prism::node, ?binary_operator: Symbol) -> InstanceVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#8825
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      binary_operator: Symbol
+    ).returns(Prism::InstanceVariableOperatorWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), binary_operator_loc: T.unsafe(nil), value: T.unsafe(nil), binary_operator: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#8810
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, binary_operator_loc: Location, value: Prism::node, binary_operator: Symbol }
   #
   # source://prism//lib/prism/node.rb#8833
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#230
@@ -17293,11 +19278,13 @@ class Prism::InstanceVariableOperatorWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#8838
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#8841
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # Returns the binary operator used to modify the receiver. This method is
@@ -17321,6 +19308,7 @@ class Prism::InstanceVariableOperatorWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#8855
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -17343,6 +19331,18 @@ class Prism::InstanceVariableOrWriteNode < ::Prism::Node
   # @return [InstanceVariableOrWriteNode] a new instance of InstanceVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#8893
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -17354,37 +19354,54 @@ class Prism::InstanceVariableOrWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#8905
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#8910
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#8920
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#8915
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node) -> InstanceVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#8925
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::InstanceVariableOrWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#8910
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#8933
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://prism//lib/prism/desugar_compiler.rb#224
@@ -17402,21 +19419,25 @@ class Prism::InstanceVariableOrWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#8938
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#8941
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#8958
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#8948
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -17428,6 +19449,7 @@ class Prism::InstanceVariableOrWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#8955
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -17450,6 +19472,7 @@ class Prism::InstanceVariableReadNode < ::Prism::Node
   # @return [InstanceVariableReadNode] a new instance of InstanceVariableReadNode
   #
   # source://prism//lib/prism/node.rb#8994
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -17461,37 +19484,51 @@ class Prism::InstanceVariableReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#9003
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9008
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#9018
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#9013
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> InstanceVariableReadNode
   #
   # source://prism//lib/prism/node.rb#9023
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::InstanceVariableReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9008
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#9031
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -17510,6 +19547,7 @@ class Prism::InstanceVariableReadNode < ::Prism::Node
   #     @_test # name `:@_test`
   #
   # source://prism//lib/prism/node.rb#9040
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -17538,6 +19576,7 @@ class Prism::InstanceVariableTargetNode < ::Prism::Node
   # @return [InstanceVariableTargetNode] a new instance of InstanceVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#9071
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer, name: Symbol).void }
   def initialize(source, node_id, location, flags, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -17549,37 +19588,51 @@ class Prism::InstanceVariableTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#9080
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9085
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#9095
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#9090
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol) -> InstanceVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#9100
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol
+    ).returns(Prism::InstanceVariableTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9085
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#9108
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -17594,6 +19647,7 @@ class Prism::InstanceVariableTargetNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#9113
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -17622,6 +19676,18 @@ class Prism::InstanceVariableWriteNode < ::Prism::Node
   # @return [InstanceVariableWriteNode] a new instance of InstanceVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#9144
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, name_loc, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -17633,37 +19699,54 @@ class Prism::InstanceVariableWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#9156
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9161
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#9171
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#9166
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?name_loc: Location, ?value: Prism::node, ?operator_loc: Location) -> InstanceVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#9176
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::InstanceVariableWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), name_loc: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9161
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, name_loc: Location, value: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#9184
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -17682,6 +19765,7 @@ class Prism::InstanceVariableWriteNode < ::Prism::Node
   #     @_foo = "bar" # name `@_foo`
   #
   # source://prism//lib/prism/node.rb#9193
+  sig { returns(Symbol) }
   def name; end
 
   # The location of the variable name.
@@ -17690,11 +19774,13 @@ class Prism::InstanceVariableWriteNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#9199
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#9225
+  sig { returns(String) }
   def operator; end
 
   # The location of the `=` operator.
@@ -17703,6 +19789,7 @@ class Prism::InstanceVariableWriteNode < ::Prism::Node
   #        ^
   #
   # source://prism//lib/prism/node.rb#9218
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -17720,6 +19807,7 @@ class Prism::InstanceVariableWriteNode < ::Prism::Node
   #           ^^^^
   #
   # source://prism//lib/prism/node.rb#9212
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -18544,6 +20632,17 @@ class Prism::InterpolatedSymbolNode < ::Prism::Node
   # @return [InterpolatedSymbolNode] a new instance of InterpolatedSymbolNode
   #
   # source://prism//lib/prism/node.rb#9796
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: T.nilable(Prism::Location),
+      parts: T::Array[T.any(Prism::StringNode, Prism::EmbeddedStatementsNode, Prism::EmbeddedVariableNode)],
+      closing_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, opening_loc, parts, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -18555,47 +20654,65 @@ class Prism::InterpolatedSymbolNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#9807
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9812
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String?
   #
   # source://prism//lib/prism/node.rb#9874
+  sig { returns(T.nilable(String)) }
   def closing; end
 
   # attr_reader closing_loc: Location?
   #
   # source://prism//lib/prism/node.rb#9856
+  sig { returns(T.nilable(Prism::Location)) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#9822
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#9817
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?opening_loc: Location?, ?parts: Array[StringNode | EmbeddedStatementsNode | EmbeddedVariableNode], ?closing_loc: Location?) -> InterpolatedSymbolNode
   #
   # source://prism//lib/prism/node.rb#9827
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: T.nilable(Prism::Location),
+      parts: T::Array[T.any(Prism::StringNode, Prism::EmbeddedStatementsNode, Prism::EmbeddedVariableNode)],
+      closing_loc: T.nilable(Prism::Location)
+    ).returns(Prism::InterpolatedSymbolNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), opening_loc: T.unsafe(nil), parts: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9812
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, opening_loc: Location?, parts: Array[StringNode | EmbeddedStatementsNode | EmbeddedVariableNode], closing_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#9835
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -18613,16 +20730,19 @@ class Prism::InterpolatedSymbolNode < ::Prism::Node
   # def opening: () -> String?
   #
   # source://prism//lib/prism/node.rb#9869
+  sig { returns(T.nilable(String)) }
   def opening; end
 
   # attr_reader opening_loc: Location?
   #
   # source://prism//lib/prism/node.rb#9840
+  sig { returns(T.nilable(Prism::Location)) }
   def opening_loc; end
 
   # attr_reader parts: Array[StringNode | EmbeddedStatementsNode | EmbeddedVariableNode]
   #
   # source://prism//lib/prism/node.rb#9853
+  sig { returns(T::Array[T.any(Prism::StringNode, Prism::EmbeddedStatementsNode, Prism::EmbeddedVariableNode)]) }
   def parts; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -18653,6 +20773,17 @@ class Prism::InterpolatedXStringNode < ::Prism::Node
   # @return [InterpolatedXStringNode] a new instance of InterpolatedXStringNode
   #
   # source://prism//lib/prism/node.rb#9910
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: Prism::Location,
+      parts: T::Array[T.any(Prism::StringNode, Prism::EmbeddedStatementsNode, Prism::EmbeddedVariableNode)],
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, opening_loc, parts, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -18664,47 +20795,65 @@ class Prism::InterpolatedXStringNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#9921
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9926
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#9976
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#9964
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#9936
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#9931
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?opening_loc: Location, ?parts: Array[StringNode | EmbeddedStatementsNode | EmbeddedVariableNode], ?closing_loc: Location) -> InterpolatedXStringNode
   #
   # source://prism//lib/prism/node.rb#9941
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      opening_loc: Prism::Location,
+      parts: T::Array[T.any(Prism::StringNode, Prism::EmbeddedStatementsNode, Prism::EmbeddedVariableNode)],
+      closing_loc: Prism::Location
+    ).returns(Prism::InterpolatedXStringNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), opening_loc: T.unsafe(nil), parts: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#9926
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, opening_loc: Location, parts: Array[StringNode | EmbeddedStatementsNode | EmbeddedVariableNode], closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#9949
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -18725,16 +20874,19 @@ class Prism::InterpolatedXStringNode < ::Prism::Node
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#9971
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#9954
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # attr_reader parts: Array[StringNode | EmbeddedStatementsNode | EmbeddedVariableNode]
   #
   # source://prism//lib/prism/node.rb#9961
+  sig { returns(T::Array[T.any(Prism::StringNode, Prism::EmbeddedStatementsNode, Prism::EmbeddedVariableNode)]) }
   def parts; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -18763,6 +20915,7 @@ class Prism::ItLocalVariableReadNode < ::Prism::Node
   # @return [ItLocalVariableReadNode] a new instance of ItLocalVariableReadNode
   #
   # source://prism//lib/prism/node.rb#10012
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -18774,37 +20927,44 @@ class Prism::ItLocalVariableReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10020
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10025
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10035
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10030
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> ItLocalVariableReadNode
   #
   # source://prism//lib/prism/node.rb#10040
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::ItLocalVariableReadNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10025
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#10048
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -18842,6 +21002,7 @@ class Prism::ItParametersNode < ::Prism::Node
   # @return [ItParametersNode] a new instance of ItParametersNode
   #
   # source://prism//lib/prism/node.rb#10080
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -18853,37 +21014,44 @@ class Prism::ItParametersNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10088
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10093
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10103
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10098
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> ItParametersNode
   #
   # source://prism//lib/prism/node.rb#10108
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::ItParametersNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10093
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#10116
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -19186,6 +21354,20 @@ class Prism::LambdaNode < ::Prism::Node
   # @return [LambdaNode] a new instance of LambdaNode
   #
   # source://prism//lib/prism/node.rb#10337
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      operator_loc: Prism::Location,
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location,
+      parameters: T.nilable(T.any(Prism::BlockParametersNode, Prism::NumberedParametersNode, Prism::ItParametersNode)),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))
+    ).void
+  end
   def initialize(source, node_id, location, flags, locals, operator_loc, opening_loc, closing_loc, parameters, body); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -19197,52 +21379,74 @@ class Prism::LambdaNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10351
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: StatementsNode | BeginNode | nil
   #
   # source://prism//lib/prism/node.rb#10414
+  sig { returns(T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10356
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#10427
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#10404
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10369
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10361
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?locals: Array[Symbol], ?operator_loc: Location, ?opening_loc: Location, ?closing_loc: Location, ?parameters: BlockParametersNode | NumberedParametersNode | ItParametersNode | nil, ?body: StatementsNode | BeginNode | nil) -> LambdaNode
   #
   # source://prism//lib/prism/node.rb#10374
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      operator_loc: Prism::Location,
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location,
+      parameters: T.nilable(T.any(Prism::BlockParametersNode, Prism::NumberedParametersNode, Prism::ItParametersNode)),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))
+    ).returns(Prism::LambdaNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), locals: T.unsafe(nil), operator_loc: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil), parameters: T.unsafe(nil), body: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10356
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, locals: Array[Symbol], operator_loc: Location, opening_loc: Location, closing_loc: Location, parameters: BlockParametersNode | NumberedParametersNode | ItParametersNode | nil, body: StatementsNode | BeginNode | nil }
   #
   # source://prism//lib/prism/node.rb#10382
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -19257,31 +21461,37 @@ class Prism::LambdaNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#10387
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#10422
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#10397
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#10417
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#10390
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # attr_reader parameters: BlockParametersNode | NumberedParametersNode | ItParametersNode | nil
   #
   # source://prism//lib/prism/node.rb#10411
+  sig { returns(T.nilable(T.any(Prism::BlockParametersNode, Prism::NumberedParametersNode, Prism::ItParametersNode))) }
   def parameters; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -19549,13 +21759,13 @@ end
 
 # This is a result specific to the `lex` and `lex_file` methods.
 #
-# source://prism//lib/prism/parse_result.rb#627
+# source://prism//lib/prism/parse_result.rb#764
 class Prism::LexResult < ::Prism::Result
   # Create a new lex result object with the given values.
   #
   # @return [LexResult] a new instance of LexResult
   #
-  # source://prism//lib/prism/parse_result.rb#632
+  # source://prism//lib/prism/parse_result.rb#769
   sig do
     params(
       value: T::Array[T.untyped],
@@ -19571,13 +21781,13 @@ class Prism::LexResult < ::Prism::Result
 
   # Implement the hash pattern matching interface for LexResult.
   #
-  # source://prism//lib/prism/parse_result.rb#638
+  # source://prism//lib/prism/parse_result.rb#775
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The list of tokens that were parsed from the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#629
+  # source://prism//lib/prism/parse_result.rb#766
   sig { returns(T::Array[T.untyped]) }
   def value; end
 end
@@ -19616,6 +21826,19 @@ class Prism::LocalVariableAndWriteNode < ::Prism::Node
   # @return [LocalVariableAndWriteNode] a new instance of LocalVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#10466
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node,
+      name: Symbol,
+      depth: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, name_loc, operator_loc, value, name, depth); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -19627,42 +21850,61 @@ class Prism::LocalVariableAndWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10479
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10484
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10494
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10489
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node, ?name: Symbol, ?depth: Integer) -> LocalVariableAndWriteNode
   #
   # source://prism//lib/prism/node.rb#10499
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node,
+      name: Symbol,
+      depth: Integer
+    ).returns(Prism::LocalVariableAndWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil), name: T.unsafe(nil), depth: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10484
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name_loc: Location, operator_loc: Location, value: Prism::node, name: Symbol, depth: Integer }
   #
   # source://prism//lib/prism/node.rb#10507
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
   # source://prism//lib/prism/node.rb#10532
+  sig { returns(Integer) }
   def depth; end
 
   # source://prism//lib/prism/desugar_compiler.rb#236
@@ -19680,21 +21922,25 @@ class Prism::LocalVariableAndWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#10529
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#10512
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#10535
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#10519
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -19706,6 +21952,7 @@ class Prism::LocalVariableAndWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#10526
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -19728,6 +21975,20 @@ class Prism::LocalVariableOperatorWriteNode < ::Prism::Node
   # @return [LocalVariableOperatorWriteNode] a new instance of LocalVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#10572
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      name: Symbol,
+      binary_operator: Symbol,
+      depth: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, name_loc, binary_operator_loc, value, name, binary_operator, depth); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -19739,52 +22000,74 @@ class Prism::LocalVariableOperatorWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10586
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader binary_operator: Symbol
   #
   # source://prism//lib/prism/node.rb#10639
+  sig { returns(Symbol) }
   def binary_operator; end
 
   # attr_reader binary_operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#10626
+  sig { returns(Prism::Location) }
   def binary_operator_loc; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10591
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10601
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10596
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name_loc: Location, ?binary_operator_loc: Location, ?value: Prism::node, ?name: Symbol, ?binary_operator: Symbol, ?depth: Integer) -> LocalVariableOperatorWriteNode
   #
   # source://prism//lib/prism/node.rb#10606
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name_loc: Prism::Location,
+      binary_operator_loc: Prism::Location,
+      value: Prism::Node,
+      name: Symbol,
+      binary_operator: Symbol,
+      depth: Integer
+    ).returns(Prism::LocalVariableOperatorWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name_loc: T.unsafe(nil), binary_operator_loc: T.unsafe(nil), value: T.unsafe(nil), name: T.unsafe(nil), binary_operator: T.unsafe(nil), depth: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10591
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name_loc: Location, binary_operator_loc: Location, value: Prism::node, name: Symbol, binary_operator: Symbol, depth: Integer }
   #
   # source://prism//lib/prism/node.rb#10614
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
   # source://prism//lib/prism/node.rb#10642
+  sig { returns(Integer) }
   def depth; end
 
   # source://prism//lib/prism/desugar_compiler.rb#248
@@ -19802,11 +22085,13 @@ class Prism::LocalVariableOperatorWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#10636
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#10619
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # Returns the binary operator used to modify the receiver. This method is
@@ -19830,6 +22115,7 @@ class Prism::LocalVariableOperatorWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#10633
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -19852,6 +22138,19 @@ class Prism::LocalVariableOrWriteNode < ::Prism::Node
   # @return [LocalVariableOrWriteNode] a new instance of LocalVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#10678
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node,
+      name: Symbol,
+      depth: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, name_loc, operator_loc, value, name, depth); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -19863,42 +22162,61 @@ class Prism::LocalVariableOrWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10691
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10696
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10706
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10701
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name_loc: Location, ?operator_loc: Location, ?value: Prism::node, ?name: Symbol, ?depth: Integer) -> LocalVariableOrWriteNode
   #
   # source://prism//lib/prism/node.rb#10711
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      value: Prism::Node,
+      name: Symbol,
+      depth: Integer
+    ).returns(Prism::LocalVariableOrWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil), name: T.unsafe(nil), depth: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10696
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name_loc: Location, operator_loc: Location, value: Prism::node, name: Symbol, depth: Integer }
   #
   # source://prism//lib/prism/node.rb#10719
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
   # source://prism//lib/prism/node.rb#10744
+  sig { returns(Integer) }
   def depth; end
 
   # source://prism//lib/prism/desugar_compiler.rb#242
@@ -19916,21 +22234,25 @@ class Prism::LocalVariableOrWriteNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#10741
+  sig { returns(Symbol) }
   def name; end
 
   # attr_reader name_loc: Location
   #
   # source://prism//lib/prism/node.rb#10724
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#10747
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#10731
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -19942,6 +22264,7 @@ class Prism::LocalVariableOrWriteNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#10738
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -19964,6 +22287,16 @@ class Prism::LocalVariableReadNode < ::Prism::Node
   # @return [LocalVariableReadNode] a new instance of LocalVariableReadNode
   #
   # source://prism//lib/prism/node.rb#10784
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      depth: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, depth); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -19975,37 +22308,52 @@ class Prism::LocalVariableReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10794
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10799
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10809
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10804
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?depth: Integer) -> LocalVariableReadNode
   #
   # source://prism//lib/prism/node.rb#10814
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      depth: Integer
+    ).returns(Prism::LocalVariableReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), depth: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10799
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, depth: Integer }
   #
   # source://prism//lib/prism/node.rb#10822
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The number of visible scopes that should be searched to find the origin of this local variable.
@@ -20017,6 +22365,7 @@ class Prism::LocalVariableReadNode < ::Prism::Node
   # The specific rules for calculating the depth may differ from individual Ruby implementations, as they are not specified by the language. For more information, see [the Prism documentation](https://github.com/ruby/prism/blob/main/docs/local_variable_depth.md).
   #
   # source://prism//lib/prism/node.rb#10844
+  sig { returns(Integer) }
   def depth; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -20039,6 +22388,7 @@ class Prism::LocalVariableReadNode < ::Prism::Node
   #     _1     # name `:_1`
   #
   # source://prism//lib/prism/node.rb#10835
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -20067,6 +22417,16 @@ class Prism::LocalVariableTargetNode < ::Prism::Node
   # @return [LocalVariableTargetNode] a new instance of LocalVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#10876
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      depth: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, depth); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -20078,42 +22438,58 @@ class Prism::LocalVariableTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10886
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10891
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10901
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10896
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?depth: Integer) -> LocalVariableTargetNode
   #
   # source://prism//lib/prism/node.rb#10906
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      depth: Integer
+    ).returns(Prism::LocalVariableTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), depth: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10891
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, depth: Integer }
   #
   # source://prism//lib/prism/node.rb#10914
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader depth: Integer
   #
   # source://prism//lib/prism/node.rb#10922
+  sig { returns(Integer) }
   def depth; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -20128,6 +22504,7 @@ class Prism::LocalVariableTargetNode < ::Prism::Node
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#10919
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -20156,6 +22533,19 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   # @return [LocalVariableWriteNode] a new instance of LocalVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#10954
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      depth: Integer,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, name, depth, name_loc, value, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -20167,37 +22557,55 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#10967
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10972
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#10982
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#10977
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?name: Symbol, ?depth: Integer, ?name_loc: Location, ?value: Prism::node, ?operator_loc: Location) -> LocalVariableWriteNode
   #
   # source://prism//lib/prism/node.rb#10987
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      name: Symbol,
+      depth: Integer,
+      name_loc: Prism::Location,
+      value: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::LocalVariableWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), name: T.unsafe(nil), depth: T.unsafe(nil), name_loc: T.unsafe(nil), value: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#10972
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, name: Symbol, depth: Integer, name_loc: Location, value: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#10995
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The number of semantic scopes we have to traverse to find the declaration of this variable.
@@ -20209,6 +22617,7 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   # The specific rules for calculating the depth may differ from individual Ruby implementations, as they are not specified by the language. For more information, see [the Prism documentation](https://github.com/ruby/prism/blob/main/docs/local_variable_depth.md).
   #
   # source://prism//lib/prism/node.rb#11013
+  sig { returns(Integer) }
   def depth; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -20227,6 +22636,7 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   #     abc = 123  # name `:abc`
   #
   # source://prism//lib/prism/node.rb#11004
+  sig { returns(Symbol) }
   def name; end
 
   # The location of the variable name.
@@ -20235,11 +22645,13 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   #     ^^^
   #
   # source://prism//lib/prism/node.rb#11019
+  sig { returns(Prism::Location) }
   def name_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#11049
+  sig { returns(String) }
   def operator; end
 
   # The location of the `=` operator.
@@ -20248,6 +22660,7 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   #       ^
   #
   # source://prism//lib/prism/node.rb#11042
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -20269,6 +22682,7 @@ class Prism::LocalVariableWriteNode < ::Prism::Node
   #     foo = foo
   #
   # source://prism//lib/prism/node.rb#11036
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -20281,20 +22695,20 @@ end
 
 # This represents a location in the source.
 #
-# source://prism//lib/prism/parse_result.rb#165
+# source://prism//lib/prism/parse_result.rb#273
 class Prism::Location
   # Create a new location object with the given source, start byte offset, and
   # byte length.
   #
   # @return [Location] a new instance of Location
   #
-  # source://prism//lib/prism/parse_result.rb#180
+  # source://prism//lib/prism/parse_result.rb#288
   sig { params(source: Prism::Source, start_offset: Integer, length: Integer).void }
   def initialize(source, start_offset, length); end
 
   # Returns true if the given other location is equal to this location.
   #
-  # source://prism//lib/prism/parse_result.rb#344
+  # source://prism//lib/prism/parse_result.rb#476
   sig { params(other: T.untyped).returns(T::Boolean) }
   def ==(other); end
 
@@ -20302,84 +22716,128 @@ class Prism::Location
   # that occurs after this location on the same line, and return the new
   # location. This will raise an error if the string does not exist.
   #
-  # source://prism//lib/prism/parse_result.rb#363
+  # source://prism//lib/prism/parse_result.rb#495
   sig { params(string: String).returns(Prism::Location) }
   def adjoin(string); end
 
+  # The end column in code units using the given cache to fetch or calculate
+  # the value.
+  #
+  # source://prism//lib/prism/parse_result.rb#461
+  sig do
+    params(
+      cache: T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer))
+    ).returns(Integer)
+  end
+  def cached_end_code_units_column(cache); end
+
+  # The end offset from the start of the file in code units using the given
+  # cache to fetch or calculate the value.
+  #
+  # source://prism//lib/prism/parse_result.rb#397
+  sig do
+    params(
+      cache: T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer))
+    ).returns(Integer)
+  end
+  def cached_end_code_units_offset(cache); end
+
+  # The start column in code units using the given cache to fetch or calculate
+  # the value.
+  #
+  # source://prism//lib/prism/parse_result.rb#437
+  sig do
+    params(
+      cache: T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer))
+    ).returns(Integer)
+  end
+  def cached_start_code_units_column(cache); end
+
+  # The start offset from the start of the file in code units using the given
+  # cache to fetch or calculate the value.
+  #
+  # source://prism//lib/prism/parse_result.rb#375
+  sig do
+    params(
+      cache: T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer))
+    ).returns(Integer)
+  end
+  def cached_start_code_units_offset(cache); end
+
   # Returns a new location that is the result of chopping off the last byte.
   #
-  # source://prism//lib/prism/parse_result.rb#226
+  # source://prism//lib/prism/parse_result.rb#334
   sig { returns(Prism::Location) }
   def chop; end
 
   # Returns all comments that are associated with this location (both leading
   # and trailing comments).
   #
-  # source://prism//lib/prism/parse_result.rb#216
+  # source://prism//lib/prism/parse_result.rb#324
   sig { returns(T::Array[Prism::Comment]) }
   def comments; end
 
   # Create a new location object with the given options.
   #
-  # source://prism//lib/prism/parse_result.rb#221
+  # source://prism//lib/prism/parse_result.rb#329
   sig { params(source: Prism::Source, start_offset: Integer, length: Integer).returns(Prism::Location) }
   def copy(source: T.unsafe(nil), start_offset: T.unsafe(nil), length: T.unsafe(nil)); end
 
   # Implement the hash pattern matching interface for Location.
   #
-  # source://prism//lib/prism/parse_result.rb#334
+  # source://prism//lib/prism/parse_result.rb#466
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The column number in characters where this location ends from the start of
   # the line.
   #
-  # source://prism//lib/prism/parse_result.rb#323
+  # source://prism//lib/prism/parse_result.rb#449
   sig { returns(Integer) }
   def end_character_column; end
 
   # The character offset from the beginning of the source where this location
   # ends.
   #
-  # source://prism//lib/prism/parse_result.rb#272
+  # source://prism//lib/prism/parse_result.rb#386
   sig { returns(Integer) }
   def end_character_offset; end
 
   # The column number in code units of the given encoding where this location
   # ends from the start of the line.
   #
-  # source://prism//lib/prism/parse_result.rb#329
+  # source://prism//lib/prism/parse_result.rb#455
   sig { params(encoding: Encoding).returns(Integer) }
   def end_code_units_column(encoding = T.unsafe(nil)); end
 
   # The offset from the start of the file in code units of the given encoding.
   #
-  # source://prism//lib/prism/parse_result.rb#277
+  # source://prism//lib/prism/parse_result.rb#391
   sig { params(encoding: Encoding).returns(Integer) }
   def end_code_units_offset(encoding = T.unsafe(nil)); end
 
   # The column number in bytes where this location ends from the start of the
   # line.
   #
-  # source://prism//lib/prism/parse_result.rb#317
+  # source://prism//lib/prism/parse_result.rb#443
   sig { returns(Integer) }
   def end_column; end
 
   # The line number where this location ends.
   #
-  # source://prism//lib/prism/parse_result.rb#293
+  # source://prism//lib/prism/parse_result.rb#413
   sig { returns(Integer) }
   def end_line; end
 
   # The byte offset from the beginning of the source where this location ends.
   #
-  # source://prism//lib/prism/parse_result.rb#266
+  # source://prism//lib/prism/parse_result.rb#380
   sig { returns(Integer) }
   def end_offset; end
 
   # Returns a string representation of this location.
   #
-  # source://prism//lib/prism/parse_result.rb#231
+  # source://prism//lib/prism/parse_result.rb#339
   sig { returns(String) }
   def inspect; end
 
@@ -20387,38 +22845,38 @@ class Prism::Location
   # other location. Raises an error if this location is not before the other
   # location or if they don't share the same source.
   #
-  # source://prism//lib/prism/parse_result.rb#353
+  # source://prism//lib/prism/parse_result.rb#485
   sig { params(other: Prism::Location).returns(Prism::Location) }
   def join(other); end
 
   # Attach a comment to the leading comments of this location.
   #
-  # source://prism//lib/prism/parse_result.rb#199
+  # source://prism//lib/prism/parse_result.rb#307
   sig { params(comment: Prism::Comment).void }
   def leading_comment(comment); end
 
   # These are the comments that are associated with this location that exist
   # before the start of this location.
   #
-  # source://prism//lib/prism/parse_result.rb#194
+  # source://prism//lib/prism/parse_result.rb#302
   sig { returns(T::Array[Prism::Comment]) }
   def leading_comments; end
 
   # The length of this location in bytes.
   #
-  # source://prism//lib/prism/parse_result.rb#176
+  # source://prism//lib/prism/parse_result.rb#284
   sig { returns(Integer) }
   def length; end
 
   # Implement the pretty print interface for Location.
   #
-  # source://prism//lib/prism/parse_result.rb#339
+  # source://prism//lib/prism/parse_result.rb#471
   sig { params(q: T.untyped).void }
   def pretty_print(q); end
 
   # The source code that this location represents.
   #
-  # source://prism//lib/prism/parse_result.rb#241
+  # source://prism//lib/prism/parse_result.rb#349
   sig { returns(String) }
   def slice; end
 
@@ -20426,78 +22884,78 @@ class Prism::Location
   # of the line that this location starts on to the end of the line that this
   # location ends on.
   #
-  # source://prism//lib/prism/parse_result.rb#248
+  # source://prism//lib/prism/parse_result.rb#356
   def slice_lines; end
 
   # Returns all of the lines of the source code associated with this location.
   #
-  # source://prism//lib/prism/parse_result.rb#236
+  # source://prism//lib/prism/parse_result.rb#344
   sig { returns(T::Array[String]) }
   def source_lines; end
 
   # The column number in characters where this location ends from the start of
   # the line.
   #
-  # source://prism//lib/prism/parse_result.rb#305
+  # source://prism//lib/prism/parse_result.rb#425
   sig { returns(Integer) }
   def start_character_column; end
 
   # The character offset from the beginning of the source where this location
   # starts.
   #
-  # source://prism//lib/prism/parse_result.rb#256
+  # source://prism//lib/prism/parse_result.rb#364
   sig { returns(Integer) }
   def start_character_offset; end
 
   # The column number in code units of the given encoding where this location
   # starts from the start of the line.
   #
-  # source://prism//lib/prism/parse_result.rb#311
+  # source://prism//lib/prism/parse_result.rb#431
   sig { params(encoding: Encoding).returns(Integer) }
   def start_code_units_column(encoding = T.unsafe(nil)); end
 
   # The offset from the start of the file in code units of the given encoding.
   #
-  # source://prism//lib/prism/parse_result.rb#261
+  # source://prism//lib/prism/parse_result.rb#369
   sig { params(encoding: Encoding).returns(Integer) }
   def start_code_units_offset(encoding = T.unsafe(nil)); end
 
   # The column number in bytes where this location starts from the start of
   # the line.
   #
-  # source://prism//lib/prism/parse_result.rb#299
+  # source://prism//lib/prism/parse_result.rb#419
   sig { returns(Integer) }
   def start_column; end
 
   # The line number where this location starts.
   #
-  # source://prism//lib/prism/parse_result.rb#282
+  # source://prism//lib/prism/parse_result.rb#402
   sig { returns(Integer) }
   def start_line; end
 
   # The content of the line where this location starts before this location.
   #
-  # source://prism//lib/prism/parse_result.rb#287
+  # source://prism//lib/prism/parse_result.rb#407
   sig { returns(String) }
   def start_line_slice; end
 
   # The byte offset from the beginning of the source where this location
   # starts.
   #
-  # source://prism//lib/prism/parse_result.rb#173
+  # source://prism//lib/prism/parse_result.rb#281
   sig { returns(Integer) }
   def start_offset; end
 
   # Attach a comment to the trailing comments of this location.
   #
-  # source://prism//lib/prism/parse_result.rb#210
+  # source://prism//lib/prism/parse_result.rb#318
   sig { params(comment: Prism::Comment).void }
   def trailing_comment(comment); end
 
   # These are the comments that are associated with this location that exist
   # after the end of this location.
   #
-  # source://prism//lib/prism/parse_result.rb#205
+  # source://prism//lib/prism/parse_result.rb#313
   sig { returns(T::Array[Prism::Comment]) }
   def trailing_comments; end
 
@@ -20506,7 +22964,7 @@ class Prism::Location
   # A Source object that is used to determine more information from the given
   # offset and length.
   #
-  # source://prism//lib/prism/parse_result.rb#168
+  # source://prism//lib/prism/parse_result.rb#276
   sig { returns(Prism::Source) }
   def source; end
 end
@@ -20523,49 +22981,49 @@ Prism::LoopFlags::BEGIN_MODIFIER = T.let(T.unsafe(nil), Integer)
 
 # This represents a magic comment that was encountered during parsing.
 #
-# source://prism//lib/prism/parse_result.rb#425
+# source://prism//lib/prism/parse_result.rb#557
 class Prism::MagicComment
   # Create a new magic comment object with the given key and value locations.
   #
   # @return [MagicComment] a new instance of MagicComment
   #
-  # source://prism//lib/prism/parse_result.rb#433
+  # source://prism//lib/prism/parse_result.rb#565
   sig { params(key_loc: Prism::Location, value_loc: Prism::Location).void }
   def initialize(key_loc, value_loc); end
 
   # Implement the hash pattern matching interface for MagicComment.
   #
-  # source://prism//lib/prism/parse_result.rb#449
+  # source://prism//lib/prism/parse_result.rb#581
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # Returns a string representation of this magic comment.
   #
-  # source://prism//lib/prism/parse_result.rb#454
+  # source://prism//lib/prism/parse_result.rb#586
   sig { returns(String) }
   def inspect; end
 
   # Returns the key of the magic comment by slicing it from the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#439
+  # source://prism//lib/prism/parse_result.rb#571
   sig { returns(String) }
   def key; end
 
   # A Location object representing the location of the key in the source.
   #
-  # source://prism//lib/prism/parse_result.rb#427
+  # source://prism//lib/prism/parse_result.rb#559
   sig { returns(Prism::Location) }
   def key_loc; end
 
   # Returns the value of the magic comment by slicing it from the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#444
+  # source://prism//lib/prism/parse_result.rb#576
   sig { returns(String) }
   def value; end
 
   # A Location object representing the location of the value in the source.
   #
-  # source://prism//lib/prism/parse_result.rb#430
+  # source://prism//lib/prism/parse_result.rb#562
   sig { returns(Prism::Location) }
   def value_loc; end
 end
@@ -20825,6 +23283,17 @@ class Prism::MatchPredicateNode < ::Prism::Node
   # @return [MatchPredicateNode] a new instance of MatchPredicateNode
   #
   # source://prism//lib/prism/node.rb#11257
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: Prism::Node,
+      pattern: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, value, pattern, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -20836,37 +23305,53 @@ class Prism::MatchPredicateNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11268
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11273
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11283
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11278
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?value: Prism::node, ?pattern: Prism::node, ?operator_loc: Location) -> MatchPredicateNode
   #
   # source://prism//lib/prism/node.rb#11288
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: Prism::Node,
+      pattern: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::MatchPredicateNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), value: T.unsafe(nil), pattern: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11273
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, value: Prism::node, pattern: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#11296
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -20881,16 +23366,19 @@ class Prism::MatchPredicateNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#11314
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#11307
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # attr_reader pattern: Prism::node
   #
   # source://prism//lib/prism/node.rb#11304
+  sig { returns(Prism::Node) }
   def pattern; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -20902,6 +23390,7 @@ class Prism::MatchPredicateNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#11301
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -20924,6 +23413,17 @@ class Prism::MatchRequiredNode < ::Prism::Node
   # @return [MatchRequiredNode] a new instance of MatchRequiredNode
   #
   # source://prism//lib/prism/node.rb#11349
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: Prism::Node,
+      pattern: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, value, pattern, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -20935,37 +23435,53 @@ class Prism::MatchRequiredNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11360
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11365
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11375
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11370
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?value: Prism::node, ?pattern: Prism::node, ?operator_loc: Location) -> MatchRequiredNode
   #
   # source://prism//lib/prism/node.rb#11380
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      value: Prism::Node,
+      pattern: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::MatchRequiredNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), value: T.unsafe(nil), pattern: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11365
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, value: Prism::node, pattern: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#11388
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -20980,16 +23496,19 @@ class Prism::MatchRequiredNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#11406
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#11399
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # attr_reader pattern: Prism::node
   #
   # source://prism//lib/prism/node.rb#11396
+  sig { returns(Prism::Node) }
   def pattern; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -21001,6 +23520,7 @@ class Prism::MatchRequiredNode < ::Prism::Node
   # attr_reader value: Prism::node
   #
   # source://prism//lib/prism/node.rb#11393
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -21023,6 +23543,16 @@ class Prism::MatchWriteNode < ::Prism::Node
   # @return [MatchWriteNode] a new instance of MatchWriteNode
   #
   # source://prism//lib/prism/node.rb#11441
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      call: Prism::CallNode,
+      targets: T::Array[Prism::LocalVariableTargetNode]
+    ).void
+  end
   def initialize(source, node_id, location, flags, call, targets); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -21034,42 +23564,58 @@ class Prism::MatchWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11451
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader call: CallNode
   #
   # source://prism//lib/prism/node.rb#11484
+  sig { returns(Prism::CallNode) }
   def call; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11456
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11466
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11461
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?call: CallNode, ?targets: Array[LocalVariableTargetNode]) -> MatchWriteNode
   #
   # source://prism//lib/prism/node.rb#11471
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      call: Prism::CallNode,
+      targets: T::Array[Prism::LocalVariableTargetNode]
+    ).returns(Prism::MatchWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), call: T.unsafe(nil), targets: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11456
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, call: CallNode, targets: Array[LocalVariableTargetNode] }
   #
   # source://prism//lib/prism/node.rb#11479
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -21084,6 +23630,7 @@ class Prism::MatchWriteNode < ::Prism::Node
   # attr_reader targets: Array[LocalVariableTargetNode]
   #
   # source://prism//lib/prism/node.rb#11487
+  sig { returns(T::Array[Prism::LocalVariableTargetNode]) }
   def targets; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -21109,6 +23656,7 @@ class Prism::MissingNode < ::Prism::Node
   # @return [MissingNode] a new instance of MissingNode
   #
   # source://prism//lib/prism/node.rb#11517
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -21120,37 +23668,44 @@ class Prism::MissingNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11525
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11530
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11540
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11535
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> MissingNode
   #
   # source://prism//lib/prism/node.rb#11545
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::MissingNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11530
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#11553
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -21188,6 +23743,20 @@ class Prism::ModuleNode < ::Prism::Node
   # @return [ModuleNode] a new instance of ModuleNode
   #
   # source://prism//lib/prism/node.rb#11585
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      module_keyword_loc: Prism::Location,
+      constant_path: T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::MissingNode),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      end_keyword_loc: Prism::Location,
+      name: Symbol
+    ).void
+  end
   def initialize(source, node_id, location, flags, locals, module_keyword_loc, constant_path, body, end_keyword_loc, name); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -21199,57 +23768,80 @@ class Prism::ModuleNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11599
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: StatementsNode | BeginNode | nil
   #
   # source://prism//lib/prism/node.rb#11648
+  sig { returns(T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11604
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11617
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11609
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader constant_path: ConstantReadNode | ConstantPathNode | MissingNode
   #
   # source://prism//lib/prism/node.rb#11645
+  sig { returns(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::MissingNode)) }
   def constant_path; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?locals: Array[Symbol], ?module_keyword_loc: Location, ?constant_path: ConstantReadNode | ConstantPathNode | MissingNode, ?body: StatementsNode | BeginNode | nil, ?end_keyword_loc: Location, ?name: Symbol) -> ModuleNode
   #
   # source://prism//lib/prism/node.rb#11622
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      module_keyword_loc: Prism::Location,
+      constant_path: T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::MissingNode),
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      end_keyword_loc: Prism::Location,
+      name: Symbol
+    ).returns(Prism::ModuleNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), locals: T.unsafe(nil), module_keyword_loc: T.unsafe(nil), constant_path: T.unsafe(nil), body: T.unsafe(nil), end_keyword_loc: T.unsafe(nil), name: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11604
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, locals: Array[Symbol], module_keyword_loc: Location, constant_path: ConstantReadNode | ConstantPathNode | MissingNode, body: StatementsNode | BeginNode | nil, end_keyword_loc: Location, name: Symbol }
   #
   # source://prism//lib/prism/node.rb#11630
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#11666
+  sig { returns(String) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#11651
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -21264,21 +23856,25 @@ class Prism::ModuleNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#11635
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # def module_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#11661
+  sig { returns(String) }
   def module_keyword; end
 
   # attr_reader module_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#11638
+  sig { returns(Prism::Location) }
   def module_keyword_loc; end
 
   # attr_reader name: Symbol
   #
   # source://prism//lib/prism/node.rb#11658
+  sig { returns(Symbol) }
   def name; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -21312,6 +23908,19 @@ class Prism::MultiTargetNode < ::Prism::Node
   # @return [MultiTargetNode] a new instance of MultiTargetNode
   #
   # source://prism//lib/prism/node.rb#11710
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      lefts: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::RequiredParameterNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      rest: T.nilable(T.any(Prism::ImplicitRestNode, Prism::SplatNode)),
+      rights: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::RequiredParameterNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      lparen_loc: T.nilable(Prism::Location),
+      rparen_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, lefts, rest, rights, lparen_loc, rparen_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -21323,37 +23932,55 @@ class Prism::MultiTargetNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11723
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11728
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11742
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11733
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?lefts: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | RequiredParameterNode | BackReferenceReadNode | NumberedReferenceReadNode], ?rest: ImplicitRestNode | SplatNode | nil, ?rights: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | RequiredParameterNode | BackReferenceReadNode | NumberedReferenceReadNode], ?lparen_loc: Location?, ?rparen_loc: Location?) -> MultiTargetNode
   #
   # source://prism//lib/prism/node.rb#11747
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      lefts: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::RequiredParameterNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      rest: T.nilable(T.any(Prism::ImplicitRestNode, Prism::SplatNode)),
+      rights: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::RequiredParameterNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      lparen_loc: T.nilable(Prism::Location),
+      rparen_loc: T.nilable(Prism::Location)
+    ).returns(Prism::MultiTargetNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), lefts: T.unsafe(nil), rest: T.unsafe(nil), rights: T.unsafe(nil), lparen_loc: T.unsafe(nil), rparen_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11728
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, lefts: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | RequiredParameterNode | BackReferenceReadNode | NumberedReferenceReadNode], rest: ImplicitRestNode | SplatNode | nil, rights: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | RequiredParameterNode | BackReferenceReadNode | NumberedReferenceReadNode], lparen_loc: Location?, rparen_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#11755
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -21376,11 +24003,15 @@ class Prism::MultiTargetNode < ::Prism::Node
   #         ^^^^
   #
   # source://prism//lib/prism/node.rb#11768
+  sig do
+    returns(T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::RequiredParameterNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)])
+  end
   def lefts; end
 
   # def lparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#11825
+  sig { returns(T.nilable(String)) }
   def lparen; end
 
   # The location of the opening parenthesis.
@@ -21389,6 +24020,7 @@ class Prism::MultiTargetNode < ::Prism::Node
   #        ^
   #
   # source://prism//lib/prism/node.rb#11796
+  sig { returns(T.nilable(Prism::Location)) }
   def lparen_loc; end
 
   # Represents a splat node in the target expression.
@@ -21407,6 +24039,7 @@ class Prism::MultiTargetNode < ::Prism::Node
   #          ^
   #
   # source://prism//lib/prism/node.rb#11784
+  sig { returns(T.nilable(T.any(Prism::ImplicitRestNode, Prism::SplatNode))) }
   def rest; end
 
   # Represents the targets expressions after a splat node.
@@ -21415,11 +24048,15 @@ class Prism::MultiTargetNode < ::Prism::Node
   #            ^^^^
   #
   # source://prism//lib/prism/node.rb#11790
+  sig do
+    returns(T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::RequiredParameterNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)])
+  end
   def rights; end
 
   # def rparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#11830
+  sig { returns(T.nilable(String)) }
   def rparen; end
 
   # The location of the closing parenthesis.
@@ -21428,6 +24065,7 @@ class Prism::MultiTargetNode < ::Prism::Node
   #             ^
   #
   # source://prism//lib/prism/node.rb#11812
+  sig { returns(T.nilable(Prism::Location)) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -21456,6 +24094,21 @@ class Prism::MultiWriteNode < ::Prism::Node
   # @return [MultiWriteNode] a new instance of MultiWriteNode
   #
   # source://prism//lib/prism/node.rb#11869
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      lefts: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      rest: T.nilable(T.any(Prism::ImplicitRestNode, Prism::SplatNode)),
+      rights: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      lparen_loc: T.nilable(Prism::Location),
+      rparen_loc: T.nilable(Prism::Location),
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, lefts, rest, rights, lparen_loc, rparen_loc, operator_loc, value); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -21467,37 +24120,57 @@ class Prism::MultiWriteNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#11884
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11889
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#11904
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#11894
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?lefts: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | BackReferenceReadNode | NumberedReferenceReadNode], ?rest: ImplicitRestNode | SplatNode | nil, ?rights: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | BackReferenceReadNode | NumberedReferenceReadNode], ?lparen_loc: Location?, ?rparen_loc: Location?, ?operator_loc: Location, ?value: Prism::node) -> MultiWriteNode
   #
   # source://prism//lib/prism/node.rb#11909
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      lefts: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      rest: T.nilable(T.any(Prism::ImplicitRestNode, Prism::SplatNode)),
+      rights: T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)],
+      lparen_loc: T.nilable(Prism::Location),
+      rparen_loc: T.nilable(Prism::Location),
+      operator_loc: Prism::Location,
+      value: Prism::Node
+    ).returns(Prism::MultiWriteNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), lefts: T.unsafe(nil), rest: T.unsafe(nil), rights: T.unsafe(nil), lparen_loc: T.unsafe(nil), rparen_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), value: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#11889
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, lefts: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | BackReferenceReadNode | NumberedReferenceReadNode], rest: ImplicitRestNode | SplatNode | nil, rights: Array[LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | MultiTargetNode | BackReferenceReadNode | NumberedReferenceReadNode], lparen_loc: Location?, rparen_loc: Location?, operator_loc: Location, value: Prism::node }
   #
   # source://prism//lib/prism/node.rb#11917
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -21520,11 +24193,15 @@ class Prism::MultiWriteNode < ::Prism::Node
   #     ^^^^^^^
   #
   # source://prism//lib/prism/node.rb#11930
+  sig do
+    returns(T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)])
+  end
   def lefts; end
 
   # def lparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#12003
+  sig { returns(T.nilable(String)) }
   def lparen; end
 
   # The location of the opening parenthesis.
@@ -21533,11 +24210,13 @@ class Prism::MultiWriteNode < ::Prism::Node
   #     ^
   #
   # source://prism//lib/prism/node.rb#11958
+  sig { returns(T.nilable(Prism::Location)) }
   def lparen_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#12013
+  sig { returns(String) }
   def operator; end
 
   # The location of the operator.
@@ -21546,6 +24225,7 @@ class Prism::MultiWriteNode < ::Prism::Node
   #             ^
   #
   # source://prism//lib/prism/node.rb#11990
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Represents a splat node in the target expression.
@@ -21564,6 +24244,7 @@ class Prism::MultiWriteNode < ::Prism::Node
   #         ^
   #
   # source://prism//lib/prism/node.rb#11946
+  sig { returns(T.nilable(T.any(Prism::ImplicitRestNode, Prism::SplatNode))) }
   def rest; end
 
   # Represents the targets expressions after a splat node.
@@ -21572,11 +24253,15 @@ class Prism::MultiWriteNode < ::Prism::Node
   #           ^^^^
   #
   # source://prism//lib/prism/node.rb#11952
+  sig do
+    returns(T::Array[T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::MultiTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode)])
+  end
   def rights; end
 
   # def rparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#12008
+  sig { returns(T.nilable(String)) }
   def rparen; end
 
   # The location of the closing parenthesis.
@@ -21585,6 +24270,7 @@ class Prism::MultiWriteNode < ::Prism::Node
   #             ^
   #
   # source://prism//lib/prism/node.rb#11974
+  sig { returns(T.nilable(Prism::Location)) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -21599,6 +24285,7 @@ class Prism::MultiWriteNode < ::Prism::Node
   #               ^^^^^^^
   #
   # source://prism//lib/prism/node.rb#12000
+  sig { returns(Prism::Node) }
   def value; end
 
   class << self
@@ -22383,6 +25070,16 @@ class Prism::NextNode < ::Prism::Node
   # @return [NextNode] a new instance of NextNode
   #
   # source://prism//lib/prism/node.rb#12054
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      arguments: T.nilable(Prism::ArgumentsNode),
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, arguments, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -22394,42 +25091,58 @@ class Prism::NextNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12064
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
   # source://prism//lib/prism/node.rb#12099
+  sig { returns(T.nilable(Prism::ArgumentsNode)) }
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12069
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12081
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12074
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?arguments: ArgumentsNode?, ?keyword_loc: Location) -> NextNode
   #
   # source://prism//lib/prism/node.rb#12086
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      arguments: T.nilable(Prism::ArgumentsNode),
+      keyword_loc: Prism::Location
+    ).returns(Prism::NextNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), arguments: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12069
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, arguments: ArgumentsNode?, keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#12094
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -22444,11 +25157,13 @@ class Prism::NextNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#12109
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#12102
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -22477,6 +25192,7 @@ class Prism::NilNode < ::Prism::Node
   # @return [NilNode] a new instance of NilNode
   #
   # source://prism//lib/prism/node.rb#12143
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -22488,37 +25204,44 @@ class Prism::NilNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12151
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12156
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12166
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12161
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> NilNode
   #
   # source://prism//lib/prism/node.rb#12171
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::NilNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12156
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#12179
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -22557,6 +25280,16 @@ class Prism::NoKeywordsParameterNode < ::Prism::Node
   # @return [NoKeywordsParameterNode] a new instance of NoKeywordsParameterNode
   #
   # source://prism//lib/prism/node.rb#12212
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      operator_loc: Prism::Location,
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, operator_loc, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -22568,37 +25301,52 @@ class Prism::NoKeywordsParameterNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12222
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12227
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12237
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12232
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?operator_loc: Location, ?keyword_loc: Location) -> NoKeywordsParameterNode
   #
   # source://prism//lib/prism/node.rb#12242
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      operator_loc: Prism::Location,
+      keyword_loc: Prism::Location
+    ).returns(Prism::NoKeywordsParameterNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), operator_loc: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12227
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, operator_loc: Location, keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#12250
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -22613,21 +25361,25 @@ class Prism::NoKeywordsParameterNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#12274
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#12262
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#12269
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#12255
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -22912,6 +25664,15 @@ class Prism::NumberedParametersNode < ::Prism::Node
   # @return [NumberedParametersNode] a new instance of NumberedParametersNode
   #
   # source://prism//lib/prism/node.rb#12308
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      maximum: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, maximum); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -22923,37 +25684,51 @@ class Prism::NumberedParametersNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12317
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12322
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12332
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12327
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?maximum: Integer) -> NumberedParametersNode
   #
   # source://prism//lib/prism/node.rb#12337
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      maximum: Integer
+    ).returns(Prism::NumberedParametersNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), maximum: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12322
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, maximum: Integer }
   #
   # source://prism//lib/prism/node.rb#12345
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -22968,6 +25743,7 @@ class Prism::NumberedParametersNode < ::Prism::Node
   # attr_reader maximum: Integer
   #
   # source://prism//lib/prism/node.rb#12350
+  sig { returns(Integer) }
   def maximum; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -22996,6 +25772,15 @@ class Prism::NumberedReferenceReadNode < ::Prism::Node
   # @return [NumberedReferenceReadNode] a new instance of NumberedReferenceReadNode
   #
   # source://prism//lib/prism/node.rb#12381
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      number: Integer
+    ).void
+  end
   def initialize(source, node_id, location, flags, number); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -23007,37 +25792,51 @@ class Prism::NumberedReferenceReadNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12390
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12395
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12405
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12400
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?number: Integer) -> NumberedReferenceReadNode
   #
   # source://prism//lib/prism/node.rb#12410
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      number: Integer
+    ).returns(Prism::NumberedReferenceReadNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), number: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12395
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, number: Integer }
   #
   # source://prism//lib/prism/node.rb#12418
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -23058,6 +25857,7 @@ class Prism::NumberedReferenceReadNode < ::Prism::Node
   #     $4294967296 # number `0`
   #
   # source://prism//lib/prism/node.rb#12429
+  sig { returns(Integer) }
   def number; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -23366,6 +26166,17 @@ class Prism::OrNode < ::Prism::Node
   # @return [OrNode] a new instance of OrNode
   #
   # source://prism//lib/prism/node.rb#12662
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      left: Prism::Node,
+      right: Prism::Node,
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, left, right, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -23377,37 +26188,53 @@ class Prism::OrNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12673
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12678
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12688
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12683
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?left: Prism::node, ?right: Prism::node, ?operator_loc: Location) -> OrNode
   #
   # source://prism//lib/prism/node.rb#12693
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      left: Prism::Node,
+      right: Prism::Node,
+      operator_loc: Prism::Location
+    ).returns(Prism::OrNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), left: T.unsafe(nil), right: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12678
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, left: Prism::node, right: Prism::node, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#12701
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -23428,11 +26255,13 @@ class Prism::OrNode < ::Prism::Node
   #     ^
   #
   # source://prism//lib/prism/node.rb#12712
+  sig { returns(Prism::Node) }
   def left; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#12734
+  sig { returns(String) }
   def operator; end
 
   # The location of the `or` keyword or the `||` operator.
@@ -23441,6 +26270,7 @@ class Prism::OrNode < ::Prism::Node
   #          ^^
   #
   # source://prism//lib/prism/node.rb#12727
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Represents the right side of the expression.
@@ -23452,6 +26282,7 @@ class Prism::OrNode < ::Prism::Node
   #          ^
   #
   # source://prism//lib/prism/node.rb#12721
+  sig { returns(Prism::Node) }
   def right; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -23733,6 +26564,21 @@ class Prism::ParametersNode < ::Prism::Node
   # @return [ParametersNode] a new instance of ParametersNode
   #
   # source://prism//lib/prism/node.rb#12770
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      requireds: T::Array[T.any(Prism::RequiredParameterNode, Prism::MultiTargetNode)],
+      optionals: T::Array[Prism::OptionalParameterNode],
+      rest: T.nilable(T.any(Prism::RestParameterNode, Prism::ImplicitRestNode)),
+      posts: T::Array[T.any(Prism::RequiredParameterNode, Prism::MultiTargetNode, Prism::KeywordRestParameterNode, Prism::NoKeywordsParameterNode, Prism::ForwardingParameterNode)],
+      keywords: T::Array[T.any(Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode)],
+      keyword_rest: T.nilable(T.any(Prism::KeywordRestParameterNode, Prism::ForwardingParameterNode, Prism::NoKeywordsParameterNode)),
+      block: T.nilable(Prism::BlockParameterNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, requireds, optionals, rest, posts, keywords, keyword_rest, block); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -23744,42 +26590,63 @@ class Prism::ParametersNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12785
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader block: BlockParameterNode?
   #
   # source://prism//lib/prism/node.rb#12844
+  sig { returns(T.nilable(Prism::BlockParameterNode)) }
   def block; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12790
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12808
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12795
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?requireds: Array[RequiredParameterNode | MultiTargetNode], ?optionals: Array[OptionalParameterNode], ?rest: RestParameterNode | ImplicitRestNode | nil, ?posts: Array[RequiredParameterNode | MultiTargetNode | KeywordRestParameterNode | NoKeywordsParameterNode | ForwardingParameterNode], ?keywords: Array[RequiredKeywordParameterNode | OptionalKeywordParameterNode], ?keyword_rest: KeywordRestParameterNode | ForwardingParameterNode | NoKeywordsParameterNode | nil, ?block: BlockParameterNode?) -> ParametersNode
   #
   # source://prism//lib/prism/node.rb#12813
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      requireds: T::Array[T.any(Prism::RequiredParameterNode, Prism::MultiTargetNode)],
+      optionals: T::Array[Prism::OptionalParameterNode],
+      rest: T.nilable(T.any(Prism::RestParameterNode, Prism::ImplicitRestNode)),
+      posts: T::Array[T.any(Prism::RequiredParameterNode, Prism::MultiTargetNode, Prism::KeywordRestParameterNode, Prism::NoKeywordsParameterNode, Prism::ForwardingParameterNode)],
+      keywords: T::Array[T.any(Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode)],
+      keyword_rest: T.nilable(T.any(Prism::KeywordRestParameterNode, Prism::ForwardingParameterNode, Prism::NoKeywordsParameterNode)),
+      block: T.nilable(Prism::BlockParameterNode)
+    ).returns(Prism::ParametersNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), requireds: T.unsafe(nil), optionals: T.unsafe(nil), rest: T.unsafe(nil), posts: T.unsafe(nil), keywords: T.unsafe(nil), keyword_rest: T.unsafe(nil), block: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12790
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, requireds: Array[RequiredParameterNode | MultiTargetNode], optionals: Array[OptionalParameterNode], rest: RestParameterNode | ImplicitRestNode | nil, posts: Array[RequiredParameterNode | MultiTargetNode | KeywordRestParameterNode | NoKeywordsParameterNode | ForwardingParameterNode], keywords: Array[RequiredKeywordParameterNode | OptionalKeywordParameterNode], keyword_rest: KeywordRestParameterNode | ForwardingParameterNode | NoKeywordsParameterNode | nil, block: BlockParameterNode? }
   #
   # source://prism//lib/prism/node.rb#12821
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -23794,31 +26661,41 @@ class Prism::ParametersNode < ::Prism::Node
   # attr_reader keyword_rest: KeywordRestParameterNode | ForwardingParameterNode | NoKeywordsParameterNode | nil
   #
   # source://prism//lib/prism/node.rb#12841
+  sig do
+    returns(T.nilable(T.any(Prism::KeywordRestParameterNode, Prism::ForwardingParameterNode, Prism::NoKeywordsParameterNode)))
+  end
   def keyword_rest; end
 
   # attr_reader keywords: Array[RequiredKeywordParameterNode | OptionalKeywordParameterNode]
   #
   # source://prism//lib/prism/node.rb#12838
+  sig { returns(T::Array[T.any(Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode)]) }
   def keywords; end
 
   # attr_reader optionals: Array[OptionalParameterNode]
   #
   # source://prism//lib/prism/node.rb#12829
+  sig { returns(T::Array[Prism::OptionalParameterNode]) }
   def optionals; end
 
   # attr_reader posts: Array[RequiredParameterNode | MultiTargetNode | KeywordRestParameterNode | NoKeywordsParameterNode | ForwardingParameterNode]
   #
   # source://prism//lib/prism/node.rb#12835
+  sig do
+    returns(T::Array[T.any(Prism::RequiredParameterNode, Prism::MultiTargetNode, Prism::KeywordRestParameterNode, Prism::NoKeywordsParameterNode, Prism::ForwardingParameterNode)])
+  end
   def posts; end
 
   # attr_reader requireds: Array[RequiredParameterNode | MultiTargetNode]
   #
   # source://prism//lib/prism/node.rb#12826
+  sig { returns(T::Array[T.any(Prism::RequiredParameterNode, Prism::MultiTargetNode)]) }
   def requireds; end
 
   # attr_reader rest: RestParameterNode | ImplicitRestNode | nil
   #
   # source://prism//lib/prism/node.rb#12832
+  sig { returns(T.nilable(T.any(Prism::RestParameterNode, Prism::ImplicitRestNode))) }
   def rest; end
 
   # Mirrors the Method#parameters method.
@@ -23853,6 +26730,17 @@ class Prism::ParenthesesNode < ::Prism::Node
   # @return [ParenthesesNode] a new instance of ParenthesesNode
   #
   # source://prism//lib/prism/node.rb#12885
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      body: T.nilable(Prism::Node),
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, body, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -23864,52 +26752,71 @@ class Prism::ParenthesesNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#12896
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: Prism::node?
   #
   # source://prism//lib/prism/node.rb#12931
+  sig { returns(T.nilable(Prism::Node)) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12901
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#12953
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#12941
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#12913
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#12906
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?body: Prism::node?, ?opening_loc: Location, ?closing_loc: Location) -> ParenthesesNode
   #
   # source://prism//lib/prism/node.rb#12918
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      body: T.nilable(Prism::Node),
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).returns(Prism::ParenthesesNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), body: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#12901
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, body: Prism::node?, opening_loc: Location, closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#12926
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -23927,11 +26834,13 @@ class Prism::ParenthesesNode < ::Prism::Node
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#12948
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#12934
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -23950,63 +26859,63 @@ end
 
 # This represents an error that was encountered during parsing.
 #
-# source://prism//lib/prism/parse_result.rb#460
+# source://prism//lib/prism/parse_result.rb#592
 class Prism::ParseError
   # Create a new error object with the given message and location.
   #
   # @return [ParseError] a new instance of ParseError
   #
-  # source://prism//lib/prism/parse_result.rb#475
+  # source://prism//lib/prism/parse_result.rb#607
   sig { params(type: Symbol, message: String, location: Prism::Location, level: Symbol).void }
   def initialize(type, message, location, level); end
 
   # Implement the hash pattern matching interface for ParseError.
   #
-  # source://prism//lib/prism/parse_result.rb#483
+  # source://prism//lib/prism/parse_result.rb#615
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # Returns a string representation of this error.
   #
-  # source://prism//lib/prism/parse_result.rb#488
+  # source://prism//lib/prism/parse_result.rb#620
   sig { returns(String) }
   def inspect; end
 
   # The level of this error.
   #
-  # source://prism//lib/prism/parse_result.rb#472
+  # source://prism//lib/prism/parse_result.rb#604
   sig { returns(Symbol) }
   def level; end
 
   # A Location object representing the location of this error in the source.
   #
-  # source://prism//lib/prism/parse_result.rb#469
+  # source://prism//lib/prism/parse_result.rb#601
   sig { returns(Prism::Location) }
   def location; end
 
   # The message associated with this error.
   #
-  # source://prism//lib/prism/parse_result.rb#466
+  # source://prism//lib/prism/parse_result.rb#598
   sig { returns(String) }
   def message; end
 
   # The type of error. This is an _internal_ symbol that is used for
   # communicating with translation layers. It is not meant to be public API.
   #
-  # source://prism//lib/prism/parse_result.rb#463
+  # source://prism//lib/prism/parse_result.rb#595
   sig { returns(Symbol) }
   def type; end
 end
 
 # This is a result specific to the `parse_lex` and `parse_lex_file` methods.
 #
-# source://prism//lib/prism/parse_result.rb#644
+# source://prism//lib/prism/parse_result.rb#781
 class Prism::ParseLexResult < ::Prism::Result
   # Create a new parse lex result object with the given values.
   #
   # @return [ParseLexResult] a new instance of ParseLexResult
   #
-  # source://prism//lib/prism/parse_result.rb#650
+  # source://prism//lib/prism/parse_result.rb#787
   sig do
     params(
       value: [Prism::ProgramNode, T::Array[T.untyped]],
@@ -24022,27 +26931,27 @@ class Prism::ParseLexResult < ::Prism::Result
 
   # Implement the hash pattern matching interface for ParseLexResult.
   #
-  # source://prism//lib/prism/parse_result.rb#656
+  # source://prism//lib/prism/parse_result.rb#793
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # A tuple of the syntax tree and the list of tokens that were parsed from
   # the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#647
+  # source://prism//lib/prism/parse_result.rb#784
   sig { returns([Prism::ProgramNode, T::Array[T.untyped]]) }
   def value; end
 end
 
 # This is a result specific to the `parse` and `parse_file` methods.
 #
-# source://prism//lib/prism/parse_result.rb#585
+# source://prism//lib/prism/parse_result.rb#722
 class Prism::ParseResult < ::Prism::Result
   # Create a new parse result object with the given values.
   #
   # @return [ParseResult] a new instance of ParseResult
   #
-  # source://prism//lib/prism/parse_result.rb#598
+  # source://prism//lib/prism/parse_result.rb#735
   sig do
     params(
       value: Prism::ProgramNode,
@@ -24058,30 +26967,30 @@ class Prism::ParseResult < ::Prism::Result
 
   # Attach the list of comments to their respective locations in the tree.
   #
-  # source://prism//lib/prism/parse_result.rb#609
+  # source://prism//lib/prism/parse_result.rb#746
   def attach_comments!; end
 
   # Implement the hash pattern matching interface for ParseResult.
   #
-  # source://prism//lib/prism/parse_result.rb#604
+  # source://prism//lib/prism/parse_result.rb#741
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # Returns a string representation of the syntax tree with the errors
   # displayed inline.
   #
-  # source://prism//lib/prism/parse_result.rb#621
+  # source://prism//lib/prism/parse_result.rb#758
   def errors_format; end
 
   # Walk the tree and mark nodes that are on a new line, loosely emulating
   # the behavior of CRuby's `:line` tracepoint event.
   #
-  # source://prism//lib/prism/parse_result.rb#615
+  # source://prism//lib/prism/parse_result.rb#752
   def mark_newlines!; end
 
   # The syntax tree that was parsed from the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#595
+  # source://prism//lib/prism/parse_result.rb#732
   sig { returns(Prism::ProgramNode) }
   def value; end
 end
@@ -24274,50 +27183,50 @@ end
 
 # This represents a warning that was encountered during parsing.
 #
-# source://prism//lib/prism/parse_result.rb#494
+# source://prism//lib/prism/parse_result.rb#626
 class Prism::ParseWarning
   # Create a new warning object with the given message and location.
   #
   # @return [ParseWarning] a new instance of ParseWarning
   #
-  # source://prism//lib/prism/parse_result.rb#509
+  # source://prism//lib/prism/parse_result.rb#641
   sig { params(type: Symbol, message: String, location: Prism::Location, level: Symbol).void }
   def initialize(type, message, location, level); end
 
   # Implement the hash pattern matching interface for ParseWarning.
   #
-  # source://prism//lib/prism/parse_result.rb#517
+  # source://prism//lib/prism/parse_result.rb#649
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # Returns a string representation of this warning.
   #
-  # source://prism//lib/prism/parse_result.rb#522
+  # source://prism//lib/prism/parse_result.rb#654
   sig { returns(String) }
   def inspect; end
 
   # The level of this warning.
   #
-  # source://prism//lib/prism/parse_result.rb#506
+  # source://prism//lib/prism/parse_result.rb#638
   sig { returns(Symbol) }
   def level; end
 
   # A Location object representing the location of this warning in the source.
   #
-  # source://prism//lib/prism/parse_result.rb#503
+  # source://prism//lib/prism/parse_result.rb#635
   sig { returns(Prism::Location) }
   def location; end
 
   # The message associated with this warning.
   #
-  # source://prism//lib/prism/parse_result.rb#500
+  # source://prism//lib/prism/parse_result.rb#632
   sig { returns(String) }
   def message; end
 
   # The type of warning. This is an _internal_ symbol that is used for
   # communicating with translation layers. It is not meant to be public API.
   #
-  # source://prism//lib/prism/parse_result.rb#497
+  # source://prism//lib/prism/parse_result.rb#629
   sig { returns(Symbol) }
   def type; end
 end
@@ -24495,6 +27404,18 @@ class Prism::PinnedExpressionNode < ::Prism::Node
   # @return [PinnedExpressionNode] a new instance of PinnedExpressionNode
   #
   # source://prism//lib/prism/node.rb#12988
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      expression: Prism::Node,
+      operator_loc: Prism::Location,
+      lparen_loc: Prism::Location,
+      rparen_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, expression, operator_loc, lparen_loc, rparen_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -24506,42 +27427,60 @@ class Prism::PinnedExpressionNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#13000
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13005
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#13015
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#13010
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?expression: Prism::node, ?operator_loc: Location, ?lparen_loc: Location, ?rparen_loc: Location) -> PinnedExpressionNode
   #
   # source://prism//lib/prism/node.rb#13020
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      expression: Prism::Node,
+      operator_loc: Prism::Location,
+      lparen_loc: Prism::Location,
+      rparen_loc: Prism::Location
+    ).returns(Prism::PinnedExpressionNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), expression: T.unsafe(nil), operator_loc: T.unsafe(nil), lparen_loc: T.unsafe(nil), rparen_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13005
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, expression: Prism::node, operator_loc: Location, lparen_loc: Location, rparen_loc: Location }
   #
   # source://prism//lib/prism/node.rb#13028
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Prism::node
   #
   # source://prism//lib/prism/node.rb#13033
+  sig { returns(Prism::Node) }
   def expression; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -24556,31 +27495,37 @@ class Prism::PinnedExpressionNode < ::Prism::Node
   # def lparen: () -> String
   #
   # source://prism//lib/prism/node.rb#13062
+  sig { returns(String) }
   def lparen; end
 
   # attr_reader lparen_loc: Location
   #
   # source://prism//lib/prism/node.rb#13043
+  sig { returns(Prism::Location) }
   def lparen_loc; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#13057
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#13036
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # def rparen: () -> String
   #
   # source://prism//lib/prism/node.rb#13067
+  sig { returns(String) }
   def rparen; end
 
   # attr_reader rparen_loc: Location
   #
   # source://prism//lib/prism/node.rb#13050
+  sig { returns(Prism::Location) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -24609,6 +27554,16 @@ class Prism::PinnedVariableNode < ::Prism::Node
   # @return [PinnedVariableNode] a new instance of PinnedVariableNode
   #
   # source://prism//lib/prism/node.rb#13103
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      variable: T.any(Prism::LocalVariableReadNode, Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::ItLocalVariableReadNode, Prism::MissingNode),
+      operator_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, variable, operator_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -24620,37 +27575,52 @@ class Prism::PinnedVariableNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#13113
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13118
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#13128
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#13123
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?variable: LocalVariableReadNode | InstanceVariableReadNode | ClassVariableReadNode | GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode | ItLocalVariableReadNode | MissingNode, ?operator_loc: Location) -> PinnedVariableNode
   #
   # source://prism//lib/prism/node.rb#13133
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      variable: T.any(Prism::LocalVariableReadNode, Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::ItLocalVariableReadNode, Prism::MissingNode),
+      operator_loc: Prism::Location
+    ).returns(Prism::PinnedVariableNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), variable: T.unsafe(nil), operator_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13118
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, variable: LocalVariableReadNode | InstanceVariableReadNode | ClassVariableReadNode | GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode | ItLocalVariableReadNode | MissingNode, operator_loc: Location }
   #
   # source://prism//lib/prism/node.rb#13141
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -24665,11 +27635,13 @@ class Prism::PinnedVariableNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#13156
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#13149
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -24681,6 +27653,9 @@ class Prism::PinnedVariableNode < ::Prism::Node
   # attr_reader variable: LocalVariableReadNode | InstanceVariableReadNode | ClassVariableReadNode | GlobalVariableReadNode | BackReferenceReadNode | NumberedReferenceReadNode | ItLocalVariableReadNode | MissingNode
   #
   # source://prism//lib/prism/node.rb#13146
+  sig do
+    returns(T.any(Prism::LocalVariableReadNode, Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::ItLocalVariableReadNode, Prism::MissingNode))
+  end
   def variable; end
 
   class << self
@@ -24703,6 +27678,18 @@ class Prism::PostExecutionNode < ::Prism::Node
   # @return [PostExecutionNode] a new instance of PostExecutionNode
   #
   # source://prism//lib/prism/node.rb#13190
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      statements: T.nilable(Prism::StatementsNode),
+      keyword_loc: Prism::Location,
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, statements, keyword_loc, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -24714,47 +27701,66 @@ class Prism::PostExecutionNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#13202
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13207
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#13271
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#13254
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#13219
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#13212
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?statements: StatementsNode?, ?keyword_loc: Location, ?opening_loc: Location, ?closing_loc: Location) -> PostExecutionNode
   #
   # source://prism//lib/prism/node.rb#13224
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      statements: T.nilable(Prism::StatementsNode),
+      keyword_loc: Prism::Location,
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).returns(Prism::PostExecutionNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), statements: T.unsafe(nil), keyword_loc: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13207
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, statements: StatementsNode?, keyword_loc: Location, opening_loc: Location, closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#13232
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -24769,26 +27775,31 @@ class Prism::PostExecutionNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#13261
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#13240
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#13266
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#13247
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#13237
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -24817,6 +27828,18 @@ class Prism::PreExecutionNode < ::Prism::Node
   # @return [PreExecutionNode] a new instance of PreExecutionNode
   #
   # source://prism//lib/prism/node.rb#13307
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      statements: T.nilable(Prism::StatementsNode),
+      keyword_loc: Prism::Location,
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, statements, keyword_loc, opening_loc, closing_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -24828,47 +27851,66 @@ class Prism::PreExecutionNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#13319
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13324
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def closing: () -> String
   #
   # source://prism//lib/prism/node.rb#13388
+  sig { returns(String) }
   def closing; end
 
   # attr_reader closing_loc: Location
   #
   # source://prism//lib/prism/node.rb#13371
+  sig { returns(Prism::Location) }
   def closing_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#13336
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#13329
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?statements: StatementsNode?, ?keyword_loc: Location, ?opening_loc: Location, ?closing_loc: Location) -> PreExecutionNode
   #
   # source://prism//lib/prism/node.rb#13341
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      statements: T.nilable(Prism::StatementsNode),
+      keyword_loc: Prism::Location,
+      opening_loc: Prism::Location,
+      closing_loc: Prism::Location
+    ).returns(Prism::PreExecutionNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), statements: T.unsafe(nil), keyword_loc: T.unsafe(nil), opening_loc: T.unsafe(nil), closing_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13324
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, statements: StatementsNode?, keyword_loc: Location, opening_loc: Location, closing_loc: Location }
   #
   # source://prism//lib/prism/node.rb#13349
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -24883,26 +27925,31 @@ class Prism::PreExecutionNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#13378
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#13357
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def opening: () -> String
   #
   # source://prism//lib/prism/node.rb#13383
+  sig { returns(String) }
   def opening; end
 
   # attr_reader opening_loc: Location
   #
   # source://prism//lib/prism/node.rb#13364
+  sig { returns(Prism::Location) }
   def opening_loc; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#13354
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -24928,6 +27975,16 @@ class Prism::ProgramNode < ::Prism::Node
   # @return [ProgramNode] a new instance of ProgramNode
   #
   # source://prism//lib/prism/node.rb#13421
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      statements: Prism::StatementsNode
+    ).void
+  end
   def initialize(source, node_id, location, flags, locals, statements); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -24939,37 +27996,52 @@ class Prism::ProgramNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#13431
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13436
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#13446
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#13441
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?locals: Array[Symbol], ?statements: StatementsNode) -> ProgramNode
   #
   # source://prism//lib/prism/node.rb#13451
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      statements: Prism::StatementsNode
+    ).returns(Prism::ProgramNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), locals: T.unsafe(nil), statements: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13436
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, locals: Array[Symbol], statements: StatementsNode }
   #
   # source://prism//lib/prism/node.rb#13459
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -24984,11 +28056,13 @@ class Prism::ProgramNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#13464
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # attr_reader statements: StatementsNode
   #
   # source://prism//lib/prism/node.rb#13467
+  sig { returns(Prism::StatementsNode) }
   def statements; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -25345,6 +28419,7 @@ class Prism::RedoNode < ::Prism::Node
   # @return [RedoNode] a new instance of RedoNode
   #
   # source://prism//lib/prism/node.rb#13720
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -25356,37 +28431,44 @@ class Prism::RedoNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#13728
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13733
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#13743
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#13738
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> RedoNode
   #
   # source://prism//lib/prism/node.rb#13748
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::RedoNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#13733
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#13756
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -26100,6 +29182,17 @@ class Prism::RescueModifierNode < ::Prism::Node
   # @return [RescueModifierNode] a new instance of RescueModifierNode
   #
   # source://prism//lib/prism/node.rb#14128
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      expression: Prism::Node,
+      keyword_loc: Prism::Location,
+      rescue_expression: Prism::Node
+    ).void
+  end
   def initialize(source, node_id, location, flags, expression, keyword_loc, rescue_expression); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -26111,42 +29204,59 @@ class Prism::RescueModifierNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14139
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14144
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14154
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14149
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?expression: Prism::node, ?keyword_loc: Location, ?rescue_expression: Prism::node) -> RescueModifierNode
   #
   # source://prism//lib/prism/node.rb#14159
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      expression: Prism::Node,
+      keyword_loc: Prism::Location,
+      rescue_expression: Prism::Node
+    ).returns(Prism::RescueModifierNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), expression: T.unsafe(nil), keyword_loc: T.unsafe(nil), rescue_expression: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14144
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, expression: Prism::node, keyword_loc: Location, rescue_expression: Prism::node }
   #
   # source://prism//lib/prism/node.rb#14167
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Prism::node
   #
   # source://prism//lib/prism/node.rb#14172
+  sig { returns(Prism::Node) }
   def expression; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -26161,11 +29271,13 @@ class Prism::RescueModifierNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#14185
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#14175
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # source://prism//lib/prism/parse_result/newlines.rb#115
@@ -26174,6 +29286,7 @@ class Prism::RescueModifierNode < ::Prism::Node
   # attr_reader rescue_expression: Prism::node
   #
   # source://prism//lib/prism/node.rb#14182
+  sig { returns(Prism::Node) }
   def rescue_expression; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -26198,7 +29311,7 @@ end
 #     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #     end
 #
-# `Foo, *splat, Bar` are in the `exceptions` field. `ex` is in the `exception` field.
+# `Foo, *splat, Bar` are in the `exceptions` field. `ex` is in the `reference` field.
 #
 # source://prism//lib/prism/node.rb#14223
 class Prism::RescueNode < ::Prism::Node
@@ -26207,6 +29320,20 @@ class Prism::RescueNode < ::Prism::Node
   # @return [RescueNode] a new instance of RescueNode
   #
   # source://prism//lib/prism/node.rb#14225
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      exceptions: T::Array[Prism::Node],
+      operator_loc: T.nilable(Prism::Location),
+      reference: T.nilable(T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::MissingNode)),
+      statements: T.nilable(Prism::StatementsNode),
+      subsequent: T.nilable(Prism::RescueNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, keyword_loc, exceptions, operator_loc, reference, statements, subsequent); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -26218,21 +29345,25 @@ class Prism::RescueNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14239
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14244
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14259
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14249
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # Returns the subsequent rescue clause of the rescue node. This method is
@@ -26244,22 +29375,38 @@ class Prism::RescueNode < ::Prism::Node
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?keyword_loc: Location, ?exceptions: Array[Prism::node], ?operator_loc: Location?, ?reference: LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | BackReferenceReadNode | NumberedReferenceReadNode | MissingNode | nil, ?statements: StatementsNode?, ?subsequent: RescueNode?) -> RescueNode
   #
   # source://prism//lib/prism/node.rb#14264
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      exceptions: T::Array[Prism::Node],
+      operator_loc: T.nilable(Prism::Location),
+      reference: T.nilable(T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::MissingNode)),
+      statements: T.nilable(Prism::StatementsNode),
+      subsequent: T.nilable(Prism::RescueNode)
+    ).returns(Prism::RescueNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), keyword_loc: T.unsafe(nil), exceptions: T.unsafe(nil), operator_loc: T.unsafe(nil), reference: T.unsafe(nil), statements: T.unsafe(nil), subsequent: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14244
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, keyword_loc: Location, exceptions: Array[Prism::node], operator_loc: Location?, reference: LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | BackReferenceReadNode | NumberedReferenceReadNode | MissingNode | nil, statements: StatementsNode?, subsequent: RescueNode? }
   #
   # source://prism//lib/prism/node.rb#14272
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader exceptions: Array[Prism::node]
   #
   # source://prism//lib/prism/node.rb#14284
+  sig { returns(T::Array[Prism::Node]) }
   def exceptions; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -26274,36 +29421,45 @@ class Prism::RescueNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#14309
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#14277
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def operator: () -> String?
   #
   # source://prism//lib/prism/node.rb#14314
+  sig { returns(T.nilable(String)) }
   def operator; end
 
   # attr_reader operator_loc: Location?
   #
   # source://prism//lib/prism/node.rb#14287
+  sig { returns(T.nilable(Prism::Location)) }
   def operator_loc; end
 
   # attr_reader reference: LocalVariableTargetNode | InstanceVariableTargetNode | ClassVariableTargetNode | GlobalVariableTargetNode | ConstantTargetNode | ConstantPathTargetNode | CallTargetNode | IndexTargetNode | BackReferenceReadNode | NumberedReferenceReadNode | MissingNode | nil
   #
   # source://prism//lib/prism/node.rb#14300
+  sig do
+    returns(T.nilable(T.any(Prism::LocalVariableTargetNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableTargetNode, Prism::GlobalVariableTargetNode, Prism::ConstantTargetNode, Prism::ConstantPathTargetNode, Prism::CallTargetNode, Prism::IndexTargetNode, Prism::BackReferenceReadNode, Prism::NumberedReferenceReadNode, Prism::MissingNode)))
+  end
   def reference; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#14303
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # attr_reader subsequent: RescueNode?
   #
   # source://prism//lib/prism/node.rb#14306
+  sig { returns(T.nilable(Prism::RescueNode)) }
   def subsequent; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -26463,13 +29619,13 @@ end
 # the requested structure, any comments that were encounters, and any errors
 # that were encountered.
 #
-# source://prism//lib/prism/parse_result.rb#530
+# source://prism//lib/prism/parse_result.rb#662
 class Prism::Result
   # Create a new result object with the given values.
   #
   # @return [Result] a new instance of Result
   #
-  # source://prism//lib/prism/parse_result.rb#552
+  # source://prism//lib/prism/parse_result.rb#684
   sig do
     params(
       comments: T::Array[Prism::Comment],
@@ -26482,9 +29638,19 @@ class Prism::Result
   end
   def initialize(comments, magic_comments, data_loc, errors, warnings, source); end
 
+  # Create a code units cache for the given encoding.
+  #
+  # source://prism//lib/prism/parse_result.rb#716
+  sig do
+    params(
+      encoding: Encoding
+    ).returns(T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer)))
+  end
+  def code_units_cache(encoding); end
+
   # The list of comments that were encountered during parsing.
   #
-  # source://prism//lib/prism/parse_result.rb#532
+  # source://prism//lib/prism/parse_result.rb#664
   sig { returns(T::Array[Prism::Comment]) }
   def comments; end
 
@@ -26492,25 +29658,25 @@ class Prism::Result
   # and the rest of the content of the file. This content is loaded into the
   # DATA constant when the file being parsed is the main file being executed.
   #
-  # source://prism//lib/prism/parse_result.rb#540
+  # source://prism//lib/prism/parse_result.rb#672
   sig { returns(T.nilable(Prism::Location)) }
   def data_loc; end
 
   # Implement the hash pattern matching interface for Result.
   #
-  # source://prism//lib/prism/parse_result.rb#562
+  # source://prism//lib/prism/parse_result.rb#694
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # Returns the encoding of the source code that was parsed.
   #
-  # source://prism//lib/prism/parse_result.rb#567
+  # source://prism//lib/prism/parse_result.rb#699
   sig { returns(Encoding) }
   def encoding; end
 
   # The list of errors that were generated during parsing.
   #
-  # source://prism//lib/prism/parse_result.rb#543
+  # source://prism//lib/prism/parse_result.rb#675
   sig { returns(T::Array[Prism::ParseError]) }
   def errors; end
 
@@ -26519,19 +29685,19 @@ class Prism::Result
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/parse_result.rb#579
+  # source://prism//lib/prism/parse_result.rb#711
   sig { returns(T::Boolean) }
   def failure?; end
 
   # The list of magic comments that were encountered during parsing.
   #
-  # source://prism//lib/prism/parse_result.rb#535
+  # source://prism//lib/prism/parse_result.rb#667
   sig { returns(T::Array[Prism::MagicComment]) }
   def magic_comments; end
 
   # A Source instance that represents the source code that was parsed.
   #
-  # source://prism//lib/prism/parse_result.rb#549
+  # source://prism//lib/prism/parse_result.rb#681
   sig { returns(Prism::Source) }
   def source; end
 
@@ -26540,13 +29706,13 @@ class Prism::Result
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/parse_result.rb#573
+  # source://prism//lib/prism/parse_result.rb#705
   sig { returns(T::Boolean) }
   def success?; end
 
   # The list of warnings that were generated during parsing.
   #
-  # source://prism//lib/prism/parse_result.rb#546
+  # source://prism//lib/prism/parse_result.rb#678
   sig { returns(T::Array[Prism::ParseWarning]) }
   def warnings; end
 end
@@ -26563,6 +29729,7 @@ class Prism::RetryNode < ::Prism::Node
   # @return [RetryNode] a new instance of RetryNode
   #
   # source://prism//lib/prism/node.rb#14462
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -26574,37 +29741,44 @@ class Prism::RetryNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14470
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14475
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14485
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14480
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> RetryNode
   #
   # source://prism//lib/prism/node.rb#14490
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::RetryNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14475
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#14498
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -26642,6 +29816,16 @@ class Prism::ReturnNode < ::Prism::Node
   # @return [ReturnNode] a new instance of ReturnNode
   #
   # source://prism//lib/prism/node.rb#14530
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      arguments: T.nilable(Prism::ArgumentsNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, keyword_loc, arguments); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -26653,42 +29837,58 @@ class Prism::ReturnNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14540
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
   # source://prism//lib/prism/node.rb#14582
+  sig { returns(T.nilable(Prism::ArgumentsNode)) }
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14545
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14557
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14550
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?keyword_loc: Location, ?arguments: ArgumentsNode?) -> ReturnNode
   #
   # source://prism//lib/prism/node.rb#14562
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      arguments: T.nilable(Prism::ArgumentsNode)
+    ).returns(Prism::ReturnNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), keyword_loc: T.unsafe(nil), arguments: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14545
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, keyword_loc: Location, arguments: ArgumentsNode? }
   #
   # source://prism//lib/prism/node.rb#14570
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -26703,11 +29903,13 @@ class Prism::ReturnNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#14585
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#14575
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -26736,6 +29938,7 @@ class Prism::SelfNode < ::Prism::Node
   # @return [SelfNode] a new instance of SelfNode
   #
   # source://prism//lib/prism/node.rb#14619
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -26747,37 +29950,44 @@ class Prism::SelfNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14627
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14632
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14642
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14637
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> SelfNode
   #
   # source://prism//lib/prism/node.rb#14647
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::SelfNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14632
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#14655
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -26816,154 +30026,154 @@ module Prism::Serialize
     # Deserialize the tokens represented by the given string into a parse
     # result.
     #
-    # source://prism//lib/prism/serialize.rb#40
+    # source://prism//lib/prism/serialize.rb#51
     def load_tokens(source, serialized); end
   end
 end
 
-# source://prism//lib/prism/serialize.rb#44
+# source://prism//lib/prism/serialize.rb#55
 class Prism::Serialize::Loader
   # @return [Loader] a new instance of Loader
   #
-  # source://prism//lib/prism/serialize.rb#80
+  # source://prism//lib/prism/serialize.rb#91
   def initialize(source, serialized); end
 
   # Returns the value of attribute constant_pool.
   #
-  # source://prism//lib/prism/serialize.rb#77
+  # source://prism//lib/prism/serialize.rb#88
   def constant_pool; end
 
   # Returns the value of attribute constant_pool_offset.
   #
-  # source://prism//lib/prism/serialize.rb#77
+  # source://prism//lib/prism/serialize.rb#88
   def constant_pool_offset; end
 
   # Returns the value of attribute encoding.
   #
-  # source://prism//lib/prism/serialize.rb#76
+  # source://prism//lib/prism/serialize.rb#87
   def encoding; end
 
   # Returns the value of attribute input.
   #
-  # source://prism//lib/prism/serialize.rb#76
+  # source://prism//lib/prism/serialize.rb#87
   def input; end
 
   # Returns the value of attribute io.
   #
-  # source://prism//lib/prism/serialize.rb#76
+  # source://prism//lib/prism/serialize.rb#87
   def io; end
 
-  # source://prism//lib/prism/serialize.rb#118
+  # source://prism//lib/prism/serialize.rb#129
   def load_comments; end
 
-  # source://prism//lib/prism/serialize.rb#104
+  # source://prism//lib/prism/serialize.rb#115
   def load_encoding; end
 
-  # source://prism//lib/prism/serialize.rb#95
+  # source://prism//lib/prism/serialize.rb#106
   def load_header; end
 
-  # source://prism//lib/prism/serialize.rb#114
+  # source://prism//lib/prism/serialize.rb#125
   def load_line_offsets; end
 
-  # source://prism//lib/prism/serialize.rb#450
+  # source://prism//lib/prism/serialize.rb#462
   def load_metadata; end
 
-  # source://prism//lib/prism/serialize.rb#484
+  # source://prism//lib/prism/serialize.rb#496
   def load_nodes; end
 
-  # source://prism//lib/prism/serialize.rb#498
+  # source://prism//lib/prism/serialize.rb#510
   def load_result; end
 
-  # source://prism//lib/prism/serialize.rb#110
+  # source://prism//lib/prism/serialize.rb#121
   def load_start_line; end
 
-  # source://prism//lib/prism/serialize.rb#459
+  # source://prism//lib/prism/serialize.rb#471
   def load_tokens; end
 
-  # source://prism//lib/prism/serialize.rb#472
+  # source://prism//lib/prism/serialize.rb#484
   def load_tokens_result; end
 
   # Returns the value of attribute serialized.
   #
-  # source://prism//lib/prism/serialize.rb#76
+  # source://prism//lib/prism/serialize.rb#87
   def serialized; end
 
   # Returns the value of attribute source.
   #
-  # source://prism//lib/prism/serialize.rb#77
+  # source://prism//lib/prism/serialize.rb#88
   def source; end
 
   # Returns the value of attribute start_line.
   #
-  # source://prism//lib/prism/serialize.rb#78
+  # source://prism//lib/prism/serialize.rb#89
   def start_line; end
 
   private
 
-  # source://prism//lib/prism/serialize.rb#584
+  # source://prism//lib/prism/serialize.rb#596
   def load_constant(index); end
 
-  # source://prism//lib/prism/serialize.rb#537
+  # source://prism//lib/prism/serialize.rb#549
   def load_double; end
 
-  # source://prism//lib/prism/serialize.rb#552
+  # source://prism//lib/prism/serialize.rb#564
   def load_embedded_string; end
 
-  # source://prism//lib/prism/serialize.rb#614
+  # source://prism//lib/prism/serialize.rb#626
   def load_error_level; end
 
-  # source://prism//lib/prism/serialize.rb#526
+  # source://prism//lib/prism/serialize.rb#538
   def load_integer; end
 
-  # source://prism//lib/prism/serialize.rb#568
+  # source://prism//lib/prism/serialize.rb#580
   def load_location; end
 
-  # source://prism//lib/prism/serialize.rb#572
+  # source://prism//lib/prism/serialize.rb#584
   def load_location_object; end
 
-  # source://prism//lib/prism/serialize.rb#643
+  # source://prism//lib/prism/serialize.rb#655
   def load_node; end
 
-  # source://prism//lib/prism/serialize.rb#609
+  # source://prism//lib/prism/serialize.rb#621
   def load_optional_constant; end
 
-  # source://prism//lib/prism/serialize.rb#576
+  # source://prism//lib/prism/serialize.rb#588
   def load_optional_location; end
 
-  # source://prism//lib/prism/serialize.rb#580
+  # source://prism//lib/prism/serialize.rb#592
   def load_optional_location_object; end
 
-  # source://prism//lib/prism/serialize.rb#545
+  # source://prism//lib/prism/serialize.rb#557
   def load_optional_node; end
 
-  # source://prism//lib/prism/serialize.rb#605
+  # source://prism//lib/prism/serialize.rb#617
   def load_required_constant; end
 
-  # source://prism//lib/prism/serialize.rb#556
+  # source://prism//lib/prism/serialize.rb#568
   def load_string; end
 
-  # source://prism//lib/prism/serialize.rb#541
+  # source://prism//lib/prism/serialize.rb#553
   def load_uint32; end
 
-  # source://prism//lib/prism/serialize.rb#521
+  # source://prism//lib/prism/serialize.rb#533
   def load_varsint; end
 
   # variable-length integer using https://en.wikipedia.org/wiki/LEB128
   # This is also what protobuf uses: https://protobuf.dev/programming-guides/encoding/#varints
   #
-  # source://prism//lib/prism/serialize.rb#507
+  # source://prism//lib/prism/serialize.rb#519
   def load_varuint; end
 
-  # source://prism//lib/prism/serialize.rb#629
+  # source://prism//lib/prism/serialize.rb#641
   def load_warning_level; end
 end
 
-# source://prism//lib/prism/serialize.rb#127
+# source://prism//lib/prism/serialize.rb#138
 Prism::Serialize::Loader::DIAGNOSTIC_TYPES = T.let(T.unsafe(nil), Array)
 
 # StringIO is synchronized and that adds a high overhead on TruffleRuby.
 #
-# source://prism//lib/prism/serialize.rb#72
+# source://prism//lib/prism/serialize.rb#83
 Prism::Serialize::Loader::FastStringIO = StringIO
 
 # The major version of prism that we are expecting to find in the serialized
@@ -26986,7 +30196,7 @@ Prism::Serialize::PATCH_VERSION = T.let(T.unsafe(nil), Integer)
 
 # The token types that can be indexed by their enum values.
 #
-# source://prism//lib/prism/serialize.rb#1725
+# source://prism//lib/prism/serialize.rb#1737
 Prism::Serialize::TOKEN_TYPES = T.let(T.unsafe(nil), Array)
 
 # This node wraps a constant write to indicate that when the value is written, it should have its shareability state modified.
@@ -27155,6 +30365,20 @@ class Prism::SingletonClassNode < ::Prism::Node
   # @return [SingletonClassNode] a new instance of SingletonClassNode
   #
   # source://prism//lib/prism/node.rb#14777
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      class_keyword_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      expression: Prism::Node,
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      end_keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, locals, class_keyword_loc, operator_loc, expression, body, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -27166,67 +30390,92 @@ class Prism::SingletonClassNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14791
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: StatementsNode | BeginNode | nil
   #
   # source://prism//lib/prism/node.rb#14847
+  sig { returns(T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode))) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14796
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def class_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#14857
+  sig { returns(String) }
   def class_keyword; end
 
   # attr_reader class_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#14830
+  sig { returns(Prism::Location) }
   def class_keyword_loc; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14809
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14801
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?locals: Array[Symbol], ?class_keyword_loc: Location, ?operator_loc: Location, ?expression: Prism::node, ?body: StatementsNode | BeginNode | nil, ?end_keyword_loc: Location) -> SingletonClassNode
   #
   # source://prism//lib/prism/node.rb#14814
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      locals: T::Array[Symbol],
+      class_keyword_loc: Prism::Location,
+      operator_loc: Prism::Location,
+      expression: Prism::Node,
+      body: T.nilable(T.any(Prism::StatementsNode, Prism::BeginNode)),
+      end_keyword_loc: Prism::Location
+    ).returns(Prism::SingletonClassNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), locals: T.unsafe(nil), class_keyword_loc: T.unsafe(nil), operator_loc: T.unsafe(nil), expression: T.unsafe(nil), body: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14796
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, locals: Array[Symbol], class_keyword_loc: Location, operator_loc: Location, expression: Prism::node, body: StatementsNode | BeginNode | nil, end_keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#14822
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # def end_keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#14867
+  sig { returns(String) }
   def end_keyword; end
 
   # attr_reader end_keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#14850
+  sig { returns(Prism::Location) }
   def end_keyword_loc; end
 
   # attr_reader expression: Prism::node
   #
   # source://prism//lib/prism/node.rb#14844
+  sig { returns(Prism::Node) }
   def expression; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -27241,16 +30490,19 @@ class Prism::SingletonClassNode < ::Prism::Node
   # attr_reader locals: Array[Symbol]
   #
   # source://prism//lib/prism/node.rb#14827
+  sig { returns(T::Array[Symbol]) }
   def locals; end
 
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#14862
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#14837
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -27277,26 +30529,37 @@ class Prism::Source
   #
   # @return [Source] a new instance of Source
   #
-  # source://prism//lib/prism/parse_result.rb#30
+  # source://prism//lib/prism/parse_result.rb#45
   sig { params(source: String, start_line: Integer, offsets: T::Array[Integer]).void }
   def initialize(source, start_line = T.unsafe(nil), offsets = T.unsafe(nil)); end
 
   # Return the column number in characters for the given byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#82
+  # source://prism//lib/prism/parse_result.rb#97
   sig { params(byte_offset: Integer).returns(Integer) }
   def character_column(byte_offset); end
 
   # Return the character offset for the given byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#77
+  # source://prism//lib/prism/parse_result.rb#92
   sig { params(byte_offset: Integer).returns(Integer) }
   def character_offset(byte_offset); end
+
+  # Generate a cache that targets a specific encoding for calculating code
+  # unit offsets.
+  #
+  # source://prism//lib/prism/parse_result.rb#125
+  sig do
+    params(
+      encoding: Encoding
+    ).returns(T.any(Prism::CodeUnitsCache, T.proc.params(byte_offset: Integer).returns(Integer)))
+  end
+  def code_units_cache(encoding); end
 
   # Returns the column number in code units for the given encoding for the
   # given byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#104
+  # source://prism//lib/prism/parse_result.rb#131
   sig { params(byte_offset: Integer, encoding: Encoding).returns(Integer) }
   def code_units_column(byte_offset, encoding); end
 
@@ -27307,71 +30570,77 @@ class Prism::Source
   # concept of code units that differs from the number of characters in other
   # encodings, it is not captured here.
   #
-  # source://prism//lib/prism/parse_result.rb#92
+  # We purposefully replace invalid and undefined characters with replacement
+  # characters in this conversion. This happens for two reasons. First, it's
+  # possible that the given byte offset will not occur on a character
+  # boundary. Second, it's possible that the source code will contain a
+  # character that has no equivalent in the given encoding.
+  #
+  # source://prism//lib/prism/parse_result.rb#113
   sig { params(byte_offset: Integer, encoding: Encoding).returns(Integer) }
   def code_units_offset(byte_offset, encoding); end
 
   # Return the column number for the given byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#72
+  # source://prism//lib/prism/parse_result.rb#87
   sig { params(byte_offset: Integer).returns(Integer) }
   def column(byte_offset); end
 
   # Returns the encoding of the source code, which is set by parameters to the
   # parser or by the encoding magic comment.
   #
-  # source://prism//lib/prism/parse_result.rb#38
+  # source://prism//lib/prism/parse_result.rb#53
   sig { returns(Encoding) }
   def encoding; end
 
   # Binary search through the offsets to find the line number for the given
   # byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#55
+  # source://prism//lib/prism/parse_result.rb#70
   sig { params(byte_offset: Integer).returns(Integer) }
   def line(byte_offset); end
 
   # Returns the byte offset of the end of the line corresponding to the given
   # byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#67
+  # source://prism//lib/prism/parse_result.rb#82
   def line_end(byte_offset); end
 
   # Return the byte offset of the start of the line corresponding to the given
   # byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#61
+  # source://prism//lib/prism/parse_result.rb#76
   sig { params(byte_offset: Integer).returns(Integer) }
   def line_start(byte_offset); end
 
   # Returns the lines of the source code as an array of strings.
   #
-  # source://prism//lib/prism/parse_result.rb#43
+  # source://prism//lib/prism/parse_result.rb#58
   sig { returns(T::Array[String]) }
   def lines; end
 
   # The list of newline byte offsets in the source code.
   #
-  # source://prism//lib/prism/parse_result.rb#27
+  # source://prism//lib/prism/parse_result.rb#42
   sig { returns(T::Array[Integer]) }
   def offsets; end
 
   # Perform a byteslice on the source code using the given byte offset and
   # byte length.
   #
-  # source://prism//lib/prism/parse_result.rb#49
+  # source://prism//lib/prism/parse_result.rb#64
   sig { params(byte_offset: Integer, length: Integer).returns(String) }
   def slice(byte_offset, length); end
 
   # The source code that this source object represents.
   #
-  # source://prism//lib/prism/parse_result.rb#21
+  # source://prism//lib/prism/parse_result.rb#36
   sig { returns(String) }
   def source; end
 
   # The line number where this source starts.
   #
-  # source://prism//lib/prism/parse_result.rb#24
+  # source://prism//lib/prism/parse_result.rb#39
   sig { returns(Integer) }
   def start_line; end
 
@@ -27380,7 +30649,7 @@ class Prism::Source
   # Binary search through the offsets to find the line number for the given
   # byte offset.
   #
-  # source://prism//lib/prism/parse_result.rb#112
+  # source://prism//lib/prism/parse_result.rb#139
   def find_line(byte_offset); end
 
   class << self
@@ -27406,6 +30675,7 @@ class Prism::SourceEncodingNode < ::Prism::Node
   # @return [SourceEncodingNode] a new instance of SourceEncodingNode
   #
   # source://prism//lib/prism/node.rb#14906
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -27417,37 +30687,44 @@ class Prism::SourceEncodingNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#14914
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14919
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#14929
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#14924
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> SourceEncodingNode
   #
   # source://prism//lib/prism/node.rb#14934
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::SourceEncodingNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#14919
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#14942
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -27625,6 +30902,7 @@ class Prism::SourceLineNode < ::Prism::Node
   # @return [SourceLineNode] a new instance of SourceLineNode
   #
   # source://prism//lib/prism/node.rb#15068
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -27636,37 +30914,44 @@ class Prism::SourceLineNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15076
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15081
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15091
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15086
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> SourceLineNode
   #
   # source://prism//lib/prism/node.rb#15096
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::SourceLineNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15081
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#15104
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -27704,6 +30989,16 @@ class Prism::SplatNode < ::Prism::Node
   # @return [SplatNode] a new instance of SplatNode
   #
   # source://prism//lib/prism/node.rb#15136
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      operator_loc: Prism::Location,
+      expression: T.nilable(Prism::Node)
+    ).void
+  end
   def initialize(source, node_id, location, flags, operator_loc, expression); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -27715,42 +31010,58 @@ class Prism::SplatNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15146
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15151
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15163
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15156
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?operator_loc: Location, ?expression: Prism::node?) -> SplatNode
   #
   # source://prism//lib/prism/node.rb#15168
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      operator_loc: Prism::Location,
+      expression: T.nilable(Prism::Node)
+    ).returns(Prism::SplatNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), operator_loc: T.unsafe(nil), expression: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15151
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, operator_loc: Location, expression: Prism::node? }
   #
   # source://prism//lib/prism/node.rb#15176
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # attr_reader expression: Prism::node?
   #
   # source://prism//lib/prism/node.rb#15188
+  sig { returns(T.nilable(Prism::Node)) }
   def expression; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -27765,11 +31076,13 @@ class Prism::SplatNode < ::Prism::Node
   # def operator: () -> String
   #
   # source://prism//lib/prism/node.rb#15191
+  sig { returns(String) }
   def operator; end
 
   # attr_reader operator_loc: Location
   #
   # source://prism//lib/prism/node.rb#15181
+  sig { returns(Prism::Location) }
   def operator_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -27798,6 +31111,15 @@ class Prism::StatementsNode < ::Prism::Node
   # @return [StatementsNode] a new instance of StatementsNode
   #
   # source://prism//lib/prism/node.rb#15225
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      body: T::Array[Prism::Node]
+    ).void
+  end
   def initialize(source, node_id, location, flags, body); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -27809,42 +31131,57 @@ class Prism::StatementsNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15234
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader body: Array[Prism::node]
   #
   # source://prism//lib/prism/node.rb#15267
+  sig { returns(T::Array[Prism::Node]) }
   def body; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15239
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15249
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15244
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?body: Array[Prism::node]) -> StatementsNode
   #
   # source://prism//lib/prism/node.rb#15254
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      body: T::Array[Prism::Node]
+    ).returns(Prism::StatementsNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), body: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15239
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, body: Array[Prism::node] }
   #
   # source://prism//lib/prism/node.rb#15262
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -28106,6 +31443,19 @@ class Prism::SuperNode < ::Prism::Node
   # @return [SuperNode] a new instance of SuperNode
   #
   # source://prism//lib/prism/node.rb#15456
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      lparen_loc: T.nilable(Prism::Location),
+      arguments: T.nilable(Prism::ArgumentsNode),
+      rparen_loc: T.nilable(Prism::Location),
+      block: T.nilable(T.any(Prism::BlockNode, Prism::BlockArgumentNode))
+    ).void
+  end
   def initialize(source, node_id, location, flags, keyword_loc, lparen_loc, arguments, rparen_loc, block); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -28117,47 +31467,67 @@ class Prism::SuperNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15469
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
   # source://prism//lib/prism/node.rb#15525
+  sig { returns(T.nilable(Prism::ArgumentsNode)) }
   def arguments; end
 
   # attr_reader block: BlockNode | BlockArgumentNode | nil
   #
   # source://prism//lib/prism/node.rb#15541
+  sig { returns(T.nilable(T.any(Prism::BlockNode, Prism::BlockArgumentNode))) }
   def block; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15474
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15487
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15479
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?keyword_loc: Location, ?lparen_loc: Location?, ?arguments: ArgumentsNode?, ?rparen_loc: Location?, ?block: BlockNode | BlockArgumentNode | nil) -> SuperNode
   #
   # source://prism//lib/prism/node.rb#15492
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      lparen_loc: T.nilable(Prism::Location),
+      arguments: T.nilable(Prism::ArgumentsNode),
+      rparen_loc: T.nilable(Prism::Location),
+      block: T.nilable(T.any(Prism::BlockNode, Prism::BlockArgumentNode))
+    ).returns(Prism::SuperNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), keyword_loc: T.unsafe(nil), lparen_loc: T.unsafe(nil), arguments: T.unsafe(nil), rparen_loc: T.unsafe(nil), block: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15474
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, keyword_loc: Location, lparen_loc: Location?, arguments: ArgumentsNode?, rparen_loc: Location?, block: BlockNode | BlockArgumentNode | nil }
   #
   # source://prism//lib/prism/node.rb#15500
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -28172,31 +31542,37 @@ class Prism::SuperNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#15544
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#15505
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def lparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#15549
+  sig { returns(T.nilable(String)) }
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#15512
+  sig { returns(T.nilable(Prism::Location)) }
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#15554
+  sig { returns(T.nilable(String)) }
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#15528
+  sig { returns(T.nilable(Prism::Location)) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -28412,54 +31788,54 @@ end
 
 # This represents a token from the Ruby source.
 #
-# source://prism//lib/prism/parse_result.rb#662
+# source://prism//lib/prism/parse_result.rb#799
 class Prism::Token
   # Create a new token object with the given type, value, and location.
   #
   # @return [Token] a new instance of Token
   #
-  # source://prism//lib/prism/parse_result.rb#674
+  # source://prism//lib/prism/parse_result.rb#811
   sig { params(source: Prism::Source, type: Symbol, value: String, location: T.any(Integer, Prism::Location)).void }
   def initialize(source, type, value, location); end
 
   # Returns true if the given other token is equal to this token.
   #
-  # source://prism//lib/prism/parse_result.rb#709
+  # source://prism//lib/prism/parse_result.rb#846
   sig { params(other: T.untyped).returns(T::Boolean) }
   def ==(other); end
 
   # Implement the hash pattern matching interface for Token.
   #
-  # source://prism//lib/prism/parse_result.rb#682
+  # source://prism//lib/prism/parse_result.rb#819
   sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # Returns a string representation of this token.
   #
-  # source://prism//lib/prism/parse_result.rb#716
+  # source://prism//lib/prism/parse_result.rb#853
   def inspect; end
 
   # A Location object representing the location of this token in the source.
   #
-  # source://prism//lib/prism/parse_result.rb#687
+  # source://prism//lib/prism/parse_result.rb#824
   sig { returns(Prism::Location) }
   def location; end
 
   # Implement the pretty print interface for Token.
   #
-  # source://prism//lib/prism/parse_result.rb#694
+  # source://prism//lib/prism/parse_result.rb#831
   sig { params(q: T.untyped).void }
   def pretty_print(q); end
 
   # The type of token that this token is.
   #
-  # source://prism//lib/prism/parse_result.rb#668
+  # source://prism//lib/prism/parse_result.rb#805
   sig { returns(Symbol) }
   def type; end
 
   # A byteslice of the source that this token represents.
   #
-  # source://prism//lib/prism/parse_result.rb#671
+  # source://prism//lib/prism/parse_result.rb#808
   sig { returns(String) }
   def value; end
 
@@ -28467,7 +31843,7 @@ class Prism::Token
 
   # The Source object that represents the source this token came from.
   #
-  # source://prism//lib/prism/parse_result.rb#664
+  # source://prism//lib/prism/parse_result.rb#801
   sig { returns(Prism::Source) }
   def source; end
 end
@@ -30905,25 +34281,25 @@ class Prism::Translation::Ripper < ::Prism::Compiler
 
   # :stopdoc:
   #
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def _dispatch_0; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def _dispatch_1(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def _dispatch_2(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def _dispatch_3(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3393
+  # source://prism//lib/prism/translation/ripper.rb#3389
   def _dispatch_4(_, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3394
+  # source://prism//lib/prism/translation/ripper.rb#3390
   def _dispatch_5(_, _, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3395
+  # source://prism//lib/prism/translation/ripper.rb#3391
   def _dispatch_7(_, _, _, _, _, _, _); end
 
   # This method is responsible for updating lineno and column information
@@ -30932,7 +34308,7 @@ class Prism::Translation::Ripper < ::Prism::Compiler
   # This method could be drastically improved with some caching on the start
   # of every line, but for now it's good enough.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3379
+  # source://prism//lib/prism/translation/ripper.rb#3375
   def bounds(location); end
 
   # Returns true if the given node is a command node.
@@ -30944,7 +34320,7 @@ class Prism::Translation::Ripper < ::Prism::Compiler
 
   # This method is called when the parser found syntax error.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3417
+  # source://prism//lib/prism/translation/ripper.rb#3413
   def compile_error(msg); end
 
   # This method is provided by the Ripper C extension. It is called when a
@@ -30952,577 +34328,577 @@ class Prism::Translation::Ripper < ::Prism::Compiler
   # that it will modify the string in place and return the number of bytes
   # that were removed.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3432
+  # source://prism//lib/prism/translation/ripper.rb#3428
   def dedent_string(string, width); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_BEGIN(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_CHAR(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_END(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on___end__(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_alias(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_alias_error(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_aref(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_aref_field(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_arg_ambiguous(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_arg_paren(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_args_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_args_add_block(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_args_add_star(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_args_forward; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_args_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_array(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3393
+  # source://prism//lib/prism/translation/ripper.rb#3389
   def on_aryptn(_, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_assign(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_assign_error(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_assoc_new(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_assoc_splat(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_assoclist_from_args(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_backref(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_backtick(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_bare_assoc_hash(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_begin(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_binary(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_block_var(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_blockarg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3393
+  # source://prism//lib/prism/translation/ripper.rb#3389
   def on_bodystmt(_, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_brace_block(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_break(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_call(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_case(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_class(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_class_name_error(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_comma(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_command(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3393
+  # source://prism//lib/prism/translation/ripper.rb#3389
   def on_command_call(_, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_comment(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_const(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_const_path_field(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_const_path_ref(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_const_ref(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_cvar(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_def(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_defined(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3394
+  # source://prism//lib/prism/translation/ripper.rb#3390
   def on_defs(_, _, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_do_block(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_dot2(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_dot3(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_dyna_symbol(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_else(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_elsif(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_embdoc(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_embdoc_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_embdoc_end(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_embexpr_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_embexpr_end(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_embvar(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_ensure(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_excessed_comma; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_fcall(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_field(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_float(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3393
+  # source://prism//lib/prism/translation/ripper.rb#3389
   def on_fndptn(_, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_for(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_gvar(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_hash(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_heredoc_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_heredoc_dedent(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_heredoc_end(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_hshptn(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_ident(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_if(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_if_mod(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_ifop(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_ignored_nl(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_ignored_sp(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_imaginary(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_in(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_int(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_ivar(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_kw(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_kwrest_param(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_label(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_label_end(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_lambda(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_lbrace(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_lbracket(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_lparen(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_magic_comment(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_massign(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_method_add_arg(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_method_add_block(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_mlhs_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_mlhs_add_post(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_mlhs_add_star(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_mlhs_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_mlhs_paren(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_module(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_mrhs_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_mrhs_add_star(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_mrhs_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_mrhs_new_from_args(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_next(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_nl(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_nokw_param(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_op(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_opassign(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_operator_ambiguous(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_param_error(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3395
+  # source://prism//lib/prism/translation/ripper.rb#3391
   def on_params(_, _, _, _, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_paren(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_parse_error(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_period(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_program(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_qsymbols_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_qsymbols_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_qsymbols_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_qwords_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_qwords_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_qwords_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_rational(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_rbrace(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_rbracket(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_redo; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_regexp_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_regexp_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_regexp_end(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_regexp_literal(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_regexp_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3393
+  # source://prism//lib/prism/translation/ripper.rb#3389
   def on_rescue(_, _, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_rescue_mod(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_rest_param(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_retry; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_return(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_return0; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_rparen(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_sclass(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_semicolon(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_sp(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_stmts_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_stmts_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_string_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_string_concat(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_string_content; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_string_dvar(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_string_embexpr(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_string_literal(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_super(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_symbeg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_symbol(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_symbol_literal(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_symbols_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_symbols_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_symbols_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_tlambda(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_tlambeg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_top_const_field(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_top_const_ref(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_tstring_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_tstring_content(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_tstring_end(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_unary(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_undef(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_unless(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_unless_mod(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_until(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_until_mod(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_var_alias(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_var_field(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_var_ref(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_vcall(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_void_stmt; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3392
+  # source://prism//lib/prism/translation/ripper.rb#3388
   def on_when(_, _, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_while(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_while_mod(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_word_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_word_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_words_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_words_beg(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_words_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_words_sep(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3391
+  # source://prism//lib/prism/translation/ripper.rb#3387
   def on_xstring_add(_, _); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_xstring_literal(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_xstring_new; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3390
+  # source://prism//lib/prism/translation/ripper.rb#3386
   def on_yield(_); end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_yield0; end
 
-  # source://prism//lib/prism/translation/ripper.rb#3389
+  # source://prism//lib/prism/translation/ripper.rb#3385
   def on_zsuper; end
 
   # Lazily initialize the parse result.
@@ -31534,7 +34910,7 @@ class Prism::Translation::Ripper < ::Prism::Compiler
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/translation/ripper.rb#3284
+  # source://prism//lib/prism/translation/ripper.rb#3280
   def trailing_comma?(left, right); end
 
   # Visit one side of an alias global variable node.
@@ -31606,7 +34982,7 @@ class Prism::Translation::Ripper < ::Prism::Compiler
   # Visit a node that represents a number. We need to explicitly handle the
   # unary - operator.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3323
+  # source://prism//lib/prism/translation/ripper.rb#3319
   def visit_number_node(node); end
 
   # Visit a pattern within a pattern match. This is used to bypass the
@@ -31631,7 +35007,7 @@ class Prism::Translation::Ripper < ::Prism::Compiler
   # Visit the string content of a particular node. This method is used to
   # split into the various token types.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3296
+  # source://prism//lib/prism/translation/ripper.rb#3292
   def visit_token(token, allow_keywords = T.unsafe(nil)); end
 
   # Dispatch a words_sep event that contains the space between the elements
@@ -31643,26 +35019,26 @@ class Prism::Translation::Ripper < ::Prism::Compiler
   # Visit a node that represents a write value. This is used to handle the
   # special case of an implicit array that is generated without brackets.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3341
+  # source://prism//lib/prism/translation/ripper.rb#3337
   def visit_write_value(node); end
 
   # Returns true if there is a semicolon between the two locations.
   #
   # @return [Boolean]
   #
-  # source://prism//lib/prism/translation/ripper.rb#3289
+  # source://prism//lib/prism/translation/ripper.rb#3285
   def void_stmt?(left, right, allow_newline); end
 
   # This method is called when weak warning is produced by the parser.
   # +fmt+ and +args+ is printf style.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3408
+  # source://prism//lib/prism/translation/ripper.rb#3404
   def warn(fmt, *args); end
 
   # This method is called when strong warning is produced by the parser.
   # +fmt+ and +args+ is printf style.
   #
-  # source://prism//lib/prism/translation/ripper.rb#3413
+  # source://prism//lib/prism/translation/ripper.rb#3409
   def warning(fmt, *args); end
 
   class << self
@@ -33587,6 +36963,7 @@ class Prism::TrueNode < ::Prism::Node
   # @return [TrueNode] a new instance of TrueNode
   #
   # source://prism//lib/prism/node.rb#15743
+  sig { params(source: Prism::Source, node_id: Integer, location: Prism::Location, flags: Integer).void }
   def initialize(source, node_id, location, flags); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -33598,37 +36975,44 @@ class Prism::TrueNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15751
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15756
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15766
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15761
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer) -> TrueNode
   #
   # source://prism//lib/prism/node.rb#15771
+  sig { params(node_id: Integer, location: Prism::Location, flags: Integer).returns(Prism::TrueNode) }
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15756
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location }
   #
   # source://prism//lib/prism/node.rb#15779
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -33666,6 +37050,16 @@ class Prism::UndefNode < ::Prism::Node
   # @return [UndefNode] a new instance of UndefNode
   #
   # source://prism//lib/prism/node.rb#15811
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      names: T::Array[T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode)],
+      keyword_loc: Prism::Location
+    ).void
+  end
   def initialize(source, node_id, location, flags, names, keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -33677,37 +37071,52 @@ class Prism::UndefNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15821
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15826
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15836
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15831
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?names: Array[SymbolNode | InterpolatedSymbolNode], ?keyword_loc: Location) -> UndefNode
   #
   # source://prism//lib/prism/node.rb#15841
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      names: T::Array[T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode)],
+      keyword_loc: Prism::Location
+    ).returns(Prism::UndefNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), names: T.unsafe(nil), keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15826
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, names: Array[SymbolNode | InterpolatedSymbolNode], keyword_loc: Location }
   #
   # source://prism//lib/prism/node.rb#15849
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -33722,16 +37131,19 @@ class Prism::UndefNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#15864
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#15857
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # attr_reader names: Array[SymbolNode | InterpolatedSymbolNode]
   #
   # source://prism//lib/prism/node.rb#15854
+  sig { returns(T::Array[T.any(Prism::SymbolNode, Prism::InterpolatedSymbolNode)]) }
   def names; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -33763,6 +37175,20 @@ class Prism::UnlessNode < ::Prism::Node
   # @return [UnlessNode] a new instance of UnlessNode
   #
   # source://prism//lib/prism/node.rb#15902
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      predicate: Prism::Node,
+      then_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode),
+      else_clause: T.nilable(Prism::ElseNode),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, keyword_loc, predicate, then_keyword_loc, statements, else_clause, end_keyword_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -33774,21 +37200,25 @@ class Prism::UnlessNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#15916
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15921
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#15935
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#15926
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # Returns the else clause of the unless node. This method is deprecated in
@@ -33800,17 +37230,32 @@ class Prism::UnlessNode < ::Prism::Node
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?keyword_loc: Location, ?predicate: Prism::node, ?then_keyword_loc: Location?, ?statements: StatementsNode?, ?else_clause: ElseNode?, ?end_keyword_loc: Location?) -> UnlessNode
   #
   # source://prism//lib/prism/node.rb#15940
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      predicate: Prism::Node,
+      then_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode),
+      else_clause: T.nilable(Prism::ElseNode),
+      end_keyword_loc: T.nilable(Prism::Location)
+    ).returns(Prism::UnlessNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), keyword_loc: T.unsafe(nil), predicate: T.unsafe(nil), then_keyword_loc: T.unsafe(nil), statements: T.unsafe(nil), else_clause: T.unsafe(nil), end_keyword_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#15921
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, keyword_loc: Location, predicate: Prism::node, then_keyword_loc: Location?, statements: StatementsNode?, else_clause: ElseNode?, end_keyword_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#15948
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # The else clause of the unless expression, if present.
@@ -33819,11 +37264,13 @@ class Prism::UnlessNode < ::Prism::Node
   #                          ^^^^^^^^
   #
   # source://prism//lib/prism/node.rb#16001
+  sig { returns(T.nilable(Prism::ElseNode)) }
   def else_clause; end
 
   # def end_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#16030
+  sig { returns(T.nilable(String)) }
   def end_keyword; end
 
   # The location of the `end` keyword, if present.
@@ -33832,6 +37279,7 @@ class Prism::UnlessNode < ::Prism::Node
   #                          ^^^
   #
   # source://prism//lib/prism/node.rb#16007
+  sig { returns(T.nilable(Prism::Location)) }
   def end_keyword_loc; end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -33846,6 +37294,7 @@ class Prism::UnlessNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#16020
+  sig { returns(String) }
   def keyword; end
 
   # The location of the `unless` keyword.
@@ -33857,6 +37306,7 @@ class Prism::UnlessNode < ::Prism::Node
   #         ^^^^^^
   #
   # source://prism//lib/prism/node.rb#15959
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # source://prism//lib/prism/parse_result/newlines.rb#97
@@ -33871,6 +37321,7 @@ class Prism::UnlessNode < ::Prism::Node
   #                ^^^^
   #
   # source://prism//lib/prism/node.rb#15972
+  sig { returns(Prism::Node) }
   def predicate; end
 
   # The body of statements that will executed if the unless condition is
@@ -33880,11 +37331,13 @@ class Prism::UnlessNode < ::Prism::Node
   #                      ^^^
   #
   # source://prism//lib/prism/node.rb#15995
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # def then_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#16025
+  sig { returns(T.nilable(String)) }
   def then_keyword; end
 
   # The location of the `then` keyword, if present.
@@ -33893,6 +37346,7 @@ class Prism::UnlessNode < ::Prism::Node
   #                 ^^^^
   #
   # source://prism//lib/prism/node.rb#15978
+  sig { returns(T.nilable(Prism::Location)) }
   def then_keyword_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -35012,6 +38466,18 @@ class Prism::WhenNode < ::Prism::Node
   # @return [WhenNode] a new instance of WhenNode
   #
   # source://prism//lib/prism/node.rb#16194
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      conditions: T::Array[Prism::Node],
+      then_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode)
+    ).void
+  end
   def initialize(source, node_id, location, flags, keyword_loc, conditions, then_keyword_loc, statements); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -35023,42 +38489,60 @@ class Prism::WhenNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#16206
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#16211
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#16224
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#16216
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # attr_reader conditions: Array[Prism::node]
   #
   # source://prism//lib/prism/node.rb#16249
+  sig { returns(T::Array[Prism::Node]) }
   def conditions; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?keyword_loc: Location, ?conditions: Array[Prism::node], ?then_keyword_loc: Location?, ?statements: StatementsNode?) -> WhenNode
   #
   # source://prism//lib/prism/node.rb#16229
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      conditions: T::Array[Prism::Node],
+      then_keyword_loc: T.nilable(Prism::Location),
+      statements: T.nilable(Prism::StatementsNode)
+    ).returns(Prism::WhenNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), keyword_loc: T.unsafe(nil), conditions: T.unsafe(nil), then_keyword_loc: T.unsafe(nil), statements: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#16211
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, keyword_loc: Location, conditions: Array[Prism::node], then_keyword_loc: Location?, statements: StatementsNode? }
   #
   # source://prism//lib/prism/node.rb#16237
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -35073,26 +38557,31 @@ class Prism::WhenNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#16268
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#16242
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # attr_reader statements: StatementsNode?
   #
   # source://prism//lib/prism/node.rb#16265
+  sig { returns(T.nilable(Prism::StatementsNode)) }
   def statements; end
 
   # def then_keyword: () -> String?
   #
   # source://prism//lib/prism/node.rb#16273
+  sig { returns(T.nilable(String)) }
   def then_keyword; end
 
   # attr_reader then_keyword_loc: Location?
   #
   # source://prism//lib/prism/node.rb#16252
+  sig { returns(T.nilable(Prism::Location)) }
   def then_keyword_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
@@ -35457,6 +38946,18 @@ class Prism::YieldNode < ::Prism::Node
   # @return [YieldNode] a new instance of YieldNode
   #
   # source://prism//lib/prism/node.rb#16560
+  sig do
+    params(
+      source: Prism::Source,
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      lparen_loc: T.nilable(Prism::Location),
+      arguments: T.nilable(Prism::ArgumentsNode),
+      rparen_loc: T.nilable(Prism::Location)
+    ).void
+  end
   def initialize(source, node_id, location, flags, keyword_loc, lparen_loc, arguments, rparen_loc); end
 
   # Implements case-equality for the node. This is effectively == but without
@@ -35468,42 +38969,60 @@ class Prism::YieldNode < ::Prism::Node
   # def accept: (Visitor visitor) -> void
   #
   # source://prism//lib/prism/node.rb#16572
+  sig { override.params(visitor: Prism::Visitor).returns(T.untyped) }
   def accept(visitor); end
 
   # attr_reader arguments: ArgumentsNode?
   #
   # source://prism//lib/prism/node.rb#16627
+  sig { returns(T.nilable(Prism::ArgumentsNode)) }
   def arguments; end
 
   # def child_nodes: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#16577
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def child_nodes; end
 
   # def comment_targets: () -> Array[Node | Location]
   #
   # source://prism//lib/prism/node.rb#16589
+  sig { override.returns(T::Array[T.any(Prism::Node, Prism::Location)]) }
   def comment_targets; end
 
   # def compact_child_nodes: () -> Array[Node]
   #
   # source://prism//lib/prism/node.rb#16582
+  sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
   # def copy: (?node_id: Integer, ?location: Location, ?flags: Integer, ?keyword_loc: Location, ?lparen_loc: Location?, ?arguments: ArgumentsNode?, ?rparen_loc: Location?) -> YieldNode
   #
   # source://prism//lib/prism/node.rb#16594
+  sig do
+    params(
+      node_id: Integer,
+      location: Prism::Location,
+      flags: Integer,
+      keyword_loc: Prism::Location,
+      lparen_loc: T.nilable(Prism::Location),
+      arguments: T.nilable(Prism::ArgumentsNode),
+      rparen_loc: T.nilable(Prism::Location)
+    ).returns(Prism::YieldNode)
+  end
   def copy(node_id: T.unsafe(nil), location: T.unsafe(nil), flags: T.unsafe(nil), keyword_loc: T.unsafe(nil), lparen_loc: T.unsafe(nil), arguments: T.unsafe(nil), rparen_loc: T.unsafe(nil)); end
 
   # def child_nodes: () -> Array[nil | Node]
   # def deconstruct: () -> Array[nil | Node]
   #
   # source://prism//lib/prism/node.rb#16577
+  sig { override.returns(T::Array[T.nilable(Prism::Node)]) }
   def deconstruct; end
 
   # def deconstruct_keys: (Array[Symbol] keys) -> { node_id: Integer, location: Location, keyword_loc: Location, lparen_loc: Location?, arguments: ArgumentsNode?, rparen_loc: Location? }
   #
   # source://prism//lib/prism/node.rb#16602
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   sig { override.returns(T::Array[Prism::Reflection::Field]) }
@@ -35518,31 +39037,37 @@ class Prism::YieldNode < ::Prism::Node
   # def keyword: () -> String
   #
   # source://prism//lib/prism/node.rb#16643
+  sig { returns(String) }
   def keyword; end
 
   # attr_reader keyword_loc: Location
   #
   # source://prism//lib/prism/node.rb#16607
+  sig { returns(Prism::Location) }
   def keyword_loc; end
 
   # def lparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#16648
+  sig { returns(T.nilable(String)) }
   def lparen; end
 
   # attr_reader lparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#16614
+  sig { returns(T.nilable(Prism::Location)) }
   def lparen_loc; end
 
   # def rparen: () -> String?
   #
   # source://prism//lib/prism/node.rb#16653
+  sig { returns(T.nilable(String)) }
   def rparen; end
 
   # attr_reader rparen_loc: Location?
   #
   # source://prism//lib/prism/node.rb#16630
+  sig { returns(T.nilable(Prism::Location)) }
   def rparen_loc; end
 
   # Return a symbol representation of this node type. See `Node#type`.
