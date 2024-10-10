@@ -15,7 +15,7 @@ module RubyLsp
           "bundle exec ruby"
         rescue Bundler::GemfileNotFound
           "ruby"
-        end + " -Itest ",
+        end,
         String,
       )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
@@ -39,7 +39,7 @@ module RubyLsp
         @path = T.let(uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
-        @group_stack = T.let([], T::Array[String])
+        @group_stack = T.let([], T::Array[[Symbol, String]])
         @group_id = T.let(1, Integer)
         @group_id_stack = T.let([], T::Array[Integer])
         # We want to avoid adding code lenses for nested definitions
@@ -63,15 +63,15 @@ module RubyLsp
       def on_class_node_enter(node)
         @visibility_stack.push([:public, :public])
         class_name = node.constant_path.slice
-        @group_stack.push(class_name)
+        @group_stack.push([:class, class_name])
 
         if @path && class_name.end_with?("Test")
           add_test_code_lens(
             node,
             name: class_name,
-            command: generate_test_command(group_stack: @group_stack),
+            command: generate_test_command(group_stack: @group_stack.map(&:last)),
             kind: :group,
-            id: generate_fully_qualified_id(group_stack: @group_stack),
+            id: generate_fully_qualified_id(group_stack: @group_stack.map(&:last)),
           )
 
           @group_id_stack.push(@group_id)
@@ -96,7 +96,7 @@ module RubyLsp
         @def_depth += 1
         return if @def_depth > 1
 
-        class_name = @group_stack.last
+        class_name = @group_stack.last&.last
         return unless class_name&.end_with?("Test")
 
         visibility, _ = @visibility_stack.last
@@ -106,9 +106,9 @@ module RubyLsp
             add_test_code_lens(
               node,
               name: method_name,
-              command: generate_test_command(method_name: method_name, group_stack: @group_stack),
+              command: generate_test_command(method_name: method_name, group_stack: @group_stack.map(&:last)),
               kind: :example,
-              id: generate_fully_qualified_id(group_stack: @group_stack, method_name: method_name),
+              id: generate_fully_qualified_id(group_stack: @group_stack.map(&:last), method_name: method_name),
             )
           end
         end
@@ -122,9 +122,9 @@ module RubyLsp
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
         if (path = namespace_constant_name(node))
-          @group_stack.push(path)
+          @group_stack.push([:module, path])
         else
-          @group_stack.push(DYNAMIC_REFERENCE_MARKER)
+          @group_stack.push([:module, DYNAMIC_REFERENCE_MARKER])
         end
       end
 
@@ -229,7 +229,10 @@ module RubyLsp
         ).returns(String)
       end
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
-        command = BASE_COMMAND + T.must(@path)
+        command = BASE_COMMAND
+        command += " -Itest" if T.must(@path).include?("#{File::SEPARATOR}test#{File::SEPARATOR}")
+        command += " -Ispec" if T.must(@path).include?("#{File::SEPARATOR}spec#{File::SEPARATOR}")
+        command += " #{T.must(@path)}"
 
         case @global_state.test_library
         when "minitest"
@@ -293,17 +296,21 @@ module RubyLsp
         else
           # Reset spec_id when entering a new group
           @spec_id = 0
-          @group_stack.push(name)
+          @group_stack.push([:describe, name])
         end
 
         if @path
+          # Remove any class or module names from the group stack.
+          # Specs don't include the class name in the test selector.
+          group_stack = @group_stack.filter_map { |type, value| value if type == :describe }
+
           method_name = format("test_%04d_%s", @spec_id, name) if kind == :example
           add_test_code_lens(
             node,
             name: name,
-            command: generate_test_command(group_stack: @group_stack, spec_name: method_name),
+            command: generate_test_command(group_stack: group_stack, spec_name: method_name),
             kind: kind,
-            id: generate_fully_qualified_id(group_stack: @group_stack, method_name: method_name),
+            id: generate_fully_qualified_id(group_stack: group_stack, method_name: method_name),
           )
         end
       end
