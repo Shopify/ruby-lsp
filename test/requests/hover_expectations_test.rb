@@ -60,6 +60,25 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_for_global_variables
+    source = <<~RUBY
+      $DEBUG
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 1 } },
+      )
+
+      assert_match("The debug flag", server.pop_response.response.contents.value)
+    end
+  end
+
   def test_hovering_precision
     source = <<~RUBY
       module Foo
