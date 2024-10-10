@@ -34,16 +34,18 @@ module RubyLsp
         )
         return unless formatted_text
 
+        code_units_cache = @document.code_units_cache
+
         [
           Interface::TextEdit.new(
             range: Interface::Range.new(
               start: Interface::Position.new(
                 line: location.start_line - 1,
-                character: location.start_code_units_column(@document.encoding),
+                character: location.cached_start_code_units_column(code_units_cache),
               ),
               end: Interface::Position.new(
                 line: location.end_line - 1,
-                character: location.end_code_units_column(@document.encoding),
+                character: location.cached_end_code_units_column(code_units_cache),
               ),
             ),
             new_text: formatted_text.strip,
