@@ -43,7 +43,7 @@ module RubyLsp
           document.parse_result.value,
           char_position,
           node_types: [Prism::CallNode],
-          encoding: global_state.encoding,
+          code_units_cache: document.code_units_cache,
         )
 
         target = adjust_for_nested_target(node_context.node, node_context.parent, position)
