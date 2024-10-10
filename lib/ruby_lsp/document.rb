@@ -127,6 +127,8 @@ module RubyLsp
     class Scanner
       extend T::Sig
 
+      class PositionNotFoundError < StandardError; end
+
       LINE_BREAK = T.let(0x0A, Integer)
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = T.let(0xFFFF, Integer)
@@ -143,10 +145,21 @@ module RubyLsp
       sig { params(position: T::Hash[Symbol, T.untyped]).returns(Integer) }
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
-        until @current_line == position[:line]
-          @pos += 1 until LINE_BREAK == @source[@pos]
+        until @current_line == position[:line] || @pos >= @source.length
+          @pos += 1 until LINE_BREAK == @source[@pos] || @pos >= @source.length
           @pos += 1
           @current_line += 1
+        end
+
+        if @current_line != position[:line]
+          raise PositionNotFoundError, <<~MESSAGE
+            Requested position: #{position}
+
+            Document state:
+            -----
+            #{@source.pack("U*")}
+            -----
+          MESSAGE
         end
 
         # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
