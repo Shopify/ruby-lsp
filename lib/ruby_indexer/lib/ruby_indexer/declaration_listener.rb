@@ -469,9 +469,8 @@ module RubyIndexer
       @index.add(Entry::GlobalVariable.new(
         name,
         @file_path,
-        loc,
+        Location.from_prism_location(loc, @encoding),
         comments,
-        @index.configuration.encoding,
       ))
     end
 
