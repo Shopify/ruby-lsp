@@ -33,6 +33,7 @@ module RubyIndexer
         T::Hash[Integer, Prism::Comment],
       )
       @inside_def = T.let(false, T::Boolean)
+      @encoding = T.let(@index.configuration.encoding, Encoding)
 
       # The nesting stack we're currently inside. Used to determine the fully qualified name of constants, but only
       # stored by unresolved aliases which need the original nesting to be lazily resolved
@@ -111,10 +112,9 @@ module RubyIndexer
       entry = Entry::Class.new(
         nesting,
         @file_path,
-        node.location,
-        constant_path.location,
+        Location.from_prism_location(node.location, @encoding),
+        Location.from_prism_location(constant_path.location, @encoding),
         comments,
-        @index.configuration.encoding,
         parent_class,
       )
 
@@ -141,10 +141,9 @@ module RubyIndexer
       entry = Entry::Module.new(
         actual_nesting(name),
         @file_path,
-        node.location,
-        constant_path.location,
+        Location.from_prism_location(node.location, @encoding),
+        Location.from_prism_location(constant_path.location, @encoding),
         comments,
-        @index.configuration.encoding,
       )
 
       @owner_stack << entry
@@ -175,19 +174,17 @@ module RubyIndexer
         if existing_entries
           entry = T.must(existing_entries.first)
           entry.update_singleton_information(
-            node.location,
-            expression.location,
+            Location.from_prism_location(node.location, @encoding),
+            Location.from_prism_location(expression.location, @encoding),
             collect_comments(node),
-            @index.configuration.encoding,
           )
         else
           entry = Entry::SingletonClass.new(
             real_nesting,
             @file_path,
-            node.location,
-            expression.location,
+            Location.from_prism_location(node.location, @encoding),
+            Location.from_prism_location(expression.location, @encoding),
             collect_comments(node),
-            @index.configuration.encoding,
             nil,
           )
           @index.add(entry, skip_prefix_tree: true)
@@ -345,10 +342,9 @@ module RubyIndexer
         @index.add(Entry::Method.new(
           method_name,
           @file_path,
-          node.location,
-          node.name_loc,
+          Location.from_prism_location(node.location, @encoding),
+          Location.from_prism_location(node.name_loc, @encoding),
           comments,
-          @index.configuration.encoding,
           [Entry::Signature.new(list_params(node.parameters))],
           current_visibility,
           @owner_stack.last,
@@ -362,10 +358,9 @@ module RubyIndexer
           @index.add(Entry::Method.new(
             method_name,
             @file_path,
-            node.location,
-            node.name_loc,
+            Location.from_prism_location(node.location, @encoding),
+            Location.from_prism_location(node.name_loc, @encoding),
             comments,
-            @index.configuration.encoding,
             [Entry::Signature.new(list_params(node.parameters))],
             current_visibility,
             singleton,
@@ -447,9 +442,8 @@ module RubyIndexer
           node.old_name.slice,
           @owner_stack.last,
           @file_path,
-          node.new_name.location,
+          Location.from_prism_location(node.new_name.location, @encoding),
           comments,
-          @index.configuration.encoding,
         ),
       )
     end
@@ -508,9 +502,8 @@ module RubyIndexer
       @index.add(Entry::InstanceVariable.new(
         name,
         @file_path,
-        loc,
+        Location.from_prism_location(loc, @encoding),
         collect_comments(node),
-        @index.configuration.encoding,
         owner,
       ))
     end
@@ -573,9 +566,8 @@ module RubyIndexer
           old_name_value,
           @owner_stack.last,
           @file_path,
-          new_name.location,
+          Location.from_prism_location(new_name.location, @encoding),
           comments,
-          @index.configuration.encoding,
         ),
       )
     end
@@ -610,9 +602,8 @@ module RubyIndexer
             @stack.dup,
             name,
             @file_path,
-            node.location,
+            Location.from_prism_location(node.location, @encoding),
             comments,
-            @index.configuration.encoding,
           )
         when Prism::ConstantWriteNode, Prism::ConstantAndWriteNode, Prism::ConstantOrWriteNode,
         Prism::ConstantOperatorWriteNode
@@ -624,9 +615,8 @@ module RubyIndexer
             @stack.dup,
             name,
             @file_path,
-            node.location,
+            Location.from_prism_location(node.location, @encoding),
             comments,
-            @index.configuration.encoding,
           )
         when Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
         Prism::ConstantPathAndWriteNode
@@ -636,12 +626,16 @@ module RubyIndexer
             @stack.dup,
             name,
             @file_path,
-            node.location,
+            Location.from_prism_location(node.location, @encoding),
             comments,
-            @index.configuration.encoding,
           )
         else
-          Entry::Constant.new(name, @file_path, node.location, comments, @index.configuration.encoding)
+          Entry::Constant.new(
+            name,
+            @file_path,
+            Location.from_prism_location(node.location, @encoding),
+            comments,
+          )
         end,
       )
     end
@@ -707,9 +701,8 @@ module RubyIndexer
           @index.add(Entry::Accessor.new(
             name,
             @file_path,
-            loc,
+            Location.from_prism_location(loc, @encoding),
             comments,
-            @index.configuration.encoding,
             current_visibility,
             @owner_stack.last,
           ))
@@ -720,9 +713,8 @@ module RubyIndexer
         @index.add(Entry::Accessor.new(
           "#{name}=",
           @file_path,
-          loc,
+          Location.from_prism_location(loc, @encoding),
           comments,
-          @index.configuration.encoding,
           current_visibility,
           @owner_stack.last,
         ))

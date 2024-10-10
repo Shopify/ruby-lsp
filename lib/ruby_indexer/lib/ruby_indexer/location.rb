@@ -5,6 +5,20 @@ module RubyIndexer
   class Location
     extend T::Sig
 
+    class << self
+      extend T::Sig
+
+      sig { params(prism_location: Prism::Location, encoding: Encoding).returns(T.attached_class) }
+      def from_prism_location(prism_location, encoding)
+        new(
+          prism_location.start_line,
+          prism_location.end_line,
+          prism_location.start_code_units_column(encoding),
+          prism_location.end_code_units_column(encoding),
+        )
+      end
+    end
+
     sig { returns(Integer) }
     attr_reader :start_line, :end_line, :start_column, :end_column
 

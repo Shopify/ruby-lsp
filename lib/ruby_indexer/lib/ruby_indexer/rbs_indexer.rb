@@ -61,9 +61,9 @@ module RubyIndexer
       comments = comments_to_string(declaration)
       entry = if declaration.is_a?(RBS::AST::Declarations::Class)
         parent_class = declaration.super_class&.name&.name&.to_s
-        Entry::Class.new(nesting, file_path, location, location, comments, @index.configuration.encoding, parent_class)
+        Entry::Class.new(nesting, file_path, location, location, comments, parent_class)
       else
-        Entry::Module.new(nesting, file_path, location, location, comments, @index.configuration.encoding)
+        Entry::Module.new(nesting, file_path, location, location, comments)
       end
       add_declaration_mixins_to_entry(declaration, entry)
       @index.add(entry)
@@ -136,7 +136,6 @@ module RubyIndexer
         location,
         location,
         comments,
-        @index.configuration.encoding,
         signatures,
         visibility,
         real_owner,
@@ -269,7 +268,6 @@ module RubyIndexer
         file_path,
         to_ruby_indexer_location(declaration.location),
         comments_to_string(declaration),
-        @index.configuration.encoding,
       ))
     end
 
@@ -279,14 +277,12 @@ module RubyIndexer
       file_path = pathname.to_s
       location = to_ruby_indexer_location(declaration.location)
       comments = comments_to_string(declaration)
-      encoding = @index.configuration.encoding
 
       @index.add(Entry::GlobalVariable.new(
         name,
         file_path,
         location,
         comments,
-        encoding,
       ))
     end
 
@@ -302,7 +298,6 @@ module RubyIndexer
         file_path,
         to_ruby_indexer_location(member.location),
         comments,
-        @index.configuration.encoding,
       )
 
       @index.add(entry)
