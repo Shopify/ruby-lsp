@@ -101,7 +101,7 @@ module RubyLsp
         @range = range
         @result_id = T.let(SemanticHighlighting.next_result_id.to_s, String)
         @response_builder = T.let(
-          ResponseBuilders::SemanticHighlighting.new(global_state.encoding),
+          ResponseBuilders::SemanticHighlighting.new(document.code_units_cache),
           ResponseBuilders::SemanticHighlighting,
         )
         Listeners::SemanticHighlighting.new(dispatcher, @response_builder)

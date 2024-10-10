@@ -55,21 +55,27 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: Interface::SemanticTokens } }
 
-      sig { params(encoding: Encoding).void }
-      def initialize(encoding)
+      sig do
+        params(code_units_cache: T.any(
+          T.proc.params(arg0: Integer).returns(Integer),
+          Prism::CodeUnitsCache,
+        )).void
+      end
+      def initialize(code_units_cache)
         super()
-        @encoding = encoding
+        @code_units_cache = code_units_cache
         @stack = T.let([], T::Array[SemanticToken])
       end
 
       sig { params(location: Prism::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
       def add_token(location, type, modifiers = [])
-        length = location.end_code_units_offset(@encoding) - location.start_code_units_offset(@encoding)
+        end_code_unit = location.cached_end_code_units_offset(@code_units_cache)
+        length = end_code_unit - location.cached_start_code_units_offset(@code_units_cache)
         modifiers_indices = modifiers.filter_map { |modifier| TOKEN_MODIFIERS[modifier] }
         @stack.push(
           SemanticToken.new(
             start_line: location.start_line,
-            start_code_unit_column: location.start_code_units_column(@encoding),
+            start_code_unit_column: location.cached_start_code_units_column(@code_units_cache),
             length: length,
             type: T.must(TOKEN_TYPES[type]),
             modifier: modifiers_indices,
@@ -83,7 +89,7 @@ module RubyLsp
         return false unless token
 
         token.start_line == location.start_line &&
-          token.start_code_unit_column == location.start_code_units_column(@encoding)
+          token.start_code_unit_column == location.cached_start_code_units_column(@code_units_cache)
       end
 
       sig { returns(T.nilable(SemanticToken)) }
