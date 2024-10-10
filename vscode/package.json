@@ -390,6 +390,11 @@
           "type": "string",
           "default": ""
         },
+        "rubyLsp.debugGemfile": {
+          "description": "Relative or absolute path to the Gemfile to use when running debug.  If unset, the Gemfile used for the Ruby LSP server will be used",
+          "type": "string",
+          "default": ""
+        },
         "rubyLsp.testTimeout": {
           "description": "The amount of time in seconds to wait for a test to finish before timing out. Only used when running tests from the test explorer",
           "type": "integer",
