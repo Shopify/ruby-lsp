@@ -159,7 +159,7 @@ module RubyLsp
         def namespace_constant_name(node)
           path = node.constant_path
           case path
-          when Prism::ConstantPathNode, Prism::ConstantReadNode, Prism::ConstantPathTargetNode
+          when Prism::ConstantPathNode, Prism::ConstantReadNode
             constant_name(path)
           end
         end
