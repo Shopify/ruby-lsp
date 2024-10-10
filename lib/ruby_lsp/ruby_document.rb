@@ -218,5 +218,15 @@ module RubyLsp
         encoding: @encoding,
       )
     end
+
+    sig do
+      returns(T.any(
+        T.proc.params(arg0: Integer).returns(Integer),
+        Prism::CodeUnitsCache,
+      ))
+    end
+    def code_units_cache
+      @parse_result.code_units_cache(@encoding)
+    end
   end
 end
