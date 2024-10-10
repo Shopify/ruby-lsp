@@ -99,7 +99,13 @@ module RubyLsp
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = RubyDocument
-          .locate(@document.parse_result.value, start_index, node_types: [Prism::StatementsNode, Prism::BlockNode])
+          .locate(@document.parse_result.value,
+            start_index,
+            node_types: [
+              Prism::StatementsNode,
+              Prism::BlockNode,
+            ],
+            code_units_cache: @document.code_units_cache)
 
         closest_statements = node_context.node
         parent_statements = node_context.parent
@@ -196,7 +202,7 @@ module RubyLsp
           @document.parse_result.value,
           start_index,
           node_types: [Prism::DefNode],
-          encoding: @global_state.encoding,
+          code_units_cache: @document.code_units_cache,
         )
         closest_node = node_context.node
         return Error::InvalidTargetRange unless closest_node

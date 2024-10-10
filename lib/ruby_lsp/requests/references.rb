@@ -42,7 +42,7 @@ module RubyLsp
             Prism::CallNode,
             Prism::DefNode,
           ],
-          encoding: @global_state.encoding,
+          code_units_cache: @document.code_units_cache,
         )
         target = node_context.node
         parent = node_context.parent

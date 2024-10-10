@@ -239,10 +239,10 @@ module RubyLsp
         statements = node.statements
         return unless statements
 
-        body = statements.body
-        return if body.empty?
+        statement = statements.body.last
+        return unless statement
 
-        add_lines_range(node.location.start_line, body.last.location.end_line)
+        add_lines_range(node.location.start_line, statement.location.end_line)
       end
 
       sig { params(node: Prism::Node).void }

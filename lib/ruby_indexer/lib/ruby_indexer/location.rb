@@ -8,13 +8,21 @@ module RubyIndexer
     class << self
       extend T::Sig
 
-      sig { params(prism_location: Prism::Location, encoding: Encoding).returns(T.attached_class) }
-      def from_prism_location(prism_location, encoding)
+      sig do
+        params(
+          prism_location: Prism::Location,
+          code_units_cache: T.any(
+            T.proc.params(arg0: Integer).returns(Integer),
+            Prism::CodeUnitsCache,
+          ),
+        ).returns(T.attached_class)
+      end
+      def from_prism_location(prism_location, code_units_cache)
         new(
           prism_location.start_line,
           prism_location.end_line,
-          prism_location.start_code_units_column(encoding),
-          prism_location.end_code_units_column(encoding),
+          prism_location.cached_start_code_units_column(code_units_cache),
+          prism_location.cached_end_code_units_column(code_units_cache),
         )
       end
     end

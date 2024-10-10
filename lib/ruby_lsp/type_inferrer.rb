@@ -93,7 +93,7 @@ module RubyLsp
         raw_receiver = if receiver.is_a?(Prism::CallNode)
           receiver.message
         else
-          receiver&.slice
+          receiver.slice
         end
 
         if raw_receiver

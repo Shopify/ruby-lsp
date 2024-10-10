@@ -9,14 +9,14 @@ module RubyIndexer
       enhancement_class = Class.new do
         include Enhancement
 
-        def on_call_node(index, owner, node, file_path)
+        def on_call_node(index, owner, node, file_path, code_units_cache)
           return unless owner
           return unless node.name == :extend
 
           arguments = node.arguments&.arguments
           return unless arguments
 
-          location = Location.from_prism_location(node.location, index.configuration.encoding)
+          location = Location.from_prism_location(node.location, code_units_cache)
 
           arguments.each do |node|
             next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
@@ -101,7 +101,7 @@ module RubyIndexer
       enhancement_class = Class.new do
         include Enhancement
 
-        def on_call_node(index, owner, node, file_path)
+        def on_call_node(index, owner, node, file_path, code_units_cache)
           return unless owner
 
           name = node.name
@@ -113,7 +113,7 @@ module RubyIndexer
           association_name = arguments.first
           return unless association_name.is_a?(Prism::SymbolNode)
 
-          location = Location.from_prism_location(association_name.location, index.configuration.encoding)
+          location = Location.from_prism_location(association_name.location, code_units_cache)
 
           index.add(Entry::Method.new(
             T.must(association_name.value),
@@ -164,7 +164,7 @@ module RubyIndexer
       enhancement_class = Class.new do
         include Enhancement
 
-        def on_call_node(index, owner, node, file_path)
+        def on_call_node(index, owner, node, file_path, code_units_cache)
           raise "Error"
         end
 
