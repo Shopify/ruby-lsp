@@ -65,6 +65,11 @@ module RubyIndexer
         :on_constant_or_write_node_enter,
         :on_constant_and_write_node_enter,
         :on_constant_operator_write_node_enter,
+        :on_global_variable_and_write_node_enter,
+        :on_global_variable_operator_write_node_enter,
+        :on_global_variable_or_write_node_enter,
+        :on_global_variable_target_node_enter,
+        :on_global_variable_write_node_enter,
         :on_instance_variable_write_node_enter,
         :on_instance_variable_and_write_node_enter,
         :on_instance_variable_operator_write_node_enter,
@@ -382,6 +387,31 @@ module RubyIndexer
       end
     end
 
+    sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+    def on_global_variable_and_write_node_enter(node)
+      handle_global_variable(node, node.name_loc)
+    end
+
+    sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+    def on_global_variable_operator_write_node_enter(node)
+      handle_global_variable(node, node.name_loc)
+    end
+
+    sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+    def on_global_variable_or_write_node_enter(node)
+      handle_global_variable(node, node.name_loc)
+    end
+
+    sig { params(node: Prism::GlobalVariableTargetNode).void }
+    def on_global_variable_target_node_enter(node)
+      handle_global_variable(node, node.location)
+    end
+
+    sig { params(node: Prism::GlobalVariableWriteNode).void }
+    def on_global_variable_write_node_enter(node)
+      handle_global_variable(node, node.name_loc)
+    end
+
     sig { params(node: Prism::InstanceVariableWriteNode).void }
     def on_instance_variable_write_node_enter(node)
       handle_instance_variable(node, node.name_loc)
@@ -425,6 +455,31 @@ module RubyIndexer
     end
 
     private
+
+    sig do
+      params(
+        node: T.any(
+          Prism::GlobalVariableAndWriteNode,
+          Prism::GlobalVariableOperatorWriteNode,
+          Prism::GlobalVariableOrWriteNode,
+          Prism::GlobalVariableTargetNode,
+          Prism::GlobalVariableWriteNode,
+        ),
+        loc: Prism::Location,
+      ).void
+    end
+    def handle_global_variable(node, loc)
+      name = node.name.to_s
+      comments = collect_comments(node)
+
+      @index.add(Entry::GlobalVariable.new(
+        name,
+        @file_path,
+        loc,
+        comments,
+        @index.configuration.encoding,
+      ))
+    end
 
     sig do
       params(
