@@ -48,7 +48,9 @@ module RubyLsp
       @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
       @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
 
-      @dependencies = T.let(load_dependencies, T::Hash[String, T.untyped])
+      dependencies, bundler_version = load_dependencies
+      @dependencies = T.let(dependencies, T::Hash[String, T.untyped])
+      @bundler_version = T.let(bundler_version, T.nilable(Gem::Version))
       @rails_app = T.let(rails_app?, T::Boolean)
       @retry = T.let(false, T::Boolean)
     end
@@ -156,14 +158,15 @@ module RubyLsp
       @custom_gemfile.write(content) unless @custom_gemfile.exist? && @custom_gemfile.read == content
     end
 
-    sig { returns(T::Hash[String, T.untyped]) }
+    sig { returns([T::Hash[String, T.untyped], T.nilable(Gem::Version)]) }
     def load_dependencies
-      return {} unless @lockfile&.exist?
+      return [{}, nil] unless @lockfile&.exist?
 
       # We need to parse the Gemfile.lock manually here. If we try to do `bundler/setup` to use something more
       # convenient, we may end up with issues when the globally installed `ruby-lsp` version mismatches the one included
       # in the `Gemfile`
-      dependencies = Bundler::LockfileParser.new(@lockfile.read).dependencies
+      lockfile_parser = Bundler::LockfileParser.new(@lockfile.read)
+      dependencies = lockfile_parser.dependencies
 
       # When working on a gem, the `ruby-lsp` might be listed as a dependency in the gemspec. We need to make sure we
       # check those as well or else we may get version mismatch errors. Notice that bundler allows more than one
@@ -172,7 +175,7 @@ module RubyLsp
         dependencies.merge!(Bundler.load_gemspec(path).dependencies.to_h { |dep| [dep.name, dep] })
       end
 
-      dependencies
+      [dependencies, lockfile_parser.bundler_version]
     end
 
     sig { params(bundle_gemfile: T.nilable(Pathname)).returns(T::Hash[String, String]) }
@@ -188,6 +191,16 @@ module RubyLsp
         env["BUNDLE_PATH"] = File.expand_path(env["BUNDLE_PATH"], @project_path)
       end
 
+      # If there's a Bundler version locked, then we need to use that one to run bundle commands, so that the composed
+      # lockfile is also locked to the same version. This avoids Bundler restarts on version mismatches
+      base_bundle = if @bundler_version
+        env["BUNDLER_VERSION"] = @bundler_version.to_s
+        install_bundler_if_needed
+        "bundle _#{@bundler_version}_"
+      else
+        "bundle"
+      end
+
       # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
       # to upgrade them or else we'll produce undesired source control changes. If the custom bundle was just created
       # and any of `ruby-lsp`, `ruby-lsp-rails` or `debug` weren't a part of the Gemfile, then we need to run `bundle
@@ -196,13 +209,13 @@ module RubyLsp
 
       # When not updating, we run `(bundle check || bundle install)`
       # When updating, we run `((bundle check && bundle update ruby-lsp debug) || bundle install)`
-      command = +"(bundle check"
+      command = +"(#{base_bundle} check"
 
       if should_bundle_update?
         # If any of `ruby-lsp`, `ruby-lsp-rails` or `debug` are not in the Gemfile, try to update them to the latest
         # version
         command.prepend("(")
-        command << " && bundle update "
+        command << " && #{base_bundle} update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
         command << "ruby-lsp-rails " if @rails_app && !@dependencies["ruby-lsp-rails"]
@@ -212,7 +225,7 @@ module RubyLsp
         @last_updated_path.write(Time.now.iso8601)
       end
 
-      command << " || bundle install) "
+      command << " || #{base_bundle} install) "
 
       # Redirect stdout to stderr to prevent going into an infinite loop. The extension might confuse stdout output with
       # responses
@@ -257,6 +270,15 @@ module RubyLsp
 
         [key, value]
       end
+    end
+
+    sig { void }
+    def install_bundler_if_needed
+      # Try to find the bundler version specified in the lockfile in installed gems. If not found, install it
+      requirement = Gem::Requirement.new(@bundler_version.to_s)
+      return if Gem::Specification.any? { |s| s.name == "bundler" && requirement =~ s.version }
+
+      Gem.install("bundler", @bundler_version.to_s)
     end
 
     sig { returns(T::Boolean) }

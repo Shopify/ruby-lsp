@@ -150,7 +150,7 @@ class SetupBundlerTest < Minitest::Test
           Bundler.with_unbundled_env do
             stub_bundle_with_env(
               bundle_env(dir, ".ruby-lsp/Gemfile"),
-              "((bundle check && bundle update ruby-lsp debug) || bundle install) 1>&2",
+              /((bundle _[\d\.]+_ check && bundle _[\d\.]+_ update ruby-lsp debug) || bundle _[\d\.]+_ install) 1>&2/,
             )
 
             FileUtils.expects(:cp).never
@@ -593,6 +593,44 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_sets_bundler_version_to_avoid_reloads
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        # Write the main Gemfile and lockfile with valid versions
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        lockfile_contents = <<~LOCKFILE
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              stringio (3.1.0)
+
+          PLATFORMS
+            arm64-darwin-23
+            ruby
+
+          DEPENDENCIES
+            stringio
+
+          BUNDLED WITH
+            2.5.7
+        LOCKFILE
+        File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+        Bundler.with_unbundled_env do
+          env = run_script(dir)
+          assert_equal("2.5.7", env["BUNDLER_VERSION"])
+        end
+
+        lockfile_parser = Bundler::LockfileParser.new(File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
+        assert_equal("2.5.7", lockfile_parser.bundler_version.to_s)
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)
@@ -635,10 +673,13 @@ class SetupBundlerTest < Minitest::Test
 
   # This method needs to be called inside the `Bundler.with_unbundled_env` block IF the command you want to test is
   # inside it.
-  def stub_bundle_with_env(env, command = "(bundle check || bundle install) 1>&2")
+  def stub_bundle_with_env(
+    env,
+    command = /(bundle check _[\d\.]+_ || bundle _[\d\.]+_ install) 1>&2/
+  )
     Object.any_instance.expects(:system).with do |actual_env, actual_command|
-      actual_env.delete_if { |k, _v| k.start_with?("BUNDLE_PKGS") }
-      actual_env.all? { |k, v| env[k] == v } && actual_command == command
+      actual_env.delete_if { |k, _v| k.start_with?("BUNDLE_PKGS") || k == "BUNDLER_VERSION" }
+      actual_env.all? { |k, v| env[k] == v } && actual_command.match?(command)
     end.returns(true)
   end
 
