@@ -469,10 +469,9 @@ To configure indexing, pass a JSON hash as part of the Ruby LSP configuration, f
 // PROJECT/.vscode/settings.json
 {
   "rubyLsp.indexing": {
-    "excludedPatterns": ["**/test/**.rb"],
-    "includedPatterns": ["**/bin/**"],
+    "excludedPatterns": ["**/test/**/*.rb"],
+    "includedPatterns": ["**/bin/**/*"],
     "excludedGems": ["rubocop", "rubocop-performance"],
-    "includedPatterns": ["rake"],
     "excludedMagicComments": ["compiled:true"],
   },
 }
