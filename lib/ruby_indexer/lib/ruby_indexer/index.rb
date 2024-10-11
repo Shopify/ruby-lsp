@@ -980,29 +980,23 @@ module RubyIndexer
     # nesting
     sig { params(name: String, nesting: T::Array[String]).returns(String) }
     def build_non_redundant_full_name(name, nesting)
+      # If there's no nesting, then we can just return the name as is
       return name if nesting.empty?
 
-      namespace = nesting.join("::")
-
       # If the name is not qualified, we can just concatenate the nesting and the name
-      return "#{namespace}::#{name}" unless name.include?("::")
+      return "#{nesting.join("::")}::#{name}" unless name.include?("::")
 
       name_parts = name.split("::")
+      first_redundant_part = nesting.index(name_parts[0])
 
-      # Find the first part of the name that is not in the nesting
-      index = name_parts.index { |part| !nesting.include?(part) }
+      # If there are no redundant parts between the name and the nesting, then the full name is both combined
+      return "#{nesting.join("::")}::#{name}" unless first_redundant_part
 
-      if index.nil?
-        # All parts of the nesting are redundant because they are already present in the name. We can return the name
-        # directly
-        name
-      elsif index == 0
-        # No parts of the nesting are in the name, we can concatenate the namespace and the name
-        "#{namespace}::#{name}"
-      else
-        # The name includes some parts of the nesting. We need to remove the redundant parts
-        "#{namespace}::#{T.must(name_parts[index..-1]).join("::")}"
-      end
+      # Otherwise, push all of the leading parts of the nesting that aren't redundant into the name. For example, if we
+      # have a reference to `Foo::Bar` inside the `[Namespace, Foo]` nesting, then only the `Foo` part is redundant, but
+      # we still need to include the `Namespace` part
+      T.unsafe(name_parts).unshift(*nesting[0...first_redundant_part])
+      name_parts.join("::")
     end
 
     sig do

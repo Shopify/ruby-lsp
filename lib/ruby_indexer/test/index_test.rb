@@ -1934,5 +1934,94 @@ module RubyIndexer
       real_namespace = @index.follow_aliased_namespace("Namespace::Second")
       assert_equal("First::Second", real_namespace)
     end
+
+    def test_resolving_alias_to_non_existing_namespace
+      index(<<~RUBY)
+        module Namespace
+          class Foo
+            module InnerNamespace
+              Constants = Namespace::Foo::Constants
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve("Constants", ["Namespace", "Foo", "InnerNamespace"])&.first
+      assert_instance_of(Entry::UnresolvedConstantAlias, entry)
+
+      entry = @index.resolve("Namespace::Foo::Constants", ["Namespace", "Foo", "InnerNamespace"])&.first
+      assert_nil(entry)
+    end
+
+    def test_resolving_alias_to_existing_constant_from_inner_namespace
+      index(<<~RUBY)
+        module Parent
+          CONST = 123
+        end
+
+        module First
+          module Namespace
+            class Foo
+              include Parent
+
+              module InnerNamespace
+                Constants = Namespace::Foo::CONST
+              end
+            end
+          end
+        end
+      RUBY
+
+      entry = @index.resolve("Namespace::Foo::CONST", ["First", "Namespace", "Foo", "InnerNamespace"])&.first
+      assert_equal("Parent::CONST", entry.name)
+      assert_instance_of(Entry::Constant, entry)
+    end
+
+    def test_build_non_redundant_name
+      assert_equal(
+        "Namespace::Foo::Constants",
+        @index.send(
+          :build_non_redundant_full_name,
+          "Namespace::Foo::Constants",
+          ["Namespace", "Foo", "InnerNamespace"],
+        ),
+      )
+
+      assert_equal(
+        "Namespace::Foo::Constants",
+        @index.send(
+          :build_non_redundant_full_name,
+          "Namespace::Foo::Constants",
+          ["Namespace", "Foo"],
+        ),
+      )
+
+      assert_equal(
+        "Namespace::Foo::Constants",
+        @index.send(
+          :build_non_redundant_full_name,
+          "Foo::Constants",
+          ["Namespace", "Foo"],
+        ),
+      )
+
+      assert_equal(
+        "Bar::Namespace::Foo::Constants",
+        @index.send(
+          :build_non_redundant_full_name,
+          "Namespace::Foo::Constants",
+          ["Bar"],
+        ),
+      )
+
+      assert_equal(
+        "First::Namespace::Foo::Constants",
+        @index.send(
+          :build_non_redundant_full_name,
+          "Namespace::Foo::Constants",
+          ["First", "Namespace", "Foo", "InnerNamespace"],
+        ),
+      )
+    end
   end
 end
