@@ -337,6 +337,34 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+      test("assignment in a condition", () => {
+        const ruby = "if (local = 1)";
+        const expectedTokens = [
+          ["if", ["source.ruby", "keyword.control.ruby"]],
+          [" (", ["source.ruby"]],
+          ["local", ["source.ruby", "variable.ruby"]],
+          [" = ", ["source.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+          [")", ["source.ruby", "punctuation.section.function.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+      test("operation assignment in a condition", () => {
+        const ruby = "if (local += 1)";
+        const expectedTokens = [
+          ["if", ["source.ruby", "keyword.control.ruby"]],
+          [" (", ["source.ruby"]],
+          ["local", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["+=", ["source.ruby", "keyword.operator.assignment.augmented.ruby"]],
+          [" ", ["source.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+          [")", ["source.ruby", "punctuation.section.function.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
     });
 
     function tokenizeRuby(ruby: string): [string, string[]][] {
