@@ -78,6 +78,8 @@ module RubyLsp
 
           parse_result = Prism.parse_file(path)
           collect_references(reference_target, parse_result, uri)
+        rescue Errno::EISDIR, Errno::ENOENT
+          # If `path` is a directory, just ignore it and continue. If the file doesn't exist, then we also ignore it.
         end
 
         @store.each do |_uri, document|
