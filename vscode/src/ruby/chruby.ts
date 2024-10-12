@@ -70,6 +70,7 @@ export class Chruby extends VersionManager {
       env: { ...process.env, ...rubyEnv },
       yjit,
       version,
+      gemPath: [gemHome, defaultGems],
     };
   }
 
