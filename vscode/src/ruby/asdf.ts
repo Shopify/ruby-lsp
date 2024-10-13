@@ -30,10 +30,12 @@ export class Asdf extends VersionManager {
     const scriptName =
       path.basename(vscode.env.shell) === "fish" ? "asdf.fish" : "asdf.sh";
 
-    if (process.env.ASDF_DIR) {
-      // Follow the ASDF_DIR if it was set up.
+    const config = vscode.workspace.getConfiguration("rubyLsp");
+    const asdfPath = config.get<string | undefined>("rubyVersionManager.asdfExecutablePath");
+
+    if (asdfPath) {
       const possiblePath = vscode.Uri.joinPath(
-        vscode.Uri.parse(process.env.ASDF_DIR),
+        vscode.Uri.parse(asdfPath),
         scriptName,
       );
 
