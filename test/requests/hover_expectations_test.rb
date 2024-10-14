@@ -62,20 +62,43 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def test_hovering_for_global_variables
     source = <<~RUBY
+      # and write node
+      $bar &&= 1
+      # operator write node
+      $baz += 1
+      # or write node
+      $qux ||= 1
+      # target write node
+      $quux, $corge = 1
+      # write node
+      $foo = 1
+      # read node
       $DEBUG
     RUBY
+
+    expectations = [
+      { line: 1, character: 1, documentation: "and write node" },
+      { line: 3, character: 1, documentation: "operator write node" },
+      { line: 5, character: 1, documentation: "or write node" },
+      { line: 7, character: 1, documentation: "target write node" },
+      { line: 7, character: 10, documentation: "target write node" },
+      { line: 9, character: 1, documentation: "write node" },
+      { line: 11, character: 1, documentation: "The debug flag" },
+    ]
 
     with_server(source) do |server, uri|
       index = server.instance_variable_get(:@global_state).index
       RubyIndexer::RBSIndexer.new(index).index_ruby_core
 
-      server.process_message(
-        id: 1,
-        method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { line: 0, character: 1 } },
-      )
+      expectations.each do |expectation|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: { textDocument: { uri: uri }, position: { line: expectation[:line], character: 1 } },
+        )
 
-      assert_match("The debug flag", server.pop_response.response.contents.value)
+        assert_match(expectation[:documentation], server.pop_response.response.contents.value)
+      end
     end
   end
 
