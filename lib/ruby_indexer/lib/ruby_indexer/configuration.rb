@@ -28,7 +28,17 @@ module RubyIndexer
       @encoding = T.let(Encoding::UTF_8, Encoding)
       @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
       @included_gems = T.let([], T::Array[String])
-      @excluded_patterns = T.let([File.join("**", "*_test.rb"), File.join("tmp", "**", "*")], T::Array[String])
+
+      @excluded_patterns = T.let(
+        [
+          File.join("**", "*_test.rb"),
+          File.join("node_modules", "**", "*"),
+          File.join("spec", "**", "*"),
+          File.join("test", "**", "*"),
+          File.join("tmp", "**", "*"),
+        ],
+        T::Array[String],
+      )
 
       path = Bundler.settings["path"]
       if path
@@ -56,6 +66,21 @@ module RubyIndexer
       )
     end
 
+    sig { returns(String) }
+    def merged_excluded_file_pattern
+      # This regex looks for @excluded_patterns that follow the format of "something/**/*", where
+      # "something" is one or more non-"/"
+      #
+      # Returns "/path/to/workspace/{tmp,node_modules}/**/*"
+      @excluded_patterns
+        .filter_map do |pattern|
+          next if File.absolute_path?(pattern)
+
+          pattern.match(%r{\A([^/]+)/\*\*/\*\z})&.captures&.first
+        end
+        .then { |dirs| File.join(@workspace_path, "{#{dirs.join(",")}}/**/*") }
+    end
+
     sig { returns(T::Array[IndexablePath]) }
     def indexables
       excluded_gems = @excluded_gems - @included_gems
@@ -64,21 +89,47 @@ module RubyIndexer
       # NOTE: indexing the patterns (both included and excluded) needs to happen before indexing gems, otherwise we risk
       # having duplicates if BUNDLE_PATH is set to a folder inside the project structure
 
+      flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
+
+      # In order to speed up indexing, only traverse into top-level directories that are not entirely excluded.
+      # For example, if "tmp/**/*" is excluded, we don't need to traverse into "tmp" at all. However, if
+      # "vendor/bundle/**/*" is excluded, we will traverse all of "vendor" and `reject!` out all "vendor/bundle" entries
+      # later.
+      excluded_pattern = merged_excluded_file_pattern
+      included_paths = Dir.glob(File.join(@workspace_path, "*/"), flags)
+        .filter_map do |included_path|
+          next if File.fnmatch?(excluded_pattern, included_path, flags)
+
+          relative_path = included_path
+            .delete_prefix(@workspace_path)
+            .tap { |path| path.delete_prefix!("/") }
+
+          [included_path, relative_path]
+        end
+
+      indexables = T.let([], T::Array[IndexablePath])
+
       # Add user specified patterns
-      indexables = @included_patterns.flat_map do |pattern|
+      @included_patterns.each do |pattern|
         load_path_entry = T.let(nil, T.nilable(String))
 
-        Dir.glob(File.join(@workspace_path, pattern), File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
-          path = File.expand_path(path)
-          # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
-          # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
-          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the current
-          # workspace directory, but each one of them belongs to a different $LOAD_PATH entry
-          if load_path_entry.nil? || !path.start_with?(load_path_entry)
-            load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
-          end
+        included_paths.each do |included_path, relative_path|
+          relative_pattern = pattern.delete_prefix(File.join(relative_path, "/"))
 
-          IndexablePath.new(load_path_entry, path)
+          next unless pattern.start_with?("**") || pattern.start_with?(relative_path)
+
+          Dir.glob(File.join(included_path, relative_pattern), flags).each do |path|
+            path = File.expand_path(path)
+            # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
+            # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This
+            # happens on repositories that define multiple gems, like Rails. All frameworks are defined inside the
+            # current workspace directory, but each one of them belongs to a different $LOAD_PATH entry
+            if load_path_entry.nil? || !path.start_with?(load_path_entry)
+              load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
+            end
+
+            indexables << IndexablePath.new(load_path_entry, path)
+          end
         end
       end
 
