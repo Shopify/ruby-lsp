@@ -147,6 +147,8 @@ module RubyLsp
           parse_result = Prism.parse_file(path)
           edits = collect_changes(target, parse_result, name, uri)
           changes[uri.to_s] = edits unless edits.empty?
+        rescue Errno::EISDIR, Errno::ENOENT
+          # If `path` is a directory, just ignore it and continue. If the file doesn't exist, then we also ignore it.
         end
 
         @store.each do |uri, document|
