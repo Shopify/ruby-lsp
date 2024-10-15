@@ -59,7 +59,10 @@ export class Workspace implements WorkspaceInterface {
     if (gitExtension) {
       const api = gitExtension.exports.getAPI(1);
       const repository = await api.openRepository(this.workspaceFolder.uri);
-      rootGitUri = repository.rootUri;
+
+      if (repository) {
+        rootGitUri = repository.rootUri;
+      }
     }
 
     this.registerCreateDeleteWatcher(
