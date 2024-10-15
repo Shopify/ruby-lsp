@@ -77,13 +77,12 @@ class HoverExpectationsTest < ExpectationsTestRunner
     RUBY
 
     expectations = [
-      { line: 1, character: 1, documentation: "and write node" },
-      { line: 3, character: 1, documentation: "operator write node" },
-      { line: 5, character: 1, documentation: "or write node" },
-      { line: 7, character: 1, documentation: "target write node" },
-      { line: 7, character: 10, documentation: "target write node" },
-      { line: 9, character: 1, documentation: "write node" },
-      { line: 11, character: 1, documentation: "The debug flag" },
+      { line: 1, documentation: "and write node" },
+      { line: 3, documentation: "operator write node" },
+      { line: 5, documentation: "or write node" },
+      { line: 7, documentation: "target write node" },
+      { line: 9, documentation: "write node" },
+      { line: 11, documentation: "The debug flag" },
     ]
 
     with_server(source) do |server, uri|
@@ -104,20 +103,16 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def test_hover_apply_target_correction
     source = <<~RUBY
-      # and write node
       $bar &&= 1
-      # operator write node
       $baz += 1
-      # or write node
       $qux ||= 1
-      # write node
       $foo = 1
     RUBY
 
-    source_line_nodes = [1, 3, 5, 7]
+    lines_with_target_correction = [1, 2, 3, 4]
 
     with_server(source) do |server, uri|
-      source_line_nodes.each do |line|
+      lines_with_target_correction.each do |line|
         server.process_message(
           id: 1,
           method: "textDocument/hover",
