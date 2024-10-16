@@ -85,7 +85,12 @@ module RubyLsp
           :on_constant_path_node_enter,
           :on_constant_read_node_enter,
           :on_call_node_enter,
+          :on_global_variable_and_write_node_enter,
+          :on_global_variable_operator_write_node_enter,
+          :on_global_variable_or_write_node_enter,
           :on_global_variable_read_node_enter,
+          :on_global_variable_target_node_enter,
+          :on_global_variable_write_node_enter,
           :on_instance_variable_read_node_enter,
           :on_instance_variable_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -181,27 +186,34 @@ module RubyLsp
         end
       end
 
+      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      def on_global_variable_and_write_node_enter(node)
+        handle_global_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      def on_global_variable_operator_write_node_enter(node)
+        handle_global_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      def on_global_variable_or_write_node_enter(node)
+        handle_global_variable_completion(node.name.to_s, node.name_loc)
+      end
+
       sig { params(node: Prism::GlobalVariableReadNode).void }
       def on_global_variable_read_node_enter(node)
-        candidates = @index.prefix_search(node.name.to_s)
+        handle_global_variable_completion(node.name.to_s, node.location)
+      end
 
-        return if candidates.none?
+      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      def on_global_variable_target_node_enter(node)
+        handle_global_variable_completion(node.name.to_s, node.location)
+      end
 
-        range = range_from_location(node.location)
-
-        candidates.flatten.each do |entry|
-          entry_name = entry.name
-
-          @response_builder << Interface::CompletionItem.new(
-            label: entry_name,
-            filter_text: entry_name,
-            label_details: Interface::CompletionItemLabelDetails.new(
-              description: entry.file_name,
-            ),
-            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
-            kind: Constant::CompletionItemKind::VARIABLE,
-          )
-        end
+      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      def on_global_variable_write_node_enter(node)
+        handle_global_variable_completion(node.name.to_s, node.name_loc)
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
@@ -287,6 +299,29 @@ module RubyLsp
             range,
             entries,
             top_level_reference || top_level?(T.must(entries.first).name),
+          )
+        end
+      end
+
+      sig { params(name: String, location: Prism::Location).void }
+      def handle_global_variable_completion(name, location)
+        candidates = @index.prefix_search(name)
+
+        return if candidates.none?
+
+        range = range_from_location(location)
+
+        candidates.flatten.each do |entry|
+          entry_name = entry.name
+
+          @response_builder << Interface::CompletionItem.new(
+            label: entry_name,
+            filter_text: entry_name,
+            label_details: Interface::CompletionItemLabelDetails.new(
+              description: entry.file_name,
+            ),
+            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
+            kind: Constant::CompletionItemKind::VARIABLE,
           )
         end
       end
