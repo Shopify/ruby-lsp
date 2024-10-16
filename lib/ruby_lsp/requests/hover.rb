@@ -98,9 +98,6 @@ module RubyLsp
       sig { params(position: T::Hash[Symbol, T.untyped], target: T.nilable(Prism::Node)).returns(T::Boolean) }
       def position_outside_target?(position, target)
         case target
-        when Prism::CallNode
-          target.name != :require && target.name != :require_relative &&
-            !covers_position?(target.message_loc, position)
         when Prism::GlobalVariableAndWriteNode,
           Prism::GlobalVariableOperatorWriteNode,
           Prism::GlobalVariableOrWriteNode,
