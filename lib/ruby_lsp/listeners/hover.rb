@@ -13,6 +13,12 @@ module RubyLsp
           Prism::ConstantReadNode,
           Prism::ConstantWriteNode,
           Prism::ConstantPathNode,
+          Prism::GlobalVariableAndWriteNode,
+          Prism::GlobalVariableOperatorWriteNode,
+          Prism::GlobalVariableOrWriteNode,
+          Prism::GlobalVariableReadNode,
+          Prism::GlobalVariableTargetNode,
+          Prism::GlobalVariableWriteNode,
           Prism::InstanceVariableReadNode,
           Prism::InstanceVariableAndWriteNode,
           Prism::InstanceVariableOperatorWriteNode,
@@ -62,6 +68,12 @@ module RubyLsp
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_global_variable_and_write_node_enter,
+          :on_global_variable_operator_write_node_enter,
+          :on_global_variable_or_write_node_enter,
+          :on_global_variable_read_node_enter,
+          :on_global_variable_target_node_enter,
+          :on_global_variable_write_node_enter,
           :on_instance_variable_read_node_enter,
           :on_instance_variable_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -126,6 +138,36 @@ module RubyLsp
         return unless message
 
         handle_method_hover(message)
+      end
+
+      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      def on_global_variable_and_write_node_enter(node)
+        handle_global_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      def on_global_variable_operator_write_node_enter(node)
+        handle_global_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      def on_global_variable_or_write_node_enter(node)
+        handle_global_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableReadNode).void }
+      def on_global_variable_read_node_enter(node)
+        handle_global_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      def on_global_variable_target_node_enter(node)
+        handle_global_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      def on_global_variable_write_node_enter(node)
+        handle_global_variable_hover(node.name.to_s)
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
@@ -263,6 +305,16 @@ module RubyLsp
         end
       rescue RubyIndexer::Index::NonExistingNamespaceError
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
+      end
+
+      sig { params(name: String).void }
+      def handle_global_variable_hover(name)
+        entries = @index[name]
+        return unless entries
+
+        categorized_markdown_from_index_entries(name, entries).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
       end
 
       sig { params(name: String, location: Prism::Location).void }

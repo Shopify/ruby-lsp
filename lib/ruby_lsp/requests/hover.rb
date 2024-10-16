@@ -46,17 +46,13 @@ module RubyLsp
         target = node_context.node
         parent = node_context.parent
 
-        if (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-            !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-            (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
+        if should_refine_target?(parent, target)
           target = determine_target(
             T.must(target),
             T.must(parent),
             position,
           )
-        elsif target.is_a?(Prism::CallNode) && target.name != :require && target.name != :require_relative &&
-            !covers_position?(target.message_loc, position)
-
+        elsif position_outside_target?(position, target)
           target = nil
         end
 
@@ -88,6 +84,28 @@ module RubyLsp
             value: @response_builder.response,
           ),
         )
+      end
+
+      private
+
+      sig { params(parent: T.nilable(Prism::Node), target: T.nilable(Prism::Node)).returns(T::Boolean) }
+      def should_refine_target?(parent, target)
+        (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
+        !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
+          (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
+      end
+
+      sig { params(position: T::Hash[Symbol, T.untyped], target: T.nilable(Prism::Node)).returns(T::Boolean) }
+      def position_outside_target?(position, target)
+        case target
+        when Prism::GlobalVariableAndWriteNode,
+          Prism::GlobalVariableOperatorWriteNode,
+          Prism::GlobalVariableOrWriteNode,
+          Prism::GlobalVariableWriteNode
+          !covers_position?(target.name_loc, position)
+        else
+          false
+        end
       end
     end
   end

@@ -60,6 +60,73 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_for_global_variables
+    source = <<~RUBY
+      # and write node
+      $bar &&= 1
+      # operator write node
+      $baz += 1
+      # or write node
+      $qux ||= 1
+      # target write node
+      $quux, $corge = 1
+      # write node
+      $foo = 1
+      # read node
+      $DEBUG
+    RUBY
+
+    expectations = [
+      { line: 1, documentation: "and write node" },
+      { line: 3, documentation: "operator write node" },
+      { line: 5, documentation: "or write node" },
+      { line: 7, documentation: "target write node" },
+      { line: 9, documentation: "write node" },
+      { line: 11, documentation: "The debug flag" },
+    ]
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      expectations.each do |expectation|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: { textDocument: { uri: uri }, position: { line: expectation[:line], character: 1 } },
+        )
+
+        assert_match(expectation[:documentation], server.pop_response.response.contents.value)
+      end
+    end
+  end
+
+  def test_hover_apply_target_correction
+    source = <<~RUBY
+      $bar &&= 1
+      $baz += 1
+      $qux ||= 1
+      $foo = 1
+    RUBY
+
+    lines_with_target_correction = [1, 2, 3, 4]
+
+    with_server(source) do |server, uri|
+      lines_with_target_correction.each do |line|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: {
+            textDocument: { uri: uri },
+            position: { line: line, character: 5 },
+          },
+        )
+
+        assert_nil(server.pop_response.response)
+      end
+    end
+  end
+
   def test_hovering_precision
     source = <<~RUBY
       module Foo
@@ -310,13 +377,13 @@ class HoverExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    # Going to definition on `argument` should not take you to the `foo` method definition
     with_server(source) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
         params: { textDocument: { uri: uri }, position: { character: 12, line: 5 } },
       )
+      # Hover on `argument` should not show you the `foo` documentation
       assert_nil(server.pop_response.response)
 
       server.process_message(
