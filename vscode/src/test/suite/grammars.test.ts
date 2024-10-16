@@ -337,6 +337,38 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+      test("or assignment", () => {
+        const ruby = "local ||= 1";
+        const expectedTokens = [
+          ["local", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          [
+            "||=",
+            ["source.ruby", "keyword.operator.assignment.augmented.ruby"],
+          ],
+          [" ", ["source.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+      test("and assignment in a condition", () => {
+        const ruby = "if local &&= 1";
+        const expectedTokens = [
+          ["if", ["source.ruby", "keyword.control.ruby"]],
+          [" ", ["source.ruby"]],
+          ["local", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          [
+            "&&=",
+            ["source.ruby", "keyword.operator.assignment.augmented.ruby"],
+          ],
+          [" ", ["source.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
       test("assignment in a condition", () => {
         const ruby = "if (local = 1)";
         const expectedTokens = [
