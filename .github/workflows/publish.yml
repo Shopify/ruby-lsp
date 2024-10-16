@@ -14,7 +14,9 @@ jobs:
         name: Checkout
 
       - uses: actions/setup-node@v4
-        name: Use Node.js 18.x
+        name: Use Node.js
+        env:
+          DISABLE_V8_COMPILE_CACHE: "1"
         with:
           node-version: "20.9"
           cache: "yarn"
