@@ -100,7 +100,7 @@ module RubyIndexer
     end
 
     def test_location_and_name_location_are_the_same
-      # NOTE: RBS does not store the name location for classes, modules or methods. This behaviour is not exactly what
+      # NOTE: RBS does not store the name location for classes, modules or methods. This behavior is not exactly what
       # we would like, but for now we assign the same location to both
 
       entries = @index["Array"]

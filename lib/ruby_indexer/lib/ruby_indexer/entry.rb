@@ -646,7 +646,7 @@ module RubyIndexer
         (positionals.empty? && forwarding_arguments.any?) ||
           (
             # Check if positional arguments match. This includes required, optional, rest arguments. We also need to
-            # verify if there's a trailing forwading argument, like `def foo(a, ...); end`
+            # verify if there's a trailing forwarding argument, like `def foo(a, ...); end`
             positional_arguments_match?(positionals, forwarding_arguments, keyword_args, min_pos, max_pos) &&
             # If the positional arguments match, we move on to checking keyword, optional keyword and keyword rest
             # arguments. If there's a forward argument, then it will always match. If the method accepts a keyword rest

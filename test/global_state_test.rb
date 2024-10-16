@@ -97,7 +97,7 @@ module RubyLsp
       assert_equal("none", state.formatter)
     end
 
-    def test_applying_auto_formatter_with_rubocop_as_transitive_dependency_and_sytax_tree
+    def test_applying_auto_formatter_with_rubocop_as_transitive_dependency_and_syntax_tree
       state = GlobalState.new
 
       stub_direct_dependencies("syntax_tree" => "1.2.3")
