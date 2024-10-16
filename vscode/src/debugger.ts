@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 
 import { LOG_CHANNEL, asyncExec } from "./common";
 import { Workspace } from "./workspace";
+import path from "path";
 
 class TerminalLogger {
   append(message: string) {
@@ -128,6 +129,19 @@ export class Debugger
     };
 
     const customBundleUri = vscode.Uri.joinPath(workspaceUri, ".ruby-lsp");
+
+    const customDebugGemfile: string = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("debugGemfile")!;
+
+    // allow user to override the default of using the RubyLsp Gemfile
+    // when debugging
+    if (customDebugGemfile.length > 0) {
+      debugConfiguration.env.BUNDLE_GEMFILE = path.isAbsolute(customDebugGemfile)
+          ? customDebugGemfile
+          : path.resolve(path.join(workspaceUri.fsPath, customDebugGemfile),);
+      return debugConfiguration;
+    }
 
     return vscode.workspace.fs.readDirectory(customBundleUri).then(
       (value) => {
