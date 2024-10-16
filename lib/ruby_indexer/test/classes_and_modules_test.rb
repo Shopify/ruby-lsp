@@ -72,7 +72,7 @@ module RubyIndexer
       assert_entry("self::Bar", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
     end
 
-    def test_dynamically_namespaced_class_doesnt_affect_other_classes
+    def test_dynamically_namespaced_class_does_not_affect_other_classes
       index(<<~RUBY)
         class Foo
           class self::Bar
@@ -143,7 +143,7 @@ module RubyIndexer
       assert_entry("self::Bar", Entry::Module, "/fake/path/foo.rb:0-0:1-3")
     end
 
-    def test_dynamically_namespaced_module_doesnt_affect_other_modules
+    def test_dynamically_namespaced_module_does_not_affect_other_modules
       index(<<~RUBY)
         module Foo
           class self::Bar

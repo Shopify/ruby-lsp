@@ -10,7 +10,7 @@ The [ruby-lsp repository](https://github.com/Shopify/ruby-lsp) contains three su
 
 - the **language server** (`ruby-lsp`), which exists at the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
 - the **VS Code extension**, which exists under the `vscode` directory. Any custom VS Code features are implemented here
-- the **documentation** website, which exists under the `jekyll` directory. All user facing documentation for both the Ruby LSP and the Rails addon is contained here
+- the **documentation** website, which exists under the `jekyll` directory. All user facing documentation for both the Ruby LSP and the Rails add-on is contained here
 
 This contributing guide is split by each component.
 

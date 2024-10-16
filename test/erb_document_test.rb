@@ -52,7 +52,7 @@ class ERBDocumentTest < Minitest::Test
     assert_equal("   \r\nbar   ", document.parse_result.source.source)
   end
 
-  def test_erb_syntax_error_doesnt_cause_crash
+  def test_erb_syntax_error_does_not_cause_crash
     [
       "<%=",
       "<%",
