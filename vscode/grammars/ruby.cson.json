@@ -124,7 +124,7 @@
           "name": "keyword.operator.assignment.augmented.ruby"
         }
       },
-      "match": "(?<!\\.)\\b(case|if|elsif|unless|until|while)\\b\\s*(\\(|\\[)*?\\s*([a-z]([A-Za-z0-9_])*)\\s*((&&|\\|\\|)=)",
+      "match": "(?<!\\.)\\b(case|if|elsif|unless|until|while)\\b\\s*(\\()*?\\s*([a-z]([A-Za-z0-9_])*)\\s*((&&|\\|\\|)=)",
       "comment": "A local variable and/or assignment in a condition"
     },
     {
