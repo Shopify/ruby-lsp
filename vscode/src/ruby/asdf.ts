@@ -34,16 +34,15 @@ export class Asdf extends VersionManager {
     const asdfPath = config.get<string | undefined>("rubyVersionManager.asdfExecutablePath");
 
     if (asdfPath) {
-      const possiblePath = vscode.Uri.joinPath(
-        vscode.Uri.parse(asdfPath),
-        scriptName,
-      );
+      const configuredPath = vscode.Uri.file(asdfPath);
 
       try {
-        await vscode.workspace.fs.stat(possiblePath);
-        return possiblePath;
+        await vscode.workspace.fs.stat(configuredPath);
+        return configuredPath;
       } catch (error: any) {
-        // Continue looking
+        throw new Error(
+          `ASDF executable configured as ${configuredPath}, but that file doesn't exist`,
+        );      
       }
     }
 
