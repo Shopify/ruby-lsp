@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.executables = ["ruby-lsp", "ruby-lsp-check"]
   s.require_paths = ["lib"]
 
+  # Dependencies must be kept in sync with the checks in the extension side on workspace.ts
   s.add_dependency("language_server-protocol", "~> 3.17.0")
   s.add_dependency("prism", ">= 1.2", "< 2.0")
   s.add_dependency("rbs", ">= 3", "< 4")

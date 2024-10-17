@@ -225,13 +225,24 @@ export class Workspace implements WorkspaceInterface {
       "rubyLsp.lastGemUpdate",
     );
 
-    const { stdout } = await asyncExec("gem list ruby-lsp", {
+    // Theses are the Ruby LSP's own dependencies, listed in `ruby-lsp.gemspec`
+    const dependencies = [
+      "ruby-lsp",
+      "language_server-protocol",
+      "prism",
+      "rbs",
+      "sorbet-runtime",
+    ];
+
+    const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {
       cwd: this.workspaceFolder.uri.fsPath,
       env: this.ruby.env,
     });
 
-    // If the gem is not yet installed, install it
-    if (!/^ruby-lsp[\s]/.exec(stdout)) {
+    // If any of the Ruby LSP's dependencies are missing, we need to install them. For example, if the user runs `gem
+    // uninstall prism`, then we must ensure it's installed or else rubygems will fail when trying to launch the
+    // executable
+    if (!dependencies.every((dep) => new RegExp(`${dep}\\s`).exec(stdout))) {
       await asyncExec("gem install ruby-lsp", {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
@@ -254,7 +265,7 @@ export class Workspace implements WorkspaceInterface {
         );
       } catch (error) {
         this.outputChannel.info(
-          `Tried deleting ${vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby - lsp")}, but it doesn't exist`,
+          `Tried deleting ${vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp")}, but it doesn't exist`,
         );
       }
     }
