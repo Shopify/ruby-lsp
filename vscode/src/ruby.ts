@@ -39,6 +39,7 @@ export class Ruby implements RubyInterface {
   // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
   // where it will be activated, either by the extension or by the server
   public yjitEnabled?: boolean;
+  readonly gemPath: string[] = [];
   private readonly workspaceFolder: vscode.WorkspaceFolder;
   #versionManager: ManagerConfiguration = vscode.workspace
     .getConfiguration("rubyLsp")
@@ -201,7 +202,7 @@ export class Ruby implements RubyInterface {
   }
 
   private async runActivation(manager: VersionManager) {
-    const { env, version, yjit } = await manager.activate();
+    const { env, version, yjit, gemPath } = await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
 
     this.sanitizeEnvironment(env);
@@ -211,6 +212,7 @@ export class Ruby implements RubyInterface {
     this._env = env;
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
+    this.gemPath.push(...gemPath);
   }
 
   // Fetch information related to the Ruby version. This can only be invoked after activation, so that `rubyVersion` is

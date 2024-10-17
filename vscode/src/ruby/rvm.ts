@@ -26,6 +26,7 @@ export class Rvm extends VersionManager {
       env: { ...process.env, ...parsedResult.env },
       yjit: parsedResult.yjit,
       version: parsedResult.version,
+      gemPath: parsedResult.gemPath,
     };
   }
 

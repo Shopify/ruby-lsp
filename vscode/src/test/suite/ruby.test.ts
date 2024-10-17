@@ -8,6 +8,8 @@ import sinon from "sinon";
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
+import * as common from "../../common";
+import { ACTIVATION_SEPARATOR } from "../../ruby/versionManager";
 
 suite("Ruby environment activation", () => {
   const workspacePath = path.dirname(
@@ -18,6 +20,14 @@ suite("Ruby environment activation", () => {
     name: path.basename(workspacePath),
     index: 0,
   };
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    workspaceState: {
+      get: () => undefined,
+      update: () => undefined,
+    },
+  } as unknown as vscode.ExtensionContext;
+  const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
     const manager = process.env.CI
@@ -37,15 +47,6 @@ suite("Ruby environment activation", () => {
           return undefined;
         },
       } as unknown as vscode.WorkspaceConfiguration);
-
-    const context = {
-      extensionMode: vscode.ExtensionMode.Test,
-      workspaceState: {
-        get: () => undefined,
-        update: () => undefined,
-      },
-    } as unknown as vscode.ExtensionContext;
-    const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
     const ruby = new Ruby(context, workspaceFolder, outputChannel);
     await ruby.activateRuby();
@@ -79,15 +80,6 @@ suite("Ruby environment activation", () => {
         },
       } as unknown as vscode.WorkspaceConfiguration);
 
-    const context = {
-      extensionMode: vscode.ExtensionMode.Test,
-      workspaceState: {
-        get: () => undefined,
-        update: () => undefined,
-      },
-    } as unknown as vscode.ExtensionContext;
-    const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
-
     const ruby = new Ruby(context, workspaceFolder, outputChannel);
 
     process.env.VERBOSE = "1";
@@ -102,5 +94,43 @@ suite("Ruby environment activation", () => {
     delete process.env.DEBUG;
     delete process.env.RUBY_GC_HEAP_GROWTH_FACTOR;
     configStub.restore();
+  });
+
+  test("Sets gem path for version managers based on shims", async () => {
+    const configStub = sinon
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: (name: string) => {
+          if (name === "rubyVersionManager") {
+            return { identifier: ManagerIdentifier.Rbenv };
+          } else if (name === "bundleGemfile") {
+            return "";
+          }
+
+          return undefined;
+        },
+      } as unknown as vscode.WorkspaceConfiguration);
+
+    const envStub = {
+      env: { ANY: "true" },
+      yjit: true,
+      version: "3.3.5",
+      gemPath: ["~/.gem/ruby/3.3.5", "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0"],
+    };
+
+    const execStub = sinon.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+    });
+
+    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+    await ruby.activateRuby();
+    execStub.restore();
+    configStub.restore();
+
+    assert.deepStrictEqual(ruby.gemPath, [
+      "~/.gem/ruby/3.3.5",
+      "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
+    ]);
   });
 });

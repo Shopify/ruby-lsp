@@ -31,6 +31,7 @@ export class Shadowenv extends VersionManager {
         env: { ...process.env, ...parsedResult.env },
         yjit: parsedResult.yjit,
         version: parsedResult.version,
+        gemPath: parsedResult.gemPath,
       };
     } catch (error: any) {
       const { stdout } = await this.runScript("command -v shadowenv");
