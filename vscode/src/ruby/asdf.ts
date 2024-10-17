@@ -31,7 +31,9 @@ export class Asdf extends VersionManager {
       path.basename(vscode.env.shell) === "fish" ? "asdf.fish" : "asdf.sh";
 
     const config = vscode.workspace.getConfiguration("rubyLsp");
-    const asdfPath = config.get<string | undefined>("rubyVersionManager.asdfExecutablePath");
+    const asdfPath = config.get<string | undefined>(
+      "rubyVersionManager.asdfExecutablePath",
+    );
 
     if (asdfPath) {
       const configuredPath = vscode.Uri.file(asdfPath);
@@ -42,7 +44,7 @@ export class Asdf extends VersionManager {
       } catch (error: any) {
         throw new Error(
           `ASDF executable configured as ${configuredPath}, but that file doesn't exist`,
-        );      
+        );
       }
     }
 
