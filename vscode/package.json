@@ -338,7 +338,7 @@
               "default": "auto"
             },
             "asdfExecutablePath": {
-              "description": "The path to the asdf executable script, if not installed on ~/.asdf, /opt/asdf, /opt/homebrew/opt/asdf/libexec, and /usr/local/opt/asdf/libexec.",
+              "description": "The path to the asdf executable script, if not installed on one of the standard locations",
               "type": "string"
             },
             "miseExecutablePath": {
