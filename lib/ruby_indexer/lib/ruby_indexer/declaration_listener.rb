@@ -312,6 +312,29 @@ module RubyIndexer
         @visibility_stack.push(Entry::Visibility::PROTECTED)
       when :private
         @visibility_stack.push(Entry::Visibility::PRIVATE)
+      when :module_function
+        name_argument = node.arguments.arguments.first
+        return unless name_argument
+
+        entries = @index.resolve_method(name_argument.value, @owner_stack.last.name)
+        return unless entries
+
+        entries.each do |e|
+          e.visibility = Entry::Visibility::PRIVATE
+
+          singleton = @index.existing_or_new_singleton_class(e.owner.name)
+
+          @index.add(Entry::Method.new(
+            name_argument.value,
+            @file_path,
+            Location.from_prism_location(node.location, @code_units_cache),
+            Location.from_prism_location(node.message_loc, @code_units_cache),
+            collect_comments(node),
+            [],
+            Entry::Visibility::PUBLIC,
+            singleton,
+          ))
+        end
       end
 
       @enhancements.each do |enhancement|
