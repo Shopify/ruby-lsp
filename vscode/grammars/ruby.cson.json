@@ -109,20 +109,23 @@
           "name": "keyword.operator.assignment.augmented.ruby"
         }
       },
-      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*(&&=)",
-      "comment": "A local variable and assignment"
+      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*((&&|\\|\\|)=)",
+      "comment": "A local variable and/or assignment"
     },
     {
       "captures": {
         "1": {
-          "name": "variable.ruby"
+          "name": "keyword.control.ruby"
         },
         "3": {
+          "name": "variable.ruby"
+        },
+        "5": {
           "name": "keyword.operator.assignment.augmented.ruby"
         }
       },
-      "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*(\\|\\|=)",
-      "comment": "A local variable or assignment"
+      "match": "(?<!\\.)\\b(case|if|elsif|unless|until|while)\\b\\s*(\\()*?\\s*([a-z]([A-Za-z0-9_])*)\\s*((&&|\\|\\|)=)",
+      "comment": "A local variable and/or assignment in a condition"
     },
     {
       "captures": {
@@ -139,11 +142,38 @@
     {
       "captures": {
         "1": {
+          "name": "keyword.control.ruby"
+        },
+        "3": {
+          "name": "variable.ruby"
+        },
+        "5": {
+          "name": "keyword.operator.assignment.augmented.ruby"
+        }
+      },
+      "match": "(?<!\\.)\\b(case|if|elsif|unless|until|while)\\b\\s*(\\()*?\\s*([a-z]([A-Za-z0-9_])*)\\s*((\\+|\\*|-|\\/|%|\\*\\*|&|\\||\\^|<<|>>)=)",
+      "comment": "A local variable operation assignment in a condition"
+    },
+    {
+      "captures": {
+        "1": {
           "name": "variable.ruby"
         }
       },
       "match": "^\\s*([a-z]([A-Za-z0-9_])*)\\s*=[^=>]",
       "comment": "A local variable assignment"
+    },
+    {
+      "captures": {
+        "1": {
+          "name": "keyword.control.ruby"
+        },
+        "3": {
+          "name": "variable.ruby"
+        }
+      },
+      "match": "(?<!\\.)\\b(case|if|elsif|unless|until|while)\\b\\s*(\\()*?\\s*([a-z]([A-Za-z0-9_])*)\\s*=[^=>]",
+      "comment": "A local variable assignment in a condition"
     },
     {
       "captures": {
