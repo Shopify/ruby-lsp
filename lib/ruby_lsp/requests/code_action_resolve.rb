@@ -121,7 +121,7 @@ module RubyLsp
         return Error::InvalidTargetRange if closest_node.is_a?(Prism::MissingNode)
 
         closest_node_loc = closest_node.location
-        # If the parent expression is a single line block, then we have to extract it inside of the oneline block
+        # If the parent expression is a single line block, then we have to extract it inside of the one-line block
         if parent_statements.is_a?(Prism::BlockNode) &&
             parent_statements.location.start_line == parent_statements.location.end_line
 

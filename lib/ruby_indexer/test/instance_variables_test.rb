@@ -209,7 +209,7 @@ module RubyIndexer
         end
       RUBY
 
-      # If the surrounding method is beind defined on any dynamic value that isn't `self`, then we attribute the
+      # If the surrounding method is behind defined on any dynamic value that isn't `self`, then we attribute the
       # instance variable to the wrong owner since there's no way to understand that statically
       entry = T.must(@index["@a"]&.first)
       owner = T.must(entry.owner)

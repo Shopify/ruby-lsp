@@ -46,7 +46,7 @@ module RubyLsp
       sig { returns(T::Array[T.class_of(Addon)]) }
       attr_reader :addon_classes
 
-      # Automatically track and instantiate addon classes
+      # Automatically track and instantiate add-on classes
       sig { params(child_class: T.class_of(Addon)).void }
       def inherited(child_class)
         addon_classes << child_class
@@ -82,7 +82,7 @@ module RubyLsp
           e
         end
 
-        # Instantiate all discovered addon classes
+        # Instantiate all discovered add-on classes
         self.addons = addon_classes.map(&:new)
         self.file_watcher_addons = addons.select { |addon| addon.respond_to?(:workspace_did_change_watched_files) }
 

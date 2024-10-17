@@ -784,7 +784,7 @@ module RubyIndexer
       singleton_levels
     )
       # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
-      # from two diffent classes in different files, we simply ignore it
+      # from two different classes in different files, we simply ignore it
       superclass = T.cast(
         if singleton_levels > 0
           self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
@@ -974,10 +974,10 @@ module RubyIndexer
       []
     end
 
-    # Removes redudancy from a constant reference's full name. For example, if we find a reference to `A::B::Foo` inside
-    # of the ["A", "B"] nesting, then we should not concatenate the nesting with the name or else we'll end up with
-    # `A::B::A::B::Foo`. This method will remove any redundant parts from the final name based on the reference and the
-    # nesting
+    # Removes redundancy from a constant reference's full name. For example, if we find a reference to `A::B::Foo`
+    # inside of the ["A", "B"] nesting, then we should not concatenate the nesting with the name or else we'll end up
+    # with `A::B::A::B::Foo`. This method will remove any redundant parts from the final name based on the reference and
+    # the nesting
     sig { params(name: String, nesting: T::Array[String]).returns(String) }
     def build_non_redundant_full_name(name, nesting)
       # If there's no nesting, then we can just return the name as is
