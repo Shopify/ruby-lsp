@@ -235,8 +235,8 @@ module RubyLsp
       $stderr.puts("Ruby LSP> Running bundle install for the composed bundle. This may take a while...")
       $stderr.puts("Ruby LSP> Command: #{command}")
 
-      # Try to run the bundle install or update command. If that fails, it normally means that the custom lockfile is in
-      # a bad state that no longer reflects the top level one. In that case, we can remove the whole directory, try
+      # Try to run the bundle install or update command. If that fails, it normally means that the composed lockfile is
+      # in a bad state that no longer reflects the top level one. In that case, we can remove the whole directory, try
       # another time and give up if it fails again
       if !system(env, command) && !@retry && @custom_dir.exist?
         @retry = true
@@ -288,13 +288,13 @@ module RubyLsp
       if @rails_app
         return false if @dependencies.values_at("ruby-lsp", "ruby-lsp-rails", "debug").all?
 
-        # If the custom lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle install
-        # before updating
+        # If the composed lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle
+        # install before updating
         return false if composed_bundle_dependencies.values_at("ruby-lsp", "debug", "ruby-lsp-rails").any?(&:nil?)
       else
         return false if @dependencies.values_at("ruby-lsp", "debug").all?
 
-        # If the custom lockfile doesn't include `ruby-lsp` or `debug`, we need to run bundle install before updating
+        # If the composed lockfile doesn't include `ruby-lsp` or `debug`, we need to run bundle install before updating
         return false if composed_bundle_dependencies.values_at("ruby-lsp", "debug").any?(&:nil?)
       end
 

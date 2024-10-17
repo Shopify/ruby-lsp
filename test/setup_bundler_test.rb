@@ -115,9 +115,9 @@ class SetupBundlerTest < Minitest::Test
 
         # At this point, the composed bundle includes the `ruby-lsp` in its lockfile, but that will be overwritten when
         # we copy the top level lockfile. If composed bundle dependencies are eagerly evaluated, then we would think the
-        # ruby-lsp is a part of the custom lockfile and would try to run `bundle update ruby-lsp`, which would fail. If
-        # we evaluate lazily, then we only find dependencies after the lockfile was copied, and then run bundle install
-        # instead, which re-locks and adds the ruby-lsp
+        # ruby-lsp is a part of the composed lockfile and would try to run `bundle update ruby-lsp`, which would fail.
+        # If we evaluate lazily, then we only find dependencies after the lockfile was copied, and then run bundle
+        # install instead, which re-locks and adds the ruby-lsp
         Bundler.with_unbundled_env do
           stub_bundle_with_env(bundle_env(dir, ".ruby-lsp/Gemfile"))
           run_script(dir)
