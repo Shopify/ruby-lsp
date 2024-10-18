@@ -120,6 +120,8 @@ GEM
 
 PLATFORMS
   arm64-darwin
+  java
+  universal-java
   x64-mingw-ucrt
   x64-mingw32
   x86_64-darwin
