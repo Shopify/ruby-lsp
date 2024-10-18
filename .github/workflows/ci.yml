@@ -3,6 +3,22 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  spelling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        env:
+          DISABLE_V8_COMPILE_CACHE: "1"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.9"
+
+      - name: Run cspell
+        run: |
+          yarn global add cspell
+          cspell
   lint_ruby:
     runs-on: ubuntu-latest
     steps:

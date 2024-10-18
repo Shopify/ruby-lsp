@@ -1,0 +1,37 @@
+{
+    "version": "0.2",
+    "dictionaryDefinitions": [
+        {
+        "name": "project-words",
+        "path": "./project-words",
+        "addWords": true
+        }
+    ],
+    // cspell recognizes 'addon' as valid but we want to enforce 'add-on', but not within code
+    "words": [
+      "!addon"
+    ],
+    "ignoreRegExpList": [
+      "\\.addon",
+      "addon\\.",
+      "\\(addon\\)",
+      "@addon",
+      "_addon",
+      "addon\\w+",
+      "addon_",
+      "addon\"",
+      "addon =",
+      "$\\s+addon^",
+      "\\|addon\\|",
+      "addon$" // could have false positives but unlikely
+    ],
+    "language": "en",
+    "files": ["**/*.rb", "**/*.md", "**/*.markdown"],
+    "ignorePaths": [
+      "**/node_modules/**",
+      "vendor/**",
+      "coverage/**",
+      "test/fixtures/",
+    ],
+    "dictionaries": ["ruby", "en_US", "shell", "file-types", "project-words", "companies", "softwareTerms", "misc"]
+  }
