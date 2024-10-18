@@ -674,6 +674,7 @@ suite("Client", () => {
       workspaceRubyFilter,
       workspaceERBFilter,
       bundledGemsFilter,
+      defaultPathFilter,
       defaultGemsFilter,
     ] = client.clientOptions.documentSelector!;
 
@@ -700,6 +701,11 @@ suite("Client", () => {
     assert.match(
       (bundledGemsFilter as TextDocumentFilter).pattern!,
       new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
+    );
+
+    assert.match(
+      (defaultPathFilter as TextDocumentFilter).pattern!,
+      /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/,
     );
 
     assert.match(
