@@ -139,13 +139,12 @@ module RubyIndexer
       # receive two entries because module_function creates a singleton method
       # for the Foo module and a private method for classes include Foo module
       assert_equal(entries.size, 2)
+      first_entry, second_entry = *entries
       # The first entry points to the location of the module_function call
-      first_entry = entries.first
       assert_equal("Foo", first_entry.owner.name)
       assert_instance_of(Entry::Module, first_entry.owner)
       assert_equal(Entry::Visibility::PRIVATE, first_entry.visibility)
       # The second entry points to the public singleton method
-      second_entry = entries.last
       assert_equal("Foo::<Class:Foo>", second_entry.owner.name)
       assert_instance_of(Entry::SingletonClass, second_entry.owner)
       assert_equal(Entry::Visibility::PUBLIC, second_entry.visibility)
