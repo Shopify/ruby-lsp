@@ -349,6 +349,9 @@ export class Workspace implements WorkspaceInterface {
             await this.ruby.activateRuby();
           }
 
+          this.outputChannel.info(
+            "Restarting the Ruby LSP because configuration changed",
+          );
           await this.restart();
         }
       }),
@@ -363,7 +366,12 @@ export class Workspace implements WorkspaceInterface {
       new vscode.RelativePattern(this.workspaceFolder, pattern),
     );
 
-    const debouncedRestart = debounce(this.restart.bind(this), 5000);
+    const debouncedRestart = debounce(async () => {
+      this.outputChannel.info(
+        `Restarting the Ruby LSP because ${pattern} changed`,
+      );
+      await this.restart();
+    }, 5000);
 
     context.subscriptions.push(
       watcher,
@@ -383,6 +391,9 @@ export class Workspace implements WorkspaceInterface {
     };
     const stop = async () => {
       this.#inhibitRestart = false;
+      this.outputChannel.info(
+        `Restarting the Ruby LSP because ${glob} changed`,
+      );
       await this.restart();
     };
 
