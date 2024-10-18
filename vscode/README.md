@@ -56,7 +56,7 @@ If you have feedback about this feature, you can let us know in the [DX Slack](h
 
 Search for `Shopify.ruby-lsp` in the extensions tab and click install.
 
-By default, the Ruby LSP will generate a `.ruby-lsp` directory with a custom bundle that includes the server gem.
+By default, the Ruby LSP will generate a `.ruby-lsp` directory with a composed bundle that includes the server gem.
 Additionally, it will attempt to use available version managers to select the correct Ruby version for any given
 project. Refer to configuration for more options.
 
@@ -158,7 +158,7 @@ separate `Gemfile` for development tools.
 
 **Note**: when using this, gems will not be installed automatically and neither will `ruby-lsp` upgrades.
 
-Create a directory to store the custom bundle outside of the project that uses the old Ruby version. Inside that
+Create a directory to store the composed bundle outside of the project that uses the old Ruby version. Inside that
 directory, add your preferred version manager configuration to select a supported Ruby version. For example, if using
 `chruby`, it would look like this:
 
