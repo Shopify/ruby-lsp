@@ -337,6 +337,10 @@
               ],
               "default": "auto"
             },
+            "asdfExecutablePath": {
+              "description": "The path to the asdf executable script, if not installed on one of the standard locations",
+              "type": "string"
+            },
             "miseExecutablePath": {
               "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
               "type": "string"
