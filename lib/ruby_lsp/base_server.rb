@@ -8,9 +8,16 @@ module RubyLsp
 
     abstract!
 
-    sig { params(test_mode: T::Boolean).void }
-    def initialize(test_mode: false)
-      @test_mode = T.let(test_mode, T::Boolean)
+    sig do
+      params(
+        test_mode: T::Boolean,
+        initialize_request: T.nilable(T::Hash[Symbol, T.untyped]),
+        setup_error: T.nilable(Bundler::BundlerError),
+      ).void
+    end
+    def initialize(test_mode: false, initialize_request: nil, setup_error: nil)
+      @test_mode = test_mode
+      @setup_error = setup_error
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)
@@ -33,6 +40,10 @@ module RubyLsp
 
       @global_state = T.let(GlobalState.new, GlobalState)
       Thread.main.priority = 1
+
+      # We read the initialize request in `exe/ruby-lsp` to be able to determine the workspace URI where Bundler should
+      # be setup
+      process_message(initialize_request) if initialize_request
     end
 
     sig { void }
