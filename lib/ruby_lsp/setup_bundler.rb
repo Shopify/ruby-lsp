@@ -61,6 +61,11 @@ module RubyLsp
     def setup!
       raise BundleNotLocked if @gemfile&.exist? && !@lockfile&.exist?
 
+      # Automatically create and ignore the .ruby-lsp folder for users
+      @custom_dir.mkpath unless @custom_dir.exist?
+      ignore_file = @custom_dir + ".gitignore"
+      ignore_file.write("*") unless ignore_file.exist?
+
       # Do not set up a custom bundle if LSP dependencies are already in the Gemfile
       if @dependencies["ruby-lsp"] &&
           @dependencies["debug"] &&
@@ -69,18 +74,8 @@ module RubyLsp
           "Ruby LSP> Skipping custom bundle setup since LSP dependencies are already in #{@gemfile}",
         )
 
-        # If the user decided to add `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) to their Gemfile after
-        # having already run the Ruby LSP, then we need to remove the `.ruby-lsp` folder, otherwise we will run `bundle
-        # install` for the top level and try to execute the Ruby LSP using the custom bundle, which will fail since the
-        # gems are not installed there
-        @custom_dir.rmtree if @custom_dir.exist?
         return run_bundle_install
       end
-
-      # Automatically create and ignore the .ruby-lsp folder for users
-      @custom_dir.mkpath unless @custom_dir.exist?
-      ignore_file = @custom_dir + ".gitignore"
-      ignore_file.write("*") unless ignore_file.exist?
 
       write_custom_gemfile
 
