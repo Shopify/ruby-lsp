@@ -473,6 +473,11 @@
           "description": "Enable ERB support. This can only work with server versions v0.17.5 or above",
           "type": "boolean",
           "default": true
+        },
+        "rubyLsp.useLauncher": {
+          "description": "[EXPERIMENTAL] Uses server launcher for gracefully handling missing dependencies.",
+          "type": "boolean",
+          "default": false
         }
       }
     },
