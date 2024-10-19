@@ -12,6 +12,7 @@ require "sorbet-runtime"
 require "bundler"
 Bundler.ui.level = :silent
 
+require "json"
 require "uri"
 require "cgi"
 require "set"
