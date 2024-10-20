@@ -54,7 +54,10 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
     refactors = expectation
       .select { |action| action["kind"].start_with?("refactor") }
       .map { |action| code_action_for_refactor(action) }
-    result = [*quickfixes, *refactors]
+    empty_kind = expectation
+      .select { |action| action["kind"] == "" }
+      .map { |action| code_action_for_refactor(action) }
+    result = [*quickfixes, *refactors, *empty_kind]
 
     JSON.parse(result.to_json)
   end
@@ -85,6 +88,17 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
       data: {
         range: refactor.dig("data", "range"),
         uri: refactor.dig("data", "uri"),
+      },
+    )
+  end
+
+  def code_action_for_empty_kind(expectations)
+    LanguageServer::Protocol::Interface::CodeAction.new(
+      title: expectations["title"],
+      kind: expectations["kind"],
+      data: {
+        range: expectations.dig("data", "range"),
+        uri: expectations.dig("data", "uri"),
       },
     )
   end

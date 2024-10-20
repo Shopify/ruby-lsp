@@ -12,6 +12,9 @@ module RubyLsp
       EXTRACT_TO_VARIABLE_TITLE = "Refactor: Extract Variable"
       EXTRACT_TO_METHOD_TITLE = "Refactor: Extract Method"
       TOGGLE_BLOCK_STYLE_TITLE = "Refactor: Toggle block style"
+      CREATE_ATTRIBUTE_READER = "Create Attribute Reader"
+      CREATE_ATTRIBUTE_WRITER = "Create Attribute Writer"
+      CREATE_ATTRIBUTE_ACCESSOR = "Create Attribute Accessor"
 
       class << self
         extend T::Sig
@@ -63,6 +66,21 @@ module RubyLsp
           code_actions << Interface::CodeAction.new(
             title: TOGGLE_BLOCK_STYLE_TITLE,
             kind: Constant::CodeActionKind::REFACTOR_REWRITE,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: CREATE_ATTRIBUTE_READER,
+            kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: CREATE_ATTRIBUTE_WRITER,
+            kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          )
+          code_actions << Interface::CodeAction.new(
+            title: CREATE_ATTRIBUTE_ACCESSOR,
+            kind: Constant::CodeActionKind::EMPTY,
             data: { range: @range, uri: @uri.to_s },
           )
         end
