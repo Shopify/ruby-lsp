@@ -475,10 +475,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
-"@eslint/js@^9.12.0":
-  version "9.12.0"
-  resolved "https://registry.yarnpkg.com/@eslint/js/-/js-9.12.0.tgz#69ca3ca9fab9a808ec6d67b8f6edb156cbac91e1"
-  integrity sha512-eohesHH8WFRUprDNyEREgqP6beG6htMeUYeCpkEgBCieCMme5r9zFWjzAJp//9S+Kub4rqE+jXe9Cp1a7IYIIA==
+"@eslint/js@^9.13.0":
+  version "9.13.0"
+  resolved "https://registry.yarnpkg.com/@eslint/js/-/js-9.13.0.tgz#c5f89bcd57eb54d5d4fa8b77693e9c28dc97e547"
+  integrity sha512-IFLyoY4d72Z5y/6o/BazFBezupzI/taV8sGumxTAVw3lXG9A6md1Dc34T9s1FoD/an9pJH8RHbAxsaEbBed9lA==
 
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
@@ -695,9 +695,9 @@
   integrity sha512-sicdRoWtYevwxjOHNMPTl3vSfJM6oyW8o1wXeI7uww6b6xHg8eBznQDNSGBCDJmsE8UMxP05JgZRtsKbTqt//Q==
 
 "@types/node@*", "@types/node@22.x":
-  version "22.7.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.5.tgz#cfde981727a7ab3611a481510b473ae54442b92b"
-  integrity sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==
+  version "22.7.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.7.tgz#6cd9541c3dccb4f7e8b141b491443f4a1570e307"
+  integrity sha512-SRxCrrg9CL/y54aiMCG3edPKdprgMVGDXjA3gB8UmmBW5TcXzRUYAh8EWzTnSJFAd1rgImPELza+A3bJ+qxz8Q==
   dependencies:
     undici-types "~6.19.2"
 
@@ -875,10 +875,10 @@
     "@vscode/vsce-sign-win32-arm64" "2.0.2"
     "@vscode/vsce-sign-win32-x64" "2.0.2"
 
-"@vscode/vsce@^3.1.0", "@vscode/vsce@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-3.1.1.tgz#b18b44796d9e5b7a48a3a1e89f93def9c3b338b9"
-  integrity sha512-N62Ca9ElRPLUUzf7l9CeEBlLrYzFPRQq7huKk4pVW+LjIOSXfFIPudixn5QvZcz+yXDOh15IopI3K2o3y9666Q==
+"@vscode/vsce@^3.1.0", "@vscode/vsce@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@vscode/vsce/-/vsce-3.2.0.tgz#7e16c39940f40d1e308faf5f81783865ef8c227a"
+  integrity sha512-c/AId5Lp50HTszCBDfXfD/Go2djm6qO/WfedP2Y3BpRP+V+ttr8T0mTvZ8WEyTiBp2EfrYnzYUCx0ocB9mHy4Q==
   dependencies:
     "@azure/identity" "^4.1.0"
     "@vscode/vsce-sign" "^2.0.0"
