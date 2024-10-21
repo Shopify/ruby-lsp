@@ -109,6 +109,14 @@ module RubyLsp
       end
     rescue DelegateRequestError
       send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))
+    rescue Document::Scanner::PositionNotFoundError => e
+      send_message(Notification.window_log_message(e.full_message, type: Constant::MessageType::ERROR))
+
+      send_message(Error.new(
+        id: message[:id],
+        code: Constant::ErrorCodes::INTERNAL_ERROR,
+        message: "Failed to find position",
+      ))
     rescue StandardError, LoadError => e
       # If an error occurred in a request, we have to return an error response or else the editor will hang
       if message[:id]
