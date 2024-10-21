@@ -1,3 +1,5 @@
+import { createHash } from "crypto";
+
 import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
 
@@ -22,6 +24,7 @@ export class Workspace implements WorkspaceInterface {
   private readonly isMainWorkspace: boolean;
   private readonly telemetry: vscode.TelemetryLogger;
   private readonly virtualDocuments = new Map<string, string>();
+  private readonly restartDocumentShas = new Map<string, string>();
   private needsRestart = false;
   #inhibitRestart = false;
   #error = false;
@@ -366,6 +369,26 @@ export class Workspace implements WorkspaceInterface {
       new vscode.RelativePattern(this.workspaceFolder, pattern),
     );
 
+    // Handler for only triggering restart if the contents of the file have been modified. If the file was just touched,
+    // but the contents are the same, we don't want to restart
+    const debouncedRestartWithHashCheck = debounce(async (uri: vscode.Uri) => {
+      const fileContents = await vscode.workspace.fs.readFile(uri);
+      const fsPath = uri.fsPath;
+
+      const hash = createHash("sha256");
+      hash.update(fileContents.toString());
+      const currentSha = hash.digest("hex");
+
+      if (this.restartDocumentShas.get(fsPath) !== currentSha) {
+        this.outputChannel.info(
+          `Restarting the Ruby LSP because ${pattern} changed`,
+        );
+
+        this.restartDocumentShas.set(fsPath, currentSha);
+        await this.restart();
+      }
+    }, 5000);
+
     const debouncedRestart = debounce(async () => {
       this.outputChannel.info(
         `Restarting the Ruby LSP because ${pattern} changed`,
@@ -375,7 +398,7 @@ export class Workspace implements WorkspaceInterface {
 
     context.subscriptions.push(
       watcher,
-      watcher.onDidChange(debouncedRestart),
+      watcher.onDidChange(debouncedRestartWithHashCheck),
       watcher.onDidCreate(debouncedRestart),
       watcher.onDidDelete(debouncedRestart),
     );
