@@ -311,7 +311,7 @@ module RubyLsp
 
         range = range_from_location(location)
 
-        candidates.flatten.each do |entry|
+        candidates.flatten.uniq(&:name).each do |entry|
           entry_name = entry.name
 
           @response_builder << Interface::CompletionItem.new(

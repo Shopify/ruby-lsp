@@ -1065,6 +1065,28 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_global_variables_show_only_uniq_entries
+    source = <<~RUBY
+      $qar &&= 1
+      $qar += 1
+      $qar ||= 1
+      $q
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 3, character: 2 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["$qar"], result.map(&:label))
+    end
+  end
+
   def test_completion_for_instance_variables
     source = +<<~RUBY
       class Foo
