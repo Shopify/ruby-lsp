@@ -8,9 +8,9 @@ module RubyLsp
 
     abstract!
 
-    sig { params(test_mode: T::Boolean).void }
-    def initialize(test_mode: false)
-      @test_mode = T.let(test_mode, T::Boolean)
+    sig { params(options: T::Boolean).void }
+    def initialize(**options)
+      @test_mode = T.let(options[:test_mode], T.nilable(T::Boolean))
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)
@@ -22,7 +22,7 @@ module RubyLsp
       @store = T.let(Store.new, Store)
       @outgoing_dispatcher = T.let(
         Thread.new do
-          unless test_mode
+          unless @test_mode
             while (message = @outgoing_queue.pop)
               @mutex.synchronize { @writer.write(message.to_hash) }
             end
