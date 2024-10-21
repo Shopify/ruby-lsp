@@ -242,3 +242,7 @@ After that, follow these steps to make and verify your changes:
 bundle exec jekyll serve
 ```
 3. Verify your changes locally by visiting [http://localhost:4000/ruby-lsp](http://localhost:4000/ruby-lsp)
+
+## Contributing to the Ruby LSP Rails add-on
+
+See [https://github.com/Shopify/ruby-lsp-rails/blob/main/CONTRIBUTING.md](https://github.com/Shopify/ruby-lsp-rails/blob/main/CONTRIBUTING.md)
