@@ -41,6 +41,15 @@ import { WorkspaceChannel } from "./workspaceChannel";
 
 type EnabledFeatures = Record<string, boolean>;
 
+interface ServerErrorTelemetryEvent {
+  type: "error";
+  errorMessage: string;
+  errorClass: string;
+  stack: string;
+}
+
+type ServerTelemetryEvent = ServerErrorTelemetryEvent;
+
 // Get the executables to start the server based on the user's configuration
 function getLspExecutables(
   workspaceFolder: vscode.WorkspaceFolder,
@@ -318,6 +327,19 @@ export default class Client extends LanguageClient implements ClientInterface {
         params.textDocument.uri,
         params.textDocument.text,
       );
+    });
+
+    this.onTelemetry((event: ServerTelemetryEvent) => {
+      if (event.type === "error") {
+        this.telemetry.logError(
+          {
+            message: event.errorMessage,
+            name: event.errorClass,
+            stack: event.stack,
+          },
+          { serverVersion: this.serverVersion },
+        );
+      }
     });
   }
 
