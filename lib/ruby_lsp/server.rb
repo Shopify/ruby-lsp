@@ -140,6 +140,11 @@ module RubyLsp
 
     sig { params(include_project_addons: T::Boolean).void }
     def load_addons(include_project_addons: true)
+      # If invoking Bundler.setup failed, then the load path will not be configured properly and trying to load add-ons
+      # with Gem.find_files will find every single version installed of an add-on, leading to requiring several
+      # different versions of the same files. We cannot load add-ons if Bundler.setup failed
+      return if @setup_error
+
       errors = Addon.load_addons(@global_state, @outgoing_queue, include_project_addons: include_project_addons)
 
       if errors.any?
@@ -292,15 +297,21 @@ module RubyLsp
       global_state_notifications.each { |notification| send_message(notification) }
 
       if @setup_error
-        message = <<~MESSAGE
-          An error occurred while setting up Bundler. This may be due to a failure when installing dependencies.
-          The Ruby LSP will continue to run, but features related to the missing dependencies will be limited.
+        send_message(Notification.telemetry(
+          type: "error",
+          errorMessage: @setup_error.message,
+          errorClass: @setup_error.class,
+          stack: @setup_error.backtrace&.join("\n"),
+        ))
+      end
 
-          Error:
-          #{@setup_error.full_message}
-        MESSAGE
-
-        send_message(Notification.window_log_message(message, type: Constant::MessageType::ERROR))
+      if @install_error
+        send_message(Notification.telemetry(
+          type: "error",
+          errorMessage: @install_error.message,
+          errorClass: @install_error.class,
+          stack: @install_error.backtrace&.join("\n"),
+        ))
       end
     end
 
@@ -309,20 +320,22 @@ module RubyLsp
       load_addons
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
-      if defined?(Requests::Support::RuboCopFormatter)
-        begin
-          @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
-        rescue RuboCop::Error => e
-          # The user may have provided unknown config switches in .rubocop or
-          # is trying to load a non-existent config file.
-          send_message(Notification.window_show_message(
-            "RuboCop configuration error: #{e.message}. Formatting will not be available.",
-            type: Constant::MessageType::ERROR,
-          ))
+      unless @setup_error
+        if defined?(Requests::Support::RuboCopFormatter)
+          begin
+            @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+          rescue RuboCop::Error => e
+            # The user may have provided unknown config switches in .rubocop or
+            # is trying to load a non-existent config file.
+            send_message(Notification.window_show_message(
+              "RuboCop configuration error: #{e.message}. Formatting will not be available.",
+              type: Constant::MessageType::ERROR,
+            ))
+          end
         end
-      end
-      if defined?(Requests::Support::SyntaxTreeFormatter)
-        @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.new)
+        if defined?(Requests::Support::SyntaxTreeFormatter)
+          @global_state.register_formatter("syntax_tree", Requests::Support::SyntaxTreeFormatter.new)
+        end
       end
 
       perform_initial_indexing
@@ -1150,6 +1163,7 @@ module RubyLsp
 
     sig { void }
     def check_formatter_is_available
+      return if @setup_error
       # Warn of an unavailable `formatter` setting, e.g. `rubocop` on a project which doesn't have RuboCop.
       # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
       return unless @global_state.formatter == "rubocop"

@@ -79,6 +79,14 @@ module RubyLsp
           params: Interface::LogMessageParams.new(type: type, message: message),
         )
       end
+
+      sig { params(data: T::Hash[Symbol, T.untyped]).returns(Notification) }
+      def telemetry(data)
+        new(
+          method: "telemetry/event",
+          params: data,
+        )
+      end
     end
 
     extend T::Sig

@@ -2,8 +2,13 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "open3"
 
 class IntegrationTest < Minitest::Test
+  def setup
+    @root = Bundler.root
+  end
+
   def test_ruby_lsp_doctor_works
     skip("CI only") unless ENV["CI"]
 
@@ -79,8 +84,6 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_launch_mode_with_no_gemfile
-    skip("CI only") unless ENV["CI"]
-
     in_temp_dir do |dir|
       Bundler.with_unbundled_env do
         launch(dir)
@@ -89,8 +92,6 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_launch_mode_with_missing_lockfile
-    skip("CI only") unless ENV["CI"]
-
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"
@@ -104,8 +105,6 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_launch_mode_with_full_bundle
-    skip("CI only") unless ENV["CI"]
-
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"
@@ -137,13 +136,10 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_launch_mode_with_no_gemfile_and_bundle_path
-    skip("CI only") unless ENV["CI"]
-
     in_temp_dir do |dir|
       Bundler.with_unbundled_env do
         system("bundle config --local path #{File.join("vendor", "bundle")}")
         assert_path_exists(File.join(dir, ".bundle", "config"))
-
         launch(dir)
       end
     end
@@ -152,7 +148,29 @@ class IntegrationTest < Minitest::Test
   private
 
   def launch(workspace_path)
-    initialize_request = {
+    specification = Gem::Specification.find_by_name("ruby-lsp")
+    paths = [specification.full_gem_path]
+    paths.concat(specification.dependencies.map { |dep| dep.to_spec.full_gem_path })
+
+    load_path = $LOAD_PATH.filter_map do |path|
+      next unless paths.any? { |gem_path| path.start_with?(gem_path) } || !path.start_with?(Bundler.bundle_path.to_s)
+
+      ["-I", File.expand_path(path)]
+    end.uniq.flatten
+
+    stdin, stdout, stderr, wait_thr = T.unsafe(Open3).popen3(
+      Gem.ruby,
+      *load_path,
+      File.join(@root, "exe", "ruby-lsp-launcher"),
+    )
+    stdin.sync = true
+    stdin.binmode
+    stdout.sync = true
+    stdout.binmode
+    stderr.sync = true
+    stderr.binmode
+
+    send_message(stdin, {
       id: 1,
       method: "initialize",
       params: {
@@ -160,34 +178,32 @@ class IntegrationTest < Minitest::Test
         capabilities: { general: { positionEncodings: ["utf-8"] } },
         workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace_path).to_s }],
       },
-    }.to_json
+    })
+    send_message(stdin, { id: 2, method: "shutdown" })
+    send_message(stdin, { method: "exit" })
 
-    $stdin.expects(:gets).with("\r\n\r\n").once.returns("Content-Length: #{initialize_request.bytesize}")
-    $stdin.expects(:read).with(initialize_request.bytesize).once.returns(initialize_request)
+    # Wait until the process exits
+    wait_thr.join
 
-    # Make `new` return a mock that raises so that we don't print to stdout and stop immediately after boot
-    server_object = mock("server")
-    server_object.expects(:start).once.raises(StandardError.new("stop"))
-    RubyLsp::Server.expects(:new).returns(server_object)
+    # If the child process failed, it is really difficult to diagnose what's happening unless we read what was printed
+    # to stderr
+    unless T.unsafe(wait_thr.value).success?
+      require "timeout"
 
-    # We load the launcher binary in the same process as the tests are running. We cannot try to re-activate a different
-    # Bundler version, because that throws an error
-    if File.exist?(File.join(workspace_path, "Gemfile.lock"))
-      spec_mock = mock("specification")
-      spec_mock.expects(:activate).once
-      Gem::Specification.expects(:find_by_name).with do |name, version|
-        name == "bundler" && !version.empty?
-      end.returns(spec_mock)
+      Timeout.timeout(5) do
+        flunk("Process failed\n#{stderr.read}")
+      end
     end
 
-    # Verify that we are setting up the bundle, but there's no actual need to do it
-    Bundler.expects(:setup).once
+    assert_path_exists(File.join(workspace_path, ".ruby-lsp", "Gemfile"))
+    assert_path_exists(File.join(workspace_path, ".ruby-lsp", "Gemfile.lock"))
+    refute_path_exists(File.join(workspace_path, ".ruby-lsp", "install_error"))
+  end
 
-    assert_raises(StandardError) do
-      load(File.expand_path("../exe/ruby-lsp-launcher", __dir__))
-    end
-
-    assert_path_exists(File.join(workspace_path, ".ruby-lsp", "bundle_gemfile"))
+  def send_message(stdin, message)
+    json_message = message.to_json
+    stdin.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
+    stdin.flush
   end
 
   def in_temp_dir
