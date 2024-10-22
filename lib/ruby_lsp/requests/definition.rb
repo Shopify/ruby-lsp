@@ -121,7 +121,12 @@ module RubyLsp
         when Prism::GlobalVariableAndWriteNode,
           Prism::GlobalVariableOperatorWriteNode,
           Prism::GlobalVariableOrWriteNode,
-          Prism::GlobalVariableWriteNode
+          Prism::GlobalVariableWriteNode,
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableWriteNode
+
           !covers_position?(target.name_loc, position)
         else
           false

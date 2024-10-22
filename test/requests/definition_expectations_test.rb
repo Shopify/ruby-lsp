@@ -728,16 +728,22 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       $foo += 1
       $foo ||= 1
       $foo = 1
+      class Foo
+        @foo &&= 1
+        @foo += 1
+        @foo ||= 1
+        @foo = 1
+      end
     RUBY
 
-    lines_with_target_correction = [0, 1, 2, 3]
+    lines_with_target_correction = [0, 1, 2, 3, 5, 6, 7, 8]
 
     with_server(source) do |server, uri|
       lines_with_target_correction.each do |line|
         server.process_message(
           id: 1,
           method: "textDocument/definition",
-          params: { textDocument: { uri: uri }, position: { character: 5, line: line } },
+          params: { textDocument: { uri: uri }, position: { character: 7, line: line } },
         )
 
         assert_empty(server.pop_response.response)
