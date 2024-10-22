@@ -6,10 +6,8 @@ require_relative "test_case"
 module RubyIndexer
   class EnhancementTest < TestCase
     def test_enhancing_indexing_included_hook
-      enhancement_class = Class.new do
-        include Enhancement
-
-        def on_call_node(index, owner, node, file_path, code_units_cache)
+      enhancement_class = Class.new(Enhancement) do
+        def on_call_node_enter(owner, node, file_path, code_units_cache)
           return unless owner
           return unless node.name == :extend
 
@@ -24,7 +22,7 @@ module RubyIndexer
             module_name = node.full_name
             next unless module_name == "ActiveSupport::Concern"
 
-            index.register_included_hook(owner.name) do |index, base|
+            @index.register_included_hook(owner.name) do |index, base|
               class_methods_name = "#{owner.name}::ClassMethods"
 
               if index.indexed?(class_methods_name)
@@ -33,7 +31,7 @@ module RubyIndexer
               end
             end
 
-            index.add(Entry::Method.new(
+            @index.add(Entry::Method.new(
               "new_method",
               file_path,
               location,
@@ -50,7 +48,7 @@ module RubyIndexer
         end
       end
 
-      @index.register_enhancement(enhancement_class.new)
+      @index.register_enhancement(enhancement_class.new(@index))
       index(<<~RUBY)
         module ActiveSupport
           module Concern
@@ -98,10 +96,8 @@ module RubyIndexer
     end
 
     def test_enhancing_indexing_configuration_dsl
-      enhancement_class = Class.new do
-        include Enhancement
-
-        def on_call_node(index, owner, node, file_path, code_units_cache)
+      enhancement_class = Class.new(Enhancement) do
+        def on_call_node_enter(owner, node, file_path, code_units_cache)
           return unless owner
 
           name = node.name
@@ -115,7 +111,7 @@ module RubyIndexer
 
           location = Location.from_prism_location(association_name.location, code_units_cache)
 
-          index.add(Entry::Method.new(
+          @index.add(Entry::Method.new(
             T.must(association_name.value),
             file_path,
             location,
@@ -128,7 +124,7 @@ module RubyIndexer
         end
       end
 
-      @index.register_enhancement(enhancement_class.new)
+      @index.register_enhancement(enhancement_class.new(@index))
       index(<<~RUBY)
         module ActiveSupport
           module Concern
@@ -160,11 +156,9 @@ module RubyIndexer
       assert_entry("posts", Entry::Method, "/fake/path/foo.rb:23-11:23-17")
     end
 
-    def test_error_handling_in_enhancement
-      enhancement_class = Class.new do
-        include Enhancement
-
-        def on_call_node(index, owner, node, file_path, code_units_cache)
+    def test_error_handling_in_on_call_node_enter_enhancement
+      enhancement_class = Class.new(Enhancement) do
+        def on_call_node_enter(owner, node, file_path, code_units_cache)
           raise "Error"
         end
 
@@ -175,7 +169,7 @@ module RubyIndexer
         end
       end
 
-      @index.register_enhancement(enhancement_class.new)
+      @index.register_enhancement(enhancement_class.new(@index))
 
       _stdout, stderr = capture_io do
         index(<<~RUBY)
@@ -189,7 +183,45 @@ module RubyIndexer
         RUBY
       end
 
-      assert_match(%r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' enhancement}, stderr)
+      assert_match(
+        %r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' on call node enter enhancement},
+        stderr,
+      )
+      # The module should still be indexed
+      assert_entry("ActiveSupport::Concern", Entry::Module, "/fake/path/foo.rb:1-2:5-5")
+    end
+
+    def test_error_handling_in_on_call_node_leave_enhancement
+      enhancement_class = Class.new(Enhancement) do
+        def on_call_node_leave(owner, node, file_path, code_units_cache)
+          raise "Error"
+        end
+
+        class << self
+          def name
+            "TestEnhancement"
+          end
+        end
+      end
+
+      @index.register_enhancement(enhancement_class.new(@index))
+
+      _stdout, stderr = capture_io do
+        index(<<~RUBY)
+          module ActiveSupport
+            module Concern
+              def self.extended(base)
+                base.class_eval("def new_method(a); end")
+              end
+            end
+          end
+        RUBY
+      end
+
+      assert_match(
+        %r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' on call node leave enhancement},
+        stderr,
+      )
       # The module should still be indexed
       assert_entry("ActiveSupport::Concern", Entry::Module, "/fake/path/foo.rb:1-2:5-5")
     end

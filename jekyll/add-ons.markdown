@@ -271,16 +271,14 @@ end
 This is how you could write an enhancement to teach the Ruby LSP to understand that DSL:
 
 ```ruby
-class MyIndexingEnhancement
-  include RubyLsp::Enhancement
-
+class MyIndexingEnhancement < RubyIndexer::Enhancement
   # This on call node handler is invoked any time during indexing when we find a method call. It can be used to insert
   # more entries into the index depending on the conditions
-  def on_call_node(index, owner, node, file_path)
+  def on_call_node_enter(owner, node, file_path, code_units_cache)
     return unless owner
 
     # Get the ancestors of the current class
-    ancestors = index.linearized_ancestors_of(owner.name)
+    ancestors = @index.linearized_ancestors_of(owner.name)
 
     # Return early unless the method call is the one we want to handle and the class invoking the DSL inherits from
     # our library's parent class
@@ -304,15 +302,19 @@ class MyIndexingEnhancement
       location,     # The Prism node location where the DSL call was found
       location,     # The Prism node location for the DSL name location. May or not be the same
       nil,          # The documentation for this DSL call. This should always be `nil` to ensure lazy fetching of docs
-      index.configuration.encoding, # The negotiated encoding. This should always be `indexing.configuration.encoding`
+      @index.configuration.encoding, # The negotiated encoding. This should always be `indexing.configuration.encoding`
       signatures,   # All signatures for this method (every way it can be invoked)
       Entry::Visibility::PUBLIC, # The method's visibility
       owner,        # The method's owner. This is almost always going to be the same owner received
     )
 
     # Push the new entry to the index
-    index.add(new_entry)
+    @index.add(new_entry)
   end
+
+  # This method is invoked when the parser has finished processing the method call node.
+  # It can be used to perform cleanups like popping a stack...etc.
+  def on_call_node_leave(owner, node, file_path, code_units_cache); end
 end
 ```
 
@@ -324,7 +326,7 @@ module RubyLsp
     class Addon < ::RubyLsp::Addon
       def activate(global_state, message_queue)
         # Register the enhancement as part of the indexing process
-        @index.register_enhancement(MyIndexingEnhancement.new)
+        @index.register_enhancement(MyIndexingEnhancement.new(@index))
       end
 
       def deactivate
