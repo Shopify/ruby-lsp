@@ -29,8 +29,8 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/Shopif
 be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor
 Covenant](CODE_OF_CONDUCT.md) code of conduct.
 
-If you wish to contribute, see [CONTRIBUTING](CONTRIBUTING.md) for development instructions and check out our pinned
-[roadmap issue](https://github.com/Shopify/ruby-lsp/issues) for a list of tasks to get started.
+If you wish to contribute, see [Contributing](https://shopify.github.io/ruby-lsp/contributing.html) for development instructions and check out our
+[Design and roadmap](https://shopify.github.io/ruby-lsp/design-and-roadmap.html) for a list of tasks to get started.
 
 ## License
 
