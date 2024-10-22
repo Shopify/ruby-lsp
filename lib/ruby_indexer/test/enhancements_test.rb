@@ -6,9 +6,7 @@ require_relative "test_case"
 module RubyIndexer
   class EnhancementTest < TestCase
     def test_enhancing_indexing_included_hook
-      enhancement_class = Class.new do
-        include Enhancement
-
+      enhancement_class = Class.new(Enhancement) do
         def on_call_node_enter(index, owner, node, file_path, code_units_cache)
           return unless owner
           return unless node.name == :extend
@@ -47,10 +45,6 @@ module RubyIndexer
                  Prism::ConstantPathNode::MissingNodesInConstantPathError
             # Do nothing
           end
-        end
-
-        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
-          # Do nothing
         end
       end
 
@@ -102,9 +96,7 @@ module RubyIndexer
     end
 
     def test_enhancing_indexing_configuration_dsl
-      enhancement_class = Class.new do
-        include Enhancement
-
+      enhancement_class = Class.new(Enhancement) do
         def on_call_node_enter(index, owner, node, file_path, code_units_cache)
           return unless owner
 
@@ -129,10 +121,6 @@ module RubyIndexer
             Entry::Visibility::PUBLIC,
             owner,
           ))
-        end
-
-        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
-          # Do nothing
         end
       end
 
@@ -169,15 +157,9 @@ module RubyIndexer
     end
 
     def test_error_handling_in_on_call_node_enter_enhancement
-      enhancement_class = Class.new do
-        include Enhancement
-
+      enhancement_class = Class.new(Enhancement) do
         def on_call_node_enter(index, owner, node, file_path, code_units_cache)
           raise "Error"
-        end
-
-        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
-          # Do nothing
         end
 
         class << self
@@ -210,13 +192,7 @@ module RubyIndexer
     end
 
     def test_error_handling_in_on_call_node_leave_enhancement
-      enhancement_class = Class.new do
-        include Enhancement
-
-        def on_call_node_enter(index, owner, node, file_path, code_units_cache)
-          # Do nothing
-        end
-
+      enhancement_class = Class.new(Enhancement) do
         def on_call_node_leave(index, owner, node, file_path, code_units_cache)
           raise "Error"
         end
