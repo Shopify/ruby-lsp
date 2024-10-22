@@ -26,5 +26,19 @@ module RubyIndexer
       ).void
     end
     def on_call_node_enter(index, owner, node, file_path, code_units_cache); end
+
+    sig do
+      abstract.params(
+        index: Index,
+        owner: T.nilable(Entry::Namespace),
+        node: Prism::CallNode,
+        file_path: String,
+        code_units_cache: T.any(
+          T.proc.params(arg0: Integer).returns(Integer),
+          Prism::CodeUnitsCache,
+        ),
+      ).void
+    end
+    def on_call_node_leave(index, owner, node, file_path, code_units_cache); end
   end
 end

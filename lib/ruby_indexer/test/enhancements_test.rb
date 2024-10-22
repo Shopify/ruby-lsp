@@ -48,6 +48,10 @@ module RubyIndexer
             # Do nothing
           end
         end
+
+        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
+          # Do nothing
+        end
       end
 
       @index.register_enhancement(enhancement_class.new)
@@ -126,6 +130,10 @@ module RubyIndexer
             owner,
           ))
         end
+
+        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
+          # Do nothing
+        end
       end
 
       @index.register_enhancement(enhancement_class.new)
@@ -160,11 +168,56 @@ module RubyIndexer
       assert_entry("posts", Entry::Method, "/fake/path/foo.rb:23-11:23-17")
     end
 
-    def test_error_handling_in_enhancement
+    def test_error_handling_in_on_call_node_enter_enhancement
       enhancement_class = Class.new do
         include Enhancement
 
         def on_call_node_enter(index, owner, node, file_path, code_units_cache)
+          raise "Error"
+        end
+
+        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
+          # Do nothing
+        end
+
+        class << self
+          def name
+            "TestEnhancement"
+          end
+        end
+      end
+
+      @index.register_enhancement(enhancement_class.new)
+
+      _stdout, stderr = capture_io do
+        index(<<~RUBY)
+          module ActiveSupport
+            module Concern
+              def self.extended(base)
+                base.class_eval("def new_method(a); end")
+              end
+            end
+          end
+        RUBY
+      end
+
+      assert_match(
+        %r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' on call node enter enhancement},
+        stderr,
+      )
+      # The module should still be indexed
+      assert_entry("ActiveSupport::Concern", Entry::Module, "/fake/path/foo.rb:1-2:5-5")
+    end
+
+    def test_error_handling_in_on_call_node_leave_enhancement
+      enhancement_class = Class.new do
+        include Enhancement
+
+        def on_call_node_enter(index, owner, node, file_path, code_units_cache)
+          # Do nothing
+        end
+
+        def on_call_node_leave(index, owner, node, file_path, code_units_cache)
           raise "Error"
         end
 
@@ -189,7 +242,10 @@ module RubyIndexer
         RUBY
       end
 
-      assert_match(%r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' enhancement}, stderr)
+      assert_match(
+        %r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' on call node leave enhancement},
+        stderr,
+      )
       # The module should still be indexed
       assert_entry("ActiveSupport::Concern", Entry::Module, "/fake/path/foo.rb:1-2:5-5")
     end

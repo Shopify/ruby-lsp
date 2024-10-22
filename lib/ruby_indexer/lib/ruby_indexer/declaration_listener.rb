@@ -317,7 +317,9 @@ module RubyIndexer
       @enhancements.each do |enhancement|
         enhancement.on_call_node_enter(@index, @owner_stack.last, node, @file_path, @code_units_cache)
       rescue StandardError => e
-        @indexing_errors << "Indexing error in #{@file_path} with '#{enhancement.class.name}' enhancement: #{e.message}"
+        @indexing_errors << <<~MSG
+          Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node enter enhancement: #{e.message}
+        MSG
       end
     end
 
@@ -331,6 +333,14 @@ module RubyIndexer
         if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
           @visibility_stack.pop
         end
+      end
+
+      @enhancements.each do |enhancement|
+        enhancement.on_call_node_leave(@index, @owner_stack.last, node, @file_path, @code_units_cache)
+      rescue StandardError => e
+        @indexing_errors << <<~MSG
+          Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node leave enhancement: #{e.message}
+        MSG
       end
     end
 
