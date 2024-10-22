@@ -1021,6 +1021,72 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_global_variables
+    source = <<~RUBY
+      $qar &&= 1
+      $qaz += 1
+      $qux ||= 1
+      $quux, $qorge = 1
+      $qoo = 1
+
+      $q
+      $LOAD
+      $
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 6, character: 2 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["$qar", "$qaz", "$qux", "$quux", "$qorge", "$qoo"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["$LOADED_FEATURES", "$LOAD_PATH"], result.map(&:label))
+      assert_equal(["global_variables.rbs", "global_variables.rbs"], result.map { _1.label_details.description })
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 1 },
+      })
+
+      result = server.pop_response.response
+      assert_operator(result.size, :>, 40)
+    end
+  end
+
+  def test_completion_for_global_variables_show_only_uniq_entries
+    source = <<~RUBY
+      $qar &&= 1
+      $qar += 1
+      $qar ||= 1
+      $q
+    RUBY
+
+    with_server(source) do |server, uri|
+      index = server.instance_variable_get(:@global_state).index
+      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 3, character: 2 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["$qar"], result.map(&:label))
+    end
+  end
+
   def test_completion_for_instance_variables
     source = +<<~RUBY
       class Foo
