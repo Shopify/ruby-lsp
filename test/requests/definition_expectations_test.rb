@@ -722,6 +722,29 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_apply_target_correction
+    source = <<~RUBY
+      $foo &&= 1
+      $foo += 1
+      $foo ||= 1
+      $foo = 1
+    RUBY
+
+    lines_with_target_correction = [0, 1, 2, 3]
+
+    with_server(source) do |server, uri|
+      lines_with_target_correction.each do |line|
+        server.process_message(
+          id: 1,
+          method: "textDocument/definition",
+          params: { textDocument: { uri: uri }, position: { character: 5, line: line } },
+        )
+
+        assert_empty(server.pop_response.response)
+      end
+    end
+  end
+
   def test_definition_for_instance_variables
     source = <<~RUBY
       class Foo

@@ -77,11 +77,9 @@ module RubyLsp
             parent,
             position,
           )
-        elsif target.is_a?(Prism::CallNode) && !SPECIAL_METHOD_CALLS.include?(target.message) && !covers_position?(
-          target.message_loc, position
-        )
-          # If the target is a method call, we need to ensure that the requested position is exactly on top of the
-          # method identifier. Otherwise, we risk showing definitions for unrelated things
+        elsif position_outside_target?(position, target)
+          # We need to ensure that the requested position is exactly on top of the
+          # target in dedicated cases like method calls. Otherwise, we risk showing definitions for unrelated things
           target = nil
         # For methods with block arguments using symbol-to-proc
         elsif target.is_a?(Prism::SymbolNode) && parent.is_a?(Prism::BlockArgumentNode)
@@ -111,6 +109,23 @@ module RubyLsp
       def perform
         @dispatcher.dispatch_once(@target) if @target
         @response_builder.response
+      end
+
+      private
+
+      sig { params(position: T::Hash[Symbol, T.untyped], target: T.nilable(Prism::Node)).returns(T::Boolean) }
+      def position_outside_target?(position, target)
+        case target
+        when Prism::CallNode
+          !SPECIAL_METHOD_CALLS.include?(target.message) && !covers_position?(target.message_loc, position)
+        when Prism::GlobalVariableAndWriteNode,
+          Prism::GlobalVariableOperatorWriteNode,
+          Prism::GlobalVariableOrWriteNode,
+          Prism::GlobalVariableWriteNode
+          !covers_position?(target.name_loc, position)
+        else
+          false
+        end
       end
     end
   end
