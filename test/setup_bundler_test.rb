@@ -5,14 +5,14 @@ require "test_helper"
 require "ruby_lsp/setup_bundler"
 
 class SetupBundlerTest < Minitest::Test
-  def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle
+  def test_does_not_create_composed_gemfile_if_ruby_lsp_and_debug_are_in_the_bundle
     stub_bundle_with_env(bundle_env)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
     run_script
-    refute_path_exists(".ruby-lsp")
+    refute_path_exists(".ruby-lsp/Gemfile")
   end
 
-  def test_does_nothing_if_both_ruby_lsp_and_debug_are_in_the_bundle2
+  def test_does_not_create_composed_gemfile_if_all_gems_are_in_the_bundle_for_rails_apps
     stub_bundle_with_env(bundle_env)
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({
       "ruby-lsp" => true,
@@ -21,28 +21,7 @@ class SetupBundlerTest < Minitest::Test
       "debug" => true,
     })
     run_script
-    refute_path_exists(".ruby-lsp")
-  end
-
-  def test_removes_ruby_lsp_folder_if_both_gems_were_added_to_the_bundle
-    stub_bundle_with_env(bundle_env)
-    Bundler::LockfileParser.any_instance.expects(:dependencies).returns({ "ruby-lsp" => true, "debug" => true })
-    FileUtils.mkdir(".ruby-lsp")
-    run_script
-    refute_path_exists(".ruby-lsp")
-  ensure
-    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
-  end
-
-  def test_in_a_rails_app_removes_ruby_lsp_folder_if_all_gems_were_added_to_the_bundle
-    stub_bundle_with_env(bundle_env)
-    Bundler::LockfileParser.any_instance.expects(:dependencies)
-      .returns({ "ruby-lsp" => true, "ruby-lsp-rails" => true, "debug" => true })
-    FileUtils.mkdir(".ruby-lsp")
-    run_script
-    refute_path_exists(".ruby-lsp")
-  ensure
-    FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
+    refute_path_exists(".ruby-lsp/Gemfile")
   end
 
   def test_creates_custom_bundle
@@ -241,7 +220,7 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
-  def test_does_nothing_if_both_ruby_lsp_and_debug_are_gemspec_dependencies
+  def test_does_not_create_composed_gemfile_if_both_ruby_lsp_and_debug_are_gemspec_dependencies
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         # Write a fake Gemfile and gemspec
@@ -279,7 +258,7 @@ class SetupBundlerTest < Minitest::Test
           run_script(dir)
         end
 
-        refute_path_exists(".ruby-lsp")
+        refute_path_exists(".ruby-lsp/Gemfile")
       end
     end
   end
