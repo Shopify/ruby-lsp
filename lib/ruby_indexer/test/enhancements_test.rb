@@ -9,7 +9,7 @@ module RubyIndexer
       enhancement_class = Class.new do
         include Enhancement
 
-        def on_call_node(index, owner, node, file_path, code_units_cache)
+        def on_call_node_enter(index, owner, node, file_path, code_units_cache)
           return unless owner
           return unless node.name == :extend
 
@@ -101,7 +101,7 @@ module RubyIndexer
       enhancement_class = Class.new do
         include Enhancement
 
-        def on_call_node(index, owner, node, file_path, code_units_cache)
+        def on_call_node_enter(index, owner, node, file_path, code_units_cache)
           return unless owner
 
           name = node.name
@@ -164,7 +164,7 @@ module RubyIndexer
       enhancement_class = Class.new do
         include Enhancement
 
-        def on_call_node(index, owner, node, file_path, code_units_cache)
+        def on_call_node_enter(index, owner, node, file_path, code_units_cache)
           raise "Error"
         end
 

@@ -25,6 +25,6 @@ module RubyIndexer
         ),
       ).void
     end
-    def on_call_node(index, owner, node, file_path, code_units_cache); end
+    def on_call_node_enter(index, owner, node, file_path, code_units_cache); end
   end
 end
