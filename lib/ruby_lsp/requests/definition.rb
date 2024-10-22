@@ -12,12 +12,6 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
-      SPECIAL_METHOD_CALLS = [
-        :require,
-        :require_relative,
-        :autoload,
-      ].freeze
-
       sig do
         params(
           document: T.any(RubyDocument, ERBDocument),
@@ -78,8 +72,6 @@ module RubyLsp
             position,
           )
         elsif position_outside_target?(position, target)
-          # We need to ensure that the requested position is exactly on top of the
-          # target in dedicated cases like method calls. Otherwise, we risk showing definitions for unrelated things
           target = nil
         # For methods with block arguments using symbol-to-proc
         elsif target.is_a?(Prism::SymbolNode) && parent.is_a?(Prism::BlockArgumentNode)
@@ -116,8 +108,6 @@ module RubyLsp
       sig { params(position: T::Hash[Symbol, T.untyped], target: T.nilable(Prism::Node)).returns(T::Boolean) }
       def position_outside_target?(position, target)
         case target
-        when Prism::CallNode
-          !SPECIAL_METHOD_CALLS.include?(target.message) && !covers_position?(target.message_loc, position)
         when Prism::GlobalVariableAndWriteNode,
           Prism::GlobalVariableOperatorWriteNode,
           Prism::GlobalVariableOrWriteNode,
