@@ -3,6 +3,9 @@
 
 require "sorbet-runtime"
 require "bundler"
+require "bundler/cli"
+require "bundler/cli/install"
+require "bundler/cli/update"
 require "fileutils"
 require "pathname"
 require "digest"
@@ -48,6 +51,7 @@ module RubyLsp
       @custom_lockfile = T.let(@custom_dir + (@lockfile&.basename || "Gemfile.lock"), Pathname)
       @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
       @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
+      @error_path = T.let(@custom_dir + "install_error", Pathname)
 
       dependencies, bundler_version = load_dependencies
       @dependencies = T.let(dependencies, T::Hash[String, T.untyped])
@@ -187,6 +191,55 @@ module RubyLsp
         env["BUNDLE_PATH"] = File.expand_path(env["BUNDLE_PATH"], @project_path)
       end
 
+      return run_bundle_install_through_command(env) unless @launcher
+
+      # This same check happens conditionally when running through the command. For invoking the CLI directly, it's
+      # important that we ensure the Bundler version is set to avoid restarts
+      if @bundler_version
+        env["BUNDLER_VERSION"] = @bundler_version.to_s
+        install_bundler_if_needed
+      end
+
+      begin
+        run_bundle_install_directly(env)
+        # If no error occurred, then clear previous errors
+        @error_path.delete if @error_path.exist?
+        $stderr.puts("Ruby LSP> Composed bundle setup complete")
+      rescue => e
+        # Write the error object to a file so that we can read it from the parent process
+        @error_path.write(Marshal.dump(e))
+      end
+
+      env
+    end
+
+    sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
+    def run_bundle_install_directly(env)
+      T.unsafe(ENV).merge!(env)
+
+      unless should_bundle_update?
+        RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
+        Bundler::CLI::Install.new({}).run
+
+        return env
+      end
+
+      # If any of `ruby-lsp`, `ruby-lsp-rails` or `debug` are not in the Gemfile, try to update them to the latest
+      # version
+      gems = []
+      gems << "ruby-lsp" unless @dependencies["ruby-lsp"]
+      gems << "debug" unless @dependencies["debug"]
+      gems << "ruby-lsp-rails" if @rails_app && !@dependencies["ruby-lsp-rails"]
+
+      RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
+      Bundler::CLI::Update.new({}, gems).run
+
+      @last_updated_path.write(Time.now.iso8601)
+      env
+    end
+
+    sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
+    def run_bundle_install_through_command(env)
       base_bundle = base_bundle_command(env)
 
       # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
