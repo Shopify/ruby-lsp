@@ -63,7 +63,7 @@ module RubyLsp
     sig { abstract.returns(LanguageId) }
     def language_id; end
 
-    # TODO: remove this method once all nonpositional requests have been migrated to the listener pattern
+    # TODO: remove this method once all non-positional requests have been migrated to the listener pattern
     sig do
       type_parameters(:T)
         .params(

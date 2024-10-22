@@ -378,11 +378,11 @@ pathname.a
 ```
 
 We do not recommend renaming methods, instance variables or local variables for the sole purpose of getting better
-accuracy - readibility should always come first. For example:
+accuracy - readability should always come first. For example:
 
 ```ruby
 # It would not be a good idea to name every string "string" for the sake of getting better accuracy.
-# Using descriptive names will outweight the benefits of the more accurate editor experience
+# Using descriptive names will outweigh the benefits of the more accurate editor experience
 
 # don't
 string = something.other_thing

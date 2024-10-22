@@ -14,35 +14,5 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
-  },
-  "cSpell.languageSettings": [
-    {
-      "languageId": "*",
-      "locale": "en",
-      "dictionaries": [
-        "wordsEn"
-      ]
-    },
-    {
-      "languageId": "*",
-      "locale": "en-US",
-      "dictionaries": [
-        "wordsEn"
-      ]
-    },
-    {
-      "languageId": "*",
-      "dictionaries": [
-        "companies",
-        "softwareTerms",
-        "misc"
-      ]
-    },
-    {
-      "languageId": "ruby",
-      "dictionaries": [
-        "ruby"
-      ]
-    }
   ],
 }
