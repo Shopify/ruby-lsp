@@ -315,7 +315,7 @@ module RubyIndexer
       end
 
       @enhancements.each do |enhancement|
-        enhancement.on_call_node_enter(@index, @owner_stack.last, node, @file_path, @code_units_cache)
+        enhancement.on_call_node_enter(@owner_stack.last, node, @file_path, @code_units_cache)
       rescue StandardError => e
         @indexing_errors << <<~MSG
           Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node enter enhancement: #{e.message}
@@ -336,7 +336,7 @@ module RubyIndexer
       end
 
       @enhancements.each do |enhancement|
-        enhancement.on_call_node_leave(@index, @owner_stack.last, node, @file_path, @code_units_cache)
+        enhancement.on_call_node_leave(@owner_stack.last, node, @file_path, @code_units_cache)
       rescue StandardError => e
         @indexing_errors << <<~MSG
           Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node leave enhancement: #{e.message}
