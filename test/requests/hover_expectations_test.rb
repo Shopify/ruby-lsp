@@ -109,7 +109,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       $foo = 1
     RUBY
 
-    lines_with_target_correction = [1, 2, 3, 4]
+    lines_with_target_correction = [0, 1, 2, 3]
 
     with_server(source) do |server, uri|
       lines_with_target_correction.each do |line|
