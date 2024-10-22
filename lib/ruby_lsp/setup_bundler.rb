@@ -233,7 +233,7 @@ module RubyLsp
       # Try to run the bundle install or update command. If that fails, it normally means that the custom lockfile is in
       # a bad state that no longer reflects the top level one. In that case, we can remove the whole directory, try
       # another time and give up if it fails again
-      if !system(env, command) && !@retry && @custom_dir.exist?
+      if !system(env, command) && !@retry && @custom_gemfile.exist?
         @retry = true
         @custom_dir.rmtree
         $stderr.puts("Ruby LSP> Running bundle install failed. Trying to re-generate the custom bundle from scratch")
