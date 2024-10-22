@@ -142,9 +142,14 @@ export class RubyLsp {
       const workspaceFolder = vscode.workspace.getWorkspaceFolder(
         activeDocument.uri,
       );
+      if (workspaceFolder) {
+        const existingWorkspace = this.workspaces.get(
+          workspaceFolder.uri.toString(),
+        );
 
-      if (workspaceFolder && workspaceFolder !== firstWorkspace) {
-        await this.activateWorkspace(workspaceFolder, true);
+        if (workspaceFolder && !existingWorkspace) {
+          await this.activateWorkspace(workspaceFolder, false);
+        }
       }
     }
 
