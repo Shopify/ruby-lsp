@@ -673,6 +673,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def test_definition_for_global_variables
     source = <<~RUBY
+      $bar &&= 1
+      $bar += 1
+      $foo ||= 1
+      $bar, $foo = 1
+      $foo = 1
       $DEBUG
     RUBY
 
@@ -685,10 +690,64 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
       )
+
+      response = server.pop_response.response
+      assert_equal(3, response.size)
+      assert_equal(0, response[0].range.start.line)
+      assert_equal(1, response[1].range.start.line)
+      assert_equal(3, response[2].range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 1, line: 2 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(3, response.size)
+      assert_equal(2, response[0].range.start.line)
+      assert_equal(3, response[1].range.start.line)
+      assert_equal(4, response[2].range.start.line)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 1, line: 5 } },
+      )
+
       response = server.pop_response.response.first
       assert_match(%r{/gems/rbs-.*/core/global_variables.rbs}, response.uri)
       assert_equal(response.range.start.line, response.range.end.line)
       assert_operator(response.range.start.character, :<, response.range.end.character)
+    end
+  end
+
+  def test_definition_apply_target_correction
+    source = <<~RUBY
+      $foo &&= 1
+      $foo += 1
+      $foo ||= 1
+      $foo = 1
+      class Foo
+        @foo &&= 1
+        @foo += 1
+        @foo ||= 1
+        @foo = 1
+      end
+    RUBY
+
+    lines_with_target_correction = [0, 1, 2, 3, 5, 6, 7, 8]
+
+    with_server(source) do |server, uri|
+      lines_with_target_correction.each do |line|
+        server.process_message(
+          id: 1,
+          method: "textDocument/definition",
+          params: { textDocument: { uri: uri }, position: { character: 7, line: line } },
+        )
+
+        assert_empty(server.pop_response.response)
+      end
     end
   end
 

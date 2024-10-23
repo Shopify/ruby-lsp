@@ -39,7 +39,12 @@ module RubyLsp
           :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
+          :on_global_variable_and_write_node_enter,
+          :on_global_variable_operator_write_node_enter,
+          :on_global_variable_or_write_node_enter,
           :on_global_variable_read_node_enter,
+          :on_global_variable_target_node_enter,
+          :on_global_variable_write_node_enter,
           :on_instance_variable_read_node_enter,
           :on_instance_variable_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -121,23 +126,34 @@ module RubyLsp
         find_in_index(name)
       end
 
+      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      def on_global_variable_and_write_node_enter(node)
+        handle_global_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      def on_global_variable_operator_write_node_enter(node)
+        handle_global_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      def on_global_variable_or_write_node_enter(node)
+        handle_global_variable_definition(node.name.to_s)
+      end
+
       sig { params(node: Prism::GlobalVariableReadNode).void }
       def on_global_variable_read_node_enter(node)
-        entries = @index[node.name.to_s]
+        handle_global_variable_definition(node.name.to_s)
+      end
 
-        return unless entries
+      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      def on_global_variable_target_node_enter(node)
+        handle_global_variable_definition(node.name.to_s)
+      end
 
-        entries.each do |entry|
-          location = entry.location
-
-          @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: entry.file_path).to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
-          )
-        end
+      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      def on_global_variable_write_node_enter(node)
+        handle_global_variable_definition(node.name.to_s)
       end
 
       sig { params(node: Prism::InstanceVariableReadNode).void }
@@ -195,6 +211,25 @@ module RubyLsp
           @type_inferrer.infer_receiver_type(@node_context),
           inherited_only: true,
         )
+      end
+
+      sig { params(name: String).void }
+      def handle_global_variable_definition(name)
+        entries = @index[name]
+
+        return unless entries
+
+        entries.each do |entry|
+          location = entry.location
+
+          @response_builder << Interface::Location.new(
+            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
       end
 
       sig { params(name: String).void }
