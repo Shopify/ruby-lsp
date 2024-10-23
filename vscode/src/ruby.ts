@@ -51,15 +51,18 @@ export class Ruby implements RubyInterface {
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
   private readonly outputChannel: WorkspaceChannel;
+  private readonly telemetry: vscode.TelemetryLogger;
 
   constructor(
     context: vscode.ExtensionContext,
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    telemetry: vscode.TelemetryLogger,
   ) {
     this.context = context;
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
+    this.telemetry = telemetry;
 
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -125,6 +128,10 @@ export class Ruby implements RubyInterface {
       try {
         await this.runManagerActivation();
       } catch (error: any) {
+        this.telemetry.logError(error, {
+          versionManager: this.versionManager.identifier,
+        });
+
         // If an error occurred and a global Ruby path is configured, then we can try to fallback to that
         const globalRubyPath = vscode.workspace
           .getConfiguration("rubyLsp")

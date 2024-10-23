@@ -44,7 +44,12 @@ export class Workspace implements WorkspaceInterface {
       LOG_CHANNEL,
     );
     this.telemetry = telemetry;
-    this.ruby = new Ruby(context, workspaceFolder, this.outputChannel);
+    this.ruby = new Ruby(
+      context,
+      workspaceFolder,
+      this.outputChannel,
+      telemetry,
+    );
     this.createTestItems = createTestItems;
     this.isMainWorkspace = isMainWorkspace;
     this.virtualDocuments = virtualDocuments;

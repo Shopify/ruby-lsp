@@ -13,6 +13,8 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../common";
 import { RUBY_VERSION } from "../rubyVersion";
 
+import { FAKE_TELEMETRY } from "./fakeTelemetry";
+
 suite("Debugger", () => {
   test("Provide debug configurations returns the default configs", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
@@ -203,7 +205,12 @@ suite("Debugger", () => {
       name: path.basename(tmpPath),
       index: 0,
     };
-    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+    const ruby = new Ruby(
+      context,
+      workspaceFolder,
+      outputChannel,
+      FAKE_TELEMETRY,
+    );
     await ruby.activateRuby();
 
     try {

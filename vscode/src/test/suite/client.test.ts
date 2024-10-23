@@ -138,7 +138,12 @@ async function launchClient(workspaceUri: vscode.Uri) {
     }
   }
 
-  const ruby = new Ruby(context, workspaceFolder, outputChannel);
+  const ruby = new Ruby(
+    context,
+    workspaceFolder,
+    outputChannel,
+    FAKE_TELEMETRY,
+  );
   await ruby.activateRuby();
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 

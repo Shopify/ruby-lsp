@@ -11,6 +11,8 @@ import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
 import { ACTIVATION_SEPARATOR } from "../../ruby/versionManager";
 
+import { FAKE_TELEMETRY } from "./fakeTelemetry";
+
 suite("Ruby environment activation", () => {
   const workspacePath = path.dirname(
     path.dirname(path.dirname(path.dirname(__dirname))),
@@ -48,7 +50,12 @@ suite("Ruby environment activation", () => {
         },
       } as unknown as vscode.WorkspaceConfiguration);
 
-    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+    const ruby = new Ruby(
+      context,
+      workspaceFolder,
+      outputChannel,
+      FAKE_TELEMETRY,
+    );
     await ruby.activateRuby();
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
@@ -80,7 +87,12 @@ suite("Ruby environment activation", () => {
         },
       } as unknown as vscode.WorkspaceConfiguration);
 
-    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+    const ruby = new Ruby(
+      context,
+      workspaceFolder,
+      outputChannel,
+      FAKE_TELEMETRY,
+    );
 
     process.env.VERBOSE = "1";
     process.env.DEBUG = "WARN";
@@ -123,7 +135,12 @@ suite("Ruby environment activation", () => {
       stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
 
-    const ruby = new Ruby(context, workspaceFolder, outputChannel);
+    const ruby = new Ruby(
+      context,
+      workspaceFolder,
+      outputChannel,
+      FAKE_TELEMETRY,
+    );
     await ruby.activateRuby();
     execStub.restore();
     configStub.restore();
