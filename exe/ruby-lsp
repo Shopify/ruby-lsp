@@ -33,6 +33,10 @@ parser = OptionParser.new do |opts|
     options[:doctor] = true
   end
 
+  opts.on("--use-launcher", "[EXPERIMENTAL] Use launcher mechanism to handle missing dependencies gracefully") do
+    options[:launcher] = true
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
@@ -54,6 +58,17 @@ end
 # using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
 # the application's bundle
 if ENV["BUNDLE_GEMFILE"].nil?
+  # Substitute the current process by the launcher. RubyGems activates all dependencies of a gem's executable eagerly,
+  # but we can't have that happen because we want to invoke Bundler.setup ourselves with the composed bundle and avoid
+  # duplicate spec activation errors. Replacing the process with the launcher executable will clear the activated specs,
+  # which gives us the opportunity to control which specs are activated and enter degraded mode if any gems failed to
+  # install rather than failing to boot the server completely
+  if options[:launcher]
+    command = +File.expand_path("ruby-lsp-launcher", __dir__)
+    command << " --debug" if options[:debug]
+    exit exec(command)
+  end
+
   require_relative "../lib/ruby_lsp/setup_bundler"
 
   begin
@@ -72,9 +87,9 @@ if ENV["BUNDLE_GEMFILE"].nil?
   exit exec(env, "#{base_bundle} exec ruby-lsp #{original_args.join(" ")}")
 end
 
-require "ruby_lsp/load_sorbet"
-
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+
+require "ruby_lsp/load_sorbet"
 require "ruby_lsp/internal"
 
 T::Utils.run_all_sig_blocks

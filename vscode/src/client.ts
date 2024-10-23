@@ -62,6 +62,7 @@ function getLspExecutables(
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
   const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
+  const useLauncher: boolean = config.get("useLauncher")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
@@ -98,17 +99,25 @@ function getLspExecutables(
       options: executableOptions,
     };
   } else {
-    const argsWithBranch = branch.length > 0 ? ["--branch", branch] : [];
+    const args = [];
+
+    if (branch.length > 0) {
+      args.push("--branch", branch);
+    }
+
+    if (useLauncher) {
+      args.push("--use-launcher");
+    }
 
     run = {
       command: "ruby-lsp",
-      args: argsWithBranch,
+      args,
       options: executableOptions,
     };
 
     debug = {
       command: "ruby-lsp",
-      args: argsWithBranch.concat(["--debug"]),
+      args: args.concat(["--debug"]),
       options: executableOptions,
     };
   }
