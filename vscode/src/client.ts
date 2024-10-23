@@ -451,7 +451,13 @@ export default class Client extends LanguageClient implements ClientInterface {
                 name: errorClass,
                 stack,
               },
-              { ...error.data, serverVersion: this.serverVersion },
+              {
+                ...error.data,
+                serverVersion: this.serverVersion,
+                workspace: new vscode.TelemetryTrustedValue(
+                  this.workingDirectory,
+                ),
+              },
             );
           }
         }
