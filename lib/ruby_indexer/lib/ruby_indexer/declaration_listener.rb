@@ -758,33 +758,39 @@ module RubyIndexer
       arguments_node = node.arguments
       return unless arguments_node
 
-      name_argument = arguments_node.arguments.first
-      return unless name_argument.is_a?(Prism::SymbolNode)
-
-      method_name = name_argument.value.to_s
       owner_name = @owner_stack.last&.name
       return unless owner_name
 
-      entries = @index.resolve_method(method_name, owner_name)
-      return unless entries
+      arguments_node.arguments.each do |argument|
+        method_name = case argument
+        when Prism::StringNode
+          argument.content
+        when Prism::SymbolNode
+          argument.value
+        end
+        next unless method_name
 
-      entries.each do |entry|
-        entry_owner_name = entry.owner&.name
-        next unless entry_owner_name
+        entries = @index.resolve_method(method_name, owner_name)
+        next unless entries
 
-        entry.visibility = Entry::Visibility::PRIVATE
+        entries.each do |entry|
+          entry_owner_name = entry.owner&.name
+          next unless entry_owner_name
 
-        singleton = @index.existing_or_new_singleton_class(entry_owner_name)
-        @index.add(Entry::Method.new(
-          method_name,
-          @file_path,
-          Location.from_prism_location(node.location, @code_units_cache),
-          Location.from_prism_location(T.must(node.message_loc), @code_units_cache),
-          collect_comments(node),
-          [],
-          Entry::Visibility::PUBLIC,
-          singleton,
-        ))
+          entry.visibility = Entry::Visibility::PRIVATE
+
+          singleton = @index.existing_or_new_singleton_class(entry_owner_name)
+          @index.add(Entry::Method.new(
+            method_name,
+            @file_path,
+            Location.from_prism_location(node.location, @code_units_cache),
+            Location.from_prism_location(T.must(node.message_loc), @code_units_cache),
+            collect_comments(node),
+            entry.signatures,
+            Entry::Visibility::PUBLIC,
+            singleton,
+          ))
+        end
       end
     end
 
