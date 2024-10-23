@@ -780,11 +780,12 @@ module RubyIndexer
           entry.visibility = Entry::Visibility::PRIVATE
 
           singleton = @index.existing_or_new_singleton_class(entry_owner_name)
+          location = Location.from_prism_location(argument.location, @code_units_cache)
           @index.add(Entry::Method.new(
             method_name,
             @file_path,
-            Location.from_prism_location(node.location, @code_units_cache),
-            Location.from_prism_location(T.must(node.message_loc), @code_units_cache),
+            location,
+            location,
             collect_comments(node),
             entry.signatures,
             Entry::Visibility::PUBLIC,
