@@ -4,11 +4,13 @@ autoloaded
 autorun
 bigdecimal
 bindir
+binmode
 binread
 Bizt
 Bizw
 bufnr
 binstub
+bytesize
 byteslice
 codepoint
 codepoints
@@ -19,6 +21,7 @@ dont
 eglot
 Eglot
 eruby
+exitstatus
 EXTGLOB
 FIXEDENCODING
 Floo
@@ -47,6 +50,7 @@ nargs
 nodoc
 noreturn
 nvim
+popen
 qtlzwssomeking
 quickfixes
 quxx

@@ -78,7 +78,117 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_launch_mode_with_no_gemfile
+    skip("CI only") unless ENV["CI"]
+
+    in_temp_dir do |dir|
+      Bundler.with_unbundled_env do
+        launch(dir)
+      end
+    end
+  end
+
+  def test_launch_mode_with_missing_lockfile
+    skip("CI only") unless ENV["CI"]
+
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        launch(dir)
+      end
+    end
+  end
+
+  def test_launch_mode_with_full_bundle
+    skip("CI only") unless ENV["CI"]
+
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            stringio (3.1.0)
+
+        PLATFORMS
+          arm64-darwin-23
+          ruby
+
+        DEPENDENCIES
+          stringio
+
+        BUNDLED WITH
+          2.5.7
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+      Bundler.with_unbundled_env do
+        launch(dir)
+      end
+    end
+  end
+
+  def test_launch_mode_with_no_gemfile_and_bundle_path
+    skip("CI only") unless ENV["CI"]
+
+    in_temp_dir do |dir|
+      Bundler.with_unbundled_env do
+        system("bundle config --local path #{File.join("vendor", "bundle")}")
+        assert_path_exists(File.join(dir, ".bundle", "config"))
+
+        launch(dir)
+      end
+    end
+  end
+
   private
+
+  def launch(workspace_path)
+    initialize_request = {
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace_path).to_s }],
+      },
+    }.to_json
+
+    $stdin.expects(:gets).with("\r\n\r\n").once.returns("Content-Length: #{initialize_request.bytesize}")
+    $stdin.expects(:read).with(initialize_request.bytesize).once.returns(initialize_request)
+
+    # Make `new` return a mock that raises so that we don't print to stdout and stop immediately after boot
+    server_object = mock("server")
+    server_object.expects(:start).once.raises(StandardError.new("stop"))
+    RubyLsp::Server.expects(:new).returns(server_object)
+
+    # We load the launcher binary in the same process as the tests are running. We cannot try to re-activate a different
+    # Bundler version, because that throws an error
+    if File.exist?(File.join(workspace_path, "Gemfile.lock"))
+      spec_mock = mock("specification")
+      spec_mock.expects(:activate).once
+      Gem::Specification.expects(:find_by_name).with do |name, version|
+        name == "bundler" && !version.empty?
+      end.returns(spec_mock)
+    end
+
+    # Verify that we are setting up the bundle, but there's no actual need to do it
+    Bundler.expects(:setup).once
+
+    assert_raises(StandardError) do
+      load(File.expand_path("../exe/ruby-lsp-launcher", __dir__))
+    end
+
+    assert_path_exists(File.join(workspace_path, ".ruby-lsp", "bundle_gemfile"))
+  end
 
   def in_temp_dir
     Dir.mktmpdir do |dir|

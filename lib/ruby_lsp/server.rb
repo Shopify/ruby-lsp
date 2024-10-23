@@ -1043,7 +1043,7 @@ module RubyLsp
             }
           end
         end
-      rescue Bundler::GemfileNotFound
+      rescue Bundler::GemfileNotFound, Bundler::GitError
         []
       end
 

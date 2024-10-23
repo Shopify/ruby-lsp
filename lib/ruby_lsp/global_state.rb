@@ -231,7 +231,9 @@ module RubyLsp
     sig { returns(T::Array[String]) }
     def gather_direct_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
-      Bundler.locked_gems.dependencies.keys + gemspec_dependencies
+
+      dependencies = Bundler.locked_gems&.dependencies&.keys || []
+      dependencies + gemspec_dependencies
     rescue Bundler::GemfileNotFound
       []
     end

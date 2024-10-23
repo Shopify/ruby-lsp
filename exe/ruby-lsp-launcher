@@ -19,24 +19,16 @@ raw_initialize = $stdin.read(content_length)
 bundle_gemfile_file = File.join(".ruby-lsp", "bundle_gemfile")
 locked_bundler_version_file = File.join(".ruby-lsp", "locked_bundler_version")
 
-# Composed the Ruby LSP bundle in a forked process so that we can require gems without polluting the main process
-# `$LOAD_PATH` and `Gem.loaded_specs`
-pid = fork do
-  require_relative "../lib/ruby_lsp/setup_bundler"
-  require "json"
-  require "uri"
-  require "core_ext/uri"
-
-  initialize_request = JSON.parse(raw_initialize, symbolize_names: true)
-  workspace_uri = initialize_request.dig(:params, :workspaceFolders, 0, :uri)
-  workspace_path = workspace_uri && URI(workspace_uri).to_standardized_path
-  workspace_path ||= Dir.pwd
-
-  env = RubyLsp::SetupBundler.new(workspace_path).setup!
-  File.write(bundle_gemfile_file, env["BUNDLE_GEMFILE"])
-  File.write(locked_bundler_version_file, env["BUNDLER_VERSION"]) if env["BUNDLER_VERSION"]
-rescue RubyLsp::SetupBundler::BundleNotLocked
-  warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems and restart the server")
+# Compose the Ruby LSP bundle in a forked process so that we can require gems without polluting the main process
+# `$LOAD_PATH` and `Gem.loaded_specs`. Windows doesn't support forking, so we need a separate path to support it
+pid = if Gem.win_platform?
+  spawn(Gem.ruby, File.expand_path("../lib/ruby_lsp/scripts/compose_bundle_windows.rb", __dir__), raw_initialize)
+else
+  fork do
+    $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+    require "ruby_lsp/scripts/compose_bundle"
+    compose(raw_initialize)
+  end
 end
 
 # Wait until the composed Bundle is finished
