@@ -17,7 +17,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -51,7 +51,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -85,7 +85,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -119,7 +119,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public",
           {
             "start_line": 5,
             "start_column": 2,
@@ -152,7 +152,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public",
           {
             "start_line": 5,
             "start_column": 2,
@@ -185,7 +185,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public",
           {
             "start_line": 5,
             "start_column": 2,
@@ -218,7 +218,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public_command",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_command",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_command",
           {
             "start_line": 9,
             "start_column": 9,
@@ -251,7 +251,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public_command",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_command",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_command",
           {
             "start_line": 9,
             "start_column": 9,
@@ -284,7 +284,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public_command",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_command",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_command",
           {
             "start_line": 9,
             "start_column": 9,
@@ -317,7 +317,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_another_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_another_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_another_public",
           {
             "start_line": 11,
             "start_column": 9,
@@ -350,7 +350,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_another_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_another_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_another_public",
           {
             "start_line": 11,
             "start_column": 9,
@@ -383,7 +383,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_another_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_another_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_another_public",
           {
             "start_line": 11,
             "start_column": 9,
@@ -416,7 +416,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public_vcall",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_vcall",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_vcall",
           {
             "start_line": 17,
             "start_column": 2,
@@ -449,7 +449,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public_vcall",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_vcall",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_vcall",
           {
             "start_line": 17,
             "start_column": 2,
@@ -482,7 +482,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_public_vcall",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_public_vcall",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_vcall",
           {
             "start_line": 17,
             "start_column": 2,
@@ -515,7 +515,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_with_q?",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
@@ -548,7 +548,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_with_q?",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
@@ -581,7 +581,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "Test#test_with_q?",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
           {
             "start_line": 19,
             "start_column": 2,
@@ -614,7 +614,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
           {
             "start_line": 24,
             "start_column": 0,
@@ -648,7 +648,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
           {
             "start_line": 24,
             "start_column": 0,
@@ -682,7 +682,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
           {
             "start_line": 24,
             "start_column": 0,
@@ -716,7 +716,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest#test_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public",
           {
             "start_line": 25,
             "start_column": 2,
@@ -749,7 +749,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest#test_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public",
           {
             "start_line": 25,
             "start_column": 2,
@@ -782,7 +782,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest#test_public",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public",
           {
             "start_line": 25,
             "start_column": 2,
@@ -815,7 +815,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest#test_public_2",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
           {
             "start_line": 31,
             "start_column": 2,
@@ -848,7 +848,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest#test_public_2",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
           {
             "start_line": 31,
             "start_column": 2,
@@ -881,7 +881,7 @@
         "arguments": [
           "/fixtures/minitest_tests.rb",
           "AnotherTest#test_public_2",
-          "bundle exec ruby -Itest /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
           {
             "start_line": 31,
             "start_column": 2,
