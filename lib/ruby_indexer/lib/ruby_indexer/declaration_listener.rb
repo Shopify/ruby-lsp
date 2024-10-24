@@ -786,7 +786,7 @@ module RubyIndexer
             @file_path,
             location,
             location,
-            collect_comments(node),
+            collect_comments(node)&.concat(entry.comments),
             entry.signatures,
             Entry::Visibility::PUBLIC,
             singleton,
