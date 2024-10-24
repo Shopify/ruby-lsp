@@ -259,6 +259,7 @@ module RubyLsp
           version: VERSION,
         },
         formatter: @global_state.formatter,
+        degraded_mode: !!(@install_error || @setup_error),
       }
 
       send_message(Result.new(id: message[:id], response: response))

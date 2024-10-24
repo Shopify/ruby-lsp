@@ -41,6 +41,7 @@ suite("StatusItems", () => {
           formatter: "none",
           serverVersion: "1.0.0",
           sendRequest: <T>() => Promise.resolve([] as T),
+          degraded: false,
         },
         error: false,
       };
@@ -78,6 +79,7 @@ suite("StatusItems", () => {
           formatter: "none",
           serverVersion: "1.0.0",
           sendRequest: <T>() => Promise.resolve([] as T),
+          degraded: false,
         },
         error: false,
       };
@@ -128,6 +130,19 @@ suite("StatusItems", () => {
       );
       assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
+
+    test("Refresh when server is in degraded mode", () => {
+      workspace.lspClient!.degraded = true;
+      status.refresh(workspace);
+      assert.strictEqual(
+        status.item.text,
+        "Ruby LSP v1.0.0: Running (degraded)",
+      );
+      assert.strictEqual(
+        status.item.severity,
+        vscode.LanguageStatusSeverity.Warning,
+      );
+    });
   });
 
   suite("ExperimentalFeaturesStatus", () => {
@@ -141,6 +156,7 @@ suite("StatusItems", () => {
           formatter,
           serverVersion: "1.0.0",
           sendRequest: <T>() => Promise.resolve([] as T),
+          degraded: false,
         },
         error: false,
       };
@@ -170,6 +186,7 @@ suite("StatusItems", () => {
           formatter: "none",
           serverVersion: "1.0.0",
           sendRequest: <T>() => Promise.resolve([] as T),
+          degraded: false,
         },
         error: false,
       };
@@ -258,6 +275,7 @@ suite("StatusItems", () => {
           state: State.Running,
           formatter: "auto",
           serverVersion: "1.0.0",
+          degraded: false,
           sendRequest: <T>() => Promise.resolve([] as T),
         },
         error: false,
@@ -283,6 +301,7 @@ suite("StatusItems", () => {
           addons: undefined,
           state: State.Running,
           formatter: "auto",
+          degraded: false,
           serverVersion: "1.0.0",
           sendRequest: <T>() => Promise.resolve([] as T),
         },

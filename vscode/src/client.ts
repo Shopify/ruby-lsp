@@ -279,6 +279,7 @@ export default class Client extends LanguageClient implements ClientInterface {
   public readonly ruby: Ruby;
   public serverVersion?: string;
   public addons?: Addon[];
+  public degraded = false;
   private readonly workingDirectory: string;
   private readonly telemetry: vscode.TelemetryLogger;
   private readonly createTestItems: (response: CodeLens[]) => void;
@@ -355,6 +356,11 @@ export default class Client extends LanguageClient implements ClientInterface {
   async afterStart() {
     this.#formatter = this.initializeResult?.formatter;
     this.serverVersion = this.initializeResult?.serverInfo?.version;
+
+    if (this.initializeResult?.degraded_mode) {
+      this.degraded = this.initializeResult?.degraded_mode;
+    }
+
     await this.fetchAddons();
   }
 
