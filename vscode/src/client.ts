@@ -131,6 +131,7 @@ function collectClientOptions(
   outputChannel: WorkspaceChannel,
   ruby: Ruby,
   isMainWorkspace: boolean,
+  telemetry: vscode.TelemetryLogger,
 ): LanguageClientOptions {
   const pullOn: "change" | "save" | "both" =
     configuration.get("pullDiagnosticsOn")!;
@@ -204,7 +205,7 @@ function collectClientOptions(
     outputChannel,
     revealOutputChannelOn: RevealOutputChannelOn.Never,
     diagnosticPullOptions,
-    errorHandler: new ClientErrorHandler(workspaceFolder),
+    errorHandler: new ClientErrorHandler(workspaceFolder, telemetry),
     initializationOptions: {
       enabledFeatures,
       experimentalFeaturesEnabled: configuration.get(
@@ -221,9 +222,14 @@ function collectClientOptions(
 
 class ClientErrorHandler implements ErrorHandler {
   private readonly workspaceFolder: vscode.WorkspaceFolder;
+  private readonly telemetry: vscode.TelemetryLogger;
 
-  constructor(workspaceFolder: vscode.WorkspaceFolder) {
+  constructor(
+    workspaceFolder: vscode.WorkspaceFolder,
+    telemetry: vscode.TelemetryLogger,
+  ) {
     this.workspaceFolder = workspaceFolder;
+    this.telemetry = telemetry;
   }
 
   error(
@@ -235,6 +241,19 @@ class ClientErrorHandler implements ErrorHandler {
   }
 
   async closed(): Promise<CloseHandlerResult> {
+    const label = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get("useLauncher")
+      ? "launcher"
+      : "direct";
+
+    this.telemetry.logUsage("ruby_lsp.launch_failure", {
+      type: "counter",
+      attributes: {
+        label,
+      },
+    });
+
     const answer = await vscode.window.showErrorMessage(
       `Launching the Ruby LSP failed. This typically happens due to an error with version manager
       integration or Bundler issues.
@@ -309,6 +328,7 @@ export default class Client extends LanguageClient implements ClientInterface {
         outputChannel,
         ruby,
         isMainWorkspace,
+        telemetry,
       ),
       debugMode,
     );
