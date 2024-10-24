@@ -417,12 +417,16 @@ export class Workspace implements WorkspaceInterface {
     const start = () => {
       this.#inhibitRestart = true;
     };
-    const stop = async () => {
-      this.#inhibitRestart = false;
+    const debouncedRestart = debounce(async () => {
       this.outputChannel.info(
         `Restarting the Ruby LSP because ${glob} changed`,
       );
       await this.restart();
+    }, 5000);
+
+    const stop = async () => {
+      this.#inhibitRestart = false;
+      await debouncedRestart();
     };
 
     this.context.subscriptions.push(
