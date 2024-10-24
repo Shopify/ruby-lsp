@@ -312,6 +312,8 @@ module RubyIndexer
         @visibility_stack.push(Entry::Visibility::PROTECTED)
       when :private
         @visibility_stack.push(Entry::Visibility::PRIVATE)
+      when :module_function
+        handle_module_function(node)
       end
 
       @enhancements.each do |enhancement|
@@ -758,6 +760,48 @@ module RubyIndexer
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
         # Do nothing
+      end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def handle_module_function(node)
+      arguments_node = node.arguments
+      return unless arguments_node
+
+      owner_name = @owner_stack.last&.name
+      return unless owner_name
+
+      arguments_node.arguments.each do |argument|
+        method_name = case argument
+        when Prism::StringNode
+          argument.content
+        when Prism::SymbolNode
+          argument.value
+        end
+        next unless method_name
+
+        entries = @index.resolve_method(method_name, owner_name)
+        next unless entries
+
+        entries.each do |entry|
+          entry_owner_name = entry.owner&.name
+          next unless entry_owner_name
+
+          entry.visibility = Entry::Visibility::PRIVATE
+
+          singleton = @index.existing_or_new_singleton_class(entry_owner_name)
+          location = Location.from_prism_location(argument.location, @code_units_cache)
+          @index.add(Entry::Method.new(
+            method_name,
+            @file_path,
+            location,
+            location,
+            collect_comments(node)&.concat(entry.comments),
+            entry.signatures,
+            Entry::Visibility::PUBLIC,
+            singleton,
+          ))
+        end
       end
     end
 

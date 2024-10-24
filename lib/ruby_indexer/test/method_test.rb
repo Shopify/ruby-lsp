@@ -123,6 +123,32 @@ module RubyIndexer
       assert_entry("baz", Entry::Method, "/fake/path/foo.rb:9-2:9-14", visibility: Entry::Visibility::PRIVATE)
     end
 
+    def test_visibility_tracking_with_module_function
+      index(<<~RUBY)
+        module Test
+          def foo; end
+          def bar; end
+          module_function :foo, "bar"
+        end
+      RUBY
+
+      ["foo", "bar"].each do |keyword|
+        entries = T.must(@index[keyword])
+        # should receive two entries because module_function creates a singleton method
+        # for the Test module and a private method for classes include the Test module
+        assert_equal(entries.size, 2)
+        first_entry, second_entry = *entries
+        # The first entry points to the location of the module_function call
+        assert_equal("Test", first_entry.owner.name)
+        assert_instance_of(Entry::Module, first_entry.owner)
+        assert_equal(Entry::Visibility::PRIVATE, first_entry.visibility)
+        # The second entry points to the public singleton method
+        assert_equal("Test::<Class:Test>", second_entry.owner.name)
+        assert_instance_of(Entry::SingletonClass, second_entry.owner)
+        assert_equal(Entry::Visibility::PUBLIC, second_entry.visibility)
+      end
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo
