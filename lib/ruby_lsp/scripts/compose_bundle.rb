@@ -2,10 +2,10 @@
 # frozen_string_literal: true
 
 def compose(raw_initialize)
-  require "ruby_lsp/setup_bundler"
+  require_relative "../setup_bundler"
   require "json"
   require "uri"
-  require "core_ext/uri"
+  require_relative "../../core_ext/uri"
 
   initialize_request = JSON.parse(raw_initialize, symbolize_names: true)
   workspace_uri = initialize_request.dig(:params, :workspaceFolders, 0, :uri)

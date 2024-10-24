@@ -12,6 +12,7 @@ module RubyLsp
     def initialize(**options)
       @test_mode = T.let(options[:test_mode], T.nilable(T::Boolean))
       @setup_error = T.let(options[:setup_error], T.nilable(StandardError))
+      @install_error = T.let(options[:install_error], T.nilable(StandardError))
       @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)

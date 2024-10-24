@@ -292,15 +292,21 @@ module RubyLsp
       global_state_notifications.each { |notification| send_message(notification) }
 
       if @setup_error
-        message = <<~MESSAGE
-          An error occurred while setting up Bundler. This may be due to a failure when installing dependencies.
-          The Ruby LSP will continue to run, but features related to the missing dependencies will be limited.
+        send_message(Notification.telemetry(
+          type: "error",
+          errorMessage: @setup_error.message,
+          errorClass: @setup_error.class,
+          stack: @setup_error.backtrace&.join("\n"),
+        ))
+      end
 
-          Error:
-          #{@setup_error.full_message}
-        MESSAGE
-
-        send_message(Notification.window_log_message(message, type: Constant::MessageType::ERROR))
+      if @install_error
+        send_message(Notification.telemetry(
+          type: "error",
+          errorMessage: @install_error.message,
+          errorClass: @install_error.class,
+          stack: @install_error.backtrace&.join("\n"),
+        ))
       end
     end
 
