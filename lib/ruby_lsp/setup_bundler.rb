@@ -186,15 +186,7 @@ module RubyLsp
         env["BUNDLE_PATH"] = File.expand_path(env["BUNDLE_PATH"], @project_path)
       end
 
-      # If there's a Bundler version locked, then we need to use that one to run bundle commands, so that the composed
-      # lockfile is also locked to the same version. This avoids Bundler restarts on version mismatches
-      base_bundle = if @bundler_version
-        env["BUNDLER_VERSION"] = @bundler_version.to_s
-        install_bundler_if_needed
-        "bundle _#{@bundler_version}_"
-      else
-        "bundle"
-      end
+      base_bundle = base_bundle_command(env)
 
       # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
       # to upgrade them or else we'll produce undesired source control changes. If the custom bundle was just created
@@ -325,6 +317,34 @@ module RubyLsp
       return false unless application_contents
 
       /class .* < (::)?Rails::Application/.match?(application_contents)
+    end
+
+    # Returns the base bundle command we should use for this project, which will be:
+    # - `bundle` if there's no locked Bundler version and no `bin/bundle` binstub in the $PATH
+    # - `bundle _<version>_` if there's a locked Bundler version
+    # - `bin/bundle` if there's a `bin/bundle` binstub in the $PATH
+    sig { params(env: T::Hash[String, String]).returns(String) }
+    def base_bundle_command(env)
+      path_parts = if Gem.win_platform?
+        ENV["Path"] || ENV["PATH"] || ENV["path"] || ""
+      else
+        ENV["PATH"] || ""
+      end.split(File::PATH_SEPARATOR)
+
+      bin_dir = File.expand_path("bin", @project_path)
+      bundle_binstub = File.join(@project_path, "bin", "bundle")
+
+      if File.exist?(bundle_binstub) && path_parts.any? { |path| File.expand_path(path, @project_path) == bin_dir }
+        return bundle_binstub
+      end
+
+      if @bundler_version
+        env["BUNDLER_VERSION"] = @bundler_version.to_s
+        install_bundler_if_needed
+        return "bundle _#{@bundler_version}_"
+      end
+
+      "bundle"
     end
   end
 end
