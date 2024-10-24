@@ -29,16 +29,8 @@ As an example, the activation script for `zsh` using `rbenv` as a version manage
 ```
 
 After activating the Ruby version, we then proceed to boot the server gem (`ruby-lsp`). To avoid having users include
-the `ruby-lsp` in their `Gemfile`, we currently create a custom bundle under the `.ruby-lsp` directory inside your
-project. That directory contains another `Gemfile`, that includes the `ruby-lsp` gem in addition to your project's
-dependencies. This approach allows us to automatically detect which formatter your project uses and which gems we need
-to index for features such as go to definition.
-
-{: .note }
-We are working with the RubyGems/Bundler team to have this type of mechanism properly supported from within
-Bundler itself, which is currently being experimented with in a plugin called `bundler-compose`. Once
-> `bundler-compose`is production ready, the entire custom bundle created under the `.ruby-lsp` directory will go away
-> and we'll rely on Bundler to compose the LOAD_PATH including the `ruby-lsp` gem.
+the `ruby-lsp` in their `Gemfile`, we create a [composed
+bundle](https://shopify.github.io/ruby-lsp/composed-bundle.html) under the `.ruby-lsp` directory inside your project.
 
 ## Common issues
 
@@ -88,7 +80,7 @@ More context about this issue on https://github.com/Shopify/vscode-ruby-lsp/issu
 
 ### Bundler issues
 
-If the extension successfully activated the Ruby environment, it may still fail when trying to compose the custom bundle
+If the extension successfully activated the Ruby environment, it may still fail when trying to compose the composed bundle
 to run the server gem. This could be a regular Bundler issue, like not being able to satisfy dependencies due to a
 conflicting version requirement, or it could be a configuration issue.
 

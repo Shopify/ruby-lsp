@@ -415,7 +415,7 @@
           "default": "both"
         },
         "rubyLsp.useBundlerCompose": {
-          "description": "This is a temporary setting for testing purposes, do not use it! Replace the custom bundle logic by bundler-compose.",
+          "description": "This is a temporary setting for testing purposes, do not use it! Replace the composed bundle logic by bundler-compose.",
           "type": "boolean",
           "default": false
         },
