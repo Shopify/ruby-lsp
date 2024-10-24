@@ -10,7 +10,8 @@ module RubyLsp
     # informs the editor of all the important symbols, such as classes, variables, and methods, defined in a file. With
     # this information, the editor can populate breadcrumbs, file outline and allow for fuzzy symbol searches.
     #
-    # In VS Code, fuzzy symbol search can be accessed by opening the command palette and inserting an `@` symbol.
+    # In VS Code, symbol search known as 'Go To Symbol in Editor' and can be accessed with Ctrl-Shift-O
+    # (Cmd-Shift-O on Mac), or by opening the command palette and inserting an `@` symbol.
     class DocumentSymbol < Request
       extend T::Sig
 
