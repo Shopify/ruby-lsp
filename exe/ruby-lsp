@@ -54,7 +54,7 @@ rescue OptionParser::InvalidOption => e
   exit(1)
 end
 
-# When we're running without bundler, then we need to make sure the custom bundle is fully configured and re-execute
+# When we're running without bundler, then we need to make sure the composed bundle is fully configured and re-execute
 # using `BUNDLE_GEMFILE=.ruby-lsp/Gemfile bundle exec ruby-lsp` so that we have access to the gems that are a part of
 # the application's bundle
 if ENV["BUNDLE_GEMFILE"].nil?
