@@ -43,6 +43,7 @@ Sorbet/TrueSigil:
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
+    - "lib/ruby_lsp/scripts/compose_bundle.rb"
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
@@ -58,6 +59,7 @@ Sorbet/StrictSigil:
     - "lib/ruby-lsp.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
+    - "lib/ruby_lsp/scripts/compose_bundle.rb"
 
 Layout/ClassStructure:
   Enabled: true

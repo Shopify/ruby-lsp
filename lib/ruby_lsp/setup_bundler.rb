@@ -27,6 +27,7 @@ module RubyLsp
     def initialize(project_path, **options)
       @project_path = project_path
       @branch = T.let(options[:branch], T.nilable(String))
+      @launcher = T.let(options[:launcher], T.nilable(T::Boolean))
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -59,7 +60,7 @@ module RubyLsp
     # used for running the server
     sig { returns(T::Hash[String, String]) }
     def setup!
-      raise BundleNotLocked if @gemfile&.exist? && !@lockfile&.exist?
+      raise BundleNotLocked if !@launcher && @gemfile&.exist? && !@lockfile&.exist?
 
       # Automatically create and ignore the .ruby-lsp folder for users
       @custom_dir.mkpath unless @custom_dir.exist?
@@ -129,7 +130,7 @@ module RubyLsp
 
       # If there's a top level Gemfile, we want to evaluate from the custom bundle. We get the source from the top level
       # Gemfile, so if there isn't one we need to add a default source
-      if @gemfile&.exist?
+      if @gemfile&.exist? && @lockfile&.exist?
         parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
       else
         parts.unshift('source "https://rubygems.org"')
