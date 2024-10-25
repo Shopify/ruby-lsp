@@ -86,6 +86,22 @@ module RubyLsp
         T::Array[T.class_of(Prism::Node)],
       )
 
+      DEFINITION_AND_CONTROL_NODES = T.let(
+        [
+          Prism::ModuleNode,
+          Prism::ClassNode,
+          Prism::SingletonClassNode,
+          Prism::DefNode,
+          Prism::CaseNode,
+          Prism::WhileNode,
+          Prism::UntilNode,
+          Prism::ForNode,
+          Prism::IfNode,
+          Prism::UnlessNode,
+        ],
+        T::Array[T.class_of(Prism::Node)],
+      )
+
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
@@ -98,6 +114,12 @@ module RubyLsp
         @response_builder = response_builder
 
         return unless target && parent
+
+        if DEFINITION_AND_CONTROL_NODES.include?(target.class)
+          add_highlight_for_definition_and_control_node(target)
+
+          return
+        end
 
         highlight_target =
           case target
@@ -548,6 +570,34 @@ module RubyLsp
           node.message
         when Prism::ClassNode, Prism::ModuleNode
           node.constant_path.slice
+        end
+      end
+
+      sig { params(node: Prism::Node).void }
+      def add_highlight_for_definition_and_control_node(node)
+        staring_location, ending_location = (
+          case node
+          when Prism::ModuleNode
+            [node.module_keyword_loc, node.end_keyword_loc]
+          when Prism::ClassNode, Prism::SingletonClassNode
+            [node.class_keyword_loc, node.end_keyword_loc]
+          when Prism::DefNode
+            [node.def_keyword_loc, node.end_keyword_loc]
+          when Prism::CaseNode
+            [node.case_keyword_loc, node.end_keyword_loc]
+          when Prism::WhileNode, Prism::UntilNode
+            [node.keyword_loc, node.closing_loc]
+          when Prism::ForNode
+            [node.for_keyword_loc, node.end_keyword_loc]
+          when Prism::IfNode
+            [node.if_keyword_loc, node.end_keyword_loc]
+          when Prism::UnlessNode
+            [node.keyword_loc, node.end_keyword_loc]
+          end
+        )
+        if staring_location && ending_location
+          add_highlight(Constant::DocumentHighlightKind::TEXT, ending_location)
+          add_highlight(Constant::DocumentHighlightKind::TEXT, staring_location)
         end
       end
     end
