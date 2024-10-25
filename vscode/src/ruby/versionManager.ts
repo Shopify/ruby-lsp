@@ -88,7 +88,9 @@ export abstract class VersionManager {
     // If the user has configured a default shell, we use that one since they are probably sourcing their version
     // manager scripts in that shell's configuration files. On Windows, we never set the shell no matter what to ensure
     // that activation runs on `cmd.exe` and not PowerShell, which avoids complex quoting and escaping issues.
-    if (vscode.env.shell.length > 0 && os.platform() !== "win32") {
+    if (os.platform() === "win32") {
+      shell = "cmd.exe";
+    } else if (vscode.env.shell.length > 0) {
       shell = vscode.env.shell;
     }
 

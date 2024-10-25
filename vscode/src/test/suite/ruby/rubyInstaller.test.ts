@@ -12,7 +12,6 @@ import { RubyInstaller } from "../../../ruby/rubyInstaller";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION } from "../../rubyVersion";
-import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {
@@ -104,7 +103,7 @@ suite("RubyInstaller", () => {
     });
   });
 
-  test("Doesn't set the shell when invoking activation script", async () => {
+  test("Sets shell to cmd.exe when invoking activation script", async () => {
     const [major, minor, _patch] = RUBY_VERSION.split(".").map(Number);
     fs.symlinkSync(
       path.join(
@@ -121,20 +120,18 @@ suite("RubyInstaller", () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
     const windows = new RubyInstaller(workspaceFolder, outputChannel);
-    const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
-      ACTIVATION_SEPARATOR,
-    );
-    const execStub = sinon.stub(common, "asyncExec").resolves({
-      stdout: "",
-      stderr: result,
-    });
+    const execSpy = sinon.spy(common, "asyncExec");
+    const { env, version, yjit } = await windows.activate();
+    execSpy.restore();
 
-    await windows.activate();
-    execStub.restore();
+    assert.strictEqual(execSpy.callCount, 1);
+    const callArgs = execSpy.getCall(0).args;
+    assert.strictEqual(callArgs[1]?.shell, "cmd.exe");
 
-    assert.strictEqual(execStub.callCount, 1);
-    const callArgs = execStub.getCall(0).args;
-    assert.strictEqual(callArgs[1]?.shell, undefined);
+    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
 
     fs.rmSync(path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`), {
       recursive: true,

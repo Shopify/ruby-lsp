@@ -39,7 +39,7 @@ suite("None", () => {
     const { env, version, yjit } = await none.activate();
 
     // We must not set the shell on Windows
-    const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
+    const shell = os.platform() === "win32" ? "cmd.exe" : vscode.env.shell;
 
     assert.ok(
       execStub.calledOnceWithExactly(
