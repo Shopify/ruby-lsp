@@ -440,8 +440,11 @@ module RubyLsp
         return unless range
 
         guessed_type = type.is_a?(TypeInferrer::GuessedType) && type.name
+        external_references = @node_context.fully_qualified_name != type.name
 
         @index.method_completion_candidates(method_name, type.name).each do |entry|
+          next if entry.visibility != RubyIndexer::Entry::Visibility::PUBLIC && external_references
+
           entry_name = entry.name
           owner_name = entry.owner&.name
 

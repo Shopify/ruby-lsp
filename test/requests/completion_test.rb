@@ -1497,6 +1497,78 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_private_methods
+    source = +<<~RUBY
+      class Foo
+        def bar
+          b
+        end
+
+        private
+
+        def baz
+        end
+      end
+
+      foo = Foo.new
+      foo.b
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 2, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_includes(result.map(&:label), "baz")
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 5 },
+      })
+
+      result = server.pop_response.response
+      refute_includes(result.map(&:label), "baz")
+    end
+  end
+
+  def test_completion_for_protected_methods
+    source = +<<~RUBY
+      class Foo
+        def bar
+          b
+        end
+
+        protected
+
+        def baz
+        end
+      end
+
+      foo = Foo.new
+      foo.b
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 2, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_includes(result.map(&:label), "baz")
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 5 },
+      })
+
+      result = server.pop_response.response
+      refute_includes(result.map(&:label), "baz")
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
