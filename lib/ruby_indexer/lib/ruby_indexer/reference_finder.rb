@@ -37,6 +37,19 @@ module RubyIndexer
       end
     end
 
+    class InstanceVariableTarget < Target
+      extend T::Sig
+
+      sig { returns(String) }
+      attr_reader :name
+
+      sig { params(name: String).void }
+      def initialize(name)
+        super()
+        @name = name
+      end
+    end
+
     class Reference
       extend T::Sig
 
@@ -94,6 +107,12 @@ module RubyIndexer
         :on_constant_or_write_node_enter,
         :on_constant_and_write_node_enter,
         :on_constant_operator_write_node_enter,
+        :on_instance_variable_read_node_enter,
+        :on_instance_variable_write_node_enter,
+        :on_instance_variable_and_write_node_enter,
+        :on_instance_variable_operator_write_node_enter,
+        :on_instance_variable_or_write_node_enter,
+        :on_instance_variable_target_node_enter,
         :on_call_node_enter,
       )
     end
@@ -262,6 +281,36 @@ module RubyIndexer
       end
     end
 
+    sig { params(node: Prism::InstanceVariableReadNode).void }
+    def on_instance_variable_read_node_enter(node)
+      collect_instance_variable_references(node.name.to_s, node.location)
+    end
+
+    sig { params(node: Prism::InstanceVariableWriteNode).void }
+    def on_instance_variable_write_node_enter(node)
+      collect_instance_variable_references(node.name.to_s, node.name_loc)
+    end
+
+    sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+    def on_instance_variable_and_write_node_enter(node)
+      collect_instance_variable_references(node.name.to_s, node.name_loc)
+    end
+
+    sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+    def on_instance_variable_operator_write_node_enter(node)
+      collect_instance_variable_references(node.name.to_s, node.name_loc)
+    end
+
+    sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+    def on_instance_variable_or_write_node_enter(node)
+      collect_instance_variable_references(node.name.to_s, node.name_loc)
+    end
+
+    sig { params(node: Prism::InstanceVariableTargetNode).void }
+    def on_instance_variable_target_node_enter(node)
+      collect_instance_variable_references(node.name.to_s, node.location)
+    end
+
     sig { params(node: Prism::CallNode).void }
     def on_call_node_enter(node)
       if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
@@ -303,6 +352,13 @@ module RubyIndexer
 
         @references << Reference.new(name, location, declaration: false)
       end
+    end
+
+    sig { params(name: String, location: Prism::Location).void }
+    def collect_instance_variable_references(name, location)
+      return unless @target.is_a?(InstanceVariableTarget) && name == @target.name
+
+      @references << Reference.new(name, location, declaration: false)
     end
 
     sig do
