@@ -53,7 +53,7 @@ async function gatherLspInfo(
     "Ruby LSP Addons": rubyLspAddons,
     "Ruby Version": workspace.ruby.rubyVersion ?? "Unknown",
     "Ruby Version Manager": workspace.ruby.versionManager.identifier,
-    "Installed Extensions": extensions,
+    "Installed Extensions": extensions.sort(),
     "Ruby LSP Settings": {
       Workspace: workspaceSpecificSettings,
       User: userSettings,

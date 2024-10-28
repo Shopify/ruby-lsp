@@ -22,9 +22,11 @@ export class Shadowenv extends VersionManager {
       );
     }
 
+    const shadowenvExec = await this.findShadowenvExec();
+
     try {
       const parsedResult = await this.runEnvActivationScript(
-        "shadowenv exec -- ruby",
+        `${shadowenvExec} exec -- ruby`,
       );
 
       return {
@@ -34,39 +36,59 @@ export class Shadowenv extends VersionManager {
         gemPath: parsedResult.gemPath,
       };
     } catch (error: any) {
-      const { stdout } = await this.runScript("command -v shadowenv");
-
-      if (stdout.trim().length === 0) {
+      // If the workspace is untrusted, offer to trust it for the user
+      if (error.message.includes("untrusted shadowenv program")) {
         const answer = await vscode.window.showErrorMessage(
-          `Couldn't find shadowenv executable. Double-check that it's installed and that it's in your PATH.`,
-          "Reload window",
-          "Cancel",
-        );
-
-        if (answer === "Reload window") {
-          return vscode.commands.executeCommand(
-            "workbench.action.reloadWindow",
-          );
-        }
-      } else {
-        // If running `shadowev exec` fails, it's typically because the workspace has not been trusted yet. Here we
-        // offer to trust it and fail it the user decides to not the trust the workspace (since in that case, we are
-        // unable to activate the Ruby environment).
-        const answer = await vscode.window.showErrorMessage(
-          `Failed to run shadowenv. Is ${this.bundleUri.fsPath} trusted? Run 'shadowenv trust --help' to know more`,
+          `Tried to activate Shadowenv, but the workspace is untrusted.
+           Workspaces must be trusted to before allowing Shadowenv to load the environment for security reasons.`,
           "Trust workspace",
-          "Cancel",
+          "Shutdown Ruby LSP",
         );
 
         if (answer === "Trust workspace") {
           await asyncExec("shadowenv trust", { cwd: this.bundleUri.fsPath });
           return this.activate();
         }
+
+        throw new Error(
+          "Cannot activate Ruby environment in an untrusted workspace",
+        );
       }
 
+      try {
+        await asyncExec("shadowenv --version");
+      } catch (_error: any) {
+        throw new Error(
+          `Shadowenv executable not found. Ensure it is installed and available in the PATH.
+           This error may happen if your shell configuration is failing to be sourced from the editor or if
+           another extension is mutating the process PATH.`,
+        );
+      }
+
+      // If it failed for some other reason, present the error to the user
       throw new Error(
-        "Cannot activate Ruby environment in an untrusted workspace",
+        `Failed to activate Ruby environment with Shadowenv: ${error.message}`,
       );
     }
+  }
+
+  // Tries to find the Shadowenv executable either directly in known paths or in the PATH
+  async findShadowenvExec() {
+    // If we can find the Shadowenv executable in the Homebrew installation path, then prefer it over relying on the
+    // executable being available in the PATH. Sometimes, users might have shell scripts or other extensions that can
+    // mess up the PATH and then we can't find the Shadowenv executable
+    const possibleUris = [vscode.Uri.file("/opt/homebrew/bin/shadowenv")];
+
+    for (const uri of possibleUris) {
+      try {
+        await vscode.workspace.fs.stat(uri);
+        this.outputChannel.info(`Found Shadowenv executable at ${uri.fsPath}`);
+        return uri.fsPath;
+      } catch (error: any) {
+        // continue searching
+      }
+    }
+
+    return "shadowenv";
   }
 }
