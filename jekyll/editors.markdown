@@ -97,13 +97,13 @@ configuration languages (JSON, Lua, ELisp, etc.).
 new H2 header in this file containing the instructions. -->
 
 - [Emacs LSP Mode](https://emacs-lsp.github.io/lsp-mode/page/lsp-ruby-lsp/)
-- [Emacs Eglot](#Emacs-Eglot)
-- [Neovim LSP](#Neovim)
+- [Emacs Eglot](#emacs-eglot)
+- [Neovim LSP](#neovim)
 - [LazyVim LSP](#lazyvim-lsp)
 - [Sublime Text LSP](#sublime-text-lsp)
 - [Zed](#zed)
-- [RubyMine](#RubyMine)
-- [Kate](#Kate)
+- [RubyMine](#rubymine)
+- [Kate](#kate)
 
 ## Emacs Eglot
 
