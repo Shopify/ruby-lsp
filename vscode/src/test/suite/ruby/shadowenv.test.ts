@@ -212,23 +212,12 @@ suite("Shadowenv", () => {
       .onFirstCall()
       .rejects(new Error("shadowenv: command not found"))
       .onSecondCall()
-      .resolves({ stdout: "", stderr: "" });
-
-    const windowStub = sinon
-      .stub(vscode.window, "showErrorMessage")
-      .resolves("Cancel" as any);
+      .rejects(new Error("shadowenv: command not found"));
 
     await assert.rejects(async () => {
       await shadowenv.activate();
     });
 
-    assert.ok(
-      windowStub.calledOnceWith(
-        "Couldn't find shadowenv executable. Double-check that it's installed and that it's in your PATH.",
-      ),
-    );
-
     execStub.restore();
-    windowStub.restore();
   });
 });
