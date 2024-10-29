@@ -32,6 +32,7 @@ module RubyLsp
       @project_path = project_path
       @branch = T.let(options[:branch], T.nilable(String))
       @launcher = T.let(options[:launcher], T.nilable(T::Boolean))
+      patch_thor_to_print_progress_to_stderr! if @launcher
 
       # Regular bundle paths
       @gemfile = T.let(
@@ -399,6 +400,22 @@ module RubyLsp
       end
 
       "bundle"
+    end
+
+    sig { void }
+    def patch_thor_to_print_progress_to_stderr!
+      return unless defined?(Bundler::Thor::Shell::Basic)
+
+      Bundler::Thor::Shell::Basic.prepend(Module.new do
+        extend T::Sig
+
+        sig { returns(IO) }
+        def stdout
+          $stderr
+        end
+      end)
+
+      Bundler.ui.level = :info
     end
   end
 end
