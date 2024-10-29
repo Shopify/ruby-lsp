@@ -1,16 +1,26 @@
 # typed: strict
 # frozen_string_literal: true
 
+# If there's no top level Gemfile, don't load RuboCop from a global installation
+begin
+  Bundler.with_original_env { Bundler.default_gemfile }
+rescue Bundler::GemfileNotFound
+  return
+end
+
+# Ensure that RuboCop is available
 begin
   require "rubocop"
 rescue LoadError
   return
 end
 
+# Ensure that RuboCop is at least version 1.4.0
 begin
   gem("rubocop", ">= 1.4.0")
 rescue LoadError
-  raise StandardError, "Incompatible RuboCop version. Ruby LSP requires >= 1.4.0"
+  $stderr.puts "Incompatible RuboCop version. Ruby LSP requires >= 1.4.0"
+  return
 end
 
 if RuboCop.const_defined?(:LSP) # This condition will be removed when requiring RuboCop >= 1.61.

@@ -1029,7 +1029,7 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_dependencies(message)
-      response = begin
+      response = if @global_state.top_level_bundle
         Bundler.with_original_env do
           definition = Bundler.definition
           dep_keys = definition.locked_deps.keys.to_set
@@ -1043,7 +1043,7 @@ module RubyLsp
             }
           end
         end
-      rescue Bundler::GemfileNotFound, Bundler::GitError
+      else
         []
       end
 
