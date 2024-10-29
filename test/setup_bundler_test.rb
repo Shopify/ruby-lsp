@@ -395,6 +395,54 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_ensures_lockfile_remotes_are_absolute_in_projects_with_nested_gems
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          # frozen_string_literal: true
+          source "https://rubygems.org"
+          gem "nested", path: "gems/nested"
+        GEMFILE
+
+        FileUtils.mkdir_p(File.join(dir, "gems", "nested", "lib"))
+
+        File.write(File.join(dir, "gems", "nested", "nested.gemspec"), <<~GEMSPEC)
+          Gem::Specification.new do |s|
+            s.platform    = Gem::Platform::RUBY
+            s.name        = "nested"
+            s.version     = "1.0.0"
+            s.summary     = "Nested gemspec"
+            s.description = "Nested gemspec"
+            s.license = "MIT"
+            s.author   = "User"
+            s.email    = "user@example.com"
+            s.homepage = "https://rubyonrails.org"
+            s.files        = Dir[]
+            s.require_path = "lib"
+          end
+        GEMSPEC
+
+        File.write(File.join(dir, "gems", "nested", "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gemspec
+        GEMFILE
+
+        real_path = File.realpath(dir)
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+            run_script(real_path)
+          end
+        end
+
+        assert_path_exists(".ruby-lsp")
+        assert_path_exists(".ruby-lsp/Gemfile.lock")
+        assert_match("remote: #{File.join(real_path, "gems", "nested")}", File.read(".ruby-lsp/Gemfile.lock"))
+      end
+    end
+  end
+
   def test_ruby_lsp_rails_is_automatically_included_in_rails_apps
     Dir.mktmpdir do |dir|
       FileUtils.mkdir("#{dir}/config")

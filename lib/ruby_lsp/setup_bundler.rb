@@ -7,6 +7,7 @@ require "fileutils"
 require "pathname"
 require "digest"
 require "time"
+require "uri"
 
 # This file is a script that will configure a custom bundle for the Ruby LSP. The custom bundle allows developers to use
 # the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
@@ -300,7 +301,7 @@ module RubyLsp
 
         # We should only apply the correction if the remote is a relative path. It might also be a URI, like
         # `https://rubygems.org` or an absolute path, in which case we shouldn't do anything
-        if path&.start_with?(".")
+        if path && !URI(path).scheme
           "remote: #{File.expand_path(path, T.must(@gemfile).dirname)}"
         else
           match
