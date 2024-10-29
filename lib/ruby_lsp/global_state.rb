@@ -21,7 +21,7 @@ module RubyLsp
     attr_reader :encoding
 
     sig { returns(T::Boolean) }
-    attr_reader :supports_watching_files, :experimental_features, :supports_request_delegation
+    attr_reader :supports_watching_files, :experimental_features, :supports_request_delegation, :top_level_bundle
 
     sig { returns(T::Array[String]) }
     attr_reader :supported_resource_operations
@@ -46,6 +46,15 @@ module RubyLsp
       @addon_settings = T.let({}, T::Hash[String, T.untyped])
       @supports_request_delegation = T.let(false, T::Boolean)
       @supported_resource_operations = T.let([], T::Array[String])
+      @top_level_bundle = T.let(
+        begin
+          Bundler.with_original_env { Bundler.default_gemfile }
+          true
+        rescue Bundler::GemfileNotFound, Bundler::GitError
+          false
+        end,
+        T::Boolean,
+      )
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -240,7 +249,7 @@ module RubyLsp
 
     sig { returns(T::Array[String]) }
     def gemspec_dependencies
-      Bundler.locked_gems.sources
+      (Bundler.locked_gems&.sources || [])
         .grep(Bundler::Source::Gemspec)
         .flat_map { _1.gemspec&.dependencies&.map(&:name) }
     end
@@ -248,7 +257,7 @@ module RubyLsp
     sig { returns(T::Array[String]) }
     def gather_direct_and_indirect_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
-      Bundler.locked_gems.specs.map(&:name)
+      Bundler.locked_gems&.specs&.map(&:name) || []
     rescue Bundler::GemfileNotFound
       []
     end
