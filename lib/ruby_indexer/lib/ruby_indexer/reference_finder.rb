@@ -283,32 +283,32 @@ module RubyIndexer
 
     sig { params(node: Prism::InstanceVariableReadNode).void }
     def on_instance_variable_read_node_enter(node)
-      collect_instance_variable_references(node.name.to_s, node.location)
+      collect_instance_variable_references(node.name.to_s, node.location, false)
     end
 
     sig { params(node: Prism::InstanceVariableWriteNode).void }
     def on_instance_variable_write_node_enter(node)
-      collect_instance_variable_references(node.name.to_s, node.name_loc)
+      collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
     sig { params(node: Prism::InstanceVariableAndWriteNode).void }
     def on_instance_variable_and_write_node_enter(node)
-      collect_instance_variable_references(node.name.to_s, node.name_loc)
+      collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
     sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
     def on_instance_variable_operator_write_node_enter(node)
-      collect_instance_variable_references(node.name.to_s, node.name_loc)
+      collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
     sig { params(node: Prism::InstanceVariableOrWriteNode).void }
     def on_instance_variable_or_write_node_enter(node)
-      collect_instance_variable_references(node.name.to_s, node.name_loc)
+      collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
     sig { params(node: Prism::InstanceVariableTargetNode).void }
     def on_instance_variable_target_node_enter(node)
-      collect_instance_variable_references(node.name.to_s, node.location)
+      collect_instance_variable_references(node.name.to_s, node.location, true)
     end
 
     sig { params(node: Prism::CallNode).void }
@@ -354,11 +354,11 @@ module RubyIndexer
       end
     end
 
-    sig { params(name: String, location: Prism::Location).void }
-    def collect_instance_variable_references(name, location)
+    sig { params(name: String, location: Prism::Location, declaration: T::Boolean).void }
+    def collect_instance_variable_references(name, location, declaration)
       return unless @target.is_a?(InstanceVariableTarget) && name == @target.name
 
-      @references << Reference.new(name, location, declaration: false)
+      @references << Reference.new(name, location, declaration: declaration)
     end
 
     sig do
