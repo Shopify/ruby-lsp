@@ -48,6 +48,7 @@ export interface ClientInterface {
   formatter: string;
   addons?: Addon[];
   serverVersion?: string;
+  degraded: boolean;
   sendRequest<T>(
     method: string,
     param: any,

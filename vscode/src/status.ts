@@ -92,8 +92,15 @@ export class ServerStatus extends StatusItem {
         this.item.text = workspace.lspClient.serverVersion
           ? `Ruby LSP v${workspace.lspClient.serverVersion}: Running`
           : "Ruby LSP: Running";
+
+        if (workspace.lspClient.degraded) {
+          this.item.text += " (degraded)";
+          this.item.severity = vscode.LanguageStatusSeverity.Warning;
+        } else {
+          this.item.severity = vscode.LanguageStatusSeverity.Information;
+        }
+
         this.item.command!.arguments = [STARTED_SERVER_OPTIONS];
-        this.item.severity = vscode.LanguageStatusSeverity.Information;
         break;
       }
       case State.Starting: {
