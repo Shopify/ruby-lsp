@@ -121,7 +121,7 @@ module RubyLsp
           },
         },
       })
-      assert(state.supports_watching_files)
+      assert(state.client_capabilities.supports_watching_files)
     end
 
     def test_watching_files_if_not_supported
@@ -136,7 +136,7 @@ module RubyLsp
           },
         },
       })
-      refute(state.supports_watching_files)
+      refute(state.client_capabilities.supports_watching_files)
     end
 
     def test_watching_files_if_not_reported
@@ -146,7 +146,7 @@ module RubyLsp
           workspace: {},
         },
       })
-      refute(state.supports_watching_files)
+      refute(state.client_capabilities.supports_watching_files)
     end
 
     def test_linter_specification
