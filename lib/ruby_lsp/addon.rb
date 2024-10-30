@@ -194,6 +194,13 @@ module RubyLsp
     sig { abstract.returns(String) }
     def version; end
 
+    # Handle a response from a window/showMessageRequest request. Add-ons must include the addon_name as part of the
+    # original request so that the response is delegated to the correct add-on and must override this method to handle
+    # the response
+    # https://microsoft.github.io/language-server-protocol/specification#window_showMessageRequest
+    sig { overridable.params(title: String).void }
+    def handle_window_show_message_response(title); end
+
     # Creates a new CodeLens listener. This method is invoked on every CodeLens request
     sig do
       overridable.params(
