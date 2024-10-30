@@ -19,7 +19,7 @@ export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
 export abstract class VersionManager {
   public activationScript = [
     `STDERR.print("${ACTIVATION_SEPARATOR}" + `,
-    "{ env: ENV.to_h, yjit: !!defined?(RubyVM:: YJIT), version: RUBY_VERSION, gemPath: Gem.path }.to_json + ",
+    "{ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION, gemPath: Gem.path }.to_json + ",
     `"${ACTIVATION_SEPARATOR}")`,
   ].join("");
 
