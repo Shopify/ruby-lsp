@@ -714,6 +714,31 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_progress_is_printed_to_stderr
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+          end
+
+          stdout, stderr = capture_subprocess_io do
+            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+          end
+
+          assert_match(/Bundle complete! [\d]+ Gemfile dependencies, [\d]+ gems now installed/, stderr)
+          assert_empty(stdout)
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)

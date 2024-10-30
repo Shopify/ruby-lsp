@@ -23,4 +23,10 @@ module Bundler
       def run; end
     end
   end
+
+  module Thor # rubocop:disable Style/ClassAndModuleChildren
+    module Shell
+      class Basic; end
+    end
+  end
 end
