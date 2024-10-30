@@ -670,6 +670,39 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_show_window_responses_are_redirected_to_addons
+    klass = Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue)
+        @activated = true
+        @settings = global_state.settings_for_addon(name)
+      end
+
+      def deactivate; end
+
+      def name
+        "My Add-on"
+      end
+
+      def version
+        "0.1.0"
+      end
+
+      def handle_window_show_message_response(title)
+      end
+    end
+
+    begin
+      @server.load_addons
+      addon = RubyLsp::Addon.addons.find { |a| a.is_a?(klass) }
+      addon.expects(:handle_window_show_message_response).with("hello")
+
+      @server.process_message(method: "window/showMessageRequest", title: "hello", addon_name: "My Add-on")
+    ensure
+      RubyLsp::Addon.addons.clear
+      RubyLsp::Addon.addon_classes.clear
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

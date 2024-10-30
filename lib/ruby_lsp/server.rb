@@ -81,6 +81,8 @@ module RubyLsp
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
         workspace_symbol(message)
+      when "window/showMessageRequest"
+        window_show_message_request(message)
       when "rubyLsp/textDocument/showSyntaxTree"
         text_document_show_syntax_tree(message)
       when "rubyLsp/workspace/dependencies"
@@ -1220,6 +1222,15 @@ module RubyLsp
       configuration.workspace_path = @global_state.workspace_path
       # The index expects snake case configurations, but VS Code standardizes on camel case settings
       configuration.apply_config(indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase })
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def window_show_message_request(message)
+      addon_name = message[:addon_name]
+      addon = Addon.addons.find { |addon| addon.name == addon_name }
+      return unless addon
+
+      addon.handle_window_show_message_response(message[:title])
     end
   end
 end

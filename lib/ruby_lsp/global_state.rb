@@ -21,7 +21,11 @@ module RubyLsp
     attr_reader :encoding
 
     sig { returns(T::Boolean) }
-    attr_reader :supports_watching_files, :experimental_features, :supports_request_delegation, :top_level_bundle
+    attr_reader :supports_watching_files,
+      :experimental_features,
+      :supports_request_delegation,
+      :top_level_bundle,
+      :window_show_message_supports_extra_properties
 
     sig { returns(T::Array[String]) }
     attr_reader :supported_resource_operations
@@ -55,6 +59,7 @@ module RubyLsp
         end,
         T::Boolean,
       )
+      @window_show_message_supports_extra_properties = T.let(false, T::Boolean)
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -148,6 +153,15 @@ module RubyLsp
       @supports_request_delegation = options.dig(:capabilities, :experimental, :requestDelegation) || false
       supported_resource_operations = options.dig(:capabilities, :workspace, :workspaceEdit, :resourceOperations)
       @supported_resource_operations = supported_resource_operations if supported_resource_operations
+
+      supports_additional_properties = options.dig(
+        :capabilities,
+        :window,
+        :showMessage,
+        :messageActionItem,
+        :additionalPropertiesSupport,
+      )
+      @window_show_message_supports_extra_properties = supports_additional_properties || false
 
       notifications
     end
