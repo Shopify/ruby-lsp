@@ -658,6 +658,62 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_invoke_cli_calls_bundler_directly_for_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+
+            mock_install = mock("install")
+            mock_install.expects(:run)
+            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
+            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+          end
+        end
+      end
+    end
+  end
+
+  def test_invoke_cli_calls_bundler_directly_for_update
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+
+            # Run the script once to generate a custom bundle
+            run_script(dir)
+          end
+        end
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            mock_update = mock("update")
+            mock_update.expects(:run)
+            require "bundler/cli/update"
+            Bundler::CLI::Update.expects(:new).with(
+              { conservative: true },
+              ["ruby-lsp", "debug", "prism"],
+            ).returns(mock_update)
+            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)
