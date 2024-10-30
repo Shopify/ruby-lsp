@@ -149,6 +149,39 @@ module RubyIndexer
       end
     end
 
+    def test_comments_documentation
+      index(<<~RUBY)
+        # Documentation for Foo
+
+        class Foo
+          # ####################
+          # Documentation for bar
+          # ####################
+          #
+          def bar
+          end
+
+          # test
+
+          # Documentation for baz
+          def baz; end
+          def ban; end
+        end
+      RUBY
+
+      foo_comment = @index["Foo"].first.comments
+      assert_equal("Documentation for Foo", foo_comment)
+
+      bar_comment = @index["bar"].first.comments
+      assert_equal("####################\nDocumentation for bar\n####################\n", bar_comment)
+
+      baz_comment = @index["baz"].first.comments
+      assert_equal("Documentation for baz", baz_comment)
+
+      ban_comment = @index["ban"].first.comments
+      assert_equal("", ban_comment)
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo
