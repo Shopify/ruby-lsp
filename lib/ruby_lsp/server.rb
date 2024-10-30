@@ -267,7 +267,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
 
       # Not every client supports dynamic registration or file watching
-      if global_state.supports_watching_files
+      if @global_state.client_capabilities.supports_watching_files
         send_message(
           Request.new(
             id: @current_request_id,

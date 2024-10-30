@@ -72,7 +72,7 @@ module RubyLsp
 
         # If the client doesn't support resource operations, such as renaming files, then we can only return the basic
         # text changes
-        unless @global_state.supported_resource_operations.include?("rename")
+        unless @global_state.client_capabilities.supports_rename?
           return Interface::WorkspaceEdit.new(changes: changes)
         end
 

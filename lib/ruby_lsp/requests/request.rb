@@ -26,7 +26,7 @@ module RubyLsp
         ).void
       end
       def delegate_request_if_needed!(global_state, document, char_position)
-        if global_state.supports_request_delegation &&
+        if global_state.client_capabilities.supports_request_delegation &&
             document.is_a?(ERBDocument) &&
             document.inside_host_language?(char_position)
           raise DelegateRequestError

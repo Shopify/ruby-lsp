@@ -21,17 +21,13 @@ module RubyLsp
     attr_reader :encoding
 
     sig { returns(T::Boolean) }
-    attr_reader :supports_watching_files,
-      :experimental_features,
-      :supports_request_delegation,
-      :top_level_bundle,
-      :window_show_message_supports_extra_properties
-
-    sig { returns(T::Array[String]) }
-    attr_reader :supported_resource_operations
+    attr_reader :experimental_features, :top_level_bundle
 
     sig { returns(TypeInferrer) }
     attr_reader :type_inferrer
+
+    sig { returns(ClientCapabilities) }
+    attr_reader :client_capabilities
 
     sig { void }
     def initialize
@@ -44,12 +40,9 @@ module RubyLsp
       @has_type_checker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
-      @supports_watching_files = T.let(false, T::Boolean)
       @experimental_features = T.let(false, T::Boolean)
       @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
       @addon_settings = T.let({}, T::Hash[String, T.untyped])
-      @supports_request_delegation = T.let(false, T::Boolean)
-      @supported_resource_operations = T.let([], T::Array[String])
       @top_level_bundle = T.let(
         begin
           Bundler.with_original_env { Bundler.default_gemfile }
@@ -59,7 +52,7 @@ module RubyLsp
         end,
         T::Boolean,
       )
-      @window_show_message_supports_extra_properties = T.let(false, T::Boolean)
+      @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -137,31 +130,14 @@ module RubyLsp
       end
       @index.configuration.encoding = @encoding
 
-      file_watching_caps = options.dig(:capabilities, :workspace, :didChangeWatchedFiles)
-      if file_watching_caps&.dig(:dynamicRegistration) && file_watching_caps&.dig(:relativePatternSupport)
-        @supports_watching_files = true
-      end
-
       @experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
+      @client_capabilities.apply_client_capabilities(options[:capabilities]) if options[:capabilities]
 
       addon_settings = options.dig(:initializationOptions, :addonSettings)
       if addon_settings
         addon_settings.transform_keys!(&:to_s)
         @addon_settings.merge!(addon_settings)
       end
-
-      @supports_request_delegation = options.dig(:capabilities, :experimental, :requestDelegation) || false
-      supported_resource_operations = options.dig(:capabilities, :workspace, :workspaceEdit, :resourceOperations)
-      @supported_resource_operations = supported_resource_operations if supported_resource_operations
-
-      supports_additional_properties = options.dig(
-        :capabilities,
-        :window,
-        :showMessage,
-        :messageActionItem,
-        :additionalPropertiesSupport,
-      )
-      @window_show_message_supports_extra_properties = supports_additional_properties || false
 
       notifications
     end
