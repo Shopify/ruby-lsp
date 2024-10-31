@@ -223,6 +223,12 @@ module RubyLsp
       assert_equal({ runtimeServerEnabled: false }, global_state.settings_for_addon("Ruby LSP Rails"))
     end
 
+    def test_delegates_supports_watching_files_to_client_capabilities
+      global_state = GlobalState.new
+      global_state.client_capabilities.expects(:supports_watching_files).returns(true)
+      global_state.supports_watching_files
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
