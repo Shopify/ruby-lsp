@@ -159,6 +159,11 @@ module RubyLsp
       end
     end
 
+    sig { returns(T::Boolean) }
+    def supports_watching_files
+      @client_capabilities.supports_watching_files
+    end
+
     private
 
     sig { params(direct_dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(String) }
