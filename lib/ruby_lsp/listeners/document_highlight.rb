@@ -200,12 +200,14 @@ module RubyLsp
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
-        def_keyword_loc = node.def_keyword_loc
-        end_keyword_loc = node_closing_keyword_loc(node)
-        if end_keyword_loc && (covers_target_position?(def_keyword_loc) || covers_target_position?(end_keyword_loc))
-          add_highlight(Constant::DocumentHighlightKind::TEXT, def_keyword_loc)
-          add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
-          return
+        if @target.is_a?(Prism::DefNode)
+          def_keyword_loc = node.def_keyword_loc
+          end_keyword_loc = node_closing_keyword_loc(node)
+          if end_keyword_loc && (covers_target_position?(def_keyword_loc) || covers_target_position?(end_keyword_loc))
+            add_highlight(Constant::DocumentHighlightKind::TEXT, def_keyword_loc)
+            add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+            return
+          end
         end
 
         return unless matches?(node, [Prism::CallNode, Prism::DefNode])
@@ -271,12 +273,14 @@ module RubyLsp
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
-        class_keyword_loc = node.class_keyword_loc
-        end_keyword_loc = node_closing_keyword_loc(node)
-        if end_keyword_loc && (covers_target_position?(class_keyword_loc) || covers_target_position?(end_keyword_loc))
-          add_highlight(Constant::DocumentHighlightKind::TEXT, class_keyword_loc)
-          add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
-          return
+        if @target.is_a?(Prism::ClassNode)
+          class_keyword_loc = node.class_keyword_loc
+          end_keyword_loc = node_closing_keyword_loc(node)
+          if end_keyword_loc && (covers_target_position?(class_keyword_loc) || covers_target_position?(end_keyword_loc))
+            add_highlight(Constant::DocumentHighlightKind::TEXT, class_keyword_loc)
+            add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+            return
+          end
         end
 
         return unless matches?(node, CONSTANT_NODES + CONSTANT_PATH_NODES + [Prism::ClassNode])
@@ -286,12 +290,15 @@ module RubyLsp
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
-        module_keyword_loc = node.module_keyword_loc
-        end_keyword_loc = node_closing_keyword_loc(node)
-        if end_keyword_loc && (covers_target_position?(module_keyword_loc) || covers_target_position?(end_keyword_loc))
-          add_highlight(Constant::DocumentHighlightKind::TEXT, module_keyword_loc)
-          add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
-          return
+        if @target.is_a?(Prism::ModuleNode)
+          module_keyword_loc = node.module_keyword_loc
+          end_keyword_loc = node_closing_keyword_loc(node)
+          if end_keyword_loc &&
+              (covers_target_position?(module_keyword_loc) || covers_target_position?(end_keyword_loc))
+            add_highlight(Constant::DocumentHighlightKind::TEXT, module_keyword_loc)
+            add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+            return
+          end
         end
 
         return unless matches?(node, CONSTANT_NODES + CONSTANT_PATH_NODES + [Prism::ModuleNode])
@@ -548,6 +555,8 @@ module RubyLsp
 
       sig { params(node: Prism::SingletonClassNode).void }
       def on_singleton_class_node_enter(node)
+        return unless @target.is_a?(Prism::SingletonClassNode)
+
         class_keyword_loc = node.class_keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless end_keyword_loc &&
@@ -559,6 +568,8 @@ module RubyLsp
 
       sig { params(node: Prism::CaseNode).void }
       def on_case_node_enter(node)
+        return unless @target.is_a?(Prism::CaseNode)
+
         case_keyword_loc = node.case_keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless end_keyword_loc &&
@@ -570,6 +581,8 @@ module RubyLsp
 
       sig { params(node: Prism::WhileNode).void }
       def on_while_node_enter(node)
+        return unless @target.is_a?(Prism::WhileNode)
+
         while_keyword_loc = node.keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless end_keyword_loc &&
@@ -581,6 +594,8 @@ module RubyLsp
 
       sig { params(node: Prism::UntilNode).void }
       def on_until_node_enter(node)
+        return unless @target.is_a?(Prism::UntilNode)
+
         until_keyword_loc = node.keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless end_keyword_loc &&
@@ -592,6 +607,8 @@ module RubyLsp
 
       sig { params(node: Prism::ForNode).void }
       def on_for_node_enter(node)
+        return unless @target.is_a?(Prism::ForNode)
+
         for_keyword_loc = node.for_keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless end_keyword_loc &&
@@ -603,6 +620,8 @@ module RubyLsp
 
       sig { params(node: Prism::IfNode).void }
       def on_if_node_enter(node)
+        return unless @target.is_a?(Prism::IfNode)
+
         if_keyword_loc = node.if_keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless if_keyword_loc && end_keyword_loc &&
@@ -614,6 +633,8 @@ module RubyLsp
 
       sig { params(node: Prism::UnlessNode).void }
       def on_unless_node_enter(node)
+        return unless @target.is_a?(Prism::UnlessNode)
+
         unless_keyword_loc = node.keyword_loc
         end_keyword_loc = node_closing_keyword_loc(node)
         return unless end_keyword_loc &&
