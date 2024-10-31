@@ -86,40 +86,19 @@ module RubyLsp
         T::Array[T.class_of(Prism::Node)],
       )
 
-      DEFINITION_AND_CONTROL_NODES = T.let(
-        [
-          Prism::ModuleNode,
-          Prism::ClassNode,
-          Prism::SingletonClassNode,
-          Prism::DefNode,
-          Prism::CaseNode,
-          Prism::WhileNode,
-          Prism::UntilNode,
-          Prism::ForNode,
-          Prism::IfNode,
-          Prism::UnlessNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
-
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
           target: T.nilable(Prism::Node),
           parent: T.nilable(Prism::Node),
           dispatcher: Prism::Dispatcher,
+          position: T::Hash[Symbol, T.untyped],
         ).void
       end
-      def initialize(response_builder, target, parent, dispatcher)
+      def initialize(response_builder, target, parent, dispatcher, position)
         @response_builder = response_builder
 
         return unless target && parent
-
-        if DEFINITION_AND_CONTROL_NODES.include?(target.class)
-          add_highlight_for_definition_and_control_node(target)
-
-          return
-        end
 
         highlight_target =
           case target
@@ -137,14 +116,17 @@ module RubyLsp
             Prism::LocalVariableReadNode, Prism::LocalVariableTargetNode, Prism::LocalVariableWriteNode,
             Prism::CallNode, Prism::BlockParameterNode, Prism::RequiredKeywordParameterNode,
             Prism::RequiredKeywordParameterNode, Prism::KeywordRestParameterNode, Prism::OptionalParameterNode,
-            Prism::RequiredParameterNode, Prism::RestParameterNode
+            Prism::RequiredParameterNode, Prism::RestParameterNode, Prism::ModuleNode, Prism::ClassNode,
+            Prism::SingletonClassNode, Prism::DefNode, Prism::CaseNode, Prism::WhileNode, Prism::UntilNode,
+            Prism::ForNode, Prism::IfNode, Prism::UnlessNode
             target
           end
 
         @target = T.let(highlight_target, T.nilable(Prism::Node))
         @target_value = T.let(node_value(highlight_target), T.nilable(String))
+        @target_position = position
 
-        if @target && @target_value
+        if @target
           dispatcher.register(
             self,
             :on_call_node_enter,
@@ -194,6 +176,13 @@ module RubyLsp
             :on_global_variable_or_write_node_enter,
             :on_global_variable_and_write_node_enter,
             :on_global_variable_operator_write_node_enter,
+            :on_singleton_class_node_enter,
+            :on_case_node_enter,
+            :on_while_node_enter,
+            :on_until_node_enter,
+            :on_for_node_enter,
+            :on_if_node_enter,
+            :on_unless_node_enter,
           )
         end
       end
@@ -211,6 +200,14 @@ module RubyLsp
 
       sig { params(node: Prism::DefNode).void }
       def on_def_node_enter(node)
+        def_keyword_loc = node.def_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        if end_keyword_loc && (covers_target_position?(def_keyword_loc) || covers_target_position?(end_keyword_loc))
+          add_highlight(Constant::DocumentHighlightKind::TEXT, def_keyword_loc)
+          add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+          return
+        end
+
         return unless matches?(node, [Prism::CallNode, Prism::DefNode])
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
@@ -274,6 +271,14 @@ module RubyLsp
 
       sig { params(node: Prism::ClassNode).void }
       def on_class_node_enter(node)
+        class_keyword_loc = node.class_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        if end_keyword_loc && (covers_target_position?(class_keyword_loc) || covers_target_position?(end_keyword_loc))
+          add_highlight(Constant::DocumentHighlightKind::TEXT, class_keyword_loc)
+          add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+          return
+        end
+
         return unless matches?(node, CONSTANT_NODES + CONSTANT_PATH_NODES + [Prism::ClassNode])
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.constant_path.location)
@@ -281,6 +286,14 @@ module RubyLsp
 
       sig { params(node: Prism::ModuleNode).void }
       def on_module_node_enter(node)
+        module_keyword_loc = node.module_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        if end_keyword_loc && (covers_target_position?(module_keyword_loc) || covers_target_position?(end_keyword_loc))
+          add_highlight(Constant::DocumentHighlightKind::TEXT, module_keyword_loc)
+          add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+          return
+        end
+
         return unless matches?(node, CONSTANT_NODES + CONSTANT_PATH_NODES + [Prism::ModuleNode])
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.constant_path.location)
@@ -533,6 +546,83 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
+      sig { params(node: Prism::SingletonClassNode).void }
+      def on_singleton_class_node_enter(node)
+        class_keyword_loc = node.class_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless end_keyword_loc &&
+          (covers_target_position?(class_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, class_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
+      sig { params(node: Prism::CaseNode).void }
+      def on_case_node_enter(node)
+        case_keyword_loc = node.case_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless end_keyword_loc &&
+          (covers_target_position?(case_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, case_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
+      sig { params(node: Prism::WhileNode).void }
+      def on_while_node_enter(node)
+        while_keyword_loc = node.keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless end_keyword_loc &&
+          (covers_target_position?(while_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, while_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
+      sig { params(node: Prism::UntilNode).void }
+      def on_until_node_enter(node)
+        until_keyword_loc = node.keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless end_keyword_loc &&
+          (covers_target_position?(until_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, until_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
+      sig { params(node: Prism::ForNode).void }
+      def on_for_node_enter(node)
+        for_keyword_loc = node.for_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless end_keyword_loc &&
+          (covers_target_position?(for_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, for_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
+      sig { params(node: Prism::IfNode).void }
+      def on_if_node_enter(node)
+        if_keyword_loc = node.if_keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless if_keyword_loc && end_keyword_loc &&
+          (covers_target_position?(if_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, if_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
+      sig { params(node: Prism::UnlessNode).void }
+      def on_unless_node_enter(node)
+        unless_keyword_loc = node.keyword_loc
+        end_keyword_loc = node_closing_keyword_loc(node)
+        return unless end_keyword_loc &&
+          (covers_target_position?(unless_keyword_loc) || covers_target_position?(end_keyword_loc))
+
+        add_highlight(Constant::DocumentHighlightKind::TEXT, unless_keyword_loc)
+        add_highlight(Constant::DocumentHighlightKind::TEXT, end_keyword_loc)
+      end
+
       private
 
       sig { params(node: Prism::Node, classes: T::Array[T.class_of(Prism::Node)]).returns(T.nilable(T::Boolean)) }
@@ -573,32 +663,32 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::Node).void }
-      def add_highlight_for_definition_and_control_node(node)
-        staring_location, ending_location = (
+      sig { params(node: Prism::Node).returns(T.nilable(Prism::Location)) }
+      def node_closing_keyword_loc(node)
+        location = (
           case node
-          when Prism::ModuleNode
-            [node.module_keyword_loc, node.end_keyword_loc]
-          when Prism::ClassNode, Prism::SingletonClassNode
-            [node.class_keyword_loc, node.end_keyword_loc]
-          when Prism::DefNode
-            [node.def_keyword_loc, node.end_keyword_loc]
-          when Prism::CaseNode
-            [node.case_keyword_loc, node.end_keyword_loc]
+          when Prism::ModuleNode, Prism::ClassNode, Prism::SingletonClassNode, Prism::DefNode, Prism::CaseNode,
+            Prism::IfNode, Prism::UnlessNode, Prism::ForNode
+            node.end_keyword_loc
           when Prism::WhileNode, Prism::UntilNode
-            [node.keyword_loc, node.closing_loc]
-          when Prism::ForNode
-            [node.for_keyword_loc, node.end_keyword_loc]
-          when Prism::IfNode
-            [node.if_keyword_loc, node.end_keyword_loc]
-          when Prism::UnlessNode
-            [node.keyword_loc, node.end_keyword_loc]
+            node.closing_loc
           end
         )
-        if staring_location && ending_location
-          add_highlight(Constant::DocumentHighlightKind::TEXT, ending_location)
-          add_highlight(Constant::DocumentHighlightKind::TEXT, staring_location)
-        end
+        return if location.nil?
+
+        # Sometimes, the closing keyword may not be present.
+        location.length.positive? ? location : nil
+      end
+
+      sig { params(location: Prism::Location).returns(T::Boolean) }
+      def covers_target_position?(location)
+        start_line = location.start_line - 1
+        end_line = location.end_line - 1
+        start_covered = start_line < @target_position[:line] ||
+          (start_line == @target_position[:line] && location.start_column <= @target_position[:character])
+        end_covered = end_line > @target_position[:line] ||
+          (end_line == @target_position[:line] && location.end_column >= @target_position[:character])
+        start_covered && end_covered
       end
     end
   end
