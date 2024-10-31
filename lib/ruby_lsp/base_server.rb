@@ -172,6 +172,10 @@ module RubyLsp
       # when trying to send a response back
       return if @outgoing_queue.closed?
 
+      if message.is_a?(Request) && !message.id
+        message.id = @current_request_id
+      end
+
       @outgoing_queue << message
       @current_request_id += 1 if message.is_a?(Request)
     end

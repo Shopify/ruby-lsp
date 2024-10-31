@@ -100,8 +100,11 @@ module RubyLsp
   class Request < Message
     extend T::Sig
 
-    sig { params(id: T.any(Integer, String), method: String, params: Object).void }
-    def initialize(id:, method:, params:)
+    sig { returns(T.nilable(T.any(Integer, String))) }
+    attr_accessor :id
+
+    sig { params(method: String, params: Object, id: T.nilable(T.any(Integer, String))).void }
+    def initialize(method:, params:, id: nil)
       @id = id
       super(method: method, params: params)
     end

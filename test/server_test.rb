@@ -703,6 +703,23 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_automatically_sets_request_id_if_missing
+    @server.send_message(RubyLsp::Request.new(
+      method: "window/showMessageRequest",
+      params: RubyLsp::Interface::ShowMessageRequestParams.new(
+        type: RubyLsp::Constant::MessageType::WARNING,
+        message: "You have migrations pending!",
+        actions: [
+          { title: "Migrate database" },
+          { title: "Cancel" },
+        ],
+      ),
+    ))
+
+    request = @server.pop_response
+    assert_equal(1, request.id)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
