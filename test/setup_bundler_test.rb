@@ -739,6 +739,53 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_succeeds_when_using_ssh_git_sources_instead_of_https
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rbi", git: "git@github.com:Shopify/rbi.git", branch: "main"
+        GEMFILE
+
+        File.write(File.join(dir, "Gemfile.lock"), <<~LOCKFILE)
+          GIT
+            remote: git@github.com:Shopify/rbi.git
+            revision: d2e59a207c0b2f07d9bbaf1eb4b6d2500a4782ea
+            branch: main
+            specs:
+              rbi (0.2.1)
+                prism (~> 1.0)
+                sorbet-runtime (>= 0.5.9204)
+
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              prism (1.2.0)
+              sorbet-runtime (0.5.11630)
+
+          PLATFORMS
+            arm64-darwin-23
+            ruby
+
+          DEPENDENCIES
+            rbi!
+
+          BUNDLED WITH
+            2.5.22
+        LOCKFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            stub_bundle_with_env(bundle_env(dir, ".ruby-lsp/Gemfile"))
+            run_script(dir)
+          end
+        end
+
+        assert_match("remote: git@github.com:Shopify/rbi.git", File.read(".ruby-lsp/Gemfile.lock"))
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)

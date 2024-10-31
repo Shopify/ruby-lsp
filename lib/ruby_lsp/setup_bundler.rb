@@ -359,6 +359,9 @@ module RubyLsp
         else
           match
         end
+      rescue URI::InvalidURIError, URI::InvalidComponentError
+        # If the path raises an invalid error, it might be a git ssh path, which indeed isn't a URI
+        match
       end
 
       @custom_lockfile.write(content)
