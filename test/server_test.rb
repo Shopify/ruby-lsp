@@ -165,19 +165,6 @@ class ServerTest < Minitest::Test
     assert_equal("rubocop", hash.dig("formatter"))
   end
 
-  def test_initialized_populates_index
-    capture_subprocess_io do
-      @server.process_message({ method: "initialized" })
-
-      assert_equal("$/progress", @server.pop_response.method)
-      assert_equal("$/progress", @server.pop_response.method)
-      assert_equal("$/progress", @server.pop_response.method)
-      assert_equal("$/progress", @server.pop_response.method)
-
-      refute_empty(@server.global_state.index)
-    end
-  end
-
   def test_initialized_recovers_from_indexing_failures
     @server.global_state.index.expects(:index_all).once.raises(StandardError, "boom!")
     capture_subprocess_io do

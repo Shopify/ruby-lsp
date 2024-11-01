@@ -188,8 +188,6 @@ module RubyLsp
       client_name = options.dig(:clientInfo, :name)
       @store.client_name = client_name if client_name
 
-      progress = options.dig(:capabilities, :window, :workDoneProgress)
-      @store.supports_progress = progress.nil? ? true : progress
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
 
       configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
@@ -1105,7 +1103,7 @@ module RubyLsp
 
     sig { params(id: String, title: String, percentage: Integer).void }
     def begin_progress(id, title, percentage: 0)
-      return unless @store.supports_progress
+      return unless @global_state.client_capabilities.supports_progress
 
       send_message(Request.new(
         id: @current_request_id,
@@ -1129,7 +1127,7 @@ module RubyLsp
 
     sig { params(id: String, percentage: Integer).void }
     def progress(id, percentage)
-      return unless @store.supports_progress
+      return unless @global_state.client_capabilities.supports_progress
 
       send_message(
         Notification.new(
@@ -1148,7 +1146,7 @@ module RubyLsp
 
     sig { params(id: String).void }
     def end_progress(id)
-      return unless @store.supports_progress
+      return unless @global_state.client_capabilities.supports_progress
 
       send_message(
         Notification.new(
