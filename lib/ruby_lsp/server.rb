@@ -81,8 +81,6 @@ module RubyLsp
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
         workspace_symbol(message)
-      when "window/showMessageRequest"
-        window_show_message_request(message)
       when "rubyLsp/textDocument/showSyntaxTree"
         text_document_show_syntax_tree(message)
       when "rubyLsp/workspace/dependencies"
@@ -108,6 +106,8 @@ module RubyLsp
         )
       when "$/cancelRequest"
         @mutex.synchronize { @cancelled_requests << message[:params][:id] }
+      when nil
+        process_response(message) if message[:result]
       end
     rescue DelegateRequestError
       send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))
@@ -138,6 +138,15 @@ module RubyLsp
       end
 
       send_log_message("Error processing #{message[:method]}: #{e.full_message}", type: Constant::MessageType::ERROR)
+    end
+
+    # Process responses to requests that were sent to the client
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def process_response(message)
+      case message.dig(:result, :method)
+      when "window/showMessageRequest"
+        window_show_message_request(message)
+      end
     end
 
     sig { params(include_project_addons: T::Boolean).void }
@@ -1193,11 +1202,14 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def window_show_message_request(message)
-      addon_name = message[:addon_name]
+      result = message[:result]
+      return unless result
+
+      addon_name = result[:addon_name]
       addon = Addon.addons.find { |addon| addon.name == addon_name }
       return unless addon
 
-      addon.handle_window_show_message_response(message[:title])
+      addon.handle_window_show_message_response(result[:title])
     end
   end
 end

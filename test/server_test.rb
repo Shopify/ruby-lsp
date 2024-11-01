@@ -683,7 +683,7 @@ class ServerTest < Minitest::Test
       addon = RubyLsp::Addon.addons.find { |a| a.is_a?(klass) }
       addon.expects(:handle_window_show_message_response).with("hello")
 
-      @server.process_message(method: "window/showMessageRequest", title: "hello", addon_name: "My Add-on")
+      @server.process_message(result: { method: "window/showMessageRequest", title: "hello", addon_name: "My Add-on" })
     ensure
       RubyLsp::Addon.addons.clear
       RubyLsp::Addon.addon_classes.clear
