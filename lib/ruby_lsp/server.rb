@@ -1111,52 +1111,21 @@ module RubyLsp
         params: Interface::WorkDoneProgressCreateParams.new(token: id),
       ))
 
-      send_message(Notification.new(
-        method: "$/progress",
-        params: Interface::ProgressParams.new(
-          token: id,
-          value: Interface::WorkDoneProgressBegin.new(
-            kind: "begin",
-            title: title,
-            percentage: percentage,
-            message: "#{percentage}% completed",
-          ),
-        ),
-      ))
+      send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
     end
 
     sig { params(id: String, percentage: Integer).void }
     def progress(id, percentage)
       return unless @global_state.client_capabilities.supports_progress
 
-      send_message(
-        Notification.new(
-          method: "$/progress",
-          params: Interface::ProgressParams.new(
-            token: id,
-            value: Interface::WorkDoneProgressReport.new(
-              kind: "report",
-              percentage: percentage,
-              message: "#{percentage}% completed",
-            ),
-          ),
-        ),
-      )
+      send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
     end
 
     sig { params(id: String).void }
     def end_progress(id)
       return unless @global_state.client_capabilities.supports_progress
 
-      send_message(
-        Notification.new(
-          method: "$/progress",
-          params: Interface::ProgressParams.new(
-            token: id,
-            value: Interface::WorkDoneProgressEnd.new(kind: "end"),
-          ),
-        ),
-      )
+      send_message(Notification.progress_end(id))
     rescue ClosedQueueError
       # If the server was killed and the message queue is already closed, there's no way to end the progress
       # notification

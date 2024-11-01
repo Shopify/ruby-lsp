@@ -87,6 +87,61 @@ module RubyLsp
           params: data,
         )
       end
+
+      sig do
+        params(
+          id: String,
+          title: String,
+          percentage: T.nilable(Integer),
+          message: T.nilable(String),
+        ).returns(Notification)
+      end
+      def progress_begin(id, title, percentage: nil, message: nil)
+        new(
+          method: "$/progress",
+          params: Interface::ProgressParams.new(
+            token: id,
+            value: Interface::WorkDoneProgressBegin.new(
+              kind: "begin",
+              title: title,
+              percentage: percentage,
+              message: message,
+            ),
+          ),
+        )
+      end
+
+      sig do
+        params(
+          id: String,
+          percentage: T.nilable(Integer),
+          message: T.nilable(String),
+        ).returns(Notification)
+      end
+      def progress_report(id, percentage: nil, message: nil)
+        new(
+          method: "$/progress",
+          params: Interface::ProgressParams.new(
+            token: id,
+            value: Interface::WorkDoneProgressReport.new(
+              kind: "report",
+              percentage: percentage,
+              message: message,
+            ),
+          ),
+        )
+      end
+
+      sig { params(id: String).returns(Notification) }
+      def progress_end(id)
+        Notification.new(
+          method: "$/progress",
+          params: Interface::ProgressParams.new(
+            token: id,
+            value: Interface::WorkDoneProgressEnd.new(kind: "end"),
+          ),
+        )
+      end
     end
 
     extend T::Sig
