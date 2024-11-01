@@ -10,7 +10,8 @@ module RubyLsp
     sig { returns(T::Boolean) }
     attr_reader :supports_watching_files,
       :supports_request_delegation,
-      :window_show_message_supports_extra_properties
+      :window_show_message_supports_extra_properties,
+      :supports_progress
 
     sig { void }
     def initialize
@@ -28,6 +29,9 @@ module RubyLsp
 
       # Which resource operations the editor supports, like renaming files
       @supported_resource_operations = T.let([], T::Array[String])
+
+      # The editor supports displaying progress requests
+      @supports_progress = T.let(false, T::Boolean)
     end
 
     sig { params(capabilities: T::Hash[Symbol, T.untyped]).void }
@@ -50,6 +54,9 @@ module RubyLsp
         :additionalPropertiesSupport,
       )
       @window_show_message_supports_extra_properties = supports_additional_properties || false
+
+      progress = capabilities.dig(:window, :workDoneProgress)
+      @supports_progress = progress if progress
     end
 
     sig { returns(T::Boolean) }

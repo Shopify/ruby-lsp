@@ -7,9 +7,6 @@ module RubyLsp
 
     class NonExistingDocumentError < StandardError; end
 
-    sig { returns(T::Boolean) }
-    attr_accessor :supports_progress
-
     sig { returns(T::Hash[Symbol, RequestConfig]) }
     attr_accessor :features_configuration
 
@@ -19,7 +16,6 @@ module RubyLsp
     sig { void }
     def initialize
       @state = T.let({}, T::Hash[String, Document[T.untyped]])
-      @supports_progress = T.let(true, T::Boolean)
       @features_configuration = T.let(
         {
           inlayHint: RequestConfig.new({
