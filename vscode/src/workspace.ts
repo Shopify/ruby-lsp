@@ -29,6 +29,11 @@ export class Workspace implements WorkspaceInterface {
   #inhibitRestart = false;
   #error = false;
 
+  private readonly debouncedRestart = debounce(async (reason: string) => {
+    this.outputChannel.info(`Restarting the Ruby LSP because ${reason}`);
+    await this.restart();
+  }, 5000);
+
   constructor(
     context: vscode.ExtensionContext,
     workspaceFolder: vscode.WorkspaceFolder,
@@ -376,7 +381,7 @@ export class Workspace implements WorkspaceInterface {
 
     // Handler for only triggering restart if the contents of the file have been modified. If the file was just touched,
     // but the contents are the same, we don't want to restart
-    const debouncedRestartWithHashCheck = debounce(async (uri: vscode.Uri) => {
+    const debouncedRestartWithHashCheck = async (uri: vscode.Uri) => {
       const fileContents = await vscode.workspace.fs.readFile(uri);
       const fsPath = uri.fsPath;
 
@@ -385,21 +390,14 @@ export class Workspace implements WorkspaceInterface {
       const currentSha = hash.digest("hex");
 
       if (this.restartDocumentShas.get(fsPath) !== currentSha) {
-        this.outputChannel.info(
-          `Restarting the Ruby LSP because ${pattern} changed`,
-        );
-
         this.restartDocumentShas.set(fsPath, currentSha);
-        await this.restart();
+        await this.debouncedRestart(`${pattern} changed`);
       }
-    }, 5000);
+    };
 
-    const debouncedRestart = debounce(async () => {
-      this.outputChannel.info(
-        `Restarting the Ruby LSP because ${pattern} changed`,
-      );
-      await this.restart();
-    }, 5000);
+    const debouncedRestart = async () => {
+      await this.debouncedRestart(`${pattern} changed`);
+    };
 
     context.subscriptions.push(
       watcher,
@@ -417,16 +415,10 @@ export class Workspace implements WorkspaceInterface {
     const start = () => {
       this.#inhibitRestart = true;
     };
-    const debouncedRestart = debounce(async () => {
-      this.outputChannel.info(
-        `Restarting the Ruby LSP because ${glob} changed`,
-      );
-      await this.restart();
-    }, 5000);
 
     const stop = async () => {
       this.#inhibitRestart = false;
-      await debouncedRestart();
+      await this.debouncedRestart(`${glob} changed`);
     };
 
     this.context.subscriptions.push(
