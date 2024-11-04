@@ -38,7 +38,13 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
         )
-        Listeners::DocumentHighlight.new(@response_builder, node_context.node, node_context.parent, dispatcher)
+        Listeners::DocumentHighlight.new(
+          @response_builder,
+          node_context.node,
+          node_context.parent,
+          dispatcher,
+          position,
+        )
       end
 
       sig { override.returns(T::Array[Interface::DocumentHighlight]) }
