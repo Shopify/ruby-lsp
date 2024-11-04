@@ -105,4 +105,23 @@ export abstract class VersionManager {
       env: process.env,
     });
   }
+
+  // Tries to find `execName` within the given directories. Prefers the executables found in the given directories over
+  // finding the executable in the PATH
+  protected async findExec(directories: vscode.Uri[], execName: string) {
+    for (const uri of directories) {
+      try {
+        const fullUri = vscode.Uri.joinPath(uri, execName);
+        await vscode.workspace.fs.stat(fullUri);
+        this.outputChannel.info(
+          `Found ${execName} executable at ${uri.fsPath}`,
+        );
+        return fullUri.fsPath;
+      } catch (error: any) {
+        // continue searching
+      }
+    }
+
+    return execName;
+  }
 }
