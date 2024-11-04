@@ -35,6 +35,8 @@ import {
   ClientInterface,
   Addon,
   SUPPORTED_LANGUAGE_IDS,
+  FEATURE_FLAGS,
+  featureEnabled,
 } from "./common";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
@@ -49,6 +51,14 @@ interface ServerErrorTelemetryEvent {
 }
 
 type ServerTelemetryEvent = ServerErrorTelemetryEvent;
+
+function enabledFeatureFlags() {
+  const allKeys = Object.keys(FEATURE_FLAGS) as (keyof typeof FEATURE_FLAGS)[];
+
+  return allKeys.map((key) => {
+    return { [key]: featureEnabled(key) };
+  });
+}
 
 // Get the executables to start the server based on the user's configuration
 function getLspExecutables(
@@ -216,6 +226,7 @@ function collectClientOptions(
       linters: configuration.get("linters"),
       indexing: configuration.get("indexing"),
       addonSettings: configuration.get("addonSettings"),
+      enabledFeatureFlags: enabledFeatureFlags(),
     },
   };
 }
