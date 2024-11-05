@@ -229,6 +229,23 @@ module RubyLsp
       global_state.supports_watching_files
     end
 
+    def test_feature_flags_are_processed_by_apply_options
+      state = GlobalState.new
+
+      state.apply_options({
+        initializationOptions: {
+          enabledFeatureFlags: {
+            semantic_highlighting: true,
+            code_lens: false,
+          },
+        },
+      })
+
+      assert(state.enabled_feature?(:semantic_highlighting))
+      refute(state.enabled_feature?(:code_lens))
+      assert_nil(state.enabled_feature?(:unknown_flag))
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)

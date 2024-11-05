@@ -53,6 +53,7 @@ module RubyLsp
         T::Boolean,
       )
       @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
+      @enabled_feature_flags = T.let({}, T::Hash[Symbol, T::Boolean])
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -139,7 +140,15 @@ module RubyLsp
         @addon_settings.merge!(addon_settings)
       end
 
+      enabled_flags = options.dig(:initializationOptions, :enabledFeatureFlags)
+      @enabled_feature_flags = enabled_flags if enabled_flags
+
       notifications
+    end
+
+    sig { params(flag: Symbol).returns(T.nilable(T::Boolean)) }
+    def enabled_feature?(flag)
+      @enabled_feature_flags[flag]
     end
 
     sig { returns(String) }
