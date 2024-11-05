@@ -22,7 +22,10 @@ export class Shadowenv extends VersionManager {
       );
     }
 
-    const shadowenvExec = await this.findShadowenvExec();
+    const shadowenvExec = await this.findExec(
+      [vscode.Uri.file("/opt/homebrew/bin")],
+      "shadowenv",
+    );
 
     try {
       const parsedResult = await this.runEnvActivationScript(
@@ -70,25 +73,5 @@ export class Shadowenv extends VersionManager {
         `Failed to activate Ruby environment with Shadowenv: ${error.message}`,
       );
     }
-  }
-
-  // Tries to find the Shadowenv executable either directly in known paths or in the PATH
-  async findShadowenvExec() {
-    // If we can find the Shadowenv executable in the Homebrew installation path, then prefer it over relying on the
-    // executable being available in the PATH. Sometimes, users might have shell scripts or other extensions that can
-    // mess up the PATH and then we can't find the Shadowenv executable
-    const possibleUris = [vscode.Uri.file("/opt/homebrew/bin/shadowenv")];
-
-    for (const uri of possibleUris) {
-      try {
-        await vscode.workspace.fs.stat(uri);
-        this.outputChannel.info(`Found Shadowenv executable at ${uri.fsPath}`);
-        return uri.fsPath;
-      } catch (error: any) {
-        // continue searching
-      }
-    }
-
-    return "shadowenv";
   }
 }
