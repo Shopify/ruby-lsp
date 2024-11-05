@@ -91,8 +91,7 @@ their Gemfiles, and at the same time being able to hook into project dependencie
 
 ### Implicit Dependencies
 
-The Ruby LSP requires certain dependencies to be present in the project in order to provide the best experience. These are the dependencies:
-- rubocop (>= 1.4.0)
+The Ruby LSP can provide an enhanced experience if RuboCop is present in the project. While using it is optional, if you do choose to include RuboCop, make sure it’s version 1.4.0 or higher.
 
 ## Add-ons
 
