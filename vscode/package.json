@@ -484,7 +484,7 @@
           "type": "object",
           "properties": {
             "all": {
-              "description": "Opt-in/out of all available feature flags",
+              "description": "Opt-into all available feature flags",
               "type": "boolean"
             },
             "tapiocaAddon": {
