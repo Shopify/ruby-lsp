@@ -119,29 +119,6 @@ export class ServerStatus extends StatusItem {
   }
 }
 
-export class ExperimentalFeaturesStatus extends StatusItem {
-  constructor() {
-    super("experimentalFeatures");
-
-    const experimentalFeaturesEnabled =
-      vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get("enableExperimentalFeatures") === true;
-    const message = experimentalFeaturesEnabled
-      ? "Experimental features enabled"
-      : "Experimental features disabled";
-
-    this.item.name = "Ruby LSP Experimental Features";
-    this.item.text = message;
-    this.item.command = {
-      title: experimentalFeaturesEnabled ? "Disable" : "Enable",
-      command: Command.ToggleExperimentalFeatures,
-    };
-  }
-
-  refresh(_workspace: WorkspaceInterface): void {}
-}
-
 export class FeaturesStatus extends StatusItem {
   constructor() {
     super("features");
@@ -225,7 +202,6 @@ export class StatusItems {
     this.items = [
       new RubyVersionStatus(),
       new ServerStatus(),
-      new ExperimentalFeaturesStatus(),
       new FeaturesStatus(),
       new FormatterStatus(),
       new AddonsStatus(),
