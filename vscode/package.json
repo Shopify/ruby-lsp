@@ -478,6 +478,21 @@
           "description": "[EXPERIMENTAL] Uses server launcher for gracefully handling missing dependencies.",
           "type": "boolean",
           "default": false
+        },
+        "rubyLsp.featureFlags": {
+          "description": "Allows opting in or out of feature flags",
+          "type": "object",
+          "properties": {
+            "all": {
+              "description": "Opt-into all available feature flags",
+              "type": "boolean"
+            },
+            "tapiocaAddon": {
+              "description": "Opt-in/out of the Tapioca add-on",
+              "type": "boolean"
+            }
+          },
+          "default": {}
         }
       }
     },

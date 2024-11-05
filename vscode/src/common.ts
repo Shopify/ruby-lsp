@@ -1,4 +1,5 @@
 import { exec } from "child_process";
+import { createHash } from "crypto";
 import { promisify } from "util";
 
 import * as vscode from "vscode";
@@ -74,6 +75,15 @@ export const LOG_CHANNEL = vscode.window.createOutputChannel(LSP_NAME, {
 });
 export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 
+// A list of feature flags where the key is the name and the value is the rollout percentage.
+//
+// Note: names added here should also be added to the `rubyLsp.optedOutFeatureFlags` enum in the `package.json` file
+export const FEATURE_FLAGS = {
+  tapiocaAddon: 0.0,
+};
+
+type FeatureFlagConfigurationKey = keyof typeof FEATURE_FLAGS | "all";
+
 // Creates a debounced version of a function with the specified delay. If the function is invoked before the delay runs
 // out, then the previous invocation of the function gets cancelled and a new one is scheduled.
 //
@@ -98,4 +108,38 @@ export function debounce(fn: (...args: any[]) => Promise<void>, delay: number) {
       }, delay);
     });
   };
+}
+
+// Check if the given feature is enabled for the current user given the configured rollout percentage
+export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
+  const flagConfiguration = vscode.workspace
+    .getConfiguration("rubyLsp")
+    .get<
+      Record<FeatureFlagConfigurationKey, boolean | undefined>
+    >("featureFlags")!;
+
+  // If the user opted out of this feature, return false. We explicitly check for `false` because `undefined` means
+  // nothing was configured
+  if (flagConfiguration[feature] === false || flagConfiguration.all === false) {
+    return false;
+  }
+
+  // If the user opted-in to all features, return true
+  if (flagConfiguration.all) {
+    return true;
+  }
+
+  const percentage = FEATURE_FLAGS[feature];
+  const machineId = vscode.env.machineId;
+  // Create a digest of the concatenated machine ID and feature name, which will generate a unique hash for this
+  // user-feature combination
+  const hash = createHash("sha256")
+    .update(`${machineId}-${feature}`)
+    .digest("hex");
+
+  // Convert the first 8 characters of the hash to a number between 0 and 1
+  const hashNum = parseInt(hash.substring(0, 8), 16) / 0xffffffff;
+
+  // If that number is below the percentage, then the feature is enabled for this user
+  return hashNum < percentage;
 }
