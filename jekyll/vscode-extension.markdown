@@ -1,3 +1,10 @@
+---
+layout: default
+title: VS Code extension
+nav_order: 1
+parent: Ruby LSP
+---
+
 # Ruby LSP
 
 The Ruby LSP is an implementation of the [language server protocol](https://microsoft.github.io/language-server-protocol/)
