@@ -12,7 +12,7 @@ for Ruby, used to improve rich features in editors.
 
 ## Features
 
-![Ruby LSP demo](extras/ruby_lsp_demo.gif)
+![Ruby LSP demo](images/ruby_lsp_demo.gif)
 
 The Ruby LSP features include
 
@@ -92,7 +92,7 @@ test boilerplates. Find the full list [here](https://github.com/Shopify/ruby-lsp
 The Ruby LSP allows disabling specific features. To do so, open the
 language status center right next to the language mode Ruby and select `Manage` right next to enabled features.
 
-![Ruby LSP status center](extras/ruby_lsp_status_center.png)
+![Ruby LSP status center](images/ruby_lsp_status_center.png)
 
 #### Ruby version managers
 
