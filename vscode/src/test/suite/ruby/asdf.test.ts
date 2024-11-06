@@ -26,7 +26,7 @@ suite("Asdf", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const asdf = new Asdf(workspaceFolder, outputChannel);
+    const asdf = new Asdf(workspaceFolder, outputChannel, async () => {});
     const envStub = {
       env: { ANY: "true" },
       yjit: true,
@@ -75,7 +75,7 @@ suite("Asdf", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const asdf = new Asdf(workspaceFolder, outputChannel);
+    const asdf = new Asdf(workspaceFolder, outputChannel, async () => {});
     const envStub = {
       env: { ANY: "true" },
       yjit: true,

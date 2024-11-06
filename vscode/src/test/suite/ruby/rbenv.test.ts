@@ -27,7 +27,7 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel);
+    const rbenv = new Rbenv(workspaceFolder, outputChannel, async () => {});
 
     const envStub = {
       env: { ANY: "true" },
@@ -70,7 +70,7 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel);
+    const rbenv = new Rbenv(workspaceFolder, outputChannel, async () => {});
 
     const envStub = {
       env: { ANY: "true" },
@@ -129,7 +129,7 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel);
+    const rbenv = new Rbenv(workspaceFolder, outputChannel, async () => {});
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
