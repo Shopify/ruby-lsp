@@ -50,8 +50,8 @@ class CompletionResolveTest < Minitest::Test
       end
 
       class Foo
-        # Foo!
         def initialize
+          # Foo!
           @a = 1
         end
       end
