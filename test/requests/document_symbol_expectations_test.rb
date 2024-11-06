@@ -7,6 +7,32 @@ require_relative "support/expectations_test_runner"
 class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
+  def test_instance_variable_with_shorthand_assignment
+    source = <<~RUBY
+      @foo = 1
+      @bar += 2
+      @baz -= 3
+      @qux ||= 4
+      @quux &&= 5
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    response = listener.perform
+
+    assert_equal(5, response.size)
+
+    assert_equal("@foo", T.must(response[0]).name)
+    assert_equal("@bar", T.must(response[1]).name)
+    assert_equal("@baz", T.must(response[2]).name)
+    assert_equal("@qux", T.must(response[3]).name)
+    assert_equal("@quux", T.must(response[4]).name)
+  end
+
   def test_labels_blank_names
     source = <<~RUBY
       def
