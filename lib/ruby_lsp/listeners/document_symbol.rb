@@ -252,7 +252,6 @@ module RubyLsp
         @response_builder.pop
       end
 
-
       sig { params(node: Prism::ClassVariableWriteNode).void }
       def on_class_variable_write_node_enter(node)
         create_document_symbol(
