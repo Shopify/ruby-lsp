@@ -1,7 +1,7 @@
 ---
 layout: default
 title: VS Code extension
-nav_order: 1
+nav_order: 5
 parent: Ruby LSP
 ---
 
