@@ -23,6 +23,7 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [With VS Code](#with-vs-code)
     - [With other editors](#with-other-editors)
     - [Composed Ruby LSP bundle](#composed-ruby-lsp-bundle)
+    - [Dependency Compatibility](#dependency-compatibility)
 - [Add-ons](#add-ons)
 - [General features](#general-features)
     - [Hover](#hover)
@@ -87,6 +88,10 @@ project's dependencies).
 
 The Ruby LSP executable generates a composed bundle with the goal of not requiring users to add the `ruby-lsp` gem to
 their Gemfiles, and at the same time being able to hook into project dependencies. [Learn more](composed-bundle).
+
+### Dependency Compatibility
+
+The Ruby LSP can provide an enhanced experience if RuboCop is present in the project. While using it is optional, if you do choose to include RuboCop, make sure it’s version 1.4.0 or higher.
 
 ## Add-ons
 

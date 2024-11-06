@@ -15,6 +15,7 @@ rescue LoadError
   return
 end
 
+# Remember to update the version in the documentation (usage/dependency-compatibility section) if you change this
 # Ensure that RuboCop is at least version 1.4.0
 begin
   gem("rubocop", ">= 1.4.0")
