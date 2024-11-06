@@ -173,7 +173,7 @@ export class Ruby implements RubyInterface {
 
   async manuallySelectRuby() {
     const manualSelection = await vscode.window.showInformationMessage(
-      "Configure global fallback or workspace specific Ruby?",
+      "Configure global or workspace specific fallback for the Ruby LSP?",
       "global",
       "workspace",
       "clear previous workspace selection",
