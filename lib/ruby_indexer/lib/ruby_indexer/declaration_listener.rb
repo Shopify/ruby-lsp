@@ -663,23 +663,7 @@ module RubyIndexer
 
       start_line = node.location.start_line - 1
       start_line -= 1 unless comment_exists_at?(start_line)
-
-      append_comment_lines(start_line, comments)
-
-      comments.chomp!
-      comments
-    end
-
-    sig { params(line: Integer).returns(T::Boolean) }
-    def comment_exists_at?(line)
-      @comments_by_line.key?(line) || !@source_lines[line - 1].to_s.strip.empty?
-    end
-
-    sig { params(start_line: Integer, comments: String).void }
-    def append_comment_lines(start_line, comments)
       start_line.downto(1) do |line|
-        break if line < 1
-
         comment = @comments_by_line[line]
         break unless comment
 
@@ -694,6 +678,14 @@ module RubyIndexer
         comment_content.delete_prefix!(" ")
         comments.prepend("#{comment_content}\n")
       end
+
+      comments.chomp!
+      comments
+    end
+
+    sig { params(line: Integer).returns(T::Boolean) }
+    def comment_exists_at?(line)
+      @comments_by_line.key?(line) || !@source_lines[line - 1].to_s.strip.empty?
     end
 
     sig { params(name: String).returns(String) }

@@ -179,7 +179,7 @@ module RubyIndexer
       assert_equal("Documentation for baz", baz_comment)
 
       ban_comment = @index["ban"].first.comments
-      assert_equal("", ban_comment)
+      assert_empty(ban_comment)
     end
 
     def test_method_with_parameters
