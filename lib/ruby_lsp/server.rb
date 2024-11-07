@@ -216,6 +216,13 @@ module RubyLsp
         Hash.new(true)
       end
 
+      bundle_env_path = File.join(".ruby-lsp", "bundle_env")
+      bundle_env = if File.exist?(bundle_env_path)
+        env = File.readlines(bundle_env_path).to_h { |line| T.cast(line.chomp.split("=", 2), [String, String]) }
+        FileUtils.rm(bundle_env_path)
+        env
+      end
+
       document_symbol_provider = Requests::DocumentSymbol.provider if enabled_features["documentSymbols"]
       document_link_provider = Requests::DocumentLink.provider if enabled_features["documentLink"]
       code_lens_provider = Requests::CodeLens.provider if enabled_features["codeLens"]
@@ -269,6 +276,7 @@ module RubyLsp
         },
         formatter: @global_state.formatter,
         degraded_mode: !!(@install_error || @setup_error),
+        bundle_env: bundle_env,
       }
 
       send_message(Result.new(id: message[:id], response: response))

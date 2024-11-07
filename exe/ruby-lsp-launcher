@@ -74,9 +74,6 @@ rescue StandardError => e
   # If Bundler.setup fails, we need to restore the original $LOAD_PATH so that we can still require the Ruby LSP server
   # in degraded mode
   $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
-ensure
-  require "fileutils"
-  FileUtils.rm(bundle_env_path) if File.exist?(bundle_env_path)
 end
 
 error_path = File.join(".ruby-lsp", "install_error")
