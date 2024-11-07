@@ -59,15 +59,15 @@ suite("Workspace", () => {
 
     await workspace.activate();
 
-    for (let i = 0; i < 5; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+    for (let i = 0; i < 4; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
       fs.writeFileSync(path.join(gitDir, "rebase-apply"), "1");
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 50));
       fs.rmSync(path.join(gitDir, "rebase-apply"));
     }
 
     // Give enough time for all watchers to fire and all debounces to run off
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 6000));
 
     startStub.restore();
     restartSpy.restore();
@@ -77,4 +77,40 @@ suite("Workspace", () => {
     // The restart call only happens once because of the debounce
     assert.strictEqual(restartSpy.callCount, 1);
   }).timeout(60000);
+
+  test("does not restart when watched files are touched without modifying contents", async () => {
+    const lockfileUri = vscode.Uri.file(
+      path.join(workspacePath, "Gemfile.lock"),
+    );
+    const contents = Buffer.from("hello");
+    await vscode.workspace.fs.writeFile(lockfileUri, contents);
+
+    const workspace = new Workspace(
+      context,
+      workspaceFolder,
+      FAKE_TELEMETRY,
+      () => {},
+      new Map(),
+    );
+
+    await workspace.activate();
+
+    const startStub = sinon.stub(workspace, "start");
+    const restartSpy = sinon.spy(workspace, "restart");
+
+    for (let i = 0; i < 4; i++) {
+      const updateDate = new Date();
+      fs.utimesSync(lockfileUri.fsPath, updateDate, updateDate);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    // Give enough time for all watchers to fire and all debounces to run off
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
+    startStub.restore();
+    restartSpy.restore();
+
+    assert.strictEqual(startStub.callCount, 0);
+    assert.strictEqual(restartSpy.callCount, 0);
+  }).timeout(10000);
 });
