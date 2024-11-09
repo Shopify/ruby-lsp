@@ -125,6 +125,8 @@ module RubyLsp
       @worker.join
       @outgoing_dispatcher.join
       @store.clear
+
+      File.write(".ruby-lsp/shutdown-timestamp", Time.now.iso8601)
     end
 
     # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
