@@ -17,6 +17,24 @@ import { None } from "./ruby/none";
 import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
 
+async function detectMise() {
+  const possiblePaths = [
+    vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
+    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
+  ];
+
+  for (const possiblePath of possiblePaths) {
+    try {
+      await vscode.workspace.fs.stat(possiblePath);
+      return true;
+    } catch (error: any) {
+      // Continue looking
+    }
+  }
+
+  return false;
+}
+
 export enum ManagerIdentifier {
   Asdf = "asdf",
   Auto = "auto",
@@ -408,19 +426,9 @@ export class Ruby implements RubyInterface {
       }
     }
 
-    try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(
-          vscode.Uri.file(os.homedir()),
-          ".local",
-          "bin",
-          "mise",
-        ),
-      );
+    if (await detectMise()) {
       this.versionManager = ManagerIdentifier.Mise;
       return;
-    } catch (error: any) {
-      // If the Mise binary doesn't exist, then continue checking
     }
 
     if (os.platform() === "win32") {
