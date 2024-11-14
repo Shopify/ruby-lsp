@@ -149,6 +149,48 @@ module RubyIndexer
       end
     end
 
+    def test_private_class_method_visibility_tracking_string_symbol_arguments
+      index(<<~RUBY)
+        class Test
+          def self.foo
+          end
+
+          def self.bar
+          end
+
+          private_class_method("foo", :bar)
+        end
+      RUBY
+
+      ["foo", "bar"].each do |keyword|
+        entries = T.must(@index[keyword])
+        assert_equal(1, entries.size)
+        entry = entries.first
+        assert_equal(Entry::Visibility::PRIVATE, entry.visibility)
+      end
+    end
+
+    def test_private_class_method_visibility_tracking_array_argument
+      index(<<~RUBY)
+        class Test
+          def self.foo
+          end
+
+          def self.bar
+          end
+
+          private_class_method(["foo", :bar])
+        end
+      RUBY
+
+      ["foo", "bar"].each do |keyword|
+        entries = T.must(@index[keyword])
+        assert_equal(1, entries.size)
+        entry = entries.first
+        assert_equal(Entry::Visibility::PRIVATE, entry.visibility)
+      end
+    end
+
     def test_method_with_parameters
       index(<<~RUBY)
         class Foo
