@@ -256,7 +256,7 @@ module RubyIndexer
 
       refs = find_method_references("foo", <<~RUBY)
         class Bar
-          attr_accessor :foo
+          attr_accessor :bar, :foo
 
           def baz
             self.foo = 1
