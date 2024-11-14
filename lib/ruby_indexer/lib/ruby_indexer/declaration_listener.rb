@@ -18,13 +18,12 @@ module RubyIndexer
         parse_result: Prism::ParseResult,
         file_path: String,
         collect_comments: T::Boolean,
-        enhancements: T::Array[Enhancement],
       ).void
     end
-    def initialize(index, dispatcher, parse_result, file_path, collect_comments: false, enhancements: [])
+    def initialize(index, dispatcher, parse_result, file_path, collect_comments: false)
       @index = index
       @file_path = file_path
-      @enhancements = enhancements
+      @enhancements = T.let(Enhancement.all(self), T::Array[Enhancement])
       @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
@@ -86,15 +85,9 @@ module RubyIndexer
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
-      @visibility_stack.push(Entry::Visibility::PUBLIC)
       constant_path = node.constant_path
-      name = constant_path.slice
-
-      comments = collect_comments(node)
-
       superclass = node.superclass
-
-      nesting = actual_nesting(name)
+      nesting = actual_nesting(constant_path.slice)
 
       parent_class = case superclass
       when Prism::ConstantReadNode, Prism::ConstantPathNode
@@ -113,53 +106,29 @@ module RubyIndexer
         end
       end
 
-      entry = Entry::Class.new(
+      add_class(
         nesting,
-        @file_path,
-        Location.from_prism_location(node.location, @code_units_cache),
-        Location.from_prism_location(constant_path.location, @code_units_cache),
-        comments,
-        parent_class,
+        node.location,
+        constant_path.location,
+        parent_class_name: parent_class,
+        comments: collect_comments(node),
       )
-
-      @owner_stack << entry
-      @index.add(entry)
-      @stack << name
     end
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_leave(node)
-      @stack.pop
-      @owner_stack.pop
-      @visibility_stack.pop
+      pop_namespace_stack
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
-      @visibility_stack.push(Entry::Visibility::PUBLIC)
       constant_path = node.constant_path
-      name = constant_path.slice
-
-      comments = collect_comments(node)
-
-      entry = Entry::Module.new(
-        actual_nesting(name),
-        @file_path,
-        Location.from_prism_location(node.location, @code_units_cache),
-        Location.from_prism_location(constant_path.location, @code_units_cache),
-        comments,
-      )
-
-      @owner_stack << entry
-      @index.add(entry)
-      @stack << name
+      add_module(constant_path.slice, node.location, constant_path.location, comments: collect_comments(node))
     end
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_leave(node)
-      @stack.pop
-      @owner_stack.pop
-      @visibility_stack.pop
+      pop_namespace_stack
     end
 
     sig { params(node: Prism::SingletonClassNode).void }
@@ -201,9 +170,7 @@ module RubyIndexer
 
     sig { params(node: Prism::SingletonClassNode).void }
     def on_singleton_class_node_leave(node)
-      @stack.pop
-      @owner_stack.pop
-      @visibility_stack.pop
+      pop_namespace_stack
     end
 
     sig { params(node: Prism::MultiWriteNode).void }
@@ -318,7 +285,7 @@ module RubyIndexer
       end
 
       @enhancements.each do |enhancement|
-        enhancement.on_call_node_enter(@owner_stack.last, node, @file_path, @code_units_cache)
+        enhancement.on_call_node_enter(node)
       rescue StandardError => e
         @indexing_errors << <<~MSG
           Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node enter enhancement: #{e.message}
@@ -339,7 +306,7 @@ module RubyIndexer
       end
 
       @enhancements.each do |enhancement|
-        enhancement.on_call_node_leave(@owner_stack.last, node, @file_path, @code_units_cache)
+        enhancement.on_call_node_leave(node)
       rescue StandardError => e
         @indexing_errors << <<~MSG
           Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node leave enhancement: #{e.message}
@@ -462,6 +429,98 @@ module RubyIndexer
           comments,
         ),
       )
+    end
+
+    sig do
+      params(
+        name: String,
+        node_location: Prism::Location,
+        signatures: T::Array[Entry::Signature],
+        visibility: Entry::Visibility,
+        comments: T.nilable(String),
+      ).void
+    end
+    def add_method(name, node_location, signatures, visibility: Entry::Visibility::PUBLIC, comments: nil)
+      location = Location.from_prism_location(node_location, @code_units_cache)
+
+      @index.add(Entry::Method.new(
+        name,
+        @file_path,
+        location,
+        location,
+        comments,
+        signatures,
+        visibility,
+        @owner_stack.last,
+      ))
+    end
+
+    sig do
+      params(
+        name: String,
+        full_location: Prism::Location,
+        name_location: Prism::Location,
+        comments: T.nilable(String),
+      ).void
+    end
+    def add_module(name, full_location, name_location, comments: nil)
+      location = Location.from_prism_location(full_location, @code_units_cache)
+      name_loc = Location.from_prism_location(name_location, @code_units_cache)
+
+      entry = Entry::Module.new(
+        actual_nesting(name),
+        @file_path,
+        location,
+        name_loc,
+        comments,
+      )
+
+      advance_namespace_stack(name, entry)
+    end
+
+    sig do
+      params(
+        name_or_nesting: T.any(String, T::Array[String]),
+        full_location: Prism::Location,
+        name_location: Prism::Location,
+        parent_class_name: T.nilable(String),
+        comments: T.nilable(String),
+      ).void
+    end
+    def add_class(name_or_nesting, full_location, name_location, parent_class_name: nil, comments: nil)
+      nesting = name_or_nesting.is_a?(Array) ? name_or_nesting : actual_nesting(name_or_nesting)
+      entry = Entry::Class.new(
+        nesting,
+        @file_path,
+        Location.from_prism_location(full_location, @code_units_cache),
+        Location.from_prism_location(name_location, @code_units_cache),
+        comments,
+        parent_class_name,
+      )
+
+      advance_namespace_stack(T.must(nesting.last), entry)
+    end
+
+    sig { params(block: T.proc.params(index: Index, base: Entry::Namespace).void).void }
+    def register_included_hook(&block)
+      owner = @owner_stack.last
+      return unless owner
+
+      @index.register_included_hook(owner.name) do |index, base|
+        block.call(index, base)
+      end
+    end
+
+    sig { void }
+    def pop_namespace_stack
+      @stack.pop
+      @owner_stack.pop
+      @visibility_stack.pop
+    end
+
+    sig { returns(T.nilable(Entry::Namespace)) }
+    def current_owner
+      @owner_stack.last
     end
 
     private
@@ -920,6 +979,14 @@ module RubyIndexer
       end
 
       corrected_nesting
+    end
+
+    sig { params(short_name: String, entry: Entry::Namespace).void }
+    def advance_namespace_stack(short_name, entry)
+      @visibility_stack.push(Entry::Visibility::PUBLIC)
+      @owner_stack << entry
+      @index.add(entry)
+      @stack << short_name
     end
   end
 end
