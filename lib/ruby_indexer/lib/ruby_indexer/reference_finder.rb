@@ -264,7 +264,7 @@ module RubyIndexer
 
     sig { params(node: Prism::CallNode).void }
     def on_call_node_enter(node)
-      return unless  @target.is_a?(MethodTarget)
+      return unless @target.is_a?(MethodTarget)
 
       if (name = node.name.to_s) == @target.method_name
         @references << Reference.new(name, T.must(node.message_loc), declaration: false)
@@ -272,18 +272,24 @@ module RubyIndexer
         @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
       elsif node.name == :attr_reader && attr_reader_matches_method(node.arguments.arguments, @target.method_name)
         @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
-      elsif node.name == :attr_accessor && (attr_reader_matches_method(node.arguments.arguments, @target.method_name) || attr_writer_matches_method(node.arguments.arguments, @target.method_name))
+      elsif node.name == :attr_accessor && (attr_reader_matches_method(
+        node.arguments.arguments,
+        @target.method_name,
+      ) || attr_writer_matches_method(node.arguments.arguments, @target.method_name))
         @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
       end
     end
 
     private
+
     def attr_reader_matches_method(arguments, method_name)
-      arguments.map(&:unescaped).include?(method_name)
+      arguments.select { |ar| ar.respond_to?(:unescaped) }.map(&:unescaped).include?(method_name)
     end
 
     def attr_writer_matches_method(arguments, method_name)
-      arguments.map(&:unescaped).any? { |unescaped_arg| "#{unescaped_arg}=" == method_name }
+      arguments.select do |ar|
+        ar.respond_to?(:unescaped)
+      end.map(&:unescaped).any? { |unescaped_arg| "#{unescaped_arg}=" == method_name }
     end
 
     sig { params(name: String).returns(T::Array[String]) }

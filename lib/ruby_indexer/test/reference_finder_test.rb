@@ -143,6 +143,24 @@ module RubyIndexer
       assert_equal(9, refs[1].location.start_line)
     end
 
+    def test_matches_attr_writer_with_call_node_argument
+      refs = find_method_references("foo=", <<~RUBY)
+        class Bar
+          attr_reader :foo, bar
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+      assert_equal(1, refs.size)
+
+      assert_equal("foo=", refs[0].name)
+      assert_equal(5, refs[0].location.start_line)
+    end
+
     def test_matches_attr_writer
       refs = find_method_references("foo=", <<~RUBY)
         class Bar
@@ -225,7 +243,6 @@ module RubyIndexer
         end
       RUBY
 
-
       assert_equal("foo", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
 
@@ -264,7 +281,6 @@ module RubyIndexer
           end
         end
       RUBY
-
 
       assert_equal("foo", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
