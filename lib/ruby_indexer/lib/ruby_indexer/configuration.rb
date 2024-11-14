@@ -109,6 +109,12 @@ module RubyIndexer
 
       indexables = T.let([], T::Array[IndexablePath])
 
+      # Handle top level files separately. The path below is an optimization to prevent descending down directories that
+      # are going to be excluded anyway, so we need to handle top level scripts separately
+      Dir.glob(File.join(@workspace_path, "*.rb"), flags).each do |path|
+        indexables << IndexablePath.new(nil, path)
+      end
+
       # Add user specified patterns
       @included_patterns.each do |pattern|
         load_path_entry = T.let(nil, T.nilable(String))
