@@ -160,5 +160,15 @@ module RubyIndexer
         )
       end
     end
+
+    def test_includes_top_level_files
+      Dir.mktmpdir do |dir|
+        FileUtils.touch(File.join(dir, "find_me.rb"))
+        @config.workspace_path = dir
+
+        indexables = @config.indexables
+        assert(indexables.find { |i| File.basename(i.full_path) == "find_me.rb" })
+      end
+    end
   end
 end
