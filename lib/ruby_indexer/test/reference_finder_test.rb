@@ -143,6 +143,136 @@ module RubyIndexer
       assert_equal(9, refs[1].location.start_line)
     end
 
+    def test_matches_attr_writer
+      refs = find_method_references("foo=", <<~RUBY)
+        class Bar
+          def foo
+          end
+
+          attr_writer :foo
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+      # We want to match `foo=` but not `foo`
+      assert_equal(2, refs.size)
+
+      assert_equal("foo=", refs[0].name)
+      assert_equal(5, refs[0].location.start_line)
+
+      assert_equal("foo=", refs[1].name)
+      assert_equal(8, refs[1].location.start_line)
+    end
+
+    def test_matches_attr_reader
+      refs = find_method_references("foo", <<~RUBY)
+        class Bar
+          def foo=(value)
+          end
+
+          attr_reader :foo
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+      # We want to match `foo=` but not `foo`
+      assert_equal(2, refs.size)
+
+      assert_equal("foo", refs[0].name)
+      assert_equal(5, refs[0].location.start_line)
+
+      assert_equal("foo", refs[1].name)
+      assert_equal(9, refs[1].location.start_line)
+    end
+
+    def test_matches_attr_accessor
+      refs = find_method_references("foo=", <<~RUBY)
+        class Bar
+          attr_accessor :foo
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+      # We want to match `foo=` but not `foo`
+      assert_equal(2, refs.size)
+
+      assert_equal("foo=", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+
+      assert_equal("foo=", refs[1].name)
+      assert_equal(5, refs[1].location.start_line)
+
+      refs = find_method_references("foo", <<~RUBY)
+        class Bar
+          attr_accessor :foo
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+
+      assert_equal("foo", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+
+      assert_equal("foo", refs[1].name)
+      assert_equal(6, refs[1].location.start_line)
+    end
+
+    def test_matches_attr_accessor_multi
+      refs = find_method_references("foo=", <<~RUBY)
+        class Bar
+          attr_accessor :bar, :foo
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+      # We want to match `foo=` but not `foo`
+      assert_equal(2, refs.size)
+
+      assert_equal("foo=", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+
+      assert_equal("foo=", refs[1].name)
+      assert_equal(5, refs[1].location.start_line)
+
+      refs = find_method_references("foo", <<~RUBY)
+        class Bar
+          attr_accessor :foo
+
+          def baz
+            self.foo = 1
+            self.foo
+          end
+        end
+      RUBY
+
+
+      assert_equal("foo", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+
+      assert_equal("foo", refs[1].name)
+      assert_equal(6, refs[1].location.start_line)
+    end
+
     def test_find_inherited_methods
       refs = find_method_references("foo", <<~RUBY)
         class Bar
