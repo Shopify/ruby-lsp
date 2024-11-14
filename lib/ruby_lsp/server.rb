@@ -604,6 +604,11 @@ module RubyLsp
       # don't want to format it
       path = uri.to_standardized_path
       unless path.nil? || path.start_with?(@global_state.workspace_path)
+        send_log_message(<<~MESSAGE)
+          Ignoring formatting request for file outside of the workspace.
+          Workspace path was set by editor as #{@global_state.workspace_path}.
+          File path requested for formatting was #{path}
+        MESSAGE
         send_empty_response(message[:id])
         return
       end
