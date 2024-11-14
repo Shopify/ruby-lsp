@@ -287,14 +287,7 @@ export class RubyLsp {
         }
 
         const options: vscode.QuickPickItem[] = client.addons
-          .sort((addon) => {
-            // Display errored addons last
-            if (addon.errored) {
-              return 1;
-            }
-
-            return -1;
-          })
+          .sort((addon) => (addon.errored ? 1 : -1))
           .map((addon) => {
             const icon = addon.errored ? "$(error)" : "$(pass)";
             return {
@@ -302,9 +295,24 @@ export class RubyLsp {
             };
           });
 
-        await vscode.window.showQuickPick(options, {
-          placeHolder: "Addons (readonly)",
+        const quickPick = vscode.window.createQuickPick();
+        quickPick.items = options;
+        quickPick.placeholder = "Addons (click to view output)";
+
+        quickPick.onDidAccept(() => {
+          const selected = quickPick.selectedItems[0];
+          // Ideally, we should display information that's specific to the selected addon
+          if (selected) {
+            this.currentActiveWorkspace()?.outputChannel.show();
+          }
+          quickPick.hide();
         });
+
+        quickPick.onDidHide(() => {
+          quickPick.dispose();
+        });
+
+        quickPick.show();
       }),
       vscode.commands.registerCommand(Command.ToggleFeatures, async () => {
         // Extract feature descriptions from our package.json
