@@ -130,13 +130,13 @@ module RubyIndexer
       RUBY
 
       b_const = @index["A::B"].first
-      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
+      assert_predicate(b_const, :private?)
 
       c_const = @index["A::C"].first
-      assert_equal(Entry::Visibility::PRIVATE, c_const.visibility)
+      assert_predicate(c_const, :private?)
 
       d_const = @index["A::D"].first
-      assert_equal(Entry::Visibility::PUBLIC, d_const.visibility)
+      assert_predicate(d_const, :public?)
     end
 
     def test_marking_constants_as_private_reopening_namespaces
@@ -163,13 +163,13 @@ module RubyIndexer
       RUBY
 
       a_const = @index["A::B::CONST_A"].first
-      assert_equal(Entry::Visibility::PRIVATE, a_const.visibility)
+      assert_predicate(a_const, :private?)
 
       b_const = @index["A::B::CONST_B"].first
-      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
+      assert_predicate(b_const, :private?)
 
       c_const = @index["A::B::CONST_C"].first
-      assert_equal(Entry::Visibility::PRIVATE, c_const.visibility)
+      assert_predicate(c_const, :private?)
     end
 
     def test_marking_constants_as_private_with_receiver
@@ -187,10 +187,10 @@ module RubyIndexer
       RUBY
 
       a_const = @index["A::B::CONST_A"].first
-      assert_equal(Entry::Visibility::PRIVATE, a_const.visibility)
+      assert_predicate(a_const, :private?)
 
       b_const = @index["A::B::CONST_B"].first
-      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
+      assert_predicate(b_const, :private?)
     end
 
     def test_indexing_constant_aliases
