@@ -274,6 +274,7 @@ module RubyIndexer
     end
 
     private
+
     sig { params(node: Prism::CallNode).returns(T::Boolean) }
     def attr_method_references?(node)
       case node.name
