@@ -141,7 +141,7 @@ module RubyIndexer
         # The first entry points to the location of the module_function call
         assert_equal("Test", first_entry.owner.name)
         assert_instance_of(Entry::Module, first_entry.owner)
-        assert_equal(Entry::Visibility::PRIVATE, first_entry.visibility)
+        assert_predicate(first_entry, :private?)
         # The second entry points to the public singleton method
         assert_equal("Test::<Class:Test>", second_entry.owner.name)
         assert_instance_of(Entry::SingletonClass, second_entry.owner)

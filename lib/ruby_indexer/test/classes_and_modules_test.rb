@@ -302,10 +302,10 @@ module RubyIndexer
       RUBY
 
       b_const = @index["A::B"].first
-      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
+      assert_predicate(b_const, :private?)
 
       c_const = @index["A::C"].first
-      assert_equal(Entry::Visibility::PRIVATE, c_const.visibility)
+      assert_predicate(c_const, :private?)
 
       d_const = @index["A::D"].first
       assert_equal(Entry::Visibility::PUBLIC, d_const.visibility)
