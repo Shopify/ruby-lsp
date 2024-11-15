@@ -268,28 +268,44 @@ module RubyIndexer
 
       if (name = node.name.to_s) == @target.method_name
         @references << Reference.new(name, T.must(node.message_loc), declaration: false)
-      elsif node.name == :attr_writer && attr_writer_matches_method(node.arguments.arguments, @target.method_name)
-        @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
-      elsif node.name == :attr_reader && attr_reader_matches_method(node.arguments.arguments, @target.method_name)
-        @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
-      elsif node.name == :attr_accessor && (attr_reader_matches_method(
-        node.arguments.arguments,
-        @target.method_name,
-      ) || attr_writer_matches_method(node.arguments.arguments, @target.method_name))
+      elsif attr_method_references?(node)
         @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
       end
     end
 
     private
-
-    def attr_reader_matches_method(arguments, method_name)
-      arguments.select { |ar| ar.respond_to?(:unescaped) }.map(&:unescaped).include?(method_name)
+    sig { params(node: Prism::CallNode).returns(T::Boolean) }
+    def attr_method_references?(node)
+      case node.name
+      when :attr_reader
+        attr_reader_references?(unescaped_argument_names(node))
+      when :attr_writer
+        attr_writer_references?(unescaped_argument_names(node))
+      when :attr_accessor
+        attr_accessor_references?(unescaped_argument_names(node))
+      else
+        false
+      end
     end
 
-    def attr_writer_matches_method(arguments, method_name)
-      arguments.select do |ar|
-        ar.respond_to?(:unescaped)
-      end.map(&:unescaped).any? { |unescaped_arg| "#{unescaped_arg}=" == method_name }
+    sig { params(node: Prism::CallNode).returns(T::Array[String]) }
+    def unescaped_argument_names(node)
+      node.arguments.arguments.select { |arg| arg.respond_to?(:unescaped) }.map(&:unescaped)
+    end
+
+    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    def attr_reader_references?(argument_names)
+      argument_names.include?(@target.method_name)
+    end
+
+    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    def attr_writer_references?(argument_names)
+      argument_names.any? { |arg| "#{arg}=" == @target.method_name }
+    end
+
+    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    def attr_accessor_references?(argument_names)
+      argument_names.any? { |arg| "#{arg}=" == @target.method_name || arg == @target.method_name }
     end
 
     sig { params(name: String).returns(T::Array[String]) }
