@@ -119,6 +119,14 @@ that prevents it from responding to new requests coming from the editor. If you 
 report [here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) including the
 steps that led to the server getting stuck.
 
+### Missing Features
+
+If you find that some features are working (such as formatting), but others aren't (such as go to definition),
+and are working on a codebase that uses Sorbet, then this may indicate the
+[Sorbet LSP isn't running](https://sorbet.org/docs/lsp#instructions-for-specific-language-clients).
+To avoid duplicate/conflicting behavior, Ruby LSP disables some features when a Sorbet codebase is detected, with the
+intention that Sorbet can provide better accuracy.
+
 ### Gem installation locations and permissions
 
 To launch the Ruby LSP server, the `ruby-lsp` gem must be installed. And in order to automatically index your project's
