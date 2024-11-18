@@ -204,10 +204,10 @@ module RubyLsp
         "0.1.0"
       end
 
-      def create_hover_listener(response_builder, node_context, index, dispatcher)
+      def create_hover_listener(response_builder, node_context, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the add-on. These factory methods are invoked on every request
-        Hover.new(client, response_builder, @config, dispatcher)
+        Hover.new(response_builder, @config, dispatcher)
       end
     end
 
@@ -222,10 +222,7 @@ module RubyLsp
       # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      def initialize(client, response_builder, config, dispatcher)
-        super(dispatcher)
-
-        @client = client
+      def initialize(response_builder, config, dispatcher)
         @response_builder = response_builder
         @config = config
 
@@ -293,18 +290,17 @@ class MyIndexingEnhancement < RubyIndexer::Enhancement
     # Create the array of signatures that this method will accept. Every signatures is composed of a list of
     # parameters. The parameter classes represent each type of parameter
     signatures = [
-      Entry::Signature.new([Entry::RequiredParameter.new(name: :a)])
+      RubyIndexer::Entry::Signature.new([RubyIndexer::Entry::RequiredParameter.new(name: :a)])
     ]
 
-    new_entry = Entry::Method.new(
+    new_entry = RubyIndexer::Entry::Method.new(
       "new_method", # The name of the method that gets created via meta-programming
       file_path,    # The file_path where the DSL call was found. This should always just be the file_path received
       location,     # The Prism node location where the DSL call was found
       location,     # The Prism node location for the DSL name location. May or not be the same
       nil,          # The documentation for this DSL call. This should always be `nil` to ensure lazy fetching of docs
-      @index.configuration.encoding, # The negotiated encoding. This should always be `indexing.configuration.encoding`
       signatures,   # All signatures for this method (every way it can be invoked)
-      Entry::Visibility::PUBLIC, # The method's visibility
+      RubyIndexer::Entry::Visibility::PUBLIC, # The method's visibility
       owner,        # The method's owner. This is almost always going to be the same owner received
     )
 
@@ -326,7 +322,7 @@ module RubyLsp
     class Addon < ::RubyLsp::Addon
       def activate(global_state, message_queue)
         # Register the enhancement as part of the indexing process
-        @index.register_enhancement(MyIndexingEnhancement.new(@index))
+        global_state.index.register_enhancement(MyIndexingEnhancement.new(global_state.index))
       end
 
       def deactivate
