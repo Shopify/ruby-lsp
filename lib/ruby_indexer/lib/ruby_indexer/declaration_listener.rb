@@ -37,6 +37,7 @@ module RubyIndexer
         parse_result.code_units_cache(@index.configuration.encoding),
         T.any(T.proc.params(arg0: Integer).returns(Integer), Prism::CodeUnitsCache),
       )
+      @source_lines = T.let(parse_result.source.lines, T::Array[String])
 
       # The nesting stack we're currently inside. Used to determine the fully qualified name of constants, but only
       # stored by unresolved aliases which need the original nesting to be lazily resolved
@@ -661,8 +662,7 @@ module RubyIndexer
       comments = +""
 
       start_line = node.location.start_line - 1
-      start_line -= 1 unless @comments_by_line.key?(start_line)
-
+      start_line -= 1 unless comment_exists_at?(start_line)
       start_line.downto(1) do |line|
         comment = @comments_by_line[line]
         break unless comment
@@ -681,6 +681,11 @@ module RubyIndexer
 
       comments.chomp!
       comments
+    end
+
+    sig { params(line: Integer).returns(T::Boolean) }
+    def comment_exists_at?(line)
+      @comments_by_line.key?(line) || !@source_lines[line - 1].to_s.strip.empty?
     end
 
     sig { params(name: String).returns(String) }
