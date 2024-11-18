@@ -1097,6 +1097,40 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_call_node_precision
+    source = <<~RUBY
+      class Foo
+        def message
+          "hello!"
+        end
+      end
+
+      class Bar
+        def with_foo(foo)
+          @foo_message = foo.message
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      # On the `foo` receiver, we should not show any results
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 19, line: 8 } },
+      )
+      assert_empty(server.pop_response.response)
+
+      # On `message`, we should
+      server.process_message(
+        id: 2,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 23, line: 8 } },
+      )
+      refute_empty(server.pop_response.response)
+    end
+  end
+
   private
 
   def create_definition_addon
