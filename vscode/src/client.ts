@@ -83,7 +83,7 @@ function getLspExecutables(
   };
 
   // If there's a user defined custom bundle, we run the LSP with `bundle exec` and just trust the user configured
-  // their bundle. Otherwise, we run the global install of the LSP and use our custom bundle logic in the server
+  // their bundle. Otherwise, we run the global install of the LSP and use our composed bundle logic in the server
   if (customBundleGemfile.length > 0) {
     run = {
       command: "bundle",
