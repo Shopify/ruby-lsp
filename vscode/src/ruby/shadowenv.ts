@@ -32,6 +32,10 @@ export class Shadowenv extends VersionManager {
         `${shadowenvExec} exec -- ruby`,
       );
 
+      // Do not let Shadowenv change the BUNDLE_GEMFILE. The server has to be able to control this in order to properly
+      // set up the environment
+      delete parsedResult.env.BUNDLE_GEMFILE;
+
       return {
         env: { ...process.env, ...parsedResult.env },
         yjit: parsedResult.yjit,
