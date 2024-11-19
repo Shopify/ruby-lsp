@@ -345,6 +345,10 @@
               "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
               "type": "string"
             },
+            "rbenvExecutablePath": {
+              "description": "The path to the rbenv executable, if not installed on one of the standard locations",
+              "type": "string"
+            },
             "chrubyRubies": {
               "description": "An array of extra directories to search for Ruby installations when using chruby. Equivalent to the RUBIES environment variable",
               "type": "array"
