@@ -169,6 +169,16 @@ mason_lspconfig.setup_handlers {
 }
 ```
 
+{: .important }
+> Using Mason to manage your installation of the Ruby LSP may cause errors
+
+Mason installs the Ruby LSP in a folder shared among all your Rubies. Some of the
+Ruby LSP dependencies are C extensions, and they rely on the Ruby ABI to look and
+act a certain way when they were linked to Ruby. This causes issues when a shared
+folder is used.
+
+See [this issue][mason-abi] for further information.
+
 ### Additional setup (optional)
 
 `rubyLsp/workspace/dependencies` is a custom method currently supported only in the VS Code plugin.
@@ -293,3 +303,6 @@ To use it with Ruby LSP, you can override particular configuration items in the 
 Kate will start an instance of the Ruby LSP server in the background for any Ruby project matching the `rootIndicationFileNames`.
 If starting Ruby LSP succeeds, the entries in the LSP-Client menu are activated.
 Otherwise the error output can be inspected in the Output window.
+
+
+[mason-abi]: https://github.com/williamboman/mason.nvim/issues/1292
