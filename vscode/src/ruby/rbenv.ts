@@ -32,7 +32,10 @@ export class Rbenv extends VersionManager {
       return this.ensureRbenvExistsAt(configuredRbenvPath);
     } else {
       return this.findExec(
-        [vscode.Uri.file("/opt/homebrew/bin"), vscode.Uri.file("/usr/local/bin")],
+        [
+          vscode.Uri.file("/opt/homebrew/bin"),
+          vscode.Uri.file("/usr/local/bin"),
+        ],
         "rbenv",
       );
     }
@@ -42,11 +45,11 @@ export class Rbenv extends VersionManager {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.file(path));
 
-      return path
+      return path;
     } catch (error: any) {
       throw new Error(
         `The Ruby LSP version manager is configured to be rbenv, but ${path} does not exist`,
-      )
+      );
     }
   }
 }
