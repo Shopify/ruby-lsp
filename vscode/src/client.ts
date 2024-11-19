@@ -498,7 +498,7 @@ export default class Client extends LanguageClient implements ClientInterface {
                 ...error.data,
                 serverVersion: this.serverVersion,
                 workspace: new vscode.TelemetryTrustedValue(
-                  this.workingDirectory,
+                  path.basename(this.workingDirectory),
                 ),
               },
             );
