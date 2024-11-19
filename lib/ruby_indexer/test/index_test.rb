@@ -1672,6 +1672,38 @@ module RubyIndexer
       )
     end
 
+    def test_extend_self
+      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          def bar
+          end
+
+          extend self
+
+          def baz
+          end
+        end
+      RUBY
+
+      ["bar", "baz"].product(["Foo", "Foo::<Class:Foo>"]).each do |method, receiver|
+        entry = @index.resolve_method(method, receiver)&.first
+        refute_nil(entry)
+        assert_equal(method, T.must(entry).name)
+      end
+
+      assert_equal(
+        [
+          "Foo::<Class:Foo>",
+          "Foo",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::<Class:Foo>"),
+      )
+    end
+
     def test_linearizing_singleton_ancestors
       @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
         module First

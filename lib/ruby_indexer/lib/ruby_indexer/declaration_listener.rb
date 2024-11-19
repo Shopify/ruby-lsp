@@ -751,16 +751,22 @@ module RubyIndexer
       return unless arguments
 
       arguments.each do |node|
-        next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode)
+        next unless node.is_a?(Prism::ConstantReadNode) || node.is_a?(Prism::ConstantPathNode) ||
+          (node.is_a?(Prism::SelfNode) && operation == :extend)
 
-        case operation
-        when :include
-          owner.mixin_operations << Entry::Include.new(node.full_name)
-        when :prepend
-          owner.mixin_operations << Entry::Prepend.new(node.full_name)
-        when :extend
+        if node.is_a?(Prism::SelfNode)
           singleton = @index.existing_or_new_singleton_class(owner.name)
-          singleton.mixin_operations << Entry::Include.new(node.full_name)
+          singleton.mixin_operations << Entry::Include.new(owner.name)
+        else
+          case operation
+          when :include
+            owner.mixin_operations << Entry::Include.new(node.full_name)
+          when :prepend
+            owner.mixin_operations << Entry::Prepend.new(node.full_name)
+          when :extend
+            singleton = @index.existing_or_new_singleton_class(owner.name)
+            singleton.mixin_operations << Entry::Include.new(node.full_name)
+          end
         end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
