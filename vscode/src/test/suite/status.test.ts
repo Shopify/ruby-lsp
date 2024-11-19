@@ -9,7 +9,6 @@ import { Ruby } from "../../ruby";
 import {
   RubyVersionStatus,
   ServerStatus,
-  ExperimentalFeaturesStatus,
   StatusItem,
   FeaturesStatus,
   FormatterStatus,
@@ -21,7 +20,6 @@ suite("StatusItems", () => {
   let ruby: Ruby;
   let status: StatusItem;
   let workspace: WorkspaceInterface;
-  let formatter: string;
 
   afterEach(() => {
     status.dispose();
@@ -141,36 +139,6 @@ suite("StatusItems", () => {
       assert.strictEqual(
         status.item.severity,
         vscode.LanguageStatusSeverity.Warning,
-      );
-    });
-  });
-
-  suite("ExperimentalFeaturesStatus", () => {
-    beforeEach(() => {
-      ruby = {} as Ruby;
-      workspace = {
-        ruby,
-        lspClient: {
-          addons: [],
-          state: State.Running,
-          formatter,
-          serverVersion: "1.0.0",
-          sendRequest: <T>() => Promise.resolve([] as T),
-          degraded: false,
-        },
-        error: false,
-      };
-      status = new ExperimentalFeaturesStatus();
-      status.refresh(workspace);
-    });
-
-    test("Status is initialized with the right values", () => {
-      assert.match(status.item.text, /Experimental features (dis|en)abled/);
-      assert.strictEqual(status.item.name, "Ruby LSP Experimental Features");
-      assert.match(status.item.command?.title!, /Enable|Disable/);
-      assert.strictEqual(
-        status.item.command!.command,
-        Command.ToggleExperimentalFeatures,
       );
     });
   });

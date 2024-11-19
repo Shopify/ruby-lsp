@@ -218,9 +218,6 @@ function collectClientOptions(
     errorHandler: new ClientErrorHandler(workspaceFolder, telemetry),
     initializationOptions: {
       enabledFeatures,
-      experimentalFeaturesEnabled: configuration.get(
-        "enableExperimentalFeatures",
-      ),
       featuresConfiguration: configuration.get("featuresConfiguration"),
       formatter: configuration.get("formatter"),
       linters: configuration.get("linters"),
