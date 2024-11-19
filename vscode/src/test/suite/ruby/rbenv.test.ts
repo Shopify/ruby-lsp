@@ -61,7 +61,6 @@ suite("Rbenv", () => {
   });
 
   test("Allows configuring where rbenv is installed", async () => {
-    // eslint-disable-next-line no-process-env
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
     );
