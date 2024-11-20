@@ -70,6 +70,7 @@ module RubyLsp
                     document.is_a?(ERBDocument)
 
                   send_message(
+                    # TODO: add method in Notification
                     Notification.new(
                       method: "delegate/textDocument/virtualState",
                       params: {

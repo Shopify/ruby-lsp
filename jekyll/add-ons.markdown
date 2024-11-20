@@ -428,6 +428,7 @@ module RubyLsp
       def initialize(message_queue, response_builder, node_context, index, dispatcher)
         @message_queue = message_queue
 
+# TODO: update example
         @message_queue << Notification.new(
           message: "$/progress",
           params: Interface::ProgressParams.new(
