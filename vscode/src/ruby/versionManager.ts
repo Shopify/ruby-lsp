@@ -26,15 +26,18 @@ export abstract class VersionManager {
   protected readonly outputChannel: WorkspaceChannel;
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
+  protected readonly manuallySelectRuby: () => Promise<void>;
 
   private readonly customBundleGemfile?: string;
 
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    manuallySelectRuby: () => Promise<void>,
   ) {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
+    this.manuallySelectRuby = manuallySelectRuby;
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("bundleGemfile")!;

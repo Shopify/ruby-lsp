@@ -23,7 +23,7 @@ suite("None", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const none = new None(workspaceFolder, outputChannel);
+    const none = new None(workspaceFolder, outputChannel, async () => {});
 
     const envStub = {
       env: { ANY: "true" },

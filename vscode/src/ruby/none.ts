@@ -19,9 +19,10 @@ export class None extends VersionManager {
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    manuallySelectRuby: () => Promise<void>,
     rubyPath?: string,
   ) {
-    super(workspaceFolder, outputChannel);
+    super(workspaceFolder, outputChannel, manuallySelectRuby);
     this.rubyPath = rubyPath ?? "ruby";
   }
 

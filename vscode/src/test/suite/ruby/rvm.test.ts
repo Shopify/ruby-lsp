@@ -26,7 +26,7 @@ suite("RVM", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rvm = new Rvm(workspaceFolder, outputChannel);
+    const rvm = new Rvm(workspaceFolder, outputChannel, async () => {});
 
     const installationPathStub = sinon
       .stub(rvm, "findRvmInstallation")

@@ -74,7 +74,7 @@ suite("Chruby", () => {
   test("Finds Ruby when .ruby-version is inside workspace", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
@@ -90,7 +90,7 @@ suite("Chruby", () => {
   test("Finds Ruby when .ruby-version is inside on parent directories", async () => {
     fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
@@ -126,7 +126,7 @@ suite("Chruby", () => {
 
     fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
@@ -171,7 +171,7 @@ suite("Chruby", () => {
       `${RUBY_VERSION}-rc1`,
     );
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
@@ -201,7 +201,7 @@ suite("Chruby", () => {
 
     fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [vscode.Uri.file(rubyHome)];
 
     const { env, version, yjit } = await chruby.activate();
@@ -223,7 +223,7 @@ suite("Chruby", () => {
             : "",
       } as any);
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     configStub.restore();
 
     const { env, version, yjit } = await chruby.activate();
@@ -247,7 +247,7 @@ suite("Chruby", () => {
       `${major}.${minor}`,
     );
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
@@ -278,7 +278,7 @@ suite("Chruby", () => {
       `${major}.${minor}`,
     );
 
-    const chruby = new Chruby(workspaceFolder, outputChannel);
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, ".rubies")),
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),

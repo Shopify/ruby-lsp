@@ -60,7 +60,11 @@ suite("RubyInstaller", () => {
 
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(workspaceFolder, outputChannel);
+    const windows = new RubyInstaller(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
     const { env, version, yjit } = await windows.activate();
 
     assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
@@ -90,7 +94,11 @@ suite("RubyInstaller", () => {
 
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(workspaceFolder, outputChannel);
+    const windows = new RubyInstaller(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
     const { env, version, yjit } = await windows.activate();
 
     assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
@@ -120,7 +128,11 @@ suite("RubyInstaller", () => {
 
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(workspaceFolder, outputChannel);
+    const windows = new RubyInstaller(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
       ACTIVATION_SEPARATOR,
     );
