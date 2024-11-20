@@ -271,15 +271,11 @@ This is how you could write an enhancement to teach the Ruby LSP to understand t
 class MyIndexingEnhancement < RubyIndexer::Enhancement
   # This on call node handler is invoked any time during indexing when we find a method call. It can be used to insert
   # more entries into the index depending on the conditions
-  def on_call_node_enter(owner, node, file_path, code_units_cache)
-    return unless owner
+  def on_call_node_enter(node)
+    return unless @listener.current_owner
 
-    # Get the ancestors of the current class
-    ancestors = @index.linearized_ancestors_of(owner.name)
-
-    # Return early unless the method call is the one we want to handle and the class invoking the DSL inherits from
-    # our library's parent class
-    return unless node.name == :my_dsl_that_creates_methods && ancestors.include?("MyLibrary::ParentClass")
+    # Return early unless the method call is the one we want to handle
+    return unless node.name == :my_dsl_that_creates_methods
 
     # Create a new entry to be inserted in the index. This entry will represent the declaration that is created via
     # meta-programming. All entries are defined in the `entry.rb` file.
@@ -293,24 +289,16 @@ class MyIndexingEnhancement < RubyIndexer::Enhancement
       RubyIndexer::Entry::Signature.new([RubyIndexer::Entry::RequiredParameter.new(name: :a)])
     ]
 
-    new_entry = RubyIndexer::Entry::Method.new(
-      "new_method", # The name of the method that gets created via meta-programming
-      file_path,    # The file_path where the DSL call was found. This should always just be the file_path received
-      location,     # The Prism node location where the DSL call was found
-      location,     # The Prism node location for the DSL name location. May or not be the same
-      nil,          # The documentation for this DSL call. This should always be `nil` to ensure lazy fetching of docs
-      signatures,   # All signatures for this method (every way it can be invoked)
-      RubyIndexer::Entry::Visibility::PUBLIC, # The method's visibility
-      owner,        # The method's owner. This is almost always going to be the same owner received
+    @listener.add_method(
+      "new_method", # Name of the method
+      location,     # Prism location for the node defining this method
+      signatures    # Signatures available to invoke this method
     )
-
-    # Push the new entry to the index
-    @index.add(new_entry)
   end
 
   # This method is invoked when the parser has finished processing the method call node.
   # It can be used to perform cleanups like popping a stack...etc.
-  def on_call_node_leave(owner, node, file_path, code_units_cache); end
+  def on_call_node_leave(node); end
 end
 ```
 

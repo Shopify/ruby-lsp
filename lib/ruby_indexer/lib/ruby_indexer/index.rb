@@ -40,9 +40,6 @@ module RubyIndexer
       # Holds the linearized ancestors list for every namespace
       @ancestors = T.let({}, T::Hash[String, T::Array[String]])
 
-      # List of classes that are enhancing the index
-      @enhancements = T.let([], T::Array[Enhancement])
-
       # Map of module name to included hooks that have to be executed when we include the given module
       @included_hooks = T.let(
         {},
@@ -50,12 +47,6 @@ module RubyIndexer
       )
 
       @configuration = T.let(RubyIndexer::Configuration.new, Configuration)
-    end
-
-    # Register an enhancement to the index. Enhancements must conform to the `Enhancement` interface
-    sig { params(enhancement: Enhancement).void }
-    def register_enhancement(enhancement)
-      @enhancements << enhancement
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
@@ -396,7 +387,6 @@ module RubyIndexer
         result,
         indexable_path.full_path,
         collect_comments: collect_comments,
-        enhancements: @enhancements,
       )
       dispatcher.dispatch(result.value)
 
