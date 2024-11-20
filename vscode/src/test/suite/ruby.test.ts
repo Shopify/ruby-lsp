@@ -150,4 +150,21 @@ suite("Ruby environment activation", () => {
       "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
     ]);
   });
+
+  test("mergeComposedEnv merges environment variables", () => {
+    const ruby = new Ruby(
+      context,
+      workspaceFolder,
+      outputChannel,
+      FAKE_TELEMETRY,
+    );
+
+    assert.deepStrictEqual(ruby.env, {});
+
+    ruby.mergeComposedEnvironment({
+      BUNDLE_GEMFILE: ".ruby-lsp/Gemfile",
+    });
+
+    assert.deepStrictEqual(ruby.env, { BUNDLE_GEMFILE: ".ruby-lsp/Gemfile" });
+  });
 });

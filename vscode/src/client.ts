@@ -389,6 +389,10 @@ export default class Client extends LanguageClient implements ClientInterface {
       this.degraded = this.initializeResult?.degraded_mode;
     }
 
+    if (this.initializeResult?.bundle_env) {
+      this.ruby.mergeComposedEnvironment(this.initializeResult.bundle_env);
+    }
+
     await this.fetchAddons();
   }
 

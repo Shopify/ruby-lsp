@@ -218,6 +218,10 @@ export class Ruby implements RubyInterface {
     return this.activateRuby();
   }
 
+  mergeComposedEnvironment(env: Record<string, string>) {
+    this._env = { ...this._env, ...env };
+  }
+
   private async runActivation(manager: VersionManager) {
     const { env, version, yjit, gemPath } = await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);

@@ -127,6 +127,12 @@ export class Debugger
       name: workspace.workspaceFolder.name,
     };
 
+    // In newer versions of the server, the composed bundle environment is merged directly into the Ruby object and no
+    // adjustments have to be made here
+    if (debugConfiguration.env.BUNDLE_GEMFILE) {
+      return debugConfiguration;
+    }
+
     const customBundleUri = vscode.Uri.joinPath(workspaceUri, ".ruby-lsp");
 
     return vscode.workspace.fs.readDirectory(customBundleUri).then(
