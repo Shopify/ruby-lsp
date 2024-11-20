@@ -166,7 +166,7 @@ module RubyIndexer
         entries = T.must(@index[keyword])
         assert_equal(1, entries.size)
         entry = entries.first
-        assert_equal(Entry::Visibility::PRIVATE, entry.visibility)
+        assert_predicate(entry.visibility, :private?)
       end
     end
 
@@ -187,7 +187,7 @@ module RubyIndexer
         entries = T.must(@index[keyword])
         assert_equal(1, entries.size)
         entry = entries.first
-        assert_equal(Entry::Visibility::PRIVATE, entry.visibility)
+        assert_predicate(entry.visibility, :private?)
       end
     end
 
