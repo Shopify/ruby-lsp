@@ -33,6 +33,29 @@ class ServerTest < Minitest::Test
     assert_includes(capabilities, "semanticTokensProvider")
   end
 
+  def test_initialize_returns_bundle_env
+    bundle_env_path = File.join(".ruby-lsp", "bundle_env")
+    FileUtils.mkdir(".ruby-lsp") unless File.exist?(".ruby-lsp")
+    File.write(bundle_env_path, "BUNDLE_PATH=vendor/bundle")
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: { enabledFeatures: [] },
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+      },
+    })
+
+    result = find_message(RubyLsp::Result, id: 1)
+    hash = JSON.parse(result.response.to_json)
+
+    begin
+      assert_equal({ "BUNDLE_PATH" => "vendor/bundle" }, hash["bundle_env"])
+    ensure
+      FileUtils.rm(bundle_env_path) if File.exist?(bundle_env_path)
+    end
+  end
+
   def test_initialize_enabled_features_with_hash
     capture_subprocess_io do
       @server.process_message({

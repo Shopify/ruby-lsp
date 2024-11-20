@@ -27,7 +27,7 @@ suite("Mise", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const mise = new Mise(workspaceFolder, outputChannel);
+    const mise = new Mise(workspaceFolder, outputChannel, async () => {});
 
     const envStub = {
       env: { ANY: "true" },
@@ -82,7 +82,7 @@ suite("Mise", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const mise = new Mise(workspaceFolder, outputChannel);
+    const mise = new Mise(workspaceFolder, outputChannel, async () => {});
 
     const envStub = {
       env: { ANY: "true" },

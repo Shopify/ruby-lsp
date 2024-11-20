@@ -141,7 +141,7 @@ module RubyIndexer
         # The first entry points to the location of the module_function call
         assert_equal("Test", first_entry.owner.name)
         assert_instance_of(Entry::Module, first_entry.owner)
-        assert_equal(Entry::Visibility::PRIVATE, first_entry.visibility)
+        assert_predicate(first_entry, :private?)
         # The second entry points to the public singleton method
         assert_equal("Test::<Class:Test>", second_entry.owner.name)
         assert_instance_of(Entry::SingletonClass, second_entry.owner)
@@ -227,6 +227,39 @@ module RubyIndexer
       assert_equal(1, entries.size)
       entry = entries.first
       assert_predicate(entry, :public?)
+    end
+
+    def test_comments_documentation
+      index(<<~RUBY)
+        # Documentation for Foo
+
+        class Foo
+          # ####################
+          # Documentation for bar
+          # ####################
+          #
+          def bar
+          end
+
+          # test
+
+          # Documentation for baz
+          def baz; end
+          def ban; end
+        end
+      RUBY
+
+      foo_comment = @index["Foo"].first.comments
+      assert_equal("Documentation for Foo", foo_comment)
+
+      bar_comment = @index["bar"].first.comments
+      assert_equal("####################\nDocumentation for bar\n####################\n", bar_comment)
+
+      baz_comment = @index["baz"].first.comments
+      assert_equal("Documentation for baz", baz_comment)
+
+      ban_comment = @index["ban"].first.comments
+      assert_empty(ban_comment)
     end
 
     def test_method_with_parameters

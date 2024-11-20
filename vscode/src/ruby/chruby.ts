@@ -29,8 +29,9 @@ export class Chruby extends VersionManager {
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    manuallySelectRuby: () => Promise<void>,
   ) {
-    super(workspaceFolder, outputChannel);
+    super(workspaceFolder, outputChannel, manuallySelectRuby);
 
     const configuredRubies = vscode.workspace
       .getConfiguration("rubyLsp")

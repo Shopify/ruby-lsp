@@ -188,17 +188,6 @@ module RubyLsp
       assert_includes(state.instance_variable_get(:@linters), "rubocop")
     end
 
-    def test_apply_options_sets_experimental_features
-      state = GlobalState.new
-      refute_predicate(state, :experimental_features)
-
-      state.apply_options({
-        initializationOptions: { experimentalFeaturesEnabled: true },
-      })
-
-      assert_predicate(state, :experimental_features)
-    end
-
     def test_type_checker_is_detected_based_on_transitive_sorbet_static
       state = GlobalState.new
 

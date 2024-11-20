@@ -158,11 +158,6 @@
     "configuration": {
       "title": "Ruby LSP",
       "properties": {
-        "rubyLsp.enableExperimentalFeatures": {
-          "description": "Enable experimental and under development features",
-          "type": "boolean",
-          "default": false
-        },
         "rubyLsp.enabledFeatures": {
           "description": "List of enabled LSP features",
           "type": "object",
@@ -345,6 +340,10 @@
               "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
               "type": "string"
             },
+            "rbenvExecutablePath": {
+              "description": "The path to the rbenv executable, if not installed on one of the standard locations",
+              "type": "string"
+            },
             "chrubyRubies": {
               "description": "An array of extra directories to search for Ruby installations when using chruby. Equivalent to the RUBIES environment variable",
               "type": "array"
@@ -415,7 +414,7 @@
           "default": "both"
         },
         "rubyLsp.useBundlerCompose": {
-          "description": "This is a temporary setting for testing purposes, do not use it! Replace the custom bundle logic by bundler-compose.",
+          "description": "This is a temporary setting for testing purposes, do not use it! Replace the composed bundle logic by bundler-compose.",
           "type": "boolean",
           "default": false
         },
@@ -728,8 +727,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.14.0",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.15.0",
     "@shopify/eslint-plugin": "^46.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",

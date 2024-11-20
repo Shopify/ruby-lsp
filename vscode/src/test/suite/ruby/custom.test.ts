@@ -23,7 +23,7 @@ suite("Custom", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const custom = new Custom(workspaceFolder, outputChannel);
+    const custom = new Custom(workspaceFolder, outputChannel, async () => {});
 
     const envStub = {
       env: { ANY: "true" },

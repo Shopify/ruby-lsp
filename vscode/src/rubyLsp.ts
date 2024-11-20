@@ -175,7 +175,6 @@ export class RubyLsp {
     workspaceFolder: vscode.WorkspaceFolder,
     eager: boolean,
   ) {
-    const workspaceDir = workspaceFolder.uri.fsPath;
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("bundleGemfile")!;
@@ -191,31 +190,8 @@ export class RubyLsp {
     // If no lockfile exists and we're activating lazily (if the user opened a Ruby file inside a workspace we hadn't
     // activated before), then we start the language server, but we warn the user that they may be missing multi-root
     // workspace configuration
-    if (
-      customBundleGemfile.length === 0 &&
-      !lockfileExists &&
-      !this.context.globalState.get("rubyLsp.disableMultirootLockfileWarning")
-    ) {
-      const answer = await vscode.window.showWarningMessage(
-        `Activating the Ruby LSP in ${workspaceDir}, but no lockfile was found. Are you using a monorepo setup?`,
-        "See the multi-root workspace docs",
-        "Don't show again",
-      );
-
-      if (answer === "See the multi-root workspace docs") {
-        await vscode.env.openExternal(
-          vscode.Uri.parse(
-            "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md?tab=readme-ov-file#multi-root-workspaces",
-          ),
-        );
-      }
-
-      if (answer === "Don't show again") {
-        await this.context.globalState.update(
-          "rubyLsp.disableMultirootLockfileWarning",
-          true,
-        );
-      }
+    if (customBundleGemfile.length === 0 && !lockfileExists) {
+      await this.showStandaloneWarning(workspaceFolder.uri.fsPath);
     }
 
     const workspace = new Workspace(
@@ -287,14 +263,7 @@ export class RubyLsp {
         }
 
         const options: vscode.QuickPickItem[] = client.addons
-          .sort((addon) => {
-            // Display errored addons last
-            if (addon.errored) {
-              return 1;
-            }
-
-            return -1;
-          })
+          .sort((addon) => (addon.errored ? 1 : -1))
           .map((addon) => {
             const icon = addon.errored ? "$(error)" : "$(pass)";
             return {
@@ -302,9 +271,24 @@ export class RubyLsp {
             };
           });
 
-        await vscode.window.showQuickPick(options, {
-          placeHolder: "Addons (readonly)",
+        const quickPick = vscode.window.createQuickPick();
+        quickPick.items = options;
+        quickPick.placeholder = "Addons (click to view output)";
+
+        quickPick.onDidAccept(() => {
+          const selected = quickPick.selectedItems[0];
+          // Ideally, we should display information that's specific to the selected addon
+          if (selected) {
+            this.currentActiveWorkspace()?.outputChannel.show();
+          }
+          quickPick.hide();
         });
+
+        quickPick.onDidHide(() => {
+          quickPick.dispose();
+        });
+
+        quickPick.show();
       }),
       vscode.commands.registerCommand(Command.ToggleFeatures, async () => {
         // Extract feature descriptions from our package.json
@@ -796,5 +780,45 @@ export class RubyLsp {
     }
 
     return false;
+  }
+
+  private async showStandaloneWarning(workspaceDir: string) {
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: "No bundle found. Launching in standalone mode in 5 seconds",
+        cancellable: true,
+      },
+      async (progress, token) => {
+        progress.report({
+          message:
+            "If working in a monorepo, cancel to see configuration instructions",
+        });
+
+        await new Promise<void>((resolve) => {
+          token.onCancellationRequested(() => {
+            resolve();
+          });
+
+          setTimeout(resolve, 5000);
+        });
+
+        if (token.isCancellationRequested) {
+          const answer = await vscode.window.showWarningMessage(
+            `Could not find a lockfile in ${workspaceDir}. Are you using a monorepo setup?`,
+            "See the multi-root workspace docs",
+            "Launch anyway",
+          );
+
+          if (answer === "See the multi-root workspace docs") {
+            const uri = vscode.Uri.parse(
+              "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md?tab=readme-ov-file#multi-root-workspaces",
+            );
+
+            await vscode.env.openExternal(uri);
+          }
+        }
+      },
+    );
   }
 }

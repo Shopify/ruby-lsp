@@ -118,6 +118,8 @@ module RubyLsp
           Prism::InstanceVariableWriteNode
 
           !covers_position?(target.name_loc, position)
+        when Prism::CallNode
+          !covers_position?(target.message_loc, position)
         else
           false
         end

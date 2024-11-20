@@ -12,7 +12,7 @@ require "digest"
 require "time"
 require "uri"
 
-# This file is a script that will configure a custom bundle for the Ruby LSP. The custom bundle allows developers to use
+# This file is a script that will configure a composed bundle for the Ruby LSP. The composed bundle allows developers to use
 # the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
 # exact locked versions of dependencies.
 
@@ -62,7 +62,7 @@ module RubyLsp
       @retry = T.let(false, T::Boolean)
     end
 
-    # Sets up the custom bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
+    # Sets up the composed bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
     # used for running the server
     sig { returns(T::Hash[String, String]) }
     def setup!
@@ -73,12 +73,12 @@ module RubyLsp
       ignore_file = @custom_dir + ".gitignore"
       ignore_file.write("*") unless ignore_file.exist?
 
-      # Do not set up a custom bundle if LSP dependencies are already in the Gemfile
+      # Do not set up a composed bundle if LSP dependencies are already in the Gemfile
       if @dependencies["ruby-lsp"] &&
           @dependencies["debug"] &&
           (@rails_app ? @dependencies["ruby-lsp-rails"] : true)
         $stderr.puts(
-          "Ruby LSP> Skipping custom bundle setup since LSP dependencies are already in #{@gemfile}",
+          "Ruby LSP> Skipping composed bundle setup since LSP dependencies are already in #{@gemfile}",
         )
 
         return run_bundle_install
@@ -96,7 +96,7 @@ module RubyLsp
 
       if @custom_lockfile.exist? && @lockfile_hash_path.exist? && @lockfile_hash_path.read == current_lockfile_hash
         $stderr.puts(
-          "Ruby LSP> Skipping custom bundle setup since #{@custom_lockfile} already exists and is up to date",
+          "Ruby LSP> Skipping composed bundle setup since #{@custom_lockfile} already exists and is up to date",
         )
         return run_bundle_install(@custom_gemfile)
       end
@@ -110,8 +110,8 @@ module RubyLsp
     private
 
     sig { returns(T::Hash[String, T.untyped]) }
-    def custom_bundle_dependencies
-      @custom_bundle_dependencies ||= T.let(
+    def composed_bundle_dependencies
+      @composed_bundle_dependencies ||= T.let(
         begin
           original_bundle_gemfile = ENV["BUNDLE_GEMFILE"]
 
@@ -136,8 +136,8 @@ module RubyLsp
         "",
       ]
 
-      # If there's a top level Gemfile, we want to evaluate from the custom bundle. We get the source from the top level
-      # Gemfile, so if there isn't one we need to add a default source
+      # If there's a top level Gemfile, we want to evaluate from the composed bundle. We get the source from the top
+      # level Gemfile, so if there isn't one we need to add a default source
       if @gemfile&.exist? && @lockfile&.exist?
         parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
       else
@@ -187,7 +187,7 @@ module RubyLsp
       env = bundler_settings_as_env
       env["BUNDLE_GEMFILE"] = bundle_gemfile.to_s
 
-      # If the user has a custom bundle path configured, we need to ensure that we will use the absolute and not
+      # If the user has a composed bundle path configured, we need to ensure that we will use the absolute and not
       # relative version of it when running `bundle install`. This is necessary to avoid installing the gems under the
       # `.ruby-lsp` folder, which is not the user's intention. For example, if the path is configured as `vendor`, we
       # want to install it in the top level `vendor` and not `.ruby-lsp/vendor`
@@ -244,7 +244,7 @@ module RubyLsp
       base_bundle = base_bundle_command(env)
 
       # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
-      # to upgrade them or else we'll produce undesired source control changes. If the custom bundle was just created
+      # to upgrade them or else we'll produce undesired source control changes. If the composed bundle was just created
       # and any of `ruby-lsp`, `ruby-lsp-rails` or `debug` weren't a part of the Gemfile, then we need to run `bundle
       # install` for the first time to generate the Gemfile.lock with them included or else Bundler will complain that
       # they're missing. We can only update if the custom `.ruby-lsp/Gemfile.lock` already exists and includes all gems
@@ -274,16 +274,16 @@ module RubyLsp
       command << "1>&2"
 
       # Add bundle update
-      $stderr.puts("Ruby LSP> Running bundle install for the custom bundle. This may take a while...")
+      $stderr.puts("Ruby LSP> Running bundle install for the composed bundle. This may take a while...")
       $stderr.puts("Ruby LSP> Command: #{command}")
 
-      # Try to run the bundle install or update command. If that fails, it normally means that the custom lockfile is in
-      # a bad state that no longer reflects the top level one. In that case, we can remove the whole directory, try
+      # Try to run the bundle install or update command. If that fails, it normally means that the composed lockfile is
+      # in a bad state that no longer reflects the top level one. In that case, we can remove the whole directory, try
       # another time and give up if it fails again
       if !system(env, command) && !@retry && @custom_gemfile.exist?
         @retry = true
         @custom_dir.rmtree
-        $stderr.puts("Ruby LSP> Running bundle install failed. Trying to re-generate the custom bundle from scratch")
+        $stderr.puts("Ruby LSP> Running bundle install failed. Trying to re-generate the composed bundle from scratch")
         return setup!
       end
 
@@ -330,14 +330,14 @@ module RubyLsp
       if @rails_app
         return false if @dependencies.values_at("ruby-lsp", "ruby-lsp-rails", "debug").all?
 
-        # If the custom lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle install
-        # before updating
-        return false if custom_bundle_dependencies.values_at("ruby-lsp", "debug", "ruby-lsp-rails").any?(&:nil?)
+        # If the composed lockfile doesn't include `ruby-lsp`, `ruby-lsp-rails` or `debug`, we need to run bundle
+        # install before updating
+        return false if composed_bundle_dependencies.values_at("ruby-lsp", "debug", "ruby-lsp-rails").any?(&:nil?)
       else
         return false if @dependencies.values_at("ruby-lsp", "debug").all?
 
-        # If the custom lockfile doesn't include `ruby-lsp` or `debug`, we need to run bundle install before updating
-        return false if custom_bundle_dependencies.values_at("ruby-lsp", "debug").any?(&:nil?)
+        # If the composed lockfile doesn't include `ruby-lsp` or `debug`, we need to run bundle install before updating
+        return false if composed_bundle_dependencies.values_at("ruby-lsp", "debug").any?(&:nil?)
       end
 
       # If the last updated file doesn't exist or was updated more than 4 hours ago, we should update

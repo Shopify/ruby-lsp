@@ -14,6 +14,13 @@ import {
 } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 
+const WATCHED_FILES = [
+  "Gemfile.lock",
+  "gems.locked",
+  ".rubocop.yml",
+  ".rubocop",
+];
+
 export class Workspace implements WorkspaceInterface {
   public lspClient?: Client;
   public readonly ruby: Ruby;
@@ -58,8 +65,6 @@ export class Workspace implements WorkspaceInterface {
     this.createTestItems = createTestItems;
     this.isMainWorkspace = isMainWorkspace;
     this.virtualDocuments = virtualDocuments;
-
-    this.registerRestarts(context);
   }
 
   // Activate this workspace. This method is intended to be invoked only once, unlikely `start` which may be invoked
@@ -82,6 +87,20 @@ export class Workspace implements WorkspaceInterface {
       rootGitUri,
       ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}",
     );
+
+    this.registerRestarts();
+
+    // Eagerly calculate SHAs for the watched files to avoid unnecessary restarts
+    for (const file of WATCHED_FILES) {
+      const uri = vscode.Uri.joinPath(this.workspaceFolder.uri, file);
+      const currentSha = await this.fileContentsSha(uri);
+
+      if (!currentSha) {
+        continue;
+      }
+
+      this.restartDocumentShas.set(uri.fsPath, currentSha);
+    }
   }
 
   async start(debugMode?: boolean) {
@@ -164,7 +183,9 @@ export class Workspace implements WorkspaceInterface {
       // server can now handle shutdown requests
       if (this.needsRestart) {
         this.needsRestart = false;
-        await this.restart();
+        await this.debouncedRestart(
+          "a restart was requested while the server was still booting",
+        );
       }
     } catch (error: any) {
       this.error = true;
@@ -342,39 +363,21 @@ export class Workspace implements WorkspaceInterface {
     return result;
   }
 
-  private registerRestarts(context: vscode.ExtensionContext) {
-    this.createRestartWatcher(context, "Gemfile.lock");
-    this.createRestartWatcher(context, "gems.locked");
-    this.createRestartWatcher(context, "**/.rubocop.yml");
-    this.createRestartWatcher(context, ".rubocop");
+  private registerRestarts() {
+    this.createRestartWatcher(`{${WATCHED_FILES.join(",")}}`);
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
-    context.subscriptions.push(
+    this.context.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration(async (event) => {
         if (event.affectsConfiguration("rubyLsp")) {
-          // Re-activate Ruby if the version manager changed
-          if (
-            event.affectsConfiguration("rubyLsp.rubyVersionManager") ||
-            event.affectsConfiguration("rubyLsp.bundleGemfile") ||
-            event.affectsConfiguration("rubyLsp.customRubyCommand")
-          ) {
-            await this.ruby.activateRuby();
-          }
-
-          this.outputChannel.info(
-            "Restarting the Ruby LSP because configuration changed",
-          );
-          await this.restart();
+          await this.debouncedRestart("configuration changed");
         }
       }),
     );
   }
 
-  private createRestartWatcher(
-    context: vscode.ExtensionContext,
-    pattern: string,
-  ) {
+  private createRestartWatcher(pattern: string) {
     const watcher = vscode.workspace.createFileSystemWatcher(
       new vscode.RelativePattern(this.workspaceFolder, pattern),
     );
@@ -382,27 +385,27 @@ export class Workspace implements WorkspaceInterface {
     // Handler for only triggering restart if the contents of the file have been modified. If the file was just touched,
     // but the contents are the same, we don't want to restart
     const debouncedRestartWithHashCheck = async (uri: vscode.Uri) => {
-      const fileContents = await vscode.workspace.fs.readFile(uri);
       const fsPath = uri.fsPath;
+      const currentSha = await this.fileContentsSha(uri);
 
-      const hash = createHash("sha256");
-      hash.update(fileContents.toString());
-      const currentSha = hash.digest("hex");
-
-      if (this.restartDocumentShas.get(fsPath) !== currentSha) {
+      if (currentSha && this.restartDocumentShas.get(fsPath) !== currentSha) {
         this.restartDocumentShas.set(fsPath, currentSha);
-        await this.debouncedRestart(`${pattern} changed`);
+        await this.debouncedRestart(`${fsPath} changed, matching ${pattern}`);
       }
     };
 
-    const debouncedRestart = async () => {
-      await this.debouncedRestart(`${pattern} changed`);
+    const debouncedRestart = async (uri: vscode.Uri) => {
+      this.restartDocumentShas.delete(uri.fsPath);
+      await this.debouncedRestart(`${uri.fsPath} changed, matching ${pattern}`);
     };
 
-    context.subscriptions.push(
+    this.context.subscriptions.push(
       watcher,
       watcher.onDidChange(debouncedRestartWithHashCheck),
-      watcher.onDidCreate(debouncedRestart),
+      // Interestingly, we are seeing create events being fired even when the file already exists. If a create event is
+      // fired for an update to an existing file, then we need to check if the contents still match to prevent unwanted
+      // restarts
+      watcher.onDidCreate(debouncedRestartWithHashCheck),
       watcher.onDidDelete(debouncedRestart),
     );
   }
@@ -416,9 +419,9 @@ export class Workspace implements WorkspaceInterface {
       this.#inhibitRestart = true;
     };
 
-    const stop = async () => {
+    const stop = async (uri: vscode.Uri) => {
       this.#inhibitRestart = false;
-      await this.debouncedRestart(`${glob} changed`);
+      await this.debouncedRestart(`${uri.fsPath} changed, matching ${glob}`);
     };
 
     this.context.subscriptions.push(
@@ -428,5 +431,19 @@ export class Workspace implements WorkspaceInterface {
       // Once they are deleted and the action is complete, then we restart
       workspaceWatcher.onDidDelete(stop),
     );
+  }
+
+  private async fileContentsSha(uri: vscode.Uri): Promise<string | undefined> {
+    let fileContents;
+
+    try {
+      fileContents = await vscode.workspace.fs.readFile(uri);
+    } catch (error: any) {
+      return undefined;
+    }
+
+    const hash = createHash("sha256");
+    hash.update(fileContents.toString());
+    return hash.digest("hex");
   }
 }

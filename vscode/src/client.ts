@@ -83,7 +83,7 @@ function getLspExecutables(
   };
 
   // If there's a user defined custom bundle, we run the LSP with `bundle exec` and just trust the user configured
-  // their bundle. Otherwise, we run the global install of the LSP and use our custom bundle logic in the server
+  // their bundle. Otherwise, we run the global install of the LSP and use our composed bundle logic in the server
   if (customBundleGemfile.length > 0) {
     run = {
       command: "bundle",
@@ -218,9 +218,6 @@ function collectClientOptions(
     errorHandler: new ClientErrorHandler(workspaceFolder, telemetry),
     initializationOptions: {
       enabledFeatures,
-      experimentalFeaturesEnabled: configuration.get(
-        "enableExperimentalFeatures",
-      ),
       featuresConfiguration: configuration.get("featuresConfiguration"),
       formatter: configuration.get("formatter"),
       linters: configuration.get("linters"),
@@ -392,6 +389,10 @@ export default class Client extends LanguageClient implements ClientInterface {
       this.degraded = this.initializeResult?.degraded_mode;
     }
 
+    if (this.initializeResult?.bundle_env) {
+      this.ruby.mergeComposedEnvironment(this.initializeResult.bundle_env);
+    }
+
     await this.fetchAddons();
   }
 
@@ -501,7 +502,7 @@ export default class Client extends LanguageClient implements ClientInterface {
                 ...error.data,
                 serverVersion: this.serverVersion,
                 workspace: new vscode.TelemetryTrustedValue(
-                  this.workingDirectory,
+                  path.basename(this.workingDirectory),
                 ),
               },
             );

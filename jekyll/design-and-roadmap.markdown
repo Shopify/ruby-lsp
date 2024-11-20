@@ -201,7 +201,6 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - [Add rename support]
 - [Add show type hierarchy support]
 - [Show index view on the VS Code extension allowing users to browse indexed gems]
-- Remove custom bundle in favor of using bundler-compose
 - [Add more refactoring code actions such as extract to method, extract to class/module, etc]
 - [Explore speeding up indexing by caching the index for gems]
 - Explore speeding up indexing by making Prism AST allocations lazy

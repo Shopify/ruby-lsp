@@ -121,7 +121,11 @@ suite("Shadowenv", () => {
       `(env/prepend-to-pathlist "PATH" "${rubyBinPath}")`,
     );
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel);
+    const shadowenv = new Shadowenv(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
     const { env, version, yjit } = await shadowenv.activate();
 
     assert.match(env.PATH!, new RegExp(rubyBinPath));
@@ -137,7 +141,11 @@ suite("Shadowenv", () => {
       shadowLispFile,
     );
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel);
+    const shadowenv = new Shadowenv(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
     const { env, version, yjit } = await shadowenv.activate();
 
     assert.match(env.PATH!, new RegExp(rubyBinPath));
@@ -159,7 +167,11 @@ suite("Shadowenv", () => {
       .stub(vscode.window, "showErrorMessage")
       .resolves("Trust workspace" as any);
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel);
+    const shadowenv = new Shadowenv(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
     const { env, version, yjit } = await shadowenv.activate();
 
     assert.match(env.PATH!, new RegExp(rubyBinPath));
@@ -185,7 +197,11 @@ suite("Shadowenv", () => {
       .stub(vscode.window, "showErrorMessage")
       .resolves("Cancel" as any);
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel);
+    const shadowenv = new Shadowenv(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
 
     await assert.rejects(async () => {
       await shadowenv.activate();
@@ -204,7 +220,11 @@ suite("Shadowenv", () => {
       shadowLispFile,
     );
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel);
+    const shadowenv = new Shadowenv(
+      workspaceFolder,
+      outputChannel,
+      async () => {},
+    );
 
     // First, reject the call to `shadowenv exec`. Then resolve the call to `which shadowenv` to return nothing
     const execStub = sinon

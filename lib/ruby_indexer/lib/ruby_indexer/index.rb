@@ -7,6 +7,7 @@ module RubyIndexer
 
     class UnresolvableAliasError < StandardError; end
     class NonExistingNamespaceError < StandardError; end
+    class IndexNotEmptyError < StandardError; end
 
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
@@ -39,9 +40,6 @@ module RubyIndexer
       # Holds the linearized ancestors list for every namespace
       @ancestors = T.let({}, T::Hash[String, T::Array[String]])
 
-      # List of classes that are enhancing the index
-      @enhancements = T.let([], T::Array[Enhancement])
-
       # Map of module name to included hooks that have to be executed when we include the given module
       @included_hooks = T.let(
         {},
@@ -49,12 +47,6 @@ module RubyIndexer
       )
 
       @configuration = T.let(RubyIndexer::Configuration.new, Configuration)
-    end
-
-    # Register an enhancement to the index. Enhancements must conform to the `Enhancement` interface
-    sig { params(enhancement: Enhancement).void }
-    def register_enhancement(enhancement)
-      @enhancements << enhancement
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
@@ -360,6 +352,15 @@ module RubyIndexer
       ).void
     end
     def index_all(indexable_paths: @configuration.indexables, &block)
+      # When troubleshooting an indexing issue, e.g. through irb, it's not obvious that `index_all` will augment the
+      # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
+      # behavior and can take appropriate action.
+      # binding.break
+      if @entries.any?
+        raise IndexNotEmptyError,
+          "The index is not empty. To prevent invalid entries, `index_all` can only be called once."
+      end
+
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
       progress_step = (indexable_paths.length / 100.0).ceil
@@ -386,7 +387,6 @@ module RubyIndexer
         result,
         indexable_path.full_path,
         collect_comments: collect_comments,
-        enhancements: @enhancements,
       )
       dispatcher.dispatch(result.value)
 

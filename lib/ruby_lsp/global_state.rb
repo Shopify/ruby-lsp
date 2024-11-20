@@ -21,7 +21,7 @@ module RubyLsp
     attr_reader :encoding
 
     sig { returns(T::Boolean) }
-    attr_reader :experimental_features, :top_level_bundle
+    attr_reader :top_level_bundle
 
     sig { returns(TypeInferrer) }
     attr_reader :type_inferrer
@@ -40,7 +40,6 @@ module RubyLsp
       @has_type_checker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
-      @experimental_features = T.let(false, T::Boolean)
       @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
       @addon_settings = T.let({}, T::Hash[String, T.untyped])
       @top_level_bundle = T.let(
@@ -131,7 +130,6 @@ module RubyLsp
       end
       @index.configuration.encoding = @encoding
 
-      @experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
       @client_capabilities.apply_client_capabilities(options[:capabilities]) if options[:capabilities]
 
       addon_settings = options.dig(:initializationOptions, :addonSettings)

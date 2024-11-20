@@ -114,7 +114,12 @@ export class Ruby implements RubyInterface {
     if (workspaceRubyPath) {
       // If a workspace specific Ruby path is configured, then we use that to activate the environment
       await this.runActivation(
-        new None(this.workspaceFolder, this.outputChannel, workspaceRubyPath),
+        new None(
+          this.workspaceFolder,
+          this.outputChannel,
+          this.manuallySelectRuby.bind(this),
+          workspaceRubyPath,
+        ),
       );
     } else {
       // If the version manager is auto, discover the actual manager before trying to activate anything
@@ -139,7 +144,12 @@ export class Ruby implements RubyInterface {
 
         if (globalRubyPath) {
           await this.runActivation(
-            new None(this.workspaceFolder, this.outputChannel, globalRubyPath),
+            new None(
+              this.workspaceFolder,
+              this.outputChannel,
+              this.manuallySelectRuby.bind(this),
+              globalRubyPath,
+            ),
           );
         } else {
           this._error = true;
@@ -208,6 +218,10 @@ export class Ruby implements RubyInterface {
     return this.activateRuby();
   }
 
+  mergeComposedEnvironment(env: Record<string, string>) {
+    this._env = { ...this._env, ...env };
+  }
+
   private async runActivation(manager: VersionManager) {
     const { env, version, yjit, gemPath } = await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
@@ -266,47 +280,83 @@ export class Ruby implements RubyInterface {
     switch (this.versionManager.identifier) {
       case ManagerIdentifier.Asdf:
         await this.runActivation(
-          new Asdf(this.workspaceFolder, this.outputChannel),
+          new Asdf(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.Chruby:
         await this.runActivation(
-          new Chruby(this.workspaceFolder, this.outputChannel),
+          new Chruby(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.Rbenv:
         await this.runActivation(
-          new Rbenv(this.workspaceFolder, this.outputChannel),
+          new Rbenv(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.Rvm:
         await this.runActivation(
-          new Rvm(this.workspaceFolder, this.outputChannel),
+          new Rvm(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.Mise:
         await this.runActivation(
-          new Mise(this.workspaceFolder, this.outputChannel),
+          new Mise(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.RubyInstaller:
         await this.runActivation(
-          new RubyInstaller(this.workspaceFolder, this.outputChannel),
+          new RubyInstaller(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.Custom:
         await this.runActivation(
-          new Custom(this.workspaceFolder, this.outputChannel),
+          new Custom(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       case ManagerIdentifier.None:
         await this.runActivation(
-          new None(this.workspaceFolder, this.outputChannel),
+          new None(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
       default:
         await this.runActivation(
-          new Shadowenv(this.workspaceFolder, this.outputChannel),
+          new Shadowenv(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
         );
         break;
     }

@@ -33,6 +33,12 @@ suite("Common", () => {
   });
 
   test("maintains enabled state when increasing rollout percentage", () => {
+    const stub = sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: () => {
+        return { all: undefined };
+      },
+    } as any);
+
     // For the fake machine of 42 in base 16 and the name `fakeFeature`, the feature flag activation percetange is
     // 0.357. For every percetange below that, the feature should appear as disabled
     [0.25, 0.3, 0.35].forEach((percentage) => {
@@ -45,6 +51,8 @@ suite("Common", () => {
       (FEATURE_FLAGS as any).fakeFeature = percentage;
       assert.strictEqual(featureEnabled("fakeFeature" as any), true);
     });
+
+    stub.restore();
   });
 
   test("returns false if user opted out of specific feature", () => {
