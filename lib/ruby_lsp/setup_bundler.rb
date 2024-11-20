@@ -45,6 +45,9 @@ module RubyLsp
       )
       @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
 
+      @gemfile_hash = T.let(@gemfile ? Digest::SHA256.hexdigest(@gemfile.read) : nil, T.nilable(String))
+      @lockfile_hash = T.let(@lockfile&.exist? ? Digest::SHA256.hexdigest(@lockfile.read) : nil, T.nilable(String))
+
       @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
 
       # Custom bundle paths
@@ -91,10 +94,8 @@ module RubyLsp
         return run_bundle_install(@custom_gemfile)
       end
 
-      lockfile_contents = @lockfile.read
-      current_lockfile_hash = Digest::SHA256.hexdigest(lockfile_contents)
-
-      if @custom_lockfile.exist? && @lockfile_hash_path.exist? && @lockfile_hash_path.read == current_lockfile_hash
+      if @lockfile_hash && @custom_lockfile.exist? && @lockfile_hash_path.exist? &&
+          @lockfile_hash_path.read == @lockfile_hash
         $stderr.puts(
           "Ruby LSP> Skipping composed bundle setup since #{@custom_lockfile} already exists and is up to date",
         )
@@ -103,7 +104,7 @@ module RubyLsp
 
       FileUtils.cp(@lockfile.to_s, @custom_lockfile.to_s)
       correct_relative_remote_paths
-      @lockfile_hash_path.write(current_lockfile_hash)
+      @lockfile_hash_path.write(@lockfile_hash)
       run_bundle_install(@custom_gemfile)
     end
 
@@ -212,6 +213,23 @@ module RubyLsp
       rescue => e
         # Write the error object to a file so that we can read it from the parent process
         @error_path.write(Marshal.dump(e))
+      end
+
+      # If either the Gemfile or the lockfile have been modified during the process of setting up the bundle, retry
+      # composing the bundle from scratch
+
+      if @gemfile && @lockfile
+        current_gemfile_hash = Digest::SHA256.hexdigest(@gemfile.read)
+        current_lockfile_hash = Digest::SHA256.hexdigest(@lockfile.read)
+
+        if !@retry && (current_gemfile_hash != @gemfile_hash || current_lockfile_hash != @lockfile_hash)
+          @gemfile_hash = current_gemfile_hash
+          @lockfile_hash = current_lockfile_hash
+          @retry = true
+          @custom_dir.rmtree
+          $stderr.puts("Ruby LSP> Bundle was modified during setup. Retrying from scratch...")
+          return setup!
+        end
       end
 
       env
