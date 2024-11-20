@@ -835,9 +835,6 @@ module RubyIndexer
           next unless entries
 
           entries.each do |entry|
-            entry_owner_name = entry.owner&.name
-            next unless entry_owner_name
-
             entry.visibility = Entry::Visibility::PRIVATE
           end
         end
