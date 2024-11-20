@@ -159,6 +159,9 @@ module RubyIndexer
           end
 
           private_class_method("foo", :bar)
+
+          def self.baz
+          end
         end
       RUBY
 
@@ -168,6 +171,11 @@ module RubyIndexer
         entry = entries.first
         assert_predicate(entry, :private?)
       end
+
+      entries = T.must(@index["baz"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :public?)
     end
 
     def test_private_class_method_visibility_tracking_array_argument
@@ -180,6 +188,9 @@ module RubyIndexer
           end
 
           private_class_method(["foo", :bar])
+
+          def self.baz
+          end
         end
       RUBY
 
@@ -189,6 +200,33 @@ module RubyIndexer
         entry = entries.first
         assert_predicate(entry, :private?)
       end
+
+      entries = T.must(@index["baz"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :public?)
+    end
+
+    def test_private_class_method_visibility_tracking_method_argument
+      index(<<~RUBY)
+        class Test
+          private_class_method def self.foo
+          end
+
+          def self.bar
+          end
+        end
+      RUBY
+
+      entries = T.must(@index["foo"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :private?)
+
+      entries = T.must(@index["bar"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :public?)
     end
 
     def test_method_with_parameters

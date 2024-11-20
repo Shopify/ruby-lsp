@@ -315,6 +315,7 @@ module RubyIndexer
       when :module_function
         handle_module_function(node)
       when :private_class_method
+        @visibility_stack.push(Entry::Visibility::PRIVATE)
         handle_private_class_method(node)
       end
 
@@ -331,7 +332,7 @@ module RubyIndexer
     def on_call_node_leave(node)
       message = node.name
       case message
-      when :public, :protected, :private
+      when :public, :protected, :private, :private_class_method
         # We want to restore the visibility stack when we leave a method definition with a visibility modifier
         # e.g. `private def foo; end`
         if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
@@ -817,6 +818,11 @@ module RubyIndexer
           argument.elements
         else
           []
+        end
+
+        unless string_or_symbol_nodes.empty?
+          # pop the visibility off since there isn't a method definition following `private_class_method`
+          @visibility_stack.pop
         end
 
         string_or_symbol_nodes.each do |string_or_symbol_node|
