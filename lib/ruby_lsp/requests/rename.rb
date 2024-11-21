@@ -12,6 +12,15 @@ module RubyLsp
 
       class InvalidNameError < StandardError; end
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Interface::RenameOptions) }
+        def provider
+          Interface::RenameOptions.new(prepare_provider: true)
+        end
+      end
+
       sig do
         params(
           global_state: GlobalState,
