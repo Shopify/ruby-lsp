@@ -266,7 +266,7 @@ module RubyLsp
       def on_instance_variable_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
-          kind: Constant::SymbolKind::VARIABLE,
+          kind: Constant::SymbolKind::FIELD,
           range_location: node.name_loc,
           selection_range_location: node.name_loc,
         )
@@ -276,7 +276,7 @@ module RubyLsp
       def on_instance_variable_operator_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
-          kind: Constant::SymbolKind::VARIABLE,
+          kind: Constant::SymbolKind::FIELD,
           range_location: node.name_loc,
           selection_range_location: node.name_loc,
         )
@@ -286,7 +286,7 @@ module RubyLsp
       def on_instance_variable_or_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
-          kind: Constant::SymbolKind::VARIABLE,
+          kind: Constant::SymbolKind::FIELD,
           range_location: node.name_loc,
           selection_range_location: node.name_loc,
         )
@@ -296,7 +296,7 @@ module RubyLsp
       def on_instance_variable_and_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
-          kind: Constant::SymbolKind::VARIABLE,
+          kind: Constant::SymbolKind::FIELD,
           range_location: node.name_loc,
           selection_range_location: node.name_loc,
         )
