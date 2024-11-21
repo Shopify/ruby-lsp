@@ -33,7 +33,7 @@ module RubyIndexer
 
     sig { params(listener: DeclarationListener).void }
     def initialize(listener)
-      @listener = listener
+      @listener = T.let(listener, RubyIndexer::DeclarationListener)
     end
 
     # The `on_extend` indexing enhancement is invoked whenever an extend is encountered in the code. It can be used to
