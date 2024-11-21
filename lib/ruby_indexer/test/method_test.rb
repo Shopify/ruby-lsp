@@ -149,6 +149,86 @@ module RubyIndexer
       end
     end
 
+    def test_private_class_method_visibility_tracking_string_symbol_arguments
+      index(<<~RUBY)
+        class Test
+          def self.foo
+          end
+
+          def self.bar
+          end
+
+          private_class_method("foo", :bar)
+
+          def self.baz
+          end
+        end
+      RUBY
+
+      ["foo", "bar"].each do |keyword|
+        entries = T.must(@index[keyword])
+        assert_equal(1, entries.size)
+        entry = entries.first
+        assert_predicate(entry, :private?)
+      end
+
+      entries = T.must(@index["baz"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :public?)
+    end
+
+    def test_private_class_method_visibility_tracking_array_argument
+      index(<<~RUBY)
+        class Test
+          def self.foo
+          end
+
+          def self.bar
+          end
+
+          private_class_method(["foo", :bar])
+
+          def self.baz
+          end
+        end
+      RUBY
+
+      ["foo", "bar"].each do |keyword|
+        entries = T.must(@index[keyword])
+        assert_equal(1, entries.size)
+        entry = entries.first
+        assert_predicate(entry, :private?)
+      end
+
+      entries = T.must(@index["baz"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :public?)
+    end
+
+    def test_private_class_method_visibility_tracking_method_argument
+      index(<<~RUBY)
+        class Test
+          private_class_method def self.foo
+          end
+
+          def self.bar
+          end
+        end
+      RUBY
+
+      entries = T.must(@index["foo"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :private?)
+
+      entries = T.must(@index["bar"])
+      assert_equal(1, entries.size)
+      entry = entries.first
+      assert_predicate(entry, :public?)
+    end
+
     def test_comments_documentation
       index(<<~RUBY)
         # Documentation for Foo

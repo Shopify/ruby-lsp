@@ -282,6 +282,9 @@ module RubyIndexer
         @visibility_stack.push(Entry::Visibility::PRIVATE)
       when :module_function
         handle_module_function(node)
+      when :private_class_method
+        @visibility_stack.push(Entry::Visibility::PRIVATE)
+        handle_private_class_method(node)
       end
 
       @enhancements.each do |enhancement|
@@ -297,7 +300,7 @@ module RubyIndexer
     def on_call_node_leave(node)
       message = node.name
       case message
-      when :public, :protected, :private
+      when :public, :protected, :private, :private_class_method
         # We want to restore the visibility stack when we leave a method definition with a visibility modifier
         # e.g. `private def foo; end`
         if node.arguments&.arguments&.first&.is_a?(Prism::DefNode)
@@ -871,6 +874,45 @@ module RubyIndexer
             Entry::Visibility::PUBLIC,
             singleton,
           ))
+        end
+      end
+    end
+
+    sig { params(node: Prism::CallNode).void }
+    def handle_private_class_method(node)
+      node.arguments&.arguments&.each do |argument|
+        string_or_symbol_nodes = case argument
+        when Prism::StringNode, Prism::SymbolNode
+          [argument]
+        when Prism::ArrayNode
+          argument.elements
+        else
+          []
+        end
+
+        unless string_or_symbol_nodes.empty?
+          # pop the visibility off since there isn't a method definition following `private_class_method`
+          @visibility_stack.pop
+        end
+
+        string_or_symbol_nodes.each do |string_or_symbol_node|
+          method_name = case string_or_symbol_node
+          when Prism::StringNode
+            string_or_symbol_node.content
+          when Prism::SymbolNode
+            string_or_symbol_node.value
+          end
+          next unless method_name
+
+          owner_name = @owner_stack.last&.name
+          next unless owner_name
+
+          entries = @index.resolve_method(method_name, @index.existing_or_new_singleton_class(owner_name).name)
+          next unless entries
+
+          entries.each do |entry|
+            entry.visibility = Entry::Visibility::PRIVATE
+          end
         end
       end
     end
