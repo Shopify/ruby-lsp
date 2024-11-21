@@ -52,12 +52,9 @@ interface ServerErrorTelemetryEvent {
 
 type ServerTelemetryEvent = ServerErrorTelemetryEvent;
 
-function enabledFeatureFlags() {
+function enabledFeatureFlags(): Record<string, boolean> {
   const allKeys = Object.keys(FEATURE_FLAGS) as (keyof typeof FEATURE_FLAGS)[];
-
-  return allKeys.map((key) => {
-    return { [key]: featureEnabled(key) };
-  });
+  return Object.fromEntries(allKeys.map((key) => [key, featureEnabled(key)]));
 }
 
 // Get the executables to start the server based on the user's configuration
