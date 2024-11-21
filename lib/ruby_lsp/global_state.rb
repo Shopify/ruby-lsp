@@ -146,7 +146,7 @@ module RubyLsp
 
     sig { params(flag: Symbol).returns(T.nilable(T::Boolean)) }
     def enabled_feature?(flag)
-      @enabled_feature_flags[flag]
+      @enabled_feature_flags[:all] || @enabled_feature_flags[flag]
     end
 
     sig { returns(String) }
