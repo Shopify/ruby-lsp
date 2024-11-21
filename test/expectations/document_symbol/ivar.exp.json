@@ -2,7 +2,7 @@
   "result": [
     {
       "name": "@a",
-      "kind": 13,
+      "kind": 8,
       "range": {
         "start": {
           "line": 0,
@@ -27,7 +27,7 @@
     },
     {
       "name": "@aa",
-      "kind": 13,
+      "kind": 8,
       "range": {
         "start": {
           "line": 1,
@@ -76,7 +76,7 @@
       "children": [
         {
           "name": "@b",
-          "kind": 13,
+          "kind": 8,
           "range": {
             "start": {
               "line": 4,
@@ -101,7 +101,7 @@
         },
         {
           "name": "@bb",
-          "kind": 13,
+          "kind": 8,
           "range": {
             "start": {
               "line": 5,
@@ -150,7 +150,7 @@
           "children": [
             {
               "name": "@c",
-              "kind": 13,
+              "kind": 8,
               "range": {
                 "start": {
                   "line": 8,
@@ -175,7 +175,7 @@
             },
             {
               "name": "@cc",
-              "kind": 13,
+              "kind": 8,
               "range": {
                 "start": {
                   "line": 9,
