@@ -786,6 +786,43 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_is_resilient_to_gemfile_changes_in_the_middle_of_setup
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+
+            # This section simulates the bundle being modified during the composed bundle setup. We initialize the
+            # composed bundle first to eagerly calculate the gemfile and lockfile hashes. Then we modify the Gemfile
+            # afterwards and trigger the setup.
+            #
+            # This type of scenario may happen if someone switches branches in the middle of running bundle install. By
+            # the time we finish, the bundle may be in a different state and we need to recover from that
+            composed_bundle = RubyLsp::SetupBundler.new(dir, launcher: true)
+
+            File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+              source "https://rubygems.org"
+              gem "rdoc"
+              gem "irb"
+            GEMFILE
+            system("bundle install")
+
+            composed_bundle.setup!
+          end
+
+          assert_match("irb", File.read(".ruby-lsp/Gemfile.lock"))
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)
