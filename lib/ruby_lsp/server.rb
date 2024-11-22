@@ -298,29 +298,11 @@ module RubyLsp
 
       # Not every client supports dynamic registration or file watching
       if @global_state.client_capabilities.supports_watching_files
-        send_message(
-          Request.new(
-            id: @current_request_id,
-            method: "client/registerCapability",
-            params: Interface::RegistrationParams.new(
-              registrations: [
-                # Register watching Ruby files
-                Interface::Registration.new(
-                  id: "workspace/didChangeWatchedFiles",
-                  method: "workspace/didChangeWatchedFiles",
-                  register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
-                    watchers: [
-                      Interface::FileSystemWatcher.new(
-                        glob_pattern: "**/*.rb",
-                        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
+        send_message(Request.register_watched_files(@current_request_id, "**/*.rb"))
+        send_message(Request.register_watched_files(
+          @current_request_id,
+          Interface::RelativePattern.new(base_uri: @global_state.workspace_uri.to_s, pattern: ".rubocop.yml"),
+        ))
       end
 
       process_indexing_configuration(options.dig(:initializationOptions, :indexing))
@@ -418,12 +400,7 @@ module RubyLsp
       @store.delete(uri)
 
       # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-      send_message(
-        Notification.new(
-          method: "textDocument/publishDiagnostics",
-          params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
-        ),
-      )
+      send_message(Notification.publish_diagnostics(uri.to_s, []))
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -1004,24 +981,53 @@ module RubyLsp
         uri = URI(change[:uri])
         file_path = uri.to_standardized_path
         next if file_path.nil? || File.directory?(file_path)
-        next unless file_path.end_with?(".rb")
 
-        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-        uri.add_require_path_from_load_entry(load_path_entry) if load_path_entry
+        if file_path.end_with?(".rb")
+          handle_ruby_file_change(index, file_path, change[:type])
+          next
+        end
 
-        content = File.read(file_path)
+        file_name = File.basename(file_path)
 
-        case change[:type]
-        when Constant::FileChangeType::CREATED
-          index.index_single(uri, content)
-        when Constant::FileChangeType::CHANGED
-          index.handle_change(uri, content)
-        when Constant::FileChangeType::DELETED
-          index.delete(uri)
+        if file_name == ".rubocop.yml" || file_name == ".rubocop"
+          handle_rubocop_config_change(uri)
         end
       end
 
       Addon.file_watcher_addons.each { |addon| T.unsafe(addon).workspace_did_change_watched_files(changes) }
+    end
+
+    sig { params(index: RubyIndexer::Index, file_path: String, change_type: Integer).void }
+    def handle_ruby_file_change(index, file_path, change_type)
+      load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
+      uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
+
+      content = File.read(file_path)
+
+      case change_type
+      when Constant::FileChangeType::CREATED
+        index.index_single(uri, content)
+      when Constant::FileChangeType::CHANGED
+        index.handle_change(uri, content)
+      when Constant::FileChangeType::DELETED
+        index.delete(uri)
+      end
+    end
+
+    sig { params(uri: URI::Generic).void }
+    def handle_rubocop_config_change(uri)
+      return unless defined?(Requests::Support::RuboCopFormatter)
+
+      send_log_message("Reloading RuboCop since #{uri} changed")
+      @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+
+      # Clear all existing diagnostics since the config changed. This has to happen under a mutex because the `state`
+      # hash cannot be mutated during iteration or that will throw an error
+      @global_state.synchronize do
+        @store.each do |uri, _document|
+          send_message(Notification.publish_diagnostics(uri.to_s, []))
+        end
+      end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
