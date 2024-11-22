@@ -235,6 +235,20 @@ module RubyLsp
       assert_nil(state.enabled_feature?(:unknown_flag))
     end
 
+    def test_enabled_feature_always_returns_true_if_all_are_enabled
+      state = GlobalState.new
+
+      state.apply_options({
+        initializationOptions: {
+          enabledFeatureFlags: {
+            all: true,
+          },
+        },
+      })
+
+      assert(state.enabled_feature?(:whatever))
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
