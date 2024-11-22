@@ -21,8 +21,8 @@ import {
   TextEdit,
   SelectionRange,
   CodeAction,
-  TextDocumentFilter,
   LocationLink,
+  TextDocumentFilter,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
@@ -675,48 +675,50 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("document selectors match default gems and bundled gems appropriately", () => {
-    const [
-      workspaceRubyFilter,
-      workspaceERBFilter,
-      bundledGemsFilter,
-      defaultPathFilter,
-      defaultGemsFilter,
-    ] = client.clientOptions.documentSelector!;
+    const selector = client.clientOptions
+      .documentSelector! as TextDocumentFilter[];
+    assert.strictEqual(selector.length, 10);
 
-    assert.strictEqual(
-      (workspaceRubyFilter as TextDocumentFilter).language!,
+    // We don't care about the order of the document filters, just that they are present. This assertion helper is just
+    // a convenience to search the registered filters
+    const assertSelector = (
+      language: string | undefined,
+      pattern: RegExp | string,
+      scheme: string | undefined,
+    ) => {
+      assert.ok(
+        selector.find(
+          (filter: TextDocumentFilter) =>
+            filter.language === language &&
+            (typeof pattern === "string"
+              ? pattern === filter.pattern
+              : pattern.test(filter.pattern!)) &&
+            filter.scheme === scheme,
+        ),
+      );
+    };
+
+    assertSelector("ruby", `${workspaceUri.fsPath}/**/*`, "file");
+    assertSelector("ruby", `${workspaceUri.fsPath}/**/*`, "git");
+    assertSelector("erb", `${workspaceUri.fsPath}/**/*`, "file");
+    assertSelector("erb", `${workspaceUri.fsPath}/**/*`, "git");
+
+    assertSelector(
       "ruby",
-    );
-
-    assert.strictEqual(
-      (workspaceRubyFilter as TextDocumentFilter).pattern!,
-      `${workspaceUri.fsPath}/**/*`,
-    );
-
-    assert.strictEqual(
-      (workspaceERBFilter as TextDocumentFilter).language!,
-      "erb",
-    );
-
-    assert.strictEqual(
-      (workspaceERBFilter as TextDocumentFilter).pattern!,
-      `${workspaceUri.fsPath}/**/*`,
-    );
-
-    assert.match(
-      (bundledGemsFilter as TextDocumentFilter).pattern!,
       new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
+      "file",
+    );
+    assertSelector(
+      "ruby",
+      new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
+      "git",
     );
 
-    assert.match(
-      (defaultPathFilter as TextDocumentFilter).pattern!,
-      /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/,
-    );
+    assertSelector("ruby", /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/, "file");
+    assertSelector("ruby", /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/, "git");
 
-    assert.match(
-      (defaultGemsFilter as TextDocumentFilter).pattern!,
-      /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/,
-    );
+    assertSelector("ruby", /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/, "file");
+    assertSelector("ruby", /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/, "git");
   });
 
   test("requests for non existing documents do not crash the server", async () => {
