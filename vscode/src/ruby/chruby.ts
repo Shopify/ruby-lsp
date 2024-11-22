@@ -17,6 +17,8 @@ interface RubyVersion {
   version: string;
 }
 
+class RubyVersionCancellationError extends Error {}
+
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
 export class Chruby extends VersionManager {
@@ -45,8 +47,26 @@ export class Chruby extends VersionManager {
   }
 
   async activate(): Promise<ActivationResult> {
-    const versionInfo = await this.discoverRubyVersion();
-    const rubyUri = await this.findRubyUri(versionInfo);
+    let versionInfo = await this.discoverRubyVersion();
+    let rubyUri: vscode.Uri;
+
+    if (versionInfo) {
+      rubyUri = await this.findRubyUri(versionInfo);
+    } else {
+      try {
+        const fallback = await this.fallbackToLatestRuby();
+        versionInfo = fallback.rubyVersion;
+        rubyUri = fallback.uri;
+      } catch (error: any) {
+        if (error instanceof RubyVersionCancellationError) {
+          // Try to re-activate if the user has configured a fallback during cancellation
+          return this.activate();
+        }
+
+        throw error;
+      }
+    }
+
     this.outputChannel.info(
       `Discovered Ruby installation at ${rubyUri.fsPath}`,
     );
@@ -118,7 +138,7 @@ export class Chruby extends VersionManager {
   }
 
   // Returns the Ruby version information including version and engine. E.g.: ruby-3.3.0, truffleruby-21.3.0
-  private async discoverRubyVersion(): Promise<RubyVersion> {
+  private async discoverRubyVersion(): Promise<RubyVersion | undefined> {
     let uri = this.bundleUri;
     const root = path.parse(uri.fsPath).root;
     let version: string;
@@ -156,7 +176,183 @@ export class Chruby extends VersionManager {
       return { engine: match.groups.engine, version: match.groups.version };
     }
 
-    throw new Error("No .ruby-version file was found");
+    return undefined;
+  }
+
+  private async fallbackToLatestRuby() {
+    let gemfileContents;
+
+    try {
+      gemfileContents = await vscode.workspace.fs.readFile(
+        vscode.Uri.joinPath(this.workspaceFolder.uri, "Gemfile"),
+      );
+    } catch (error: any) {
+      // The Gemfile doesn't exist
+    }
+
+    // If the Gemfile includes ruby version restrictions, then trying to fall back to latest Ruby may lead to errors
+    if (
+      gemfileContents &&
+      /^ruby(\s|\()("|')[\d.]+/.test(gemfileContents.toString())
+    ) {
+      throw this.rubyVersionError();
+    }
+
+    const fallback = await vscode.window.withProgress(
+      {
+        title:
+          "No .ruby-version found. Trying to fall back to latest installed Ruby in 10 seconds",
+        location: vscode.ProgressLocation.Notification,
+        cancellable: true,
+      },
+      async (progress, token) => {
+        progress.report({
+          message:
+            "You can create a .ruby-version file in a parent directory to configure a fallback",
+        });
+
+        // If they don't cancel, we wait 10 seconds before falling back so that they are aware of what's happening
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 10000);
+
+          // If the user cancels the fallback, resolve immediately so that they don't have to wait 10 seconds
+          token.onCancellationRequested(() => {
+            resolve();
+          });
+        });
+
+        if (token.isCancellationRequested) {
+          await this.handleCancelledFallback();
+
+          // We throw this error to be able to catch and re-run activation after the user has configured a fallback
+          throw new RubyVersionCancellationError();
+        }
+
+        const fallback = await this.findFallbackRuby();
+
+        if (!fallback) {
+          throw new Error("Cannot find any Ruby installations");
+        }
+
+        return fallback;
+      },
+    );
+
+    return fallback;
+  }
+
+  private async handleCancelledFallback() {
+    const answer = await vscode.window.showInformationMessage(
+      `The Ruby LSP requires a Ruby version to launch.
+      You can define a fallback for the system or for the Ruby LSP only`,
+      "System",
+      "Ruby LSP only",
+    );
+
+    if (answer === "System") {
+      await this.createParentRubyVersionFile();
+    } else if (answer === "Ruby LSP only") {
+      await this.manuallySelectRuby();
+    }
+
+    throw this.rubyVersionError();
+  }
+
+  private async createParentRubyVersionFile() {
+    const items: vscode.QuickPickItem[] = [];
+
+    for (const uri of this.rubyInstallationUris) {
+      let directories;
+
+      try {
+        directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
+          (left, right) => right[0].localeCompare(left[0]),
+        );
+
+        directories.forEach((directory) => {
+          items.push({
+            label: directory[0],
+          });
+        });
+      } catch (error: any) {
+        continue;
+      }
+    }
+
+    const answer = await vscode.window.showQuickPick(items, {
+      title: "Select a Ruby version to use as fallback",
+      ignoreFocusOut: true,
+    });
+
+    if (!answer) {
+      throw this.rubyVersionError();
+    }
+
+    const targetDirectory = await vscode.window.showOpenDialog({
+      defaultUri: vscode.Uri.file(os.homedir()),
+      openLabel: "Add fallback in this directory",
+      canSelectFiles: false,
+      canSelectFolders: true,
+      canSelectMany: false,
+      title: "Select the directory to create the .ruby-version fallback in",
+    });
+
+    if (!targetDirectory) {
+      throw this.rubyVersionError();
+    }
+
+    await vscode.workspace.fs.writeFile(
+      vscode.Uri.joinPath(targetDirectory[0], ".ruby-version"),
+      Buffer.from(answer.label),
+    );
+  }
+
+  private async findFallbackRuby(): Promise<
+    { uri: vscode.Uri; rubyVersion: RubyVersion } | undefined
+  > {
+    for (const uri of this.rubyInstallationUris) {
+      let directories;
+
+      try {
+        directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
+          (left, right) => right[0].localeCompare(left[0]),
+        );
+
+        let groups;
+        let targetDirectory;
+
+        for (const directory of directories) {
+          const match =
+            /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(
+              directory[0],
+            );
+
+          if (match?.groups) {
+            groups = match.groups;
+            targetDirectory = directory;
+            break;
+          }
+        }
+
+        if (targetDirectory) {
+          return {
+            uri: vscode.Uri.joinPath(uri, targetDirectory[0], "bin", "ruby"),
+            rubyVersion: {
+              engine: groups!.engine,
+              version: groups!.version,
+            },
+          };
+        }
+      } catch (error: any) {
+        // If the directory doesn't exist, keep searching
+        this.outputChannel.debug(
+          `Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`,
+        );
+        continue;
+      }
+    }
+
+    return undefined;
   }
 
   // Run the activation script using the Ruby installation we found so that we can discover gem paths
@@ -196,5 +392,12 @@ export class Chruby extends VersionManager {
       result.stderr.split(ACTIVATION_SEPARATOR);
 
     return { defaultGems, gemHome, yjit: yjit === "true", version };
+  }
+
+  private rubyVersionError() {
+    return new Error(
+      `Cannot find .ruby-version file. Please specify the Ruby version in a
+           .ruby-version either in ${this.bundleUri.fsPath} or in a parent directory`,
+    );
   }
 }

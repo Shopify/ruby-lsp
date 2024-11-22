@@ -4,7 +4,7 @@ import assert from "assert";
 import path from "path";
 import os from "os";
 
-import { before, after } from "mocha";
+import { beforeEach, afterEach } from "mocha";
 import * as vscode from "vscode";
 import sinon from "sinon";
 
@@ -45,7 +45,7 @@ suite("Chruby", () => {
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
 
-  before(() => {
+  beforeEach(() => {
     rootPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-chruby-"));
 
     fs.mkdirSync(path.join(rootPath, "opt", "rubies", RUBY_VERSION, "bin"), {
@@ -67,7 +67,7 @@ suite("Chruby", () => {
     outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
   });
 
-  after(() => {
+  afterEach(() => {
     fs.rmSync(rootPath, { recursive: true, force: true });
   });
 
@@ -290,5 +290,32 @@ suite("Chruby", () => {
     assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
+  });
+
+  test("Uses latest Ruby as a fallback if no .ruby-version is found", async () => {
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const { env, version, yjit } = await chruby.activate();
+
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
+  }).timeout(20000);
+
+  test("Doesn't try to fallback to latest version if there's a Gemfile with ruby constraints", async () => {
+    fs.writeFileSync(path.join(workspacePath, "Gemfile"), "ruby '3.3.0'");
+
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    await assert.rejects(() => {
+      return chruby.activate();
+    });
   });
 });
