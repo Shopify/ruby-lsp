@@ -54,7 +54,13 @@ export class Chruby extends VersionManager {
       rubyUri = await this.findRubyUri(versionInfo);
     } else {
       try {
-        const fallback = await this.fallbackToLatestRuby();
+        const fallback = await this.fallbackWithCancellation(
+          "No .ruby-version file found. Trying to fall back to latest installed Ruby in 10 seconds",
+          "You can create a .ruby-version file in a parent directory to configure a fallback",
+          this.findFallbackRuby.bind(this),
+          this.rubyVersionError.bind(this),
+        );
+
         versionInfo = fallback.rubyVersion;
         rubyUri = fallback.uri;
       } catch (error: any) {
@@ -179,7 +185,12 @@ export class Chruby extends VersionManager {
     return undefined;
   }
 
-  private async fallbackToLatestRuby() {
+  private async fallbackWithCancellation<T>(
+    title: string,
+    message: string,
+    fallbackFn: () => Promise<T>,
+    errorFn: () => Error,
+  ): Promise<T> {
     let gemfileContents;
 
     try {
@@ -190,26 +201,22 @@ export class Chruby extends VersionManager {
       // The Gemfile doesn't exist
     }
 
-    // If the Gemfile includes ruby version restrictions, then trying to fall back to latest Ruby may lead to errors
+    // If the Gemfile includes ruby version restrictions, then trying to fall back may lead to errors
     if (
       gemfileContents &&
       /^ruby(\s|\()("|')[\d.]+/.test(gemfileContents.toString())
     ) {
-      throw this.rubyVersionError();
+      throw errorFn();
     }
 
     const fallback = await vscode.window.withProgress(
       {
-        title:
-          "No .ruby-version found. Trying to fall back to latest installed Ruby in 10 seconds",
+        title,
         location: vscode.ProgressLocation.Notification,
         cancellable: true,
       },
       async (progress, token) => {
-        progress.report({
-          message:
-            "You can create a .ruby-version file in a parent directory to configure a fallback",
-        });
+        progress.report({ message });
 
         // If they don't cancel, we wait 10 seconds before falling back so that they are aware of what's happening
         await new Promise<void>((resolve) => {
@@ -222,26 +229,20 @@ export class Chruby extends VersionManager {
         });
 
         if (token.isCancellationRequested) {
-          await this.handleCancelledFallback();
+          await this.handleCancelledFallback(errorFn);
 
           // We throw this error to be able to catch and re-run activation after the user has configured a fallback
           throw new RubyVersionCancellationError();
         }
 
-        const fallback = await this.findFallbackRuby();
-
-        if (!fallback) {
-          throw new Error("Cannot find any Ruby installations");
-        }
-
-        return fallback;
+        return fallbackFn();
       },
     );
 
     return fallback;
   }
 
-  private async handleCancelledFallback() {
+  private async handleCancelledFallback(errorFn: () => Error) {
     const answer = await vscode.window.showInformationMessage(
       `The Ruby LSP requires a Ruby version to launch.
       You can define a fallback for the system or for the Ruby LSP only`,
@@ -250,15 +251,15 @@ export class Chruby extends VersionManager {
     );
 
     if (answer === "System") {
-      await this.createParentRubyVersionFile();
+      await this.createParentRubyVersionFile(errorFn);
     } else if (answer === "Ruby LSP only") {
       await this.manuallySelectRuby();
     }
 
-    throw this.rubyVersionError();
+    throw errorFn();
   }
 
-  private async createParentRubyVersionFile() {
+  private async createParentRubyVersionFile(errorFn: () => Error) {
     const items: vscode.QuickPickItem[] = [];
 
     for (const uri of this.rubyInstallationUris) {
@@ -285,7 +286,7 @@ export class Chruby extends VersionManager {
     });
 
     if (!answer) {
-      throw this.rubyVersionError();
+      throw errorFn();
     }
 
     const targetDirectory = await vscode.window.showOpenDialog({
@@ -298,7 +299,7 @@ export class Chruby extends VersionManager {
     });
 
     if (!targetDirectory) {
-      throw this.rubyVersionError();
+      throw errorFn();
     }
 
     await vscode.workspace.fs.writeFile(
@@ -307,9 +308,10 @@ export class Chruby extends VersionManager {
     );
   }
 
-  private async findFallbackRuby(): Promise<
-    { uri: vscode.Uri; rubyVersion: RubyVersion } | undefined
-  > {
+  private async findFallbackRuby(): Promise<{
+    uri: vscode.Uri;
+    rubyVersion: RubyVersion;
+  }> {
     for (const uri of this.rubyInstallationUris) {
       let directories;
 
@@ -352,7 +354,7 @@ export class Chruby extends VersionManager {
       }
     }
 
-    return undefined;
+    throw new Error("Cannot find any Ruby installations");
   }
 
   // Run the activation script using the Ruby installation we found so that we can discover gem paths
