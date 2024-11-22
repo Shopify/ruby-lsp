@@ -50,6 +50,10 @@ const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
     includeName: "text.html.basic",
   },
   {
+    label: "ERB",
+    contentName: "text.erb",
+  },
+  {
     id: "js",
     label: "Javascript",
     delimiters: ["JS", "JAVASCRIPT"],
