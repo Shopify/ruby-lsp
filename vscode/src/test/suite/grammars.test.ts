@@ -96,16 +96,18 @@ suite("Grammars", () => {
           "./node_modules/vscode-oniguruma/release/onig.wasm",
         ),
       );
-      const vscodeOnigurumaLib = oniguruma.loadWASM(wasmBin.buffer).then(() => {
-        return {
-          createOnigScanner(patterns: string[]) {
-            return new oniguruma.OnigScanner(patterns);
-          },
-          createOnigString(str: string) {
-            return new oniguruma.OnigString(str);
-          },
-        };
-      });
+      const vscodeOnigurumaLib = oniguruma
+        .loadWASM(Buffer.from(wasmBin).buffer)
+        .then(() => {
+          return {
+            createOnigScanner(patterns: string[]) {
+              return new oniguruma.OnigScanner(patterns);
+            },
+            createOnigString(str: string) {
+              return new oniguruma.OnigString(str);
+            },
+          };
+        });
       const registry = new vsctm.Registry({
         onigLib: vscodeOnigurumaLib,
         loadGrammar: async (scopeName) => {
