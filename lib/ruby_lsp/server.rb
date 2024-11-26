@@ -981,15 +981,15 @@ module RubyLsp
         next unless file_path.end_with?(".rb")
 
         load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-        indexable = RubyIndexer::IndexablePath.new(load_path_entry, file_path)
+        uri.add_require_path_from_load_entry(load_path_entry) if load_path_entry
 
         case change[:type]
         when Constant::FileChangeType::CREATED
-          index.index_single(indexable)
+          index.index_single(uri)
         when Constant::FileChangeType::CHANGED
-          index.handle_change(indexable)
+          index.handle_change(uri)
         when Constant::FileChangeType::DELETED
-          index.delete(indexable)
+          index.delete(uri)
         end
       end
 

@@ -18,7 +18,7 @@ class ReferencesTest < Minitest::Test
     source = File.read(fixture_path)
     path = File.expand_path(fixture_path)
     global_state = RubyLsp::GlobalState.new
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, path), source)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
 
     store = RubyLsp::Store.new
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))

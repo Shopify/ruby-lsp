@@ -15,27 +15,26 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       index = server.global_state.index
 
       index.index_single(
-        RubyIndexer::IndexablePath.new(
-          "#{Dir.pwd}/lib",
-          File.expand_path(
+        URI::Generic.from_path(
+          load_path_entry: "#{Dir.pwd}/lib",
+          path: File.expand_path(
             "../../test/fixtures/class_reference_target.rb",
             __dir__,
           ),
         ),
       )
       index.index_single(
-        RubyIndexer::IndexablePath.new(
-          nil,
-          File.expand_path(
+        URI::Generic.from_path(
+          path: File.expand_path(
             "../../test/fixtures/constant_reference_target.rb",
             __dir__,
           ),
         ),
       )
       index.index_single(
-        RubyIndexer::IndexablePath.new(
-          "#{Dir.pwd}/lib",
-          File.expand_path(
+        URI::Generic.from_path(
+          load_path_entry: "#{Dir.pwd}/lib",
+          path: File.expand_path(
             "../../lib/ruby_lsp/server.rb",
             __dir__,
           ),
@@ -76,12 +75,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   def test_jumping_to_default_gems
     with_server("Pathname") do |server, uri|
       index = server.global_state.index
-      index.index_single(
-        RubyIndexer::IndexablePath.new(
-          nil,
-          "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb",
-        ),
-      )
+      index.index_single(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -165,15 +159,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     with_server("require \"bundler\"") do |server, uri|
       index = server.global_state.index
 
-      bundler_uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
-      index.index_single(
-        RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], T.must(bundler_uri.to_standardized_path)),
+      bundler_uri = URI::Generic.from_path(
+        path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb",
+        load_path_entry: RbConfig::CONFIG["rubylibdir"],
       )
+      index.index_single(bundler_uri)
 
       Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
-        index.index_single(
-          RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path),
-        )
+        index.index_single(URI::Generic.from_path(load_path_entry: RbConfig::CONFIG["rubylibdir"], path: path))
       end
 
       server.process_message(
@@ -238,9 +231,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       with_server(source, stub_no_typechecker: true) do |server, uri|
         server.global_state.index.index_single(
-          RubyIndexer::IndexablePath.new(
-            "#{Dir.pwd}/lib",
-            File.expand_path(
+          URI::Generic.from_path(
+            load_path_entry: "#{Dir.pwd}/lib",
+            path: File.expand_path(
               "../../test/fixtures/class_reference_target.rb",
               __dir__,
             ),
@@ -319,7 +312,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         },
       })
       index = server.global_state.index
-      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
+      index.index_single(URI::Generic.from_path(path: T.must(second_uri.to_standardized_path)), second_source)
 
       server.process_message(
         id: 1,
@@ -388,12 +381,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source) do |server, uri|
       server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(nil, "/fake/path/bar.rb"), <<~RUBY
+        URI::Generic.from_path(path: "/fake/path/bar.rb"), <<~RUBY
           class Foo::Bar; end
         RUBY
       )
       server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(nil, "/fake/path/baz.rb"), <<~RUBY
+        URI::Generic.from_path(path: "/fake/path/baz.rb"), <<~RUBY
           class Foo::Bar; end
         RUBY
       )
@@ -593,7 +586,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source, URI("/fake.erb")) do |server, uri|
       server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY
+        URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY
           class Bar
             def foo; end
 

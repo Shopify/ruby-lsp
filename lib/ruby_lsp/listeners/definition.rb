@@ -290,20 +290,22 @@ module RubyLsp
       def handle_require_definition(node, message)
         case message
         when :require
-          entry = @index.search_require_paths(node.content).find do |indexable_path|
-            indexable_path.require_path == node.content
+          entry = @index.search_require_paths(node.content).find do |uri|
+            uri.require_path == node.content
           end
 
           if entry
             candidate = entry.full_path
 
-            @response_builder << Interface::Location.new(
-              uri: URI::Generic.from_path(path: candidate).to_s,
-              range: Interface::Range.new(
-                start: Interface::Position.new(line: 0, character: 0),
-                end: Interface::Position.new(line: 0, character: 0),
-              ),
-            )
+            if candidate
+              @response_builder << Interface::Location.new(
+                uri: URI::Generic.from_path(path: candidate).to_s,
+                range: Interface::Range.new(
+                  start: Interface::Position.new(line: 0, character: 0),
+                  end: Interface::Position.new(line: 0, character: 0),
+                ),
+              )
+            end
           end
         when :require_relative
           required_file = "#{node.content}.rb"

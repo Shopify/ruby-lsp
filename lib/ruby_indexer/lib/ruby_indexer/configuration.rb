@@ -152,7 +152,7 @@ module RubyIndexer
       # Remove user specified patterns
       indexables.reject! do |indexable|
         excluded_patterns.any? do |pattern|
-          File.fnmatch?(pattern, indexable.full_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+          File.fnmatch?(pattern, T.must(indexable.full_path), File::FNM_PATHNAME | File::FNM_EXTGLOB)
         end
       end
 

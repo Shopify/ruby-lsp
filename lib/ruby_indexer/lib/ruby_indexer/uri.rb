@@ -45,6 +45,14 @@ module URI
     sig { returns(T.nilable(String)) }
     attr_accessor :require_path
 
+    sig { params(load_path_entry: String).void }
+    def add_require_path_from_load_entry(load_path_entry)
+      path = to_standardized_path
+      return unless path
+
+      self.require_path = path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb")
+    end
+
     sig { returns(T.nilable(String)) }
     def to_standardized_path
       parsed_path = path

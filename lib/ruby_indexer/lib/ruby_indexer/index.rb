@@ -35,7 +35,7 @@ module RubyIndexer
       @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
-      @require_paths_tree = T.let(PrefixTree[IndexablePath].new, PrefixTree[IndexablePath])
+      @require_paths_tree = T.let(PrefixTree[URI::Generic].new, PrefixTree[URI::Generic])
 
       # Holds the linearized ancestors list for every namespace
       @ancestors = T.let({}, T::Hash[String, T::Array[String]])
@@ -55,11 +55,14 @@ module RubyIndexer
       (@included_hooks[module_name] ||= []) << hook
     end
 
-    sig { params(indexable: IndexablePath).void }
-    def delete(indexable)
+    sig { params(uri: URI::Generic).void }
+    def delete(uri)
+      full_path = uri.full_path
+      return unless full_path
+
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
-      @files_to_entries[indexable.full_path]&.each do |entry|
+      @files_to_entries[full_path]&.each do |entry|
         name = entry.name
         entries = @entries[name]
         next unless entries
@@ -77,9 +80,9 @@ module RubyIndexer
         end
       end
 
-      @files_to_entries.delete(indexable.full_path)
+      @files_to_entries.delete(full_path)
 
-      require_path = indexable.require_path
+      require_path = uri.require_path
       @require_paths_tree.delete(require_path) if require_path
     end
 
@@ -97,7 +100,7 @@ module RubyIndexer
       @entries[fully_qualified_name.delete_prefix("::")]
     end
 
-    sig { params(query: String).returns(T::Array[IndexablePath]) }
+    sig { params(query: String).returns(T::Array[URI::Generic]) }
     def search_require_paths(query)
       @require_paths_tree.search(query)
     end
@@ -342,16 +345,16 @@ module RubyIndexer
       nil
     end
 
-    # Index all files for the given indexable paths, which defaults to what is configured. A block can be used to track
-    # and control indexing progress. That block is invoked with the current progress percentage and should return `true`
-    # to continue indexing or `false` to stop indexing.
+    # Index all files for the given URIs, which defaults to what is configured. A block can be used to track and control
+    # indexing progress. That block is invoked with the current progress percentage and should return `true` to continue
+    # indexing or `false` to stop indexing.
     sig do
       params(
-        indexable_paths: T::Array[IndexablePath],
+        uris: T::Array[URI::Generic],
         block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
       ).void
     end
-    def index_all(indexable_paths: @configuration.indexables, &block)
+    def index_all(uris: @configuration.indexables, &block)
       # When troubleshooting an indexing issue, e.g. through irb, it's not obvious that `index_all` will augment the
       # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
       # behavior and can take appropriate action.
@@ -363,21 +366,24 @@ module RubyIndexer
 
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
-      progress_step = (indexable_paths.length / 100.0).ceil
+      progress_step = (uris.length / 100.0).ceil
 
-      indexable_paths.each_with_index do |path, index|
+      uris.each_with_index do |uri, index|
         if block && index % progress_step == 0
           progress = (index / progress_step) + 1
           break unless block.call(progress)
         end
 
-        index_single(path, collect_comments: false)
+        index_single(uri, collect_comments: false)
       end
     end
 
-    sig { params(indexable_path: IndexablePath, source: T.nilable(String), collect_comments: T::Boolean).void }
-    def index_single(indexable_path, source = nil, collect_comments: true)
-      content = source || File.read(indexable_path.full_path)
+    sig { params(uri: URI::Generic, source: T.nilable(String), collect_comments: T::Boolean).void }
+    def index_single(uri, source = nil, collect_comments: true)
+      full_path = uri.full_path
+      return unless full_path
+
+      content = source || File.read(full_path)
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(content)
@@ -385,15 +391,15 @@ module RubyIndexer
         self,
         dispatcher,
         result,
-        indexable_path.full_path,
+        full_path,
         collect_comments: collect_comments,
       )
       dispatcher.dispatch(result.value)
 
       indexing_errors = listener.indexing_errors.uniq
 
-      require_path = indexable_path.require_path
-      @require_paths_tree.insert(require_path, indexable_path) if require_path
+      require_path = uri.require_path
+      @require_paths_tree.insert(require_path, uri) if require_path
 
       if indexing_errors.any?
         indexing_errors.each do |error|
@@ -405,7 +411,7 @@ module RubyIndexer
       # it
     rescue SystemStackError => e
       if e.backtrace&.first&.include?("prism")
-        $stderr.puts "Prism error indexing #{indexable_path.full_path}: #{e.message}"
+        $stderr.puts "Prism error indexing #{T.must(full_path)}: #{e.message}"
       else
         raise
       end
@@ -600,16 +606,19 @@ module RubyIndexer
       variables
     end
 
-    # Synchronizes a change made to the given indexable path. This method will ensure that new declarations are indexed,
-    # removed declarations removed and that the ancestor linearization cache is cleared if necessary
-    sig { params(indexable: IndexablePath).void }
-    def handle_change(indexable)
-      original_entries = @files_to_entries[indexable.full_path]
+    # Synchronizes a change made to the given URI. This method will ensure that new declarations are indexed, removed
+    # declarations removed and that the ancestor linearization cache is cleared if necessary
+    sig { params(uri: URI::Generic).void }
+    def handle_change(uri)
+      full_path = uri.full_path
+      return unless full_path
 
-      delete(indexable)
-      index_single(indexable)
+      original_entries = @files_to_entries[full_path]
 
-      updated_entries = @files_to_entries[indexable.full_path]
+      delete(uri)
+      index_single(uri)
+
+      updated_entries = @files_to_entries[full_path]
 
       return unless original_entries && updated_entries
 

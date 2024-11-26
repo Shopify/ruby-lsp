@@ -200,7 +200,7 @@ module RubyIndexer
 
       assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
 
-      @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
+      @index.delete(URI::Generic.from_path(path: "/fake/path/foo.rb"))
       refute_entry("Foo")
 
       assert_no_indexed_entries
@@ -618,10 +618,12 @@ module RubyIndexer
     end
 
     def test_lazy_comment_fetching_uses_correct_line_breaks_for_rendering
-      path = "lib/ruby_lsp/node_context.rb"
-      indexable = IndexablePath.new("#{Dir.pwd}/lib", path)
+      uri = URI::Generic.from_path(
+        load_path_entry: "#{Dir.pwd}/lib",
+        path: "#{Dir.pwd}/lib/ruby_lsp/node_context.rb",
+      )
 
-      @index.index_single(indexable, collect_comments: false)
+      @index.index_single(uri, collect_comments: false)
 
       entry = @index["RubyLsp::NodeContext"].first
 
@@ -632,9 +634,12 @@ module RubyIndexer
     end
 
     def test_lazy_comment_fetching_does_not_fail_if_file_gets_deleted
-      indexable = IndexablePath.new("#{Dir.pwd}/lib", "lib/ruby_lsp/does_not_exist.rb")
+      uri = URI::Generic.from_path(
+        load_path_entry: "#{Dir.pwd}/lib",
+        path: "#{Dir.pwd}/lib/ruby_lsp/does_not_exist.rb",
+      )
 
-      @index.index_single(indexable, <<~RUBY, collect_comments: false)
+      @index.index_single(uri, <<~RUBY, collect_comments: false)
         class Foo
         end
       RUBY
