@@ -69,7 +69,6 @@ function getLspExecutables(
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
   const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
-  const useLauncher: boolean = config.get("useLauncher")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
@@ -112,7 +111,7 @@ function getLspExecutables(
       args.push("--branch", branch);
     }
 
-    if (useLauncher) {
+    if (featureEnabled("launcher")) {
       args.push("--use-launcher");
     }
 
