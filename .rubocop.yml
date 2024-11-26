@@ -6,6 +6,7 @@ require:
   - rubocop-md
   - rubocop-minitest
   - rubocop-rake
+  - ./lib/rubocop/cop/ruby_lsp/output
   - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
   - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
 
@@ -32,6 +33,10 @@ Naming/FileName:
 RubyLsp/UseLanguageServerAliases:
   Exclude:
     - "test/**/*.rb"
+
+RubyLsp/Output:
+  Include:
+    - "**/*.rb"
 
 Sorbet/FalseSigil:
   Enabled: false
