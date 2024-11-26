@@ -13,8 +13,15 @@ module URI
     class << self
       extend T::Sig
 
-      sig { params(path: String, fragment: T.nilable(String), scheme: String).returns(URI::Generic) }
-      def from_path(path:, fragment: nil, scheme: "file")
+      sig do
+        params(
+          path: String,
+          fragment: T.nilable(String),
+          scheme: String,
+          load_path_entry: T.nilable(String),
+        ).returns(URI::Generic)
+      end
+      def from_path(path:, fragment: nil, scheme: "file", load_path_entry: nil)
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
           PARSER.escape("/#{path}")
@@ -25,9 +32,18 @@ module URI
           PARSER.escape(path)
         end
 
-        build(scheme: scheme, path: escaped_path, fragment: fragment)
+        uri = build(scheme: scheme, path: escaped_path, fragment: fragment)
+
+        if load_path_entry
+          uri.require_path = path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb")
+        end
+
+        uri
       end
     end
+
+    sig { returns(T.nilable(String)) }
+    attr_accessor :require_path
 
     sig { returns(T.nilable(String)) }
     def to_standardized_path
@@ -44,5 +60,7 @@ module URI
         unescaped_path
       end
     end
+
+    alias_method :full_path, :to_standardized_path
   end
 end
