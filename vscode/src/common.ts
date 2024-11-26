@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, spawn as originalSpawn } from "child_process";
 import { createHash } from "crypto";
 import { promisify } from "util";
 
@@ -65,10 +65,19 @@ export interface WorkspaceInterface {
   error: boolean;
 }
 
+export interface PathConverterInterface {
+  pathMapping: [string, string][];
+  toRemotePath: (localPath: string) => string;
+  toLocalPath: (remotePath: string) => string;
+  toRemoteUri: (localUri: vscode.Uri) => vscode.Uri;
+}
+
 // Event emitter used to signal that the language status items need to be refreshed
 export const STATUS_EMITTER = new vscode.EventEmitter<
   WorkspaceInterface | undefined
 >();
+
+export const spawn = originalSpawn;
 
 export const asyncExec = promisify(exec);
 export const LSP_NAME = "Ruby LSP";

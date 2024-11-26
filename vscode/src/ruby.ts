@@ -1,19 +1,22 @@
 /* eslint-disable no-process-env */
 import path from "path";
 import os from "os";
+import { ExecOptions } from "child_process";
 
 import * as vscode from "vscode";
+import { Executable } from "vscode-languageclient/node";
 
-import { asyncExec, RubyInterface } from "./common";
+import { asyncExec, PathConverterInterface, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
-import { VersionManager } from "./ruby/versionManager";
+import { PathConverter, VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
 import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
+import { Compose } from "./ruby/compose";
 import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
 
@@ -44,6 +47,7 @@ export enum ManagerIdentifier {
   Shadowenv = "shadowenv",
   Mise = "mise",
   RubyInstaller = "rubyInstaller",
+  Compose = "compose",
   None = "none",
   Custom = "custom",
 }
@@ -65,6 +69,8 @@ export class Ruby implements RubyInterface {
 
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
+  private _manager?: VersionManager;
+  private _pathConverter: PathConverterInterface = new PathConverter();
   private _error = false;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
@@ -107,6 +113,14 @@ export class Ruby implements RubyInterface {
     } else {
       this.#versionManager = versionManager;
     }
+  }
+
+  get pathConverter() {
+    return this._pathConverter;
+  }
+
+  set pathConverter(pathConverter: PathConverterInterface) {
+    this._pathConverter = pathConverter;
   }
 
   get env() {
@@ -189,6 +203,14 @@ export class Ruby implements RubyInterface {
     }
   }
 
+  runActivatedScript(command: string, options: ExecOptions = {}) {
+    return this._manager!.runActivatedScript(command, options);
+  }
+
+  activateExecutable(executable: Executable) {
+    return this._manager!.activateExecutable(executable);
+  }
+
   async manuallySelectRuby() {
     const manualSelection = await vscode.window.showInformationMessage(
       "Configure global or workspace specific fallback for the Ruby LSP?",
@@ -246,9 +268,12 @@ export class Ruby implements RubyInterface {
 
     this.sanitizeEnvironment(env);
 
+    this.pathConverter = await manager.buildPathConverter(this.workspaceFolder);
+
     // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
     process.env = env;
     this._env = env;
+    this._manager = manager;
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
     this.gemPath.push(...gemPath);
@@ -344,6 +369,15 @@ export class Ruby implements RubyInterface {
       case ManagerIdentifier.RubyInstaller:
         await this.runActivation(
           new RubyInstaller(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
+        );
+        break;
+      case ManagerIdentifier.Compose:
+        await this.runActivation(
+          new Compose(
             this.workspaceFolder,
             this.outputChannel,
             this.manuallySelectRuby.bind(this),
