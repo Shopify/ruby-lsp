@@ -8,7 +8,6 @@ binmode
 binread
 binstub
 binwrite
-binwrite
 Bizt
 Bizw
 bufnr
@@ -33,8 +32,6 @@ fnmatch
 fooo
 gemname
 gvar
-gvar
-gvar
 hostedtoolcache
 importmap
 indexables
@@ -57,7 +54,6 @@ mkpath
 multibyte
 nargs
 nodoc
-nonblock
 nonblock
 noreturn
 numblock
@@ -93,7 +89,6 @@ strscan
 subexpression
 supertypes
 suppo
-syswrite
 syswrite
 unaliased
 unindexed
