@@ -4,14 +4,21 @@ import fs from "fs";
 import os from "os";
 
 import * as vscode from "vscode";
-import sinon from "sinon";
 
 import { None } from "../../../ruby/none";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import { createSpawnStub } from "../testHelpers";
 
 suite("None", () => {
+  let spawnStub: sinon.SinonStub;
+  let stdinData: string[];
+
+  teardown(() => {
+    spawnStub?.restore();
+  });
+
   test("Invokes Ruby directly", async () => {
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
@@ -31,10 +38,9 @@ suite("None", () => {
       version: "3.0.0",
     };
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
-      stdout: "",
+    ({ spawnStub, stdinData } = createSpawnStub({
       stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
-    });
+    }));
 
     const { env, version, yjit } = await none.activate();
 
@@ -42,22 +48,20 @@ suite("None", () => {
     const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
 
     assert.ok(
-      execStub.calledOnceWithExactly(
-        `ruby -W0 -rjson -e '${none.activationScript}'`,
-        {
-          cwd: uri.fsPath,
-          shell,
-          // eslint-disable-next-line no-process-env
-          env: process.env,
-        },
-      ),
+      spawnStub.calledOnceWithExactly("ruby", ["-W0", "-rjson"], {
+        cwd: uri.fsPath,
+        shell,
+        // eslint-disable-next-line no-process-env
+        env: process.env,
+      }),
     );
+
+    assert.ok(stdinData.join("\n").includes(none.activationScript));
 
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.deepStrictEqual(env.ANY, "true");
 
-    execStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
   });
 });

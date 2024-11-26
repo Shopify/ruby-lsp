@@ -9,6 +9,7 @@ import { Asdf } from "../../../ruby/asdf";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import { createSpawnStub } from "../testHelpers";
 
 suite("Asdf", () => {
   if (os.platform() === "win32") {
@@ -16,6 +17,13 @@ suite("Asdf", () => {
     console.log("Skipping Asdf tests on Windows");
     return;
   }
+
+  let spawnStub: sinon.SinonStub;
+  let stdinData: string[];
+
+  teardown(() => {
+    spawnStub?.restore();
+  });
 
   test("Finds Ruby based on .tool-versions", async () => {
     // eslint-disable-next-line no-process-env
@@ -33,10 +41,9 @@ suite("Asdf", () => {
       version: "3.0.0",
     };
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
-      stdout: "",
+    ({ spawnStub, stdinData } = createSpawnStub({
       stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
-    });
+    }));
 
     const findInstallationStub = sinon
       .stub(asdf, "findAsdfInstallation")
@@ -46,8 +53,17 @@ suite("Asdf", () => {
     const { env, version, yjit } = await asdf.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -W0 -rjson -e '${asdf.activationScript}'`,
+      spawnStub.calledOnceWithExactly(
+        ".",
+        [
+          `${os.homedir()}/.asdf/asdf.sh`,
+          "&&",
+          "asdf",
+          "exec",
+          "ruby",
+          "-W0",
+          "-rjson",
+        ],
         {
           cwd: workspacePath,
           shell: "/bin/bash",
@@ -57,11 +73,12 @@ suite("Asdf", () => {
       ),
     );
 
+    assert.ok(stdinData.join("\n").includes(asdf.activationScript));
+
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
 
-    execStub.restore();
     findInstallationStub.restore();
     shellStub.restore();
   });
@@ -82,10 +99,9 @@ suite("Asdf", () => {
       version: "3.0.0",
     };
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
-      stdout: "",
+    ({ spawnStub, stdinData } = createSpawnStub({
       stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
-    });
+    }));
 
     const findInstallationStub = sinon
       .stub(asdf, "findAsdfInstallation")
@@ -97,8 +113,17 @@ suite("Asdf", () => {
     const { env, version, yjit } = await asdf.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -W0 -rjson -e '${asdf.activationScript}'`,
+      spawnStub.calledOnceWithExactly(
+        ".",
+        [
+          `${os.homedir()}/.asdf/asdf.fish`,
+          "&&",
+          "asdf",
+          "exec",
+          "ruby",
+          "-W0",
+          "-rjson",
+        ],
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",
@@ -108,11 +133,12 @@ suite("Asdf", () => {
       ),
     );
 
+    assert.ok(stdinData.join("\n").includes(asdf.activationScript));
+
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
 
-    execStub.restore();
     findInstallationStub.restore();
     shellStub.restore();
   });

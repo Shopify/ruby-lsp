@@ -13,6 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../../common";
 import { RUBY_VERSION } from "../../rubyVersion";
 import * as common from "../../../common";
+import { createSpawnStub } from "../testHelpers";
 
 suite("Shadowenv", () => {
   if (os.platform() === "win32") {
@@ -26,6 +27,8 @@ suite("Shadowenv", () => {
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
   let rubyBinPath: string;
+  let spawnStub: sinon.SinonStub;
+
   const [major, minor, patch] = RUBY_VERSION.split(".");
 
   if (process.env.CI && os.platform() === "linux") {
@@ -111,6 +114,8 @@ suite("Shadowenv", () => {
 
   afterEach(() => {
     fs.rmSync(rootPath, { recursive: true, force: true });
+
+    spawnStub?.restore();
   });
 
   test("Finds Ruby only binary path is appended to PATH", async () => {
@@ -226,12 +231,13 @@ suite("Shadowenv", () => {
       async () => {},
     );
 
-    // First, reject the call to `shadowenv exec`. Then resolve the call to `which shadowenv` to return nothing
+    // First, reject the call to `shadowenv exec`.
+    ({ spawnStub } = createSpawnStub());
+    spawnStub.rejects(new Error("shadowenv: command not found"));
+
+    // Then reject the call to `shadowenv --version`
     const execStub = sinon
       .stub(common, "asyncExec")
-      .onFirstCall()
-      .rejects(new Error("shadowenv: command not found"))
-      .onSecondCall()
       .rejects(new Error("shadowenv: command not found"));
 
     await assert.rejects(async () => {

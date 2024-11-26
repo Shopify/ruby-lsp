@@ -6,7 +6,6 @@ import { CodeLens, State } from "vscode-languageclient/node";
 import { Ruby } from "./ruby";
 import Client from "./client";
 import {
-  asyncExec,
   LOG_CHANNEL,
   WorkspaceInterface,
   STATUS_EMITTER,
@@ -268,16 +267,19 @@ export class Workspace implements WorkspaceInterface {
       "sorbet-runtime",
     ];
 
-    const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {
-      cwd: this.workspaceFolder.uri.fsPath,
-      env: this.ruby.env,
-    });
+    const { stdout } = await this.ruby.runActivatedScript(
+      `gem list ${dependencies.join(" ")}`,
+      {
+        cwd: this.workspaceFolder.uri.fsPath,
+        env: this.ruby.env,
+      },
+    );
 
     // If any of the Ruby LSP's dependencies are missing, we need to install them. For example, if the user runs `gem
     // uninstall prism`, then we must ensure it's installed or else rubygems will fail when trying to launch the
     // executable
     if (!dependencies.every((dep) => new RegExp(`${dep}\\s`).exec(stdout))) {
-      await asyncExec("gem install ruby-lsp", {
+      await this.ruby.runActivatedScript("gem install ruby-lsp", {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
       });
@@ -311,7 +313,7 @@ export class Workspace implements WorkspaceInterface {
       Date.now() - lastUpdatedAt > oneDayInMs
     ) {
       try {
-        await asyncExec("gem update ruby-lsp", {
+        await this.ruby.runActivatedScript("gem update ruby-lsp", {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
@@ -347,7 +349,7 @@ export class Workspace implements WorkspaceInterface {
       this.outputChannel.info(`Running "${command}"`);
     }
 
-    const result = await asyncExec(command, {
+    const result = await this.ruby.runActivatedScript(command, {
       env: this.ruby.env,
       cwd: this.workspaceFolder.uri.fsPath,
     });

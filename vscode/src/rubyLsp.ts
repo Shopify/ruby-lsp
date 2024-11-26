@@ -110,7 +110,7 @@ export class RubyLsp {
           }
 
           const decodedUri = decodeURIComponent(originalUri);
-          return this.virtualDocuments.get(decodedUri);
+          return this.virtualDocuments.get(decodedUri) || "";
         },
       }),
       LOG_CHANNEL,

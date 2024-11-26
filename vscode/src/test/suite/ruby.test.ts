@@ -8,10 +8,10 @@ import sinon from "sinon";
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
-import * as common from "../../common";
 import { ACTIVATION_SEPARATOR } from "../../ruby/versionManager";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { createSpawnStub } from "./testHelpers";
 
 suite("Ruby environment activation", () => {
   const workspacePath = path.dirname(
@@ -130,8 +130,7 @@ suite("Ruby environment activation", () => {
       gemPath: ["~/.gem/ruby/3.3.5", "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0"],
     };
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
-      stdout: "",
+    const { spawnStub } = createSpawnStub({
       stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
     });
 
@@ -142,7 +141,7 @@ suite("Ruby environment activation", () => {
       FAKE_TELEMETRY,
     );
     await ruby.activateRuby();
-    execStub.restore();
+    spawnStub.restore();
     configStub.restore();
 
     assert.deepStrictEqual(ruby.gemPath, [
