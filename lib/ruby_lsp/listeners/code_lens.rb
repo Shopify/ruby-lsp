@@ -229,10 +229,11 @@ module RubyLsp
         ).returns(String)
       end
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
+        path = T.must(@path)
         command = BASE_COMMAND
-        command += " -Itest" if T.must(@path).include?("#{File::SEPARATOR}test#{File::SEPARATOR}")
-        command += " -Ispec" if T.must(@path).include?("#{File::SEPARATOR}spec#{File::SEPARATOR}")
-        command += " #{T.must(@path)}"
+        command += " -Itest" if File.fnmatch?("**/test/**/*", path, File::FNM_PATHNAME)
+        command += " -Ispec" if File.fnmatch?("**/spec/**/*", path, File::FNM_PATHNAME)
+        command += " #{path}"
 
         case @global_state.test_library
         when "minitest"
