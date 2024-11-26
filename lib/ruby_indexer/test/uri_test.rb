@@ -3,7 +3,7 @@
 
 require "test_helper"
 
-module RubyLsp
+module RubyIndexer
   class URITest < Minitest::Test
     def test_from_path_on_unix
       uri = URI::Generic.from_path(path: "/some/unix/path/to/file.rb")
