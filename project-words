@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 activestorage
 autocorrect
 autoloaded
@@ -93,3 +95,15 @@ XQRK
 yarp
 YARP
 YJIT
+binwrite
+syswrite
+nonblock
+csend
+numblock
+gvar
+gvar
+cbase
+binwrite
+syswrite
+nonblock
+gvar
