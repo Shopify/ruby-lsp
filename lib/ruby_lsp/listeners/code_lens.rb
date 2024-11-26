@@ -15,7 +15,7 @@ module RubyLsp
           "bundle exec ruby"
         rescue Bundler::GemfileNotFound
           "ruby"
-        end + " -Itest ",
+        end,
         String,
       )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
@@ -229,7 +229,11 @@ module RubyLsp
         ).returns(String)
       end
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
-        command = BASE_COMMAND + T.must(@path)
+        path = T.must(@path)
+        command = BASE_COMMAND
+        command += " -Itest" if File.fnmatch?("**/test/**/*", path, File::FNM_PATHNAME)
+        command += " -Ispec" if File.fnmatch?("**/spec/**/*", path, File::FNM_PATHNAME)
+        command += " #{path}"
 
         case @global_state.test_library
         when "minitest"
