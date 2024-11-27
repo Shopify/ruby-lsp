@@ -33,5 +33,5 @@
       "coverage/**",
       "test/fixtures/",
     ],
-    "dictionaries": ["ruby", "en_US", "shell", "file-types", "project-words", "companies", "softwareTerms", "misc"]
+    "dictionaries": ["ruby", "en_US", "shell", "file-types", "project-words", "companies", "softwareTerms", "misc", "coding-terms"]
   }
