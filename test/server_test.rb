@@ -439,8 +439,8 @@ class ServerTest < Minitest::Test
   end
 
   def test_changed_file_only_indexes_ruby
-    @server.global_state.index.expects(:index_single).once.with do |indexable|
-      indexable.full_path == "/foo.rb"
+    @server.global_state.index.expects(:index_single).once.with do |uri|
+      uri.full_path == "/foo.rb"
     end
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",

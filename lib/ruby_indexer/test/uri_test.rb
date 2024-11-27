@@ -55,5 +55,18 @@ module RubyIndexer
       uri = URI::Generic.from_path(path: "//?/C:/hostedtoolcache/windows/Ruby/3.3.1/x64/lib/ruby/3.3.0/open-uri.rb")
       assert_equal("C:/hostedtoolcache/windows/Ruby/3.3.1/x64/lib/ruby/3.3.0/open-uri.rb", uri.to_standardized_path)
     end
+
+    def test_from_path_computes_require_path_when_load_path_entry_is_given
+      uri = URI::Generic.from_path(path: "/some/unix/path/to/file.rb", load_path_entry: "/some/unix/path")
+      assert_equal("to/file", uri.require_path)
+    end
+
+    def test_allows_adding_require_path_with_load_path_entry
+      uri = URI::Generic.from_path(path: "/some/unix/path/to/file.rb")
+      assert_nil(uri.require_path)
+
+      uri.add_require_path_from_load_entry("/some/unix/path")
+      assert_equal("to/file", uri.require_path)
+    end
   end
 end

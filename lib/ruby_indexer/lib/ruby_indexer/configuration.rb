@@ -81,7 +81,7 @@ module RubyIndexer
         .then { |dirs| File.join(@workspace_path, "{#{dirs.join(",")}}/**/*") }
     end
 
-    sig { returns(T::Array[IndexablePath]) }
+    sig { returns(T::Array[URI::Generic]) }
     def indexables
       excluded_gems = @excluded_gems - @included_gems
       locked_gems = Bundler.locked_gems&.specs
@@ -107,12 +107,12 @@ module RubyIndexer
           [included_path, relative_path]
         end
 
-      indexables = T.let([], T::Array[IndexablePath])
+      indexables = T.let([], T::Array[URI::Generic])
 
       # Handle top level files separately. The path below is an optimization to prevent descending down directories that
       # are going to be excluded anyway, so we need to handle top level scripts separately
       Dir.glob(File.join(@workspace_path, "*.rb"), flags).each do |path|
-        indexables << IndexablePath.new(nil, path)
+        indexables << URI::Generic.from_path(path: path)
       end
 
       # Add user specified patterns
@@ -134,7 +134,7 @@ module RubyIndexer
               load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
             end
 
-            indexables << IndexablePath.new(load_path_entry, path)
+            indexables << URI::Generic.from_path(path: path, load_path_entry: load_path_entry)
           end
         end
       end
@@ -152,7 +152,7 @@ module RubyIndexer
       # Remove user specified patterns
       indexables.reject! do |indexable|
         excluded_patterns.any? do |pattern|
-          File.fnmatch?(pattern, indexable.full_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+          File.fnmatch?(pattern, T.must(indexable.full_path), File::FNM_PATHNAME | File::FNM_EXTGLOB)
         end
       end
 
@@ -184,12 +184,12 @@ module RubyIndexer
           # If the default_path is a directory, we index all the Ruby files in it
           indexables.concat(
             Dir.glob(File.join(default_path, "**", "*.rb"), File::FNM_PATHNAME | File::FNM_EXTGLOB).map! do |path|
-              IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path)
+              URI::Generic.from_path(path: path, load_path_entry: RbConfig::CONFIG["rubylibdir"])
             end,
           )
         elsif pathname.extname == ".rb"
           # If the default_path is a Ruby file, we index it
-          indexables << IndexablePath.new(RbConfig::CONFIG["rubylibdir"], default_path)
+          indexables << URI::Generic.from_path(path: default_path, load_path_entry: RbConfig::CONFIG["rubylibdir"])
         end
       end
 
@@ -207,7 +207,9 @@ module RubyIndexer
         indexables.concat(
           spec.require_paths.flat_map do |require_path|
             load_path_entry = File.join(spec.full_gem_path, require_path)
-            Dir.glob(File.join(load_path_entry, "**", "*.rb")).map! { |path| IndexablePath.new(load_path_entry, path) }
+            Dir.glob(File.join(load_path_entry, "**", "*.rb")).map! do |path|
+              URI::Generic.from_path(path: path, load_path_entry: load_path_entry)
+            end
           end,
         )
       rescue Gem::MissingSpecError
@@ -216,7 +218,7 @@ module RubyIndexer
         # just ignore if they're missing
       end
 
-      indexables.uniq!(&:full_path)
+      indexables.uniq!(&:to_s)
       indexables
     end
 

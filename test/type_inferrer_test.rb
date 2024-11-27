@@ -406,7 +406,7 @@ module RubyLsp
     private
 
     def index_and_locate(source, position)
-      @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), source)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), source)
       document = RubyLsp::RubyDocument.new(
         source: source,
         version: 1,

@@ -35,8 +35,8 @@ class RenameTest < Minitest::Test
       },
     })
     path = File.expand_path(fixture_path)
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, path), source)
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
+    global_state.index.index_single(URI::Generic.from_path(path: "/fake.rb"), <<~RUBY)
       class Conflicting
       end
     RUBY
@@ -69,7 +69,7 @@ class RenameTest < Minitest::Test
       },
     })
     path = File.expand_path(fixture_path)
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, path), source)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
 
     store = RubyLsp::Store.new
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))

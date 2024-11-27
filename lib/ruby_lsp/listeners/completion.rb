@@ -368,9 +368,9 @@ module RubyLsp
 
         return unless path_node_to_complete.is_a?(Prism::StringNode)
 
-        matched_indexable_paths = @index.search_require_paths(path_node_to_complete.content)
+        matched_uris = @index.search_require_paths(path_node_to_complete.content)
 
-        matched_indexable_paths.map!(&:require_path).sort!.each do |path|
+        matched_uris.map!(&:require_path).sort!.each do |path|
           @response_builder << build_completion(T.must(path), path_node_to_complete)
         end
       end

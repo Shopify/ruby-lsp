@@ -1596,14 +1596,11 @@ class CompletionTest < Minitest::Test
       ])
 
       index = server.global_state.index
-      indexables = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
-        RubyIndexer::IndexablePath.new(tmpdir, path)
+      uris = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
+        URI::Generic.from_path(load_path_entry: tmpdir, path: path)
       end
 
-      indexables.each do |indexable|
-        index.index_single(indexable)
-      end
-
+      uris.each { |uri| index.index_single(uri) }
       block.call(tmpdir)
     ensure
       $LOAD_PATH.delete(tmpdir)
