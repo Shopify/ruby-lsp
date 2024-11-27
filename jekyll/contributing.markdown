@@ -6,6 +6,9 @@ nav_order: 50
 
 # Contributing
 
+{: .note }
+> If you plan to invest significant effort into a large pull request with multiple decisions that may impact the long term maintenance of the Ruby LSP, please open a [discussion](https://github.com/Shopify/ruby-lsp/discussions/new/choose) first to align on the direction.
+
 The [ruby-lsp repository](https://github.com/Shopify/ruby-lsp) contains three sub-projects:
 
 - the **language server** (`ruby-lsp`), which exists at the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
