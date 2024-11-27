@@ -354,7 +354,7 @@ module RubyIndexer
         block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
       ).void
     end
-    def index_all(uris: @configuration.indexables, &block)
+    def index_all(uris: @configuration.indexable_uris, &block)
       # When troubleshooting an indexing issue, e.g. through irb, it's not obvious that `index_all` will augment the
       # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
       # behavior and can take appropriate action.
