@@ -4,15 +4,15 @@
 module RubyLsp
   module Requests
     # The
-    # [prepare_rename](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_prepareRename)
-    # request checks the validity of a rename operation at a given location.
+    # [prepare_rename](https://microsoft.github.io/language-server-protocol/specification#textDocument_prepareRename)
+    # # request checks the validity of a rename operation at a given location.
     class PrepareRename < Request
       extend T::Sig
       include Support::Common
 
       sig do
         params(
-          document: T.any(RubyDocument, ERBDocument),
+          document: RubyDocument,
           position: T::Hash[Symbol, T.untyped],
         ).void
       end
@@ -44,7 +44,6 @@ module RubyLsp
           )
         end
 
-        target = T.cast(target, T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode))
         range_from_location(target.location)
       end
     end
