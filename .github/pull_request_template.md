@@ -1,3 +1,7 @@
+<!--
+NOTE: If you plan to invest significant effort into a large pull request with multiple decisions that may impact the long term maintenance of the Ruby LSP, please open a [discussion](https://github.com/Shopify/ruby-lsp/discussions/new/choose) first to align on the direction.
+-->
+
 ### Motivation
 
 <!-- Closes # -->
