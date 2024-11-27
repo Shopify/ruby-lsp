@@ -13,7 +13,7 @@ module RubyIndexer
 
     def test_load_configuration_executes_configure_block
       @config.apply_config({ "excluded_patterns" => ["**/fixtures/**/*.rb"] })
-      uris = @config.indexables
+      uris = @config.indexable_uris
 
       assert(uris.none? { |uri| uri.full_path.include?("test/fixtures") })
       assert(uris.none? { |uri| uri.full_path.include?("minitest-reporters") })
@@ -22,16 +22,16 @@ module RubyIndexer
       assert(uris.none? { |uri| uri.full_path == __FILE__ })
     end
 
-    def test_indexables_have_expanded_full_paths
+    def test_indexable_uris_have_expanded_full_paths
       @config.apply_config({ "included_patterns" => ["**/*.rb"] })
-      uris = @config.indexables
+      uris = @config.indexable_uris
 
       # All paths should be expanded
       assert(uris.all? { |uri| File.absolute_path?(uri.full_path) })
     end
 
-    def test_indexables_only_includes_gem_require_paths
-      uris = @config.indexables
+    def test_indexable_uris_only_includes_gem_require_paths
+      uris = @config.indexable_uris
 
       Bundler.locked_gems.specs.each do |lazy_spec|
         next if lazy_spec.name == "ruby-lsp"
@@ -43,21 +43,21 @@ module RubyIndexer
       end
     end
 
-    def test_indexables_does_not_include_default_gem_path_when_in_bundle
-      uris = @config.indexables
+    def test_indexable_uris_does_not_include_default_gem_path_when_in_bundle
+      uris = @config.indexable_uris
       assert(uris.none? { |uri| uri.full_path.start_with?("#{RbConfig::CONFIG["rubylibdir"]}/psych") })
     end
 
-    def test_indexables_includes_default_gems
-      paths = @config.indexables.map(&:full_path)
+    def test_indexable_uris_includes_default_gems
+      paths = @config.indexable_uris.map(&:full_path)
 
       assert_includes(paths, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
       assert_includes(paths, "#{RbConfig::CONFIG["rubylibdir"]}/ipaddr.rb")
       assert_includes(paths, "#{RbConfig::CONFIG["rubylibdir"]}/erb.rb")
     end
 
-    def test_indexables_includes_project_files
-      paths = @config.indexables.map(&:full_path)
+    def test_indexable_uris_includes_project_files
+      paths = @config.indexable_uris.map(&:full_path)
 
       Dir.glob("#{Dir.pwd}/lib/**/*.rb").each do |path|
         next if path.end_with?("_test.rb")
@@ -66,7 +66,7 @@ module RubyIndexer
       end
     end
 
-    def test_indexables_avoids_duplicates_if_bundle_path_is_inside_project
+    def test_indexable_uris_avoids_duplicates_if_bundle_path_is_inside_project
       Bundler.settings.temporary(path: "vendor/bundle") do
         config = Configuration.new
 
@@ -74,31 +74,31 @@ module RubyIndexer
       end
     end
 
-    def test_indexables_does_not_include_gems_own_installed_files
-      uris = @config.indexables
-      indexables_inside_bundled_lsp = uris.select do |uri|
+    def test_indexable_uris_does_not_include_gems_own_installed_files
+      uris = @config.indexable_uris
+      uris_inside_bundled_lsp = uris.select do |uri|
         uri.full_path.start_with?(Bundler.bundle_path.join("gems", "ruby-lsp").to_s)
       end
 
       assert_empty(
-        indexables_inside_bundled_lsp,
-        "Indexables should not include files from the gem currently being worked on. " \
-          "Included: #{indexables_inside_bundled_lsp.map(&:full_path)}",
+        uris_inside_bundled_lsp,
+        "Indexable URIs should not include files from the gem currently being worked on. " \
+          "Included: #{uris_inside_bundled_lsp.map(&:full_path)}",
       )
     end
 
-    def test_indexables_does_not_include_non_ruby_files_inside_rubylibdir
+    def test_indexable_uris_does_not_include_non_ruby_files_inside_rubylibdir
       path = Pathname.new(RbConfig::CONFIG["rubylibdir"]).join("extra_file.txt").to_s
       FileUtils.touch(path)
 
-      uris = @config.indexables
+      uris = @config.indexable_uris
       assert(uris.none? { |uri| uri.full_path == path })
     ensure
       FileUtils.rm(T.must(path))
     end
 
     def test_paths_are_unique
-      uris = @config.indexables
+      uris = @config.indexable_uris
       assert_equal(uris.uniq.length, uris.length)
     end
 
@@ -128,7 +128,7 @@ module RubyIndexer
       end
     end
 
-    def test_indexables_respect_given_workspace_path
+    def test_indexable_uris_respect_given_workspace_path
       Dir.mktmpdir do |dir|
         FileUtils.mkdir(File.join(dir, "ignore"))
         FileUtils.touch(File.join(dir, "ignore", "file0.rb"))
@@ -138,10 +138,10 @@ module RubyIndexer
         @config.apply_config({ "excluded_patterns" => ["ignore/**/*.rb"] })
         @config.workspace_path = dir
 
-        uris = @config.indexables
+        uris = @config.indexable_uris
         assert(uris.none? { |uri| uri.full_path.start_with?(File.join(dir, "ignore")) })
 
-        # After switching the workspace path, all indexables will be found in one of these places:
+        # After switching the workspace path, all indexable URIs will be found in one of these places:
         # - The new workspace path
         # - The Ruby LSP's own code (because Bundler is requiring the dependency from source)
         # - Bundled gems
@@ -162,7 +162,7 @@ module RubyIndexer
         FileUtils.touch(File.join(dir, "find_me.rb"))
         @config.workspace_path = dir
 
-        uris = @config.indexables
+        uris = @config.indexable_uris
         assert(uris.find { |u| File.basename(u.full_path) == "find_me.rb" })
       end
     end

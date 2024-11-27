@@ -44,14 +44,14 @@ puts "\n"
 puts "Verifying that indexing executes successfully. This may take a while..."
 
 index = RubyIndexer::Index.new
-indexables = index.configuration.indexables
+uris = index.configuration.indexable_uris
 
-indexables.each_with_index do |uri, i|
+uris.each_with_index do |uri, i|
   index.index_single(uri)
 rescue => e
   errors[uri.full_path] = e
 ensure
-  print("\033[M\033[0KIndexed #{i + 1}/#{indexables.length}") unless ENV["CI"]
+  print("\033[M\033[0KIndexed #{i + 1}/#{uris.length}") unless ENV["CI"]
 end
 puts "\n"
 
