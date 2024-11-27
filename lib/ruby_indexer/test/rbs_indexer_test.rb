@@ -377,7 +377,7 @@ module RubyIndexer
       _, _, declarations = RBS::Parser.parse_signature(buffer)
       index = RubyIndexer::Index.new
       indexer = RubyIndexer::RBSIndexer.new(index)
-      pathname = Pathname.new("file.rbs")
+      pathname = Pathname.new("/file.rbs")
       indexer.process_signature(pathname, declarations)
       entry = T.must(index[method_name]).first
       T.cast(entry, Entry::Method).signatures
