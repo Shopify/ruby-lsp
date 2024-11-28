@@ -96,4 +96,18 @@ suite("Common", () => {
     stub.restore();
     assert.strictEqual(result, true);
   });
+
+  test("returns true if user opted in to a specific feature", () => {
+    (FEATURE_FLAGS as any).fakeFeature = 0.02;
+
+    const stub = sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: () => {
+        return { fakeFeature: true };
+      },
+    } as any);
+
+    const result = featureEnabled("fakeFeature" as any);
+    stub.restore();
+    assert.strictEqual(result, true);
+  });
 });

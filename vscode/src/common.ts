@@ -126,7 +126,7 @@ export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   }
 
   // If the user opted-in to all features, return true
-  if (flagConfiguration.all) {
+  if (flagConfiguration.all || flagConfiguration[feature]) {
     return true;
   }
 
