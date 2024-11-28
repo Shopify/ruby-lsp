@@ -21,7 +21,8 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
       def perform
         @index.fuzzy_search(@query).filter_map do |entry|
-          file_path = entry.file_path
+          uri = entry.uri
+          file_path = T.must(uri.full_path)
 
           # We only show symbols declared in the workspace
           in_dependencies = !not_in_dependencies?(file_path)
@@ -43,7 +44,7 @@ module RubyLsp
             container_name: container.join("::"),
             kind: kind,
             location: Interface::Location.new(
-              uri: URI::Generic.from_path(path: file_path).to_s,
+              uri: uri.to_s,
               range:  Interface::Range.new(
                 start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
                 end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),

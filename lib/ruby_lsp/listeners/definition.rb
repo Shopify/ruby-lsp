@@ -223,7 +223,7 @@ module RubyLsp
           location = entry.location
 
           @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            uri: entry.uri.to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
               end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
@@ -248,7 +248,7 @@ module RubyLsp
           location = entry.location
 
           @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: entry.file_path).to_s,
+            uri: entry.uri.to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
               end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
@@ -275,11 +275,11 @@ module RubyLsp
         return unless methods
 
         methods.each do |target_method|
-          file_path = target_method.file_path
-          next if sorbet_level_true_or_higher?(@sorbet_level) && not_in_dependencies?(file_path)
+          uri = target_method.uri
+          next if sorbet_level_true_or_higher?(@sorbet_level) && not_in_dependencies?(T.must(uri.full_path))
 
           @response_builder << Interface::LocationLink.new(
-            target_uri: URI::Generic.from_path(path: file_path).to_s,
+            target_uri: uri.to_s,
             target_range: range_from_location(target_method.location),
             target_selection_range: range_from_location(target_method.name_location),
           )
@@ -348,11 +348,11 @@ module RubyLsp
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
           # ignore
-          file_path = entry.file_path
-          next if @sorbet_level != RubyDocument::SorbetLevel::Ignore && not_in_dependencies?(file_path)
+          uri = entry.uri
+          next if @sorbet_level != RubyDocument::SorbetLevel::Ignore && not_in_dependencies?(T.must(uri.full_path))
 
           @response_builder << Interface::LocationLink.new(
-            target_uri: URI::Generic.from_path(path: file_path).to_s,
+            target_uri: uri.to_s,
             target_range: range_from_location(entry.location),
             target_selection_range: range_from_location(entry.name_location),
           )
