@@ -5,34 +5,7 @@ nav_order: 5
 parent: Ruby LSP
 ---
 
-# Ruby LSP
-
-The Ruby LSP is an implementation of the [language server protocol](https://microsoft.github.io/language-server-protocol/)
-for Ruby, used to improve rich features in editors.
-
-## Features
-
-![Ruby LSP demo](images/ruby_lsp_demo.gif)
-
-The Ruby LSP features include
-
-- Semantic highlighting
-- Symbol search and code outline
-- RuboCop errors and warnings (diagnostics)
-- Format on save (with RuboCop or Syntax Tree)
-- Format on type
-- Debugging support
-- Running and debugging tests through VS Code's UI
-- Go to definition
-- Showing documentation on hover
-- Completion
-- Fuzzy search declarations anywhere in the project (workspace symbol)
-- Running Rails generators from the UI
-
-See complete information about features [here](https://shopify.github.io/ruby-lsp).
-
-If you experience issues, please see the [troubleshooting
-guide](https://shopify.github.io/ruby-lsp/troubleshooting.html).
+# VS Code extension
 
 ### [Experimental] GitHub Copilot chat agent
 
