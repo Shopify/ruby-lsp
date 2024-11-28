@@ -69,6 +69,7 @@ export interface PathConverterInterface {
   toRemotePath: (localPath: string) => string;
   toLocalPath: (remotePath: string) => string;
   toRemoteUri: (localUri: vscode.Uri) => vscode.Uri;
+  alternativePaths: (path: string) => string[];
 }
 
 export class PathConverter implements PathConverterInterface {
@@ -84,6 +85,10 @@ export class PathConverter implements PathConverterInterface {
 
   toRemoteUri(localUri: vscode.Uri) {
     return localUri;
+  }
+
+  alternativePaths(path: string) {
+    return [path];
   }
 }
 
