@@ -1,16 +1,21 @@
 /* eslint-disable no-process-env */
 import path from "path";
 import os from "os";
-import { ExecOptions } from "child_process";
 
 import * as vscode from "vscode";
-import { Executable } from "vscode-languageclient/node";
+import { Executable, ExecutableOptions } from "vscode-languageclient/node";
 
-import { asyncExec, PathConverterInterface, RubyInterface } from "./common";
+import {
+  asyncExec,
+  parseCommand,
+  PathConverter,
+  PathConverterInterface,
+  RubyInterface,
+} from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
-import { PathConverter, VersionManager } from "./ruby/versionManager";
+import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
@@ -69,9 +74,9 @@ export class Ruby implements RubyInterface {
 
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
-  private _manager?: VersionManager;
-  private _pathConverter: PathConverterInterface = new PathConverter();
   private _error = false;
+  private _pathConverter: PathConverterInterface;
+  private _wrapCommand: (executable: Executable) => Executable;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
   private readonly outputChannel: WorkspaceChannel;
@@ -87,6 +92,8 @@ export class Ruby implements RubyInterface {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
     this.telemetry = telemetry;
+    this._pathConverter = new PathConverter();
+    this._wrapCommand = (executable: Executable) => executable;
 
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -117,10 +124,6 @@ export class Ruby implements RubyInterface {
 
   get pathConverter() {
     return this._pathConverter;
-  }
-
-  set pathConverter(pathConverter: PathConverterInterface) {
-    this._pathConverter = pathConverter;
   }
 
   get env() {
@@ -203,12 +206,22 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  runActivatedScript(command: string, options: ExecOptions = {}) {
-    return this._manager!.runActivatedScript(command, options);
+  runActivatedScript(script: string, options: ExecutableOptions = {}) {
+    const parsedExecutable = parseCommand(script);
+    const executable = this.activateExecutable({
+      ...parsedExecutable,
+      options,
+    });
+    const command = [executable.command, ...(executable.args || [])].join(" ");
+
+    return asyncExec(command, {
+      cwd: this.workspaceFolder.uri.fsPath || executable.options?.cwd,
+      env: { ...process.env, ...executable.options?.env },
+    });
   }
 
   activateExecutable(executable: Executable) {
-    return this._manager!.activateExecutable(executable);
+    return this._wrapCommand(executable);
   }
 
   async manuallySelectRuby() {
@@ -263,20 +276,25 @@ export class Ruby implements RubyInterface {
   }
 
   private async runActivation(manager: VersionManager) {
-    const { env, version, yjit, gemPath } = await manager.activate();
+    const { env, version, yjit, gemPath, pathConverter, wrapCommand } =
+      await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
 
     this.sanitizeEnvironment(env);
 
-    this.pathConverter = await manager.buildPathConverter(this.workspaceFolder);
-
     // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
     process.env = env;
     this._env = env;
-    this._manager = manager;
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
     this.gemPath.push(...gemPath);
+
+    if (pathConverter) {
+      this._pathConverter = pathConverter;
+    }
+    if (wrapCommand) {
+      this._wrapCommand = wrapCommand;
+    }
   }
 
   // Fetch information related to the Ruby version. This can only be invoked after activation, so that `rubyVersion` is
