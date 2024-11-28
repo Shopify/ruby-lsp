@@ -279,7 +279,7 @@ function collectClientOptions(
     });
   }
 
-  outputChannel.info(
+  outputChannel.debug(
     `Document Selector Paths: ${JSON.stringify(documentSelector)}`,
   );
 

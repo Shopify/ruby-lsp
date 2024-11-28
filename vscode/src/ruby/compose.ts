@@ -1,6 +1,8 @@
 /* eslint-disable no-process-env */
-import { ExecOptions } from "child_process";
 import path from "path";
+import os from "os";
+import { StringDecoder } from "string_decoder";
+import { ExecOptions } from "child_process";
 
 import * as vscode from "vscode";
 import { Executable } from "vscode-languageclient/node";
@@ -10,8 +12,13 @@ import {
   ContainerPathConverter,
   fetchPathMapping,
 } from "../docker";
+import { parseCommand, spawn } from "../common";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import {
+  VersionManager,
+  ActivationResult,
+  ACTIVATION_SEPARATOR,
+} from "./versionManager";
 
 // Compose
 //
@@ -24,52 +31,63 @@ export class Compose extends VersionManager {
   async activate(): Promise<ActivationResult> {
     await this.ensureConfigured();
 
-    const parsedResult = await this.runEnvActivationScript(
-      `${this.composeRunCommand()} ${this.composeServiceName()} ruby`,
+    const rubyCommand = `${this.composeRunCommand()} ${this.composeServiceName()} ruby -W0 -rjson`;
+    const { stderr: output } = await this.runRubyCode(
+      rubyCommand,
+      this.activationScript,
     );
+
+    this.outputChannel.debug(`Activation output: ${output}`);
+
+    const activationContent = new RegExp(
+      `${ACTIVATION_SEPARATOR}(.*)${ACTIVATION_SEPARATOR}`,
+    ).exec(output);
+
+    const parsedResult = this.parseWithErrorHandling(activationContent![1]);
+    const pathConverter = await this.buildPathConverter();
+
+    const wrapCommand = (executable: Executable) => {
+      const composeCommad = parseCommand(
+        `${this.composeRunCommand()} ${this.composeServiceName()}`,
+      );
+
+      const command = {
+        command: composeCommad.command,
+        args: [
+          ...(composeCommad.args ?? []),
+          executable.command,
+          ...(executable.args ?? []),
+        ],
+        options: {
+          ...executable.options,
+          env: {
+            ...executable.options?.env,
+            ...composeCommad.options?.env,
+          },
+        },
+      };
+
+      return command;
+    };
 
     return {
       env: { ...process.env },
       yjit: parsedResult.yjit,
       version: parsedResult.version,
       gemPath: parsedResult.gemPath,
+      pathConverter,
+      wrapCommand,
     };
   }
 
-  runActivatedScript(command: string, options: ExecOptions = {}) {
-    return this.runScript(
-      `${this.composeRunCommand()} ${this.composeServiceName()} ${command}`,
-      options,
-    );
-  }
-
-  activateExecutable(executable: Executable) {
-    const composeCommand = this.parseCommand(
-      `${this.composeRunCommand()} ${this.composeServiceName()}`,
-    );
-
-    return {
-      command: composeCommand.command,
-      args: [
-        ...composeCommand.args,
-        executable.command,
-        ...(executable.args || []),
-      ],
-      options: {
-        ...executable.options,
-        env: { ...(executable.options?.env || {}), ...composeCommand.env },
-      },
-    };
-  }
-
-  async buildPathConverter(workspaceFolder: vscode.WorkspaceFolder) {
+  protected async buildPathConverter() {
     const pathMapping = fetchPathMapping(
       this.composeConfig,
       this.composeServiceName(),
     );
 
     const stats = Object.entries(pathMapping).map(([local, remote]) => {
-      const absolute = path.resolve(workspaceFolder.uri.fsPath, local);
+      const absolute = path.resolve(this.workspaceFolder.uri.fsPath, local);
       return vscode.workspace.fs.stat(vscode.Uri.file(absolute)).then(
         (stat) => ({ stat, local, remote, absolute }),
         () => ({ stat: undefined, local, remote, absolute }),
@@ -160,6 +178,83 @@ export class Compose extends VersionManager {
       ...workspaceConfig,
       ...{ composeService: answer.label },
     });
+  }
+
+  protected runRubyCode(
+    rubyCommand: string,
+    code: string,
+  ): Promise<{ stdout: string; stderr: string }> {
+    return new Promise((resolve, reject) => {
+      this.outputChannel.info(
+        `Ruby \`${rubyCommand}\` running Ruby code: \`${code}\``,
+      );
+
+      const {
+        command,
+        args,
+        options: { env } = { env: {} },
+      } = parseCommand(rubyCommand);
+      const ruby = spawn(command, args, this.execOptions({ env }));
+
+      let stdout = "";
+      let stderr = "";
+
+      const stdoutDecoder = new StringDecoder("utf-8");
+      const stderrDecoder = new StringDecoder("utf-8");
+
+      ruby.stdout.on("data", (data) => {
+        stdout += stdoutDecoder.write(data);
+
+        if (stdout.includes("END_OF_RUBY_CODE_OUTPUT")) {
+          stdout = stdout.replace(/END_OF_RUBY_CODE_OUTPUT.*/s, "");
+          resolve({ stdout, stderr });
+        }
+      });
+      ruby.stderr.on("data", (data) => {
+        stderr += stderrDecoder.write(data);
+      });
+      ruby.on("error", (error) => {
+        reject(error);
+      });
+      ruby.on("close", (status) => {
+        if (status) {
+          reject(new Error(`Process exited with status ${status}: ${stderr}`));
+        } else {
+          resolve({ stdout, stderr });
+        }
+      });
+
+      const script = [
+        "begin",
+        ...code.split("\n").map((line) => `  ${line}`),
+        "ensure",
+        '  puts "END_OF_RUBY_CODE_OUTPUT"',
+        "end",
+      ].join("\n");
+
+      this.outputChannel.info(`Running Ruby code:\n${script}`);
+
+      ruby.stdin.write(script);
+      ruby.stdin.end();
+    });
+  }
+
+  protected execOptions(options: ExecOptions = {}): ExecOptions {
+    let shell: string | undefined;
+
+    // If the user has configured a default shell, we use that one since they are probably sourcing their version
+    // manager scripts in that shell's configuration files. On Windows, we never set the shell no matter what to ensure
+    // that activation runs on `cmd.exe` and not PowerShell, which avoids complex quoting and escaping issues.
+    if (vscode.env.shell.length > 0 && os.platform() !== "win32") {
+      shell = vscode.env.shell;
+    }
+
+    return {
+      cwd: this.bundleUri.fsPath,
+      shell,
+      ...options,
+      env: { ...process.env, ...options.env },
+    };
   }
 
   private async getComposeConfig(): Promise<ComposeConfig> {
