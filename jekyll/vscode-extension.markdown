@@ -7,6 +7,31 @@ parent: Ruby LSP
 
 # VS Code extension
 
+## Usage
+
+Search for `Shopify.ruby-lsp` in the extensions tab and click install.
+
+By default, the Ruby LSP will generate a `.ruby-lsp` directory with a composed bundle that includes the server gem.
+Additionally, it will attempt to use available version managers to select the correct Ruby version for any given
+project. Refer to configuration for more options.
+
+### Commands
+
+Available commands are listed below and can always be found by searching for the `Ruby LSP` prefix in the command
+palette (Default hotkey: CMD + SHIFT + P).
+
+| Command                              | Description                                             |
+| ------------------------------------ | ------------------------------------------------------- |
+| Ruby LSP: Start                      | Start the Ruby LSP server                               |
+| Ruby LSP: Restart                    | Restart the Ruby LSP server                             |
+| Ruby LSP: Stop                       | Stop the Ruby LSP server                                |
+| Ruby LSP: Update language server gem | Updates the `ruby-lsp` server gem to the latest version |
+
+### Snippets
+
+This extension provides convenience snippets for common Ruby constructs, such as blocks, classes, methods or even unit
+test boilerplates. Find the full list [here](https://github.com/Shopify/ruby-lsp/blob/main/vscode/snippets.json).
+
 ### [Experimental] GitHub Copilot chat agent
 
 For users of Copilot, the Ruby LSP contributes a Ruby agent for AI assisted development of Ruby applications. Below you
@@ -33,30 +58,6 @@ generation.
 
 If you have feedback about this feature, you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new).
 
-## Usage
-
-Search for `Shopify.ruby-lsp` in the extensions tab and click install.
-
-By default, the Ruby LSP will generate a `.ruby-lsp` directory with a composed bundle that includes the server gem.
-Additionally, it will attempt to use available version managers to select the correct Ruby version for any given
-project. Refer to configuration for more options.
-
-### Commands
-
-Available commands are listed below and can always be found by searching for the `Ruby LSP` prefix in the command
-palette (Default hotkey: CMD + SHIFT + P).
-
-| Command                              | Description                                             |
-| ------------------------------------ | ------------------------------------------------------- |
-| Ruby LSP: Start                      | Start the Ruby LSP server                               |
-| Ruby LSP: Restart                    | Restart the Ruby LSP server                             |
-| Ruby LSP: Stop                       | Stop the Ruby LSP server                                |
-| Ruby LSP: Update language server gem | Updates the `ruby-lsp` server gem to the latest version |
-
-### Snippets
-
-This extension provides convenience snippets for common Ruby constructs, such as blocks, classes, methods or even unit
-test boilerplates. Find the full list [here](https://github.com/Shopify/ruby-lsp/blob/main/vscode/snippets.json).
 
 ### Configuration
 
