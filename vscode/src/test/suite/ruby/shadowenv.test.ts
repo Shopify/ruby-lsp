@@ -3,6 +3,7 @@ import fs from "fs";
 import assert from "assert";
 import path from "path";
 import os from "os";
+import { execSync } from "child_process";
 
 import { beforeEach, afterEach } from "mocha";
 import * as vscode from "vscode";
@@ -18,6 +19,14 @@ suite("Shadowenv", () => {
   if (os.platform() === "win32") {
     // eslint-disable-next-line no-console
     console.log("Skipping Shadowenv tests on Windows");
+    return;
+  }
+
+  try {
+    execSync("shadowenv --version >/dev/null 2>&1");
+  } catch {
+    // eslint-disable-next-line no-console
+    console.log("Skipping Shadowenv tests because no `shadowenv` found");
     return;
   }
 
