@@ -156,6 +156,7 @@ function collectClientOptions(
   const supportedSchemes = ["file", "git"];
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
+  const pathConverter = ruby.pathConverter;
 
   // For each workspace, the language client is responsible for handling requests for:
   // 1. Files inside of the workspace itself
@@ -163,37 +164,13 @@ function collectClientOptions(
   // 3. Default gems
   let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.flatMap(
     (language) => {
-      return supportedSchemes.map((scheme) => {
-        return { scheme, language, pattern: `${fsPath}/**/*` };
+      return pathConverter.alternativePaths(fsPath).flatMap((pathVariant) => {
+        return supportedSchemes.map((scheme) => {
+          return { scheme, language, pattern: `${pathVariant}/**/*` };
+        });
       });
     },
   );
-
-  const pathConverter = ruby.pathConverter;
-
-  const pushAlternativePaths = (
-    path: string,
-    schemes: string[] = supportedSchemes,
-  ) => {
-    schemes.forEach((scheme) => {
-      [
-        pathConverter.toLocalPath(path),
-        pathConverter.toRemotePath(path),
-      ].forEach((convertedPath) => {
-        if (convertedPath !== path) {
-          SUPPORTED_LANGUAGE_IDS.forEach((language) => {
-            documentSelector.push({
-              scheme,
-              language,
-              pattern: `${convertedPath}/**/*`,
-            });
-          });
-        }
-      });
-    });
-  };
-
-  pushAlternativePaths(fsPath);
 
   // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
   // all workspaces
@@ -208,37 +185,35 @@ function collectClientOptions(
 
   ruby.gemPath.forEach((gemPath) => {
     supportedSchemes.forEach((scheme) => {
-      documentSelector.push({
-        scheme,
-        language: "ruby",
-        pattern: `${gemPath}/**/*`,
-      });
-
-      pushAlternativePaths(gemPath, [scheme]);
-
-      // Because of how default gems are installed, the gemPath location is actually not exactly where the files are
-      // located. With the regex, we are correcting the default gem path from this (where the files are not located)
-      // /opt/rubies/3.3.1/lib/ruby/gems/3.3.0
-      //
-      // to this (where the files are actually stored)
-      // /opt/rubies/3.3.1/lib/ruby/3.3.0
-      //
-      // Notice that we still need to add the regular path to the selector because some version managers will install
-      // gems under the non-corrected path
-      if (/lib\/ruby\/gems\/(?=\d)/.test(gemPath)) {
-        const correctedPath = gemPath.replace(
-          /lib\/ruby\/gems\/(?=\d)/,
-          "lib/ruby/",
-        );
-
+      pathConverter.alternativePaths(gemPath).forEach((pathVariant) => {
         documentSelector.push({
           scheme,
           language: "ruby",
-          pattern: `${correctedPath}/**/*`,
+          pattern: `${pathVariant}/**/*`,
         });
 
-        pushAlternativePaths(correctedPath, [scheme]);
-      }
+        // Because of how default gems are installed, the gemPath location is actually not exactly where the files are
+        // located. With the regex, we are correcting the default gem path from this (where the files are not located)
+        // /opt/rubies/3.3.1/lib/ruby/gems/3.3.0
+        //
+        // to this (where the files are actually stored)
+        // /opt/rubies/3.3.1/lib/ruby/3.3.0
+        //
+        // Notice that we still need to add the regular path to the selector because some version managers will install
+        // gems under the non-corrected path
+        if (/lib\/ruby\/gems\/(?=\d)/.test(pathVariant)) {
+          const correctedPath = pathVariant.replace(
+            /lib\/ruby\/gems\/(?=\d)/,
+            "lib/ruby/",
+          );
+
+          documentSelector.push({
+            scheme,
+            language: "ruby",
+            pattern: `${correctedPath}/**/*`,
+          });
+        }
+      });
     });
   });
 

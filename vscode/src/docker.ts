@@ -101,6 +101,16 @@ export class ContainerPathConverter implements PathConverterInterface {
     const remotePath = this.toRemotePath(localUri.fsPath);
     return vscode.Uri.file(remotePath);
   }
+
+  alternativePaths(path: string) {
+    const alternatives = [
+      this.toRemotePath(path),
+      this.toLocalPath(path),
+      path,
+    ];
+
+    return Array.from(new Set(alternatives));
+  }
 }
 
 function fetchComposeBindings(
