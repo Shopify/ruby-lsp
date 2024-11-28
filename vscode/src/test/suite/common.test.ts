@@ -39,8 +39,8 @@ suite("Common", () => {
       },
     } as any);
 
-    // For the fake machine of 42 in base 16 and the name `fakeFeature`, the feature flag activation percetange is
-    // 0.357. For every percetange below that, the feature should appear as disabled
+    // For the fake machine of 42 in base 16 and the name `fakeFeature`, the feature flag activation percentage is
+    // 0.357. For every percentage below that, the feature should appear as disabled
     [0.25, 0.3, 0.35].forEach((percentage) => {
       (FEATURE_FLAGS as any).fakeFeature = percentage;
       assert.strictEqual(featureEnabled("fakeFeature" as any), false);
