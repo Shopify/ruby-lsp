@@ -172,8 +172,8 @@ export class AddonsStatus extends StatusItem {
   constructor() {
     super("addons");
 
-    this.item.name = "Ruby LSP Addons";
-    this.item.text = "Fetching addon information";
+    this.item.name = "Ruby LSP Add-ons";
+    this.item.text = "Fetching add-on information";
   }
 
   refresh(workspace: WorkspaceInterface): void {

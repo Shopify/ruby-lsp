@@ -121,7 +121,7 @@ export class TestController {
         // Add nested group to its parent group
         const group = groupIdMap.get(data.group_id);
 
-        // If there's a mistake on the server or in an addon, a code lens may be produced for a non-existing group
+        // If there's a mistake on the server or in an add-on, a code lens may be produced for a non-existing group
         if (group) {
           group.children.add(testItem);
         } else {
