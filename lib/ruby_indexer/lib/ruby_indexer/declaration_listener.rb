@@ -16,13 +16,13 @@ module RubyIndexer
         index: Index,
         dispatcher: Prism::Dispatcher,
         parse_result: Prism::ParseResult,
-        file_path: String,
+        uri: URI::Generic,
         collect_comments: T::Boolean,
       ).void
     end
-    def initialize(index, dispatcher, parse_result, file_path, collect_comments: false)
+    def initialize(index, dispatcher, parse_result, uri, collect_comments: false)
       @index = index
-      @file_path = file_path
+      @uri = uri
       @enhancements = T.let(Enhancement.all(self), T::Array[Enhancement])
       @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
       @comments_by_line = T.let(
@@ -154,7 +154,7 @@ module RubyIndexer
         else
           entry = Entry::SingletonClass.new(
             real_nesting,
-            @file_path,
+            @uri,
             Location.from_prism_location(node.location, @code_units_cache),
             Location.from_prism_location(expression.location, @code_units_cache),
             collect_comments(node),
@@ -291,7 +291,7 @@ module RubyIndexer
         enhancement.on_call_node_enter(node)
       rescue StandardError => e
         @indexing_errors << <<~MSG
-          Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node enter enhancement: #{e.message}
+          Indexing error in #{@uri} with '#{enhancement.class.name}' on call node enter enhancement: #{e.message}
         MSG
       end
     end
@@ -312,7 +312,7 @@ module RubyIndexer
         enhancement.on_call_node_leave(node)
       rescue StandardError => e
         @indexing_errors << <<~MSG
-          Indexing error in #{@file_path} with '#{enhancement.class.name}' on call node leave enhancement: #{e.message}
+          Indexing error in #{@uri} with '#{enhancement.class.name}' on call node leave enhancement: #{e.message}
         MSG
       end
     end
@@ -327,7 +327,7 @@ module RubyIndexer
       when nil
         @index.add(Entry::Method.new(
           method_name,
-          @file_path,
+          @uri,
           Location.from_prism_location(node.location, @code_units_cache),
           Location.from_prism_location(node.name_loc, @code_units_cache),
           comments,
@@ -343,7 +343,7 @@ module RubyIndexer
 
           @index.add(Entry::Method.new(
             method_name,
-            @file_path,
+            @uri,
             Location.from_prism_location(node.location, @code_units_cache),
             Location.from_prism_location(node.name_loc, @code_units_cache),
             comments,
@@ -427,7 +427,7 @@ module RubyIndexer
           method_name,
           node.old_name.slice,
           @owner_stack.last,
-          @file_path,
+          @uri,
           Location.from_prism_location(node.new_name.location, @code_units_cache),
           comments,
         ),
@@ -448,7 +448,7 @@ module RubyIndexer
 
       @index.add(Entry::Method.new(
         name,
-        @file_path,
+        @uri,
         location,
         location,
         comments,
@@ -472,7 +472,7 @@ module RubyIndexer
 
       entry = Entry::Module.new(
         actual_nesting(name),
-        @file_path,
+        @uri,
         location,
         name_loc,
         comments,
@@ -494,7 +494,7 @@ module RubyIndexer
       nesting = name_or_nesting.is_a?(Array) ? name_or_nesting : actual_nesting(name_or_nesting)
       entry = Entry::Class.new(
         nesting,
-        @file_path,
+        @uri,
         Location.from_prism_location(full_location, @code_units_cache),
         Location.from_prism_location(name_location, @code_units_cache),
         comments,
@@ -546,7 +546,7 @@ module RubyIndexer
 
       @index.add(Entry::GlobalVariable.new(
         name,
-        @file_path,
+        @uri,
         Location.from_prism_location(loc, @code_units_cache),
         comments,
       ))
@@ -578,7 +578,7 @@ module RubyIndexer
 
       @index.add(Entry::InstanceVariable.new(
         name,
-        @file_path,
+        @uri,
         Location.from_prism_location(loc, @code_units_cache),
         collect_comments(node),
         owner,
@@ -642,7 +642,7 @@ module RubyIndexer
           new_name_value,
           old_name_value,
           @owner_stack.last,
-          @file_path,
+          @uri,
           Location.from_prism_location(new_name.location, @code_units_cache),
           comments,
         ),
@@ -678,7 +678,7 @@ module RubyIndexer
             value.slice,
             @stack.dup,
             name,
-            @file_path,
+            @uri,
             Location.from_prism_location(node.location, @code_units_cache),
             comments,
           )
@@ -691,7 +691,7 @@ module RubyIndexer
             value.name.to_s,
             @stack.dup,
             name,
-            @file_path,
+            @uri,
             Location.from_prism_location(node.location, @code_units_cache),
             comments,
           )
@@ -702,14 +702,14 @@ module RubyIndexer
             value.target.slice,
             @stack.dup,
             name,
-            @file_path,
+            @uri,
             Location.from_prism_location(node.location, @code_units_cache),
             comments,
           )
         else
           Entry::Constant.new(
             name,
-            @file_path,
+            @uri,
             Location.from_prism_location(node.location, @code_units_cache),
             comments,
           )
@@ -781,7 +781,7 @@ module RubyIndexer
         if reader
           @index.add(Entry::Accessor.new(
             name,
-            @file_path,
+            @uri,
             Location.from_prism_location(loc, @code_units_cache),
             comments,
             current_visibility,
@@ -793,7 +793,7 @@ module RubyIndexer
 
         @index.add(Entry::Accessor.new(
           "#{name}=",
-          @file_path,
+          @uri,
           Location.from_prism_location(loc, @code_units_cache),
           comments,
           current_visibility,
@@ -866,7 +866,7 @@ module RubyIndexer
           location = Location.from_prism_location(argument.location, @code_units_cache)
           @index.add(Entry::Method.new(
             method_name,
-            @file_path,
+            @uri,
             location,
             location,
             collect_comments(node)&.concat(entry.comments),

@@ -172,7 +172,7 @@ module RubyIndexer
       end
 
       assert_match(
-        %r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' on call node enter enhancement},
+        %r{Indexing error in file:///fake/path/foo\.rb with 'TestEnhancement' on call node enter enhancement},
         stderr,
       )
       # The module should still be indexed
@@ -205,7 +205,7 @@ module RubyIndexer
       end
 
       assert_match(
-        %r{Indexing error in /fake/path/foo\.rb with 'TestEnhancement' on call node leave enhancement},
+        %r{Indexing error in file:///fake/path/foo\.rb with 'TestEnhancement' on call node leave enhancement},
         stderr,
       )
       # The module should still be indexed

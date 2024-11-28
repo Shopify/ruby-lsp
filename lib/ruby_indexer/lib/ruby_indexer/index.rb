@@ -391,7 +391,7 @@ module RubyIndexer
         self,
         dispatcher,
         result,
-        full_path,
+        uri,
         collect_comments: collect_comments,
       )
       dispatcher.dispatch(result.value)
@@ -670,7 +670,7 @@ module RubyIndexer
 
         singleton = Entry::SingletonClass.new(
           [full_singleton_name],
-          attached_ancestor.file_path,
+          attached_ancestor.uri,
           attached_ancestor.location,
           attached_ancestor.name_location,
           nil,
