@@ -66,7 +66,7 @@ class WorkspaceSymbolTest < Minitest::Test
   end
 
   def test_does_not_include_symbols_from_dependencies
-    @index.index_single(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
+    @index.index_file(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
 
     result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Pathname").perform
     assert_empty(result)

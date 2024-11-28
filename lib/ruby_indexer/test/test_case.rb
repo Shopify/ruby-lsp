@@ -13,8 +13,8 @@ module RubyIndexer
 
     private
 
-    def index(source)
-      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), source)
+    def index(source, uri: URI::Generic.from_path(path: "/fake/path/foo.rb"))
+      @index.index_single(uri, source)
     end
 
     def assert_entry(expected_name, type, expected_location, visibility: nil)

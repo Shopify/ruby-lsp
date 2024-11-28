@@ -623,7 +623,7 @@ module RubyIndexer
         path: "#{Dir.pwd}/lib/ruby_lsp/node_context.rb",
       )
 
-      @index.index_single(uri, collect_comments: false)
+      @index.index_file(uri, collect_comments: false)
 
       entry = @index["RubyLsp::NodeContext"].first
 
