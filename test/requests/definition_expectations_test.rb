@@ -14,7 +14,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       index = server.global_state.index
 
-      index.index_single(
+      index.index_file(
         URI::Generic.from_path(
           load_path_entry: "#{Dir.pwd}/lib",
           path: File.expand_path(
@@ -23,7 +23,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           ),
         ),
       )
-      index.index_single(
+      index.index_file(
         URI::Generic.from_path(
           path: File.expand_path(
             "../../test/fixtures/constant_reference_target.rb",
@@ -31,7 +31,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           ),
         ),
       )
-      index.index_single(
+      index.index_file(
         URI::Generic.from_path(
           load_path_entry: "#{Dir.pwd}/lib",
           path: File.expand_path(
@@ -75,7 +75,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   def test_jumping_to_default_gems
     with_server("Pathname") do |server, uri|
       index = server.global_state.index
-      index.index_single(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
+      index.index_file(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -163,10 +163,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb",
         load_path_entry: RbConfig::CONFIG["rubylibdir"],
       )
-      index.index_single(bundler_uri)
+      index.index_file(bundler_uri)
 
       Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
-        index.index_single(URI::Generic.from_path(load_path_entry: RbConfig::CONFIG["rubylibdir"], path: path))
+        index.index_file(URI::Generic.from_path(load_path_entry: RbConfig::CONFIG["rubylibdir"], path: path))
       end
 
       server.process_message(
@@ -230,7 +230,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       create_definition_addon
 
       with_server(source, stub_no_typechecker: true) do |server, uri|
-        server.global_state.index.index_single(
+        server.global_state.index.index_file(
           URI::Generic.from_path(
             load_path_entry: "#{Dir.pwd}/lib",
             path: File.expand_path(

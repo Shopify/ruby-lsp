@@ -47,7 +47,7 @@ index = RubyIndexer::Index.new
 uris = index.configuration.indexable_uris
 
 uris.each_with_index do |uri, i|
-  index.index_single(uri)
+  index.index_file(uri)
 rescue => e
   errors[uri.full_path] = e
 ensure

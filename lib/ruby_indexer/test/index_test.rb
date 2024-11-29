@@ -124,7 +124,7 @@ module RubyIndexer
       FileUtils.mkdir(path)
 
       begin
-        @index.index_single(URI::Generic.from_path(path: path))
+        @index.index_file(URI::Generic.from_path(path: path))
       ensure
         FileUtils.rm_r(path)
       end
@@ -351,14 +351,14 @@ module RubyIndexer
 
       fixtures.each do |fixture|
         uri = URI::Generic.from_path(path: fixture)
-        @index.index_single(uri)
+        @index.index_file(uri)
       end
 
       refute_empty(@index)
     end
 
     def test_index_single_does_not_fail_for_non_existing_file
-      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"))
+      @index.index_file(URI::Generic.from_path(path: "/fake/path/foo.rb"))
       entries_after_indexing = @index.names
       assert_equal(@default_indexed_entries.keys, entries_after_indexing)
     end
@@ -787,7 +787,7 @@ module RubyIndexer
           RUBY
 
           uri = URI::Generic.from_path(path: File.join(dir, "foo.rb"))
-          @index.index_single(uri)
+          @index.index_file(uri)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -800,7 +800,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(uri)
+          @index.handle_change(uri, File.read(T.must(uri.full_path)))
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -821,7 +821,7 @@ module RubyIndexer
           RUBY
 
           uri = URI::Generic.from_path(path: File.join(dir, "foo.rb"))
-          @index.index_single(uri)
+          @index.index_file(uri)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -837,7 +837,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(uri)
+          @index.handle_change(uri, File.read(T.must(uri.full_path)))
           refute_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -857,7 +857,7 @@ module RubyIndexer
           RUBY
 
           uri = URI::Generic.from_path(path: File.join(dir, "foo.rb"))
-          @index.index_single(uri)
+          @index.index_file(uri)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -870,7 +870,7 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(uri)
+          @index.handle_change(uri, File.read(T.must(uri.full_path)))
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -1889,13 +1889,13 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.entries_for("/fake/path/foo.rb", Entry)
+      entries = @index.entries_for("file:///fake/path/foo.rb", Entry)
       assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
 
-      entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
+      entries = @index.entries_for("file:///fake/path/foo.rb", RubyIndexer::Entry::Namespace)
       assert_equal(["Foo", "Bar", "Bar::<Class:Bar>"], entries.map(&:name))
 
-      entries = @index.entries_for("/fake/path/foo.rb")
+      entries = @index.entries_for("file:///fake/path/foo.rb")
       assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
     end
 
@@ -2065,6 +2065,31 @@ module RubyIndexer
       assert_raises(Index::IndexNotEmptyError) do
         @index.index_all
       end
+    end
+
+    def test_index_can_handle_entries_from_untitled_scheme
+      uri = URI("untitled:Untitled-1")
+
+      index(<<~RUBY, uri: uri)
+        class Foo
+        end
+      RUBY
+
+      entry = @index["Foo"]&.first
+      refute_nil(entry, "Expected indexer to be able to handle unsaved URIs")
+      assert_equal("untitled:Untitled-1", entry.uri.to_s)
+      assert_equal("Untitled-1", entry.file_name)
+      assert_nil(entry.file_path)
+
+      @index.handle_change(uri, <<~RUBY)
+        # I added this comment!
+        class Foo
+        end
+      RUBY
+
+      entry = @index["Foo"]&.first
+      refute_nil(entry, "Expected indexer to be able to handle unsaved URIs")
+      assert_equal("I added this comment!", entry.comments)
     end
   end
 end

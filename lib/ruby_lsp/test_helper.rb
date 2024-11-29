@@ -36,20 +36,21 @@ module RubyLsp
             },
           },
         })
+
+        server.global_state.index.index_single(uri, source)
       end
 
-      server.global_state.index.index_single(
-        URI::Generic.from_path(path: T.must(uri.to_standardized_path)),
-        source,
-      )
       server.load_addons(include_project_addons: false) if load_addons
-      block.call(server, uri)
-    ensure
-      if load_addons
-        RubyLsp::Addon.addons.each(&:deactivate)
-        RubyLsp::Addon.addons.clear
+
+      begin
+        block.call(server, uri)
+      ensure
+        if load_addons
+          RubyLsp::Addon.addons.each(&:deactivate)
+          RubyLsp::Addon.addons.clear
+        end
+        server.run_shutdown
       end
-      T.must(server).run_shutdown
     end
   end
 end

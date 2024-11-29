@@ -439,6 +439,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_changed_file_only_indexes_ruby
+    File.expects(:read).with("/foo.rb").returns("class Foo\nend")
     @server.global_state.index.expects(:index_single).once.with do |uri|
       uri.full_path == "/foo.rb"
     end

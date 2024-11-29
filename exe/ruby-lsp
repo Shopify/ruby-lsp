@@ -140,8 +140,8 @@ if options[:doctor]
   puts "Globbing for indexable files"
 
   index.configuration.indexable_uris.each do |uri|
-    puts "indexing: #{uri.full_path}"
-    index.index_single(uri)
+    puts "indexing: #{uri}"
+    index.index_file(uri)
   end
   return
 end

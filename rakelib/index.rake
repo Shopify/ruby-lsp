@@ -84,8 +84,7 @@ task "index:topgems": ["download:topgems"] do
 
     errors = Dir[File.join(directory, "**", "*.rb")].filter_map do |filepath|
       print(".")
-      code = File.read(filepath)
-      index.index_single(URI::Generic.from_path(path: filepath), code)
+      index.index_file(URI::Generic.from_path(path: filepath))
       nil
     rescue => e
       errors << { message: e.message, file: filepath }

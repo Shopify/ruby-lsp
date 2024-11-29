@@ -60,19 +60,24 @@ module RubyIndexer
 
     sig { returns(String) }
     def file_name
-      File.basename(file_path)
+      if @uri.scheme == "untitled"
+        T.must(@uri.opaque)
+      else
+        File.basename(T.must(file_path))
+      end
     end
 
-    sig { returns(String) }
+    sig { returns(T.nilable(String)) }
     def file_path
-      T.must(@uri.full_path)
+      @uri.full_path
     end
 
     sig { returns(String) }
     def comments
       @comments ||= begin
         # Parse only the comments based on the file path, which is much faster than parsing the entire file
-        parsed_comments = Prism.parse_file_comments(file_path)
+        path = file_path
+        parsed_comments = path ? Prism.parse_file_comments(path) : []
 
         # Group comments based on whether they belong to a single block of comments
         grouped = parsed_comments.slice_when do |left, right|

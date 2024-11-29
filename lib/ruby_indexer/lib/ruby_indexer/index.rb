@@ -29,10 +29,11 @@ module RubyIndexer
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
-      #  "/my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
-      #  "/my/project/bar.rb" => [#<Entry::Class>],
+      #  "file:///my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
+      #  "file:///my/project/bar.rb" => [#<Entry::Class>],
+      #  "untitled:Untitled-1" => [#<Entry::Class>],
       # }
-      @files_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
+      @uris_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = T.let(PrefixTree[URI::Generic].new, PrefixTree[URI::Generic])
@@ -57,12 +58,10 @@ module RubyIndexer
 
     sig { params(uri: URI::Generic).void }
     def delete(uri)
-      full_path = uri.full_path
-      return unless full_path
-
+      key = uri.to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
-      @files_to_entries[full_path]&.each do |entry|
+      @uris_to_entries[key]&.each do |entry|
         name = entry.name
         entries = @entries[name]
         next unless entries
@@ -80,7 +79,7 @@ module RubyIndexer
         end
       end
 
-      @files_to_entries.delete(full_path)
+      @uris_to_entries.delete(key)
 
       require_path = uri.require_path
       @require_paths_tree.delete(require_path) if require_path
@@ -91,7 +90,7 @@ module RubyIndexer
       name = entry.name
 
       (@entries[name] ||= []) << entry
-      (@files_to_entries[entry.file_path] ||= []) << entry
+      (@uris_to_entries[entry.uri.to_s] ||= []) << entry
       @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
     end
 
@@ -374,47 +373,38 @@ module RubyIndexer
           break unless block.call(progress)
         end
 
-        index_single(uri, collect_comments: false)
+        index_file(uri, collect_comments: false)
       end
     end
 
-    sig { params(uri: URI::Generic, source: T.nilable(String), collect_comments: T::Boolean).void }
-    def index_single(uri, source = nil, collect_comments: true)
-      full_path = uri.full_path
-      return unless full_path
-
-      content = source || File.read(full_path)
+    sig { params(uri: URI::Generic, source: String, collect_comments: T::Boolean).void }
+    def index_single(uri, source, collect_comments: true)
       dispatcher = Prism::Dispatcher.new
 
-      result = Prism.parse(content)
-      listener = DeclarationListener.new(
-        self,
-        dispatcher,
-        result,
-        uri,
-        collect_comments: collect_comments,
-      )
+      result = Prism.parse(source)
+      listener = DeclarationListener.new(self, dispatcher, result, uri, collect_comments: collect_comments)
       dispatcher.dispatch(result.value)
-
-      indexing_errors = listener.indexing_errors.uniq
 
       require_path = uri.require_path
       @require_paths_tree.insert(require_path, uri) if require_path
 
-      if indexing_errors.any?
-        indexing_errors.each do |error|
-          $stderr.puts error
-        end
-      end
-    rescue Errno::EISDIR, Errno::ENOENT
-      # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
-      # it
+      indexing_errors = listener.indexing_errors.uniq
+      indexing_errors.each { |error| $stderr.puts(error) } if indexing_errors.any?
     rescue SystemStackError => e
       if e.backtrace&.first&.include?("prism")
-        $stderr.puts "Prism error indexing #{T.must(full_path)}: #{e.message}"
+        $stderr.puts "Prism error indexing #{uri}: #{e.message}"
       else
         raise
       end
+    end
+
+    # Indexes a File URI by reading the contents from disk
+    sig { params(uri: URI::Generic, collect_comments: T::Boolean).void }
+    def index_file(uri, collect_comments: true)
+      index_single(uri, File.read(T.must(uri.full_path)), collect_comments: collect_comments)
+    rescue Errno::EISDIR, Errno::ENOENT
+      # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
+      # it
     end
 
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
@@ -608,17 +598,15 @@ module RubyIndexer
 
     # Synchronizes a change made to the given URI. This method will ensure that new declarations are indexed, removed
     # declarations removed and that the ancestor linearization cache is cleared if necessary
-    sig { params(uri: URI::Generic).void }
-    def handle_change(uri)
-      full_path = uri.full_path
-      return unless full_path
-
-      original_entries = @files_to_entries[full_path]
+    sig { params(uri: URI::Generic, source: String).void }
+    def handle_change(uri, source)
+      key = uri.to_s
+      original_entries = @uris_to_entries[key]
 
       delete(uri)
-      index_single(uri)
+      index_single(uri, source)
 
-      updated_entries = @files_to_entries[full_path]
+      updated_entries = @uris_to_entries[key]
 
       return unless original_entries && updated_entries
 
@@ -684,12 +672,12 @@ module RubyIndexer
 
     sig do
       type_parameters(:T).params(
-        path: String,
+        uri: String,
         type: T.nilable(T::Class[T.all(T.type_parameter(:T), Entry)]),
       ).returns(T.nilable(T.any(T::Array[Entry], T::Array[T.type_parameter(:T)])))
     end
-    def entries_for(path, type = nil)
-      entries = @files_to_entries[path]
+    def entries_for(uri, type = nil)
+      entries = @uris_to_entries[uri.to_s]
       return entries unless type
 
       entries&.grep(type)

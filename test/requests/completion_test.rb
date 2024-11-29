@@ -1600,7 +1600,7 @@ class CompletionTest < Minitest::Test
         URI::Generic.from_path(load_path_entry: tmpdir, path: path)
       end
 
-      uris.each { |uri| index.index_single(uri) }
+      uris.each { |uri| index.index_file(uri) }
       block.call(tmpdir)
     ensure
       $LOAD_PATH.delete(tmpdir)

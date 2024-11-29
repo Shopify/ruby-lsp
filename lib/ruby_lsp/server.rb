@@ -1004,11 +1004,13 @@ module RubyLsp
         load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
         uri.add_require_path_from_load_entry(load_path_entry) if load_path_entry
 
+        content = File.read(file_path)
+
         case change[:type]
         when Constant::FileChangeType::CREATED
-          index.index_single(uri)
+          index.index_single(uri, content)
         when Constant::FileChangeType::CHANGED
-          index.handle_change(uri)
+          index.handle_change(uri, content)
         when Constant::FileChangeType::DELETED
           index.delete(uri)
         end
