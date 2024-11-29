@@ -770,6 +770,29 @@ class RubyDocumentTest < Minitest::Test
     assert_nil(document.cache_get("textDocument/codeLens"))
   end
 
+  def test_locating_a_non_existing_location_raises
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///foo/bar.rb"))
+      class Foo
+      end
+    RUBY
+
+    # Exactly at the last character doesn't raise
+    document.locate_node({ line: 1, character: 2 })
+
+    # Anything beyond does
+    error = assert_raises(RubyLsp::Document::LocationNotFoundError) do
+      document.locate_node({ line: 3, character: 2 })
+    end
+
+    assert_equal(<<~MESSAGE.chomp, error.message)
+      Requested position: {:line=>3, :character=>2}
+      Source:
+
+      class Foo
+      end
+    MESSAGE
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
