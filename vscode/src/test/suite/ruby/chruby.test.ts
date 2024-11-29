@@ -29,7 +29,19 @@ function createRubySymlinks(destination: string) {
       destination,
     );
   } else {
-    fs.symlinkSync(`/opt/rubies/${RUBY_VERSION}/bin/ruby`, destination);
+    const possibleLocations = [
+      `${os.homedir()}/.rubies/${RUBY_VERSION}/bin/ruby`,
+      `${os.homedir()}/.rubies/ruby-${RUBY_VERSION}/bin/ruby`,
+      `/opt/rubies/${RUBY_VERSION}/bin/ruby`,
+      `/opt/rubies/ruby-${RUBY_VERSION}/bin/ruby`,
+    ];
+
+    for (const location of possibleLocations) {
+      if (fs.existsSync(location)) {
+        fs.symlinkSync(location, destination);
+        break;
+      }
+    }
   }
 }
 
