@@ -12,6 +12,7 @@ import { Chruby } from "../../../ruby/chruby";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION } from "../../rubyVersion";
+import { ActivationResult } from "../../../ruby/versionManager";
 
 const [major, minor, _patch] = RUBY_VERSION.split(".");
 const VERSION_REGEX = `${major}\\.${minor}\\.\\d+`;
@@ -91,12 +92,8 @@ suite("Chruby", () => {
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
 
-    const { env, version, yjit } = await chruby.activate();
-
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
   });
 
   test("Finds Ruby when .ruby-version is inside on parent directories", async () => {
@@ -107,12 +104,8 @@ suite("Chruby", () => {
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
 
-    const { env, version, yjit } = await chruby.activate();
-
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
   });
 
   test("Considers any version with a suffix to be the latest", async () => {
@@ -238,12 +231,8 @@ suite("Chruby", () => {
     const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
     configStub.restore();
 
-    const { env, version, yjit } = await chruby.activate();
-
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
   });
 
   test("Finds Ruby when .ruby-version omits patch", async () => {
@@ -264,12 +253,8 @@ suite("Chruby", () => {
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
 
-    const { env, version, yjit } = await chruby.activate();
-
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
 
     fs.rmSync(path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`), {
       recursive: true,
@@ -296,12 +281,8 @@ suite("Chruby", () => {
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
 
-    const { env, version, yjit } = await chruby.activate();
-
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
   });
 
   test("Uses latest Ruby as a fallback if no .ruby-version is found", async () => {
@@ -310,12 +291,8 @@ suite("Chruby", () => {
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
     ];
 
-    const { env, version, yjit } = await chruby.activate();
-
-    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
-    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
   }).timeout(20000);
 
   test("Doesn't try to fallback to latest version if there's a Gemfile with ruby constraints", async () => {
@@ -330,4 +307,52 @@ suite("Chruby", () => {
       return chruby.activate();
     });
   });
+
+  test("Uses closest Ruby if the version specified in .ruby-version is not installed (patch difference)", async () => {
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.3.3'");
+
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
+  }).timeout(20000);
+
+  test("Uses closest Ruby if the version specified in .ruby-version is not installed (minor difference)", async () => {
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.2.0'");
+
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
+  }).timeout(20000);
+
+  test("Uses closest Ruby if the version specified in .ruby-version is not installed (previews)", async () => {
+    fs.writeFileSync(
+      path.join(workspacePath, ".ruby-version"),
+      "ruby '3.4.0-preview1'",
+    );
+
+    const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
+    chruby.rubyInstallationUris = [
+      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
+    ];
+
+    const result = await chruby.activate();
+    assertActivatedRuby(result);
+  }).timeout(20000);
+
+  function assertActivatedRuby(activationResult: ActivationResult) {
+    const { env, version, yjit } = activationResult;
+
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
+    assert.strictEqual(version, RUBY_VERSION);
+    assert.notStrictEqual(yjit, undefined);
+  }
 });

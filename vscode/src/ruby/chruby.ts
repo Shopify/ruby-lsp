@@ -17,7 +17,7 @@ interface RubyVersion {
   version: string;
 }
 
-class RubyVersionCancellationError extends Error {}
+class RubyActivationCancellationError extends Error {}
 
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
@@ -48,12 +48,14 @@ export class Chruby extends VersionManager {
 
   async activate(): Promise<ActivationResult> {
     let versionInfo = await this.discoverRubyVersion();
-    let rubyUri: vscode.Uri;
+    let rubyUri: vscode.Uri | undefined;
 
-    if (versionInfo) {
-      rubyUri = await this.findRubyUri(versionInfo);
-    } else {
-      try {
+    // If the version informed is available, try to find the Ruby installation. Otherwise, try to fall back to an
+    // existing version
+    try {
+      if (versionInfo) {
+        rubyUri = await this.findRubyUri(versionInfo);
+      } else {
         const fallback = await this.fallbackWithCancellation(
           "No .ruby-version file found. Trying to fall back to latest installed Ruby in 10 seconds",
           "You can create a .ruby-version file in a parent directory to configure a fallback",
@@ -63,14 +65,39 @@ export class Chruby extends VersionManager {
 
         versionInfo = fallback.rubyVersion;
         rubyUri = fallback.uri;
-      } catch (error: any) {
-        if (error instanceof RubyVersionCancellationError) {
-          // Try to re-activate if the user has configured a fallback during cancellation
-          return this.activate();
-        }
-
-        throw error;
       }
+    } catch (error: any) {
+      if (error instanceof RubyActivationCancellationError) {
+        // Try to re-activate if the user has configured a fallback during cancellation
+        return this.activate();
+      }
+
+      throw error;
+    }
+
+    // If we couldn't find a Ruby installation, that means there's a `.ruby-version` file, but that Ruby is not
+    // installed. In this case, we fallback to a closest installation of Ruby - preferably only varying in patch
+    try {
+      if (!rubyUri) {
+        const currentVersionInfo = { ...versionInfo };
+
+        const fallback = await this.fallbackWithCancellation(
+          `Couldn't find installation for ${versionInfo.version}. Trying to fall back to other Ruby in 10 seconds`,
+          "You can cancel this fallback and install the required Ruby",
+          async () => this.findClosestRubyInstallation(currentVersionInfo),
+          () => this.missingRubyError(currentVersionInfo.version),
+        );
+
+        versionInfo = fallback.rubyVersion;
+        rubyUri = fallback.uri;
+      }
+    } catch (error: any) {
+      if (error instanceof RubyActivationCancellationError) {
+        // Try to re-activate if the user has configured a fallback during cancellation
+        return this.activate();
+      }
+
+      throw error;
     }
 
     this.outputChannel.info(
@@ -106,7 +133,9 @@ export class Chruby extends VersionManager {
   }
 
   // Returns the full URI to the Ruby executable
-  protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri> {
+  protected async findRubyUri(
+    rubyVersion: RubyVersion,
+  ): Promise<vscode.Uri | undefined> {
     const possibleVersionNames = rubyVersion.engine
       ? [`${rubyVersion.engine}-${rubyVersion.version}`, rubyVersion.version]
       : [rubyVersion.version, `ruby-${rubyVersion.version}`];
@@ -137,10 +166,67 @@ export class Chruby extends VersionManager {
       }
     }
 
-    throw new Error(
-      `Cannot find installation directory for Ruby version ${possibleVersionNames.join(" or ")}.
-       Searched in ${this.rubyInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
-    );
+    return undefined;
+  }
+
+  private async findClosestRubyInstallation(rubyVersion: RubyVersion): Promise<{
+    uri: vscode.Uri;
+    rubyVersion: RubyVersion;
+  }> {
+    const [major, minor, _patch] = rubyVersion.version.split(".");
+    const directories: { uri: vscode.Uri; rubyVersion: RubyVersion }[] = [];
+
+    for (const uri of this.rubyInstallationUris) {
+      try {
+        // Accumulate all directories that match the `engine-version` pattern and that start with the same requested
+        // major version. We do not try to approximate major versions
+        (await vscode.workspace.fs.readDirectory(uri)).forEach(([name]) => {
+          const match =
+            /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(
+              name,
+            );
+
+          if (match?.groups && match.groups.version.startsWith(major)) {
+            directories.push({
+              uri: vscode.Uri.joinPath(uri, name, "bin", "ruby"),
+              rubyVersion: {
+                engine: match.groups.engine,
+                version: match.groups.version,
+              },
+            });
+          }
+        });
+      } catch (error: any) {
+        // If the directory doesn't exist, keep searching
+        this.outputChannel.debug(
+          `Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`,
+        );
+        continue;
+      }
+    }
+
+    // Sort the directories based on the difference between the minor version and the requested minor version. On
+    // conflicts, we use the patch version to break the tie. If there's no distance, we prefer the higher patch version
+    const closest = directories.sort((left, right) => {
+      const leftVersion = left.rubyVersion.version.split(".");
+      const rightVersion = right.rubyVersion.version.split(".");
+
+      const leftDiff = Math.abs(Number(leftVersion[1]) - Number(minor));
+      const rightDiff = Math.abs(Number(rightVersion[1]) - Number(minor));
+
+      // If the distance to minor version is the same, prefer higher patch number
+      if (leftDiff === rightDiff) {
+        return Number(rightVersion[2] || 0) - Number(leftVersion[2] || 0);
+      }
+
+      return leftDiff - rightDiff;
+    })[0];
+
+    if (closest) {
+      return closest;
+    }
+
+    throw new Error("Cannot find any Ruby installations");
   }
 
   // Returns the Ruby version information including version and engine. E.g.: ruby-3.3.0, truffleruby-21.3.0
@@ -232,7 +318,7 @@ export class Chruby extends VersionManager {
           await this.handleCancelledFallback(errorFn);
 
           // We throw this error to be able to catch and re-run activation after the user has configured a fallback
-          throw new RubyVersionCancellationError();
+          throw new RubyActivationCancellationError();
         }
 
         return fallbackFn();
@@ -394,6 +480,10 @@ export class Chruby extends VersionManager {
       result.stderr.split(ACTIVATION_SEPARATOR);
 
     return { defaultGems, gemHome, yjit: yjit === "true", version };
+  }
+
+  private missingRubyError(version: string) {
+    return new Error(`Cannot find Ruby installation for version ${version}`);
   }
 
   private rubyVersionError() {
