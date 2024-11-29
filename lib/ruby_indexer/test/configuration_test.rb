@@ -184,7 +184,9 @@ module RubyIndexer
           RUBY
 
           Bundler.with_unbundled_env do
-            system("bundle install")
+            capture_subprocess_io do
+              system("bundle install")
+            end
 
             stdout, _stderr = capture_subprocess_io do
               script = [
