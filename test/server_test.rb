@@ -714,6 +714,36 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_requests_to_a_non_existing_position_return_error
+    uri = URI("file:///foo.rb")
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    @server.process_message({
+      id: 1,
+      method: "textDocument/completion",
+      params: {
+        textDocument: {
+          uri: uri,
+        },
+        position: { line: 10, character: 0 },
+      },
+    })
+
+    error = find_message(RubyLsp::Error)
+    assert_match("Request textDocument/completion failed to find the target position.", error.message)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)

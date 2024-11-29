@@ -119,11 +119,23 @@ module RubyLsp
         # If a document is deleted before we are able to process all of its enqueued requests, we will try to read it
         # from disk and it raise this error. This is expected, so we don't include the `data` attribute to avoid
         # reporting these to our telemetry
-        if e.is_a?(Store::NonExistingDocumentError)
+        case e
+        when Store::NonExistingDocumentError
           send_message(Error.new(
             id: message[:id],
             code: Constant::ErrorCodes::INVALID_PARAMS,
             message: e.full_message,
+          ))
+        when Document::LocationNotFoundError
+          send_message(Error.new(
+            id: message[:id],
+            code: Constant::ErrorCodes::REQUEST_FAILED,
+            message: <<~MESSAGE,
+              Request #{message[:method]} failed to find the target position.
+              The file might have been modified while the server was in the middle of searching for the target.
+              If you experience this regularly, please report any findings and extra information on
+              https://github.com/Shopify/ruby-lsp/issues/2446
+            MESSAGE
           ))
         else
           send_message(Error.new(
