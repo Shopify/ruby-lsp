@@ -91,7 +91,8 @@ module RubyLsp
         # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
         # else is pushed into the incoming queue
         case method
-        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
+        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange",
+             "$/cancelRequest"
           process_message(message)
         when "shutdown"
           send_log_message("Shutting down Ruby LSP...")
@@ -133,6 +134,12 @@ module RubyLsp
       @outgoing_queue.pop
     end
 
+    # This method is only intended to be used in tests! Pushes a message to the incoming queue directly
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def push_message(message)
+      @incoming_queue << message
+    end
+
     sig { abstract.params(message: T::Hash[Symbol, T.untyped]).void }
     def process_message(message); end
 
@@ -154,7 +161,11 @@ module RubyLsp
           # Check if the request was cancelled before trying to process it
           @mutex.synchronize do
             if id && @cancelled_requests.include?(id)
-              send_message(Result.new(id: id, response: nil))
+              send_message(Error.new(
+                id: id,
+                code: Constant::ErrorCodes::REQUEST_CANCELLED,
+                message: "Request #{id} was cancelled",
+              ))
               @cancelled_requests.delete(id)
               next
             end
