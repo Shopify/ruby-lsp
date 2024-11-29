@@ -15,10 +15,12 @@ module RubyIndexer
       @config.apply_config({ "excluded_patterns" => ["**/fixtures/**/*.rb"] })
       uris = @config.indexable_uris
 
+      bundle_path = Bundler.bundle_path.join("gems")
+
       assert(uris.none? { |uri| uri.full_path.include?("test/fixtures") })
-      assert(uris.none? { |uri| uri.full_path.include?("minitest-reporters") })
-      assert(uris.none? { |uri| uri.full_path.include?("ansi") })
-      assert(uris.any? { |uri| uri.full_path.include?("sorbet-runtime") })
+      assert(uris.none? { |uri| uri.full_path.include?(bundle_path.join("minitest-reporters").to_s) })
+      assert(uris.none? { |uri| uri.full_path.include?(bundle_path.join("ansi").to_s) })
+      assert(uris.any? { |uri| uri.full_path.include?(bundle_path.join("sorbet-runtime").to_s) })
       assert(uris.none? { |uri| uri.full_path == __FILE__ })
     end
 
@@ -164,6 +166,40 @@ module RubyIndexer
 
         uris = @config.indexable_uris
         assert(uris.find { |u| File.basename(u.full_path) == "find_me.rb" })
+      end
+    end
+
+    def test_transitive_dependencies_for_non_dev_gems_are_not_excluded
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          # Both IRB and debug depend on reline. Since IRB is in the default group, reline should not be excluded
+          File.write(File.join(dir, "Gemfile"), <<~RUBY)
+            source "https://rubygems.org"
+            gem "irb"
+            gem "ruby-lsp", path: "#{Bundler.root}"
+
+            group :development do
+              gem "debug"
+            end
+          RUBY
+
+          Bundler.with_unbundled_env do
+            system("bundle install")
+
+            stdout, _stderr = capture_subprocess_io do
+              script = [
+                "require \"ruby_lsp/internal\"",
+                "print RubyIndexer::Configuration.new.instance_variable_get(:@excluded_gems).join(\",\")",
+              ].join(";")
+              system("bundle exec ruby -e '#{script}'")
+            end
+
+            excluded_gems = stdout.split(",")
+            assert_includes(excluded_gems, "debug")
+            refute_includes(excluded_gems, "reline")
+            refute_includes(excluded_gems, "irb")
+          end
+        end
       end
     end
   end
