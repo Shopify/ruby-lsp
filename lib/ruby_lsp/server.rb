@@ -464,11 +464,19 @@ module RubyLsp
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
-      # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
-      # updated on save
-      @global_state.index.handle_change(uri) do |index|
-        index.delete(uri, skip_require_paths_tree: true)
-        RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
+      if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
+        # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
+        # updated on save
+        @global_state.synchronize do
+          send_log_message("Detected that last edit may have modified declarations. Re-indexing #{uri}")
+
+          @global_state.index.handle_change(uri) do |index|
+            index.delete(uri, skip_require_paths_tree: true)
+            RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
+            dispatcher.dispatch(parse_result.value)
+          end
+        end
+      else
         dispatcher.dispatch(parse_result.value)
       end
 
