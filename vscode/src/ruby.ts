@@ -5,13 +5,7 @@ import os from "os";
 import * as vscode from "vscode";
 import { Executable, ExecutableOptions } from "vscode-languageclient/node";
 
-import {
-  asyncExec,
-  parseCommand,
-  PathConverter,
-  PathConverterInterface,
-  RubyInterface,
-} from "./common";
+import { asyncExec, parseCommand, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -75,7 +69,7 @@ export class Ruby implements RubyInterface {
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
-  private _pathConverter: PathConverterInterface;
+  private _pathMapping: Record<string, string> = {};
   private _wrapCommand: (executable: Executable) => Executable;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
@@ -92,7 +86,6 @@ export class Ruby implements RubyInterface {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
     this.telemetry = telemetry;
-    this._pathConverter = new PathConverter();
     this._wrapCommand = (executable: Executable) => executable;
 
     const customBundleGemfile: string = vscode.workspace
@@ -122,8 +115,8 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  get pathConverter() {
-    return this._pathConverter;
+  get pathMapping() {
+    return this._pathMapping;
   }
 
   get env() {
@@ -276,7 +269,7 @@ export class Ruby implements RubyInterface {
   }
 
   private async runActivation(manager: VersionManager) {
-    const { env, version, yjit, gemPath, pathConverter, wrapCommand } =
+    const { env, version, yjit, gemPath, pathMapping, wrapCommand } =
       await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
 
@@ -289,8 +282,8 @@ export class Ruby implements RubyInterface {
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
     this.gemPath.push(...gemPath);
 
-    if (pathConverter) {
-      this._pathConverter = pathConverter;
+    if (pathMapping) {
+      this._pathMapping = pathMapping;
     }
     if (wrapCommand) {
       this._wrapCommand = wrapCommand;

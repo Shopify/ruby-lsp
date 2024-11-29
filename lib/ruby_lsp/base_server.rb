@@ -57,6 +57,7 @@ module RubyLsp
           if uri
             begin
               parsed_uri = URI(uri)
+              parsed_uri = @global_state.to_internal_uri(parsed_uri)
               message[:params][:textDocument][:uri] = parsed_uri
 
               # We don't want to try to parse documents on text synchronization notifications

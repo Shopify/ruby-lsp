@@ -1,10 +1,5 @@
 import path from "path";
 
-import * as vscode from "vscode";
-
-import { PathConverterInterface } from "./common";
-import { WorkspaceChannel } from "./workspaceChannel";
-
 export interface ComposeConfig {
   services: Record<string, ComposeService>;
   ["x-mutagen"]?: { sync: Record<string, MutagenShare> } | undefined;
@@ -51,66 +46,6 @@ export function fetchPathMapping(
   );
 
   return bindings;
-}
-
-export class ContainerPathConverter implements PathConverterInterface {
-  readonly pathMapping: [string, string][];
-  private readonly outputChannel: WorkspaceChannel;
-
-  constructor(
-    pathMapping: Record<string, string>,
-    outputChannel: WorkspaceChannel,
-  ) {
-    this.pathMapping = Object.entries(pathMapping);
-    this.outputChannel = outputChannel;
-  }
-
-  toRemotePath(path: string) {
-    for (const [local, remote] of this.pathMapping) {
-      if (path.startsWith(local)) {
-        const remotePath = path.replace(local, remote);
-
-        this.outputChannel.debug(
-          `Converted toRemotePath ${path} to ${remotePath}`,
-        );
-
-        return path.replace(local, remote);
-      }
-    }
-
-    return path;
-  }
-
-  toLocalPath(path: string) {
-    for (const [local, remote] of this.pathMapping) {
-      if (path.startsWith(remote)) {
-        const localPath = path.replace(remote, local);
-
-        this.outputChannel.debug(
-          `Converted toLocalPath ${path} to ${localPath}`,
-        );
-
-        return localPath;
-      }
-    }
-
-    return path;
-  }
-
-  toRemoteUri(localUri: vscode.Uri) {
-    const remotePath = this.toRemotePath(localUri.fsPath);
-    return vscode.Uri.file(remotePath);
-  }
-
-  alternativePaths(path: string) {
-    const alternatives = [
-      this.toRemotePath(path),
-      this.toLocalPath(path),
-      path,
-    ];
-
-    return Array.from(new Set(alternatives));
-  }
 }
 
 function fetchComposeBindings(

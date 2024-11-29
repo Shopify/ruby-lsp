@@ -421,6 +421,8 @@ module RubyLsp
         uri = message.dig(:params, :textDocument, :uri)
         @store.delete(uri)
 
+        uri = global_state.to_external_uri(uri)
+
         # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
         send_message(
           Notification.new(
@@ -1106,10 +1108,13 @@ module RubyLsp
           dep_keys = definition.locked_deps.keys.to_set
 
           definition.specs.map do |spec|
+            uri = URI("file://#{spec.full_gem_path}")
+            uri = global_state.to_external_uri(uri)
+
             {
               name: spec.name,
               version: spec.version,
-              path: spec.full_gem_path,
+              path: uri.path,
               dependency: dep_keys.include?(spec.name),
             }
           end

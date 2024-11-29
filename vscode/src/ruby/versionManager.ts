@@ -6,14 +6,14 @@ import * as vscode from "vscode";
 import { Executable } from "vscode-languageclient/node";
 
 import { WorkspaceChannel } from "../workspaceChannel";
-import { asyncExec, PathConverterInterface } from "../common";
+import { asyncExec } from "../common";
 
 export interface ActivationResult {
   env: NodeJS.ProcessEnv;
   yjit: boolean;
   version: string;
   gemPath: string[];
-  pathConverter?: PathConverterInterface;
+  pathMapping?: Record<string, string>;
   wrapCommand?: (executable: Executable) => Executable;
 }
 

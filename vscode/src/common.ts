@@ -66,34 +66,6 @@ export interface WorkspaceInterface {
   error: boolean;
 }
 
-export interface PathConverterInterface {
-  pathMapping: [string, string][];
-  toRemotePath: (localPath: string) => string;
-  toLocalPath: (remotePath: string) => string;
-  toRemoteUri: (localUri: vscode.Uri) => vscode.Uri;
-  alternativePaths: (path: string) => string[];
-}
-
-export class PathConverter implements PathConverterInterface {
-  readonly pathMapping: [string, string][] = [];
-
-  toRemotePath(path: string) {
-    return path;
-  }
-
-  toLocalPath(path: string) {
-    return path;
-  }
-
-  toRemoteUri(localUri: vscode.Uri) {
-    return localUri;
-  }
-
-  alternativePaths(path: string) {
-    return [path];
-  }
-}
-
 // Event emitter used to signal that the language status items need to be refreshed
 export const STATUS_EMITTER = new vscode.EventEmitter<
   WorkspaceInterface | undefined
