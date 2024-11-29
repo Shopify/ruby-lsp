@@ -67,6 +67,7 @@ rhtml
 rindex
 rjson
 rmtree
+rruby
 rubyfmt
 rubylibdir
 rubylibprefix

@@ -273,6 +273,9 @@ module RubyIndexer
       end
 
       others.concat(this_gem.to_spec.dependencies) if this_gem
+      others.concat(others.filter_map { |d| d.to_spec&.dependencies }.flatten)
+      others.uniq!
+      others.map!(&:name)
 
       excluded.each do |dependency|
         next unless dependency.runtime?
@@ -281,12 +284,7 @@ module RubyIndexer
         next unless spec
 
         spec.dependencies.each do |transitive_dependency|
-          # If the transitive dependency is included in other groups, skip it
-          next if others.any? { |d| d.name == transitive_dependency.name }
-
-          # If the transitive dependency is included as a transitive dependency of a gem outside of the development
-          # group, skip it
-          next if others.any? { |d| d.to_spec&.dependencies&.include?(transitive_dependency) }
+          next if others.include?(transitive_dependency.name)
 
           excluded << transitive_dependency
         end
