@@ -158,10 +158,6 @@ Sorry, your browser doesn't support embedded videos. This video demonstrates the
 
 ### Completion
 
-{: .note }
-There is currently a technical limitation that [code is only indexed when saved](https://github.com/Shopify/ruby-lsp/issues/1908).
-This means if you add, for example, a new method to its called, its completion will not be available until you save that file.
-
 The completion feature provides users with completion candidates when the text they type matches certain indexed components. This helps speed up coding by reducing the need to type out full method names or constants.
 It also allows developers to discover constants or methods that are available to them.
 
