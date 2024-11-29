@@ -494,16 +494,18 @@ module RubyLsp
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
-      # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
-      # updated on save
-      @global_state.index.delete(uri, skip_require_tree: true)
-      RubyIndexer::DeclarationListener.new(
-        @global_state.index,
-        dispatcher,
-        parse_result,
-        uri,
-        collect_comments: true,
-      )
+      if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
+        # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
+        # updated on save
+        @global_state.index.delete(uri, skip_require_tree: true)
+        RubyIndexer::DeclarationListener.new(
+          @global_state.index,
+          dispatcher,
+          parse_result,
+          uri,
+          collect_comments: true,
+        )
+      end
 
       dispatcher.dispatch(parse_result.value)
 
