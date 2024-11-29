@@ -173,6 +173,9 @@ module RubyLsp
     sig { returns(String) }
     attr_reader :message
 
+    sig { returns(Integer) }
+    attr_reader :code
+
     sig { params(id: Integer, code: Integer, message: String, data: T.nilable(T::Hash[Symbol, T.untyped])).void }
     def initialize(id:, code:, message:, data: nil)
       @id = id

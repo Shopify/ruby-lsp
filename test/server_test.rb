@@ -744,6 +744,51 @@ class ServerTest < Minitest::Test
     assert_match("Request textDocument/completion failed to find the target position.", error.message)
   end
 
+  def test_cancelling_requests_returns_expected_error_code
+    uri = URI("file:///foo.rb")
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    mutex = Mutex.new
+    mutex.lock
+
+    # Use a mutex to lock the request in the middle so that we can cancel it before it finishes
+    @server.stubs(:text_document_definition) do |_message|
+      mutex.synchronize { 123 }
+    end
+
+    thread = Thread.new do
+      @server.push_message({
+        id: 1,
+        method: "textDocument/definition",
+        params: {
+          textDocument: {
+            uri: uri,
+          },
+          position: { line: 0, character: 6 },
+        },
+      })
+    end
+
+    @server.process_message({ method: "$/cancelRequest", params: { id: 1 } })
+    mutex.unlock
+    thread.join
+
+    error = find_message(RubyLsp::Error)
+    assert_equal(RubyLsp::Constant::ErrorCodes::REQUEST_CANCELLED, error.code)
+    assert_equal("Request 1 was cancelled", error.message)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
