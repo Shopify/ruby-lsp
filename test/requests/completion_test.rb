@@ -1087,6 +1087,65 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_class_variables
+    source = <<~RUBY
+      class Foo
+        def set_variables
+          @@foo = 1
+          @@foobar = 2
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @@ = 123
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@foo", "@@foobar"], result.map(&:label))
+      assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
+    end
+  end
+
+  def test_completion_for_class_variables_show_only_uniq_entries
+    source = <<~RUBY
+      class Foo
+        def set_variables
+          @@foo = 1
+          @@foo = 2
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @@ = 123
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@foo"], result.map(&:label))
+    end
+  end
+
   def test_completion_for_instance_variables
     source = +<<~RUBY
       class Foo
