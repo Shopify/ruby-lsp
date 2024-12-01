@@ -430,6 +430,38 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_for_class_variables
+    source = <<~RUBY
+      class Foo
+        def foo
+          # or write node
+          @@a ||= 1
+        end
+
+        def bar
+          # operator write node
+          @@a += 5
+        end
+
+        def baz
+          @@a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 12 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("or write node", contents)
+      assert_match("operator write node", contents)
+    end
+  end
+
   def test_hovering_over_inherited_methods
     source = <<~RUBY
       module Foo
