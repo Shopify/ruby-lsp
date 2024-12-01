@@ -770,7 +770,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       response = server.pop_response.response
       assert_equal(2, response.size)
       assert_equal(2, response[0].range.start.line)
-      assert_equal(6, response[0].range.start.line)
+      assert_equal(6, response[1].range.start.line)
     end
   end
 
