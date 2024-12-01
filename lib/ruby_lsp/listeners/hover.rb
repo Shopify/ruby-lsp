@@ -361,12 +361,17 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_class_variable_hover(name)
-        entries = @index[name]
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_class_variable(name, type.name)
         return unless entries
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)
         end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String, location: Prism::Location).void }

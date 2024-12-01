@@ -1117,6 +1117,40 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_inherited_class_variables
+    source = <<~RUBY
+      module Foo
+        def set_variable
+          @@bar = 9
+        end
+      end
+
+      class Parent
+        def set_variable
+          @@baz = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 16, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@bar", "@@baz"], result.map(&:label))
+    end
+  end
+
   def test_completion_for_class_variables_show_only_uniq_entries
     source = <<~RUBY
       class Foo

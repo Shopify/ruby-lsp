@@ -270,8 +270,10 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_class_variable_definition(name)
-        entries = @index[name]
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
 
+        entries = @index.resolve_class_variable(name, type.name)
         return unless entries
 
         entries.each do |entry|
@@ -285,6 +287,8 @@ module RubyLsp
             ),
           )
         end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String).void }

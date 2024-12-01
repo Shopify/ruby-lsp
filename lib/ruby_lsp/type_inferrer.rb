@@ -21,7 +21,9 @@ module RubyLsp
         infer_receiver_for_call_node(node, node_context)
       when Prism::InstanceVariableReadNode, Prism::InstanceVariableAndWriteNode, Prism::InstanceVariableWriteNode,
         Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode,
-        Prism::SuperNode, Prism::ForwardingSuperNode
+        Prism::SuperNode, Prism::ForwardingSuperNode, Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode,
+        Prism::ClassVariableOperatorWriteNode, Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode,
+        Prism::ClassVariableTargetNode
         self_receiver_handling(node_context)
       end
     end

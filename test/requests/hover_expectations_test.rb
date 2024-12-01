@@ -462,6 +462,44 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_for_inherited_class_variables
+    source = <<~RUBY
+      module Foo
+        def set_variable
+          # Foo
+          @@bar = 1
+        end
+      end
+
+      class Parent
+        def set_variable
+          # Parent
+          @@bar = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @@bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 18 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Foo", contents)
+      assert_match("Parent", contents)
+    end
+  end
+
   def test_hovering_over_inherited_methods
     source = <<~RUBY
       module Foo

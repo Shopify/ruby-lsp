@@ -774,6 +774,42 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_inherited_class_variables
+    source = <<~RUBY
+      module Foo
+        def set_variable
+          @@bar = 1
+        end
+      end
+
+      class Parent
+        def set_variable
+          @@bar = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @@bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 16 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(2, response[0].range.start.line)
+      assert_equal(8, response[1].range.start.line)
+    end
+  end
+
   def test_definition_for_instance_variables
     source = <<~RUBY
       class Foo

@@ -364,25 +364,33 @@ module RubyLsp
 
       sig { params(name: String, location: Prism::Location).void }
       def handle_class_variable_completion(name, location)
-        candidates = @index.prefix_search(name)
-
-        return if candidates.none?
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
 
         range = range_from_location(location)
 
-        candidates.flatten.uniq(&:name).each do |entry|
-          entry_name = entry.name
+        @index.class_variable_completion_candidates(name, type.name).each do |entry|
+          variable_name = entry.name
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+          )
 
           @response_builder << Interface::CompletionItem.new(
-            label: entry_name,
-            filter_text: entry_name,
-            label_details: Interface::CompletionItemLabelDetails.new(
-              description: entry.file_name,
+            label: variable_name,
+            label_details: label_details,
+            text_edit: Interface::TextEdit.new(
+              range: range,
+              new_text: variable_name,
             ),
-            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
             kind: Constant::CompletionItemKind::FIELD,
+            data: {
+              owner_name: entry.owner&.name,
+            },
           )
         end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String, location: Prism::Location).void }
