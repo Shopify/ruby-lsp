@@ -55,6 +55,12 @@ module RubyLsp
           :on_symbol_node_enter,
           :on_super_node_enter,
           :on_forwarding_super_node_enter,
+          :on_class_variable_and_write_node_enter,
+          :on_class_variable_operator_write_node_enter,
+          :on_class_variable_or_write_node_enter,
+          :on_class_variable_read_node_enter,
+          :on_class_variable_target_node_enter,
+          :on_class_variable_write_node_enter,
         )
       end
 
@@ -196,6 +202,36 @@ module RubyLsp
         handle_super_node_definition
       end
 
+      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      def on_class_variable_and_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      def on_class_variable_operator_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      def on_class_variable_or_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableTargetNode).void }
+      def on_class_variable_target_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableReadNode).void }
+      def on_class_variable_read_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableWriteNode).void }
+      def on_class_variable_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
       private
 
       sig { void }
@@ -215,6 +251,25 @@ module RubyLsp
 
       sig { params(name: String).void }
       def handle_global_variable_definition(name)
+        entries = @index[name]
+
+        return unless entries
+
+        entries.each do |entry|
+          location = entry.location
+
+          @response_builder << Interface::Location.new(
+            uri: entry.uri.to_s,
+            range: Interface::Range.new(
+              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
+            ),
+          )
+        end
+      end
+
+      sig { params(name: String).void }
+      def handle_class_variable_definition(name)
         entries = @index[name]
 
         return unless entries
