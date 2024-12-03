@@ -210,6 +210,7 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - Allow the Ruby LSP to connect to a typechecker add-on to improve accuracy
 - Make the Ruby LSP’s default functionality act as a fallback for the more accurate typechecker results
 - Introduce a mechanism for add-ons to be automatically detected without needing user configuration
+- [Support intrinsics for `new` and similar methods]
 
 [Ruby on Rails Community survey]: https://rails-hosting.com/2022/#ruby-rails-version-updates
 [Sorbet]: https://sorbet.org/
@@ -229,3 +230,4 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 [Explore speeding up indexing by caching the index for gems]: https://github.com/Shopify/ruby-lsp/issues/1009
 [Add range formatting support for formatters that do support it]: https://github.com/Shopify/ruby-lsp/issues/203
 [Add ERB support]: https://github.com/Shopify/ruby-lsp/issues/1055
+[Support intrinsics for `new` and similar methods]: https://github.com/Shopify/ruby-lsp/issues/2585
