@@ -507,7 +507,7 @@ Finding a general solution to this problem is not trivial due to the number of d
 systems, shells, plugins and version managers. On top of those, people configure their shell environments differently.
 For example, some users may source their version managers in `~/.zshrc` while others will do it in `~/.zshenv`  or `~/.zprofile`.<br><br>
 If experiencing issues, keep in mind that shell configurations could be interfering, check
-[troubleshooting](troubleshooting) and, if none of the listed solutions work, please [report an issue](https://github.com/Shopify/ruby-lsp/issues/new).
+[troubleshooting](troubleshooting) and, if none of the listed solutions work, please [report an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
 ### Test explorer
 
@@ -525,7 +525,7 @@ requirements
 ## Experimental Features
 
 Ruby LSP also provides experimental features that are not enabled by default. If you have feedback about these features,
-you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new).
+you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
 ### Ancestors Hierarchy Request
 

@@ -116,7 +116,7 @@ requests, which means the dialogue will never go away.
 
 This is always the result of a bug in the server. It should always fail gracefully without getting into a corrupt state
 that prevents it from responding to new requests coming from the editor. If you encounter this, please submit a bug
-report [here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) including the
+report [here](https://github.com/Shopify/ruby-lsp/issues/new/choose) including the
 steps that led to the server getting stuck.
 
 ### Missing Features
@@ -185,7 +185,7 @@ Does the server status say it's running? If it is running, but you are missing c
 [features documentation](https://shopify.github.io/ruby-lsp/#general-features) to ensure we already added support for it.
 
 If the feature is listed as fully supported, but not working for you, report [an
-issue](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&projects=&template=bug_template.yml) so that we can
+issue](https://github.com/Shopify/ruby-lsp/issues/new/choose) so that we can
 assist.
 
 ### Check the VS Code output tab
@@ -245,5 +245,5 @@ In the meantime, you can [configure Ruby LSP to ignore a particular gem or file 
 ## After troubleshooting
 
 If after troubleshooting the Ruby LSP is still not initializing properly, please report an issue
-[here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) so that we can assist
+[here](https://github.com/Shopify/ruby-lsp/issues/new/choose) so that we can assist
 in fixing the problem. Remember to include the steps taken when trying to diagnose the issue.

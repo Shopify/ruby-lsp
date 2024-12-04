@@ -40,4 +40,4 @@ the `ruby-lsp` language server gem to ensure fast distribution of bug fixes and 
 {: .note }
 Setting up the composed bundle requires several integrations with Bundler and there are many edge cases to consider,
 like how to handle configurations or installing private dependencies. If you encounter a problem with the composed
-bundle setup, please let us know by [reporting an issue](https://github.com/Shopify/ruby-lsp/issues/new).
+bundle setup, please let us know by [reporting an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
