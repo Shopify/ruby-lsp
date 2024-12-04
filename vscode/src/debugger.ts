@@ -256,9 +256,11 @@ export class Debugger
 
       args.push("--open", "--command", "--", configuration.program);
 
-      LOG_CHANNEL.info(`Spawning debugger in directory ${cwd}`);
-      LOG_CHANNEL.info(`   Command bundle ${args.join(" ")}`);
-      LOG_CHANNEL.info(`   Environment ${JSON.stringify(configuration.env)}`);
+      this.logDebuggerMessage(`Spawning debugger in directory ${cwd}`);
+      this.logDebuggerMessage(`   Command bundle ${args.join(" ")}`);
+      this.logDebuggerMessage(
+        `   Environment ${JSON.stringify(configuration.env)}`,
+      );
 
       this.debugProcess = spawn("bundle", args, {
         shell: true,
@@ -268,8 +270,7 @@ export class Debugger
 
       this.debugProcess.stderr.on("data", (data) => {
         const message = data.toString();
-        // Print whatever data we get in stderr in the debug console since it might be relevant for the user
-        this.console.append(message);
+        this.logDebuggerMessage(message);
 
         if (!initialized) {
           initialMessage += message;
@@ -296,14 +297,14 @@ export class Debugger
         }
       });
 
-      // Anything printed by debug to stdout we want to show in the debug console
+      // Anything printed by debug to stdout we want to show in the Ruby LSP output channel
       this.debugProcess.stdout.on("data", (data) => {
-        this.console.append(data.toString());
+        this.logDebuggerMessage(data.toString());
       });
 
-      // If any errors occur in the server, we have to show that in the debug console and reject the promise
+      // If any errors occur in the server, we have to show that in the Ruby LSP output channel and reject the promise
       this.debugProcess.on("error", (error) => {
-        this.console.append(error.message);
+        this.logDebuggerMessage(error.message);
         reject(error);
       });
 
@@ -312,8 +313,10 @@ export class Debugger
       // actually an error
       this.debugProcess.on("close", (code) => {
         if (code) {
-          const message = `Debugger exited with status ${code}. Check the output channel for more information.`;
-          this.console.append(message);
+          const message =
+            `Debugger exited with status ${code}. ` +
+            "Check the Ruby LSP output channel for more information.";
+          this.logDebuggerMessage(message);
           reject(new Error(message));
         }
       });
@@ -340,5 +343,13 @@ export class Debugger
         });
       });
     });
+  }
+
+  private logDebuggerMessage(message: string) {
+    const trimmedMessage = message.trimEnd();
+    if (trimmedMessage.length > 0) {
+      LOG_CHANNEL.info(`[debugger]: ${trimmedMessage}`);
+      this.console.append(trimmedMessage);
+    }
   }
 }
