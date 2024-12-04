@@ -110,13 +110,14 @@ module RubyLsp
         name = constant_name(node)
         return if name.nil?
 
+        range = range_from_location(node.location)
         candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         candidates.each do |entries|
           complete_name = T.must(entries.first).name
           @response_builder << build_entry_completion(
             complete_name,
             name,
-            range_from_location(node.location),
+            range,
             entries,
             top_level?(complete_name),
           )
@@ -335,6 +336,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
+        range = range_from_location(location)
         @index.instance_variable_completion_candidates(name, type.name).each do |entry|
           variable_name = entry.name
 
@@ -346,7 +348,7 @@ module RubyLsp
             label: variable_name,
             label_details: label_details,
             text_edit: Interface::TextEdit.new(
-              range: range_from_location(location),
+              range: range,
               new_text: variable_name,
             ),
             kind: Constant::CompletionItemKind::FIELD,
