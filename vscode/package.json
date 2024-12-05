@@ -153,6 +153,11 @@
         "command": "rubyLsp.collectRubyLspInfo",
         "title": "Collect Ruby LSP information for issue reporting",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.migrateLaunchConfiguration",
+        "title": "Migrate launch.json configurations from rdbg to ruby_lsp",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {

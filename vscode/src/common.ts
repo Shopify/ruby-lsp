@@ -29,6 +29,7 @@ export enum Command {
   NewMinitestFile = "rubyLsp.newMinitestFile",
   CollectRubyLspInfo = "rubyLsp.collectRubyLspInfo",
   StartServerInDebugMode = "rubyLsp.startServerInDebugMode",
+  MigrateLaunchConfiguration = "rubyLsp.migrateLaunchConfiguration",
 }
 
 export interface RubyInterface {
