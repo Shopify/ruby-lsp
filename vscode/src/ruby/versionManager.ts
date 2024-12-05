@@ -3,15 +3,18 @@ import path from "path";
 import os from "os";
 
 import * as vscode from "vscode";
+import { Executable } from "vscode-languageclient/node";
 
 import { WorkspaceChannel } from "../workspaceChannel";
-import { asyncExec } from "../common";
+import { asyncExec, PathConverterInterface } from "../common";
 
 export interface ActivationResult {
   env: NodeJS.ProcessEnv;
   yjit: boolean;
   version: string;
   gemPath: string[];
+  pathConverter?: PathConverterInterface;
+  wrapCommand?: (executable: Executable) => Executable;
 }
 
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
