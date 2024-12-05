@@ -347,10 +347,12 @@ export class Debugger
   }
 
   private logDebuggerMessage(message: string) {
-    const trimmedMessage = message.trimEnd();
-    if (trimmedMessage.length > 0) {
-      LOG_CHANNEL.info(`[debugger]: ${trimmedMessage}`);
-      this.console.append(trimmedMessage);
-    }
+    // In the Output panel, each log automatically gets a new line
+    // And trailing newlines will create one additional line in the panel, so we trimEnd() here to avoid that
+    LOG_CHANNEL.info(`[debugger]: ${message.trimEnd()}`);
+
+    // In the Debug Console, output doesn't get a new line automatically, so we don't trimEnd() here as well as print
+    // the newlines too
+    this.console.append(message);
   }
 }
