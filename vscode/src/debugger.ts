@@ -314,8 +314,9 @@ export class Debugger
       this.debugProcess.on("close", (code) => {
         if (code) {
           const message =
-            `Debugger exited with status ${code}. ` +
-            "Check the Ruby LSP output channel for more information.";
+            `Debugger exited with status ${code}.\n` +
+            `Please make sure \`bundle ${args.join(" ")}\` runs without errors in the terminal.\n` +
+            "Check the Ruby LSP output channel for more information.\n";
           this.logDebuggerMessage(message);
           reject(new Error(message));
         }
