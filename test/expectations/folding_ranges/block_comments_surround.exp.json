@@ -1,0 +1,27 @@
+{
+  "result": [
+    {
+      "startLine": 2,
+      "endLine": 4,
+      "kind": "region"
+    },
+    {
+      "startLine": 2,
+      "endLine": 4,
+      "kind": "region"
+    },
+    {
+      "startLine": 0,
+      "endLine": 1,
+      "kind": "comment"
+    },
+    {
+      "startLine": 3,
+      "endLine": 4,
+      "kind": "comment"
+    }
+  ],
+  "params": [
+
+  ]
+}

@@ -195,7 +195,7 @@ module RubyLsp
       def push_comment_ranges
         # Group comments that are on consecutive lines and then push ranges for each group that has at least 2 comments
         @comments.chunk_while do |this, other|
-          this.location.end_line + 1 == other.location.start_line
+          this.location.end_line + 1 == other.location.start_line && !this.trailing? && !other.trailing?
         end.each do |chunk|
           next if chunk.length == 1
 
