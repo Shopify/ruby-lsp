@@ -48,6 +48,8 @@ module RubyIndexer
       )
 
       @configuration = T.let(RubyIndexer::Configuration.new, Configuration)
+
+      @initial_indexing_complete = T.let(false, T::Boolean)
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
@@ -56,8 +58,8 @@ module RubyIndexer
       (@included_hooks[module_name] ||= []) << hook
     end
 
-    sig { params(uri: URI::Generic).void }
-    def delete(uri)
+    sig { params(uri: URI::Generic, skip_require_tree: T::Boolean).void }
+    def delete(uri, skip_require_tree: false)
       key = uri.to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
@@ -80,6 +82,7 @@ module RubyIndexer
       end
 
       @uris_to_entries.delete(key)
+      return if skip_require_tree
 
       require_path = uri.require_path
       @require_paths_tree.delete(require_path) if require_path
@@ -358,10 +361,12 @@ module RubyIndexer
       # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
       # behavior and can take appropriate action.
       # binding.break
-      if @entries.any?
+      if @initial_indexing_complete
         raise IndexNotEmptyError,
           "The index is not empty. To prevent invalid entries, `index_all` can only be called once."
       end
+
+      @initial_indexing_complete = true
 
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
