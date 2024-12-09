@@ -211,6 +211,7 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 - Make the Ruby LSP’s default functionality act as a fallback for the more accurate typechecker results
 - Introduce a mechanism for add-ons to be automatically detected without needing user configuration
 - [Support intrinsics for `new` and similar methods]
+- [(VS Code) Allow navigation between related code, e.g. from test to implementation]
 
 [Ruby on Rails Community survey]: https://rails-hosting.com/2022/#ruby-rails-version-updates
 [Sorbet]: https://sorbet.org/
@@ -231,3 +232,4 @@ Interested in contributing? Check out the issues tagged with [help-wanted] or [g
 [Add range formatting support for formatters that do support it]: https://github.com/Shopify/ruby-lsp/issues/203
 [Add ERB support]: https://github.com/Shopify/ruby-lsp/issues/1055
 [Support intrinsics for `new` and similar methods]: https://github.com/Shopify/ruby-lsp/issues/2585
+[(VS Code) Allow navigation between related code, e.g. from test to implementation]: https://github.com/Shopify/ruby-lsp/issues/2966
