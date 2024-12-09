@@ -287,7 +287,7 @@ suite("StatusItems", () => {
         status.item.text,
         "Addons: requires server to be v0.17.4 or higher to display this field",
       );
-      assert.strictEqual(status.item.name, "Ruby LSP Addons");
+      assert.strictEqual(status.item.name, "Ruby LSP Add-ons");
     });
 
     test("Status displays no addons when addons is an empty array", () => {
@@ -295,10 +295,10 @@ suite("StatusItems", () => {
       status.refresh(workspace);
 
       assert.strictEqual(status.item.text, "Addons: none");
-      assert.strictEqual(status.item.name, "Ruby LSP Addons");
+      assert.strictEqual(status.item.name, "Ruby LSP Add-ons");
     });
 
-    test("Status displays addon count and command to list commands", () => {
+    test("Status displays add-on count and command to list commands", () => {
       workspace.lspClient!.addons = [
         { name: "foo", errored: false },
         { name: "bar", errored: true },
@@ -307,7 +307,7 @@ suite("StatusItems", () => {
       status.refresh(workspace);
 
       assert.strictEqual(status.item.text, "Addons: 2");
-      assert.strictEqual(status.item.name, "Ruby LSP Addons");
+      assert.strictEqual(status.item.name, "Ruby LSP Add-ons");
       assert.strictEqual(status.item.command?.title, "Details");
       assert.strictEqual(status.item.command.command, Command.DisplayAddons);
     });
