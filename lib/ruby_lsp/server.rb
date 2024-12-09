@@ -493,6 +493,18 @@ module RubyLsp
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
+
+      # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
+      # updated on save
+      @global_state.index.delete(uri, skip_require_tree: true)
+      RubyIndexer::DeclarationListener.new(
+        @global_state.index,
+        dispatcher,
+        parse_result,
+        uri,
+        collect_comments: true,
+      )
+
       dispatcher.dispatch(parse_result.value)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
