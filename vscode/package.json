@@ -744,7 +744,7 @@
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-prettier": "^5.2.1",
     "glob": "^11.0.0",
-    "mocha": "^10.8.2",
+    "mocha": "^11.0.1",
     "ovsx": "^0.10.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
