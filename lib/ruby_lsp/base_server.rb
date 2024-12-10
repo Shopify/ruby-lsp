@@ -95,11 +95,9 @@ module RubyLsp
              "$/cancelRequest"
           process_message(message)
         when "shutdown"
-          send_log_message("Shutting down Ruby LSP...")
-
-          shutdown
-
           @mutex.synchronize do
+            send_log_message("Shutting down Ruby LSP...")
+            shutdown
             run_shutdown
             @writer.write(Result.new(id: message[:id], response: nil).to_hash)
           end
