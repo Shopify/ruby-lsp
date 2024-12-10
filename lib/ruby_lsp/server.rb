@@ -1123,7 +1123,7 @@ module RubyLsp
 
     sig { override.void }
     def shutdown
-      Addon.addons.each(&:deactivate)
+      Addon.unload_addons
     end
 
     sig { void }

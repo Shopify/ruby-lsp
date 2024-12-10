@@ -97,6 +97,15 @@ module RubyLsp
         errors
       end
 
+      # Unloads all add-ons. Only intended to be invoked once when shutting down the Ruby LSP server
+      sig { void }
+      def unload_addons
+        @addons.each(&:deactivate)
+        @addons.clear
+        @addon_classes.clear
+        @file_watcher_addons.clear
+      end
+
       # Get a reference to another add-on object by name and version. If an add-on exports an API that can be used by
       # other add-ons, this is the way to get access to that API.
       #
