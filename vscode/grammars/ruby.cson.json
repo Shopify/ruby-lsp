@@ -2260,16 +2260,13 @@
           "end": "(?=,|\\|\\s*)",
           "patterns": [
             {
-              "match": "\\G([&*]?)([a-zA-Z][\\w_]*)|(_[\\w_]*)",
+              "match": "\\G([&*]?)([a-zA-Z_][\\w_]*)",
               "captures": {
                 "1": {
                   "name": "storage.type.variable.ruby"
                 },
                 "2": {
                   "name": "variable.other.block.ruby"
-                },
-                "3": {
-                  "name": "variable.other.block.unused.ruby variable.other.constant.ruby"
                 }
               }
             }
