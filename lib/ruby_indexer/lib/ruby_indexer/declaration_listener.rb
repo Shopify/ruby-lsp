@@ -80,6 +80,11 @@ module RubyIndexer
         :on_instance_variable_or_write_node_enter,
         :on_instance_variable_target_node_enter,
         :on_alias_method_node_enter,
+        :on_class_variable_and_write_node_enter,
+        :on_class_variable_operator_write_node_enter,
+        :on_class_variable_or_write_node_enter,
+        :on_class_variable_target_node_enter,
+        :on_class_variable_write_node_enter,
       )
     end
 
@@ -434,6 +439,31 @@ module RubyIndexer
       )
     end
 
+    sig { params(node: Prism::ClassVariableAndWriteNode).void }
+    def on_class_variable_and_write_node_enter(node)
+      handle_class_variable(node, node.name_loc)
+    end
+
+    sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+    def on_class_variable_operator_write_node_enter(node)
+      handle_class_variable(node, node.name_loc)
+    end
+
+    sig { params(node: Prism::ClassVariableOrWriteNode).void }
+    def on_class_variable_or_write_node_enter(node)
+      handle_class_variable(node, node.name_loc)
+    end
+
+    sig { params(node: Prism::ClassVariableTargetNode).void }
+    def on_class_variable_target_node_enter(node)
+      handle_class_variable(node, node.location)
+    end
+
+    sig { params(node: Prism::ClassVariableWriteNode).void }
+    def on_class_variable_write_node_enter(node)
+      handle_class_variable(node, node.name_loc)
+    end
+
     sig do
       params(
         name: String,
@@ -549,6 +579,34 @@ module RubyIndexer
         @uri,
         Location.from_prism_location(loc, @code_units_cache),
         comments,
+      ))
+    end
+
+    sig do
+      params(
+        node: T.any(
+          Prism::ClassVariableAndWriteNode,
+          Prism::ClassVariableOperatorWriteNode,
+          Prism::ClassVariableOrWriteNode,
+          Prism::ClassVariableTargetNode,
+          Prism::ClassVariableWriteNode,
+        ),
+        loc: Prism::Location,
+      ).void
+    end
+    def handle_class_variable(node, loc)
+      name = node.name.to_s
+      return if name == "@@"
+
+      comments = collect_comments(node)
+      owner = @owner_stack.last
+
+      @index.add(Entry::ClassVariable.new(
+        name,
+        @uri,
+        Location.from_prism_location(loc, @code_units_cache),
+        comments,
+        owner,
       ))
     end
 

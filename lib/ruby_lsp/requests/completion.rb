@@ -62,6 +62,12 @@ module RubyLsp
             Prism::InstanceVariableOrWriteNode,
             Prism::InstanceVariableTargetNode,
             Prism::InstanceVariableWriteNode,
+            Prism::ClassVariableAndWriteNode,
+            Prism::ClassVariableOperatorWriteNode,
+            Prism::ClassVariableOrWriteNode,
+            Prism::ClassVariableReadNode,
+            Prism::ClassVariableTargetNode,
+            Prism::ClassVariableWriteNode,
           ],
           code_units_cache: document.code_units_cache,
         )
