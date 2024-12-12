@@ -823,6 +823,41 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_update_does_not_fail_if_gems_are_uninstalled
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            system("bundle install")
+            run_script(dir)
+
+            mock_update = mock("update")
+            mock_update.expects(:run).raises(Bundler::GemNotFound.new("rdoc"))
+            require "bundler/cli/update"
+            Bundler::CLI::Update.expects(:new).with(
+              { conservative: true },
+              ["ruby-lsp", "debug", "prism"],
+            ).returns(mock_update)
+
+            mock_install = mock("install")
+            mock_install.expects(:run)
+            require "bundler/cli/install"
+            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
+
+            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+          end
+        end
+
+        refute_path_exists(File.join(".ruby-lsp", "install_error"))
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)
