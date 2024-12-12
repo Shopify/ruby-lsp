@@ -439,16 +439,21 @@ class ServerTest < Minitest::Test
   end
 
   def test_changed_file_only_indexes_ruby
-    File.expects(:read).with("/foo.rb").returns("class Foo\nend")
+    path = File.join(Dir.pwd, "lib", "foo.rb")
+    File.write(path, "class Foo\nend")
+
     @server.global_state.index.expects(:index_single).once.with do |uri|
-      uri.full_path == "/foo.rb"
+      uri.full_path == path
     end
+
+    uri = URI::Generic.from_path(path: path)
+
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",
       params: {
         changes: [
           {
-            uri: URI("file:///foo.rb"),
+            uri: uri,
             type: RubyLsp::Constant::FileChangeType::CREATED,
           },
           {
@@ -458,6 +463,8 @@ class ServerTest < Minitest::Test
         ],
       },
     })
+  ensure
+    FileUtils.rm(T.must(path))
   end
 
   def test_workspace_addons
