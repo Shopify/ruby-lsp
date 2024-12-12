@@ -12,7 +12,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -46,7 +46,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -114,7 +114,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -147,7 +147,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -213,7 +213,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -247,7 +247,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -315,7 +315,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -348,7 +348,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -414,7 +414,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -448,7 +448,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -516,7 +516,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -549,7 +549,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -615,7 +615,7 @@
         }
       },
       "command": {
-        "title": "Run",
+        "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -648,7 +648,7 @@
         }
       },
       "command": {
-        "title": "Run In Terminal",
+        "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
           "/fixtures/nested_minitest_tests.rb",
@@ -703,7 +703,5 @@
       }
     }
   ],
-  "params": [
-
-  ]
+  "params": []
 }
