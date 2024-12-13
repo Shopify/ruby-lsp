@@ -597,6 +597,10 @@ export class RubyLsp {
         },
       ),
     );
+    vscode.commands.registerCommand(Command.ShowOutput, async () => {
+      const workspace = await this.showWorkspacePick();
+      workspace?.lspClient?.outputChannel.show();
+    });
   }
 
   // Get the current active workspace based on which file is opened in the editor
