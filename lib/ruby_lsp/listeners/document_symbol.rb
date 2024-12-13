@@ -278,8 +278,8 @@ module RubyLsp
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::FIELD,
-          range_location: node.name_loc,
-          selection_range_location: node.name_loc,
+          range_location: node.location,
+          selection_range_location: node.location,
         )
       end
 
