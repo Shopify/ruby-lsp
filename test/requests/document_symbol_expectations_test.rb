@@ -33,6 +33,29 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     assert_equal("@quux", T.must(response[4]).name)
   end
 
+  def test_instance_variable_with_destructuring_assignment
+    source = <<~RUBY
+      @a, @b = [1, 2]
+      @c, @d, @e = [3, 4, 5]
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    response = listener.perform
+
+    assert_equal(5, response.size)
+
+    assert_equal("@a", T.must(response[0]).name)
+    assert_equal("@b", T.must(response[1]).name)
+    assert_equal("@c", T.must(response[2]).name)
+    assert_equal("@d", T.must(response[3]).name)
+    assert_equal("@e", T.must(response[4]).name)
+  end
+
   def test_labels_blank_names
     source = <<~RUBY
       def
