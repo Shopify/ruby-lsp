@@ -80,6 +80,8 @@ More context about this issue on https://github.com/Shopify/vscode-ruby-lsp/issu
 
 ### Bundler issues
 
+Firstly, ensure you are using the latest release of Bundler (run `bundle update --bundler`).
+
 If the extension successfully activated the Ruby environment, it may still fail when trying to compose the composed bundle
 to run the server gem. This could be a regular Bundler issue, like not being able to satisfy dependencies due to a
 conflicting version requirement, or it could be a configuration issue.
