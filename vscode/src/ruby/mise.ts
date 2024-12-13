@@ -30,24 +30,52 @@ export class Mise extends VersionManager {
     const misePath = config.get<string | undefined>(
       "rubyVersionManager.miseExecutablePath",
     );
-    const miseUri = misePath
-      ? vscode.Uri.file(misePath)
-      : vscode.Uri.joinPath(
-          vscode.Uri.file(os.homedir()),
-          ".local",
-          "bin",
-          "mise",
-        );
 
-    try {
-      await vscode.workspace.fs.stat(miseUri);
-      return miseUri;
-    } catch (error: any) {
-      // Couldn't find it
+    if (misePath) {
+      const configuredPath = vscode.Uri.file(misePath);
+
+      try {
+        await vscode.workspace.fs.stat(configuredPath);
+        return configuredPath;
+      } catch (error: any) {
+        throw new Error(
+          `Mise executable configured as ${configuredPath}, but that file doesn't exist`,
+        );
+      }
+    }
+
+    // Possible mise installation paths
+    //
+    // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
+    // 2. Homebrew M series
+    const possiblePaths = [
+      vscode.Uri.joinPath(
+        vscode.Uri.file(os.homedir()),
+        ".local",
+        "bin",
+        "mise",
+      ),
+      vscode.Uri.joinPath(
+        vscode.Uri.file("/"),
+        "opt",
+        "homebrew",
+        "bin",
+        "mise",
+      ),
+    ];
+
+    for (const possiblePath of possiblePaths) {
+      try {
+        await vscode.workspace.fs.stat(possiblePath);
+        return possiblePath;
+      } catch (error: any) {
+        // Continue looking
+      }
     }
 
     throw new Error(
-      `The Ruby LSP version manager is configured to be Mise, but ${miseUri.fsPath} does not exist`,
+      `The Ruby LSP version manager is configured to be Mise, but could not find Mise installation. Searched in
+        ${possiblePaths.join(", ")}`,
     );
   }
 }
