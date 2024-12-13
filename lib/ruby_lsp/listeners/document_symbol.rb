@@ -41,6 +41,7 @@ module RubyLsp
           :on_module_node_enter,
           :on_module_node_leave,
           :on_instance_variable_write_node_enter,
+          :on_instance_variable_target_node_enter,
           :on_instance_variable_operator_write_node_enter,
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_and_write_node_enter,
@@ -264,6 +265,16 @@ module RubyLsp
 
       sig { params(node: Prism::InstanceVariableWriteNode).void }
       def on_instance_variable_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::FIELD,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      def on_instance_variable_target_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
           kind: Constant::SymbolKind::FIELD,
