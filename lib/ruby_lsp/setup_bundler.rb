@@ -152,7 +152,13 @@ module RubyLsp
       end
 
       unless @dependencies["debug"]
-        parts << 'gem "debug", require: false, group: :development, platforms: :mri'
+        # The `mri` platform excludes Windows. We want to install the debug gem only on MRI for any operating system,
+        # but that constraint doesn't yet exist in Bundler. On Windows, we are manually checking if the engine is MRI
+        parts << if Gem.win_platform?
+          'gem "debug", require: false, group: :development, install_if: -> { RUBY_ENGINE == "ruby" }'
+        else
+          'gem "debug", require: false, group: :development, platforms: :mri'
+        end
       end
 
       if @rails_app && !@dependencies["ruby-lsp-rails"]
@@ -238,9 +244,13 @@ module RubyLsp
     sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
     def run_bundle_install_directly(env)
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
+
+      # The ENV can only be merged after checking if an update is required because we depend on the original value of
+      # ENV["BUNDLE_GEMFILE"], which gets overridden after the merge
+      should_update = should_bundle_update?
       T.unsafe(ENV).merge!(env)
 
-      unless should_bundle_update?
+      unless should_update
         Bundler::CLI::Install.new({}).run
         correct_relative_remote_paths if @custom_lockfile.exist?
         return env
