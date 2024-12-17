@@ -21,10 +21,11 @@ module RubyLsp
         infer_receiver_for_call_node(node, node_context)
       when Prism::InstanceVariableReadNode, Prism::InstanceVariableAndWriteNode, Prism::InstanceVariableWriteNode,
         Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode,
-        Prism::SuperNode, Prism::ForwardingSuperNode, Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode,
-        Prism::ClassVariableOperatorWriteNode, Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode,
-        Prism::ClassVariableTargetNode
+        Prism::SuperNode, Prism::ForwardingSuperNode
         self_receiver_handling(node_context)
+      when Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode, Prism::ClassVariableOperatorWriteNode,
+        Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode,Prism::ClassVariableTargetNode
+        infer_receiver_for_class_variables(node_context)
       end
     end
 
@@ -143,6 +144,25 @@ module RubyLsp
     rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
            Prism::ConstantPathNode::MissingNodesInConstantPathError
       nil
+    end
+
+    sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
+    def infer_receiver_for_class_variables(node_context)
+      nesting_parts = node_context.nesting
+
+      return Type.new("Object") if nesting_parts.empty?
+
+      nesting_parts.reverse_each do |part|
+        break unless part.include?("<Class:")
+
+        nesting_parts.pop
+      end
+
+      receiver_name = nesting_parts.join("::")
+      resolved_receiver = @index.resolve(receiver_name, node_context.nesting)&.first
+      return unless resolved_receiver&.name
+
+      Type.new(resolved_receiver.name)
     end
 
     # A known type
