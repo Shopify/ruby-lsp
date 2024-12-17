@@ -151,7 +151,7 @@
       },
       {
         "command": "rubyLsp.collectRubyLspInfo",
-        "title": "Collect Ruby LSP Information for Issue Reporting",
+        "title": "Collect Ruby LSP information for issue reporting",
         "category": "Ruby LSP"
       }
     ],

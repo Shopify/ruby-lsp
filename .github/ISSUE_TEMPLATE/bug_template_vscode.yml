@@ -21,7 +21,7 @@ body:
 
         ### When submitting
 
-        Please run the `Collect Ruby LSP Information for Issue Reporting` command through VS Code's command
+        Please run the `Collect Ruby LSP information for issue reporting` command through VS Code's command
         palette and paste the result below.
 
   - type: textarea
@@ -31,7 +31,7 @@ body:
       value: |
         ### Ruby LSP Information
 
-        <!-- Please run `Collect Ruby LSP Information for Issue Reporting` from VS Code's command palette and paste the result here -->
+        <!-- Please run `Collect Ruby LSP information for issue reporting` from VS Code's command palette and paste the result here -->
 
         ### Reproduction steps
 
