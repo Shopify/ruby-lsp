@@ -52,5 +52,37 @@ module RubyLsp
         server.run_shutdown
       end
     end
+
+    sig { params(server: RubyLsp::Server).returns(RubyLsp::Result) }
+    def pop_result(server)
+      result = server.pop_response
+      result = server.pop_response until result.is_a?(RubyLsp::Result) || result.is_a?(RubyLsp::Error)
+
+      if result.is_a?(RubyLsp::Error)
+        raise "Failed to execute request #{result.message}"
+      else
+        result
+      end
+    end
+
+    # TODO: write correct sig
+    sig { params(message_queue: T.untyped, type: T.untyped).returns(T.untyped) }
+    def pop_log_notification(message_queue, type)
+      log = message_queue.pop
+      return log if log.params.type == type
+
+      log = message_queue.pop until log.params.type == type
+      log
+    end
+
+    # TODO: write correct sig
+    sig { params(outgoing_queue: T.untyped, block: T.untyped).returns(T.untyped) }
+    def pop_message(outgoing_queue, &block)
+      message = outgoing_queue.pop
+      return message if block.call(message)
+
+      message = outgoing_queue.pop until block.call(message)
+      message
+    end
   end
 end
