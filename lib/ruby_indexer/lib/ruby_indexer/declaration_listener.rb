@@ -599,7 +599,13 @@ module RubyIndexer
       return if name == "@@"
 
       comments = collect_comments(node)
+
       owner = @owner_stack.last
+
+      # set the class variable's owner to the attached context when defined within a singleton scope.
+      if owner.is_a?(Entry::SingletonClass)
+        owner = @owner_stack.reverse.find { |entry| !entry.name.include?("<Class:") }
+      end
 
       @index.add(Entry::ClassVariable.new(
         name,

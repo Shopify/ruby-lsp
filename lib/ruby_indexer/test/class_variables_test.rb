@@ -71,7 +71,7 @@ module RubyIndexer
       assert_entry("@@bar", Entry::ClassVariable, "/fake/path/foo.rb:1-2:1-7")
     end
 
-    def test_empty_name_class_variables
+    def test_empty_name_class_variable
       index(<<~RUBY)
         module Foo
           @@ = 1
@@ -81,7 +81,7 @@ module RubyIndexer
       refute_entry("@@")
     end
 
-    def test_top_level_class_variables
+    def test_top_level_class_variable
       index(<<~RUBY)
         @foo = 123
       RUBY
@@ -90,7 +90,7 @@ module RubyIndexer
       assert_nil(entry.owner)
     end
 
-    def test_class_variables_inside_self_method
+    def test_class_variable_inside_self_method
       index(<<~RUBY)
         class Foo
           def self.bar
@@ -101,8 +101,40 @@ module RubyIndexer
 
       entry = T.must(@index["@@bar"]&.first)
       owner = T.must(entry.owner)
-      assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::<Class:Foo>", owner.name)
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo", owner.name)
+    end
+
+    def test_class_variable_inside_singleton_class
+      index(<<~RUBY)
+        class Foo
+          class << self
+            @@bar = 123
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["@@bar"]&.first)
+      owner = T.must(entry.owner)
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo", owner.name)
+    end
+
+    def test_class_variable_in_singleton_class_method
+      index(<<~RUBY)
+        class Foo
+          class << self
+            def self.bar
+              @@bar = 123
+            end
+          end
+        end
+      RUBY
+
+      entry = T.must(@index["@@bar"]&.first)
+      owner = T.must(entry.owner)
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo", owner.name)
     end
   end
 end
