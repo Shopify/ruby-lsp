@@ -156,7 +156,7 @@
       },
       {
         "command": "rubyLsp.showOutput",
-        "title": "Show Output Channel",
+        "title": "Show output channel",
         "category": "Ruby LSP"
       }
     ],

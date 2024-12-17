@@ -598,8 +598,7 @@ export class RubyLsp {
       ),
     );
     vscode.commands.registerCommand(Command.ShowOutput, async () => {
-      const workspace = await this.showWorkspacePick();
-      workspace?.lspClient?.outputChannel.show();
+      LOG_CHANNEL.show();
     });
   }
 
