@@ -586,8 +586,8 @@ module RubyIndexer
 
     sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::ClassVariable])) }
     def resolve_class_variable(variable_name, owner_name)
-      entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::ClassVariable]))
-      return unless entries
+      entries = self[variable_name]&.grep(Entry::ClassVariable)
+      return unless entries&.any?
 
       ancestors = linearized_ancestors_of(owner_name)
       return if ancestors.empty?
