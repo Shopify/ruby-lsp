@@ -1180,6 +1180,44 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_class_variables_in_different_context
+    source = <<~RUBY
+      class Foo
+        @@a = 1
+
+        class << self
+          @@b = 2
+
+          def foo
+            @@c = 3
+          end
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @@ = 4
+        end
+
+        def self.foobar
+          @@d = 5
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@a", "@@b", "@@c", "@@d"], result.map(&:label))
+    end
+  end
+
   def test_completion_for_instance_variables
     source = +<<~RUBY
       class Foo

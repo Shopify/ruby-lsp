@@ -24,7 +24,7 @@ module RubyLsp
         Prism::SuperNode, Prism::ForwardingSuperNode
         self_receiver_handling(node_context)
       when Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode, Prism::ClassVariableOperatorWriteNode,
-        Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode,Prism::ClassVariableTargetNode
+        Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode, Prism::ClassVariableTargetNode
         infer_receiver_for_class_variables(node_context)
       end
     end

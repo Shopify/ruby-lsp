@@ -500,6 +500,50 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_for_class_variables_in_different_context
+    source = <<~RUBY
+      class Foo
+        # comment 1
+        @@a = 1
+
+        class << self
+          # comment 2
+          @@a = 2
+
+          def foo
+            # comment 3
+            @@a = 3
+          end
+        end
+
+        def bar
+          # comment 4
+          @@a = 4
+        end
+
+        def self.baz
+          # comment 5
+          @@a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 2 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("comment 1", contents)
+      assert_match("comment 2", contents)
+      assert_match("comment 3", contents)
+      assert_match("comment 4", contents)
+      assert_match("comment 5", contents)
+    end
+  end
+
   def test_hovering_over_inherited_methods
     source = <<~RUBY
       module Foo

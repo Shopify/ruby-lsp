@@ -810,6 +810,45 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_class_variables_in_different_context
+    source = <<~RUBY
+      class Foo
+        @@a = 1
+
+        class << self
+          @@a = 2
+
+          def foo
+            @@a = 3
+          end
+        end
+
+        def bar
+          @@a = 4
+        end
+
+        def self.baz
+          @@a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 1 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(1, response[0].range.start.line)
+      assert_equal(4, response[1].range.start.line)
+      assert_equal(7, response[2].range.start.line)
+      assert_equal(12, response[3].range.start.line)
+      assert_equal(16, response[4].range.start.line)
+    end
+  end
+
   def test_definition_for_instance_variables
     source = <<~RUBY
       class Foo
