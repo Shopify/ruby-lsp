@@ -153,6 +153,11 @@
         "command": "rubyLsp.collectRubyLspInfo",
         "title": "Collect Ruby LSP information for issue reporting",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.showOutput",
+        "title": "Show output channel",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {
