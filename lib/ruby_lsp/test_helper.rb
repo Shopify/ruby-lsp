@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # frozen_string_literal: true
 
 # NOTE: This module is intended to be used by addons for writing their own tests, so keep that in mind if changing.
@@ -65,8 +65,6 @@ module RubyLsp
       end
     end
 
-    # TODO: write correct sig
-    sig { params(message_queue: T.untyped, type: T.untyped).returns(T.untyped) }
     def pop_log_notification(message_queue, type)
       log = message_queue.pop
       return log if log.params.type == type
@@ -75,8 +73,6 @@ module RubyLsp
       log
     end
 
-    # TODO: write correct sig
-    sig { params(outgoing_queue: T.untyped, block: T.untyped).returns(T.untyped) }
     def pop_message(outgoing_queue, &block)
       message = outgoing_queue.pop
       return message if block.call(message)
