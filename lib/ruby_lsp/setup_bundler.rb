@@ -241,8 +241,8 @@ module RubyLsp
       env
     end
 
-    sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
-    def run_bundle_install_directly(env)
+    sig { params(env: T::Hash[String, String], force_install: T::Boolean).returns(T::Hash[String, String]) }
+    def run_bundle_install_directly(env, force_install: false)
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
       # The ENV can only be merged after checking if an update is required because we depend on the original value of
@@ -250,7 +250,7 @@ module RubyLsp
       should_update = should_bundle_update?
       T.unsafe(ENV).merge!(env)
 
-      unless should_update
+      unless should_update && !force_install
         Bundler::CLI::Install.new({}).run
         correct_relative_remote_paths if @custom_lockfile.exist?
         return env
@@ -265,6 +265,9 @@ module RubyLsp
       correct_relative_remote_paths if @custom_lockfile.exist?
       @last_updated_path.write(Time.now.iso8601)
       env
+    rescue Bundler::GemNotFound, Bundler::GitError
+      # If a gem is not installed, skip the upgrade and try to install it with a single retry
+      @retry ? env : run_bundle_install_directly(env, force_install: true)
     end
 
     sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
