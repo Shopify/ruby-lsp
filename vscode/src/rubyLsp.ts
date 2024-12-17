@@ -596,6 +596,34 @@ export class RubyLsp {
           await workspace?.start(true);
         },
       ),
+      vscode.commands.registerCommand(Command.GotoTest, async () => {
+        const uri = vscode.window.activeTextEditor?.document.uri;
+        if (!uri) {
+          return;
+        }
+        const response: { locations: string[] } | null | undefined =
+          await this.currentActiveWorkspace()?.lspClient?.sendGotoTestRequest(
+            uri,
+          );
+
+        if (response) {
+          return openUris(response.locations);
+        }
+      }),
+      vscode.commands.registerCommand(Command.GotoSource, async () => {
+        const uri = vscode.window.activeTextEditor?.document.uri;
+        if (!uri) {
+          return;
+        }
+        const response: { locations: string[] } | null | undefined =
+          await this.currentActiveWorkspace()?.lspClient?.sendGotoSourceRequest(
+            uri,
+          );
+
+        if (response) {
+          return openUris(response.locations);
+        }
+      }),
     );
   }
 

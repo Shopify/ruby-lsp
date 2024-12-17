@@ -85,6 +85,10 @@ module RubyLsp
         workspace_symbol(message)
       when "rubyLsp/textDocument/showSyntaxTree"
         text_document_show_syntax_tree(message)
+      when "rubyLsp/textDocument/gotoTest"
+        text_document_goto_test(message)
+      when "rubyLsp/textDocument/gotoSource"
+        text_document_goto_source(message)
       when "rubyLsp/workspace/dependencies"
         workspace_dependencies(message)
       when "rubyLsp/workspace/addons"
@@ -1058,6 +1062,42 @@ module RubyLsp
         ast: Requests::ShowSyntaxTree.new(
           document,
           params[:range],
+        ).perform,
+      }
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_goto_test(message)
+      path = message.dig(:params, :textDocument, :uri)&.path
+
+      unless path
+        send_empty_response(message[:id])
+        return
+      end
+
+      response = {
+        locations: Requests::GotoRelevantFile.new(
+          path,
+          Requests::GotoRelevantFile::TYPE_TEST,
+        ).perform,
+      }
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def text_document_goto_source(message)
+      path = message.dig(:params, :textDocument, :uri)&.path
+
+      unless path
+        send_empty_response(message[:id])
+        return
+      end
+
+      response = {
+        locations: Requests::GotoRelevantFile.new(
+          path,
+          Requests::GotoRelevantFile::TYPE_SOURCE,
         ).perform,
       }
       send_message(Result.new(id: message[:id], response: response))

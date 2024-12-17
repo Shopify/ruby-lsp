@@ -433,6 +433,22 @@ export default class Client extends LanguageClient implements ClientInterface {
     });
   }
 
+  async sendGotoTestRequest(
+    uri: vscode.Uri,
+  ): Promise<{ locations: string[] } | null> {
+    return this.sendRequest("rubyLsp/textDocument/gotoTest", {
+      textDocument: { uri: uri.toString() },
+    });
+  }
+
+  async sendGotoSourceRequest(
+    uri: vscode.Uri,
+  ): Promise<{ locations: string[] } | null> {
+    return this.sendRequest("rubyLsp/textDocument/gotoSource", {
+      textDocument: { uri: uri.toString() },
+    });
+  }
+
   private async benchmarkMiddleware<T>(
     type: string | MessageSignature,
     params: any,
