@@ -597,6 +597,68 @@ export class RubyLsp {
         },
       ),
     );
+    vscode.commands.registerCommand(
+      Command.MigrateLaunchConfiguration,
+      async () => {
+        const workspace = await this.showWorkspacePick();
+
+        if (!workspace) {
+          return;
+        }
+
+        const launchConfig =
+          (vscode.workspace
+            .getConfiguration("launch")
+            ?.get("configurations") as any[]) || [];
+
+        const updatedLaunchConfig = launchConfig.map((config: any) => {
+          if (config.type === "rdbg") {
+            if (config.request === "launch") {
+              const newConfig = { ...config };
+              newConfig.type = "ruby_lsp";
+
+              if (newConfig.askParameters !== true) {
+                delete newConfig.rdbgPath;
+                delete newConfig.cwd;
+                delete newConfig.useBundler;
+
+                const command = (newConfig.command || "").replace(
+                  "${workspaceRoot}/",
+                  "",
+                );
+                const script = newConfig.script || "";
+                const args = (newConfig.args || []).join(" ");
+                newConfig.program = `${command} ${script} ${args}`.trim();
+
+                delete newConfig.command;
+                delete newConfig.script;
+                delete newConfig.args;
+                delete newConfig.askParameters;
+              }
+
+              return newConfig;
+            } else if (config.request === "attach") {
+              const newConfig = { ...config };
+              newConfig.type = "ruby_lsp";
+              // rdbg's `debugPort` could be a socket path, or port number, or host:port
+              // we don't do complex parsing here, just assume it's socket path
+              newConfig.debugSocketPath = config.debugPort;
+
+              return newConfig;
+            }
+          }
+          return config;
+        });
+
+        await vscode.workspace
+          .getConfiguration("launch")
+          .update(
+            "configurations",
+            updatedLaunchConfig,
+            vscode.ConfigurationTarget.Workspace,
+          );
+      },
+    );
   }
 
   // Get the current active workspace based on which file is opened in the editor
