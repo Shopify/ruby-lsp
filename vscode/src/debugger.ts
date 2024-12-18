@@ -347,12 +347,12 @@ export class Debugger
   }
 
   private logDebuggerMessage(message: string) {
-    // In the Output panel, each log automatically gets a new line
-    // And trailing newlines will create one additional line in the panel, so we trimEnd() here to avoid that
+    // Log to Output panel: Messages here automatically get newlines appended.
+    // Trim trailing newlines to prevent unwanted blank lines in the output
     LOG_CHANNEL.info(`[debugger]: ${message.trimEnd()}`);
 
-    // In the Debug Console, output doesn't get a new line automatically, so we don't trimEnd() here as well as print
-    // the newlines too
+    // Log to Debug Console: Unlike Output panel, this needs explicit newlines
+    // so we preserve the original message format including any newlines
     this.console.append(message);
   }
 }

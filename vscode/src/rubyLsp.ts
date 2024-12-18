@@ -640,7 +640,7 @@ export class RubyLsp {
             } else if (config.request === "attach") {
               const newConfig = { ...config };
               newConfig.type = "ruby_lsp";
-              // rdbg's `debugPort` could be socket path, or port number, or host:port
+              // rdbg's `debugPort` could be a socket path, or port number, or host:port
               // we don't do complex parsing here, just assume it's socket path
               newConfig.debugSocketPath = config.debugPort;
 
