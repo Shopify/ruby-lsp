@@ -596,6 +596,8 @@ module RubyIndexer
     end
     def handle_class_variable(node, loc)
       name = node.name.to_s
+      # Ignore incomplete class variable names, which aren't valid Ruby syntax.
+      # This could occur if the code is in an incomplete or temporary state.
       return if name == "@@"
 
       comments = collect_comments(node)

@@ -1151,7 +1151,7 @@ class CompletionTest < Minitest::Test
     end
   end
 
-  def test_completion_for_class_variables_show_only_uniq_entries
+  def test_completion_for_class_variables_show_only_unique_entries
     source = <<~RUBY
       class Foo
         def set_variables
