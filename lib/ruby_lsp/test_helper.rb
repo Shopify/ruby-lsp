@@ -5,6 +5,8 @@
 
 module RubyLsp
   module TestHelper
+    class TestError < StandardError; end
+
     extend T::Sig
 
     sig do
@@ -59,7 +61,7 @@ module RubyLsp
       result = server.pop_response until result.is_a?(RubyLsp::Result) || result.is_a?(RubyLsp::Error)
 
       if result.is_a?(RubyLsp::Error)
-        raise "Failed to execute request #{result.message}"
+        raise TestError, "Failed to execute request #{result.message}"
       else
         result
       end
