@@ -8,6 +8,9 @@ module RubyLsp
     class TestError < StandardError; end
 
     extend T::Sig
+    extend T::Helpers
+
+    requires_ancestor { Kernel }
 
     sig do
       type_parameters(:T)
