@@ -462,7 +462,7 @@ export class RubyLsp {
             return openUris(rubySourceLocation);
           }
 
-          // Old format: we can remove after the Rails addon has been using the new format for a while
+          // Old format: we can remove after the Rails add-on has been using the new format for a while
           const [file, line] = rubySourceLocation;
           const workspace = this.currentActiveWorkspace();
           return openFile(this.telemetry, workspace, {
