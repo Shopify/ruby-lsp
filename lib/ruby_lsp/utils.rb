@@ -142,6 +142,20 @@ module RubyLsp
           ),
         )
       end
+
+      sig do
+        params(
+          uri: String,
+          diagnostics: T::Array[Interface::Diagnostic],
+          version: T.nilable(Integer),
+        ).returns(Notification)
+      end
+      def publish_diagnostics(uri, diagnostics, version: nil)
+        new(
+          method: "textDocument/publishDiagnostics",
+          params: Interface::PublishDiagnosticsParams.new(uri: uri, diagnostics: diagnostics, version: version),
+        )
+      end
     end
 
     extend T::Sig
@@ -154,6 +168,35 @@ module RubyLsp
 
   class Request < Message
     extend T::Sig
+
+    class << self
+      extend T::Sig
+
+      sig { params(id: Integer, pattern: T.any(Interface::RelativePattern, String), kind: Integer).returns(Request) }
+      def register_watched_files(
+        id,
+        pattern,
+        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE
+      )
+        new(
+          id: id,
+          method: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              Interface::Registration.new(
+                id: "workspace/didChangeWatchedFiles",
+                method: "workspace/didChangeWatchedFiles",
+                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
+                  watchers: [
+                    Interface::FileSystemWatcher.new(glob_pattern: pattern, kind: kind),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      end
+    end
 
     sig { params(id: T.any(Integer, String), method: String, params: Object).void }
     def initialize(id:, method:, params:)
