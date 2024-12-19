@@ -36,8 +36,8 @@ module RubyLsp
 
         MESSAGE = <<~EOS
           An internal error occurred %s.
-          Updating to a newer version of RuboCop may solve this.
-          For more details, run RuboCop on the command line.
+          Updating to a newer version of RuboCop (and its extensions) may solve this.
+          For more details, run `bundle exec rubocop` on the command line.
         EOS
 
         sig { params(rubocop_error: T.any(RuboCop::ErrorWithAnalyzedFileLocation, StandardError)).void }
