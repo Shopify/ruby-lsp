@@ -27,59 +27,89 @@ class IntegrationTest < Minitest::Test
     end
   end
 
-  def test_adds_bundler_version_as_part_of_exec_command
+  def test_uses_same_bundler_version_as_main_app
     in_temp_dir do |dir|
-      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"
-        gem "ruby-lsp", path: "#{Bundler.root}"
-      GEMFILE
+        gem "stringio"
+      RUBY
+
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            stringio (3.1.0)
+
+        PLATFORMS
+          arm64-darwin-23
+          ruby
+
+        DEPENDENCIES
+          stringio
+
+        BUNDLED WITH
+          2.5.7
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
       Bundler.with_unbundled_env do
         capture_subprocess_io do
           system("bundle install")
-
-          Object.any_instance.expects(:exec).with do |env, command|
-            env.key?("BUNDLE_GEMFILE") &&
-              env.key?("BUNDLER_VERSION") &&
-              /bundle _[\d\.]+_ exec ruby-lsp/.match?(command)
-          end.once.raises(StandardError.new("stop"))
-
-          # We raise intentionally to avoid continuing running the executable
-          assert_raises(StandardError) do
-            load(Gem.bin_path("ruby-lsp", "ruby-lsp"))
-          end
         end
       end
+
+      Bundler.with_unbundled_env do
+        launch(dir, "ruby-lsp")
+      end
+
+      assert_match(/BUNDLED WITH\n\s*2.5.7/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
-  def test_avoids_bundler_version_if_local_bin_is_in_path
+  def test_does_not_use_custom_binstubs_if_they_are_in_the_path
     in_temp_dir do |dir|
-      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"
-        gem "ruby-lsp", path: "#{Bundler.root}"
-      GEMFILE
+        gem "stringio"
+      RUBY
 
-      FileUtils.mkdir(File.join(dir, "bin"))
-      FileUtils.touch(File.join(dir, "bin", "bundle"))
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            stringio (3.1.0)
+
+        PLATFORMS
+          arm64-darwin-23
+          ruby
+
+        DEPENDENCIES
+          stringio
+
+        BUNDLED WITH
+          2.5.7
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
       Bundler.with_unbundled_env do
         capture_subprocess_io do
           system("bundle install")
-
-          Object.any_instance.expects(:exec).with do |env, command|
-            env.key?("BUNDLE_GEMFILE") &&
-              !env.key?("BUNDLER_VERSION") &&
-              "bundle exec ruby-lsp" == command
-          end.once.raises(StandardError.new("stop"))
-
-          ENV["PATH"] = "./bin#{File::PATH_SEPARATOR}#{ENV["PATH"]}"
-          # We raise intentionally to avoid continuing running the executable
-          assert_raises(StandardError) do
-            load(Gem.bin_path("ruby-lsp", "ruby-lsp"))
-          end
         end
       end
+
+      bin_path = File.join(dir, "bin")
+      FileUtils.mkdir(bin_path)
+      File.write(File.join(bin_path, "bundle"), <<~RUBY)
+        #!/usr/bin/env ruby
+        raise "This should not be called"
+      RUBY
+      FileUtils.chmod(0o755, File.join(bin_path, "bundle"))
+
+      Bundler.with_unbundled_env do
+        launch(dir, "ruby-lsp", { "PATH" => "#{bin_path}#{File::PATH_SEPARATOR}#{ENV["PATH"]}" })
+      end
+
+      assert_match(/BUNDLED WITH\n\s*2.5.7/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
@@ -163,7 +193,7 @@ class IntegrationTest < Minitest::Test
 
   private
 
-  def launch(workspace_path)
+  def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})
     specification = Gem::Specification.find_by_name("ruby-lsp")
     paths = [specification.full_gem_path]
     paths.concat(specification.dependencies.map { |dep| dep.to_spec.full_gem_path })
@@ -175,9 +205,10 @@ class IntegrationTest < Minitest::Test
     end.uniq.flatten
 
     stdin, stdout, stderr, wait_thr = T.unsafe(Open3).popen3(
+      extra_env,
       Gem.ruby,
       *load_path,
-      File.join(@root, "exe", "ruby-lsp-launcher"),
+      File.join(@root, "exe", exec),
     )
     stdin.sync = true
     stdin.binmode
