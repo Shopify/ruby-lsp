@@ -60,6 +60,7 @@ Sorbet/StrictSigil:
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
+    - "lib/ruby_lsp/test_helper.rb"
 
 Layout/ClassStructure:
   Enabled: true
