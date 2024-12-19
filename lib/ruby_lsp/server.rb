@@ -107,7 +107,7 @@ module RubyLsp
           ),
         )
       when "$/cancelRequest"
-        @mutex.synchronize { @cancelled_requests << message[:params][:id] }
+        @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
         process_response(message) if message[:result]
       end
@@ -377,7 +377,7 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_open(message)
-      @mutex.synchronize do
+      @global_state.synchronize do
         text_document = message.dig(:params, :textDocument)
         language_id = case text_document[:languageId]
         when "erb", "eruby"
@@ -417,7 +417,7 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
-      @mutex.synchronize do
+      @global_state.synchronize do
         uri = message.dig(:params, :textDocument, :uri)
         @store.delete(uri)
 
@@ -436,7 +436,7 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
-      @mutex.synchronize do
+      @global_state.synchronize do
         @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
       end
     end
@@ -755,7 +755,7 @@ module RubyLsp
       send_message(
         Result.new(
           id: message[:id],
-          response: Requests::PrepareRename.new(document, params[:position]).perform,
+          response: Requests::PrepareRename.new(@global_state, document, params[:position]).perform,
         ),
       )
     end
@@ -1056,6 +1056,7 @@ module RubyLsp
 
       response = {
         ast: Requests::ShowSyntaxTree.new(
+          @global_state,
           document,
           params[:range],
         ).perform,
