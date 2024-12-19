@@ -2061,7 +2061,8 @@ module RubyIndexer
     end
 
     def test_prevents_multiple_calls_to_index_all
-      # For this test class, `index_all` is already called once in `setup`.
+      @index.index_all
+
       assert_raises(Index::IndexNotEmptyError) do
         @index.index_all
       end
