@@ -31,6 +31,12 @@ module RubyLsp
           Prism::SuperNode,
           Prism::ForwardingSuperNode,
           Prism::YieldNode,
+          Prism::ClassVariableAndWriteNode,
+          Prism::ClassVariableOperatorWriteNode,
+          Prism::ClassVariableOrWriteNode,
+          Prism::ClassVariableReadNode,
+          Prism::ClassVariableTargetNode,
+          Prism::ClassVariableWriteNode,
         ],
         T::Array[T.class_of(Prism::Node)],
       )
@@ -85,6 +91,12 @@ module RubyLsp
           :on_string_node_enter,
           :on_interpolated_string_node_enter,
           :on_yield_node_enter,
+          :on_class_variable_and_write_node_enter,
+          :on_class_variable_operator_write_node_enter,
+          :on_class_variable_or_write_node_enter,
+          :on_class_variable_read_node_enter,
+          :on_class_variable_target_node_enter,
+          :on_class_variable_write_node_enter,
         )
       end
 
@@ -215,6 +227,36 @@ module RubyLsp
         handle_keyword_documentation(node.keyword)
       end
 
+      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      def on_class_variable_and_write_node_enter(node)
+        handle_class_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      def on_class_variable_operator_write_node_enter(node)
+        handle_class_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      def on_class_variable_or_write_node_enter(node)
+        handle_class_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableTargetNode).void }
+      def on_class_variable_target_node_enter(node)
+        handle_class_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableReadNode).void }
+      def on_class_variable_read_node_enter(node)
+        handle_class_variable_hover(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableWriteNode).void }
+      def on_class_variable_write_node_enter(node)
+        handle_class_variable_hover(node.name.to_s)
+      end
+
       private
 
       sig { params(node: T.any(Prism::InterpolatedStringNode, Prism::StringNode)).void }
@@ -315,6 +357,21 @@ module RubyLsp
         categorized_markdown_from_index_entries(name, entries).each do |category, content|
           @response_builder.push(content, category: category)
         end
+      end
+
+      sig { params(name: String).void }
+      def handle_class_variable_hover(name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_class_variable(name, type.name)
+        return unless entries
+
+        categorized_markdown_from_index_entries(name, entries).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String, location: Prism::Location).void }
