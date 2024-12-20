@@ -9,9 +9,12 @@ module RubyLsp
     class ShowSyntaxTree < Request
       extend T::Sig
 
-      sig { params(document: RubyDocument, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
-      def initialize(document, range)
+      sig do
+        params(global_state: GlobalState, document: RubyDocument, range: T.nilable(T::Hash[Symbol, T.untyped])).void
+      end
+      def initialize(global_state, document, range)
         super()
+        @global_state = global_state
         @document = document
         @range = range
         @tree = T.let(document.parse_result.value, Prism::ProgramNode)
@@ -32,9 +35,10 @@ module RubyLsp
       def ast_for_range
         range = T.must(@range)
 
-        scanner = @document.create_scanner
-        start_char = scanner.find_char_position(range[:start])
-        end_char = scanner.find_char_position(range[:end])
+        start_char, end_char = @global_state.synchronize do
+          scanner = @document.create_scanner
+          [scanner.find_char_position(range[:start]), scanner.find_char_position(range[:end])]
+        end
 
         queue = @tree.statements.body.dup
         found_nodes = []
