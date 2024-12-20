@@ -50,7 +50,7 @@ async function gatherLspInfo(
     "VS Code Version": vscodeVersion,
     "Ruby LSP Extension Version": rubyLspExtensionVersion,
     "Ruby LSP Server Version": rubyLspVersion,
-    "Ruby LSP Addons": rubyLspAddons,
+    "Ruby LSP Add-ons": rubyLspAddons,
     "Ruby Version": workspace.ruby.rubyVersion ?? "Unknown",
     "Ruby Version Manager": workspace.ruby.versionManager.identifier,
     "Installed Extensions": extensions.sort(),

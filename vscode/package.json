@@ -151,7 +151,12 @@
       },
       {
         "command": "rubyLsp.collectRubyLspInfo",
-        "title": "Collect Ruby LSP Information for Issue Reporting",
+        "title": "Collect Ruby LSP information for issue reporting",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.migrateLaunchConfiguration",
+        "title": "Migrate launch.json configurations from rdbg to ruby_lsp",
         "category": "Ruby LSP"
       },
       {
@@ -732,7 +737,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.16.0",
+    "@eslint/js": "^9.17.0",
     "@shopify/eslint-plugin": "^46.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",

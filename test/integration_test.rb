@@ -145,6 +145,22 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_composed_bundle_includes_debug
+    in_temp_dir do |dir|
+      Bundler.with_unbundled_env do
+        launch(dir)
+
+        _stdout, stderr = capture_subprocess_io do
+          system(
+            { "BUNDLE_GEMFILE" => File.join(dir, ".ruby-lsp", "Gemfile") },
+            "bundle exec ruby -e 'require \"debug\"'",
+          )
+        end
+        assert_empty(stderr)
+      end
+    end
+  end
+
   private
 
   def launch(workspace_path)

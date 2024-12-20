@@ -26,7 +26,7 @@
       "addon$" // could have false positives but unlikely
     ],
     "language": "en",
-    "files": ["**/*.rb", "**/*.md", "**/*.markdown"],
+    "files": ["**/*.rb", "**/*.md", "**/*.markdown", "**/*.ts"],
     "ignorePaths": [
       "**/node_modules/**",
       "vendor/**",
