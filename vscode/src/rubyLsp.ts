@@ -597,6 +597,9 @@ export class RubyLsp {
         },
       ),
     );
+    vscode.commands.registerCommand(Command.ShowOutput, async () => {
+      LOG_CHANNEL.show();
+    });
     vscode.commands.registerCommand(
       Command.MigrateLaunchConfiguration,
       async () => {

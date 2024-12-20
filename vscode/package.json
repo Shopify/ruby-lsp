@@ -158,6 +158,11 @@
         "command": "rubyLsp.migrateLaunchConfiguration",
         "title": "Migrate launch.json configurations from rdbg to ruby_lsp",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.showOutput",
+        "title": "Show output channel",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {
