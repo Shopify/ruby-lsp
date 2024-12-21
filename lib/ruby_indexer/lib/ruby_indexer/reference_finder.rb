@@ -264,12 +264,50 @@ module RubyIndexer
 
     sig { params(node: Prism::CallNode).void }
     def on_call_node_enter(node)
-      if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
+      return unless @target.is_a?(MethodTarget)
+
+      if (name = node.name.to_s) == @target.method_name
         @references << Reference.new(name, T.must(node.message_loc), declaration: false)
+      elsif attr_method_references?(node)
+        @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
       end
     end
 
     private
+
+    sig { params(node: Prism::CallNode).returns(T::Boolean) }
+    def attr_method_references?(node)
+      case node.name
+      when :attr_reader
+        attr_reader_references?(unescaped_argument_names(node))
+      when :attr_writer
+        attr_writer_references?(unescaped_argument_names(node))
+      when :attr_accessor
+        attr_accessor_references?(unescaped_argument_names(node))
+      else
+        false
+      end
+    end
+
+    sig { params(node: Prism::CallNode).returns(T::Array[String]) }
+    def unescaped_argument_names(node)
+      node.arguments.arguments.select { |arg| arg.respond_to?(:unescaped) }.map(&:unescaped)
+    end
+
+    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    def attr_reader_references?(argument_names)
+      argument_names.include?(@target.method_name)
+    end
+
+    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    def attr_writer_references?(argument_names)
+      argument_names.any? { |arg| "#{arg}=" == @target.method_name }
+    end
+
+    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    def attr_accessor_references?(argument_names)
+      argument_names.any? { |arg| "#{arg}=" == @target.method_name || arg == @target.method_name }
+    end
 
     sig { params(name: String).returns(T::Array[String]) }
     def actual_nesting(name)
