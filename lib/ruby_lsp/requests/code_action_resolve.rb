@@ -54,10 +54,12 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        target = @document.locate_first_within_range(
-          @code_action.dig(:data, :range),
-          node_types: [Prism::CallNode],
-        )
+        target = @global_state.synchronize do
+          @document.locate_first_within_range(
+            @code_action.dig(:data, :range),
+            node_types: [Prism::CallNode],
+          )
+        end
 
         return Error::InvalidTargetRange unless target.is_a?(Prism::CallNode)
 
@@ -92,10 +94,13 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(source_range[:start])
-        end_index = scanner.find_char_position(source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        start_index, extracted_source = @global_state.synchronize do
+          scanner = @document.create_scanner
+          start_index = scanner.find_char_position(source_range[:start])
+          end_index = scanner.find_char_position(source_range[:end])
+          extracted_source = T.must(@document.source[start_index...end_index])
+          [start_index, extracted_source]
+        end
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = RubyDocument
@@ -192,10 +197,13 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(source_range[:start])
-        end_index = scanner.find_char_position(source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        start_index, extracted_source = @global_state.synchronize do
+          scanner = @document.create_scanner
+          start_index = scanner.find_char_position(source_range[:start])
+          end_index = scanner.find_char_position(source_range[:end])
+          extracted_source = T.must(@document.source[start_index...end_index])
+          [start_index, extracted_source]
+        end
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
         node_context = RubyDocument.locate(
@@ -305,13 +313,15 @@ module RubyLsp
       def switch_block_body(body, indentation)
         # Check if there are any nested blocks inside of the current block
         body_loc = body.location
-        nested_block = @document.locate_first_within_range(
-          {
-            start: { line: body_loc.start_line - 1, character: body_loc.start_column },
-            end: { line: body_loc.end_line - 1, character: body_loc.end_column },
-          },
-          node_types: [Prism::BlockNode],
-        )
+        nested_block = @global_state.synchronize do
+          @document.locate_first_within_range(
+            {
+              start: { line: body_loc.start_line - 1, character: body_loc.start_column },
+              end: { line: body_loc.end_line - 1, character: body_loc.end_column },
+            },
+            node_types: [Prism::BlockNode],
+          )
+        end
 
         body_content = body.slice.dup
 

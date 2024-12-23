@@ -25,7 +25,9 @@ module RubyLsp
       end
       def initialize(global_state, document, position, dispatcher)
         super()
-        char_position = document.create_scanner.find_char_position(position)
+        char_position = global_state.synchronize do
+          document.create_scanner.find_char_position(position)
+        end
         delegate_request_if_needed!(global_state, document, char_position)
 
         node_context = RubyDocument.locate(

@@ -12,19 +12,23 @@ module RubyLsp
 
       sig do
         params(
+          global_state: GlobalState,
           document: RubyDocument,
           position: T::Hash[Symbol, T.untyped],
         ).void
       end
-      def initialize(document, position)
+      def initialize(global_state, document, position)
         super()
+        @global_state = global_state
         @document = document
         @position = T.let(position, T::Hash[Symbol, Integer])
       end
 
       sig { override.returns(T.nilable(Interface::Range)) }
       def perform
-        char_position = @document.create_scanner.find_char_position(@position)
+        char_position = @global_state.synchronize do
+          @document.create_scanner.find_char_position(@position)
+        end
 
         node_context = RubyDocument.locate(
           @document.parse_result.value,
