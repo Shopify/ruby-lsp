@@ -430,6 +430,120 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_for_class_variables
+    source = <<~RUBY
+      class Foo
+        def foo
+          # or write node
+          @@a ||= 1
+        end
+
+        def bar
+          # operator write node
+          @@a += 5
+        end
+
+        def baz
+          @@a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 12 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("or write node", contents)
+      assert_match("operator write node", contents)
+    end
+  end
+
+  def test_hovering_for_inherited_class_variables
+    source = <<~RUBY
+      module Foo
+        def set_variable
+          # Foo
+          @@bar = 1
+        end
+      end
+
+      class Parent
+        def set_variable
+          # Parent
+          @@bar = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @@bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 18 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("Foo", contents)
+      assert_match("Parent", contents)
+    end
+  end
+
+  def test_hovering_for_class_variables_in_different_context
+    source = <<~RUBY
+      class Foo
+        # comment 1
+        @@a = 1
+
+        class << self
+          # comment 2
+          @@a = 2
+
+          def foo
+            # comment 3
+            @@a = 3
+          end
+        end
+
+        def bar
+          # comment 4
+          @@a = 4
+        end
+
+        def self.baz
+          # comment 5
+          @@a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 2 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      assert_match("comment 1", contents)
+      assert_match("comment 2", contents)
+      assert_match("comment 3", contents)
+      assert_match("comment 4", contents)
+      assert_match("comment 5", contents)
+    end
+  end
+
   def test_hovering_over_inherited_methods
     source = <<~RUBY
       module Foo
