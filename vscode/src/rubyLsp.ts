@@ -119,10 +119,10 @@ export class RubyLsp {
 
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
   // all language servers for each existing workspace
-  async activate() {
-    await vscode.commands.executeCommand("testing.clearTestResults");
-
-    const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
+  async activate(firstWorkspace = vscode.workspace.workspaceFolders?.[0]) {
+    if (this.context.extensionMode !== vscode.ExtensionMode.Test) {
+      await vscode.commands.executeCommand("testing.clearTestResults");
+    }
 
     // We only activate the first workspace eagerly to avoid running into performance and memory issues. Having too many
     // workspaces spawning the Ruby LSP server and indexing can grind the editor to a halt. All other workspaces are
