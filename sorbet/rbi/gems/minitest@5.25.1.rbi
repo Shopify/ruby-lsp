@@ -894,7 +894,7 @@ end
 # source://minitest//lib/minitest.rb#591
 Minitest::Reportable::BASE_DIR = T.let(T.unsafe(nil), String)
 
-# source://minitest//lib/minitest.rb#734
+# source://minitest//lib/minitest.rb#732
 class Minitest::Reporter < ::Minitest::AbstractReporter
   # @return [Reporter] a new instance of Reporter
   #

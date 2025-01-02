@@ -769,6 +769,9 @@ module RuboCop::AST::CollectionNode
   def fetch(*_arg0, **_arg1, &_arg2); end
 
   # source://rubocop-ast//lib/rubocop/ast/utilities/simple_forwardable.rb#9
+  def fetch_values(*_arg0, **_arg1, &_arg2); end
+
+  # source://rubocop-ast//lib/rubocop/ast/utilities/simple_forwardable.rb#9
   def fill(*_arg0, **_arg1, &_arg2); end
 
   # source://rubocop-ast//lib/rubocop/ast/utilities/simple_forwardable.rb#9
@@ -4172,7 +4175,7 @@ end
 # Doc on how this fits in the compiling process:
 #   /docs/modules/ROOT/pages/node_pattern.adoc
 #
-# source://rubocop-ast//lib/rubocop/ast/node_pattern/compiler/sequence_subcompiler.rb#17
+# source://rubocop-ast//lib/rubocop/ast/node_pattern/compiler/sequence_subcompiler.rb#16
 class RuboCop::AST::NodePattern::Compiler::SequenceSubcompiler < ::RuboCop::AST::NodePattern::Compiler::Subcompiler
   # Calls `compile_sequence`; the actual `compile` method
   # will be used for the different terms of the sequence.

@@ -133,12 +133,8 @@ end
 # source://racc//lib/racc/parser.rb#205
 Racc::Parser::Racc_Main_Parsing_Routine = T.let(T.unsafe(nil), Symbol)
 
-Racc::Parser::Racc_Runtime_Core_Id_C = T.let(T.unsafe(nil), String)
-
 # source://racc//lib/racc/parser.rb#207
 Racc::Parser::Racc_Runtime_Core_Version = T.let(T.unsafe(nil), String)
-
-Racc::Parser::Racc_Runtime_Core_Version_C = T.let(T.unsafe(nil), String)
 
 # source://racc//lib/racc/parser.rb#187
 Racc::Parser::Racc_Runtime_Core_Version_R = T.let(T.unsafe(nil), String)
