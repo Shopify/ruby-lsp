@@ -8,6 +8,7 @@ bindir
 binmode
 binread
 binstub
+binstubs
 Bizt
 Bizw
 bufnr
