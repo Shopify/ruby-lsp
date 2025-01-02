@@ -272,6 +272,33 @@ module RubyLsp
         )
       end
 
+      sig { params(str: String).returns(String) }
+      def remove_newlines_in_brackets(str)
+        result = ""
+        stack = []
+        i = 0
+
+        while i < str.length
+          char = T.must(str[i])
+
+          case char
+          when "{", "["
+            stack.push(char)
+            result += char
+          when "}", "]"
+            stack.pop unless stack.empty?
+            result += char
+          when "\n"
+            result += stack.empty? ? char : " "
+          else
+            result += char
+          end
+          i += 1
+        end
+
+        result
+      end
+
       sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
       def recursively_switch_nested_block_styles(node, indentation)
         parameters = node.parameters
@@ -327,7 +354,11 @@ module RubyLsp
             recursively_switch_nested_block_styles(nested_block, next_indentation)
         end
 
-        indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
+        if indentation
+          body_content.gsub(";", "\n")
+        else
+          "#{remove_newlines_in_brackets(body_content).gsub("\n", ";").squeeze(" ")} "
+        end
       end
     end
   end
