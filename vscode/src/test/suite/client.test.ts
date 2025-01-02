@@ -23,17 +23,17 @@ import {
   CodeAction,
   LocationLink,
   TextDocumentFilter,
+  ShowMessageParams,
+  MessageType,
 } from "vscode-languageclient/node";
 import { after, afterEach, before } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import Client from "../../client";
 import { WorkspaceChannel } from "../../workspaceChannel";
-import { RUBY_VERSION } from "../rubyVersion";
+import { RUBY_VERSION, MAJOR, MINOR } from "../rubyVersion";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
-
-const [major, minor, _patch] = RUBY_VERSION.split(".");
 
 class FakeLogger {
   receivedMessages = "";
@@ -133,7 +133,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
           RUBY_VERSION,
           "x64",
         ),
-        path.join("C:", `Ruby${major}${minor}-${os.arch()}`),
+        path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`),
       );
     }
   }
@@ -177,6 +177,18 @@ async function launchClient(workspaceUri: vscode.Uri) {
       `Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`,
     );
   };
+
+  client.onNotification("window/showMessage", (params: ShowMessageParams) => {
+    if (params.type === MessageType.Error) {
+      assert.fail(`Server error: ${params.message}`);
+    }
+  });
+
+  client.onNotification("window/logMessage", (params: ShowMessageParams) => {
+    if (params.type === MessageType.Error) {
+      assert.fail(`Server error: ${params.message}`);
+    }
+  });
 
   try {
     await client.start();
@@ -240,7 +252,7 @@ suite("Client", () => {
           force: true,
         });
       } else {
-        fs.rmSync(path.join("C:", `Ruby${major}${minor}-${os.arch()}`), {
+        fs.rmSync(path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`), {
           recursive: true,
           force: true,
         });

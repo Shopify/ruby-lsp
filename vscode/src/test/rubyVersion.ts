@@ -10,3 +10,6 @@ export const RUBY_VERSION = fs
     "utf-8",
   )
   .trim();
+
+export const [MAJOR, MINOR, PATCH] = RUBY_VERSION.split(".");
+export const VERSION_REGEX = `${MAJOR}\\.${MINOR}\\.\\d+`;

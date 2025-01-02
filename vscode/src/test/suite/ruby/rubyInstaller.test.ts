@@ -11,7 +11,7 @@ import * as common from "../../../common";
 import { RubyInstaller } from "../../../ruby/rubyInstaller";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
-import { RUBY_VERSION } from "../../rubyVersion";
+import { RUBY_VERSION, VERSION_REGEX } from "../../rubyVersion";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("RubyInstaller", () => {
@@ -67,8 +67,8 @@ suite("RubyInstaller", () => {
     );
     const { env, version, yjit } = await windows.activate();
 
-    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
-    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
 
@@ -101,8 +101,8 @@ suite("RubyInstaller", () => {
     );
     const { env, version, yjit } = await windows.activate();
 
-    assert.match(env.GEM_PATH!, /ruby\/3\.3\.0/);
-    assert.match(env.GEM_PATH!, /lib\/ruby\/gems\/3\.3\.0/);
+    assert.match(env.GEM_PATH!, new RegExp(`ruby/${VERSION_REGEX}`));
+    assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
 

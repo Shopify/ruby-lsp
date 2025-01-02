@@ -340,7 +340,7 @@ module RubyLsp
         ).returns(Interface::DocumentSymbol)
       end
       def create_document_symbol(name:, kind:, range_location:, selection_range_location:)
-        name = "<blank>" if name.empty?
+        name = "<blank>" if name.strip.empty?
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: kind,

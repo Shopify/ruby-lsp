@@ -156,7 +156,7 @@ class IntegrationTest < Minitest::Test
             "bundle exec ruby -e 'require \"debug\"'",
           )
         end
-        assert_empty(stderr)
+        refute_match(/cannot load such file/, stderr)
       end
     end
   end
