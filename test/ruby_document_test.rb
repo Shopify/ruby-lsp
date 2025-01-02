@@ -784,8 +784,8 @@ class RubyDocumentTest < Minitest::Test
       document.locate_node({ line: 3, character: 2 })
     end
 
-    assert_equal(<<~MESSAGE.chomp, error.message)
-      Requested position: {:line=>3, :character=>2}
+    assert_match(/Requested position: {(:)?line[\s:=>]+3, (:)?character[\s:=>]+2}/, error.message)
+    assert_match(<<~MESSAGE.chomp, error.message)
       Source:
 
       class Foo

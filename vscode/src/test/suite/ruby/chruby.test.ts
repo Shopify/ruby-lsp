@@ -11,11 +11,8 @@ import sinon from "sinon";
 import { Chruby } from "../../../ruby/chruby";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
-import { RUBY_VERSION } from "../../rubyVersion";
+import { RUBY_VERSION, MAJOR, MINOR, VERSION_REGEX } from "../../rubyVersion";
 import { ActivationResult } from "../../../ruby/versionManager";
-
-const [major, minor, _patch] = RUBY_VERSION.split(".");
-const VERSION_REGEX = `${major}\\.${minor}\\.\\d+`;
 
 // Create links to the real Ruby installations on CI and on our local machines
 function createRubySymlinks(destination: string) {
@@ -237,7 +234,7 @@ suite("Chruby", () => {
 
   test("Finds Ruby when .ruby-version omits patch", async () => {
     fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`, "bin"),
+      path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`, "bin"),
       {
         recursive: true,
       },
@@ -245,7 +242,7 @@ suite("Chruby", () => {
 
     fs.writeFileSync(
       path.join(workspacePath, ".ruby-version"),
-      `${major}.${minor}`,
+      `${MAJOR}.${MINOR}`,
     );
 
     const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});
@@ -256,7 +253,7 @@ suite("Chruby", () => {
     const result = await chruby.activate();
     assertActivatedRuby(result);
 
-    fs.rmSync(path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`), {
+    fs.rmSync(path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`), {
       recursive: true,
       force: true,
     });
@@ -264,7 +261,7 @@ suite("Chruby", () => {
 
   test("Continues searching if first directory doesn't exist for omitted patch", async () => {
     fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${major}.${minor}.0`, "bin"),
+      path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`, "bin"),
       {
         recursive: true,
       },
@@ -272,7 +269,7 @@ suite("Chruby", () => {
 
     fs.writeFileSync(
       path.join(workspacePath, ".ruby-version"),
-      `${major}.${minor}`,
+      `${MAJOR}.${MINOR}`,
     );
 
     const chruby = new Chruby(workspaceFolder, outputChannel, async () => {});

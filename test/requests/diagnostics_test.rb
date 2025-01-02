@@ -105,4 +105,41 @@ class DiagnosticsTest < Minitest::Test
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
     assert(diagnostics.find { |d| d.message == "Hello from custom formatter" })
   end
+
+  def test_ambiguous_syntax_warnings
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///fake/file.rb"))
+      b +a
+      b -a
+      b *a
+      b /a/
+    RUBY
+
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    assert_match("ambiguous first argument", T.must(diagnostics[0]).message)
+    assert_match("ambiguous first argument", T.must(diagnostics[1]).message)
+    assert_match("ambiguous `*`", T.must(diagnostics[2]).message)
+    assert_match("ambiguous `/`", T.must(diagnostics[3]).message)
+  end
+
+  def test_END_inside_method_definition_warning
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///fake/file.rb"))
+      def m; END{}; end
+    RUBY
+
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    assert_equal("END in method; use at_exit", T.must(diagnostics[0]).message)
+  end
+
+  def test_syntax_error_diagnostic
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///fake/file.rb"))
+      def foo
+    RUBY
+
+    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    assert_equal("expected a delimiter to close the parameters", T.must(diagnostics[0]).message)
+    assert_equal(
+      "unexpected end-of-input, assuming it is closing the parent top level context",
+      T.must(diagnostics[1]).message,
+    )
+  end
 end
