@@ -97,6 +97,12 @@ module RubyLsp
           :on_instance_variable_operator_write_node_enter,
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
+          :on_class_variable_and_write_node_enter,
+          :on_class_variable_operator_write_node_enter,
+          :on_class_variable_or_write_node_enter,
+          :on_class_variable_read_node_enter,
+          :on_class_variable_target_node_enter,
+          :on_class_variable_write_node_enter,
         )
       end
 
@@ -247,6 +253,36 @@ module RubyLsp
         handle_instance_variable_completion(node.name.to_s, node.location)
       end
 
+      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      def on_class_variable_and_write_node_enter(node)
+        handle_class_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      def on_class_variable_operator_write_node_enter(node)
+        handle_class_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      def on_class_variable_or_write_node_enter(node)
+        handle_class_variable_completion(node.name.to_s, node.name_loc)
+      end
+
+      sig { params(node: Prism::ClassVariableTargetNode).void }
+      def on_class_variable_target_node_enter(node)
+        handle_class_variable_completion(node.name.to_s, node.location)
+      end
+
+      sig { params(node: Prism::ClassVariableReadNode).void }
+      def on_class_variable_read_node_enter(node)
+        handle_class_variable_completion(node.name.to_s, node.location)
+      end
+
+      sig { params(node: Prism::ClassVariableWriteNode).void }
+      def on_class_variable_write_node_enter(node)
+        handle_class_variable_completion(node.name.to_s, node.name_loc)
+      end
+
       private
 
       sig { params(name: String, range: Interface::Range).void }
@@ -325,6 +361,37 @@ module RubyLsp
             kind: Constant::CompletionItemKind::VARIABLE,
           )
         end
+      end
+
+      sig { params(name: String, location: Prism::Location).void }
+      def handle_class_variable_completion(name, location)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        range = range_from_location(location)
+
+        @index.class_variable_completion_candidates(name, type.name).each do |entry|
+          variable_name = entry.name
+
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: entry.file_name,
+          )
+
+          @response_builder << Interface::CompletionItem.new(
+            label: variable_name,
+            label_details: label_details,
+            text_edit: Interface::TextEdit.new(
+              range: range,
+              new_text: variable_name,
+            ),
+            kind: Constant::CompletionItemKind::FIELD,
+            data: {
+              owner_name: entry.owner&.name,
+            },
+          )
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String, location: Prism::Location).void }

@@ -584,11 +584,32 @@ module RubyIndexer
       entries.select { |e| ancestors.include?(e.owner&.name) }
     end
 
+    sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::ClassVariable])) }
+    def resolve_class_variable(variable_name, owner_name)
+      entries = self[variable_name]&.grep(Entry::ClassVariable)
+      return unless entries&.any?
+
+      ancestors = linearized_ancestors_of(owner_name)
+      return if ancestors.empty?
+
+      entries.select { |e| ancestors.include?(e.owner&.name) }
+    end
+
     # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
     # include the `@` prefix
     sig { params(name: String, owner_name: String).returns(T::Array[Entry::InstanceVariable]) }
     def instance_variable_completion_candidates(name, owner_name)
       entries = T.cast(prefix_search(name).flatten, T::Array[Entry::InstanceVariable])
+      ancestors = linearized_ancestors_of(owner_name)
+
+      variables = entries.select { |e| ancestors.any?(e.owner&.name) }
+      variables.uniq!(&:name)
+      variables
+    end
+
+    sig { params(name: String, owner_name: String).returns(T::Array[Entry::ClassVariable]) }
+    def class_variable_completion_candidates(name, owner_name)
+      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::ClassVariable])
       ancestors = linearized_ancestors_of(owner_name)
 
       variables = entries.select { |e| ancestors.any?(e.owner&.name) }

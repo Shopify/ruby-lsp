@@ -486,6 +486,26 @@ module RubyIndexer
     # Represents a global variable e.g.: $DEBUG
     class GlobalVariable < Entry; end
 
+    # Represents a class variable e.g.: @@a = 1
+    class ClassVariable < Entry
+      sig { returns(T.nilable(Entry::Namespace)) }
+      attr_reader :owner
+
+      sig do
+        params(
+          name: String,
+          uri: URI::Generic,
+          location: Location,
+          comments: T.nilable(String),
+          owner: T.nilable(Entry::Namespace),
+        ).void
+      end
+      def initialize(name, uri, location, comments, owner)
+        super(name, uri, location, comments)
+        @owner = owner
+      end
+    end
+
     # Represents an instance variable e.g.: @a = 1
     class InstanceVariable < Entry
       sig { returns(T.nilable(Entry::Namespace)) }

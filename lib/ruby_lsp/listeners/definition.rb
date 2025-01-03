@@ -55,6 +55,12 @@ module RubyLsp
           :on_symbol_node_enter,
           :on_super_node_enter,
           :on_forwarding_super_node_enter,
+          :on_class_variable_and_write_node_enter,
+          :on_class_variable_operator_write_node_enter,
+          :on_class_variable_or_write_node_enter,
+          :on_class_variable_read_node_enter,
+          :on_class_variable_target_node_enter,
+          :on_class_variable_write_node_enter,
         )
       end
 
@@ -196,6 +202,36 @@ module RubyLsp
         handle_super_node_definition
       end
 
+      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      def on_class_variable_and_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      def on_class_variable_operator_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      def on_class_variable_or_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableTargetNode).void }
+      def on_class_variable_target_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableReadNode).void }
+      def on_class_variable_read_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
+      sig { params(node: Prism::ClassVariableWriteNode).void }
+      def on_class_variable_write_node_enter(node)
+        handle_class_variable_definition(node.name.to_s)
+      end
+
       private
 
       sig { void }
@@ -230,6 +266,24 @@ module RubyLsp
             ),
           )
         end
+      end
+
+      sig { params(name: String).void }
+      def handle_class_variable_definition(name)
+        type = @type_inferrer.infer_receiver_type(@node_context)
+        return unless type
+
+        entries = @index.resolve_class_variable(name, type.name)
+        return unless entries
+
+        entries.each do |entry|
+          @response_builder << Interface::Location.new(
+            uri: entry.uri.to_s,
+            range: range_from_location(entry.location),
+          )
+        end
+      rescue RubyIndexer::Index::NonExistingNamespaceError
+        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       sig { params(name: String).void }
