@@ -60,7 +60,7 @@ function enabledFeatureFlags(): Record<string, boolean> {
 // Get the executables to start the server based on the user's configuration
 function getLspExecutables(
   workspaceFolder: vscode.WorkspaceFolder,
-  env: NodeJS.ProcessEnv,
+  ruby: Ruby,
 ): ServerOptions {
   let run: Executable;
   let debug: Executable;
@@ -73,8 +73,8 @@ function getLspExecutables(
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
     env: bypassTypechecker
-      ? { ...env, RUBY_LSP_BYPASS_TYPECHECKER: "true" }
-      : env,
+      ? { ...ruby.env, RUBY_LSP_BYPASS_TYPECHECKER: "true" }
+      : ruby.env,
     shell: true,
   };
 
@@ -128,6 +128,9 @@ function getLspExecutables(
     };
   }
 
+  run = ruby.activateExecutable(run);
+  debug = ruby.activateExecutable(debug);
+
   return { run, debug };
 }
 
@@ -152,6 +155,7 @@ function collectClientOptions(
   const supportedSchemes = ["file", "git"];
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
+  const pathMapping = ruby.pathMapping;
 
   // For each workspace, the language client is responsible for handling requests for:
   // 1. Files inside of the workspace itself
@@ -227,6 +231,7 @@ function collectClientOptions(
       indexing: configuration.get("indexing"),
       addonSettings: configuration.get("addonSettings"),
       enabledFeatureFlags: enabledFeatureFlags(),
+      localFsMap: pathMapping,
     },
   };
 }
@@ -333,7 +338,7 @@ export default class Client extends LanguageClient implements ClientInterface {
   ) {
     super(
       LSP_NAME,
-      getLspExecutables(workspaceFolder, ruby.env),
+      getLspExecutables(workspaceFolder, ruby),
       collectClientOptions(
         vscode.workspace.getConfiguration("rubyLsp"),
         workspaceFolder,

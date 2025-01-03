@@ -37,6 +37,10 @@ parser = OptionParser.new do |opts|
     options[:launcher] = true
   end
 
+  opts.on("--local-fs-map [FS_MAP]", "Local fs map in format 'local:remote,local2:remote2,...'") do |map|
+    options[:local_fs_map] = map
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
@@ -144,6 +148,13 @@ if options[:doctor]
     index.index_file(uri)
   end
   return
+end
+
+if options[:local_fs_map]
+  ENV["RUBY_LSP_LOCAL_FS_MAP"] = [
+    ENV["RUBY_LSP_LOCAL_FS_MAP"],
+    options[:local_fs_map],
+  ].reject(&:nil?).join(",")
 end
 
 # Ensure all output goes out stderr by default to allow puts/p/pp to work

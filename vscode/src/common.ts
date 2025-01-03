@@ -1,9 +1,10 @@
-import { exec } from "child_process";
+import { exec, spawn as originalSpawn } from "child_process";
 import { createHash } from "crypto";
 import { promisify } from "util";
 
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient";
+import { Executable } from "vscode-languageclient/node";
 
 export enum Command {
   Start = "rubyLsp.start",
@@ -69,6 +70,8 @@ export interface WorkspaceInterface {
 export const STATUS_EMITTER = new vscode.EventEmitter<
   WorkspaceInterface | undefined
 >();
+
+export const spawn = originalSpawn;
 
 export const asyncExec = promisify(exec);
 export const LSP_NAME = "Ruby LSP";
@@ -145,4 +148,30 @@ export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
 
   // If that number is below the percentage, then the feature is enabled for this user
   return hashNum < percentage;
+}
+
+export function parseCommand(commandString: string): Executable {
+  // Regular expression to split arguments while respecting quotes
+  const regex = /(?:[^\s"']+|"[^"]*"|'[^']*')+/g;
+
+  const parts =
+    commandString.match(regex)?.map((arg) => {
+      // Remove surrounding quotes, if any
+      return arg.replace(/^['"]|['"]$/g, "");
+    }) ?? [];
+
+  // Extract environment variables
+  const env: Record<string, string> = {};
+  while (parts[0] && parts[0].includes("=")) {
+    const [key, value] = parts.shift()?.split("=") ?? [];
+    if (key) {
+      env[key] = value || "";
+    }
+  }
+
+  // The first part is the command, the rest are arguments
+  const command = parts.shift() || "";
+  const args = parts;
+
+  return { command, args, options: { env } };
 }

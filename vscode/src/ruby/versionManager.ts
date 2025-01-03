@@ -3,6 +3,7 @@ import path from "path";
 import os from "os";
 
 import * as vscode from "vscode";
+import { Executable } from "vscode-languageclient/node";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 import { asyncExec } from "../common";
@@ -12,6 +13,8 @@ export interface ActivationResult {
   yjit: boolean;
   version: string;
   gemPath: string[];
+  pathMapping?: Record<string, string>;
+  wrapCommand?: (executable: Executable) => Executable;
 }
 
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
