@@ -91,27 +91,43 @@ module RubyLsp
         return Type.new("#{last}::<Class:#{last}>") if parts.empty?
 
         Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
+      when Prism::CallNode
+        raw_receiver = receiver.message
+
+        if raw_receiver == "new"
+          # When invoking `new`, we recursively infer the type of the receiver to get the class type its being invoked
+          # on and then return the attached version of that type, since it's being instantiated.
+          type = infer_receiver_for_call_node(receiver, node_context)
+
+          return unless type
+
+          # If the method `new` was overridden, then we cannot assume that it will return a new instance of the class
+          new_method = @index.resolve_method("new", type.name)&.first
+          return if new_method && new_method.owner&.name != "Class"
+
+          type.attached
+        elsif raw_receiver
+          guess_type(raw_receiver, node_context.nesting)
+        end
       else
-
-        raw_receiver = if receiver.is_a?(Prism::CallNode)
-          receiver.message
-        else
-          receiver.slice
-        end
-
-        if raw_receiver
-          guessed_name = raw_receiver
-            .delete_prefix("@")
-            .delete_prefix("@@")
-            .split("_")
-            .map(&:capitalize)
-            .join
-
-          entries = @index.resolve(guessed_name, node_context.nesting) || @index.first_unqualified_const(guessed_name)
-          name = entries&.first&.name
-          GuessedType.new(name) if name
-        end
+        guess_type(receiver.slice, node_context.nesting)
       end
+    end
+
+    sig { params(raw_receiver: String, nesting: T::Array[String]).returns(T.nilable(GuessedType)) }
+    def guess_type(raw_receiver, nesting)
+      guessed_name = raw_receiver
+        .delete_prefix("@")
+        .delete_prefix("@@")
+        .split("_")
+        .map(&:capitalize)
+        .join
+
+      entries = @index.resolve(guessed_name, nesting) || @index.first_unqualified_const(guessed_name)
+      name = entries&.first&.name
+      return unless name
+
+      GuessedType.new(name)
     end
 
     sig { params(node_context: NodeContext).returns(Type) }
@@ -175,6 +191,12 @@ module RubyLsp
       sig { params(name: String).void }
       def initialize(name)
         @name = name
+      end
+
+      # Returns the attached version of this type by removing the `<Class:...>` part from its name
+      sig { returns(Type) }
+      def attached
+        Type.new(T.must(@name.split("::")[..-2]).join("::"))
       end
     end
 

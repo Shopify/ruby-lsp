@@ -471,6 +471,31 @@ module RubyLsp
       assert_equal("Object", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_object_instantiation_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 1, character: 8 })
+        class Foo; end
+        Foo.new.bar
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_object_instantiation_receiver_is_ignored_if_new_is_overridden
+      node_context = index_and_locate(<<~RUBY, { line: 8, character: 8 })
+        module Bar
+          def new; end
+        end
+
+        class Foo
+          extend Bar
+        end
+
+        Foo.new.bar
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
     private
 
     def index_and_locate(source, position)
