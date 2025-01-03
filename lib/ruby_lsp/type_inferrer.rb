@@ -148,7 +148,7 @@ module RubyLsp
 
     sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
     def infer_receiver_for_class_variables(node_context)
-      nesting_parts = node_context.nesting
+      nesting_parts = node_context.nesting.dup
 
       return Type.new("Object") if nesting_parts.empty?
 

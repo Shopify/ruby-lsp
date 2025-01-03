@@ -277,14 +277,9 @@ module RubyLsp
         return unless entries
 
         entries.each do |entry|
-          location = entry.location
-
           @response_builder << Interface::Location.new(
             uri: entry.uri.to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
+            range: range_from_location(entry.location),
           )
         end
       rescue RubyIndexer::Index::NonExistingNamespaceError
