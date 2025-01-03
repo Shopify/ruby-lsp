@@ -40,7 +40,9 @@ module RubyLsp
 
       sig { override.returns(T.nilable(Interface::WorkspaceEdit)) }
       def perform
-        char_position = @document.create_scanner.find_char_position(@position)
+        char_position = @global_state.synchronize do
+          @document.create_scanner.find_char_position(@position)
+        end
 
         node_context = RubyDocument.locate(
           @document.parse_result.value,
