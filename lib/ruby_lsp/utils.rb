@@ -80,6 +80,24 @@ module RubyLsp
         )
       end
 
+      sig { params(uri: String).returns(Notification) }
+      def clear_diagnostics(uri)
+        new(
+          method: "textDocument/publishDiagnostics",
+          params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
+        )
+      end
+
+      def progress(id, kind)
+        new(
+          method: "$/progress",
+          params: Interface::ProgressParams.new(
+            token: id,
+            value: Interface::WorkDoneProgressEnd.new(kind: kind),
+          ),
+        )
+      end
+
       sig { params(data: T::Hash[Symbol, T.untyped]).returns(Notification) }
       def telemetry(data)
         new(
@@ -134,13 +152,7 @@ module RubyLsp
 
       sig { params(id: String).returns(Notification) }
       def progress_end(id)
-        Notification.new(
-          method: "$/progress",
-          params: Interface::ProgressParams.new(
-            token: id,
-            value: Interface::WorkDoneProgressEnd.new(kind: "end"),
-          ),
-        )
+        Notification.progress(id, "end")
       end
     end
 
@@ -160,6 +172,8 @@ module RubyLsp
       @id = id
       super(method: method, params: params)
     end
+
+    private_class_method :new # we want to force the use of the factory methods
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
