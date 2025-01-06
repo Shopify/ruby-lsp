@@ -281,7 +281,7 @@ module RubyLsp
       # When not updating, we run `(bundle check || bundle install)`
       # When updating, we run `((bundle check && bundle update ruby-lsp debug) || bundle install)`
       bundler_path = File.join(Gem.default_bindir, "bundle")
-      base_command = (File.exist?(bundler_path) ? "#{Gem.ruby} #{bundler_path}" : "bundle").dup
+      base_command = (!Gem.win_platform? && File.exist?(bundler_path) ? "#{Gem.ruby} #{bundler_path}" : "bundle").dup
 
       if env["BUNDLER_VERSION"]
         base_command << " _#{env["BUNDLER_VERSION"]}_"
