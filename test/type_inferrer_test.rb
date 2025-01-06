@@ -479,6 +479,7 @@ module RubyLsp
         source: source,
         version: 1,
         uri: URI::Generic.build(scheme: "file", path: "/fake/path/foo.rb"),
+        global_state: RubyLsp::GlobalState.new,
       )
       document.locate_node(position)
     end

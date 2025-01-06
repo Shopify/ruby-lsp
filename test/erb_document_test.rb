@@ -4,8 +4,12 @@
 require "test_helper"
 
 class ERBDocumentTest < Minitest::Test
+  def setup
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   def test_erb_file_is_properly_parsed
-    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+    source = +<<~ERB
       <ul>
         <li><%= foo %><li>
         <li><%= bar %><li>
@@ -13,6 +17,12 @@ class ERBDocumentTest < Minitest::Test
         <li><%- quz %><li>
       </ul>
     ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
 
     document.parse!
 
@@ -24,7 +34,7 @@ class ERBDocumentTest < Minitest::Test
   end
 
   def test_erb_file_parses_in_eval_context
-    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+    source = +<<~ERB
       <html>
         <head>
           <%= yield :head %>
@@ -34,6 +44,12 @@ class ERBDocumentTest < Minitest::Test
         </body>
       </html>
     ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
 
     document.parse!
 
@@ -45,7 +61,12 @@ class ERBDocumentTest < Minitest::Test
   end
 
   def test_erb_document_handles_windows_newlines
-    document = RubyLsp::ERBDocument.new(source: "<%=\r\nbar %>", version: 1, uri: URI("file:///foo.erb"))
+    document = RubyLsp::ERBDocument.new(
+      source: "<%=\r\nbar %>",
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
     document.parse!
 
     refute_predicate(document, :syntax_error?)
@@ -61,28 +82,45 @@ class ERBDocumentTest < Minitest::Test
       "<%= foo %>\n<%= bar",
       "<%= foo %\n<%= bar %>",
     ].each do |source|
-      document = RubyLsp::ERBDocument.new(source: source, version: 1, uri: URI("file:///foo.erb"))
+      document = RubyLsp::ERBDocument.new(
+        source: source,
+        version: 1,
+        uri: URI("file:///foo.erb"),
+        global_state: @global_state,
+      )
       document.parse!
     end
   end
 
   def test_failing_to_parse_indicates_syntax_error
-    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+    source = +<<~ERB
       <ul>
         <li><%= foo %><li>
         <li><%= end %><li>
       </ul>
     ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
 
     assert_predicate(document, :syntax_error?)
   end
 
   def test_locate
-    document = RubyLsp::ERBDocument.new(source: <<~ERB, version: 1, uri: URI("file:///foo/bar.erb"))
+    source = <<~ERB
       <% Post.all.each do |post| %>
         <h1><%= post.title %></h1>
       <% end %>
     ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo/bar.erb"),
+      global_state: @global_state,
+    )
 
     # Locate the `Post` class
     node_context = document.locate_node({ line: 0, character: 3 })
@@ -100,7 +138,12 @@ class ERBDocumentTest < Minitest::Test
   end
 
   def test_cache_set_and_get
-    document = RubyLsp::ERBDocument.new(source: +"", version: 1, uri: URI("file:///foo/bar.erb"))
+    document = RubyLsp::ERBDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///foo/bar.erb"),
+      global_state: @global_state,
+    )
     value = [1, 2, 3]
 
     assert_equal(value, document.cache_set("textDocument/semanticHighlighting", value))
@@ -108,12 +151,18 @@ class ERBDocumentTest < Minitest::Test
   end
 
   def test_keeps_track_of_virtual_host_language_source
-    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+    source = +<<~ERB
       <ul>
         <li><%= foo %><li>
         <li><%= end %><li>
       </ul>
     ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
 
     assert_equal(<<~HTML, document.host_language_source)
       <ul>
@@ -124,11 +173,17 @@ class ERBDocumentTest < Minitest::Test
   end
 
   def test_erb_is_parsed_as_a_partial_script
-    document = RubyLsp::ERBDocument.new(source: +<<~ERB, version: 1, uri: URI("file:///foo.erb"))
+    source = +<<~ERB
       <ul>
         <li><%= redo %><li>
       </ul>
     ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
 
     document.parse!
 

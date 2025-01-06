@@ -7,6 +7,10 @@ class ExpectationsTestRunner < Minitest::Test
   TEST_RUBY_LSP_FIXTURES = File.join(TEST_FIXTURES_DIR, "*.{rb,rake}")
   TEST_PRISM_FIXTURES = File.join(TEST_FIXTURES_DIR, "prism/test/prism/fixtures/**", "*.txt")
 
+  def setup
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   class << self
     def expectations_tests(handler_class, expectation_suffix)
       class_eval(<<~RB, __FILE__, __LINE__ + 1)

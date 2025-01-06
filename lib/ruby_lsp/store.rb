@@ -13,8 +13,9 @@ module RubyLsp
     sig { returns(String) }
     attr_accessor :client_name
 
-    sig { void }
-    def initialize
+    sig { params(global_state: GlobalState).void }
+    def initialize(global_state)
+      @global_state = global_state
       @state = T.let({}, T::Hash[String, Document[T.untyped]])
       @features_configuration = T.let(
         {
@@ -61,17 +62,16 @@ module RubyLsp
         source: String,
         version: Integer,
         language_id: Document::LanguageId,
-        encoding: Encoding,
       ).returns(Document[T.untyped])
     end
-    def set(uri:, source:, version:, language_id:, encoding: Encoding::UTF_8)
+    def set(uri:, source:, version:, language_id:)
       @state[uri.to_s] = case language_id
       when Document::LanguageId::ERB
-        ERBDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+        ERBDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
       when Document::LanguageId::RBS
-        RBSDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+        RBSDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
       else
-        RubyDocument.new(source: source, version: version, uri: uri, encoding: encoding)
+        RubyDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
       end
     end
 

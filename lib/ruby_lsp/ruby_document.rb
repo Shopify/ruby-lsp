@@ -142,8 +142,8 @@ module RubyLsp
     end
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    def initialize(source:, version:, uri:, global_state:)
       super
       @code_units_cache = T.let(@parse_result.code_units_cache(@encoding), T.any(
         T.proc.params(arg0: Integer).returns(Integer),

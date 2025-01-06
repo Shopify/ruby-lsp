@@ -5,6 +5,7 @@ require "test_helper"
 
 class DiagnosticsTest < Minitest::Test
   def setup
+    @uri = URI("file:///fake/file.rb")
     @global_state = RubyLsp::GlobalState.new
     @global_state.apply_options({
       initializationOptions: { linters: ["rubocop"] },
@@ -21,6 +22,7 @@ class DiagnosticsTest < Minitest::Test
       source: File.read(fixture_path),
       version: 1,
       uri: URI::Generic.from_path(path: fixture_path),
+      global_state: @global_state,
     )
 
     result = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform
@@ -28,7 +30,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_returns_syntax_error_diagnostics
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
     RUBY
 
@@ -39,7 +41,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_empty_diagnostics_without_rubocop
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
         "Hello, world!"
       end
@@ -61,7 +63,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_empty_diagnostics_with_rubocop
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
         "Hello, world!"
       end
@@ -73,7 +75,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_registering_formatter_with_diagnostic_support
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
         "Hello, world!"
       end
@@ -107,7 +109,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_ambiguous_syntax_warnings
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
       b +a
       b -a
       b *a
@@ -122,7 +124,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_END_inside_method_definition_warning
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
       def m; END{}; end
     RUBY
 
@@ -131,7 +133,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_syntax_error_diagnostic
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///fake/file.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
       def foo
     RUBY
 

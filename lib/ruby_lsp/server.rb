@@ -392,7 +392,6 @@ module RubyLsp
           uri: text_document[:uri],
           source: text_document[:text],
           version: text_document[:version],
-          encoding: @global_state.encoding,
           language_id: language_id,
         )
 

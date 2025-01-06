@@ -4,8 +4,13 @@
 require "test_helper"
 
 class RubyDocumentTest < Minitest::Test
+  def setup
+    @uri = URI("file:///foo.rb")
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   def test_valid_incremental_edits
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
       end
     RUBY
@@ -55,7 +60,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_deletion_full_node
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
         puts 'a' # comment
       end
@@ -75,7 +80,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_deletion_single_character
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
         puts 'a'
       end
@@ -95,7 +100,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_add_delete_single_character
-    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: @global_state)
 
     # Add a
     document.push_edits(
@@ -115,7 +120,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_replace
-    document = RubyLsp::RubyDocument.new(source: +"puts 'a'", version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"puts 'a'", version: 1, uri: @uri, global_state: @global_state)
 
     # Replace for puts 'b'
     document.push_edits(
@@ -130,7 +135,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_new_line_and_char_addition
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       # frozen_string_literal: true
 
       class Foo
@@ -169,7 +174,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_multi_cursor_edit
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       # frozen_string_literal: true
 
 
@@ -271,7 +276,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_pushing_edits_to_document_with_unicode
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       chars = ["億"]
     RUBY
 
@@ -325,11 +330,17 @@ class RubyDocumentTest < Minitest::Test
         a = "👋"
       end
     RUBY
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+
     document = RubyLsp::RubyDocument.new(
       source: source,
       version: 1,
       uri: URI("file:///foo.rb"),
-      encoding: Encoding::UTF_16LE,
+      global_state: global_state,
     )
 
     document.push_edits(
@@ -395,7 +406,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_failing_to_parse_indicates_syntax_error
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
       end
     RUBY
@@ -415,7 +426,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_files_opened_with_syntax_errors_are_properly_marked
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
     RUBY
 
@@ -423,7 +434,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Post < ActiveRecord::Base
         scope :published do
           # find posts that are published
@@ -455,7 +466,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_nesting
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       module Foo
         class Other
           def do_it
@@ -481,7 +492,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_call_node
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       module Foo
         class Other
           def do_it
@@ -502,7 +513,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_call_node_nested
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       module Foo
         class Other
           def do_it
@@ -518,7 +529,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_call_node_for_blocks
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       foo do
         "hello"
       end
@@ -529,7 +540,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_call_node_ZZZ
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       foo(
         if bar(1, 2, 3)
           "hello" # this is the target
@@ -542,7 +553,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_correct_nesting_when_specifying_target_classes
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       module Foo
         class Bar
           def baz
@@ -559,7 +570,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_returns_correct_nesting_when_contains_multibyte_characters
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       module A動物
         class Bねこ
           def C鳴く
@@ -581,7 +592,7 @@ class RubyDocumentTest < Minitest::Test
   def test_reparsing_without_new_edits_does_nothing
     text = "def foo; end"
 
-    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: @global_state)
     document.push_edits(
       [{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: text }],
       version: 2,
@@ -608,7 +619,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_cache_set_and_get
-    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: @global_state)
     value = [1, 2, 3]
 
     assert_equal(value, document.cache_set("textDocument/semanticHighlighting", value))
@@ -619,38 +630,39 @@ class RubyDocumentTest < Minitest::Test
     document = RubyLsp::RubyDocument.new(
       source: +"# frozen_string_literal: true",
       version: 1,
-      uri: URI("file:///foo/bar.rb"),
+      uri: @uri,
+      global_state: @global_state,
     )
     assert_equal(RubyLsp::RubyDocument::SorbetLevel::None, document.sorbet_level)
   end
 
   def test_sigil_ignore
-    document = RubyLsp::RubyDocument.new(source: +"# typed: ignore", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"# typed: ignore", version: 1, uri: @uri, global_state: @global_state)
     assert_equal(RubyLsp::RubyDocument::SorbetLevel::Ignore, document.sorbet_level)
   end
 
   def test_sigil_false
-    document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: @uri, global_state: @global_state)
     assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
   end
 
   def test_sigil_true
-    document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: @uri, global_state: @global_state)
     assert_equal(RubyLsp::RubyDocument::SorbetLevel::True, document.sorbet_level)
   end
 
   def test_sigil_strict
-    document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: @uri, global_state: @global_state)
     assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sigil_strong
-    document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: @uri, global_state: @global_state)
     assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
   end
 
   def test_sorbet_sigil_only_in_magic_comment
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       # typed: false
 
       def foo
@@ -675,7 +687,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locating_compact_namespace_declaration
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo::Bar
       end
 
@@ -693,7 +705,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locating_singleton_contexts
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo
         hello1
 
@@ -737,7 +749,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locate_first_within_range
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       method_call(other_call).each do |a|
         nested_call(fourth_call).each do |b|
         end
@@ -760,7 +772,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_uncached_requests_return_empty_cache_object
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo
       end
     RUBY
@@ -771,7 +783,7 @@ class RubyDocumentTest < Minitest::Test
   end
 
   def test_locating_a_non_existing_location_raises
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: URI("file:///foo/bar.rb"))
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
       class Foo
       end
     RUBY

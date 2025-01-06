@@ -21,7 +21,8 @@ module RubyLsp
       @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
       @current_request_id = T.let(1, Integer)
-      @store = T.let(Store.new, Store)
+      @global_state = T.let(GlobalState.new, GlobalState)
+      @store = T.let(Store.new(@global_state), Store)
       @outgoing_dispatcher = T.let(
         Thread.new do
           unless @test_mode
@@ -33,7 +34,6 @@ module RubyLsp
         Thread,
       )
 
-      @global_state = T.let(GlobalState.new, GlobalState)
       Thread.main.priority = 1
 
       # We read the initialize request in `exe/ruby-lsp` to be able to determine the workspace URI where Bundler should

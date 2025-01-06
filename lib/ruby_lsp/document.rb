@@ -43,13 +43,14 @@ module RubyLsp
     sig { returns(T.any(Interface::SemanticTokens, Object)) }
     attr_accessor :semantic_tokens
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    def initialize(source:, version:, uri:, global_state:)
+      @source = source
+      @version = version
+      @global_state = global_state
       @cache = T.let(Hash.new(EMPTY_CACHE), T::Hash[String, T.untyped])
       @semantic_tokens = T.let(EMPTY_CACHE, T.any(Interface::SemanticTokens, Object))
-      @encoding = T.let(encoding, Encoding)
-      @source = T.let(source, String)
-      @version = T.let(version, Integer)
+      @encoding = T.let(global_state.encoding, Encoding)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
       @parse_result = T.let(T.unsafe(nil), ParseResultType)

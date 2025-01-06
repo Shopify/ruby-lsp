@@ -68,13 +68,6 @@ class CodeActionsFormattingTest < Minitest::Test
     ).returns(T.untyped)
   end
   def assert_corrects_to_expected(diagnostic_code, code_action_title, source, expected)
-    document = RubyLsp::RubyDocument.new(
-      source: source.dup,
-      version: 1,
-      uri: URI::Generic.from_path(path: __FILE__),
-      encoding: Encoding::UTF_16LE,
-    )
-
     global_state = RubyLsp::GlobalState.new
     global_state.apply_options({
       initializationOptions: { linters: ["rubocop"] },
@@ -82,6 +75,13 @@ class CodeActionsFormattingTest < Minitest::Test
     global_state.register_formatter(
       "rubocop",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
+    )
+
+    document = RubyLsp::RubyDocument.new(
+      source: source.dup,
+      version: 1,
+      uri: URI::Generic.from_path(path: __FILE__),
+      global_state: global_state,
     )
 
     diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform
