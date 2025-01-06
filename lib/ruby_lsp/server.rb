@@ -182,14 +182,9 @@ module RubyLsp
       errored_addons = Addon.addons.select(&:error?)
 
       if errored_addons.any?
+        message = "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}"
         send_message(
-          Notification.new(
-            method: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::WARNING,
-              message: "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
-            ),
-          ),
+          Notification.window_show_message(message, type: Constant::MessageType::WARNING),
         )
 
         unless @test_mode
@@ -403,13 +398,7 @@ module RubyLsp
           MESSAGE
 
           send_message(
-            Notification.new(
-              method: "window/logMessage",
-              params: Interface::LogMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: log_message,
-              ),
-            ),
+            Notification.window_log_message(log_message, type: Constant::MessageType::WARNING),
           )
         end
       end
@@ -423,10 +412,7 @@ module RubyLsp
 
         # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
         send_message(
-          Notification.new(
-            method: "textDocument/publishDiagnostics",
-            params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
-          ),
+          Notification.clear_diagnostics(uri),
         )
       end
     end
@@ -1214,27 +1200,16 @@ module RubyLsp
 
       if File.exist?(index_path)
         begin
-          @global_state.index.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
+          message = "The .index.yml configuration file is deprecated. " \
+            "Please use editor settings to configure the index"
           send_message(
-            Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: "The .index.yml configuration file is deprecated. " \
-                  "Please use editor settings to configure the index",
-              ),
-            ),
+            Notification.window_show_message(message, type: Constant::MessageType::WARNING),
           )
+          @global_state.index.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
         rescue Psych::SyntaxError => e
           message = "Syntax error while loading configuration: #{e.message}"
           send_message(
-            Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: message,
-              ),
-            ),
+            Notification.window_show_message(message, type: Constant::MessageType::WARNING),
           )
         end
         return
