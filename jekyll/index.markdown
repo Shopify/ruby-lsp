@@ -169,6 +169,14 @@ It also allows developers to discover constants or methods that are available to
 Sorry, your browser doesn't support embedded videos. This video illustrates the completion feature, providing completion candidates as the user types.
 </video>
 
+{: .note }
+Completion for method calls can only be provided when the type of the receiver is known. For example, when typing `foo.`
+it's only possible to show method completion candidates if know the type of `foo`. Since the Ruby LSP does not require
+users to adopt a type system, completion for methods ends up being available only when types can be determined even
+without annotations (e.g.: methods invoked on literals, constants, direct instantiations of objects using `new`).<br><br>
+If you would like to have more accurate completion, consider adopting a
+[type system](design-and-roadmap#accuracy-correctness-and-type-checking).
+
 ### Signature Help
 
 Signature help often appears right after users finish typing a method, providing hints about the method's parameters. This feature is invaluable for understanding the expected arguments and improving code accuracy.
