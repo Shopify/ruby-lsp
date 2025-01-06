@@ -202,14 +202,14 @@ module RubyLsp
         env["BUNDLE_PATH"] = File.expand_path(env["BUNDLE_PATH"], @project_path)
       end
 
-      return run_bundle_install_through_command(env) unless @launcher
-
-      # This same check happens conditionally when running through the command. For invoking the CLI directly, it's
-      # important that we ensure the Bundler version is set to avoid restarts
+      # Set the specific Bundler version used by the main app. This avoids issues with Bundler restarts, which clean the
+      # environment and lead to the `ruby-lsp` executable not being found
       if @bundler_version
         env["BUNDLER_VERSION"] = @bundler_version.to_s
         install_bundler_if_needed
       end
+
+      return run_bundle_install_through_command(env) unless @launcher
 
       begin
         run_bundle_install_directly(env)
@@ -272,8 +272,6 @@ module RubyLsp
 
     sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
     def run_bundle_install_through_command(env)
-      base_bundle = base_bundle_command(env)
-
       # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
       # to upgrade them or else we'll produce undesired source control changes. If the composed bundle was just created
       # and any of `ruby-lsp`, `ruby-lsp-rails` or `debug` weren't a part of the Gemfile, then we need to run `bundle
@@ -282,13 +280,20 @@ module RubyLsp
 
       # When not updating, we run `(bundle check || bundle install)`
       # When updating, we run `((bundle check && bundle update ruby-lsp debug) || bundle install)`
-      command = +"(#{base_bundle} check"
+      bundler_path = File.join(Gem.default_bindir, "bundle")
+      base_command = (File.exist?(bundler_path) ? "#{Gem.ruby} #{bundler_path}" : "bundle").dup
+
+      if env["BUNDLER_VERSION"]
+        base_command << " _#{env["BUNDLER_VERSION"]}_"
+      end
+
+      command = +"(#{base_command} check"
 
       if should_bundle_update?
         # If any of `ruby-lsp`, `ruby-lsp-rails` or `debug` are not in the Gemfile, try to update them to the latest
         # version
         command.prepend("(")
-        command << " && #{base_bundle} update "
+        command << " && #{base_command} update "
         command << "ruby-lsp " unless @dependencies["ruby-lsp"]
         command << "debug " unless @dependencies["debug"]
         command << "ruby-lsp-rails " if @rails_app && !@dependencies["ruby-lsp-rails"]
@@ -298,7 +303,7 @@ module RubyLsp
         @last_updated_path.write(Time.now.iso8601)
       end
 
-      command << " || #{base_bundle} install) "
+      command << " || #{base_command} install) "
 
       # Redirect stdout to stderr to prevent going into an infinite loop. The extension might confuse stdout output with
       # responses
@@ -406,34 +411,6 @@ module RubyLsp
       return false unless application_contents
 
       /class .* < (::)?Rails::Application/.match?(application_contents)
-    end
-
-    # Returns the base bundle command we should use for this project, which will be:
-    # - `bundle` if there's no locked Bundler version and no `bin/bundle` binstub in the $PATH
-    # - `bundle _<version>_` if there's a locked Bundler version
-    # - `bin/bundle` if there's a `bin/bundle` binstub in the $PATH
-    sig { params(env: T::Hash[String, String]).returns(String) }
-    def base_bundle_command(env)
-      path_parts = if Gem.win_platform?
-        ENV["Path"] || ENV["PATH"] || ENV["path"] || ""
-      else
-        ENV["PATH"] || ""
-      end.split(File::PATH_SEPARATOR)
-
-      bin_dir = File.expand_path("bin", @project_path)
-      bundle_binstub = File.join(@project_path, "bin", "bundle")
-
-      if File.exist?(bundle_binstub) && path_parts.any? { |path| File.expand_path(path, @project_path) == bin_dir }
-        return bundle_binstub
-      end
-
-      if @bundler_version
-        env["BUNDLER_VERSION"] = @bundler_version.to_s
-        install_bundler_if_needed
-        return "bundle _#{@bundler_version}_"
-      end
-
-      "bundle"
     end
 
     sig { void }
