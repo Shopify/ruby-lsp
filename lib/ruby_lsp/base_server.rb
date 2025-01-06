@@ -18,7 +18,6 @@ module RubyLsp
       @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)
       @outgoing_queue = T.let(Thread::Queue.new, Thread::Queue)
       @cancelled_requests = T.let([], T::Array[Integer])
-      @mutex = T.let(Mutex.new, Mutex)
       @worker = T.let(new_worker, Thread)
       @current_request_id = T.let(1, Integer)
       @global_state = T.let(GlobalState.new, GlobalState)
@@ -27,7 +26,7 @@ module RubyLsp
         Thread.new do
           unless @test_mode
             while (message = @outgoing_queue.pop)
-              @mutex.synchronize { @writer.write(message.to_hash) }
+              @global_state.synchronize { @writer.write(message.to_hash) }
             end
           end
         end,
@@ -51,7 +50,7 @@ module RubyLsp
         # source. Altering the source reference during parsing will put the parser in an invalid internal state, since
         # it started parsing with one source but then it changed in the middle. We don't want to do this for text
         # synchronization notifications
-        @mutex.synchronize do
+        @global_state.synchronize do
           uri = message.dig(:params, :textDocument, :uri)
 
           if uri
@@ -95,14 +94,14 @@ module RubyLsp
              "$/cancelRequest"
           process_message(message)
         when "shutdown"
-          @mutex.synchronize do
+          @global_state.synchronize do
             send_log_message("Shutting down Ruby LSP...")
             shutdown
             run_shutdown
             @writer.write(Result.new(id: message[:id], response: nil).to_hash)
           end
         when "exit"
-          @mutex.synchronize do
+          @global_state.synchronize do
             status = @incoming_queue.closed? ? 0 : 1
             send_log_message("Shutdown complete with status #{status}")
             exit(status)
@@ -157,7 +156,7 @@ module RubyLsp
           id = message[:id]
 
           # Check if the request was cancelled before trying to process it
-          @mutex.synchronize do
+          @global_state.synchronize do
             if id && @cancelled_requests.include?(id)
               send_message(Error.new(
                 id: id,

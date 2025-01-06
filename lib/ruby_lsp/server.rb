@@ -107,7 +107,7 @@ module RubyLsp
           ),
         )
       when "$/cancelRequest"
-        @mutex.synchronize { @cancelled_requests << message[:params][:id] }
+        @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
         process_response(message) if message[:result]
       end
@@ -377,57 +377,53 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_open(message)
-      @mutex.synchronize do
-        text_document = message.dig(:params, :textDocument)
-        language_id = case text_document[:languageId]
-        when "erb", "eruby"
-          Document::LanguageId::ERB
-        when "rbs"
-          Document::LanguageId::RBS
-        else
-          Document::LanguageId::Ruby
-        end
+      text_document = message.dig(:params, :textDocument)
+      language_id = case text_document[:languageId]
+      when "erb", "eruby"
+        Document::LanguageId::ERB
+      when "rbs"
+        Document::LanguageId::RBS
+      else
+        Document::LanguageId::Ruby
+      end
 
-        document = @store.set(
-          uri: text_document[:uri],
-          source: text_document[:text],
-          version: text_document[:version],
-          language_id: language_id,
-        )
+      document = @store.set(
+        uri: text_document[:uri],
+        source: text_document[:text],
+        version: text_document[:version],
+        language_id: language_id,
+      )
 
-        if document.past_expensive_limit? && text_document[:uri].scheme == "file"
-          log_message = <<~MESSAGE
-            The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
-            diagnostics will be disabled.
-          MESSAGE
+      if document.past_expensive_limit? && text_document[:uri].scheme == "file"
+        log_message = <<~MESSAGE
+          The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
+          diagnostics will be disabled.
+        MESSAGE
 
-          send_message(
-            Notification.new(
-              method: "window/logMessage",
-              params: Interface::LogMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: log_message,
-              ),
+        send_message(
+          Notification.new(
+            method: "window/logMessage",
+            params: Interface::LogMessageParams.new(
+              type: Constant::MessageType::WARNING,
+              message: log_message,
             ),
-          )
-        end
+          ),
+        )
       end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
-      @mutex.synchronize do
-        uri = message.dig(:params, :textDocument, :uri)
-        @store.delete(uri)
+      uri = message.dig(:params, :textDocument, :uri)
+      @store.delete(uri)
 
-        # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-        send_message(
-          Notification.new(
-            method: "textDocument/publishDiagnostics",
-            params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
-          ),
-        )
-      end
+      # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
+      send_message(
+        Notification.new(
+          method: "textDocument/publishDiagnostics",
+          params: Interface::PublishDiagnosticsParams.new(uri: uri.to_s, diagnostics: []),
+        ),
+      )
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -435,9 +431,7 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
-      @mutex.synchronize do
-        @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
-      end
+      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }

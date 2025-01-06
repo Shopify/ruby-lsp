@@ -30,7 +30,7 @@ module RubyLsp
       sig { override.returns(T::Array[Interface::Location]) }
       def perform
         position = @params[:position]
-        char_position = @document.create_scanner.find_char_position(position)
+        char_position, _ = @document.find_index_by_position(position)
 
         node_context = RubyDocument.locate(
           @document.parse_result.value,

@@ -40,7 +40,8 @@ module RubyLsp
         @dispatcher = dispatcher
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
-        char_position = document.create_scanner.find_char_position(params[:position]) - 1
+        char_position, _ = document.find_index_by_position(params[:position])
+        char_position -= 1
         delegate_request_if_needed!(global_state, document, char_position)
 
         node_context = RubyDocument.locate(
