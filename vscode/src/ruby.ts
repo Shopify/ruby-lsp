@@ -3,8 +3,9 @@ import path from "path";
 import os from "os";
 
 import * as vscode from "vscode";
+import { Executable, ExecutableOptions } from "vscode-languageclient/node";
 
-import { asyncExec, RubyInterface } from "./common";
+import { asyncExec, parseCommand, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -14,6 +15,7 @@ import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
 import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
+import { Compose } from "./ruby/compose";
 import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
 
@@ -44,6 +46,7 @@ export enum ManagerIdentifier {
   Shadowenv = "shadowenv",
   Mise = "mise",
   RubyInstaller = "rubyInstaller",
+  Compose = "compose",
   None = "none",
   Custom = "custom",
 }
@@ -66,6 +69,8 @@ export class Ruby implements RubyInterface {
   private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
+  private _pathMapping: Record<string, string> = {};
+  private _wrapCommand: (executable: Executable) => Executable;
   private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
   private readonly outputChannel: WorkspaceChannel;
@@ -81,6 +86,7 @@ export class Ruby implements RubyInterface {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
     this.telemetry = telemetry;
+    this._wrapCommand = (executable: Executable) => executable;
 
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -107,6 +113,10 @@ export class Ruby implements RubyInterface {
     } else {
       this.#versionManager = versionManager;
     }
+  }
+
+  get pathMapping() {
+    return this._pathMapping;
   }
 
   get env() {
@@ -189,6 +199,24 @@ export class Ruby implements RubyInterface {
     }
   }
 
+  runActivatedScript(script: string, options: ExecutableOptions = {}) {
+    const parsedExecutable = parseCommand(script);
+    const executable = this.activateExecutable({
+      ...parsedExecutable,
+      options,
+    });
+    const command = [executable.command, ...(executable.args || [])].join(" ");
+
+    return asyncExec(command, {
+      cwd: this.workspaceFolder.uri.fsPath || executable.options?.cwd,
+      env: { ...process.env, ...executable.options?.env },
+    });
+  }
+
+  activateExecutable(executable: Executable) {
+    return this._wrapCommand(executable);
+  }
+
   async manuallySelectRuby() {
     const manualSelection = await vscode.window.showInformationMessage(
       "Configure global or workspace specific fallback for the Ruby LSP?",
@@ -241,7 +269,8 @@ export class Ruby implements RubyInterface {
   }
 
   private async runActivation(manager: VersionManager) {
-    const { env, version, yjit, gemPath } = await manager.activate();
+    const { env, version, yjit, gemPath, pathMapping, wrapCommand } =
+      await manager.activate();
     const [major, minor, _patch] = version.split(".").map(Number);
 
     this.sanitizeEnvironment(env);
@@ -252,6 +281,13 @@ export class Ruby implements RubyInterface {
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);
     this.gemPath.push(...gemPath);
+
+    if (pathMapping) {
+      this._pathMapping = pathMapping;
+    }
+    if (wrapCommand) {
+      this._wrapCommand = wrapCommand;
+    }
   }
 
   // Fetch information related to the Ruby version. This can only be invoked after activation, so that `rubyVersion` is
@@ -344,6 +380,15 @@ export class Ruby implements RubyInterface {
       case ManagerIdentifier.RubyInstaller:
         await this.runActivation(
           new RubyInstaller(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.manuallySelectRuby.bind(this),
+          ),
+        );
+        break;
+      case ManagerIdentifier.Compose:
+        await this.runActivation(
+          new Compose(
             this.workspaceFolder,
             this.outputChannel,
             this.manuallySelectRuby.bind(this),

@@ -258,8 +258,10 @@ module RubyLsp
         entries.each do |entry|
           location = entry.location
 
+          external_uri = @global_state.to_external_uri(entry.uri)
+
           @response_builder << Interface::Location.new(
-            uri: entry.uri.to_s,
+            uri: external_uri.to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
               end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
@@ -301,8 +303,10 @@ module RubyLsp
         entries.each do |entry|
           location = entry.location
 
+          external_uri = @global_state.to_external_uri(entry.uri)
+
           @response_builder << Interface::Location.new(
-            uri: entry.uri.to_s,
+            uri: external_uri.to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
               end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
@@ -332,8 +336,10 @@ module RubyLsp
           uri = target_method.uri
           next if sorbet_level_true_or_higher?(@sorbet_level) && not_in_dependencies?(T.must(uri.full_path))
 
+          external_uri = @global_state.to_external_uri(uri)
+
           @response_builder << Interface::LocationLink.new(
-            target_uri: uri.to_s,
+            target_uri: external_uri.to_s,
             target_range: range_from_location(target_method.location),
             target_selection_range: range_from_location(target_method.name_location),
           )
@@ -352,8 +358,11 @@ module RubyLsp
             candidate = entry.full_path
 
             if candidate
+              uri = URI::Generic.from_path(path: candidate)
+              external_uri = @global_state.to_external_uri(uri)
+
               @response_builder << Interface::Location.new(
-                uri: URI::Generic.from_path(path: candidate).to_s,
+                uri: external_uri.to_s,
                 range: Interface::Range.new(
                   start: Interface::Position.new(line: 0, character: 0),
                   end: Interface::Position.new(line: 0, character: 0),
@@ -367,8 +376,11 @@ module RubyLsp
           current_folder = path ? Pathname.new(CGI.unescape(path)).dirname : @global_state.workspace_path
           candidate = File.expand_path(File.join(current_folder, required_file))
 
+          uri = URI::Generic.from_path(path: candidate)
+          external_uri = @global_state.to_external_uri(uri)
+
           @response_builder << Interface::Location.new(
-            uri: URI::Generic.from_path(path: candidate).to_s,
+            uri: external_uri.to_s,
             range: Interface::Range.new(
               start: Interface::Position.new(line: 0, character: 0),
               end: Interface::Position.new(line: 0, character: 0),
@@ -405,8 +417,10 @@ module RubyLsp
           uri = entry.uri
           next if @sorbet_level != RubyDocument::SorbetLevel::Ignore && not_in_dependencies?(T.must(uri.full_path))
 
+          external_uri = @global_state.to_external_uri(uri)
+
           @response_builder << Interface::LocationLink.new(
-            target_uri: uri.to_s,
+            target_uri: external_uri.to_s,
             target_range: range_from_location(entry.location),
             target_selection_range: range_from_location(entry.name_location),
           )

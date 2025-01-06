@@ -137,8 +137,10 @@ module RubyLsp
         dispatcher.visit(parse_result.value)
 
         finder.references.each do |reference|
+          external_uri = @global_state.to_external_uri(uri)
+
           @locations << Interface::Location.new(
-            uri: uri.to_s,
+            uri: external_uri.to_s,
             range: range_from_location(reference.location),
           )
         end

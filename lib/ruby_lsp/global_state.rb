@@ -29,6 +29,9 @@ module RubyLsp
     sig { returns(ClientCapabilities) }
     attr_reader :client_capabilities
 
+    sig { returns(T::Hash[String, String]) }
+    attr_accessor :local_fs_map
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
@@ -53,6 +56,7 @@ module RubyLsp
       )
       @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
       @enabled_feature_flags = T.let({}, T::Hash[Symbol, T::Boolean])
+      @local_fs_map = T.let(build_local_fs_map_from_env, T::Hash[String, String])
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
@@ -81,8 +85,15 @@ module RubyLsp
       notifications = []
       direct_dependencies = gather_direct_dependencies
       all_dependencies = gather_direct_and_indirect_dependencies
+
+      options.dig(:initializationOptions, :localFsMap)&.each do |local, remote|
+        local_fs_map[local.to_s] = remote
+      end
+
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
-      @workspace_uri = URI(workspace_uri) if workspace_uri
+      if workspace_uri
+        @workspace_uri = to_internal_uri(URI(workspace_uri))
+      end
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
 
@@ -169,6 +180,36 @@ module RubyLsp
     sig { returns(T::Boolean) }
     def supports_watching_files
       @client_capabilities.supports_watching_files
+    end
+
+    sig { params(uri: URI::Generic).returns(URI::Generic) }
+    def to_internal_uri(uri)
+      path = uri.path
+      return uri unless path
+
+      local_fs_map.each do |external, internal|
+        next unless path.start_with?(external)
+
+        uri.path = path.sub(external, internal)
+        return uri
+      end
+
+      uri
+    end
+
+    sig { params(uri: URI::Generic).returns(URI::Generic) }
+    def to_external_uri(uri)
+      path = uri.path
+      return uri unless path
+
+      local_fs_map.each do |external, internal|
+        next unless path.start_with?(internal)
+
+        uri.path = path.sub(internal, external)
+        return uri
+      end
+
+      uri
     end
 
     private
@@ -262,6 +303,17 @@ module RubyLsp
       Bundler.locked_gems&.specs&.map(&:name) || []
     rescue Bundler::GemfileNotFound
       []
+    end
+
+    sig { returns(T::Hash[String, String]) }
+    def build_local_fs_map_from_env
+      env = ENV["RUBY_LSP_LOCAL_FS_MAP"]
+      return {} unless env
+
+      env.split(",").each_with_object({}) do |pair, map|
+        local, remote = pair.split(":", 2)
+        map[local] = remote
+      end
     end
   end
 end

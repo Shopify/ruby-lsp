@@ -39,12 +39,14 @@ module RubyLsp
           # short name `Bar`, then searching for `Foo::Bar` would not return any results
           *container, _short_name = entry.name.split("::")
 
+          external_uri = @global_state.to_external_uri(uri)
+
           Interface::WorkspaceSymbol.new(
             name: entry.name,
             container_name: container.join("::"),
             kind: kind,
             location: Interface::Location.new(
-              uri: uri.to_s,
+              uri: external_uri.to_s,
               range:  Interface::Range.new(
                 start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
                 end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
