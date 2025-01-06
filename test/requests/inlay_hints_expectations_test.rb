@@ -10,7 +10,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     params = @__params&.any? ? @__params : default_args
     uri = URI("file://#{@_path}")
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
@@ -30,7 +30,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
   def test_skip_implicit_hash_value
     uri = URI("file://foo.rb")
-    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1)
+    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1, global_state: @global_state)
       {bar:, baz:}
     RUBY
 
@@ -43,7 +43,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
 
   def test_skip_implicit_rescue
     uri = URI("file://foo.rb")
-    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1)
+    document = RubyLsp::RubyDocument.new(uri: uri, source: <<~RUBY, version: 1, global_state: @global_state)
       begin
       rescue
       end

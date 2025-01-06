@@ -92,9 +92,7 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(source_range[:start])
-        end_index = scanner.find_char_position(source_range[:end])
+        start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest statements node, so that we place the refactor in a valid position
@@ -192,9 +190,7 @@ module RubyLsp
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(source_range[:start])
-        end_index = scanner.find_char_position(source_range[:end])
+        start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
         extracted_source = T.must(@document.source[start_index...end_index])
 
         # Find the closest method declaration node, so that we place the refactor in a valid position

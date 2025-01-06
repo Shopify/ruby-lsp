@@ -8,14 +8,18 @@ class FormattingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Formatting, "formatting"
 
   def run_expectations(source)
-    global_state = RubyLsp::GlobalState.new
-    global_state.formatter = "rubocop"
-    global_state.register_formatter(
+    @global_state.formatter = "rubocop"
+    @global_state.register_formatter(
       "rubocop",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
-    RubyLsp::Requests::Formatting.new(global_state, document).perform&.first&.new_text
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: __FILE__),
+      global_state: @global_state,
+    )
+    RubyLsp::Requests::Formatting.new(@global_state, document).perform&.first&.new_text
   end
 
   def assert_expectations(source, expected)

@@ -19,8 +19,8 @@ module RubyLsp
     end
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    def initialize(source:, version:, uri:, global_state:)
       # This has to be initialized before calling super because we call `parse` in the parent constructor, which
       # overrides this with the proper virtual host language source
       @host_language_source = T.let("", String)
@@ -63,9 +63,11 @@ module RubyLsp
       ).returns(NodeContext)
     end
     def locate_node(position, node_types: [])
+      char_position, _ = find_index_by_position(position)
+
       RubyDocument.locate(
         @parse_result.value,
-        create_scanner.find_char_position(position),
+        char_position,
         code_units_cache: @code_units_cache,
         node_types: node_types,
       )

@@ -10,7 +10,7 @@ class RangeFormattingTest < Minitest::Test
     regular_formatter = RubyLsp::Requests::Support::SyntaxTreeFormatter.new
     @global_state.register_formatter("syntax_tree", regular_formatter)
     @global_state.stubs(:active_formatter).returns(regular_formatter)
-    @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    source = +<<~RUBY
       class Foo
 
         def foo
@@ -23,6 +23,12 @@ class RangeFormattingTest < Minitest::Test
         end
       end
     RUBY
+    @document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: __FILE__),
+      global_state: @global_state,
+    )
   end
 
   def test_syntax_tree_supports_range_formatting

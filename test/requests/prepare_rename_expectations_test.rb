@@ -10,7 +10,7 @@ class PrepareRenameExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     position = @__params&.any? ? @__params[:position] : default_position
     uri = URI("file://#{@_path}")
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
     RubyLsp::Requests::PrepareRename.new(document, position).perform
   end
 

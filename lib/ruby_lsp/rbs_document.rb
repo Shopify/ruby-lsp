@@ -8,8 +8,8 @@ module RubyLsp
 
     ParseResultType = type_member { { fixed: T::Array[RBS::AST::Declarations::Base] } }
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    def initialize(source:, version:, uri:, global_state:)
       @syntax_error = T.let(false, T::Boolean)
       super
     end

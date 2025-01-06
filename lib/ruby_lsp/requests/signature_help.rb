@@ -36,7 +36,7 @@ module RubyLsp
       def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         super()
 
-        char_position = document.create_scanner.find_char_position(position)
+        char_position, _ = document.find_index_by_position(position)
         delegate_request_if_needed!(global_state, document, char_position)
 
         node_context = RubyDocument.locate(

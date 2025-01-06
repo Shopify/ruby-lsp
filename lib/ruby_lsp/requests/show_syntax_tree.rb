@@ -31,10 +31,7 @@ module RubyLsp
       sig { returns(String) }
       def ast_for_range
         range = T.must(@range)
-
-        scanner = @document.create_scanner
-        start_char = scanner.find_char_position(range[:start])
-        end_char = scanner.find_char_position(range[:end])
+        start_char, end_char = @document.find_index_by_position(range[:start], range[:end])
 
         queue = @tree.statements.body.dup
         found_nodes = []

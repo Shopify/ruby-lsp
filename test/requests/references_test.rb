@@ -20,8 +20,13 @@ class ReferencesTest < Minitest::Test
     global_state = RubyLsp::GlobalState.new
     global_state.index.index_single(URI::Generic.from_path(path: path), source)
 
-    store = RubyLsp::Store.new
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))
+    store = RubyLsp::Store.new(global_state)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
 
     RubyLsp::Requests::References.new(
       global_state,

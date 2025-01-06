@@ -41,8 +41,13 @@ class RenameTest < Minitest::Test
       end
     RUBY
 
-    store = RubyLsp::Store.new
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))
+    store = RubyLsp::Store.new(global_state)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
 
     assert_raises(RubyLsp::Requests::Rename::InvalidNameError) do
       RubyLsp::Requests::Rename.new(
@@ -71,8 +76,13 @@ class RenameTest < Minitest::Test
     path = File.expand_path(fixture_path)
     global_state.index.index_single(URI::Generic.from_path(path: path), source)
 
-    store = RubyLsp::Store.new
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))
+    store = RubyLsp::Store.new(global_state)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
     workspace_edit = T.must(
       RubyLsp::Requests::Rename.new(
         global_state,

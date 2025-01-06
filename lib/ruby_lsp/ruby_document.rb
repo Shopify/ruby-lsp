@@ -142,8 +142,8 @@ module RubyLsp
     end
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    def initialize(source:, version:, uri:, global_state:)
       super
       @code_units_cache = T.let(@parse_result.code_units_cache(@encoding), T.any(
         T.proc.params(arg0: Integer).returns(Integer),
@@ -198,9 +198,8 @@ module RubyLsp
       ).returns(T.nilable(Prism::Node))
     end
     def locate_first_within_range(range, node_types: [])
-      scanner = create_scanner
-      start_position = scanner.find_char_position(range[:start])
-      end_position = scanner.find_char_position(range[:end])
+      start_position, end_position = find_index_by_position(range[:start], range[:end])
+
       desired_range = (start_position...end_position)
       queue = T.let(@parse_result.value.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
 
@@ -232,9 +231,11 @@ module RubyLsp
       ).returns(NodeContext)
     end
     def locate_node(position, node_types: [])
+      char_position, _ = find_index_by_position(position)
+
       RubyDocument.locate(
         @parse_result.value,
-        create_scanner.find_char_position(position),
+        char_position,
         code_units_cache: @code_units_cache,
         node_types: node_types,
       )

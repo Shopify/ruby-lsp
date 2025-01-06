@@ -4,12 +4,23 @@
 require "test_helper"
 
 class RBSDocumentTest < Minitest::Test
+  def setup
+    @global_state = RubyLsp::GlobalState.new
+  end
+
   def test_parse_result_is_array_of_declarations
-    document = RubyLsp::RBSDocument.new(source: <<~RBS, version: 1, uri: URI("file:///foo.rbs"))
+    source = <<~RBS
       class Foo
         def bar: () -> void
       end
     RBS
+
+    document = RubyLsp::RBSDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.rbs"),
+      global_state: @global_state,
+    )
 
     refute_predicate(document, :syntax_error?)
     assert_equal(:Foo, T.cast(document.parse_result[0], RBS::AST::Declarations::Class).name.name)
@@ -17,11 +28,17 @@ class RBSDocumentTest < Minitest::Test
 
   def test_parsing_remembers_syntax_errors
     # The syntax error is that `-` should be `->`
-    document = RubyLsp::RBSDocument.new(source: +<<~RBS, version: 1, uri: URI("file:///foo.rbs"))
+    source = +<<~RBS
       class Foo
         def bar: () - void
       end
     RBS
+    document = RubyLsp::RBSDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.rbs"),
+      global_state: @global_state,
+    )
 
     assert_predicate(document, :syntax_error?)
 

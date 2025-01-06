@@ -5,7 +5,8 @@ require "test_helper"
 
 class StoreTest < Minitest::Test
   def setup
-    @store = RubyLsp::Store.new
+    @global_state = RubyLsp::GlobalState.new
+    @store = RubyLsp::Store.new(@global_state)
     @store.set(
       uri: URI::Generic.from_path(path: "/foo/bar.rb"),
       source: "def foo; end",
@@ -17,7 +18,7 @@ class StoreTest < Minitest::Test
   def test_get
     uri = URI::Generic.from_path(path: "/foo/bar.rb")
     assert_equal(
-      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri, global_state: @global_state),
       @store.get(uri),
     )
   end
@@ -29,7 +30,7 @@ class StoreTest < Minitest::Test
     uri = URI("file://#{file.path}")
 
     assert_equal(
-      RubyLsp::ERBDocument.new(source: "<%= foo %>", version: 1, uri: uri),
+      RubyLsp::ERBDocument.new(source: "<%= foo %>", version: 1, uri: uri, global_state: @global_state),
       @store.get(uri),
     )
   ensure
@@ -45,7 +46,7 @@ class StoreTest < Minitest::Test
     document = @store.get(uri)
 
     assert_equal(
-      RubyLsp::ERBDocument.new(source: "<%= foo %>", version: 1, uri: uri),
+      RubyLsp::ERBDocument.new(source: "<%= foo %>", version: 1, uri: uri, global_state: @global_state),
       document,
     )
   ensure
@@ -58,7 +59,7 @@ class StoreTest < Minitest::Test
     @store.set(uri: uri, source: "def foo; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
 
     assert_equal(
-      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri, global_state: @global_state),
       @store.get(uri),
     )
   end
@@ -68,7 +69,7 @@ class StoreTest < Minitest::Test
     @store.set(uri: uri, source: "def foo; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
 
     assert_equal(
-      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri, global_state: @global_state),
       @store.get(uri),
     )
 
@@ -101,7 +102,7 @@ class StoreTest < Minitest::Test
     uri = URI("file://#{file.path}")
 
     assert_equal(
-      RubyLsp::RubyDocument.new(source: "def great_code; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def great_code; end", version: 1, uri: uri, global_state: @global_state),
       @store.get(uri),
     )
   ensure
@@ -116,7 +117,7 @@ class StoreTest < Minitest::Test
     uri = URI("file://#{file.path}")
 
     assert_equal(
-      RubyLsp::RubyDocument.new(source: "def great_code; end", version: 1, uri: uri),
+      RubyLsp::RubyDocument.new(source: "def great_code; end", version: 1, uri: uri, global_state: @global_state),
       @store.get(uri),
     )
   ensure
@@ -228,6 +229,7 @@ class StoreTest < Minitest::Test
         source: "def bar; puts 'a'; end",
         version: 1,
         uri: uri,
+        global_state: @global_state,
       ),
       @store.get(uri),
     )

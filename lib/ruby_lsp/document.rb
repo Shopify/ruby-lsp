@@ -43,13 +43,14 @@ module RubyLsp
     sig { returns(T.any(Interface::SemanticTokens, Object)) }
     attr_accessor :semantic_tokens
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    def initialize(source:, version:, uri:, global_state:)
+      @source = source
+      @version = version
+      @global_state = global_state
       @cache = T.let(Hash.new(EMPTY_CACHE), T::Hash[String, T.untyped])
       @semantic_tokens = T.let(EMPTY_CACHE, T.any(Interface::SemanticTokens, Object))
-      @encoding = T.let(encoding, Encoding)
-      @source = T.let(source, String)
-      @version = T.let(version, Integer)
+      @encoding = T.let(global_state.encoding, Encoding)
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
       @parse_result = T.let(T.unsafe(nil), ParseResultType)
@@ -64,7 +65,6 @@ module RubyLsp
     sig { abstract.returns(LanguageId) }
     def language_id; end
 
-    # TODO: remove this method once all non-positional requests have been migrated to the listener pattern
     sig do
       type_parameters(:T)
         .params(
@@ -93,19 +93,21 @@ module RubyLsp
 
     sig { params(edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
     def push_edits(edits, version:)
-      edits.each do |edit|
-        range = edit[:range]
-        scanner = create_scanner
+      @global_state.synchronize do
+        edits.each do |edit|
+          range = edit[:range]
+          scanner = create_scanner
 
-        start_position = scanner.find_char_position(range[:start])
-        end_position = scanner.find_char_position(range[:end])
+          start_position = scanner.find_char_position(range[:start])
+          end_position = scanner.find_char_position(range[:end])
 
-        @source[start_position...end_position] = edit[:text]
+          @source[start_position...end_position] = edit[:text]
+        end
+
+        @version = version
+        @needs_parsing = true
+        @cache.clear
       end
-
-      @version = version
-      @needs_parsing = true
-      @cache.clear
     end
 
     # Returns `true` if the document was parsed and `false` if nothing needed parsing
@@ -115,14 +117,31 @@ module RubyLsp
     sig { abstract.returns(T::Boolean) }
     def syntax_error?; end
 
-    sig { returns(Scanner) }
-    def create_scanner
-      Scanner.new(@source, @encoding)
-    end
-
     sig { returns(T::Boolean) }
     def past_expensive_limit?
       @source.length > MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES
+    end
+
+    sig do
+      params(
+        start_pos: T::Hash[Symbol, T.untyped],
+        end_pos: T.nilable(T::Hash[Symbol, T.untyped]),
+      ).returns([Integer, T.nilable(Integer)])
+    end
+    def find_index_by_position(start_pos, end_pos = nil)
+      @global_state.synchronize do
+        scanner = create_scanner
+        start_index = scanner.find_char_position(start_pos)
+        end_index = scanner.find_char_position(end_pos) if end_pos
+        [start_index, end_index]
+      end
+    end
+
+    private
+
+    sig { returns(Scanner) }
+    def create_scanner
+      Scanner.new(@source, @encoding)
     end
 
     class Scanner

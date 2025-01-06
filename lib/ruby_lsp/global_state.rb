@@ -53,6 +53,12 @@ module RubyLsp
       )
       @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
       @enabled_feature_flags = T.let({}, T::Hash[Symbol, T::Boolean])
+      @mutex = T.let(Mutex.new, Mutex)
+    end
+
+    sig { type_parameters(:T).params(block: T.proc.returns(T.type_parameter(:T))).returns(T.type_parameter(:T)) }
+    def synchronize(&block)
+      @mutex.synchronize(&block)
     end
 
     sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }

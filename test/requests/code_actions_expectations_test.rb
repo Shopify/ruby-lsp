@@ -9,7 +9,12 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     params = @__params&.any? ? @__params : default_args
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake"))
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///fake"),
+      global_state: @global_state,
+    )
     result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
 
     stdout, _ = capture_io do
