@@ -204,5 +204,36 @@ module RubyIndexer
         end
       end
     end
+
+    def test_does_not_fail_if_there_are_missing_specs_due_to_platform_constraints
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          File.write(File.join(dir, "Gemfile"), <<~RUBY)
+            source "https://rubygems.org"
+            gem "ruby-lsp", path: "#{Bundler.root}"
+
+            platforms :windows do
+              gem "tzinfo"
+              gem "tzinfo-data"
+            end
+          RUBY
+
+          Bundler.with_unbundled_env do
+            capture_subprocess_io { system("bundle install") }
+
+            _stdout, stderr = capture_subprocess_io do
+              script = [
+                "require \"ruby_lsp/internal\"",
+                "RubyIndexer::Configuration.new.indexable_uris",
+              ].join(";")
+
+              system("bundle exec ruby -e '#{script}'")
+            end
+
+            assert_empty(stderr)
+          end
+        end
+      end
+    end
   end
 end

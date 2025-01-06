@@ -273,7 +273,13 @@ module RubyIndexer
       end
 
       others.concat(this_gem.to_spec.dependencies) if this_gem
-      others.concat(others.filter_map { |d| d.to_spec&.dependencies }.flatten)
+      others.concat(
+        others.filter_map do |d|
+          d.to_spec&.dependencies
+        rescue Gem::MissingSpecError
+          nil
+        end.flatten,
+      )
       others.uniq!
       others.map!(&:name)
 
