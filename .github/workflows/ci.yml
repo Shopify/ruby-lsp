@@ -118,12 +118,19 @@ jobs:
           chmod +x shadowenv
           sudo mv shadowenv /usr/local/bin/shadowenv
 
+      - name: Install gems for node tests
+        shell: bash
+        run: |
+          gem install debug
+          gem build ruby-lsp.gemspec
+          build_path=$(find . -name "ruby-lsp-*.gem")
+          gem install "$build_path"
+
       - name: Run tests
         working-directory: ./vscode
         env:
           DISPLAY: ":99.0"
         run: |
-          gem install ruby-lsp debug
           yarn --frozen-lockfile
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           yarn run test
