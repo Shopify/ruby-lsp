@@ -107,7 +107,7 @@ module RubyLsp
           ),
         )
       when "$/cancelRequest"
-        @global_state.synchronize { @cancelled_requests << message[:params][:id] }
+        @global_state.synchronize { @cancellation_requested_ids << message[:params][:id] }
       when nil
         process_response(message) if message[:result]
       end

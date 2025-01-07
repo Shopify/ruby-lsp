@@ -794,6 +794,24 @@ class ServerTest < Minitest::Test
     error = find_message(RubyLsp::Error)
     assert_equal(RubyLsp::Constant::ErrorCodes::REQUEST_CANCELLED, error.code)
     assert_equal("Request 1 was cancelled", error.message)
+
+    # Retrying the cancelled request should return nothing
+    @server.push_message({
+      id: 1,
+      method: "textDocument/definition",
+      params: {
+        textDocument: {
+          uri: uri,
+        },
+        position: { line: 0, character: 6 },
+      },
+    })
+
+    assert_raises(Timeout::Error) do
+      Timeout.timeout(0.5) do
+        @server.pop_response
+      end
+    end
   end
 
   def test_unsaved_changes_are_indexed_when_computing_automatic_features

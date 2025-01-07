@@ -17,7 +17,13 @@ module RubyLsp
       @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
       @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)
       @outgoing_queue = T.let(Thread::Queue.new, Thread::Queue)
-      @cancelled_requests = T.let([], T::Array[Integer])
+
+      # IDs for which the cancellation has been requested, but has not occurred yet
+      @cancellation_requested_ids = T.let([], T::Array[Integer])
+
+      # IDs for which the request was fully cancelled. Subsequent requests using these IDs will be ignored
+      @cancelled_request_ids = T.let([], T::Array[Integer])
+
       @worker = T.let(new_worker, Thread)
       @current_request_id = T.let(1, Integer)
       @global_state = T.let(GlobalState.new, GlobalState)
@@ -118,7 +124,7 @@ module RubyLsp
       @outgoing_queue.clear
       @incoming_queue.close
       @outgoing_queue.close
-      @cancelled_requests.clear
+      @cancellation_requested_ids.clear
 
       @worker.join
       @outgoing_dispatcher.join
@@ -157,14 +163,20 @@ module RubyLsp
 
           # Check if the request was cancelled before trying to process it
           @global_state.synchronize do
-            if id && @cancelled_requests.include?(id)
-              send_message(Error.new(
-                id: id,
-                code: Constant::ErrorCodes::REQUEST_CANCELLED,
-                message: "Request #{id} was cancelled",
-              ))
-              @cancelled_requests.delete(id)
-              next
+            if id
+              if @cancellation_requested_ids.include?(id)
+                send_message(Error.new(
+                  id: id,
+                  code: Constant::ErrorCodes::REQUEST_CANCELLED,
+                  message: "Request #{id} was cancelled",
+                ))
+                @cancellation_requested_ids.delete(id)
+                @cancelled_request_ids << id
+                next
+              elsif @cancelled_request_ids.include?(id)
+                # Return nothing if the request was already cancelled
+                next
+              end
             end
           end
 
