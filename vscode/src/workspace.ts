@@ -14,12 +14,7 @@ import {
 } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 
-const WATCHED_FILES = [
-  "Gemfile.lock",
-  "gems.locked",
-  ".rubocop.yml",
-  ".rubocop",
-];
+const WATCHED_FILES = ["Gemfile.lock", "gems.locked"];
 
 export class Workspace implements WorkspaceInterface {
   public lspClient?: Client;

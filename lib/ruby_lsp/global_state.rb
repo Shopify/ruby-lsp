@@ -29,6 +29,9 @@ module RubyLsp
     sig { returns(ClientCapabilities) }
     attr_reader :client_capabilities
 
+    sig { returns(URI::Generic) }
+    attr_reader :workspace_uri
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
