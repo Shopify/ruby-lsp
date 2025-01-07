@@ -216,5 +216,25 @@ module RubyIndexer
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
     end
+
+    def test_module_function_does_not_impact_instance_variables
+      # One possible way of implementing `module_function` would be to push a fake singleton class to the stack, so that
+      # methods are inserted into it. However, that would be incorrect because it would then bind instance variables to
+      # the wrong type. This test is here to prevent that from happening.
+      index(<<~RUBY)
+        module Foo
+          module_function
+
+          def something; end
+
+          @a = 123
+        end
+      RUBY
+
+      entry = T.must(@index["@a"]&.first)
+      owner = T.must(entry.owner)
+      assert_instance_of(Entry::SingletonClass, owner)
+      assert_equal("Foo::<Class:Foo>", owner.name)
+    end
   end
 end
