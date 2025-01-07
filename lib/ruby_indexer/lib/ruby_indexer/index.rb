@@ -48,6 +48,8 @@ module RubyIndexer
       )
 
       @configuration = T.let(RubyIndexer::Configuration.new, Configuration)
+
+      @initial_indexing_completed = T.let(false, T::Boolean)
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
@@ -56,8 +58,8 @@ module RubyIndexer
       (@included_hooks[module_name] ||= []) << hook
     end
 
-    sig { params(uri: URI::Generic).void }
-    def delete(uri)
+    sig { params(uri: URI::Generic, skip_require_paths_tree: T::Boolean).void }
+    def delete(uri, skip_require_paths_tree: false)
       key = uri.to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
@@ -80,6 +82,7 @@ module RubyIndexer
       end
 
       @uris_to_entries.delete(key)
+      return if skip_require_paths_tree
 
       require_path = uri.require_path
       @require_paths_tree.delete(require_path) if require_path
@@ -357,11 +360,12 @@ module RubyIndexer
       # When troubleshooting an indexing issue, e.g. through irb, it's not obvious that `index_all` will augment the
       # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
       # behavior and can take appropriate action.
-      # binding.break
-      if @entries.any?
+      if @initial_indexing_completed
         raise IndexNotEmptyError,
           "The index is not empty. To prevent invalid entries, `index_all` can only be called once."
       end
+
+      @initial_indexing_completed = true
 
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
@@ -618,17 +622,24 @@ module RubyIndexer
     end
 
     # Synchronizes a change made to the given URI. This method will ensure that new declarations are indexed, removed
-    # declarations removed and that the ancestor linearization cache is cleared if necessary
-    sig { params(uri: URI::Generic, source: String).void }
-    def handle_change(uri, source)
+    # declarations removed and that the ancestor linearization cache is cleared if necessary. If a block is passed, the
+    # consumer of this API has to handle deleting and inserting/updating entries in the index instead of passing the
+    # document's source (used to handle unsaved changes to files)
+    sig do
+      params(uri: URI::Generic, source: T.nilable(String), block: T.nilable(T.proc.params(index: Index).void)).void
+    end
+    def handle_change(uri, source = nil, &block)
       key = uri.to_s
       original_entries = @uris_to_entries[key]
 
-      delete(uri)
-      index_single(uri, source)
+      if block
+        block.call(self)
+      else
+        delete(uri)
+        index_single(uri, T.must(source))
+      end
 
       updated_entries = @uris_to_entries[key]
-
       return unless original_entries && updated_entries
 
       # A change in one ancestor may impact several different others, which could be including that ancestor through

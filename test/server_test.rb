@@ -796,6 +796,136 @@ class ServerTest < Minitest::Test
     assert_equal("Request 1 was cancelled", error.message)
   end
 
+  def test_unsaved_changes_are_indexed_when_computing_automatic_features
+    uri = URI("file:///foo.rb")
+    index = @server.global_state.index
+
+    # Simulate opening a file. First, send the notification to open the file with a class inside
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: +"class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    # Fire the automatic features requests to trigger indexing
+    @server.process_message({
+      id: 1,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+
+    entries = index["Foo"]
+    assert_equal(1, entries.length)
+
+    # Modify the file without saving
+    @server.process_message({
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri: uri, version: 2 },
+        contentChanges: [
+          { text: "  def bar\n  end\n", range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } } },
+        ],
+      },
+    })
+
+    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
+    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
+    # isn't reproduced here. Parsing manually matches what happens normally
+    store = @server.instance_variable_get(:@store)
+    store.get(uri).parse!
+
+    # Trigger the automatic features again
+    @server.process_message({
+      id: 2,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+
+    # There should still only be one entry for each declaration, but we should have picked up the new ones
+    entries = index["Foo"]
+    assert_equal(1, entries.length)
+
+    entries = index["bar"]
+    assert_equal(1, entries.length)
+  end
+
+  def test_ancestors_are_recomputed_even_on_unsaved_changes
+    uri = URI("file:///foo.rb")
+    index = @server.global_state.index
+    source = +<<~RUBY
+      module Bar; end
+
+      class Foo
+        extend Bar
+      end
+    RUBY
+
+    # Simulate opening a file. First, send the notification to open the file with a class inside
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: source,
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    # Fire the automatic features requests to trigger indexing
+    @server.process_message({
+      id: 1,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+
+    assert_equal(["Foo::<Class:Foo>", "Bar"], index.linearized_ancestors_of("Foo::<Class:Foo>"))
+
+    # Delete the extend
+    @server.process_message({
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri: uri, version: 2 },
+        contentChanges: [
+          { text: "", range: { start: { line: 3, character: 0 }, end: { line: 3, character: 12 } } },
+        ],
+      },
+    })
+
+    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
+    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
+    # isn't reproduced here. Parsing manually matches what happens normally
+    store = @server.instance_variable_get(:@store)
+    document = store.get(uri)
+
+    assert_equal(<<~RUBY, document.source)
+      module Bar; end
+
+      class Foo
+
+      end
+    RUBY
+
+    document.parse!
+
+    # Trigger the automatic features again
+    @server.process_message({
+      id: 2,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+
+    result = find_message(RubyLsp::Result, id: 2)
+    refute_nil(result)
+
+    assert_equal(["Foo::<Class:Foo>"], index.linearized_ancestors_of("Foo::<Class:Foo>"))
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
