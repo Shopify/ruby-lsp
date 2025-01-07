@@ -24,7 +24,7 @@ module RubyIndexer
       @index = index
       @uri = uri
       @enhancements = T.let(Enhancement.all(self), T::Array[Enhancement])
-      @visibility_stack = T.let([Entry::Visibility::PUBLIC], T::Array[Entry::Visibility])
+      @visibility_stack = T.let([VisibilityScope.public_scope], T::Array[VisibilityScope])
       @comments_by_line = T.let(
         parse_result.comments.to_h do |c|
           [c.location.start_line, c]
@@ -138,7 +138,7 @@ module RubyIndexer
 
     sig { params(node: Prism::SingletonClassNode).void }
     def on_singleton_class_node_enter(node)
-      @visibility_stack.push(Entry::Visibility::PUBLIC)
+      @visibility_stack.push(VisibilityScope.public_scope)
 
       current_owner = @owner_stack.last
 
@@ -280,15 +280,15 @@ module RubyIndexer
       when :include, :prepend, :extend
         handle_module_operation(node, message)
       when :public
-        @visibility_stack.push(Entry::Visibility::PUBLIC)
+        @visibility_stack.push(VisibilityScope.public_scope)
       when :protected
-        @visibility_stack.push(Entry::Visibility::PROTECTED)
+        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PROTECTED))
       when :private
-        @visibility_stack.push(Entry::Visibility::PRIVATE)
+        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PRIVATE))
       when :module_function
         handle_module_function(node)
       when :private_class_method
-        @visibility_stack.push(Entry::Visibility::PRIVATE)
+        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PRIVATE))
         handle_private_class_method(node)
       end
 
@@ -324,12 +324,48 @@ module RubyIndexer
 
     sig { params(node: Prism::DefNode).void }
     def on_def_node_enter(node)
+      owner = @owner_stack.last
+      return unless owner
+
       @inside_def = true
       method_name = node.name.to_s
       comments = collect_comments(node)
+      scope = current_visibility_scope
 
       case node.receiver
       when nil
+        location = Location.from_prism_location(node.location, @code_units_cache)
+        name_location = Location.from_prism_location(node.name_loc, @code_units_cache)
+        signatures = [Entry::Signature.new(list_params(node.parameters))]
+
+        @index.add(Entry::Method.new(
+          method_name,
+          @uri,
+          location,
+          name_location,
+          comments,
+          signatures,
+          scope.visibility,
+          owner,
+        ))
+
+        if scope.module_func
+          singleton = @index.existing_or_new_singleton_class(owner.name)
+
+          @index.add(Entry::Method.new(
+            method_name,
+            @uri,
+            location,
+            name_location,
+            comments,
+            signatures,
+            Entry::Visibility::PUBLIC,
+            singleton,
+          ))
+        end
+      when Prism::SelfNode
+        singleton = @index.existing_or_new_singleton_class(owner.name)
+
         @index.add(Entry::Method.new(
           method_name,
           @uri,
@@ -337,29 +373,12 @@ module RubyIndexer
           Location.from_prism_location(node.name_loc, @code_units_cache),
           comments,
           [Entry::Signature.new(list_params(node.parameters))],
-          current_visibility,
-          @owner_stack.last,
+          scope.visibility,
+          singleton,
         ))
-      when Prism::SelfNode
-        owner = @owner_stack.last
 
-        if owner
-          singleton = @index.existing_or_new_singleton_class(owner.name)
-
-          @index.add(Entry::Method.new(
-            method_name,
-            @uri,
-            Location.from_prism_location(node.location, @code_units_cache),
-            Location.from_prism_location(node.name_loc, @code_units_cache),
-            comments,
-            [Entry::Signature.new(list_params(node.parameters))],
-            current_visibility,
-            singleton,
-          ))
-
-          @owner_stack << singleton
-          @stack << "<Class:#{@stack.last}>"
-        end
+        @owner_stack << singleton
+        @stack << "<Class:#{@stack.last}>"
       end
     end
 
@@ -834,6 +853,8 @@ module RubyIndexer
       return unless receiver.nil? || receiver.is_a?(Prism::SelfNode)
 
       comments = collect_comments(node)
+      scope = current_visibility_scope
+
       arguments.each do |argument|
         name, loc = case argument
         when Prism::SymbolNode
@@ -850,7 +871,7 @@ module RubyIndexer
             @uri,
             Location.from_prism_location(loc, @code_units_cache),
             comments,
-            current_visibility,
+            scope.visibility,
             @owner_stack.last,
           ))
         end
@@ -862,7 +883,7 @@ module RubyIndexer
           @uri,
           Location.from_prism_location(loc, @code_units_cache),
           comments,
-          current_visibility,
+          scope.visibility,
           @owner_stack.last,
         ))
       end
@@ -904,11 +925,20 @@ module RubyIndexer
 
     sig { params(node: Prism::CallNode).void }
     def handle_module_function(node)
-      arguments_node = node.arguments
-      return unless arguments_node
+      # Invoking `module_function` in a class raises
+      owner = @owner_stack.last
+      return unless owner.is_a?(Entry::Module)
 
-      owner_name = @owner_stack.last&.name
-      return unless owner_name
+      arguments_node = node.arguments
+
+      # If `module_function` is invoked without arguments, all methods defined after it become singleton methods and the
+      # visibility for instance methods changes to private
+      unless arguments_node
+        @visibility_stack.push(VisibilityScope.module_function_scope)
+        return
+      end
+
+      owner_name = owner.name
 
       arguments_node.arguments.each do |argument|
         method_name = case argument
@@ -983,8 +1013,8 @@ module RubyIndexer
       end
     end
 
-    sig { returns(Entry::Visibility) }
-    def current_visibility
+    sig { returns(VisibilityScope) }
+    def current_visibility_scope
       T.must(@visibility_stack.last)
     end
 
@@ -1091,7 +1121,7 @@ module RubyIndexer
 
     sig { params(short_name: String, entry: Entry::Namespace).void }
     def advance_namespace_stack(short_name, entry)
-      @visibility_stack.push(Entry::Visibility::PUBLIC)
+      @visibility_stack.push(VisibilityScope.public_scope)
       @owner_stack << entry
       @index.add(entry)
       @stack << short_name

@@ -88,19 +88,21 @@ module RubyIndexer
 
     def test_visibility_tracking
       index(<<~RUBY)
-        private def foo
+        class Foo
+          private def foo
+          end
+
+          def bar; end
+
+          protected
+
+          def baz; end
         end
-
-        def bar; end
-
-        protected
-
-        def baz; end
       RUBY
 
-      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:0-8:1-3", visibility: Entry::Visibility::PRIVATE)
-      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:3-0:3-12", visibility: Entry::Visibility::PUBLIC)
-      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:7-0:7-12", visibility: Entry::Visibility::PROTECTED)
+      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:1-10:2-5", visibility: Entry::Visibility::PRIVATE)
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:4-2:4-14", visibility: Entry::Visibility::PUBLIC)
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:8-2:8-14", visibility: Entry::Visibility::PROTECTED)
     end
 
     def test_visibility_tracking_with_nested_class_or_modules
@@ -844,6 +846,67 @@ module RubyIndexer
 
       entry = T.must(@index["baz"].first)
       assert_signature_matches(entry, "baz(1)")
+    end
+
+    def test_module_function_with_no_arguments
+      index(<<~RUBY)
+        module Foo
+          def bar; end
+
+          module_function
+
+          def baz; end
+          attr_reader :attribute
+
+          public
+
+          def qux; end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      assert_predicate(entry, :public?)
+      assert_equal("Foo", T.must(entry.owner).name)
+
+      instance_baz, singleton_baz = T.must(@index["baz"])
+      assert_predicate(instance_baz, :private?)
+      assert_equal("Foo", T.must(instance_baz.owner).name)
+
+      assert_predicate(singleton_baz, :public?)
+      assert_equal("Foo::<Class:Foo>", T.must(singleton_baz.owner).name)
+
+      # After invoking `public`, the state of `module_function` is reset
+      instance_qux, singleton_qux = T.must(@index["qux"])
+      assert_nil(singleton_qux)
+      assert_predicate(instance_qux, :public?)
+      assert_equal("Foo", T.must(instance_baz.owner).name)
+
+      # Attributes are not turned into class methods, they do become private
+      instance_attribute, singleton_attribute = @index["attribute"]
+      assert_nil(singleton_attribute)
+      assert_equal("Foo", T.must(instance_attribute.owner).name)
+      assert_predicate(instance_attribute, :private?)
+    end
+
+    def test_module_function_does_nothing_in_classes
+      # Invoking `module_function` in a class raises an error. We simply ignore it
+      index(<<~RUBY)
+        class Foo
+          def bar; end
+
+          module_function
+
+          def baz; end
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      assert_predicate(entry, :public?)
+      assert_equal("Foo", T.must(entry.owner).name)
+
+      entry = T.must(@index["baz"].first)
+      assert_predicate(entry, :public?)
+      assert_equal("Foo", T.must(entry.owner).name)
     end
 
     private
