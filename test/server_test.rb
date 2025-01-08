@@ -751,7 +751,7 @@ class ServerTest < Minitest::Test
     assert_match("Request textDocument/completion failed to find the target position.", error.message)
   end
 
-  def test_cancelling_requests_returns_expected_error_code
+  def test_cancelling_requests_returns_nil
     uri = URI("file:///foo.rb")
 
     @server.process_message({
@@ -791,9 +791,8 @@ class ServerTest < Minitest::Test
     mutex.unlock
     thread.join
 
-    error = find_message(RubyLsp::Error)
-    assert_equal(RubyLsp::Constant::ErrorCodes::REQUEST_CANCELLED, error.code)
-    assert_equal("Request 1 was cancelled", error.message)
+    result = find_message(RubyLsp::Result)
+    assert_nil(result.response)
   end
 
   def test_unsaved_changes_are_indexed_when_computing_automatic_features
