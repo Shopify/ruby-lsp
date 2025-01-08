@@ -158,11 +158,7 @@ module RubyLsp
           # Check if the request was cancelled before trying to process it
           @global_state.synchronize do
             if id && @cancelled_requests.include?(id)
-              send_message(Error.new(
-                id: id,
-                code: Constant::ErrorCodes::REQUEST_CANCELLED,
-                message: "Request #{id} was cancelled",
-              ))
+              send_message(Result.new(id: id, response: nil))
               @cancelled_requests.delete(id)
               next
             end
