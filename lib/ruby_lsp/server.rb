@@ -126,17 +126,6 @@ module RubyLsp
             code: Constant::ErrorCodes::INVALID_PARAMS,
             message: e.full_message,
           ))
-        when Document::LocationNotFoundError
-          send_message(Error.new(
-            id: message[:id],
-            code: Constant::ErrorCodes::REQUEST_FAILED,
-            message: <<~MESSAGE,
-              Request #{message[:method]} failed to find the target position.
-              The file might have been modified while the server was in the middle of searching for the target.
-              If you experience this regularly, please report any findings and extra information on
-              https://github.com/Shopify/ruby-lsp/issues/2446
-            MESSAGE
-          ))
         else
           send_message(Error.new(
             id: message[:id],

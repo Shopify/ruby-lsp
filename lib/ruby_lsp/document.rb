@@ -15,7 +15,6 @@ module RubyLsp
     extend T::Helpers
     extend T::Generic
 
-    class LocationNotFoundError < StandardError; end
     ParseResultType = type_member
 
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
@@ -200,15 +199,7 @@ module RubyLsp
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]
-          until LINE_BREAK == @source[@pos]
-            @pos += 1
-
-            if @pos >= @source.length
-              # Pack the code points back into the original string to provide context in the error message
-              raise LocationNotFoundError, "Requested position: #{position}\nSource:\n\n#{@source.pack("U*")}"
-            end
-          end
-
+          @pos += 1 until LINE_BREAK == @source[@pos]
           @pos += 1
           @current_line += 1
         end
