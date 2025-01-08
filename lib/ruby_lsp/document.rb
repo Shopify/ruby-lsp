@@ -40,6 +40,9 @@ module RubyLsp
     sig { returns(Encoding) }
     attr_reader :encoding
 
+    sig { returns(T.nilable(Edit)) }
+    attr_reader :last_edit
+
     sig { returns(T.any(Interface::SemanticTokens, Object)) }
     attr_accessor :semantic_tokens
 
@@ -54,6 +57,7 @@ module RubyLsp
       @uri = T.let(uri, URI::Generic)
       @needs_parsing = T.let(true, T::Boolean)
       @parse_result = T.let(T.unsafe(nil), ParseResultType)
+      @last_edit = T.let(nil, T.nilable(Edit))
       parse!
     end
 
@@ -107,6 +111,19 @@ module RubyLsp
         @version = version
         @needs_parsing = true
         @cache.clear
+
+        last_edit = edits.last
+        return unless last_edit
+
+        last_edit_range = last_edit[:range]
+
+        @last_edit = if last_edit_range[:start] == last_edit_range[:end]
+          Insert.new(last_edit_range)
+        elsif last_edit[:text].empty?
+          Delete.new(last_edit_range)
+        else
+          Replace.new(last_edit_range)
+        end
       end
     end
 
@@ -143,6 +160,25 @@ module RubyLsp
     def create_scanner
       Scanner.new(@source, @encoding)
     end
+
+    class Edit
+      extend T::Sig
+      extend T::Helpers
+
+      abstract!
+
+      sig { returns(T::Hash[Symbol, T.untyped]) }
+      attr_reader :range
+
+      sig { params(range: T::Hash[Symbol, T.untyped]).void }
+      def initialize(range)
+        @range = range
+      end
+    end
+
+    class Insert < Edit; end
+    class Replace < Edit; end
+    class Delete < Edit; end
 
     class Scanner
       extend T::Sig
