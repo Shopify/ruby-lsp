@@ -1260,10 +1260,10 @@ module RubyLsp
         return
       end
 
-      return unless indexing_options
-
       configuration = @global_state.index.configuration
       configuration.workspace_path = @global_state.workspace_path
+      return unless indexing_options
+
       # The index expects snake case configurations, but VS Code standardizes on camel case settings
       configuration.apply_config(indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase })
     end

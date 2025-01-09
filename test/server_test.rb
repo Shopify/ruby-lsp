@@ -225,6 +225,21 @@ class ServerTest < Minitest::Test
     )
   end
 
+  def test_applies_workspace_uri_to_indexing_configs_even_if_no_configs_are_specified
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: "/fake").to_s }],
+      },
+    })
+
+    index = @server.instance_variable_get(:@global_state).index
+    assert_equal("/fake", index.configuration.instance_variable_get(:@workspace_path))
+  end
+
   def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
     capture_subprocess_io do
       @server.process_message({
@@ -233,7 +248,7 @@ class ServerTest < Minitest::Test
         params: {
           initializationOptions: { enabledFeatures: ["formatting", "diagnostics"] },
           capabilities: { general: { positionEncodings: ["utf-8"] } },
-          workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_standardized_path }],
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
         },
       })
     end
