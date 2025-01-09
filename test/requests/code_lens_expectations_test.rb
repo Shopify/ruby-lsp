@@ -190,6 +190,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def test_code_lens_addons
     source = <<~RUBY
+      class Minitest::Test; end # TODO need?
       class Test < Minitest::Test; end
     RUBY
 
