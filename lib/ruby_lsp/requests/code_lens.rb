@@ -36,7 +36,7 @@ module RubyLsp
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
         )
         super()
-        Listeners::CodeLens.new(@response_builder, global_state, test_library, uri, dispatcher)
+        Listeners::CodeLens.new(@response_builder, test_library, uri, dispatcher)
 
         Addon.addons.each do |addon|
           addon.create_code_lens_listener(@response_builder, uri, dispatcher)

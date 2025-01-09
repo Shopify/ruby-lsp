@@ -27,15 +27,13 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-          global_state: GlobalState,
           test_library: String,
           uri: URI::Generic,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, global_state, test_library, uri, dispatcher)
+      def initialize(response_builder, test_library, uri, dispatcher)
         @response_builder = response_builder
-        @global_state = global_state
         @test_library = test_library
         @uri = T.let(uri, URI::Generic)
         @path = T.let(uri.to_standardized_path, T.nilable(String))
