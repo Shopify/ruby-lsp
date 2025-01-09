@@ -59,6 +59,54 @@ class RenameTest < Minitest::Test
     end
   end
 
+  def test_renaming_an_unsaved_symbol
+    fixture_path = "test/fixtures/rename_me.rb"
+    source = File.read(fixture_path)
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      capabilities: {
+        workspace: {
+          workspaceEdit: {
+            resourceOperations: ["rename"],
+          },
+        },
+      },
+    })
+
+    store = RubyLsp::Store.new(global_state)
+
+    path = File.expand_path(fixture_path)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
+
+    untitled_uri = URI("untitled:Untitled-1")
+    untitled_source = <<~RUBY
+      class RenameMe
+      end
+    RUBY
+    global_state.index.index_single(untitled_uri, untitled_source)
+    store.set(uri: untitled_uri, source: untitled_source, version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
+
+    response = T.must(
+      RubyLsp::Requests::Rename.new(
+        global_state,
+        store,
+        document,
+        { position: { line: 3, character: 7 }, newName: "NewMe" },
+      ).perform,
+    )
+
+    untitled_change = response.document_changes[1]
+    assert_equal("untitled:Untitled-1", untitled_change.text_document.uri)
+    assert_equal("NewMe", untitled_change.edits[0].new_text)
+  end
+
   private
 
   def expect_renames(fixture_path, new_fixture_path, expected, position, new_name)
