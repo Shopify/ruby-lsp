@@ -97,33 +97,31 @@ module RubyLsp
 
     sig { params(edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
     def push_edits(edits, version:)
-      @global_state.synchronize do
-        edits.each do |edit|
-          range = edit[:range]
-          scanner = create_scanner
+      edits.each do |edit|
+        range = edit[:range]
+        scanner = create_scanner
 
-          start_position = scanner.find_char_position(range[:start])
-          end_position = scanner.find_char_position(range[:end])
+        start_position = scanner.find_char_position(range[:start])
+        end_position = scanner.find_char_position(range[:end])
 
-          @source[start_position...end_position] = edit[:text]
-        end
+        @source[start_position...end_position] = edit[:text]
+      end
 
-        @version = version
-        @needs_parsing = true
-        @cache.clear
+      @version = version
+      @needs_parsing = true
+      @cache.clear
 
-        last_edit = edits.last
-        return unless last_edit
+      last_edit = edits.last
+      return unless last_edit
 
-        last_edit_range = last_edit[:range]
+      last_edit_range = last_edit[:range]
 
-        @last_edit = if last_edit_range[:start] == last_edit_range[:end]
-          Insert.new(last_edit_range)
-        elsif last_edit[:text].empty?
-          Delete.new(last_edit_range)
-        else
-          Replace.new(last_edit_range)
-        end
+      @last_edit = if last_edit_range[:start] == last_edit_range[:end]
+        Insert.new(last_edit_range)
+      elsif last_edit[:text].empty?
+        Delete.new(last_edit_range)
+      else
+        Replace.new(last_edit_range)
       end
     end
 
