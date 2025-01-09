@@ -243,6 +243,7 @@ module RubyLsp
 
     sig { returns(String) }
     def test_library
+      # TODO: return 'none' immediately if path doesn't contain 'test' or 'spec' ?
       class_entries = @global_state.index.entries_for(@uri.to_s, RubyIndexer::Entry::Class)
       return "none" unless class_entries
 
