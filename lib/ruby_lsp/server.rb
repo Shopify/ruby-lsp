@@ -461,7 +461,7 @@ module RubyLsp
       folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
-      code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
+      code_lens = Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
       # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
