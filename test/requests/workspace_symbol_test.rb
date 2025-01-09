@@ -107,4 +107,14 @@ class WorkspaceSymbolTest < Minitest::Test
     assert_equal("baz", T.must(result).name)
     assert_equal(RubyLsp::Constant::SymbolKind::PROPERTY, T.must(result).kind)
   end
+
+  def test_returns_symbols_from_unsaved_files
+    @index.index_single(URI("untitled:Untitled-1"), <<~RUBY)
+      class Foo; end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo").perform.first
+    assert_equal("Foo", T.must(result).name)
+    assert_equal(RubyLsp::Constant::SymbolKind::CLASS, T.must(result).kind)
+  end
 end

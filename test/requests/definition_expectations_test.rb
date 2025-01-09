@@ -1229,6 +1229,49 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_does_proper_dependency_checking_for_unsaved_files_for_methods
+    source = <<~RUBY
+      # typed: true
+      class Foo
+        def bar
+        end
+      end
+
+      Foo.new.bar
+    RUBY
+
+    with_server(source, URI("untitled:Untitled-1")) do |server, uri|
+      # On the `foo` receiver, we should not show any results
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 8, line: 6 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_does_proper_dependency_checking_for_unsaved_files_for_constants
+    source = <<~RUBY
+      class Foo
+        def bar
+        end
+      end
+
+      Foo
+    RUBY
+
+    with_server(source, URI("untitled:Untitled-1")) do |server, uri|
+      # On the `foo` receiver, we should not show any results
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 8, line: 0 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   private
 
   def create_definition_addon
