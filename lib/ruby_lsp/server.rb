@@ -462,7 +462,6 @@ module RubyLsp
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(
-        @global_state,
         uri,
         T.cast(document, RubyLsp::RubyDocument).test_library, # TODO: fix
         dispatcher,

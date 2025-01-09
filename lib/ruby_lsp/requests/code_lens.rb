@@ -24,13 +24,12 @@ module RubyLsp
 
       sig do
         params(
-          global_state: GlobalState,
           uri: URI::Generic,
           test_library: String,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(global_state, uri, test_library, dispatcher)
+      def initialize(uri, test_library, dispatcher)
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
