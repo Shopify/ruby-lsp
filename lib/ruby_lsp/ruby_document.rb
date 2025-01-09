@@ -243,11 +243,12 @@ module RubyLsp
 
     sig { returns(String) }
     def test_library
-      # TODO: return 'none' immediately if path doesn't contain 'test' or 'spec' ?
+      # TODO: return 'none' immediately if filename doesn't contain 'test' or 'spec' ?
       class_entries = @global_state.index.entries_for(@uri.to_s, RubyIndexer::Entry::Class)
-      return "none" unless class_entries
+      return "unknown" unless class_entries
 
       # TODO: consider performance hit
+      # A better approach might be check the classes entries one at a time.
       ancestors = class_entries
         .map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
 
@@ -259,7 +260,7 @@ module RubyLsp
       elsif ancestors.include?("Test::Unit::TestCase")
         "test-unit"
       else
-        "none"
+        "unknown"
       end
     end
   end

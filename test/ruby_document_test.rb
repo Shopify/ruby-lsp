@@ -864,7 +864,7 @@ class RubyDocumentTest < Minitest::Test
 
     @global_state.index.index_single(@uri, document.source)
 
-    assert_equal("none", document.test_library)
+    assert_equal("unknown", document.test_library)
   end
 
   private
