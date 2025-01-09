@@ -90,8 +90,7 @@ module RubyLsp
         # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
         # else is pushed into the incoming queue
         case method
-        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange",
-             "$/cancelRequest"
+        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
           process_message(message)
         when "shutdown"
           @global_state.synchronize do
