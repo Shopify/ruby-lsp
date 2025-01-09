@@ -240,5 +240,25 @@ module RubyLsp
         node_types: node_types,
       )
     end
+
+    sig { returns(String) }
+    def test_library
+      entries = @global_state.index.entries_for(@uri.to_s)
+      return "none" unless entries
+
+      # TODO: consider performance hit
+      ancestors = entries.map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
+
+      # ActiveSupport::TestCase is a subclass of Minitest::Test so we must check for it first
+      if ancestors.include?("ActiveSupport::TestCase")
+        "rails"
+      elsif ancestors.include?("Minitest::Test")
+        "minitest"
+      elsif ancestors.include?("Test::Unit::TestCase")
+        "test-unit"
+      else
+        "none"
+      end
+    end
   end
 end
