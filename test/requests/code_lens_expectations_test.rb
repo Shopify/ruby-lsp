@@ -7,19 +7,24 @@ require_relative "support/expectations_test_runner"
 class CodeLensExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
+  def setup
+    super
+    @test_library = "minitest"
+  end
+
   def run_expectations(source)
     uri = URI("file://#{@_path}")
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    # stub_test_library("minitest")
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     listener.perform
   end
 
   def test_command_generation_for_minitest
-    stub_test_library("minitest")
+    # stub_test_library("minitest")
     source = <<~RUBY
       class FooTest < MiniTest::Test
         def test_bar; end
@@ -30,7 +35,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -49,7 +54,6 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_command_generation_for_minitest_spec
-    stub_test_library("minitest")
     source = <<~RUBY
       class FooTest < MiniTest::Test
         describe "a" do
@@ -62,7 +66,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -86,7 +90,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_command_generation_for_test_unit
-    stub_test_library("test-unit")
+    @test_library = "test-unit"
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar; end
@@ -97,7 +101,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -123,8 +127,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, "unknown", dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -142,8 +145,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, "rspec", dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -161,8 +163,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -180,8 +181,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -220,7 +220,6 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_no_code_lens_for_nested_defs
-    stub_test_library("test-unit")
     source = <<~RUBY
       class FooTest < Test::Unit::TestCase
         def test_bar
@@ -233,7 +232,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, @global_state.test_library, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, "test-unit", dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -282,9 +281,5 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
         "0.1.0"
       end
     end
-  end
-
-  def stub_test_library(name)
-    @global_state.stubs(:test_library).returns(name)
   end
 end
