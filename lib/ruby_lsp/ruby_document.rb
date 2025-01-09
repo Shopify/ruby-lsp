@@ -243,11 +243,12 @@ module RubyLsp
 
     sig { returns(String) }
     def test_library
-      entries = @global_state.index.entries_for(@uri.to_s)
-      return "none" unless entries
+      class_entries = @global_state.index.entries_for(@uri.to_s, RubyIndexer::Entry::Class)
+      return "none" unless class_entries
 
       # TODO: consider performance hit
-      ancestors = entries.map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
+      ancestors = class_entries
+        .map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
 
       # ActiveSupport::TestCase is a subclass of Minitest::Test so we must check for it first
       if ancestors.include?("ActiveSupport::TestCase")
