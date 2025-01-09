@@ -1034,4 +1034,24 @@ suite("Client", () => {
       ),
     );
   }).timeout(20000);
+
+  test("requests for documents that were not opened by the client", async () => {
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "lib",
+      "ruby_lsp",
+      "server.rb",
+    );
+
+    const response: vscode.DocumentSymbol[] = await client.sendRequest(
+      "textDocument/documentSymbol",
+      {
+        textDocument: {
+          uri: uri.toString(),
+        },
+      },
+    );
+
+    assert.ok(response.length > 0);
+  }).timeout(20000);
 });
