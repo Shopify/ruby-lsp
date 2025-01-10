@@ -31,7 +31,7 @@ module RubyLsp
 
         # TODO: avoid passing document once we have alternative ways to get at
         # encoding and file source
-        sig { params(document: RubyDocument, offense: RuboCop::Cop::Offense, uri: URI::Generic).void }
+        sig { params(document: RubyDocument, offense: ::RuboCop::Cop::Offense, uri: URI::Generic).void }
         def initialize(document, offense, uri)
           @document = document
           @offense = offense
@@ -48,7 +48,7 @@ module RubyLsp
           code_actions
         end
 
-        sig { params(config: RuboCop::Config).returns(Interface::Diagnostic) }
+        sig { params(config: ::RuboCop::Config).returns(Interface::Diagnostic) }
         def to_lsp_diagnostic(config)
           # highlighted_area contains the begin and end position of the first line
           # This ensures that multiline offenses don't clutter the editor
@@ -90,7 +90,7 @@ module RubyLsp
           RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
         end
 
-        sig { params(config: RuboCop::Config).returns(T.nilable(Interface::CodeDescription)) }
+        sig { params(config: ::RuboCop::Config).returns(T.nilable(Interface::CodeDescription)) }
         def code_description(config)
           cop = RuboCopRunner.find_cop_by_name(@offense.cop_name)
           return unless cop
