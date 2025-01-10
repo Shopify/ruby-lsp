@@ -243,7 +243,8 @@ module RubyLsp
 
     sig { returns(String) }
     def test_library
-      # TODO: return 'none' immediately if filename doesn't contain 'test' or 'spec' ?
+      return "none" unless test_file?
+
       class_entries = @global_state.index.entries_for(@uri.to_s, RubyIndexer::Entry::Class)
       return "unknown" unless class_entries
 
@@ -263,6 +264,12 @@ module RubyLsp
       else
         "unknown"
       end
+    end
+
+    sig { returns(T::Boolean) }
+    def test_file?
+      path = T.must(@uri.path)
+      path.include?("/test/") || path.include?("/spec/")
     end
   end
 end
