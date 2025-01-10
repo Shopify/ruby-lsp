@@ -250,6 +250,7 @@ module RubyLsp
       # TODO: consider performance hit
       # A better approach might be check the classes entries one at a time.
       ancestors = class_entries
+        .reject { T.cast(_1, RubyIndexer::Entry::Class).parent_class == "::Object" }
         .map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
 
       # ActiveSupport::TestCase is a subclass of Minitest::Test so we must check for it first
