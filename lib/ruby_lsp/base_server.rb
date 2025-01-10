@@ -100,11 +100,7 @@ module RubyLsp
             @writer.write(Result.new(id: message[:id], response: nil).to_hash)
           end
         when "exit"
-          @global_state.synchronize do
-            status = @incoming_queue.closed? ? 0 : 1
-            send_log_message("Shutdown complete with status #{status}")
-            exit(status)
-          end
+          @global_state.synchronize { exit(@incoming_queue.closed? ? 0 : 1) }
         else
           @incoming_queue << message
         end
@@ -119,8 +115,8 @@ module RubyLsp
       @outgoing_queue.close
       @cancelled_requests.clear
 
-      @worker.join
-      @outgoing_dispatcher.join
+      @worker.terminate
+      @outgoing_dispatcher.terminate
       @store.clear
     end
 
