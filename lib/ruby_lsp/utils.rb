@@ -162,7 +162,9 @@ module RubyLsp
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
-      { method: @method, params: T.unsafe(@params).to_hash }
+      hash = { method: @method }
+      hash[:params] = T.unsafe(@params).to_hash if @params
+      hash
     end
   end
 
@@ -206,7 +208,9 @@ module RubyLsp
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
-      { id: @id, method: @method, params: T.unsafe(@params).to_hash }
+      hash = { id: @id, method: @method }
+      hash[:params] = T.unsafe(@params).to_hash if @params
+      hash
     end
   end
 
