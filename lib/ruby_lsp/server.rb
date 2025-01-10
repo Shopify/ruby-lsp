@@ -1039,15 +1039,19 @@ module RubyLsp
     def handle_rubocop_config_change(uri)
       return unless defined?(Requests::Support::RuboCopFormatter)
 
-      send_log_message("Reloading RuboCop since #{uri} changed")
+      # Register a new runner to reload configurations
       @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
 
-      # Clear all existing diagnostics since the config changed. This has to happen under a mutex because the `state`
-      # hash cannot be mutated during iteration or that will throw an error
+      # Clear all document caches for pull diagnostics
       @global_state.synchronize do
-        @store.each do |uri, _document|
-          send_message(Notification.publish_diagnostics(uri.to_s, []))
+        @store.each do |_uri, document|
+          document.cache_set("textDocument/diagnostic", Document::EMPTY_CACHE)
         end
+      end
+
+      # Request a pull diagnostic refresh from the editor
+      if @global_state.client_capabilities.supports_diagnostic_refresh
+        send_message(Request.new(id: @current_request_id, method: "workspace/diagnostic/refresh", params: nil))
       end
     end
 

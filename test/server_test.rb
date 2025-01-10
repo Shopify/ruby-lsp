@@ -995,6 +995,39 @@ class ServerTest < Minitest::Test
     assert_equal(1, entries.length)
   end
 
+  def test_rubocop_config_changes_trigger_workspace_diagnostic_refresh
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, ".rubocop.yml"))
+
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {
+          general: {
+            positionEncodings: ["utf-8"],
+          },
+          workspace: { diagnostics: { refreshSupport: true } },
+        },
+      },
+    })
+
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: uri,
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+
+    request = find_message(RubyLsp::Request)
+    assert_equal("workspace/diagnostic/refresh", request.method)
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
