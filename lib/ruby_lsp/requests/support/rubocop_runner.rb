@@ -40,10 +40,10 @@ module RubyLsp
           For more details, run RuboCop on the command line.
         EOS
 
-        sig { params(rubocop_error: T.any(RuboCop::ErrorWithAnalyzedFileLocation, StandardError)).void }
+        sig { params(rubocop_error: T.any(::RuboCop::ErrorWithAnalyzedFileLocation, StandardError)).void }
         def initialize(rubocop_error)
           message = case rubocop_error
-          when RuboCop::ErrorWithAnalyzedFileLocation
+          when ::RuboCop::ErrorWithAnalyzedFileLocation
             format(MESSAGE, "for the #{rubocop_error.cop.name} cop")
           when StandardError
             format(MESSAGE, rubocop_error.message)
@@ -53,7 +53,7 @@ module RubyLsp
       end
 
       # :nodoc:
-      class RuboCopRunner < RuboCop::Runner
+      class RuboCopRunner < ::RuboCop::Runner
         extend T::Sig
 
         class ConfigurationError < StandardError; end
@@ -68,14 +68,14 @@ module RubyLsp
           T::Array[String],
         )
 
-        sig { returns(T::Array[RuboCop::Cop::Offense]) }
+        sig { returns(T::Array[::RuboCop::Cop::Offense]) }
         attr_reader :offenses
 
         sig { returns(::RuboCop::Config) }
         attr_reader :config_for_working_directory
 
         begin
-          RuboCop::Options.new.parse(["--raise-cop-error"])
+          ::RuboCop::Options.new.parse(["--raise-cop-error"])
           DEFAULT_ARGS << "--raise-cop-error"
         rescue OptionParser::InvalidOption
           # older versions of RuboCop don't support this flag
@@ -85,7 +85,7 @@ module RubyLsp
         sig { params(args: String).void }
         def initialize(*args)
           @options = T.let({}, T::Hash[Symbol, T.untyped])
-          @offenses = T.let([], T::Array[RuboCop::Cop::Offense])
+          @offenses = T.let([], T::Array[::RuboCop::Cop::Offense])
           @errors = T.let([], T::Array[String])
           @warnings = T.let([], T::Array[String])
 
@@ -113,9 +113,9 @@ module RubyLsp
           # RuboCop rescues interrupts and then sets the `@aborting` variable to true. We don't want them to be rescued,
           # so here we re-raise in case RuboCop received an interrupt.
           raise Interrupt if aborting?
-        rescue RuboCop::Runner::InfiniteCorrectionLoop => error
+        rescue ::RuboCop::Runner::InfiniteCorrectionLoop => error
           raise Formatting::Error, error.message
-        rescue RuboCop::ValidationError => error
+        rescue ::RuboCop::ValidationError => error
           raise ConfigurationError, error.message
         rescue StandardError => error
           raise InternalRuboCopError, error
@@ -129,25 +129,25 @@ module RubyLsp
         class << self
           extend T::Sig
 
-          sig { params(cop_name: String).returns(T.nilable(T.class_of(RuboCop::Cop::Base))) }
+          sig { params(cop_name: String).returns(T.nilable(T.class_of(::RuboCop::Cop::Base))) }
           def find_cop_by_name(cop_name)
             cop_registry[cop_name]&.first
           end
 
           private
 
-          sig { returns(T::Hash[String, [T.class_of(RuboCop::Cop::Base)]]) }
+          sig { returns(T::Hash[String, [T.class_of(::RuboCop::Cop::Base)]]) }
           def cop_registry
             @cop_registry ||= T.let(
-              RuboCop::Cop::Registry.global.to_h,
-              T.nilable(T::Hash[String, [T.class_of(RuboCop::Cop::Base)]]),
+              ::RuboCop::Cop::Registry.global.to_h,
+              T.nilable(T::Hash[String, [T.class_of(::RuboCop::Cop::Base)]]),
             )
           end
         end
 
         private
 
-        sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
+        sig { params(_file: String, offenses: T::Array[::RuboCop::Cop::Offense]).void }
         def file_finished(_file, offenses)
           @offenses = offenses
         end
