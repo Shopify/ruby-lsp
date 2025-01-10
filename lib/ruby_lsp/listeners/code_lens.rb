@@ -27,16 +27,15 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-          test_library: String,
-          uri: URI::Generic,
+          document: RubyDocument,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, test_library, uri, dispatcher)
+      def initialize(response_builder, document, dispatcher)
         @response_builder = response_builder
-        @test_library = test_library
-        @uri = T.let(uri, URI::Generic)
-        @path = T.let(uri.to_standardized_path, T.nilable(String))
+        @uri = T.let(document.uri, URI::Generic)
+        @test_library = T.let(document.test_library, String)
+        @path = T.let(@uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
         @group_stack = T.let([], T::Array[String])
