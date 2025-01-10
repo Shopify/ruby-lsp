@@ -48,6 +48,9 @@ end
 error_path = File.join(".ruby-lsp", "install_error")
 
 install_error = if File.exist?(error_path)
+  # The error report may contain error objects reported by bundler.
+  # Therefore, we need to require bunder before loading the error report.
+  require "bundler"
   Marshal.load(File.read(error_path))
 end
 
