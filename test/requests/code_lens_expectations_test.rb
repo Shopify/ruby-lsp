@@ -17,14 +17,12 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    # stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(uri, @test_library, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     listener.perform
   end
 
   def test_command_generation_for_minitest
-    # stub_test_library("minitest")
     source = <<~RUBY
       class FooTest < MiniTest::Test
         def test_bar; end
