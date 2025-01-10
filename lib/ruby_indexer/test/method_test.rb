@@ -138,7 +138,7 @@ module RubyIndexer
         entries = T.must(@index[keyword])
         # should receive two entries because module_function creates a singleton method
         # for the Test module and a private method for classes include the Test module
-        assert_equal(entries.size, 2)
+        assert_equal(2, entries.size)
         first_entry, second_entry = *entries
         # The first entry points to the location of the module_function call
         assert_equal("Test", first_entry.owner.name)
