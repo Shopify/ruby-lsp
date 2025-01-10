@@ -62,6 +62,7 @@ module RubyLsp
         return Error::InvalidTargetRange unless target.is_a?(Prism::CallNode)
 
         node = target.block
+        print(node)
         return Error::InvalidTargetRange unless node.is_a?(Prism::BlockNode)
 
         indentation = " " * target.location.start_column unless node.opening_loc.slice == "do"
@@ -272,31 +273,46 @@ module RubyLsp
         )
       end
 
-      sig { params(str: String).returns(String) }
-      def remove_newlines_in_brackets(str)
-        result = ""
-        stack = []
-        i = 0
+      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(T.nilable(String)) }
+      def transform_node(body, indentation)
+        body_loc = body.location
+        node = @document.locate_first_within_range(
+          {
+            start: { line: body_loc.start_line - 1, character: body_loc.start_column },
+            end: { line: body_loc.end_line - 1, character: body_loc.end_column },
+          },
+          node_types: [Prism::HashNode, Prism::ArrayNode],
+        )
+        body_content = body.slice.dup
+        if node.is_a?(Prism::HashNode)
+          location = node.location
+          correction_start = location.start_offset - body_loc.start_offset
+          correction_end = location.end_offset - body_loc.start_offset
+          next_indentation = indentation ? "#{indentation}  " : nil
 
-        while i < str.length
-          char = T.must(str[i])
+          body_content[correction_start...correction_end] = transform_hash_node(node, next_indentation)
+        elsif node.is_a?(Prism::ArrayNode)
+          location = node.location
+          correction_start = location.start_offset - body_loc.start_offset
+          correction_end = location.end_offset - body_loc.start_offset
+          next_indentation = indentation ? "#{indentation}  " : nil
 
-          case char
-          when "{", "["
-            stack.push(char)
-            result += char
-          when "}", "]"
-            stack.pop unless stack.empty?
-            result += char
-          when "\n"
-            result += stack.empty? ? char : " "
-          else
-            result += char
-          end
-          i += 1
+          body_content[correction_start...correction_end] = transform_array_node(node, next_indentation)
         end
+      end
 
-        result
+      sig { params(node: Prism::HashNode, indentation: T.nilable(String)).returns(String) }
+      def transform_hash_node(node, indentation)
+        elements = node.elements.map { |elem| "#{elem.key.slice}: #{transform_node(elem.value, indentation)}" }
+        if indentation
+          "{\n#{indentation}  #{elements.join(",\n#{indentation}  ")}\n#{indentation}}"
+        else
+          "{ #{elements.join(", ")} }"
+        end
+      end
+
+      sig { params(node: Prism::ArrayNode, indentation: T.nilable(String)).returns(String) }
+      def transform_array_node(node, indentation)
       end
 
       sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
@@ -353,11 +369,12 @@ module RubyLsp
           body_content[correction_start...correction_end] =
             recursively_switch_nested_block_styles(nested_block, next_indentation)
         end
+        # Find array or hash in blocks
 
         if indentation
           body_content.gsub(";", "\n")
         else
-          "#{remove_newlines_in_brackets(body_content).gsub("\n", ";").squeeze(" ")} "
+          "#{body_content.gsub("\n", ";").squeeze(" ")} "
         end
       end
     end
