@@ -207,7 +207,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
         response = result.response
 
-        assert_equal(response.size, 4)
+        assert_equal(4, response.size)
         assert_match("▶ Run", response[0].command.title)
         assert_match("▶ Run In Terminal", response[1].command.title)
         assert_match("Debug", response[2].command.title)
