@@ -6,9 +6,6 @@ module RubyLsp
     extend T::Sig
 
     sig { returns(String) }
-    attr_reader :test_library
-
-    sig { returns(String) }
     attr_accessor :formatter
 
     sig { returns(T::Boolean) }
@@ -39,7 +36,6 @@ module RubyLsp
 
       @formatter = T.let("auto", String)
       @linters = T.let([], T::Array[String])
-      @test_library = T.let("minitest", String)
       @has_type_checker = T.let(true, T::Boolean)
       @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
       @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
@@ -116,9 +112,6 @@ module RubyLsp
       else
         Notification.window_log_message("Auto detected linters: #{@linters.join(", ")}")
       end
-
-      @test_library = detect_test_library(direct_dependencies)
-      notifications << Notification.window_log_message("Detected test library: #{@test_library}")
 
       @has_type_checker = detect_typechecker(all_dependencies)
       if @has_type_checker
@@ -207,26 +200,6 @@ module RubyLsp
       end
 
       linters
-    end
-
-    sig { params(dependencies: T::Array[String]).returns(String) }
-    def detect_test_library(dependencies)
-      if dependencies.any?(/^rspec/)
-        "rspec"
-      # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
-      # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
-      # activestorage may be added to the gemfile so that other components aren't downloaded. Check for the presence
-      #  of bin/rails to support these cases.
-      elsif bin_rails_present
-        "rails"
-      # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
-      elsif dependencies.any?(/^minitest$/)
-        "minitest"
-      elsif dependencies.any?(/^test-unit/)
-        "test-unit"
-      else
-        "unknown"
-      end
     end
 
     sig { params(dependencies: T::Array[String]).returns(T::Boolean) }
