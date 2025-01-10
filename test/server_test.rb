@@ -225,6 +225,21 @@ class ServerTest < Minitest::Test
     )
   end
 
+  def test_applies_workspace_uri_to_indexing_configs_even_if_no_configs_are_specified
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: "/fake").to_s }],
+      },
+    })
+
+    index = @server.instance_variable_get(:@global_state).index
+    assert_equal("/fake", index.configuration.instance_variable_get(:@workspace_path))
+  end
+
   def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
     capture_subprocess_io do
       @server.process_message({
@@ -233,7 +248,7 @@ class ServerTest < Minitest::Test
         params: {
           initializationOptions: { enabledFeatures: ["formatting", "diagnostics"] },
           capabilities: { general: { positionEncodings: ["utf-8"] } },
-          workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_standardized_path }],
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
         },
       })
     end
@@ -923,6 +938,61 @@ class ServerTest < Minitest::Test
     refute_nil(result)
 
     assert_equal(["Foo::<Class:Foo>"], index.linearized_ancestors_of("Foo::<Class:Foo>"))
+  end
+
+  def test_edits_outside_of_declarations_do_not_trigger_indexing
+    uri = URI("file:///foo.rb")
+    index = @server.global_state.index
+
+    # Simulate opening a file. First, send the notification to open the file with a class inside
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: +"class Foo\n\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    # Fire the automatic features requests to trigger indexing
+    @server.process_message({
+      id: 1,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+
+    entries = index["Foo"]
+    assert_equal(1, entries.length)
+
+    # Modify the file without saving
+    @server.process_message({
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri: uri, version: 2 },
+        contentChanges: [
+          { text: "d", range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } } },
+        ],
+      },
+    })
+
+    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
+    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
+    # isn't reproduced here. Parsing manually matches what happens normally
+    store = @server.instance_variable_get(:@store)
+    store.get(uri).parse!
+
+    # Trigger the automatic features again
+    index.expects(:delete).never
+    @server.process_message({
+      id: 2,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+
+    entries = index["Foo"]
+    assert_equal(1, entries.length)
   end
 
   private

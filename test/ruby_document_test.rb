@@ -889,6 +889,73 @@ class RubyDocumentTest < Minitest::Test
     assert_equal("none", document.test_library)
   end
 
+  def test_document_tracks_latest_edit_context
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+
+      end
+    RUBY
+
+    # Insert
+    range = { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }
+    document.push_edits([{ range: range, text: "d" }], version: 2)
+
+    last_edit = T.must(document.last_edit)
+    assert_instance_of(RubyLsp::Document::Insert, last_edit)
+    assert_equal(range, last_edit.range)
+
+    # Replace
+    range = { start: { line: 1, character: 0 }, end: { line: 1, character: 1 } }
+    document.push_edits([{ range: range, text: "def" }], version: 3)
+
+    last_edit = T.must(document.last_edit)
+    assert_instance_of(RubyLsp::Document::Replace, last_edit)
+    assert_equal(range, last_edit.range)
+
+    # Delete
+    range = { start: { line: 1, character: 0 }, end: { line: 1, character: 3 } }
+    document.push_edits([{ range: range, text: "" }], version: 4)
+
+    last_edit = T.must(document.last_edit)
+    assert_instance_of(RubyLsp::Document::Delete, last_edit)
+    assert_equal(range, last_edit.range)
+
+    assert_equal(<<~RUBY, document.source)
+      class Foo
+
+      end
+    RUBY
+  end
+
+  def test_last_edit_may_change_declarations_for_inserts
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+      end
+    RUBY
+    assert_predicate(document, :last_edit_may_change_declarations?)
+
+    range = { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } }
+    document.push_edits([{ range: range, text: "t" }], version: 2)
+
+    assert_instance_of(RubyLsp::Document::Insert, document.last_edit)
+    assert_predicate(document, :last_edit_may_change_declarations?)
+  end
+
+  def test_last_edit_may_change_declarations_for_replaces
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+      end
+    RUBY
+
+    assert_predicate(document, :last_edit_may_change_declarations?)
+
+    range = { start: { line: 0, character: 6 }, end: { line: 0, character: 9 } }
+    document.push_edits([{ range: range, text: "Bar" }], version: 2)
+
+    assert_instance_of(RubyLsp::Document::Replace, document.last_edit)
+    assert_predicate(document, :last_edit_may_change_declarations?)
+  end
+
   private
 
   def assert_error_edit(actual, error_range)

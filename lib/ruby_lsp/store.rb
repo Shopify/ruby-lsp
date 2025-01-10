@@ -65,15 +65,13 @@ module RubyLsp
       ).returns(Document[T.untyped])
     end
     def set(uri:, source:, version:, language_id:)
-      @global_state.synchronize do
-        @state[uri.to_s] = case language_id
-        when Document::LanguageId::ERB
-          ERBDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
-        when Document::LanguageId::RBS
-          RBSDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
-        else
-          RubyDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
-        end
+      @state[uri.to_s] = case language_id
+      when Document::LanguageId::ERB
+        ERBDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
+      when Document::LanguageId::RBS
+        RBSDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
+      else
+        RubyDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
       end
     end
 
@@ -94,9 +92,7 @@ module RubyLsp
 
     sig { params(uri: URI::Generic).void }
     def delete(uri)
-      @global_state.synchronize do
-        @state.delete(uri.to_s)
-      end
+      @state.delete(uri.to_s)
     end
 
     sig { params(uri: URI::Generic).returns(T::Boolean) }

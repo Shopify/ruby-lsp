@@ -196,6 +196,9 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           params: { textDocument: { uri: uri }, position: { line: 1, character: 2 } },
         })
 
+        # Pop the re-indexing notification
+        server.pop_response
+
         result = server.pop_response
         assert_instance_of(RubyLsp::Result, result)
 

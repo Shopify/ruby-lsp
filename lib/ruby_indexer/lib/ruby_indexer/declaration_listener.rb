@@ -64,7 +64,6 @@ module RubyIndexer
         :on_constant_path_or_write_node_enter,
         :on_constant_path_operator_write_node_enter,
         :on_constant_path_and_write_node_enter,
-        :on_constant_or_write_node_enter,
         :on_constant_write_node_enter,
         :on_constant_or_write_node_enter,
         :on_constant_and_write_node_enter,
@@ -288,7 +287,6 @@ module RubyIndexer
       when :module_function
         handle_module_function(node)
       when :private_class_method
-        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PRIVATE))
         handle_private_class_method(node)
       end
 
@@ -976,39 +974,42 @@ module RubyIndexer
 
     sig { params(node: Prism::CallNode).void }
     def handle_private_class_method(node)
-      node.arguments&.arguments&.each do |argument|
-        string_or_symbol_nodes = case argument
-        when Prism::StringNode, Prism::SymbolNode
-          [argument]
-        when Prism::ArrayNode
-          argument.elements
-        else
-          []
+      arguments = node.arguments&.arguments
+      return unless arguments
+
+      # If we're passing a method definition directly to `private_class_method`, push a new private scope. That will be
+      # applied when the indexer finds the method definition and then popped on `call_node_leave`
+      if arguments.first.is_a?(Prism::DefNode)
+        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PRIVATE))
+        return
+      end
+
+      owner_name = @owner_stack.last&.name
+      return unless owner_name
+
+      # private_class_method accepts strings, symbols or arrays of strings and symbols as arguments. Here we build a
+      # single list of all of the method names that have to be made private
+      arrays, others = T.cast(
+        arguments.partition { |argument| argument.is_a?(Prism::ArrayNode) },
+        [T::Array[Prism::ArrayNode], T::Array[Prism::Node]],
+      )
+      arrays.each { |array| others.concat(array.elements) }
+
+      names = others.filter_map do |argument|
+        case argument
+        when Prism::StringNode
+          argument.unescaped
+        when Prism::SymbolNode
+          argument.value
         end
+      end
 
-        unless string_or_symbol_nodes.empty?
-          # pop the visibility off since there isn't a method definition following `private_class_method`
-          @visibility_stack.pop
-        end
+      names.each do |name|
+        entries = @index.resolve_method(name, @index.existing_or_new_singleton_class(owner_name).name)
+        next unless entries
 
-        string_or_symbol_nodes.each do |string_or_symbol_node|
-          method_name = case string_or_symbol_node
-          when Prism::StringNode
-            string_or_symbol_node.content
-          when Prism::SymbolNode
-            string_or_symbol_node.value
-          end
-          next unless method_name
-
-          owner_name = @owner_stack.last&.name
-          next unless owner_name
-
-          entries = @index.resolve_method(method_name, @index.existing_or_new_singleton_class(owner_name).name)
-          next unless entries
-
-          entries.each do |entry|
-            entry.visibility = Entry::Visibility::PRIVATE
-          end
+        entries.each do |entry|
+          entry.visibility = Entry::Visibility::PRIVATE
         end
       end
     end

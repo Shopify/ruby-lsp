@@ -909,6 +909,21 @@ module RubyIndexer
       assert_equal("Foo", T.must(entry.owner).name)
     end
 
+    def test_making_several_class_methods_private
+      index(<<~RUBY)
+        class Foo
+          def self.bar; end
+          def self.baz; end
+          def self.qux; end
+
+          private_class_method :bar, :baz, :qux
+
+          def initialize
+          end
+        end
+      RUBY
+    end
+
     private
 
     sig { params(entry: Entry::Method, call_string: String).void }

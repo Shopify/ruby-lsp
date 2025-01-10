@@ -90,8 +90,7 @@ module RubyLsp
         # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
         # else is pushed into the incoming queue
         case method
-        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange",
-             "$/cancelRequest"
+        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
           process_message(message)
         when "shutdown"
           @global_state.synchronize do
@@ -101,11 +100,7 @@ module RubyLsp
             @writer.write(Result.new(id: message[:id], response: nil).to_hash)
           end
         when "exit"
-          @global_state.synchronize do
-            status = @incoming_queue.closed? ? 0 : 1
-            send_log_message("Shutdown complete with status #{status}")
-            exit(status)
-          end
+          @global_state.synchronize { exit(@incoming_queue.closed? ? 0 : 1) }
         else
           @incoming_queue << message
         end
@@ -120,8 +115,8 @@ module RubyLsp
       @outgoing_queue.close
       @cancelled_requests.clear
 
-      @worker.join
-      @outgoing_dispatcher.join
+      @worker.terminate
+      @outgoing_dispatcher.terminate
       @store.clear
     end
 

@@ -116,8 +116,8 @@ module RubyLsp
         T.must(@global_state.index[fully_qualified_name]).each do |entry|
           # Do not rename files that are not part of the workspace
           uri = entry.uri
-          file_path = T.must(uri.full_path)
-          next unless file_path.start_with?(@global_state.workspace_path)
+          file_path = uri.full_path
+          next unless file_path&.start_with?(@global_state.workspace_path)
 
           case entry
           when RubyIndexer::Entry::Class, RubyIndexer::Entry::Module, RubyIndexer::Entry::Constant,

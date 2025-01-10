@@ -359,48 +359,52 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_open(message)
-      text_document = message.dig(:params, :textDocument)
-      language_id = case text_document[:languageId]
-      when "erb", "eruby"
-        Document::LanguageId::ERB
-      when "rbs"
-        Document::LanguageId::RBS
-      else
-        Document::LanguageId::Ruby
-      end
+      @global_state.synchronize do
+        text_document = message.dig(:params, :textDocument)
+        language_id = case text_document[:languageId]
+        when "erb", "eruby"
+          Document::LanguageId::ERB
+        when "rbs"
+          Document::LanguageId::RBS
+        else
+          Document::LanguageId::Ruby
+        end
 
-      document = @store.set(
-        uri: text_document[:uri],
-        source: text_document[:text],
-        version: text_document[:version],
-        language_id: language_id,
-      )
-
-      if document.past_expensive_limit? && text_document[:uri].scheme == "file"
-        log_message = <<~MESSAGE
-          The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
-          diagnostics will be disabled.
-        MESSAGE
-
-        send_message(
-          Notification.new(
-            method: "window/logMessage",
-            params: Interface::LogMessageParams.new(
-              type: Constant::MessageType::WARNING,
-              message: log_message,
-            ),
-          ),
+        document = @store.set(
+          uri: text_document[:uri],
+          source: text_document[:text],
+          version: text_document[:version],
+          language_id: language_id,
         )
+
+        if document.past_expensive_limit? && text_document[:uri].scheme == "file"
+          log_message = <<~MESSAGE
+            The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
+            diagnostics will be disabled.
+          MESSAGE
+
+          send_message(
+            Notification.new(
+              method: "window/logMessage",
+              params: Interface::LogMessageParams.new(
+                type: Constant::MessageType::WARNING,
+                message: log_message,
+              ),
+            ),
+          )
+        end
       end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def text_document_did_close(message)
-      uri = message.dig(:params, :textDocument, :uri)
-      @store.delete(uri)
+      @global_state.synchronize do
+        uri = message.dig(:params, :textDocument, :uri)
+        @store.delete(uri)
 
-      # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-      send_message(Notification.publish_diagnostics(uri.to_s, []))
+        # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
+        send_message(Notification.publish_diagnostics(uri.to_s, []))
+      end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -408,7 +412,9 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
-      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+      @global_state.synchronize do
+        @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+      end
     end
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
@@ -464,11 +470,19 @@ module RubyLsp
       code_lens = Requests::CodeLens.new(uri, document, dispatcher) if document.is_a?(RubyDocument)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
-      # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
-      # updated on save
-      @global_state.index.handle_change(uri) do |index|
-        index.delete(uri, skip_require_paths_tree: true)
-        RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
+      if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
+        # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
+        # updated on save
+        @global_state.synchronize do
+          send_log_message("Detected that last edit may have modified declarations. Re-indexing #{uri}")
+
+          @global_state.index.handle_change(uri) do |index|
+            index.delete(uri, skip_require_paths_tree: true)
+            RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
+            dispatcher.dispatch(parse_result.value)
+          end
+        end
+      else
         dispatcher.dispatch(parse_result.value)
       end
 
@@ -1246,10 +1260,10 @@ module RubyLsp
         return
       end
 
-      return unless indexing_options
-
       configuration = @global_state.index.configuration
       configuration.workspace_path = @global_state.workspace_path
+      return unless indexing_options
+
       # The index expects snake case configurations, but VS Code standardizes on camel case settings
       configuration.apply_config(indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase })
     end
