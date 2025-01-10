@@ -273,7 +273,7 @@ module RubyLsp
         )
       end
 
-      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(T.nilable(String)) }
+      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(String) }
       def transform_node(body, indentation)
         body_loc = body.location
         node = @document.locate_first_within_range(
@@ -298,6 +298,8 @@ module RubyLsp
           next_indentation = indentation ? "#{indentation}  " : nil
 
           body_content[correction_start...correction_end] = transform_array_node(node, next_indentation)
+        else
+          indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";").squeeze(" ")} "
         end
       end
 
@@ -313,6 +315,12 @@ module RubyLsp
 
       sig { params(node: Prism::ArrayNode, indentation: T.nilable(String)).returns(String) }
       def transform_array_node(node, indentation)
+        elements = node.elements.map { |elem| transform_node(elem, indentation) }
+        if indentation
+          "[\n#{indentation}  #{elements.join(",\n#{indentation}  ")}\n#{indentation}]"
+        else
+          "[ #{elements.join(", ")} ]"
+        end
       end
 
       sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
@@ -370,12 +378,7 @@ module RubyLsp
             recursively_switch_nested_block_styles(nested_block, next_indentation)
         end
         # Find array or hash in blocks
-
-        if indentation
-          body_content.gsub(";", "\n")
-        else
-          "#{body_content.gsub("\n", ";").squeeze(" ")} "
-        end
+        transform_node(body, indentation)
       end
     end
   end
