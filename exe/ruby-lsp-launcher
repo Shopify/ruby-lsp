@@ -7,6 +7,7 @@
 # !!!!!!!
 
 setup_error = nil
+install_error = nil
 
 # Read the initialize request before even starting the server. We need to do this to figure out the workspace URI.
 # Editors are not required to spawn the language server process on the same directory as the workspace URI, so we need
@@ -45,12 +46,6 @@ rescue Errno::ECHILD
   # In theory, the child process can finish before we even get to the wait call, but that is not an error
 end
 
-error_path = File.join(".ruby-lsp", "install_error")
-
-install_error = if File.exist?(error_path)
-  Marshal.load(File.read(error_path))
-end
-
 begin
   bundle_env_path = File.join(".ruby-lsp", "bundle_env")
   # We can't require `bundler/setup` because that file prematurely exits the process if setup fails. However, we can't
@@ -67,6 +62,14 @@ begin
 
     require "bundler"
     Bundler.ui.level = :silent
+
+    # This Marshal load can only happen after requiring Bundler because it will load a custom error class from Bundler
+    # itself. If we try to load before requiring, the class will not be defined and loading will fail
+    error_path = File.join(".ruby-lsp", "install_error")
+    install_error = if File.exist?(error_path)
+      Marshal.load(File.read(error_path))
+    end
+
     Bundler.setup
     $stderr.puts("Composed Bundle set up successfully")
   end
