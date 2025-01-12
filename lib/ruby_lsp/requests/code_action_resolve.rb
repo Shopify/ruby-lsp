@@ -284,23 +284,40 @@ module RubyLsp
           node_types: [Prism::HashNode, Prism::ArrayNode],
         )
         body_content = body.slice.dup
+        puts "Original body_content: #{body_content.inspect}"
         if node.is_a?(Prism::HashNode)
-          location = node.location
-          correction_start = location.start_offset - body_loc.start_offset
-          correction_end = location.end_offset - body_loc.start_offset
-          next_indentation = indentation ? "#{indentation}  " : nil
-
-          body_content[correction_start...correction_end] = transform_hash_node(node, next_indentation)
+          handle_nested_structure(body_content, body_loc, node, indentation)
         elsif node.is_a?(Prism::ArrayNode)
-          location = node.location
-          correction_start = location.start_offset - body_loc.start_offset
-          correction_end = location.end_offset - body_loc.start_offset
-          next_indentation = indentation ? "#{indentation}  " : nil
-
-          body_content[correction_start...correction_end] = transform_array_node(node, next_indentation)
+          handle_nested_structure(body_content, body_loc, node, indentation)
         else
           indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";").squeeze(" ")} "
         end
+      end
+
+      sig do
+        params(
+          body_content: String,
+          body_loc: Prism::Location,
+          node: Prism::Node,
+          indentation: T.nilable(String),
+        ).returns(String)
+      end
+      def handle_nested_structure(body_content, body_loc, node, indentation)
+        location = node.location
+        correction_start = location.start_offset - body_loc.start_offset
+        correction_end = location.end_offset - body_loc.start_offset
+        next_indentation = indentation ? "#{indentation}  " : nil
+
+        transformed_content = if node.is_a?(Prism::HashNode)
+          transform_hash_node(node, next_indentation)
+        elsif node.is_a?(Prism::ArrayNode)
+          transform_array_node(node, next_indentation)
+        else
+          raise "Unsupported node type: #{node.class.name}"
+        end
+
+        body_content[correction_start...correction_end] = transformed_content
+        body_content
       end
 
       sig { params(node: Prism::HashNode, indentation: T.nilable(String)).returns(String) }
@@ -319,7 +336,7 @@ module RubyLsp
         if indentation
           "[\n#{indentation}  #{elements.join(",\n#{indentation}  ")}\n#{indentation}]"
         else
-          "[ #{elements.join(", ")} ]"
+          "[#{elements.join(", ")}]"
         end
       end
 

@@ -158,3 +158,5 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
     end
   end
 end
+
+[].each { |something| a[:hello] = [something[1], something[2], something[3]] }
