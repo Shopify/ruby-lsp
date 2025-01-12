@@ -159,4 +159,17 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
   end
 end
 
-[].each { |something| a[:hello] = [something[1], something[2], something[3]] }
+[].each do |something|
+  a[:hello] = [
+    something[1],
+    something[2],
+    something[3],
+  ]
+end
+
+arr.map do |a|
+  {
+    :id => a.id,
+    "d" => a.name,
+  }
+end

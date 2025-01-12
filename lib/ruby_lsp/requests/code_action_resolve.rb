@@ -322,9 +322,13 @@ module RubyLsp
 
       sig { params(node: Prism::HashNode, indentation: T.nilable(String)).returns(String) }
       def transform_hash_node(node, indentation)
-        elements = node.elements.map { |elem| "#{elem.key.slice}: #{transform_node(elem.value, indentation)}" }
+        elements = node.elements.map do |elem|
+          if elem.is_a?(Prism::AssocNode)
+            "#{elem.key.slice} #{transform_node(elem.value, indentation).strip}"
+          end
+        end
         if indentation
-          "{\n#{indentation}  #{elements.join(",\n#{indentation}  ")}\n#{indentation}}"
+          "{\n#{indentation}  #{elements.join(",\n#{indentation}  ")},\n#{indentation}}"
         else
           "{ #{elements.join(", ")} }"
         end
@@ -332,9 +336,9 @@ module RubyLsp
 
       sig { params(node: Prism::ArrayNode, indentation: T.nilable(String)).returns(String) }
       def transform_array_node(node, indentation)
-        elements = node.elements.map { |elem| transform_node(elem, indentation) }
+        elements = node.elements.map { |elem| transform_node(elem, indentation).strip }
         if indentation
-          "[\n#{indentation}  #{elements.join(",\n#{indentation}  ")}\n#{indentation}]"
+          "[\n#{indentation}  #{elements.join(",\n#{indentation}  ")},\n#{indentation}]"
         else
           "[#{elements.join(", ")}]"
         end
