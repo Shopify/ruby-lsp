@@ -167,9 +167,5 @@ end
   ]
 end
 
-arr.map do |a|
-  {
-    :id => a.id,
-    "d" => a.name,
-  }
-end
+base = { a: 1, b: 2 }
+arr.map { |a| { :id => a.id, "d" => a.name, **base } }

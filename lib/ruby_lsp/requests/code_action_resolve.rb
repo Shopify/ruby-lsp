@@ -323,8 +323,12 @@ module RubyLsp
       sig { params(node: Prism::HashNode, indentation: T.nilable(String)).returns(String) }
       def transform_hash_node(node, indentation)
         elements = node.elements.map do |elem|
-          if elem.is_a?(Prism::AssocNode)
+          if elem.is_a?(Prism::AssocNode) && !elem.operator
             "#{elem.key.slice} #{transform_node(elem.value, indentation).strip}"
+          elsif elem.is_a?(Prism::AssocNode) && elem.operator
+            "#{elem.key.slice} => #{transform_node(elem.value, indentation).strip}"
+          elsif elem.is_a?(Prism::AssocSplatNode)
+            "**#{elem.value&.slice}"
           end
         end
         if indentation
