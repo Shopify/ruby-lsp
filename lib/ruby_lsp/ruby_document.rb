@@ -278,12 +278,16 @@ module RubyLsp
       elsif ancestors.include?("Test::Unit::TestCase")
         "test-unit"
       else
+        $stdout.puts("*** test_library 4")
         "unknown"
       end
     end
 
     sig { returns(T::Boolean) }
     def test_file?
+      # if the file is not saved, then we don't know its path, so can't know it's a test
+      return false unless @uri.path # file may not be saved
+
       path = T.must(@uri.path)
       path.include?("/test/") || path.include?("/spec/")
     end
