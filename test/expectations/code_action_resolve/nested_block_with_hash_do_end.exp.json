@@ -1,0 +1,47 @@
+{
+  "params": {
+      "kind": "refactor.rewrite",
+      "title": "Refactor: Toggle block style",
+      "data": {
+          "range": {
+              "start": {
+                  "line": 0,
+                  "character": 0
+              },
+              "end": {
+                  "line": 8,
+                  "character": 3
+              }
+          },
+          "uri": "file:///fake"
+      }
+  },
+  "result": {
+      "title": "Refactor: Toggle block style",
+      "edit": {
+          "documentChanges": [
+              {
+                  "textDocument": {
+                      "uri": "file:///fake",
+                      "version": null
+                  },
+                  "edits": [
+                      {
+                          "range": {
+                              "start": {
+                                  "line": 0,
+                                  "character": 10
+                              },
+                              "end": {
+                                  "line": 8,
+                                  "character": 3
+                              }
+                          },
+                          "newText": "{ |user| items.each { |item| { :user_id => user.id, item_id: item.id, **status } } }"
+                      }
+                  ]
+              }
+          ]
+      }
+  }
+}

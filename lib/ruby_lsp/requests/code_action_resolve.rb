@@ -351,7 +351,8 @@ module RubyLsp
           source << "{ "
           source << "#{parameters.slice} " if parameters
           source << switch_block_body(body, nil) if body
-          source << "}"
+          source << " }"
+          source = source.squeeze(" ").gsub("\n", ";")
         end
 
         source
@@ -376,7 +377,7 @@ module RubyLsp
         if nested_block.is_a?(Prism::HashNode) || nested_block.is_a?(Prism::ArrayNode) || nested_block.is_a?(Prism::BlockNode)
           handle_nested_structure(body_content, body_loc, nested_block, indentation)
         else
-          indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";").squeeze(" ")} "
+          indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
         end
       end
     end
