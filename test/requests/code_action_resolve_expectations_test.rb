@@ -158,14 +158,3 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
     end
   end
 end
-
-[].each do |something|
-  a[:hello] = [
-    something[1],
-    something[2],
-    something[3],
-  ]
-end
-
-base = { a: 1, b: 2 }
-arr.map { |a| { :id => a.id, "d" => a.name, **base } }

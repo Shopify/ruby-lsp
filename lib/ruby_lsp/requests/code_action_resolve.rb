@@ -62,7 +62,6 @@ module RubyLsp
         return Error::InvalidTargetRange unless target.is_a?(Prism::CallNode)
 
         node = target.block
-        print(node)
         return Error::InvalidTargetRange unless node.is_a?(Prism::BlockNode)
 
         indentation = " " * target.location.start_column unless node.opening_loc.slice == "do"
@@ -273,27 +272,6 @@ module RubyLsp
         )
       end
 
-      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(String) }
-      def transform_node(body, indentation)
-        body_loc = body.location
-        node = @document.locate_first_within_range(
-          {
-            start: { line: body_loc.start_line - 1, character: body_loc.start_column },
-            end: { line: body_loc.end_line - 1, character: body_loc.end_column },
-          },
-          node_types: [Prism::HashNode, Prism::ArrayNode],
-        )
-        body_content = body.slice.dup
-        puts "Original body_content: #{body_content.inspect}"
-        if node.is_a?(Prism::HashNode)
-          handle_nested_structure(body_content, body_loc, node, indentation)
-        elsif node.is_a?(Prism::ArrayNode)
-          handle_nested_structure(body_content, body_loc, node, indentation)
-        else
-          indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";").squeeze(" ")} "
-        end
-      end
-
       sig do
         params(
           body_content: String,
@@ -312,6 +290,8 @@ module RubyLsp
           transform_hash_node(node, next_indentation)
         elsif node.is_a?(Prism::ArrayNode)
           transform_array_node(node, next_indentation)
+        elsif node.is_a?(Prism::BlockNode)
+          recursively_switch_nested_block_styles(node, next_indentation)
         else
           raise "Unsupported node type: #{node.class.name}"
         end
@@ -324,9 +304,9 @@ module RubyLsp
       def transform_hash_node(node, indentation)
         elements = node.elements.map do |elem|
           if elem.is_a?(Prism::AssocNode) && !elem.operator
-            "#{elem.key.slice} #{transform_node(elem.value, indentation).strip}"
+            "#{elem.key.slice} #{switch_block_body(elem.value, indentation).strip}"
           elsif elem.is_a?(Prism::AssocNode) && elem.operator
-            "#{elem.key.slice} => #{transform_node(elem.value, indentation).strip}"
+            "#{elem.key.slice} => #{switch_block_body(elem.value, indentation).strip}"
           elsif elem.is_a?(Prism::AssocSplatNode)
             "**#{elem.value&.slice}"
           end
@@ -334,13 +314,13 @@ module RubyLsp
         if indentation
           "{\n#{indentation}  #{elements.join(",\n#{indentation}  ")},\n#{indentation}}"
         else
-          "{ #{elements.join(", ")} }"
+          "{ #{elements.join(", ")} } "
         end
       end
 
       sig { params(node: Prism::ArrayNode, indentation: T.nilable(String)).returns(String) }
       def transform_array_node(node, indentation)
-        elements = node.elements.map { |elem| transform_node(elem, indentation).strip }
+        elements = node.elements.map { |elem| switch_block_body(elem, indentation).strip }
         if indentation
           "[\n#{indentation}  #{elements.join(",\n#{indentation}  ")},\n#{indentation}]"
         else
@@ -386,24 +366,18 @@ module RubyLsp
             start: { line: body_loc.start_line - 1, character: body_loc.start_column },
             end: { line: body_loc.end_line - 1, character: body_loc.end_column },
           },
-          node_types: [Prism::BlockNode],
+          node_types: [Prism::BlockNode, Prism::HashNode, Prism::ArrayNode],
         )
 
         body_content = body.slice.dup
 
         # If there are nested blocks, then we change their style too and we have to mutate the string using the
         # relative position in respect to the beginning of the body
-        if nested_block.is_a?(Prism::BlockNode)
-          location = nested_block.location
-          correction_start = location.start_offset - body_loc.start_offset
-          correction_end = location.end_offset - body_loc.start_offset
-          next_indentation = indentation ? "#{indentation}  " : nil
-
-          body_content[correction_start...correction_end] =
-            recursively_switch_nested_block_styles(nested_block, next_indentation)
+        if nested_block.is_a?(Prism::HashNode) || nested_block.is_a?(Prism::ArrayNode) || nested_block.is_a?(Prism::BlockNode)
+          handle_nested_structure(body_content, body_loc, nested_block, indentation)
+        else
+          indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";").squeeze(" ")} "
         end
-        # Find array or hash in blocks
-        transform_node(body, indentation)
       end
     end
   end
