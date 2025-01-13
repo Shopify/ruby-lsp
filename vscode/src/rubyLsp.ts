@@ -626,7 +626,7 @@ export class RubyLsp {
                 delete newConfig.useBundler;
 
                 const command = (newConfig.command || "").replace(
-                  /\$\{workspaceRoot\}\//,
+                  `\${workspaceRoot}/`,
                   "",
                 );
                 const script = newConfig.script || "";
