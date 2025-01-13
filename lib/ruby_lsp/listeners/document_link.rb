@@ -128,7 +128,10 @@ module RubyLsp
         gem_version = resolve_version(uri)
         return if gem_version.nil?
 
-        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(uri.path))
+        path = uri.path
+        return unless path
+
+        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(path))
         return if file_path.nil?
 
         @response_builder << Interface::DocumentLink.new(

@@ -31,6 +31,25 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     listener.perform
   end
 
+  def test_magic_source_links_on_unsaved_files
+    source = <<~RUBY
+      # source://erb/#1
+      def bar
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/documentLink",
+        params: { textDocument: { uri: uri } },
+      )
+
+      server.pop_response
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   private
 
   def substitute(original)
