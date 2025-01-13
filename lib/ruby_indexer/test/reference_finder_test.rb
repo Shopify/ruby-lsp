@@ -216,6 +216,64 @@ module RubyIndexer
       assert_equal(11, refs[2].location.start_line)
     end
 
+    def test_finds_instance_variable_read_references
+      refs = find_instance_variable_references("@foo", <<~RUBY)
+        class Foo
+          def foo
+            @foo
+          end
+        end
+      RUBY
+      assert_equal(1, refs.size)
+
+      assert_equal("@foo", refs[0].name)
+      assert_equal(3, refs[0].location.start_line)
+    end
+
+    def test_finds_instance_variable_write_references
+      refs = find_instance_variable_references("@foo", <<~RUBY)
+        class Foo
+          def write
+            @foo = 1
+            @foo &&= 2
+            @foo ||= 3
+            @foo += 4
+            @foo, @bar = []
+          end
+        end
+      RUBY
+      assert_equal(5, refs.size)
+
+      assert_equal(["@foo"], refs.map(&:name).uniq)
+      assert_equal(3, refs[0].location.start_line)
+      assert_equal(4, refs[1].location.start_line)
+      assert_equal(5, refs[2].location.start_line)
+      assert_equal(6, refs[3].location.start_line)
+      assert_equal(7, refs[4].location.start_line)
+    end
+
+    def test_finds_instance_variable_references_ignore_context
+      refs = find_instance_variable_references("@name", <<~RUBY)
+        class Foo
+          def name
+            @name = "foo"
+          end
+        end
+        class Bar
+          def name
+            @name = "bar"
+          end
+        end
+      RUBY
+      assert_equal(2, refs.size)
+
+      assert_equal("@name", refs[0].name)
+      assert_equal(3, refs[0].location.start_line)
+
+      assert_equal("@name", refs[1].name)
+      assert_equal(8, refs[1].location.start_line)
+    end
+
     private
 
     def find_const_references(const_name, source)
@@ -225,6 +283,11 @@ module RubyIndexer
 
     def find_method_references(method_name, source)
       target = ReferenceFinder::MethodTarget.new(method_name)
+      find_references(target, source)
+    end
+
+    def find_instance_variable_references(instance_variable_name, source)
+      target = ReferenceFinder::InstanceVariableTarget.new(instance_variable_name)
       find_references(target, source)
     end
 
