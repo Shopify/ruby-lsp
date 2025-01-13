@@ -726,7 +726,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile",
     "format": "eslint '**/*.ts' --fix && prettier '**/*.{json,md,yaml,yml}' --write",
-    "lint": "eslint '**/*.ts' && prettier '**/*.{json,md,yaml,yml}' --check",
+    "lint": "eslint '**/*.ts' --max-warnings=0 && prettier '**/*.{json,md,yaml,yml}' --check",
     "test": "node ./out/test/runTest.js"
   },
   "resolutions": {
