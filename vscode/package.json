@@ -737,7 +737,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.17.0",
+    "@eslint/js": "^9.18.0",
     "@shopify/eslint-plugin": "^46.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
@@ -753,11 +753,11 @@
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "glob": "^11.0.0",
+    "glob": "^11.0.1",
     "mocha": "^11.0.1",
     "ovsx": "^0.10.1",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "sinon": "^19.0.2",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.2.0"
