@@ -106,6 +106,8 @@ module RubyLsp
               end,
           ),
         )
+      when "rubyLsp/composeBundle"
+        compose_bundle(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -283,6 +285,7 @@ module RubyLsp
           document_range_formatting_provider: true,
           experimental: {
             addon_detection: true,
+            compose_bundle: true,
           },
         ),
         serverInfo: {
@@ -1281,6 +1284,31 @@ module RubyLsp
       return unless addon
 
       addon.handle_window_show_message_response(result[:title])
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def compose_bundle(message)
+      already_composed_path = File.join(@global_state.workspace_path, ".ruby-lsp", "bundle_is_composed")
+      command = "#{Gem.ruby} #{File.expand_path("../../exe/ruby-lsp-launcher", __dir__)} #{@global_state.workspace_uri}"
+      id = message[:id]
+
+      # We compose the bundle in a thread so that the LSP continues to work while we're checking for its validity. Once
+      # we return the response back to the editor, then the restart is triggered
+      Thread.new do
+        send_log_message("Recomposing the bundle ahead of restart")
+        pid = Process.spawn(command)
+        _, status = Process.wait2(pid)
+
+        if status&.exitstatus == 0
+          # Create a signal for the restart that it can skip composing the bundle and launch directly
+          FileUtils.touch(already_composed_path)
+          send_message(Result.new(id: id, response: { success: true }))
+        else
+          # This special error code makes the extension avoid restarting in case we already know that the composed
+          # bundle is not valid
+          send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle"))
+        end
+      end
     end
   end
 end

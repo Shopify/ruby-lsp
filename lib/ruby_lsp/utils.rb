@@ -37,6 +37,8 @@ module RubyLsp
     CODE = -32900
   end
 
+  BUNDLE_COMPOSE_FAILED_CODE = -33000
+
   # A notification to be sent to the client
   class Message
     extend T::Sig

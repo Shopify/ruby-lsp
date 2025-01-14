@@ -205,6 +205,8 @@ export class Workspace implements WorkspaceInterface {
         return this.start();
       }
 
+      let canRestart = false;
+
       switch (this.lspClient.state) {
         // If the server is still starting, then it may not be ready to handle a shutdown request yet. Trying to send
         // one could lead to a hanging process. Instead we set a flag and only restart once the server finished booting
@@ -214,10 +216,18 @@ export class Workspace implements WorkspaceInterface {
           break;
         // If the server is running, we want to stop it, dispose of the client and start a new one
         case State.Running:
-          await this.stop();
-          await this.lspClient.dispose();
-          this.lspClient = undefined;
-          await this.start();
+          // If the server doesn't support checking the validity of the composed bundle or if composing the bundle was
+          // successful, then we can restart
+          canRestart =
+            !this.lspClient.initializeResult?.capabilities.experimental
+              .compose_bundle || (await this.composingBundleSucceeds());
+
+          if (canRestart) {
+            await this.stop();
+            await this.lspClient.dispose();
+            this.lspClient = undefined;
+            await this.start();
+          }
           break;
         // If the server is already stopped, then we need to dispose it and start a new one
         case State.Stopped:
@@ -440,5 +450,20 @@ export class Workspace implements WorkspaceInterface {
     const hash = createHash("sha256");
     hash.update(fileContents.toString());
     return hash.digest("hex");
+  }
+
+  private async composingBundleSucceeds(): Promise<boolean> {
+    if (!this.lspClient) {
+      return false;
+    }
+
+    try {
+      const response: { success: boolean } = await this.lspClient.sendRequest(
+        "rubyLsp/composeBundle",
+      );
+      return response.success;
+    } catch (error: any) {
+      return false;
+    }
   }
 }
