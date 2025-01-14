@@ -143,7 +143,7 @@ module RubyIndexer
 
       if current_owner
         expression = node.expression
-        name = (expression.is_a?(Prism::SelfNode) ? "<Class:#{@stack.last}>" : "<Class:#{expression.slice}>")
+        name = (expression.is_a?(Prism::SelfNode) ? "<Class:#{last_name_in_stack}>" : "<Class:#{expression.slice}>")
         real_nesting = actual_nesting(name)
 
         existing_entries = T.cast(@index[real_nesting.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
@@ -376,7 +376,6 @@ module RubyIndexer
         ))
 
         @owner_stack << singleton
-        @stack << "<Class:#{@stack.last}>"
       end
     end
 
@@ -386,7 +385,6 @@ module RubyIndexer
 
       if node.receiver.is_a?(Prism::SelfNode)
         @owner_stack.pop
-        @stack.pop
       end
     end
 
@@ -1126,6 +1124,16 @@ module RubyIndexer
       @owner_stack << entry
       @index.add(entry)
       @stack << short_name
+    end
+
+    # Returns the last name in the stack not as we found it, but in terms of declared constants. For example, if the
+    # last entry in the stack is a compact namespace like `Foo::Bar`, then the last name is `Bar`
+    sig { returns(T.nilable(String)) }
+    def last_name_in_stack
+      name = @stack.last
+      return unless name
+
+      name.split("::").last
     end
   end
 end
