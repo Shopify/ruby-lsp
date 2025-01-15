@@ -8,10 +8,10 @@ class DiagnosticsTest < Minitest::Test
     @uri = URI("file:///fake/file.rb")
     @global_state = RubyLsp::GlobalState.new
     @global_state.apply_options({
-      initializationOptions: { linters: ["rubocop"] },
+      initializationOptions: { linters: ["rubocop_internal"] },
     })
     @global_state.register_formatter(
-      "rubocop",
+      "rubocop_internal",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
   end
@@ -52,7 +52,7 @@ class DiagnosticsTest < Minitest::Test
     klass = RubyLsp::Requests::Support::RuboCopFormatter
     RubyLsp::Requests::Support.send(:remove_const, :RuboCopFormatter)
 
-    @global_state.instance_variable_get(:@supported_formatters).delete("rubocop")
+    @global_state.instance_variable_get(:@supported_formatters).delete("rubocop_internal")
 
     diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
 

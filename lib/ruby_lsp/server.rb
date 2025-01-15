@@ -338,7 +338,7 @@ module RubyLsp
       unless @setup_error
         if defined?(Requests::Support::RuboCopFormatter)
           begin
-            @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+            @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
           rescue ::RuboCop::Error => e
             # The user may have provided unknown config switches in .rubocop or
             # is trying to load a non-existent config file.
@@ -1040,7 +1040,7 @@ module RubyLsp
       return unless defined?(Requests::Support::RuboCopFormatter)
 
       send_log_message("Reloading RuboCop since #{uri} changed")
-      @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+      @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
 
       # Clear all existing diagnostics since the config changed. This has to happen under a mutex because the `state`
       # hash cannot be mutated during iteration or that will throw an error
@@ -1211,16 +1211,15 @@ module RubyLsp
     sig { void }
     def check_formatter_is_available
       return if @setup_error
-      # Warn of an unavailable `formatter` setting, e.g. `rubocop` on a project which doesn't have RuboCop.
-      # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
-      return unless @global_state.formatter == "rubocop"
+      # Warn of an unavailable `formatter` setting, e.g. `rubocop_internal` on a project which doesn't have RuboCop.
+      return unless @global_state.formatter == "rubocop_internal"
 
       unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
         @global_state.formatter = "none"
 
         send_message(
           Notification.window_show_message(
-            "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+            "Ruby LSP formatter is set to `rubocop_internal` but RuboCop was not found in the Gemfile or gemspec.",
             type: Constant::MessageType::ERROR,
           ),
         )

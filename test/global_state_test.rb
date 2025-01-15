@@ -63,14 +63,14 @@ module RubyLsp
     def test_applying_auto_formatter_invokes_detection
       state = GlobalState.new
       state.apply_options({ initializationOptions: { formatter: "auto" } })
-      assert_equal("rubocop", state.formatter)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     def test_applying_auto_formatter_with_rubocop_extension
       state = GlobalState.new
       stub_direct_dependencies("rubocop-rails" => "1.2.3")
       state.apply_options({ initializationOptions: { formatter: "auto" } })
-      assert_equal("rubocop", state.formatter)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     def test_applying_auto_formatter_with_rubocop_as_transitive_dependency
@@ -82,7 +82,7 @@ module RubyLsp
 
       state.apply_options({ initializationOptions: { formatter: "auto" } })
 
-      assert_equal("rubocop", state.formatter)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     def test_applying_auto_formatter_with_rubocop_as_transitive_dependency_without_config
@@ -150,12 +150,13 @@ module RubyLsp
     end
 
     def test_linter_specification
+      ::RuboCop::Version.const_set(:STRING, "1.68.0")
       state = GlobalState.new
       state.apply_options({
         initializationOptions: { linters: ["rubocop", "brakeman"] },
       })
 
-      assert_equal(["rubocop", "brakeman"], state.instance_variable_get(:@linters))
+      assert_equal(["brakeman", "rubocop_internal"], state.instance_variable_get(:@linters))
     end
 
     def test_linter_auto_detection
@@ -163,7 +164,7 @@ module RubyLsp
       state = GlobalState.new
       state.apply_options({})
 
-      assert_equal(["rubocop"], state.instance_variable_get(:@linters))
+      assert_equal(["rubocop_internal"], state.instance_variable_get(:@linters))
     end
 
     def test_specifying_empty_linters
@@ -185,7 +186,7 @@ module RubyLsp
 
       state.apply_options({})
 
-      assert_includes(state.instance_variable_get(:@linters), "rubocop")
+      assert_includes(state.instance_variable_get(:@linters), "rubocop_internal")
     end
 
     def test_type_checker_is_detected_based_on_transitive_sorbet_static
@@ -247,6 +248,58 @@ module RubyLsp
       })
 
       assert(state.enabled_feature?(:whatever))
+    end
+
+    def test_notifies_the_user_when_using_rubocop_addon_through_linters
+      ::RuboCop::Version.const_set(:STRING, "1.70.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { linters: ["rubocop"] } })
+
+      log = notifications.find do |n|
+        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal(["rubocop"], state.instance_variable_get(:@linters))
+    end
+
+    def test_notifies_the_user_when_using_rubocop_addon_through_formatter
+      ::RuboCop::Version.const_set(:STRING, "1.70.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { formatter: "rubocop" } })
+
+      log = notifications.find do |n|
+        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal("rubocop", state.formatter)
+    end
+
+    def test_falls_back_to_internal_integration_for_linters_if_rubocop_has_no_addon
+      ::RuboCop::Version.const_set(:STRING, "1.68.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { linters: ["rubocop"] } })
+
+      log = notifications.find do |n|
+        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal(["rubocop_internal"], state.instance_variable_get(:@linters))
+    end
+
+    def test_falls_back_to_internal_integration_for_formatters_if_rubocop_has_no_addon
+      ::RuboCop::Version.const_set(:STRING, "1.68.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { formatter: "rubocop" } })
+
+      log = notifications.find do |n|
+        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     private
