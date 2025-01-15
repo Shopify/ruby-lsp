@@ -25,7 +25,7 @@ module RubyLsp
     end,
     String,
   )
-  GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/design-and-roadmap.html#guessed-types"
+  GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
 
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
   # use this custom error class as a way to return a signal to the client that the request should be delegated to the
