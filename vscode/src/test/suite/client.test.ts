@@ -87,6 +87,13 @@ async function launchClient(workspaceUri: vscode.Uri) {
 
   // Ensure that we're activating the correct Ruby version on CI
   if (process.env.CI) {
+    await vscode.workspace
+      .getConfiguration("rubyLsp")
+      .update("formatter", "rubocop_internal", true);
+    await vscode.workspace
+      .getConfiguration("rubyLsp")
+      .update("linters", ["rubocop_internal"], true);
+
     if (os.platform() === "linux") {
       await vscode.workspace
         .getConfiguration("rubyLsp")
@@ -507,7 +514,9 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("formatting", async () => {
-    const text = "  def foo\n end";
+    const text = ["# frozen_string_literal: true", "", "def foo", "end"]
+      .join("\n")
+      .trim();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -531,10 +540,11 @@ suite("Client", () => {
       "",
       "def foo",
       "end",
-      "",
-    ].join("\n");
+    ]
+      .join("\n")
+      .trim();
 
-    assert.strictEqual(response[0].newText, expected);
+    assert.strictEqual(response[0].newText.trim(), expected);
   }).timeout(20000);
 
   test("selection range", async () => {

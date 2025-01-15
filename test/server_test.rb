@@ -379,6 +379,10 @@ class ServerTest < Minitest::Test
       })
 
       @server.global_state.register_formatter("rubocop_internal", RubyLsp::Requests::Support::RuboCopFormatter.new)
+
+      # Avoid trying to load add-ons because the RuboCop add-on will crash when the gem is artificially unloaded
+      @server.expects(:load_addons)
+
       with_uninstalled_rubocop do
         @server.process_message({ method: "initialized" })
       end
@@ -492,6 +496,7 @@ class ServerTest < Minitest::Test
     assert_equal("window/showMessage", addon_error_notification.method)
     assert_equal("Error loading add-ons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
     addons_info = @server.pop_response.response
+    addons_info.delete_if { |addon_info| addon_info[:name] == "RuboCop" }
 
     assert_equal("Foo", addons_info[0][:name])
     assert_equal("0.1.0", addons_info[0][:version])
