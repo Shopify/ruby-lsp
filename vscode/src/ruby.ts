@@ -186,6 +186,20 @@ export class Ruby implements RubyInterface {
     if (!this.error) {
       this.fetchRubyVersionInfo();
       await this.setupBundlePath();
+
+      // When working on the Ruby LSP itself, we want to use the local version of our executables rather than the ones
+      // globally installed. That allows us to catch mistakes made in the launch process before they are released
+      if (
+        path.basename(this.workspaceFolder.uri.fsPath) === "ruby-lsp" &&
+        os.platform() !== "win32"
+      ) {
+        const localExecutablesUri = vscode.Uri.joinPath(
+          this.workspaceFolder.uri,
+          "exe",
+        );
+
+        this._env.PATH = `${localExecutablesUri.fsPath}${path.delimiter}${this._env.PATH}`;
+      }
     }
   }
 
