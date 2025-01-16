@@ -25,7 +25,7 @@ module RubyLsp
       sig do
         params(
           uri: URI::Generic,
-          document: RubyDocument,
+          document: RubyLsp::RubyDocument,
           dispatcher: Prism::Dispatcher,
         ).void
       end

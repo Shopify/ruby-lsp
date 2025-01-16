@@ -214,7 +214,7 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-        document: Document,
+        document: RubyLsp::Document[T.untyped],
         dispatcher: Prism::Dispatcher,
       ).void
     end
