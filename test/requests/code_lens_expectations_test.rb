@@ -268,13 +268,13 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
   def create_code_lens_addon
     Class.new(RubyLsp::Addon) do
-      def create_code_lens_listener(response_builder, uri, dispatcher)
-        raise "uri can't be nil" unless uri
+      def create_code_lens_listener(response_builder, document, dispatcher)
+        # raise "uri can't be nil" unless uri
 
         klass = Class.new do
           include RubyLsp::Requests::Support::Common
 
-          def initialize(response_builder, uri, dispatcher)
+          def initialize(response_builder, document, dispatcher)
             @response_builder = response_builder
             dispatcher.register(self, :on_class_node_enter)
           end
@@ -292,7 +292,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, dispatcher)
+        T.unsafe(klass).new(response_builder, document, dispatcher)
       end
 
       def activate(global_state, outgoing_queue)

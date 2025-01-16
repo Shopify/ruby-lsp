@@ -214,11 +214,11 @@ module RubyLsp
     sig do
       overridable.params(
         response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-        uri: URI::Generic,
+        document: Document,
         dispatcher: Prism::Dispatcher,
       ).void
     end
-    def create_code_lens_listener(response_builder, uri, dispatcher); end
+    def create_code_lens_listener(response_builder, document, dispatcher); end
 
     # Creates a new Hover listener. This method is invoked on every Hover request
     sig do
