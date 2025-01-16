@@ -199,16 +199,17 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   end
 
   def test_code_lens_addons
-    skip("not yet working")
+    # skip("not yet working")
 
-    setup = <<~RUBY
-      class Minitest::Test; end
-    RUBY
+    # setup = <<~RUBY
+    # RUBY
     source = <<~RUBY
-      class Test < Minitest::Test; end
+      class Minitest::Test; end
+      class FooTest < Minitest::Test; end
     RUBY
     uri = URI("file:///test/fake.rb")
-    @global_state.index.index_single(uri, setup)
+    # @global_state.index.index_single(uri, setup)
+    @global_state.index.index_single(uri, source)
 
     begin
       create_code_lens_addon
@@ -228,11 +229,13 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
         response = result.response
 
-        assert_equal(4, response.size)
-        assert_match("▶ Run", response[0].command.title)
-        assert_match("▶ Run In Terminal", response[1].command.title)
-        assert_match("Debug", response[2].command.title)
-        assert_match("Run Test", response[3].command.title)
+        # Currently we add code lenses for the library test itself. This is just a quirk of how we test, and
+        # we will come back to later (also updated indices to 0, 1, 2, 3)
+        assert_equal(8, response.size)
+        assert_match("▶ Run", response[4].command.title)
+        assert_match("▶ Run In Terminal", response[5].command.title)
+        assert_match("Debug", response[6].command.title)
+        assert_match("Run FooTest", response[7].command.title)
       ensure
         RubyLsp::Addon.addon_classes.clear
       end
