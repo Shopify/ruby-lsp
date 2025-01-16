@@ -4,6 +4,7 @@
 require "test_helper"
 require_relative "support/expectations_test_runner"
 
+# TODO: work out code lens not appearing for this test file
 class CodeLensExpectationsTest < ExpectationsTestRunner
   # expectations_tests RubyLsp::Requests::CodeLens, "code_lens"
 
