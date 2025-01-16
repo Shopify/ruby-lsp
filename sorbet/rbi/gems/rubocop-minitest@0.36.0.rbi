@@ -1271,7 +1271,7 @@ class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::DefNode
   include ::RuboCop::Cop::MinitestExplorationHelpers
 
-  # source://rubocop/1.66.1/lib/rubocop/cop/exclude_limit.rb#11
+  # source://rubocop/1.70.0/lib/rubocop/cop/exclude_limit.rb#11
   def max=(value); end
 
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#37
@@ -1288,10 +1288,10 @@ class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#77
   def assertions_count_in_assignment(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#95
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#99
   def assertions_count_in_branches(branches); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#99
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#103
   def max_assertions; end
 end
 
@@ -2198,12 +2198,12 @@ class RuboCop::Cop::Minitest::SkipEnsure < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_ensure.rb#81
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_ensure.rb#83
   def use_skip_in_rescue?(skip_method); end
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_ensure.rb#85
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/skip_ensure.rb#87
   def valid_conditional_skip?(skip_method, ensure_node); end
 end
 
@@ -2647,51 +2647,54 @@ module RuboCop::Minitest; end
 module RuboCop::Minitest::AssertOffense
   private
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#126
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#127
   def _investigate(cop, processed_source); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#133
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#138
   def assert_correction(correction, loop: T.unsafe(nil)); end
 
   # @raise [RuboCop::Runner::InfiniteCorrectionLoop]
   #
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#158
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#163
   def assert_no_corrections; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#95
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#97
   def assert_no_offenses(source, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#106
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#108
   def assert_offense(source, file = T.unsafe(nil), **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#209
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#214
   def configuration; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#85
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#78
+  def cop; end
+
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#134
+  def enable_autocorrect; end
+
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#87
   def format_offense(source, **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#177
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#182
   def inspect_source(source, cop, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#184
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#189
   def investigate(cop, processed_source); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#196
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#201
   def parse_source!(source, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#231
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#236
   def parser_engine; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#217
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#222
   def registry; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#226
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#231
   def ruby_version; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#78
-  def setup; end
-
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#172
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#177
   def setup_assertion; end
 end
 

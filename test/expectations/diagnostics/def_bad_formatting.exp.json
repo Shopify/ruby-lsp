@@ -13,6 +13,9 @@
       },
       "severity": 3,
       "code": "Sorbet/TrueSigil",
+      "codeDescription": {
+        "href": "https://github.com/Shopify/rubocop-sorbet/blob/main/manual/cops_sorbet.md#sorbettruesigil"
+      },
       "source": "RuboCop",
       "message": "Sorbet/TrueSigil: No Sorbet sigil found in file. Try a `typed: true` to start (you can also use `rubocop -a` to automatically add this).",
       "data": {
