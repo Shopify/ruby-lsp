@@ -226,6 +226,13 @@ class IntegrationTest < Minitest::Test
         workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace_path).to_s }],
       },
     })
+
+    # First message is the log of initializing Ruby LSP
+    read_message(stdout)
+    # Verify that initialization didn't fail
+    initialize_response = read_message(stdout)
+    refute(initialize_response[:error], initialize_response.dig(:error, :message))
+
     send_message(stdin, { id: 2, method: "shutdown" })
     send_message(stdin, { method: "exit" })
 
@@ -251,6 +258,12 @@ class IntegrationTest < Minitest::Test
     json_message = message.to_json
     stdin.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
     stdin.flush
+  end
+
+  def read_message(stdout)
+    headers = stdout.gets("\r\n\r\n")
+    length = headers[/Content-Length: (\d+)/i, 1].to_i
+    JSON.parse(stdout.read(length), symbolize_names: true)
   end
 
   def in_temp_dir
