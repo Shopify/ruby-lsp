@@ -34,12 +34,15 @@ export class Debugger
     uri: vscode.Uri | undefined,
   ) => Workspace | undefined;
 
+  private readonly context: vscode.ExtensionContext;
+
   constructor(
     context: vscode.ExtensionContext,
     workspaceResolver: (uri: vscode.Uri | undefined) => Workspace | undefined,
   ) {
     this.workspaceResolver = workspaceResolver;
 
+    this.context = context;
     context.subscriptions.push(
       vscode.debug.registerDebugConfigurationProvider("ruby_lsp", this),
       vscode.debug.registerDebugAdapterDescriptorFactory("ruby_lsp", this),
@@ -258,9 +261,6 @@ export class Debugger
 
       this.logDebuggerMessage(`Spawning debugger in directory ${cwd}`);
       this.logDebuggerMessage(`   Command bundle ${args.join(" ")}`);
-      this.logDebuggerMessage(
-        `   Environment ${JSON.stringify(configuration.env)}`,
-      );
 
       this.debugProcess = spawn("bundle", args, {
         shell: true,
@@ -354,5 +354,10 @@ export class Debugger
     // Log to Debug Console: Unlike Output panel, this needs explicit newlines
     // so we preserve the original message format including any newlines
     this.console.append(message);
+
+    if (this.context.extensionMode === vscode.ExtensionMode.Test) {
+      // eslint-disable-next-line no-console
+      console.log(message);
+    }
   }
 }
