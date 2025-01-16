@@ -373,6 +373,7 @@
           "enum": [
             "auto",
             "rubocop",
+            "rubocop_internal",
             "syntax_tree",
             "standard",
             "rubyfmt",
@@ -381,6 +382,7 @@
           "enumDescriptions": [
             "Automatically detect formatter",
             "RuboCop",
+            "Ruby LSP RuboCop integration",
             "Syntax Tree",
             "Standard (supported by community addon)",
             "Rubyfmt (supported by community addon)",
@@ -393,7 +395,7 @@
           "type": "array",
           "examples": [
             [
-              "rubocop"
+              "rubocop_internal"
             ]
           ],
           "default": null

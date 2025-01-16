@@ -171,7 +171,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_info_includes_formatter
-    @server.global_state.expects(:formatter).twice.returns("rubocop")
+    @server.global_state.expects(:formatter).twice.returns("rubocop_internal")
     capture_subprocess_io do
       @server.process_message({
         id: 1,
@@ -185,7 +185,7 @@ class ServerTest < Minitest::Test
 
     result = find_message(RubyLsp::Result, id: 1)
     hash = JSON.parse(result.response.to_json)
-    assert_equal("rubocop", hash.dig("formatter"))
+    assert_equal("rubocop_internal", hash.dig("formatter"))
   end
 
   def test_initialized_recovers_from_indexing_failures
@@ -375,10 +375,10 @@ class ServerTest < Minitest::Test
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
     capture_subprocess_io do
       @server.process_message(id: 1, method: "initialize", params: {
-        initializationOptions: { formatter: "rubocop" },
+        initializationOptions: { formatter: "rubocop_internal" },
       })
 
-      @server.global_state.register_formatter("rubocop", RubyLsp::Requests::Support::RuboCopFormatter.new)
+      @server.global_state.register_formatter("rubocop_internal", RubyLsp::Requests::Support::RuboCopFormatter.new)
       with_uninstalled_rubocop do
         @server.process_message({ method: "initialized" })
       end
@@ -388,7 +388,7 @@ class ServerTest < Minitest::Test
       notification = find_message(RubyLsp::Notification, "window/showMessage")
 
       assert_equal(
-        "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+        "Ruby LSP formatter is set to `rubocop_internal` but RuboCop was not found in the Gemfile or gemspec.",
         T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
       )
     end

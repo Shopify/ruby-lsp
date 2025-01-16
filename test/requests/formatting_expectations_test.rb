@@ -8,9 +8,9 @@ class FormattingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Formatting, "formatting"
 
   def run_expectations(source)
-    @global_state.formatter = "rubocop"
+    @global_state.formatter = "rubocop_internal"
     @global_state.register_formatter(
-      "rubocop",
+      "rubocop_internal",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
     document = RubyLsp::RubyDocument.new(
