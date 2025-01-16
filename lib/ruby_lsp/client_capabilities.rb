@@ -11,7 +11,8 @@ module RubyLsp
     attr_reader :supports_watching_files,
       :supports_request_delegation,
       :window_show_message_supports_extra_properties,
-      :supports_progress
+      :supports_progress,
+      :supports_diagnostic_refresh
 
     sig { void }
     def initialize
@@ -32,6 +33,9 @@ module RubyLsp
 
       # The editor supports displaying progress requests
       @supports_progress = T.let(false, T::Boolean)
+
+      # The editor supports server initiated refresh for diagnostics
+      @supports_diagnostic_refresh = T.let(false, T::Boolean)
     end
 
     sig { params(capabilities: T::Hash[Symbol, T.untyped]).void }
@@ -57,6 +61,8 @@ module RubyLsp
 
       progress = capabilities.dig(:window, :workDoneProgress)
       @supports_progress = progress if progress
+
+      @supports_diagnostic_refresh = workspace_capabilities.dig(:diagnostics, :refreshSupport) || false
     end
 
     sig { returns(T::Boolean) }
