@@ -64,7 +64,10 @@ if ENV["BUNDLE_GEMFILE"].nil?
   # which gives us the opportunity to control which specs are activated and enter degraded mode if any gems failed to
   # install rather than failing to boot the server completely
   if options[:launcher]
-    command = +"#{Gem.ruby} #{File.expand_path("ruby-lsp-launcher", __dir__)}"
+    # Run `/path/to/ruby /path/to/exe/ruby-lsp-launcher` and ensuring that the Windows long format path is normalized
+    # for exec
+    command = +"#{Gem.ruby.delete_prefix("//?/")} "
+    command << File.expand_path("ruby-lsp-launcher", __dir__).delete_prefix("//?/")
     command << " --debug" if options[:debug]
     exit exec(command)
   end

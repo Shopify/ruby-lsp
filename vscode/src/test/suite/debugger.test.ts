@@ -4,18 +4,34 @@ import * as path from "path";
 import * as os from "os";
 
 import * as vscode from "vscode";
-import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Debugger } from "../../debugger";
-import { Ruby, ManagerIdentifier } from "../../ruby";
+import { ManagerIdentifier, Ruby } from "../../ruby";
 import { Workspace } from "../../workspace";
 import { WorkspaceChannel } from "../../workspaceChannel";
-import { LOG_CHANNEL, asyncExec } from "../../common";
+import { LOG_CHANNEL } from "../../common";
 import { RUBY_VERSION } from "../rubyVersion";
 
-import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { FAKE_TELEMETRY, launchClient } from "./testHelpers";
 
 suite("Debugger", () => {
+  const originalSaveBeforeStart = vscode.workspace
+    .getConfiguration("debug")
+    .get("saveBeforeStart");
+
+  beforeEach(async () => {
+    await vscode.workspace
+      .getConfiguration("debug")
+      .update("saveBeforeStart", "none", true);
+  });
+
+  afterEach(async () => {
+    await vscode.workspace
+      .getConfiguration("debug")
+      .update("saveBeforeStart", originalSaveBeforeStart, true);
+  });
+
   test("Provide debug configurations returns the default configs", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const debug = new Debugger(context, () => {
@@ -162,25 +178,15 @@ suite("Debugger", () => {
 
   test("Launching the debugger", async () => {
     // eslint-disable-next-line no-process-env
-    const manager = process.env.CI
-      ? ManagerIdentifier.None
-      : ManagerIdentifier.Chruby;
-
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) => {
-          if (name === "rubyVersionManager") {
-            return { identifier: manager };
-          } else if (name === "bundleGemfile") {
-            return "";
-          } else if (name === "saveBeforeStart") {
-            return "none";
-          }
-
-          return undefined;
-        },
-      } as unknown as vscode.WorkspaceConfiguration);
+    if (process.env.CI) {
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update(
+          "rubyVersionManager",
+          { identifier: ManagerIdentifier.None },
+          true,
+        );
+    }
 
     const tmpPath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-debugger"),
@@ -189,7 +195,25 @@ suite("Debugger", () => {
     fs.writeFileSync(path.join(tmpPath, ".ruby-version"), RUBY_VERSION);
     fs.writeFileSync(
       path.join(tmpPath, "Gemfile"),
-      'source "https://rubygems.org"\ngem "debug"',
+      'source "https://rubygems.org"',
+    );
+    fs.writeFileSync(
+      path.join(tmpPath, "Gemfile.lock"),
+      [
+        "GEM",
+        "  remote: https://rubygems.org/",
+        "specs:",
+        "",
+        "PLATFORMS",
+        "  arm64-darwin-23",
+        " ruby",
+        "",
+        "DEPENDENCIES",
+        "",
+        "",
+        "BUNDLED WITH",
+        " 2.5.7",
+      ].join("\n"),
     );
 
     const context = {
@@ -213,17 +237,19 @@ suite("Debugger", () => {
     );
     await ruby.activateRuby();
 
-    try {
-      await asyncExec("bundle install", { env: ruby.env, cwd: tmpPath });
-    } catch (error: any) {
-      assert.fail(`Failed to bundle install: ${error.message}`);
-    }
-
-    assert.ok(fs.existsSync(path.join(tmpPath, "Gemfile.lock")));
-    assert.match(
-      fs.readFileSync(path.join(tmpPath, "Gemfile.lock")).toString(),
-      /debug/,
+    // We launch the client to compose the bundle and merge the environment into the Ruby object
+    const client = await launchClient(
+      context,
+      ruby,
+      workspaceFolder,
+      outputChannel,
     );
+    try {
+      await client.stop();
+      await client.dispose();
+    } catch (error: any) {
+      assert.fail(`Failed to stop client: ${error.message}`);
+    }
 
     const debug = new Debugger(context, () => {
       return {
@@ -243,17 +269,15 @@ suite("Debugger", () => {
       assert.fail(`Failed to launch debugger: ${error.message}`);
     }
 
-    // The debugger might take a bit of time to disconnect from the editor. We need to perform cleanup when we receive
-    // the termination callback or else we try to dispose of the debugger client too early, but we need to wait for that
     // so that we can clean up stubs otherwise they leak into other tests.
     await new Promise<void>((resolve) => {
-      vscode.debug.onDidTerminateDebugSession((_session) => {
-        configStub.restore();
+      const callback = vscode.debug.onDidTerminateDebugSession((_session) => {
         debug.dispose();
         context.subscriptions.forEach((subscription) => subscription.dispose());
         fs.rmSync(tmpPath, { recursive: true, force: true });
+        callback.dispose();
         resolve();
       });
     });
-  }).timeout(45000);
+  }).timeout(90000);
 });

@@ -10,7 +10,7 @@ import { beforeEach, afterEach } from "mocha";
 
 import { Workspace } from "../../workspace";
 
-import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { FAKE_TELEMETRY } from "./testHelpers";
 
 suite("Workspace", () => {
   const context = {
