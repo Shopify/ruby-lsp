@@ -94,7 +94,8 @@ module RubyLsp
       @workspace_uri = URI(workspace_uri) if workspace_uri
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
-      rubocop_has_addon = Gem::Requirement.new(">= 1.70.0").satisfied_by?(Gem::Version.new(::RuboCop::Version::STRING))
+      rubocop_has_addon = defined?(::RuboCop::Version::STRING) &&
+        Gem::Requirement.new(">= 1.70.0").satisfied_by?(Gem::Version.new(::RuboCop::Version::STRING))
 
       if specified_formatter
         @formatter = specified_formatter
