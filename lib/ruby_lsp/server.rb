@@ -310,24 +310,7 @@ module RubyLsp
       begin_progress("indexing-progress", "Ruby LSP: indexing files")
 
       global_state_notifications.each { |notification| send_message(notification) }
-
-      if @setup_error
-        send_message(Notification.telemetry(
-          type: "error",
-          errorMessage: @setup_error.message,
-          errorClass: @setup_error.class,
-          stack: @setup_error.backtrace&.join("\n"),
-        ))
-      end
-
-      if @install_error
-        send_message(Notification.telemetry(
-          type: "error",
-          errorMessage: @install_error.message,
-          errorClass: @install_error.class,
-          stack: @install_error.backtrace&.join("\n"),
-        ))
-      end
+      report_bundle_errors
     end
 
     sig { void }
@@ -1281,6 +1264,37 @@ module RubyLsp
       return unless addon
 
       addon.handle_window_show_message_response(result[:title])
+    end
+
+    sig { void }
+    def report_bundle_errors
+      unrecoverable_setup_errors = [
+        Bundler::PathError, # E.g.: using `path:` in the Gemfile and pointing to a non-existing directory
+      ]
+
+      if @setup_error && !unrecoverable_setup_errors.include?(@setup_error.class)
+        send_message(Notification.telemetry(
+          type: "error",
+          errorMessage: @setup_error.message,
+          errorClass: @setup_error.class,
+          stack: @setup_error.backtrace&.join("\n"),
+        ))
+      end
+
+      unrecoverable_install_errors = [
+        Bundler::HTTPError, # An HTTP error occurred when trying to download gems
+        Bundler::Fetcher::NetworkDownError, # A network error happened when trying to fetch specs from RubyGems
+        Bundler::InstallError, # Failed to install a gem. Usually happens with native extensions
+      ]
+
+      if @install_error && !unrecoverable_install_errors.include?(@install_error.class)
+        send_message(Notification.telemetry(
+          type: "error",
+          errorMessage: @install_error.message,
+          errorClass: @install_error.class,
+          stack: @install_error.backtrace&.join("\n"),
+        ))
+      end
     end
   end
 end

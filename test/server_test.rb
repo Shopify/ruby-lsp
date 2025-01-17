@@ -1033,6 +1033,38 @@ class ServerTest < Minitest::Test
     assert_equal("workspace/diagnostic/refresh", request.method)
   end
 
+  def test_does_not_report_unrecoverable_bundler_errors
+    server = RubyLsp::Server.new(
+      test_mode: true,
+      install_error: Bundler::Fetcher::NetworkDownError.new("boom"),
+      setup_error: Bundler::PathError.new("boom"),
+    )
+
+    server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: { enabledFeatures: [] },
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+      },
+    })
+
+    6.times do
+      message = server.pop_response
+      next unless message.is_a?(RubyLsp::Notification)
+
+      refute_equal("telemetry/event", message.method)
+    end
+
+    begin
+      assert_raises(Timeout::Error) do
+        Timeout.timeout(0.2) { server.pop_response }
+      end
+    ensure
+      server.run_shutdown
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
