@@ -106,6 +106,7 @@ export abstract class VersionManager {
       cwd: this.bundleUri.fsPath,
       shell,
       env: process.env,
+      encoding: "utf-8",
     });
   }
 

@@ -60,6 +60,7 @@ suite("Mise", () => {
           shell: vscode.env.shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
@@ -119,6 +120,7 @@ suite("Mise", () => {
           shell: vscode.env.shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );

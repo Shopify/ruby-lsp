@@ -52,6 +52,7 @@ suite("Custom", () => {
           shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );

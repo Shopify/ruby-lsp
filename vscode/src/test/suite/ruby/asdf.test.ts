@@ -53,6 +53,7 @@ suite("Asdf", () => {
           shell: "/bin/bash",
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
@@ -104,6 +105,7 @@ suite("Asdf", () => {
           shell: "/opt/homebrew/bin/fish",
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );

@@ -61,6 +61,7 @@ suite("RVM", () => {
           cwd: workspacePath,
           shell: vscode.env.shell,
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
