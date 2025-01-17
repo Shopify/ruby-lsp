@@ -19,7 +19,7 @@ module RubyLsp
         sig { returns(Interface::CodeActionRegistrationOptions) }
         def provider
           Interface::CodeActionRegistrationOptions.new(
-            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            document_selector: nil,
             resolve_provider: true,
           )
         end
