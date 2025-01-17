@@ -14,13 +14,9 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::DocumentFormattingRegistrationOptions) }
+        sig { returns(TrueClass) }
         def provider
-          Interface::DocumentFormattingRegistrationOptions.new(
-            document_selector: [
-              Interface::DocumentFilter.new(language: "ruby"),
-            ],
-          )
+          true
         end
       end
 

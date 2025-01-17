@@ -14,7 +14,7 @@ module RubyLsp
         sig { returns(Interface::DocumentOnTypeFormattingRegistrationOptions) }
         def provider
           Interface::DocumentOnTypeFormattingRegistrationOptions.new(
-            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            document_selector: nil,
             first_trigger_character: "{",
             more_trigger_character: ["\n", "|", "d"],
           )
