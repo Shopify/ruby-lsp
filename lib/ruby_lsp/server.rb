@@ -1292,6 +1292,13 @@ module RubyLsp
       command = "#{Gem.ruby} #{File.expand_path("../../exe/ruby-lsp-launcher", __dir__)} #{@global_state.workspace_uri}"
       id = message[:id]
 
+      begin
+        Bundler::LockfileParser.new(Bundler.default_lockfile.read)
+      rescue Bundler::LockfileError => e
+        send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: e.message))
+        return
+      end
+
       # We compose the bundle in a thread so that the LSP continues to work while we're checking for its validity. Once
       # we return the response back to the editor, then the restart is triggered
       Thread.new do

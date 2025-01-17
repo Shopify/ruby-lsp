@@ -1056,6 +1056,55 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_compose_bundle_detects_syntax_errors_in_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        # Write a lockfile that has a git conflict marker
+        lockfile_contents = <<~LOCKFILE
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              <<<<<<< HEAD
+              stringio (3.1.0)
+              >>>>>> 12345
+
+          PLATFORMS
+            arm64-darwin-23
+            ruby
+
+          DEPENDENCIES
+            stringio
+
+          BUNDLED WITH
+            2.5.7
+        LOCKFILE
+        File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+        Bundler.with_unbundled_env do
+          @server.process_message({ id: 2, method: "rubyLsp/composeBundle" })
+        end
+
+        error = find_message(RubyLsp::Error)
+        assert_match("Your Gemfile.lock contains merge conflicts.", error.message)
+      end
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
