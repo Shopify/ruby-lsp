@@ -29,6 +29,7 @@ suite("Ruby environment activation", () => {
       get: () => undefined,
       update: () => undefined,
     },
+    extensionUri: vscode.Uri.file(path.join(workspacePath, "vscode")),
   } as unknown as vscode.ExtensionContext;
   const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
