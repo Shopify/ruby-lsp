@@ -22,6 +22,16 @@ suite("RubyInstaller", () => {
     return;
   }
 
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
+
   let rootPath: string;
   let workspacePath: string;
   let workspaceFolder: vscode.WorkspaceFolder;
@@ -58,6 +68,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -77,6 +88,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -96,6 +108,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
