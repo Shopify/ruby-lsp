@@ -12,6 +12,16 @@ import * as common from "../../../common";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("Custom", () => {
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
+
   test("Invokes custom script and then Ruby", async () => {
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
@@ -23,7 +33,12 @@ suite("Custom", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const custom = new Custom(workspaceFolder, outputChannel, async () => {});
+    const custom = new Custom(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const envStub = {
       env: { ANY: "true" },
@@ -40,13 +55,21 @@ suite("Custom", () => {
       .stub(custom, "customCommand")
       .returns("my_version_manager activate_env");
     const { env, version, yjit } = await custom.activate();
+    const activationUri = vscode.Uri.joinPath(
+      context.extensionUri,
+      "activation.rb",
+    );
 
     // We must not set the shell on Windows
     const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `my_version_manager activate_env && ruby -W0 -rjson -e '${custom.activationScript}'`,
+<<<<<<< Updated upstream
+        `my_version_manager activate_env && ruby -W0 -rjson '/fake/activation.rb'`,
+=======
+        `my_version_manager activate_env && ruby '${activationUri.fsPath}'`,
+>>>>>>> Stashed changes
         {
           cwd: uri.fsPath,
           shell,

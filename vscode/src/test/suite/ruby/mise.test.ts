@@ -18,6 +18,16 @@ suite("Mise", () => {
     return;
   }
 
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
+
   test("Finds Ruby only binary path is appended to PATH", async () => {
     // eslint-disable-next-line no-process-env
     const workspacePath = process.env.PWD!;
@@ -27,7 +37,12 @@ suite("Mise", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const mise = new Mise(workspaceFolder, outputChannel, async () => {});
+    const mise = new Mise(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const envStub = {
       env: { ANY: "true" },
@@ -54,7 +69,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${os.homedir()}/.local/bin/mise x -- ruby -W0 -rjson -e '${mise.activationScript}'`,
+        `${os.homedir()}/.local/bin/mise x -- ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -82,7 +97,12 @@ suite("Mise", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const mise = new Mise(workspaceFolder, outputChannel, async () => {});
+    const mise = new Mise(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const envStub = {
       env: { ANY: "true" },
@@ -113,7 +133,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${misePath} x -- ruby -W0 -rjson -e '${mise.activationScript}'`,
+        `${misePath} x -- ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

@@ -13,6 +13,15 @@ import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("None", () => {
   test("Invokes Ruby directly", async () => {
+    const context = {
+      extensionMode: vscode.ExtensionMode.Test,
+      subscriptions: [],
+      workspaceState: {
+        get: (_name: string) => undefined,
+        update: (_name: string, _value: any) => Promise.resolve(),
+      },
+      extensionUri: vscode.Uri.parse("file:///fake"),
+    } as unknown as vscode.ExtensionContext;
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
     );
@@ -23,7 +32,12 @@ suite("None", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const none = new None(workspaceFolder, outputChannel, async () => {});
+    const none = new None(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const envStub = {
       env: { ANY: "true" },
@@ -37,20 +51,25 @@ suite("None", () => {
     });
 
     const { env, version, yjit } = await none.activate();
+    const activationUri = vscode.Uri.joinPath(
+      context.extensionUri,
+      "activation.rb",
+    );
 
     // We must not set the shell on Windows
     const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
 
     assert.ok(
-      execStub.calledOnceWithExactly(
-        `ruby -W0 -rjson -e '${none.activationScript}'`,
-        {
-          cwd: uri.fsPath,
-          shell,
-          // eslint-disable-next-line no-process-env
-          env: process.env,
-        },
-      ),
+<<<<<<< Updated upstream
+      execStub.calledOnceWithExactly(`ruby -W0 -rjson '/fake/activation.rb'`, {
+=======
+      execStub.calledOnceWithExactly(`ruby '${activationUri.fsPath}'`, {
+>>>>>>> Stashed changes
+        cwd: uri.fsPath,
+        shell,
+        // eslint-disable-next-line no-process-env
+        env: process.env,
+      }),
     );
 
     assert.strictEqual(version, "3.0.0");

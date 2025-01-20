@@ -17,26 +17,23 @@ export interface ActivationResult {
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
 
 export abstract class VersionManager {
-  public activationScript = [
-    `STDERR.print("${ACTIVATION_SEPARATOR}" + `,
-    "{ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION, gemPath: Gem.path }.to_json + ",
-    `"${ACTIVATION_SEPARATOR}")`,
-  ].join("");
-
   protected readonly outputChannel: WorkspaceChannel;
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
   protected readonly manuallySelectRuby: () => Promise<void>;
 
+  private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
 
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    context: vscode.ExtensionContext,
     manuallySelectRuby: () => Promise<void>,
   ) {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
+    this.context = context;
     this.manuallySelectRuby = manuallySelectRuby;
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -60,8 +57,12 @@ export abstract class VersionManager {
   abstract activate(): Promise<ActivationResult>;
 
   protected async runEnvActivationScript(activatedRuby: string) {
+    const activationUri = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "activation.rb",
+    );
     const result = await this.runScript(
-      `${activatedRuby} -W0 -rjson -e '${this.activationScript}'`,
+      `${activatedRuby} -W0 -rjson '${activationUri.fsPath}'`,
     );
 
     const activationContent = new RegExp(

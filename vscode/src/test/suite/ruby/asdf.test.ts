@@ -16,6 +16,15 @@ suite("Asdf", () => {
     console.log("Skipping Asdf tests on Windows");
     return;
   }
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
 
   test("Finds Ruby based on .tool-versions", async () => {
     // eslint-disable-next-line no-process-env
@@ -26,7 +35,12 @@ suite("Asdf", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const asdf = new Asdf(workspaceFolder, outputChannel, async () => {});
+    const asdf = new Asdf(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
     const envStub = {
       env: { ANY: "true" },
       yjit: true,
@@ -47,7 +61,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -W0 -rjson -e '${asdf.activationScript}'`,
+        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: "/bin/bash",
@@ -75,7 +89,12 @@ suite("Asdf", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const asdf = new Asdf(workspaceFolder, outputChannel, async () => {});
+    const asdf = new Asdf(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
     const envStub = {
       env: { ANY: "true" },
       yjit: true,
@@ -98,7 +117,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -W0 -rjson -e '${asdf.activationScript}'`,
+        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",

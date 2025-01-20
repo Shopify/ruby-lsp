@@ -18,6 +18,16 @@ suite("RVM", () => {
     return;
   }
 
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
+
   test("Populates the gem env and path", async () => {
     const workspacePath = process.env.PWD!;
     const workspaceFolder = {
@@ -26,7 +36,12 @@ suite("RVM", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rvm = new Rvm(workspaceFolder, outputChannel, async () => {});
+    const rvm = new Rvm(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const installationPathStub = sinon
       .stub(rvm, "findRvmInstallation")
@@ -56,7 +71,7 @@ suite("RVM", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson -e '${rvm.activationScript}'`,
+        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
