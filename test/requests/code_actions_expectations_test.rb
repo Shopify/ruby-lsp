@@ -52,7 +52,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
       .select { |action| action["kind"] == "quickfix" }
       .map { |action| code_action_for_diagnostic(action) }
     refactors = expectation
-      .select { |action| action["kind"].start_with?("refactor") }
+      .select { |action| action["kind"].start_with?("refactor") || action["kind"] == "" }
       .map { |action| code_action_for_refactor(action) }
     result = [*quickfixes, *refactors]
 
