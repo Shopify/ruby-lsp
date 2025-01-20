@@ -16,6 +16,18 @@ module RubyLsp
       CREATE_ATTRIBUTE_WRITER = "Create Attribute Writer"
       CREATE_ATTRIBUTE_ACCESSOR = "Create Attribute Accessor"
 
+      INSTANCE_VARIABLE_NODES = T.let(
+        [
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableReadNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode,
+        ],
+        T::Array[T.class_of(Prism::Node)],
+      )
+
       class << self
         extend T::Sig
 
@@ -68,24 +80,51 @@ module RubyLsp
             kind: Constant::CodeActionKind::REFACTOR_REWRITE,
             data: { range: @range, uri: @uri.to_s },
           )
-          code_actions << Interface::CodeAction.new(
-            title: CREATE_ATTRIBUTE_READER,
-            kind: Constant::CodeActionKind::EMPTY,
-            data: { range: @range, uri: @uri.to_s },
-          )
-          code_actions << Interface::CodeAction.new(
-            title: CREATE_ATTRIBUTE_WRITER,
-            kind: Constant::CodeActionKind::EMPTY,
-            data: { range: @range, uri: @uri.to_s },
-          )
-          code_actions << Interface::CodeAction.new(
-            title: CREATE_ATTRIBUTE_ACCESSOR,
-            kind: Constant::CodeActionKind::EMPTY,
-            data: { range: @range, uri: @uri.to_s },
-          )
+          code_actions.concat(attribute_actions)
         end
 
         code_actions
+      end
+
+      private
+
+      sig { returns(T::Array[Interface::CodeAction]) }
+      def attribute_actions
+        return [] unless @document.is_a?(RubyDocument)
+
+        node = @document.locate_first_within_range(
+          @range,
+          node_types: INSTANCE_VARIABLE_NODES,
+        )
+
+        if node.nil?
+          start_index, _ = @document.find_index_by_position(@range[:start], @range[:end])
+          node_context = RubyDocument.locate(
+            @document.parse_result.value,
+            start_index,
+            node_types: INSTANCE_VARIABLE_NODES,
+            code_units_cache: @document.code_units_cache,
+          )
+          return [] unless INSTANCE_VARIABLE_NODES.include?(node_context.node.class)
+        end
+
+        [
+          Interface::CodeAction.new(
+            title: CREATE_ATTRIBUTE_READER,
+            kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          ),
+          Interface::CodeAction.new(
+            title: CREATE_ATTRIBUTE_WRITER,
+            kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          ),
+          Interface::CodeAction.new(
+            title: CREATE_ATTRIBUTE_ACCESSOR,
+            kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          ),
+        ]
       end
     end
   end

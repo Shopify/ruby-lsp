@@ -69,6 +69,57 @@
         },
         "uri": "file:///fake"
       }
+    },
+    {
+      "title": "Create Attribute Reader",
+      "kind": "",
+      "data": {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 9
+          },
+          "end": {
+            "line": 2,
+            "character": 13
+          }
+        },
+        "uri": "file:///fake"
+      }
+    },
+    {
+      "title": "Create Attribute Writer",
+      "kind": "",
+      "data": {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 9
+          },
+          "end": {
+            "line": 2,
+            "character": 13
+          }
+        },
+        "uri": "file:///fake"
+      }
+    },
+    {
+      "title": "Create Attribute Accessor",
+      "kind": "",
+      "data": {
+        "range": {
+          "start": {
+            "line": 2,
+            "character": 9
+          },
+          "end": {
+            "line": 2,
+            "character": 13
+          }
+        },
+        "uri": "file:///fake"
+      }
     }
   ]
 }
