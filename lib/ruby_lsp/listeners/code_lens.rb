@@ -27,16 +27,15 @@ module RubyLsp
       sig do
         params(
           response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-          global_state: GlobalState,
-          uri: URI::Generic,
+          document: RubyDocument,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, global_state, uri, dispatcher)
+      def initialize(response_builder, document, dispatcher)
         @response_builder = response_builder
-        @global_state = global_state
-        @uri = T.let(uri, URI::Generic)
-        @path = T.let(uri.to_standardized_path, T.nilable(String))
+        @uri = T.let(document.uri, URI::Generic)
+        @test_library = T.let(document.test_library, String)
+        @path = T.let(@uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
         @group_stack = T.let([], T::Array[String])
@@ -178,7 +177,7 @@ module RubyLsp
       sig { params(node: Prism::Node, name: String, command: String, kind: Symbol, id: String).void }
       def add_test_code_lens(node, name:, command:, kind:, id: name)
         # don't add code lenses if the test library is not supported or unknown
-        return unless SUPPORTED_TEST_LIBRARIES.include?(@global_state.test_library) && @path
+        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library) && @path
 
         arguments = [
           @path,
@@ -235,7 +234,7 @@ module RubyLsp
         command += " -Ispec" if File.fnmatch?("**/spec/**/*", path, File::FNM_PATHNAME)
         command += " #{path}"
 
-        case @global_state.test_library
+        case @test_library
         when "minitest"
           last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
           command += if last_dynamic_reference_index

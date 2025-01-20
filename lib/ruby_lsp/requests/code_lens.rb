@@ -24,21 +24,21 @@ module RubyLsp
 
       sig do
         params(
-          global_state: GlobalState,
           uri: URI::Generic,
+          document: RubyLsp::RubyDocument,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(global_state, uri, dispatcher)
+      def initialize(uri, document, dispatcher)
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens].new,
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
         )
         super()
-        Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
+        Listeners::CodeLens.new(@response_builder, document, dispatcher)
 
         Addon.addons.each do |addon|
-          addon.create_code_lens_listener(@response_builder, uri, dispatcher)
+          addon.create_code_lens_listener(@response_builder, document, dispatcher)
         end
       end
 
