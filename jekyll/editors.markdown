@@ -122,8 +122,8 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ### nvim-lspconfig
 
-The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_lsp.lua)
-plugin has support for Ruby LSP.
+The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/configs/ruby_lsp.lua) plugin has
+support for Ruby LSP.
 
 The Ruby LSP can be configured using the `init_options` key when setting up the LSP.
 
