@@ -337,16 +337,21 @@ module RubyLsp
 
         node = @document.locate_first_within_range(
           @code_action.dig(:data, :range),
-          node_types: [
-            Prism::InstanceVariableAndWriteNode,
-            Prism::InstanceVariableOperatorWriteNode,
-            Prism::InstanceVariableOrWriteNode,
-            Prism::InstanceVariableReadNode,
-            Prism::InstanceVariableTargetNode,
-            Prism::InstanceVariableWriteNode,
-          ],
+          node_types: CodeActions::INSTANCE_VARIABLE_NODES,
         )
-        return Error::EmptySelection if node.nil?
+
+        if node.nil?
+          start_index, _ = @document.find_index_by_position(source_range[:start], source_range[:end])
+          node_context = RubyDocument.locate(
+            @document.parse_result.value,
+            start_index,
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+            code_units_cache: @document.code_units_cache,
+          )
+          node = node_context.node
+
+          return Error::EmptySelection unless CodeActions::INSTANCE_VARIABLE_NODES.include?(node.class)
+        end
 
         node = T.cast(
           node,
@@ -360,10 +365,11 @@ module RubyLsp
           ),
         )
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(
-          line: node.location.start_line,
-          character: node.location.start_character_column,
+        start_index, _ = @document.find_index_by_position(
+          {
+            line: node.location.start_line,
+            character: node.location.start_character_column,
+          },
         )
         node_context = RubyDocument.locate(
           @document.parse_result.value,
