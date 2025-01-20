@@ -11,7 +11,7 @@ import * as common from "../../../common";
 import { RubyInstaller } from "../../../ruby/rubyInstaller";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
-import { RUBY_VERSION, VERSION_REGEX } from "../../rubyVersion";
+import { RUBY_VERSION, MAJOR, MINOR, VERSION_REGEX } from "../../rubyVersion";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 
 suite("RubyInstaller", () => {
@@ -44,8 +44,13 @@ suite("RubyInstaller", () => {
     fs.rmSync(rootPath, { recursive: true, force: true });
   });
 
-  test("Finds Ruby when under C:/RubyXY-arch", async () => {
-    const [major, minor, _patch] = RUBY_VERSION.split(".").map(Number);
+  function symlinkRubyIfNeeded() {
+    const linkPath = path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`);
+
+    if (fs.existsSync(linkPath)) {
+      return;
+    }
+
     fs.symlinkSync(
       path.join(
         "C:",
@@ -55,8 +60,12 @@ suite("RubyInstaller", () => {
         RUBY_VERSION,
         "x64",
       ),
-      path.join("C:", `Ruby${major}${minor}-${os.arch()}`),
+      linkPath,
     );
+  }
+
+  test("Finds Ruby when under C:/RubyXY-arch", async () => {
+    symlinkRubyIfNeeded();
 
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
@@ -71,26 +80,10 @@ suite("RubyInstaller", () => {
     assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
-
-    fs.rmSync(path.join("C:", `Ruby${major}${minor}-${os.arch()}`), {
-      recursive: true,
-      force: true,
-    });
   });
 
   test("Finds Ruby when under C:/Users/Username/RubyXY-arch", async () => {
-    const [major, minor, _patch] = RUBY_VERSION.split(".").map(Number);
-    fs.symlinkSync(
-      path.join(
-        "C:",
-        "hostedtoolcache",
-        "windows",
-        "Ruby",
-        RUBY_VERSION,
-        "x64",
-      ),
-      path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`),
-    );
+    symlinkRubyIfNeeded();
 
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
@@ -105,26 +98,10 @@ suite("RubyInstaller", () => {
     assert.match(env.GEM_PATH!, new RegExp(`lib/ruby/gems/${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
-
-    fs.rmSync(path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`), {
-      recursive: true,
-      force: true,
-    });
   });
 
   test("Doesn't set the shell when invoking activation script", async () => {
-    const [major, minor, _patch] = RUBY_VERSION.split(".").map(Number);
-    fs.symlinkSync(
-      path.join(
-        "C:",
-        "hostedtoolcache",
-        "windows",
-        "Ruby",
-        RUBY_VERSION,
-        "x64",
-      ),
-      path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`),
-    );
+    symlinkRubyIfNeeded();
 
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
@@ -147,10 +124,5 @@ suite("RubyInstaller", () => {
     assert.strictEqual(execStub.callCount, 1);
     const callArgs = execStub.getCall(0).args;
     assert.strictEqual(callArgs[1]?.shell, undefined);
-
-    fs.rmSync(path.join(os.homedir(), `Ruby${major}${minor}-${os.arch()}`), {
-      recursive: true,
-      force: true,
-    });
   });
 });

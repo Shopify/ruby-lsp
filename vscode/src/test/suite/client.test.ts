@@ -1,8 +1,6 @@
 /* eslint-disable no-process-env */
 import assert from "assert";
 import path from "path";
-import os from "os";
-import fs from "fs";
 
 import sinon from "sinon";
 import * as vscode from "vscode";
@@ -26,46 +24,13 @@ import {
   ShowMessageParams,
   MessageType,
 } from "vscode-languageclient/node";
-import { after, afterEach, before } from "mocha";
+import { after, afterEach, before, beforeEach } from "mocha";
 
-import { Ruby, ManagerIdentifier } from "../../ruby";
+import { Ruby } from "../../ruby";
 import Client from "../../client";
 import { WorkspaceChannel } from "../../workspaceChannel";
-import { RUBY_VERSION, MAJOR, MINOR } from "../rubyVersion";
 
-import { FAKE_TELEMETRY } from "./fakeTelemetry";
-
-class FakeLogger {
-  receivedMessages = "";
-
-  trace(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  debug(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  info(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  warn(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  error(error: string | Error, ..._args: any[]): void {
-    this.receivedMessages += error.toString();
-  }
-
-  append(value: string): void {
-    this.receivedMessages += value;
-  }
-
-  appendLine(value: string): void {
-    this.receivedMessages += value;
-  }
-}
+import { setupRubyForCi, FAKE_TELEMETRY, FakeLogger } from "./testHelpers";
 
 async function launchClient(workspaceUri: vscode.Uri) {
   const workspaceFolder: vscode.WorkspaceFolder = {
@@ -84,66 +49,6 @@ async function launchClient(workspaceUri: vscode.Uri) {
   } as unknown as vscode.ExtensionContext;
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
-
-  // Ensure that we're activating the correct Ruby version on CI
-  if (process.env.CI) {
-    await vscode.workspace
-      .getConfiguration("rubyLsp")
-      .update("formatter", "rubocop_internal", true);
-    await vscode.workspace
-      .getConfiguration("rubyLsp")
-      .update("linters", ["rubocop_internal"], true);
-
-    if (os.platform() === "linux") {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.Chruby },
-          true,
-        );
-
-      fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
-      fs.symlinkSync(
-        `/opt/hostedtoolcache/Ruby/${RUBY_VERSION}/x64`,
-        path.join(os.homedir(), ".rubies", RUBY_VERSION),
-      );
-    } else if (os.platform() === "darwin") {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.Chruby },
-          true,
-        );
-
-      fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
-      fs.symlinkSync(
-        `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64`,
-        path.join(os.homedir(), ".rubies", RUBY_VERSION),
-      );
-    } else {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.RubyInstaller },
-          true,
-        );
-
-      fs.symlinkSync(
-        path.join(
-          "C:",
-          "hostedtoolcache",
-          "windows",
-          "Ruby",
-          RUBY_VERSION,
-          "x64",
-        ),
-        path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`),
-      );
-    }
-  }
 
   const ruby = new Ruby(
     context,
@@ -241,6 +146,20 @@ suite("Client", () => {
     client = await launchClient(workspaceUri);
   });
 
+  beforeEach(async () => {
+    // Ensure that we're activating the correct Ruby version on CI
+    if (process.env.CI) {
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update("formatter", "rubocop_internal", true);
+      await vscode.workspace
+        .getConfiguration("rubyLsp")
+        .update("linters", ["rubocop_internal"], true);
+
+      await setupRubyForCi();
+    }
+  });
+
   after(async function () {
     // eslint-disable-next-line no-invalid-this
     this.timeout(20000);
@@ -250,20 +169,6 @@ suite("Client", () => {
       await client.dispose();
     } catch (error: any) {
       assert.fail(`Failed to stop server: ${error.message}`);
-    }
-
-    if (process.env.CI) {
-      if (os.platform() === "linux" || os.platform() === "darwin") {
-        fs.rmSync(path.join(os.homedir(), ".rubies"), {
-          recursive: true,
-          force: true,
-        });
-      } else {
-        fs.rmSync(path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`), {
-          recursive: true,
-          force: true,
-        });
-      }
     }
   });
 

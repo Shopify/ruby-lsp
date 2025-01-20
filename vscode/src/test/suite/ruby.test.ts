@@ -12,7 +12,7 @@ import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
 import { ACTIVATION_SEPARATOR } from "../../ruby/versionManager";
 
-import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { FAKE_TELEMETRY } from "./testHelpers";
 
 suite("Ruby environment activation", () => {
   const workspacePath = path.dirname(

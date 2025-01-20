@@ -6,7 +6,7 @@ import { CodeLens } from "vscode-languageclient/node";
 import { TestController } from "../../testController";
 import { Command } from "../../common";
 
-import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { FAKE_TELEMETRY } from "./testHelpers";
 
 suite("TestController", () => {
   const context = {
