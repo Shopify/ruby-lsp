@@ -198,12 +198,16 @@ suite("Debugger", () => {
       'source "https://rubygems.org"\ngem "debug"',
     );
 
+    const extensionPath = path.dirname(
+      path.dirname(path.dirname(path.dirname(__dirname))),
+    );
     const context = {
       subscriptions: [],
       workspaceState: {
         get: () => undefined,
         update: () => undefined,
       },
+      extensionUri: vscode.Uri.file(path.join(extensionPath, "vscode")),
     } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
     const workspaceFolder: vscode.WorkspaceFolder = {

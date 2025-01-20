@@ -50,6 +50,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
       get: (_name: string) => undefined,
       update: (_name: string, _value: any) => Promise.resolve(),
     },
+    extensionUri: vscode.Uri.file(path.join(workspaceUri.fsPath, "vscode")),
   } as unknown as vscode.ExtensionContext;
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);

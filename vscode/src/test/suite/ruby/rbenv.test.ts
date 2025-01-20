@@ -18,6 +18,16 @@ suite("Rbenv", () => {
     return;
   }
 
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
+
   test("Finds Ruby based on .ruby-version", async () => {
     // eslint-disable-next-line no-process-env
     const workspacePath = process.env.PWD!;
@@ -27,7 +37,12 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel, async () => {});
+    const rbenv = new Rbenv(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const envStub = {
       env: { ANY: "true" },
@@ -44,7 +59,7 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson -e '${rbenv.activationScript}'`,
+        `rbenv exec ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -70,7 +85,12 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel, async () => {});
+    const rbenv = new Rbenv(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const envStub = {
       env: { ANY: "true" },
@@ -101,7 +121,7 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${rbenvPath} exec ruby -W0 -rjson -e '${rbenv.activationScript}'`,
+        `${rbenvPath} exec ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -129,7 +149,12 @@ suite("Rbenv", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(workspaceFolder, outputChannel, async () => {});
+    const rbenv = new Rbenv(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
@@ -145,7 +170,7 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson -e '${rbenv.activationScript}'`,
+        `rbenv exec ruby -W0 -rjson '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
