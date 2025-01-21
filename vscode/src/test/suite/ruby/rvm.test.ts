@@ -9,7 +9,11 @@ import sinon from "sinon";
 import { Rvm } from "../../../ruby/rvm";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  FIELD_SEPARATOR,
+  VALUE_SEPARATOR,
+} from "../../../ruby/versionManager";
 
 suite("RVM", () => {
   if (os.platform() === "win32") {
@@ -54,28 +58,28 @@ suite("RVM", () => {
         ),
       );
 
-    const envStub = {
-      env: {
-        ANY: "true",
-      },
-      yjit: true,
-      version: "3.0.0",
-    };
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await rvm.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson '/fake/activation.rb'`,
+        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -EUTF-8:UTF-8 '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
