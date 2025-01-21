@@ -8,7 +8,11 @@ import sinon from "sinon";
 import { Asdf } from "../../../ruby/asdf";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  FIELD_SEPARATOR,
+  VALUE_SEPARATOR,
+} from "../../../ruby/versionManager";
 
 suite("Asdf", () => {
   if (os.platform() === "win32") {
@@ -41,15 +45,16 @@ suite("Asdf", () => {
       context,
       async () => {},
     );
-    const envStub = {
-      env: { ANY: "true" },
-      yjit: true,
-      version: "3.0.0",
-    };
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const findInstallationStub = sinon
@@ -61,12 +66,13 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -W0 -rjson '/fake/activation.rb'`,
+        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: "/bin/bash",
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
@@ -95,15 +101,16 @@ suite("Asdf", () => {
       context,
       async () => {},
     );
-    const envStub = {
-      env: { ANY: "true" },
-      yjit: true,
-      version: "3.0.0",
-    };
 
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const findInstallationStub = sinon
@@ -117,12 +124,13 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -W0 -rjson '/fake/activation.rb'`,
+        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );

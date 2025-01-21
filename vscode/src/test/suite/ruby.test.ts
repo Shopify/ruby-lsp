@@ -10,7 +10,11 @@ import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
-import { ACTIVATION_SEPARATOR } from "../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  FIELD_SEPARATOR,
+  VALUE_SEPARATOR,
+} from "../../ruby/versionManager";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
@@ -125,16 +129,16 @@ suite("Ruby environment activation", () => {
         },
       } as unknown as vscode.WorkspaceConfiguration);
 
-    const envStub = {
-      env: { ANY: "true" },
-      yjit: true,
-      version: "3.3.5",
-      gemPath: ["~/.gem/ruby/3.3.5", "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0"],
-    };
+    const envStub = [
+      "3.3.5",
+      "~/.gem/ruby/3.3.5,/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const ruby = new Ruby(

@@ -258,9 +258,6 @@ export class Debugger
 
       this.logDebuggerMessage(`Spawning debugger in directory ${cwd}`);
       this.logDebuggerMessage(`   Command bundle ${args.join(" ")}`);
-      this.logDebuggerMessage(
-        `   Environment ${JSON.stringify(configuration.env)}`,
-      );
 
       this.debugProcess = spawn("bundle", args, {
         shell: true,

@@ -9,7 +9,11 @@ import sinon from "sinon";
 import { Rbenv } from "../../../ruby/rbenv";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  FIELD_SEPARATOR,
+  VALUE_SEPARATOR,
+} from "../../../ruby/versionManager";
 
 suite("Rbenv", () => {
   if (os.platform() === "win32") {
@@ -44,27 +48,29 @@ suite("Rbenv", () => {
       async () => {},
     );
 
-    const envStub = {
-      env: { ANY: "true" },
-      yjit: true,
-      version: "3.0.0",
-    };
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await rbenv.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson '/fake/activation.rb'`,
+        `rbenv exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
@@ -92,15 +98,16 @@ suite("Rbenv", () => {
       async () => {},
     );
 
-    const envStub = {
-      env: { ANY: "true" },
-      yjit: true,
-      version: "3.0.0",
-    };
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const rbenvPath = path.join(workspacePath, "rbenv");
@@ -121,12 +128,13 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${rbenvPath} exec ruby -W0 -rjson '/fake/activation.rb'`,
+        `${rbenvPath} exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
           // eslint-disable-next-line no-process-env
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
@@ -138,55 +146,5 @@ suite("Rbenv", () => {
     execStub.restore();
     configStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
-  });
-
-  test("Reports invalid JSON environments", async () => {
-    // eslint-disable-next-line no-process-env
-    const workspacePath = process.env.PWD!;
-    const workspaceFolder = {
-      uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
-      name: path.basename(workspacePath),
-      index: 0,
-    };
-    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rbenv = new Rbenv(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-
-    const execStub = sinon.stub(common, "asyncExec").resolves({
-      stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}not a json${ACTIVATION_SEPARATOR}`,
-    });
-
-    const errorStub = sinon.stub(outputChannel, "error");
-
-    await assert.rejects(
-      rbenv.activate(),
-      "SyntaxError: Unexpected token 'o', \"not a json\" is not valid JSON",
-    );
-
-    assert.ok(
-      execStub.calledOnceWithExactly(
-        `rbenv exec ruby -W0 -rjson '/fake/activation.rb'`,
-        {
-          cwd: workspacePath,
-          shell: vscode.env.shell,
-          // eslint-disable-next-line no-process-env
-          env: process.env,
-        },
-      ),
-    );
-
-    assert.ok(
-      errorStub.calledOnceWithExactly(
-        "Tried parsing invalid JSON environment: not a json",
-      ),
-    );
-
-    execStub.restore();
-    errorStub.restore();
   });
 });

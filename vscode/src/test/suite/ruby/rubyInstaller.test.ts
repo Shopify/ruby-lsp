@@ -133,6 +133,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const result = [

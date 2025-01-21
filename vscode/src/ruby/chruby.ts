@@ -200,7 +200,7 @@ export class Chruby extends VersionManager {
     ].join(";");
 
     const result = await this.runScript(
-      `${rubyExecutableUri.fsPath} -W0 -e '${script}'`,
+      `${rubyExecutableUri.fsPath} -EUTF-8:UTF-8 -e '${script}'`,
     );
 
     const [defaultGems, gemHome, yjit, version] =
