@@ -9,7 +9,11 @@ import sinon from "sinon";
 import { None } from "../../../ruby/none";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  FIELD_SEPARATOR,
+  VALUE_SEPARATOR,
+} from "../../../ruby/versionManager";
 
 suite("None", () => {
   test("Invokes Ruby directly", async () => {
@@ -39,15 +43,16 @@ suite("None", () => {
       async () => {},
     );
 
-    const envStub = {
-      env: { ANY: "true" },
-      yjit: true,
-      version: "3.0.0",
-    };
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await none.activate();
@@ -60,16 +65,16 @@ suite("None", () => {
     const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
 
     assert.ok(
-<<<<<<< Updated upstream
-      execStub.calledOnceWithExactly(`ruby -W0 -rjson '/fake/activation.rb'`, {
-=======
-      execStub.calledOnceWithExactly(`ruby '${activationUri.fsPath}'`, {
->>>>>>> Stashed changes
-        cwd: uri.fsPath,
-        shell,
-        // eslint-disable-next-line no-process-env
-        env: process.env,
-      }),
+      execStub.calledOnceWithExactly(
+        `ruby -EUTF-8:UTF-8 '${activationUri.fsPath}'`,
+        {
+          cwd: uri.fsPath,
+          shell,
+          // eslint-disable-next-line no-process-env
+          env: process.env,
+          encoding: "utf-8",
+        },
+      ),
     );
 
     assert.strictEqual(version, "3.0.0");
