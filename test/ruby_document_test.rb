@@ -805,6 +805,90 @@ class RubyDocumentTest < Minitest::Test
     MESSAGE
   end
 
+  def test_detect_minitest
+    @uri = URI("file:///test/foo_test.rb")
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Minitest::Test
+      end
+
+      class MyTest < Minitest::Test
+      end
+
+      class FooTest < MyTest
+      end
+    RUBY
+
+    @global_state.index.index_single(@uri, document.source)
+
+    assert_equal("minitest", document.test_library)
+  end
+
+  def test_detect_rails_testing
+    @uri = URI("file:///test/foo_test.rb")
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Minitest::Test
+      end
+
+      class ActiveSupport::TestCase < ::Minitest::Test
+      end
+
+      class FooTest < MyTest
+      end
+    RUBY
+
+    @global_state.index.index_single(@uri, document.source)
+
+    assert_equal("rails", document.test_library)
+  end
+
+  def test_detect_test_unit
+    @uri = URI("file:///test/foo_test.rb")
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Test::Unit::TestCase
+      end
+
+      class MyTest < Test::Unit::TestCase
+      end
+
+      class FooTest < MyTest
+      end
+    RUBY
+
+    @global_state.index.index_single(@uri, document.source)
+
+    assert_equal("test-unit", document.test_library)
+  end
+
+  def test_detect_no_test_library
+    @uri = URI("file:///test/foo_test.rb")
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class FooTest < MyCustomTest
+      end
+    RUBY
+
+    @global_state.index.index_single(@uri, document.source)
+
+    assert_equal("unknown", document.test_library)
+  end
+
+  def test_detects_test_library_as_none_if_not_in_suitable_directory
+    @uri = URI("file:///models/foo_test.rb")
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Minitest::Test
+      end
+
+      class MyTest < Minitest::Test
+      end
+
+      class FooTest < MyTest
+      end
+    RUBY
+
+    @global_state.index.index_single(@uri, document.source)
+
+    assert_equal("none", document.test_library)
+  end
+
   def test_document_tracks_latest_edit_context
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo

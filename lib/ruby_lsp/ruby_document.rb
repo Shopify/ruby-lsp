@@ -257,6 +257,41 @@ module RubyLsp
       )
     end
 
+    sig { returns(String) }
+    def test_library
+      return "none" unless test_file?
+
+      class_entries = @global_state.index.entries_for(@uri.to_s, RubyIndexer::Entry::Class)
+      unless class_entries
+        return "none"
+      end
+
+      # TODO: consider performance hit
+      # A better approach might be check the classes entries one at a time.
+      ancestors = class_entries
+        .map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
+
+      # ActiveSupport::TestCase is a subclass of Minitest::Test so we must check for it first
+      if ancestors.include?("ActiveSupport::TestCase")
+        "rails"
+      elsif ancestors.include?("Minitest::Test")
+        "minitest"
+      elsif ancestors.include?("Test::Unit::TestCase")
+        "test-unit"
+      else
+        "unknown"
+      end
+    end
+
+    sig { returns(T::Boolean) }
+    def test_file?
+      # if the file is not saved, then we don't know its path, so can't know it's a test
+      return false unless @uri.path # file may not be saved
+
+      path = T.must(@uri.path)
+      path.include?("/test/") || path.include?("/spec/")
+    end
+
     sig { returns(T::Boolean) }
     def last_edit_may_change_declarations?
       # This method controls when we should index documents. If there's no recent edit and the document has just been

@@ -87,3 +87,6 @@ Layout/ClassStructure:
       - include
       - prepend
       - extend
+
+Minitest/LiteralAsActualArgument:
+  Enabled: true

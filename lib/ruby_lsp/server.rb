@@ -467,7 +467,7 @@ module RubyLsp
       folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
-      code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
+      code_lens = Requests::CodeLens.new(uri, document, dispatcher) if document.is_a?(RubyDocument)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
       if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
@@ -491,7 +491,7 @@ module RubyLsp
       document.cache_set("textDocument/foldingRange", folding_range.perform)
       document.cache_set("textDocument/documentSymbol", document_symbol.perform)
       document.cache_set("textDocument/documentLink", document_link.perform)
-      document.cache_set("textDocument/codeLens", code_lens.perform)
+      document.cache_set("textDocument/codeLens", code_lens.perform) if code_lens
       document.cache_set("textDocument/inlayHint", inlay_hint.perform)
 
       send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
