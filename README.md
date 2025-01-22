@@ -4,7 +4,7 @@
 
 [![Build Status](https://github.com/Shopify/ruby-lsp/workflows/CI/badge.svg)](https://github.com/Shopify/ruby-lsp/actions/workflows/ci.yml)
 [![Ruby LSP extension](https://img.shields.io/badge/VS%20Code-Ruby%20LSP-success?logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp)
-[![Ruby DX Slack](https://img.shields.io/badge/Slack-Ruby%20DX-success?logo=slack)](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q)
+[![Ruby DX Slack](https://img.shields.io/badge/Slack-Ruby%20DX-success?logo=slack)](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA)
 
 # Ruby LSP
 
@@ -13,7 +13,7 @@ for Ruby, used to improve rich features in editors. It is a part of a wider goal
 experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
 
 Want to discuss Ruby developer experience? Consider joining the public
-[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA).
 
 ## Getting Started
 

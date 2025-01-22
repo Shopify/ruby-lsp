@@ -15,7 +15,7 @@ for Ruby, used to improve rich features in editors. It is a part of a wider goal
 experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
 
 Want to discuss Ruby developer experience? Consider joining the public
-[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA).
 
 ## Table of Contents
 
@@ -529,7 +529,7 @@ requirements
 ## Experimental Features
 
 Ruby LSP also provides experimental features that are not enabled by default. If you have feedback about these features,
-you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
+you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
 ### Ancestors Hierarchy Request
 
