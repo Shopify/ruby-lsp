@@ -173,6 +173,22 @@ module RubyLsp
       @client_capabilities.supports_watching_files
     end
 
+    sig do
+      params(
+        node: T.any(
+          Prism::ConstantPathNode,
+          Prism::ConstantReadNode,
+          Prism::ConstantPathTargetNode,
+        ),
+      ).returns(T.nilable(String))
+    end
+    def constant_name(node)
+      node.full_name
+    rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
+           Prism::ConstantPathNode::MissingNodesInConstantPathError
+      nil
+    end
+
     private
 
     sig { params(direct_dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(String) }

@@ -200,6 +200,27 @@ module RubyLsp
       assert(state.enabled_feature?(:whatever))
     end
 
+    # TODO: index tests only when open, and remove when closed
+
+    def test_test_library_for_group_for_minitest_test
+      # TODO: consider nesting
+      code = <<~RUBY
+        module MyTests
+          class TestFoo < Minitest::Test
+          end
+        end
+        class Minitest::Test
+        end
+      RUBY
+      first_class = Prism.parse(code).value.statements.body.first
+
+      state = GlobalState.new
+      uri = URI::Generic.from_path(path: "/test.rb")
+      state.index.index_single(uri, code)
+
+      assert_equal("minitest", state.test_library_for_group(first_class))
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
