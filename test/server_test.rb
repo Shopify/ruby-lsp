@@ -1033,6 +1033,29 @@ class ServerTest < Minitest::Test
     assert_equal("workspace/diagnostic/refresh", request.method)
   end
 
+  def test_compose_bundle_creates_file_to_skip_next_compose
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        capture_subprocess_io do
+          @server.process_message({ id: 2, method: "rubyLsp/composeBundle" })
+        end
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
+        assert_path_exists(File.join(dir, ".ruby-lsp", "bundle_is_composed"))
+      end
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
