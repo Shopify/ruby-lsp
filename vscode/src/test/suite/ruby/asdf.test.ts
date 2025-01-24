@@ -13,6 +13,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { fakeContext } from "../helpers";
 
 suite("Asdf", () => {
   if (os.platform() === "win32") {
@@ -20,15 +21,7 @@ suite("Asdf", () => {
     console.log("Skipping Asdf tests on Windows");
     return;
   }
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
 
   test("Finds Ruby based on .tool-versions", async () => {
     // eslint-disable-next-line no-process-env
@@ -63,10 +56,11 @@ suite("Asdf", () => {
     const shellStub = sinon.stub(vscode.env, "shell").get(() => "/bin/bash");
 
     const { env, version, yjit } = await asdf.activate();
+    const baseCommand = `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby`;
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${baseCommand} -EUTF-8:UTF-8 '${context.extensionUri.fsPath}/activation.rb'`,
         {
           cwd: workspacePath,
           shell: "/bin/bash",
@@ -121,10 +115,11 @@ suite("Asdf", () => {
       .get(() => "/opt/homebrew/bin/fish");
 
     const { env, version, yjit } = await asdf.activate();
+    const baseCommand = `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby`;
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${baseCommand} -EUTF-8:UTF-8 '${context.extensionUri.fsPath}/activation.rb'`,
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",

@@ -14,6 +14,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { fakeContext } from "../helpers";
 
 suite("Mise", () => {
   if (os.platform() === "win32") {
@@ -22,15 +23,7 @@ suite("Mise", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
 
   test("Finds Ruby only binary path is appended to PATH", async () => {
     // eslint-disable-next-line no-process-env
@@ -74,7 +67,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${os.homedir()}/.local/bin/mise x -- ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${os.homedir()}/.local/bin/mise x -- ruby -EUTF-8:UTF-8 '${context.extensionUri.fsPath}/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -140,7 +133,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${misePath} x -- ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${misePath} x -- ruby -EUTF-8:UTF-8 '${context.extensionUri.fsPath}/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

@@ -14,7 +14,7 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import * as common from "../../common";
 
 import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
-import { createRubySymlinks } from "./helpers";
+import { createRubySymlinks, fakeContext } from "./helpers";
 
 suite("Launch integrations", () => {
   const workspacePath = path.dirname(
@@ -27,15 +27,7 @@ suite("Launch integrations", () => {
     index: 0,
   };
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.joinPath(workspaceUri, "vscode"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
 

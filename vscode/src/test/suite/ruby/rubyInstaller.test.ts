@@ -13,7 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, VERSION_REGEX } from "../../rubyVersion";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
-import { createRubySymlinks } from "../helpers";
+import { createRubySymlinks, fakeContext } from "../helpers";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {
@@ -22,15 +22,7 @@ suite("RubyInstaller", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
 
   let rootPath: string;
   let workspacePath: string;
