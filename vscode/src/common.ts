@@ -81,7 +81,7 @@ export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 //
 // Note: names added here should also be added to the `rubyLsp.optedOutFeatureFlags` enum in the `package.json` file
 export const FEATURE_FLAGS = {
-  tapiocaAddon: 0.0,
+  tapiocaAddon: 0.3,
   launcher: 0.05,
 };
 
