@@ -620,6 +620,14 @@
           "source.js": "javascript",
           "source.ruby": "ruby"
         }
+      },
+      {
+        "path": "./grammars/rbs.injection.json",
+        "scopeName": "rbs-comment.injection",
+        "injectTo": ["source.ruby"],
+        "embeddedLanguages": {
+          "meta.type.signature.rbs": "rbs"
+        }
       }
     ],
     "languages": [
@@ -690,6 +698,10 @@
           ".rhtm"
         ],
         "configuration": "./languages/erb.json"
+      },
+      {
+        "id": "rbs",
+        "configuration": "./languages/rbs.json"
       }
     ],
     "configurationDefaults": {
