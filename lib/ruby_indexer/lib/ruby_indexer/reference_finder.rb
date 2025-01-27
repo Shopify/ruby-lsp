@@ -341,15 +341,16 @@ module RubyIndexer
       entries = @index.resolve(name, @stack)
       return unless entries
 
-      previous_reference = @references.last
+      previous_locations = [@references.last&.location].compact
 
       entries.each do |entry|
         next unless entry.name == @target.fully_qualified_name
 
         # When processing a class/module declaration, we eagerly handle the constant reference. To avoid duplicates,
         # when we find the constant node defining the namespace, then we have to check if it wasn't already added
-        next if previous_reference&.location == location
+        next if previous_locations.find{ |previous_location| location == previous_location  }
 
+        previous_locations << location
         @references << Reference.new(name, location, declaration: false)
       end
     end

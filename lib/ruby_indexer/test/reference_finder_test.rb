@@ -274,6 +274,30 @@ module RubyIndexer
       assert_equal(8, refs[1].location.start_line)
     end
 
+    def test_accounts_for_reopened_classes
+      refs = find_const_references("Foo", <<~RUBY)
+        class Foo
+        end
+        class Foo
+          class Bar
+          end
+        end
+
+        Foo.new
+      RUBY
+      
+      assert_equal(3, refs.size)
+
+      assert_equal("Foo", refs[0].name)
+      assert_equal(1, refs[0].location.start_line)
+
+      assert_equal("Foo", refs[1].name)
+      assert_equal(3, refs[1].location.start_line)
+
+      assert_equal("Foo", refs[2].name)
+      assert_equal(8, refs[2].location.start_line)
+    end
+
     private
 
     def find_const_references(const_name, source)
