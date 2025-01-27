@@ -11,6 +11,7 @@ binstub
 binstubs
 Bizt
 Bizw
+boolish
 bufnr
 bytesize
 byteslice
@@ -34,6 +35,7 @@ FIXEDENCODING
 Floo
 fnmatch
 fooo
+hashkey
 hostedtoolcache
 importmap
 indexables

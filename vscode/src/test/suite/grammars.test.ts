@@ -86,8 +86,10 @@ const filename = path.relative(path.join(repoRoot, "out"), __filename);
 suite("Grammars", () => {
   suite("ruby", () => {
     const grammarPath = "grammars/ruby.cson.json";
+    const rbsGrammarPath = "grammars/rbs.injection.json";
 
     let rubyGrammar: vsctm.IGrammar | null = null;
+    let rbsGrammar: vsctm.IGrammar | null = null;
 
     suiteSetup(async () => {
       const wasmBin = await fs.readFile(
@@ -117,6 +119,12 @@ suite("Grammars", () => {
               "utf8",
             );
             return vsctm.parseRawGrammar(data, grammarPath);
+          } else if (scopeName === "rbs-comment.injection") {
+            const data = await fs.readFile(
+              path.join(repoRoot, rbsGrammarPath),
+              "utf8",
+            );
+            return vsctm.parseRawGrammar(data, rbsGrammarPath);
           }
 
           // We expect to run unto unsupported grammars for the embedded languages.
@@ -125,9 +133,14 @@ suite("Grammars", () => {
       });
 
       rubyGrammar = await registry.loadGrammar("source.ruby");
+      rbsGrammar = await registry.loadGrammar("rbs-comment.injection");
 
       if (!rubyGrammar) {
         throw new Error("Failed to load Ruby grammar");
+      }
+
+      if (!rbsGrammar) {
+        throw new Error("Failed to load RBS grammar");
       }
     });
 
@@ -327,6 +340,255 @@ suite("Grammars", () => {
       });
     });
 
+    suite("rbs", () => {
+      test("inline method signature", () => {
+        const ruby = "#: (String) -> (String | nil)";
+        const expectedTokens = [
+          [
+            "#:",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "(",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "String",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+          [
+            ")",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "->",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "(",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "String",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "|",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "nil",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "support.type.builtin.rbs",
+            ],
+          ],
+          [
+            ")",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+        ];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("inline method signature with block", () => {
+        const ruby = "#: (String) { (String) -> boolish } -> void";
+        const expectedTokens = [
+          [
+            "#:",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "(",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "String",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+          [
+            ")",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "{",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "(",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "String",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+          [
+            ")",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "->",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "boolish",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "support.type.builtin.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "}",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "->",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "void",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "support.type.builtin.rbs",
+            ],
+          ],
+        ];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("inline method signature with keyword", () => {
+        const ruby = "#: return: String";
+        const expectedTokens = [
+          [
+            "#:",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "return:",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "constant.other.symbol.hashkey.parameter.function.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "String",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+        ];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+    });
+
     suite("Local variables", () => {
       test("rescue is not confused", () => {
         const ruby = "rescue => e";
@@ -431,6 +693,31 @@ suite("Grammars", () => {
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
     });
+
+    function tokenizeRBS(rbs: string): [string, string[]][] {
+      if (!rbsGrammar) {
+        throw new Error("RBS grammar not loaded");
+      }
+
+      const lines = rbs.split("\n");
+      let ruleStack = vsctm.INITIAL;
+
+      // Typescript's flow sensitive typing doesn't seem to extend into the next function, so we re-assign the value
+      const grammar = rbsGrammar;
+
+      const tokens = lines.flatMap((line) => {
+        const lineTokens = grammar.tokenizeLine(line, ruleStack);
+        ruleStack = lineTokens.ruleStack;
+
+        return lineTokens.tokens.map((token) => {
+          const tokenString = line.substring(token.startIndex, token.endIndex);
+          const pair: [string, string[]] = [tokenString, token.scopes];
+          return pair;
+        });
+      });
+
+      return tokens;
+    }
 
     function tokenizeRuby(ruby: string): [string, string[]][] {
       if (!rubyGrammar) {
