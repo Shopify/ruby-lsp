@@ -13,6 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, MAJOR, MINOR, VERSION_REGEX } from "../../rubyVersion";
 import { ActivationResult } from "../../../ruby/versionManager";
+import { fakeContext } from "../helpers";
 
 // Create links to the real Ruby installations on CI and on our local machines
 function createRubySymlinks(destination: string) {
@@ -50,15 +51,7 @@ suite("Chruby", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
 
   let rootPath: string;
   let workspacePath: string;

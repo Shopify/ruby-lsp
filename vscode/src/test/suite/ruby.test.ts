@@ -17,6 +17,7 @@ import {
 } from "../../ruby/versionManager";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { fakeContext } from "./helpers";
 
 suite("Ruby environment activation", () => {
   const workspacePath = path.dirname(
@@ -27,14 +28,7 @@ suite("Ruby environment activation", () => {
     name: path.basename(workspacePath),
     index: 0,
   };
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    workspaceState: {
-      get: () => undefined,
-      update: () => undefined,
-    },
-    extensionUri: vscode.Uri.file(path.join(workspacePath, "vscode")),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
   const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {

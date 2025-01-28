@@ -2,21 +2,20 @@ import * as assert from "assert";
 
 import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
+import { afterEach } from "mocha";
 
 import { TestController } from "../../testController";
 import { Command } from "../../common";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { fakeContext } from "./helpers";
 
 suite("TestController", () => {
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
+
+  afterEach(() => {
+    context.subscriptions.forEach((subscription) => subscription.dispose());
+  });
 
   test("createTestItems doesn't break when there's a missing group", () => {
     const controller = new TestController(

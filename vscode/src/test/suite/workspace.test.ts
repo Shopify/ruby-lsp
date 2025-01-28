@@ -11,16 +11,10 @@ import { beforeEach, afterEach } from "mocha";
 import { Workspace } from "../../workspace";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { fakeContext } from "./helpers";
 
 suite("Workspace", () => {
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
   let workspacePath: string;
   let workspaceUri: vscode.Uri;
   let workspaceFolder: vscode.WorkspaceFolder;

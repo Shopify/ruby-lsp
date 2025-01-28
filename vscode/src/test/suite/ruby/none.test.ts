@@ -14,18 +14,11 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { fakeContext } from "../helpers";
 
 suite("None", () => {
   test("Invokes Ruby directly", async () => {
-    const context = {
-      extensionMode: vscode.ExtensionMode.Test,
-      subscriptions: [],
-      workspaceState: {
-        get: (_name: string) => undefined,
-        update: (_name: string, _value: any) => Promise.resolve(),
-      },
-      extensionUri: vscode.Uri.parse("file:///fake"),
-    } as unknown as vscode.ExtensionContext;
+    const context = fakeContext();
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
     );

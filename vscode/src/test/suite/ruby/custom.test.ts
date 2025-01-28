@@ -14,17 +14,10 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { fakeContext } from "../helpers";
 
 suite("Custom", () => {
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
 
   test("Invokes custom script and then Ruby", async () => {
     const workspacePath = fs.mkdtempSync(

@@ -176,6 +176,10 @@ export class RubyLsp {
     }
   }
 
+  getWorkspace(uri: vscode.Uri): Workspace | undefined {
+    return this.workspaces.get(uri.toString());
+  }
+
   private async activateWorkspace(
     workspaceFolder: vscode.WorkspaceFolder,
     eager: boolean,
@@ -691,10 +695,6 @@ export class RubyLsp {
     }
 
     return this.getWorkspace(workspaceFolder.uri);
-  }
-
-  private getWorkspace(uri: vscode.Uri): Workspace | undefined {
-    return this.workspaces.get(uri.toString());
   }
 
   private workspaceResolver(

@@ -14,6 +14,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { fakeContext } from "../helpers";
 
 suite("RVM", () => {
   if (os.platform() === "win32") {
@@ -22,15 +23,7 @@ suite("RVM", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  const context = fakeContext();
 
   test("Populates the gem env and path", async () => {
     const workspacePath = process.env.PWD!;
@@ -71,10 +64,11 @@ suite("RVM", () => {
     });
 
     const { env, version, yjit } = await rvm.activate();
+    const baseCommand = path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby");
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${baseCommand} -EUTF-8:UTF-8 '${context.extensionUri.fsPath}/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

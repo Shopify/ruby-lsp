@@ -102,12 +102,24 @@ export class Debugger
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
-    const workspace = this.workspaceResolver(folder?.uri);
+    // On certain occasions, the objects passed to this method are serialized. In particular for the URI, we have to
+    // ensure we're dealing with a `vscode.Uri` object and not a plain object
+    const uriAttributes =
+      folder?.uri ?? debugConfiguration.workspaceFolder?.uri;
+
+    if (!uriAttributes) {
+      throw new Error(`Couldn't find a workspace to start debugging`);
+    }
+
+    const uri =
+      uriAttributes instanceof vscode.Uri
+        ? uriAttributes
+        : vscode.Uri.from(uriAttributes);
+
+    const workspace = this.workspaceResolver(uri);
 
     if (!workspace) {
-      throw new Error(
-        `Couldn't find a workspace for URI: ${folder?.uri} or editor: ${vscode.window.activeTextEditor}`,
-      );
+      throw new Error(`Couldn't find a workspace for URI: ${uri}`);
     }
 
     if (debugConfiguration.env) {
@@ -120,10 +132,8 @@ export class Debugger
       debugConfiguration.env = workspace.ruby.env;
     }
 
-    const workspaceUri = workspace.workspaceFolder.uri;
-
     debugConfiguration.targetFolder = {
-      path: workspaceUri.fsPath,
+      path: uri.fsPath,
       name: workspace.workspaceFolder.name,
     };
 
@@ -133,7 +143,7 @@ export class Debugger
       return debugConfiguration;
     }
 
-    const customBundleUri = vscode.Uri.joinPath(workspaceUri, ".ruby-lsp");
+    const customBundleUri = vscode.Uri.joinPath(uri, ".ruby-lsp");
 
     return vscode.workspace.fs.readDirectory(customBundleUri).then(
       (value) => {
