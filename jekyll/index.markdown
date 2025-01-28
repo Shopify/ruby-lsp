@@ -69,7 +69,7 @@ If using VS Code, all you have to do is install the [Ruby LSP
 extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
 editor. Do not install the `ruby-lsp` gem manually.
 
-For more information on using and configuring the extension, see the extension's [README.md](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md).
+For more information on using and configuring the extension, see the [extension page](vscode-extension.html).
 
 ### With other editors
 
