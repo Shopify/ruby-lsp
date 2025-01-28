@@ -126,15 +126,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ClassNode).void }
     def on_class_node_enter(node)
-      constant_path = node.constant_path
-      name = constant_path.slice
-      nesting = actual_nesting(name)
-
-      if @target.is_a?(ConstTarget) && nesting.join("::") == @target.fully_qualified_name
-        @references << Reference.new(name, constant_path.location, declaration: true)
-      end
-
-      @stack << name
+      @stack << node.constant_path.slice
     end
 
     sig { params(node: Prism::ClassNode).void }
@@ -144,15 +136,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ModuleNode).void }
     def on_module_node_enter(node)
-      constant_path = node.constant_path
-      name = constant_path.slice
-      nesting = actual_nesting(name)
-
-      if @target.is_a?(ConstTarget) && nesting.join("::") == @target.fully_qualified_name
-        @references << Reference.new(name, constant_path.location, declaration: true)
-      end
-
-      @stack << name
+      @stack << node.constant_path.slice
     end
 
     sig { params(node: Prism::ModuleNode).void }
@@ -341,18 +325,23 @@ module RubyIndexer
       entries = @index.resolve(name, @stack)
       return unless entries
 
-      previous_locations = [@references.last&.location].compact
+      previous_reference = @references.last
+      entry = entries.first
 
-      entries.each do |entry|
-        next unless entry.name == @target.fully_qualified_name
+      return unless entry.name == @target.fully_qualified_name
 
-        # When processing a class/module declaration, we eagerly handle the constant reference. To avoid duplicates,
-        # when we find the constant node defining the namespace, then we have to check if it wasn't already added
-        next if previous_locations.find{ |previous_location| location == previous_location  }
+      # When processing a class/module declaration, we eagerly handle the constant reference. To avoid duplicates,
+      # when we find the constant node defining the namespace, then we have to check if it wasn't already added
+      return if previous_reference&.location == location
 
-        previous_locations << location
-        @references << Reference.new(name, location, declaration: false)
-      end
+      # Get the fully qualified name of the constant we just resolved
+      full_constant_name = T.must(entry).name
+
+      # Check if this constant is a namespace declaration
+      # (class or module)
+      declaration = @index[full_constant_name].any? { |e| e.is_a?(Entry::Namespace) }
+
+      @references << Reference.new(name, location, declaration: declaration)
     end
 
     sig { params(name: String, location: Prism::Location, declaration: T::Boolean).void }

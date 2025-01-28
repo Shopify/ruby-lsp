@@ -285,7 +285,7 @@ module RubyIndexer
 
         Foo.new
       RUBY
-      
+
       assert_equal(3, refs.size)
 
       assert_equal("Foo", refs[0].name)
