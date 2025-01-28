@@ -55,6 +55,29 @@ export class RubyInstaller extends Chruby {
     );
   }
 
+  protected async runActivationScript(
+    rubyExecutableUri: vscode.Uri,
+    rubyVersion: RubyVersion,
+  ): Promise<{
+    defaultGems: string;
+    gemHome: string;
+    yjit: boolean;
+    version: string;
+  }> {
+    const activationResult = await super.runActivationScript(
+      rubyExecutableUri,
+      rubyVersion,
+    );
+
+    activationResult.gemHome = activationResult.gemHome.replace(/\//g, "\\");
+    activationResult.defaultGems = activationResult.defaultGems.replace(
+      /\//g,
+      "\\",
+    );
+
+    return activationResult;
+  }
+
   // Override the `runScript` method to ensure that we do not pass any `shell` to `asyncExec`. The activation script is
   // only compatible with `cmd.exe`, and not Powershell, due to escaping of quotes. We need to ensure to always run the
   // script on `cmd.exe`.

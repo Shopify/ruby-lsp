@@ -169,6 +169,45 @@ export class Chruby extends VersionManager {
     return undefined;
   }
 
+  // Run the activation script using the Ruby installation we found so that we can discover gem paths
+  protected async runActivationScript(
+    rubyExecutableUri: vscode.Uri,
+    rubyVersion: RubyVersion,
+  ): Promise<{
+    defaultGems: string;
+    gemHome: string;
+    yjit: boolean;
+    version: string;
+  }> {
+    // Typically, GEM_HOME points to $HOME/.gem/ruby/version_without_patch. For example, for Ruby 3.2.2, it would be
+    // $HOME/.gem/ruby/3.2.0. However, chruby overrides GEM_HOME to use the patch part of the version, resulting in
+    // $HOME/.gem/ruby/3.2.2. In our activation script, we check if a directory using the patch exists and then prefer
+    // that over the default one.
+    const script = [
+      "user_dir = Gem.user_dir",
+      "paths = Gem.path",
+      "if paths.length > 2",
+      "  paths.delete(Gem.default_dir)",
+      "  paths.delete(Gem.user_dir)",
+      "  if paths[0]",
+      "    user_dir = paths[0] if Dir.exist?(paths[0])",
+      "  end",
+      "end",
+      `newer_gem_home = File.join(File.dirname(user_dir), "${rubyVersion.version}")`,
+      "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
+      `STDERR.print([Gem.default_dir, gems, !!defined?(RubyVM::YJIT), RUBY_VERSION].join("${ACTIVATION_SEPARATOR}"))`,
+    ].join(";");
+
+    const result = await this.runScript(
+      `${rubyExecutableUri.fsPath} -W0 -e '${script}'`,
+    );
+
+    const [defaultGems, gemHome, yjit, version] =
+      result.stderr.split(ACTIVATION_SEPARATOR);
+
+    return { defaultGems, gemHome, yjit: yjit === "true", version };
+  }
+
   private async findClosestRubyInstallation(rubyVersion: RubyVersion): Promise<{
     uri: vscode.Uri;
     rubyVersion: RubyVersion;
@@ -441,45 +480,6 @@ export class Chruby extends VersionManager {
     }
 
     throw new Error("Cannot find any Ruby installations");
-  }
-
-  // Run the activation script using the Ruby installation we found so that we can discover gem paths
-  private async runActivationScript(
-    rubyExecutableUri: vscode.Uri,
-    rubyVersion: RubyVersion,
-  ): Promise<{
-    defaultGems: string;
-    gemHome: string;
-    yjit: boolean;
-    version: string;
-  }> {
-    // Typically, GEM_HOME points to $HOME/.gem/ruby/version_without_patch. For example, for Ruby 3.2.2, it would be
-    // $HOME/.gem/ruby/3.2.0. However, chruby overrides GEM_HOME to use the patch part of the version, resulting in
-    // $HOME/.gem/ruby/3.2.2. In our activation script, we check if a directory using the patch exists and then prefer
-    // that over the default one.
-    const script = [
-      "user_dir = Gem.user_dir",
-      "paths = Gem.path",
-      "if paths.length > 2",
-      "  paths.delete(Gem.default_dir)",
-      "  paths.delete(Gem.user_dir)",
-      "  if paths[0]",
-      "    user_dir = paths[0] if Dir.exist?(paths[0])",
-      "  end",
-      "end",
-      `newer_gem_home = File.join(File.dirname(user_dir), "${rubyVersion.version}")`,
-      "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
-      `STDERR.print([Gem.default_dir, gems, !!defined?(RubyVM::YJIT), RUBY_VERSION].join("${ACTIVATION_SEPARATOR}"))`,
-    ].join(";");
-
-    const result = await this.runScript(
-      `${rubyExecutableUri.fsPath} -W0 -e '${script}'`,
-    );
-
-    const [defaultGems, gemHome, yjit, version] =
-      result.stderr.split(ACTIVATION_SEPARATOR);
-
-    return { defaultGems, gemHome, yjit: yjit === "true", version };
   }
 
   private missingRubyError(version: string) {
