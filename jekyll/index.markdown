@@ -193,40 +193,40 @@ lens](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.
 request requires specific commands to be implemented in the editor in order to work. For VS Code, this is included with the Ruby LSP extension. If you are using a different editor, please check the editor's documentation on how to
 define the required commands.
 
-![Code lens demo](images/code_lens.gif)
+![Code lens demo](images/code_lens.gif){: width="1200px" height="800px" }
 
 ### Document symbol
 
 Document symbol allows users to fuzzy search declarations inside the current file. It is also used to populate the
 breadcrumbs and the outline.
 
-![Document symbol demo](images/document_symbol.gif)
+![Document symbol demo](images/document_symbol.gif){: width="1200px" height="800px" }
 
 ### Workspace symbol
 
 Workspace symbol is the project-wide version of document symbol. It allows users to fuzzy search any declaration in the
 entire project.
 
-![Workspace symbol demo](images/workspace_symbol.gif)
+![Workspace symbol demo](images/workspace_symbol.gif){: width="1200px" height="800px" }
 
 ### Document link
 
 Document link makes magic `source` links clickable. This is used to connect two declarations for convenience. Note that
 the links are only processed if they are immediately above a declaration and not anywhere in the code.
 
-![Document link demo](images/document_link.gif)
+![Document link demo](images/document_link.gif){: width="1200px" height="800px" }
 
 ### Document highlight
 
 Document highlight reveals occurrences and declarations of the entity under the cursor.
 
-![Document highlight demo](images/document_highlight.gif)
+![Document highlight demo](images/document_highlight.gif){: width="1200px" height="800px" }
 
 ### Folding range
 
 Folding range allows users to fold code at relevant ranges of the source.
 
-![Folding range demo](images/folding_range.gif)
+![Folding range demo](images/folding_range.gif){: width="1200px" height="800px" }
 
 ### Semantic highlighting
 
@@ -253,13 +253,13 @@ of the code. The Ruby LSP has native support for syntax errors and also supports
 {: .note }
 You can configure which linters to use as long as they have integrations for the Ruby LSP. Check the available [configurations](editors#all-initialization-options).
 
-![Diagnostic demo](images/diagnostic.gif)
+![Diagnostic demo](images/diagnostic.gif){: width="1200px" height="800px" }
 
 ### Formatting
 
 Formatting allows documents to be formatted automatically on save or manually if the editor supports it.
 
-![Formatting demo](images/formatting.gif)
+![Formatting demo](images/formatting.gif){: width="1200px" height="800px" }
 
 ### Code actions
 
@@ -267,13 +267,13 @@ Formatting allows documents to be formatted automatically on save or manually if
 
 The Ruby LSP supports fixing violations through quick fixes.
 
-![Quickfix demo](images/quickfix.gif)
+![Quickfix demo](images/quickfix.gif){: width="1200px" height="800px" }
 
 **Refactors**
 
 The Ruby LSP supports some code refactorings, like extract to variable, extract to method and switch block style.
 
-![Refactors demo](images/refactors.gif)
+![Refactors demo](images/refactors.gif){: width="1200px" height="800px" }
 
 
 ### Inlay hints
@@ -297,7 +297,7 @@ hint behavior:
 
 To configure other editors, see the [initialization options](editors#all-initialization-options).
 
-![Inlay hint demo](images/inlay_hint.gif)
+![Inlay hint demo](images/inlay_hint.gif){: width="1200px" height="800px" }
 
 ### On type formatting
 
@@ -306,7 +306,7 @@ On type formatting applies changes to the code as the user is typing. For exampl
 {: .note }
 In VS Code, format on type is disabled by default. You can enable it with `"editor.formatOnType": true`
 
-![On type formatting demo](images/on_type_formatting.gif)
+![On type formatting demo](images/on_type_formatting.gif){: width="1200px" height="800px" }
 
 ### Range formatting
 
@@ -322,14 +322,14 @@ formatting a file. Supporting range formatting for RuboCop or Standard requires 
 Ruby LSP can inform the formatter of the base indentation at the place of the selection. Additionally, the formatter
 can only apply corrections that make sense for the portion of the document.
 
-![Range formatting demo](images/range_formatting.gif)
+![Range formatting demo](images/range_formatting.gif){: width="1200px" height="800px" }
 
 ### Selection range
 
 Selection range (or smart ranges) expands or shrinks a selection based on the code's constructs. In VS Code, this can
 be triggered with `CTRL + SHIFT + LEFT/RIGHT ARROW` to expand/shrink, respectively.
 
-![Selection range demo](images/selection_range.gif)
+![Selection range demo](images/selection_range.gif){: width="1200px" height="800px" }
 
 ### Show syntax tree
 
@@ -340,7 +340,7 @@ show the AST for the entire document or for a selection.
 This feature is not a part of the language server specification. It is a custom feature, which is implemented in the
 Ruby LSP's VS Code extension. Other editors can implement a similar approach to achieve the same functionality
 
-![Show syntax tree demo](images/show_syntax_tree.gif)
+![Show syntax tree demo](images/show_syntax_tree.gif){: width="1200px" height="800px" }
 
 ### ERB support
 
@@ -360,7 +360,7 @@ will sometimes display incorrect candidates. We believe this might be a limitati
 and we've opened a [discussion with VS Code](https://github.com/microsoft/vscode-discussions/discussions/1628) to better
 understand it.
 
-![ERB features demo](images/erb.gif)
+![ERB features demo](images/erb.gif){: width="1200px" height="800px" }
 
 ### Guessed types
 
@@ -446,14 +446,14 @@ Rename allows developers to rename all occurrences of the entity under the curso
 renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
 
-![Rename demo](images/rename.gif)
+![Rename demo](images/rename.gif){: width="1200px" height="800px" }
 
 ### Find references
 
 The find references request allows users to both see a list of references or jump to reference locations. Note that
 only constants are currently supported, but support for methods, instance variables and local variables is planned.
 
-![References demo](images/references.gif)
+![References demo](images/references.gif){: width="1200px" height="800px" }
 
 ## VS Code features
 
@@ -464,7 +464,7 @@ The following features are all custom made for VS Code.
 The Ruby LSP contributes a custom dependencies view panel that allows users to navigate the dependencies of their
 projects.
 
-![Dependencies view demo](images/dependencies_view.gif)
+![Dependencies view demo](images/dependencies_view.gif){: width="1200px" height="800px" }
 
 ### Rails generator integrations
 
