@@ -1,3 +1,10 @@
+---
+layout: default
+title: VS Code extension
+nav_order: 5
+parent: Ruby LSP
+---
+
 # Ruby LSP
 
 The Ruby LSP is an implementation of the [language server protocol](https://microsoft.github.io/language-server-protocol/)
@@ -5,7 +12,7 @@ for Ruby, used to improve rich features in editors.
 
 ## Features
 
-![Ruby LSP demo](extras/ruby_lsp_demo.gif)
+![Ruby LSP demo](images/ruby_lsp_demo.gif)
 
 The Ruby LSP features include
 
@@ -85,7 +92,7 @@ test boilerplates. Find the full list [here](https://github.com/Shopify/ruby-lsp
 The Ruby LSP allows disabling specific features. To do so, open the
 language status center right next to the language mode Ruby and select `Manage` right next to enabled features.
 
-![Ruby LSP status center](extras/ruby_lsp_status_center.png)
+![Ruby LSP status center](images/ruby_lsp_status_center.png)
 
 #### Ruby version managers
 
@@ -119,8 +126,7 @@ To make sure that the Ruby LSP can find the version manager scripts, make sure t
 configuration script (e.g.: ~/.bashrc, ~/.zshrc) and that the SHELL environment variable is set and pointing to the
 default shell.
 
-> [!NOTE]
->
+{: .note }
 > For manager-specific notes, setting up custom activation for managers not listed above and community-contributed
 > examples, please see [version managers](https://shopify.github.io/ruby-lsp/version-managers.html).
 
@@ -180,8 +186,7 @@ gem "ruby-lsp"
 gem "rubocop"
 ```
 
-> [!NOTE]
->
+{: .note }
 > Take in mind that formatters, linters and their extensions should be included in the custom gemfile; you might need to add more gems than the ones shown above.
 > e.g: If you are using rubocop, you would also need to add them:
 
@@ -202,8 +207,7 @@ the version manager configuration, use the following configuration in VS Code to
 }
 ```
 
-> [!NOTE]
->
+{: .note }
 > `rubyLsp.bundleGemfile` can be a relative or absolute path.
 
 #### Configuring VS Code debugger
@@ -304,7 +308,7 @@ repository is.
 
 #### Example configurations
 
-> [!NOTE]
+{: .note }
 > To make sure Ruby LSP works well with your multi-root workspace project, please
 > read through the instructions below and configure it following the examples.
 > After configuring, do not forget to tell VS Code to open the workspace from the
