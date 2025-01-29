@@ -307,7 +307,7 @@ Otherwise the error output can be inspected in the Output window.
 
 ## Helix
 
-To configure the Ruby LSP in helix you first need to define it as a language server and then set it as the main LSP for ruby.
+To configure the Ruby LSP in Helix you first need to define it as a language server and then set it as the main language server for Ruby.
 This will also set ruby-lsp to be used as a formatter with its built-in rubocop integration.
 
 ```toml
