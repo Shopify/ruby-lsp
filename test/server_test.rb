@@ -486,6 +486,27 @@ class ServerTest < Minitest::Test
     FileUtils.rm(T.must(path))
   end
 
+  def test_did_change_watched_files_does_not_fail_for_non_existing_files
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI::Generic.from_path(path: File.join(Dir.pwd, "lib", "non_existing.rb")).to_s,
+            type: RubyLsp::Constant::FileChangeType::CREATED,
+          },
+        ],
+      },
+    })
+
+    assert_raises(Timeout::Error) do
+      Timeout.timeout(0.5) do
+        notification = find_message(RubyLsp::Notification, "window/logMessage")
+        flunk(notification.params.message)
+      end
+    end
+  end
+
   def test_workspace_addons
     create_test_addons
     @server.load_addons

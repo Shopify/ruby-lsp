@@ -1036,6 +1036,10 @@ module RubyLsp
       when Constant::FileChangeType::DELETED
         index.delete(uri)
       end
+    rescue Errno::ENOENT
+      # If a file is created and then delete immediately afterwards, we will process the created notification before we
+      # receive the deleted one, but the file no longer exists. This may happen when running a test suite that creates
+      # and deletes files automatically.
     end
 
     sig { params(uri: URI::Generic).void }
