@@ -170,7 +170,7 @@ module RubyLsp
 
       sig { params(line: Integer, character: Integer).void }
       def move_cursor_to(line, character)
-        return unless @client_name.start_with?("Visual Studio Code")
+        return unless /Visual Studio Code|Cursor/.match?(@client_name)
 
         position = Interface::Position.new(
           line: line,
