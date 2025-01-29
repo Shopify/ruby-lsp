@@ -1290,25 +1290,40 @@ module RubyLsp
       addon.handle_window_show_message_response(result[:title])
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    # NOTE: all servers methods are void because they can produce several messages for the client. The only reason this
+    # method returns the created thread is to that we can join it in tests and avoid flakiness. The implementation is
+    # not supposed to rely on the return of this method
+    sig { params(message: T::Hash[Symbol, T.untyped]).returns(T.nilable(Thread)) }
     def compose_bundle(message)
       already_composed_path = File.join(@global_state.workspace_path, ".ruby-lsp", "bundle_is_composed")
-      command = "#{Gem.ruby} #{File.expand_path("../../exe/ruby-lsp-launcher", __dir__)} #{@global_state.workspace_uri}"
       id = message[:id]
 
       begin
-        Bundler::LockfileParser.new(Bundler.default_lockfile.read)
+        Bundler.with_original_env do
+          Bundler::LockfileParser.new(Bundler.default_lockfile.read)
+        end
       rescue Bundler::LockfileError => e
         send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: e.message))
         return
+      rescue Bundler::GemfileNotFound, Errno::ENOENT
+        # We still compose the bundle if there's no Gemfile or if the lockfile got deleted
       end
 
       # We compose the bundle in a thread so that the LSP continues to work while we're checking for its validity. Once
       # we return the response back to the editor, then the restart is triggered
       Thread.new do
         send_log_message("Recomposing the bundle ahead of restart")
-        pid = Process.spawn(command)
-        _, status = Process.wait2(pid)
+
+        _stdout, stderr, status = Bundler.with_unbundled_env do
+          Open3.capture3(
+            Gem.ruby,
+            "-I",
+            File.dirname(T.must(__dir__)),
+            File.expand_path("../../exe/ruby-lsp-launcher", __dir__),
+            @global_state.workspace_uri.to_s,
+            chdir: @global_state.workspace_path,
+          )
+        end
 
         if status&.exitstatus == 0
           # Create a signal for the restart that it can skip composing the bundle and launch directly
@@ -1317,7 +1332,9 @@ module RubyLsp
         else
           # This special error code makes the extension avoid restarting in case we already know that the composed
           # bundle is not valid
-          send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle"))
+          send_message(
+            Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle\n#{stderr}"),
+          )
         end
       end
     end

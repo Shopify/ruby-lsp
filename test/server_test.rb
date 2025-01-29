@@ -1068,7 +1068,7 @@ class ServerTest < Minitest::Test
         })
 
         capture_subprocess_io do
-          @server.process_message({ id: 2, method: "rubyLsp/composeBundle" })
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
         end
         result = find_message(RubyLsp::Result, id: 2)
         assert(result.response[:success])
@@ -1116,12 +1116,63 @@ class ServerTest < Minitest::Test
         LOCKFILE
         File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
-        Bundler.with_unbundled_env do
-          @server.process_message({ id: 2, method: "rubyLsp/composeBundle" })
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+      end
+
+      error = find_message(RubyLsp::Error)
+      assert_match("Your Gemfile.lock contains merge conflicts.", error.message)
+    end
+  end
+
+  def test_compose_bundle_does_not_fail_if_bundle_is_missing
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
         end
 
-        error = find_message(RubyLsp::Error)
-        assert_match("Your Gemfile.lock contains merge conflicts.", error.message)
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
+      end
+    end
+  end
+
+  def test_compose_bundle_does_not_fail_if_restarting_on_lockfile_deletion
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
       end
     end
   end
@@ -1201,6 +1252,10 @@ class ServerTest < Minitest::Test
     until message.is_a?(desired_class) && (!desired_method || T.unsafe(message).method == desired_method) &&
         (!id || T.unsafe(message).id == id)
       message = @server.pop_response
+
+      if message.is_a?(RubyLsp::Error) && desired_class != RubyLsp::Error
+        flunk("Unexpected error: #{message.message}")
+      end
     end
 
     message

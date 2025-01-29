@@ -241,8 +241,7 @@ module RubyLsp
 
       # If either the Gemfile or the lockfile have been modified during the process of setting up the bundle, retry
       # composing the bundle from scratch
-
-      if @gemfile && @lockfile
+      if @gemfile&.exist? && @lockfile&.exist?
         current_gemfile_hash = Digest::SHA256.hexdigest(@gemfile.read)
         current_lockfile_hash = Digest::SHA256.hexdigest(@lockfile.read)
 

@@ -22,6 +22,7 @@ require "prism/visitor"
 require "language_server-protocol"
 require "rbs"
 require "fileutils"
+require "open3"
 
 require "ruby-lsp"
 require "ruby_lsp/base_server"
