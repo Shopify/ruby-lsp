@@ -317,11 +317,12 @@ module RubyIndexer
 
     def find_references(target, source)
       file_path = "/fake.rb"
+      uri = URI::Generic.from_path(path: file_path)
       index = Index.new
-      index.index_single(URI::Generic.from_path(path: file_path), source)
+      index.index_single(uri, source)
       parse_result = Prism.parse(source)
       dispatcher = Prism::Dispatcher.new
-      finder = ReferenceFinder.new(target, index, dispatcher)
+      finder = ReferenceFinder.new(target, index, dispatcher, uri)
       dispatcher.visit(parse_result.value)
       finder.references
     end

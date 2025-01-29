@@ -75,12 +75,14 @@ module RubyIndexer
         target: Target,
         index: RubyIndexer::Index,
         dispatcher: Prism::Dispatcher,
+        uri: URI::Generic,
         include_declarations: T::Boolean,
       ).void
     end
-    def initialize(target, index, dispatcher, include_declarations: true)
+    def initialize(target, index, dispatcher, uri, include_declarations: true)
       @target = target
       @index = index
+      @uri = uri
       @include_declarations = include_declarations
       @stack = T.let([], T::Array[String])
       @references = T.let([], T::Array[Reference])
@@ -325,21 +327,25 @@ module RubyIndexer
       entries = @index.resolve(name, @stack)
       return unless entries
 
-      previous_reference = @references.last
-      entry = entries.first
+      # Filter down to all constant declarations that match the expected name and type
+      matching_entries = entries.select do |e|
+        [
+          Entry::Namespace,
+          Entry::Constant,
+          Entry::ConstantAlias,
+          Entry::UnresolvedConstantAlias,
+          Entry::Class
+        ].include?(e.class) &&
+          e.name == @target.fully_qualified_name
+      end
 
-      return unless entry.name == @target.fully_qualified_name
+      return if matching_entries.empty?
 
-      # When processing a class/module declaration, we eagerly handle the constant reference. To avoid duplicates,
-      # when we find the constant node defining the namespace, then we have to check if it wasn't already added
-      return if previous_reference&.location == location
-
-      # Get the fully qualified name of the constant we just resolved
-      full_constant_name = T.must(entry).name
-
-      # Check if this constant is a namespace declaration
-      # (class or module)
-      declaration = @index[full_constant_name].any? { |e| e.is_a?(Entry::Namespace) }
+      # If any of the matching entries have the same location as the constant and were
+      # defined in the same file, then it is that constant's declaration
+      declaration = matching_entries.any? do |e|
+        e.name_location == location && e.uri == @uri
+      end
 
       @references << Reference.new(name, location, declaration: declaration)
     end
