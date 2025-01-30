@@ -343,7 +343,7 @@ module RubyIndexer
       # If any of the matching entries have the same location as the constant and were
       # defined in the same file, then it is that constant's declaration
       declaration = matching_entries.any? do |e|
-        e.name_location == location && e.uri == @uri
+        e.uri == @uri && e.name_location == location
       end
 
       @references << Reference.new(name, location, declaration: declaration)
