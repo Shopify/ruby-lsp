@@ -334,8 +334,7 @@ module RubyIndexer
           Entry::Constant,
           Entry::ConstantAlias,
           Entry::UnresolvedConstantAlias,
-          Entry::Class
-        ].include?(e.class) &&
+        ].any? { |klass| e.is_a?(klass) } &&
           e.name == @target.fully_qualified_name
       end
 
