@@ -92,14 +92,12 @@ module RubyLsp
       def attribute_actions
         return [] unless @document.is_a?(RubyDocument)
 
-        node = (
-          if @range.dig(:start) != @range.dig(:end)
-            @document.locate_first_within_range(
-              @range,
-              node_types: INSTANCE_VARIABLE_NODES,
-            )
-          end
-        )
+        node = if @range.dig(:start) != @range.dig(:end)
+          @document.locate_first_within_range(
+            @range,
+            node_types: INSTANCE_VARIABLE_NODES,
+          )
+        end
 
         if node.nil?
           start_index, _ = @document.find_index_by_position(@range[:start], @range[:end])

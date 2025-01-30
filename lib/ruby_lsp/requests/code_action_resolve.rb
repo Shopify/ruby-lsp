@@ -334,14 +334,12 @@ module RubyLsp
       def create_attribute_accessor
         source_range = @code_action.dig(:data, :range)
 
-        node = (
-          if source_range[:start] != source_range[:end]
-            @document.locate_first_within_range(
-              @code_action.dig(:data, :range),
-              node_types: CodeActions::INSTANCE_VARIABLE_NODES,
-            )
-          end
-        )
+        node = if source_range[:start] != source_range[:end]
+          @document.locate_first_within_range(
+            @code_action.dig(:data, :range),
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+          )
+        end
 
         if node.nil?
           start_index, _ = @document.find_index_by_position(source_range[:start], source_range[:end])
@@ -368,21 +366,16 @@ module RubyLsp
           ),
         )
 
-        start_index, _ = @document.find_index_by_position(
+        node_context = @document.locate_node(
           {
             line: node.location.start_line,
             character: node.location.start_character_column,
           },
-        )
-        node_context = RubyDocument.locate(
-          @document.parse_result.value,
-          start_index,
           node_types: [
             Prism::ClassNode,
             Prism::ModuleNode,
             Prism::SingletonClassNode,
           ],
-          code_units_cache: @document.code_units_cache,
         )
         closest_node = node_context.node
         return Error::InvalidTargetRange if closest_node.nil?
@@ -390,16 +383,14 @@ module RubyLsp
         attribute_name = node.name[1..]
         indentation = " " * (closest_node.location.start_column + 2)
         attribute_accessor_source = T.must(
-          (
-            case @code_action[:title]
-            when CodeActions::CREATE_ATTRIBUTE_READER
-              "#{indentation}attr_reader :#{attribute_name}\n\n"
-            when CodeActions::CREATE_ATTRIBUTE_WRITER
-              "#{indentation}attr_writer :#{attribute_name}\n\n"
-            when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
-              "#{indentation}attr_accessor :#{attribute_name}\n\n"
-            end
-          ),
+          case @code_action[:title]
+          when CodeActions::CREATE_ATTRIBUTE_READER
+            "#{indentation}attr_reader :#{attribute_name}\n\n"
+          when CodeActions::CREATE_ATTRIBUTE_WRITER
+            "#{indentation}attr_writer :#{attribute_name}\n\n"
+          when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+            "#{indentation}attr_accessor :#{attribute_name}\n\n"
+          end,
         )
 
         target_start_line = closest_node.location.start_line
