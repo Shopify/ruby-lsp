@@ -1561,6 +1561,23 @@ module RubyIndexer
       assert_equal("Foo::Bar", entry.name)
     end
 
+    def test_first_unqualified_const_prefers_exact_matches
+      index(<<~RUBY)
+        module Foo
+          class ParseResultType
+          end
+        end
+
+        module Namespace
+          class Type
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.first_unqualified_const("Type")&.first)
+      assert_equal("Namespace::Type", entry.name)
+    end
+
     def test_completion_does_not_duplicate_overridden_methods
       index(<<~RUBY)
         class Foo
