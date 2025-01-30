@@ -80,8 +80,8 @@ module RubyLsp
             kind: Constant::CodeActionKind::REFACTOR_REWRITE,
             data: { range: @range, uri: @uri.to_s },
           )
-          code_actions.concat(attribute_actions)
         end
+        code_actions.concat(attribute_actions)
 
         code_actions
       end
@@ -92,9 +92,13 @@ module RubyLsp
       def attribute_actions
         return [] unless @document.is_a?(RubyDocument)
 
-        node = @document.locate_first_within_range(
-          @range,
-          node_types: INSTANCE_VARIABLE_NODES,
+        node = (
+          if @range.dig(:start) != @range.dig(:end)
+            @document.locate_first_within_range(
+              @range,
+              node_types: INSTANCE_VARIABLE_NODES,
+            )
+          end
         )
 
         if node.nil?

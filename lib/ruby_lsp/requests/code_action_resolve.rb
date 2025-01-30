@@ -333,11 +333,14 @@ module RubyLsp
       sig { returns(T.any(Interface::CodeAction, Error)) }
       def create_attribute_accessor
         source_range = @code_action.dig(:data, :range)
-        return Error::EmptySelection if source_range[:start] == source_range[:end]
 
-        node = @document.locate_first_within_range(
-          @code_action.dig(:data, :range),
-          node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+        node = (
+          if source_range[:start] != source_range[:end]
+            @document.locate_first_within_range(
+              @code_action.dig(:data, :range),
+              node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+            )
+          end
         )
 
         if node.nil?

@@ -5,12 +5,12 @@
     "data": {
       "range": {
         "start": {
-          "line": 2,
-          "character": 0
+          "line": 0,
+          "character": 1
         },
         "end": {
-          "line": 2,
-          "character": 16
+          "line": 0,
+          "character": 1
         }
       },
       "uri": "file:///fake"
