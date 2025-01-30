@@ -446,6 +446,8 @@ Rename allows developers to rename all occurrences of the entity under the curso
 renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
 
+Rename is currently only supported for constants, module names and class names.
+
 ![Rename demo](images/rename.gif)
 
 ### Find references
