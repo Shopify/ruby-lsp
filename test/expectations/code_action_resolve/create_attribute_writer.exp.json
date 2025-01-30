@@ -37,7 +37,7 @@
                   "character": 0
                 }
               },
-              "newText": "  attr_accessor :foo\n\n"
+              "newText": "    attr_writer :foo\n\n"
             }
           ]
         }
