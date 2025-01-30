@@ -2109,5 +2109,57 @@ module RubyIndexer
       refute_nil(entry, "Expected indexer to be able to handle unsaved URIs")
       assert_equal("I added this comment!", entry.comments)
     end
+
+    def test_instance_variable_completion_returns_class_variables_too
+      index(<<~RUBY)
+        class Parent
+          @@abc = 123
+        end
+
+        class Child < Parent
+          @@adf = 123
+
+          def self.do
+          end
+        end
+      RUBY
+
+      abc, adf = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+
+      refute_nil(abc)
+      refute_nil(adf)
+
+      assert_equal("@@abc", abc.name)
+      assert_equal("@@adf", adf.name)
+    end
+
+    def test_class_variable_completion_from_singleton_context
+      index(<<~RUBY)
+        class Foo
+          @@hello = 123
+
+          def self.do
+          end
+        end
+      RUBY
+
+      candidates = @index.class_variable_completion_candidates("@@", "Foo::<Class:Foo>")
+      refute_empty(candidates)
+
+      assert_equal("@@hello", candidates.first&.name)
+    end
+
+    def test_resolve_class_variable_in_singleton_context
+      index(<<~RUBY)
+        class Foo
+          @@hello = 123
+        end
+      RUBY
+
+      candidates = @index.resolve_class_variable("@@hello", "Foo::<Class:Foo>")
+      refute_empty(candidates)
+
+      assert_equal("@@hello", candidates.first&.name)
+    end
   end
 end
