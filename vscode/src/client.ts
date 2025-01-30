@@ -178,10 +178,14 @@ function collectClientOptions(
 
   ruby.gemPath.forEach((gemPath) => {
     supportedSchemes.forEach((scheme) => {
+      // On Windows, gem paths may be using backslashes, but those are not valid as a glob pattern. We need to ensure
+      // that we're using forward slashes for the document selectors
+      const pathAsGlobPattern = gemPath.replace(/\\/g, "/");
+
       documentSelector.push({
         scheme,
         language: "ruby",
-        pattern: `${gemPath}/**/*`,
+        pattern: `${pathAsGlobPattern}/**/*`,
       });
 
       // Because of how default gems are installed, the gemPath location is actually not exactly where the files are
@@ -193,11 +197,11 @@ function collectClientOptions(
       //
       // Notice that we still need to add the regular path to the selector because some version managers will install
       // gems under the non-corrected path
-      if (/lib\/ruby\/gems\/(?=\d)/.test(gemPath)) {
+      if (/lib\/ruby\/gems\/(?=\d)/.test(pathAsGlobPattern)) {
         documentSelector.push({
           scheme,
           language: "ruby",
-          pattern: `${gemPath.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
+          pattern: `${pathAsGlobPattern.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
         });
       }
     });

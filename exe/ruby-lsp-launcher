@@ -51,7 +51,7 @@ end
 
 begin
   # Wait until the composed Bundle is finished
-  Process.wait(pid)
+  _, status = Process.wait2(pid)
 rescue Errno::ECHILD
   # In theory, the child process can finish before we even get to the wait call, but that is not an error
 end
@@ -105,7 +105,7 @@ end
 # flow, we are not booting the LSP yet, just checking if the bundle is valid before rebooting
 if reboot
   # Use the exit status to signal to the server if composing the bundle succeeded
-  exit(install_error || setup_error ? 1 : 0)
+  exit(install_error || setup_error ? 1 : status&.exitstatus || 0)
 end
 
 # Now that the bundle is set up, we can begin actually launching the server. Note that `Bundler.setup` will have already

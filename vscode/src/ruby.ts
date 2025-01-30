@@ -260,8 +260,11 @@ export class Ruby implements RubyInterface {
 
     this.sanitizeEnvironment(env);
 
-    // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
-    process.env = env;
+    if (this.context.extensionMode !== vscode.ExtensionMode.Test) {
+      // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
+      process.env = env;
+    }
+
     this._env = env;
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);

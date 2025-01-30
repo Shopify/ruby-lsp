@@ -69,7 +69,7 @@ If using VS Code, all you have to do is install the [Ruby LSP
 extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
 editor. Do not install the `ruby-lsp` gem manually.
 
-For more information on using and configuring the extension, see the extension's [README.md](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md).
+For more information on using and configuring the extension, see the [extension page](vscode-extension.html).
 
 ### With other editors
 
@@ -445,6 +445,8 @@ user.a
 Rename allows developers to rename all occurrences of the entity under the cursor across the entire project. In VS Code
 renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
+
+Rename is currently only supported for constants, module names and class names.
 
 ![Rename demo](images/rename.gif)
 

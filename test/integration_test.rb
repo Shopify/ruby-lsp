@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "open3"
 
 class IntegrationTest < Minitest::Test
   def setup

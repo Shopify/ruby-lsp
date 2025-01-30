@@ -120,8 +120,16 @@ module RubyIndexer
       )]))
     end
     def first_unqualified_const(name)
+      # Look for an exact match first
       _name, entries = @entries.find do |const_name, _entries|
-        const_name.end_with?(name)
+        const_name == name || const_name.end_with?("::#{name}")
+      end
+
+      # If an exact match is not found, then try to find a constant that ends with the name
+      unless entries
+        _name, entries = @entries.find do |const_name, _entries|
+          const_name.end_with?(name)
+        end
       end
 
       T.cast(
