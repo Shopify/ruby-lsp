@@ -128,7 +128,7 @@ module RubyIndexer
     def on_class_node_enter(node)
       constant_path = node.constant_path
       name = constant_path.slice
-      nesting = actual_nesting(name)
+      nesting = Index.actual_nesting(@stack, name)
 
       if @target.is_a?(ConstTarget) && nesting.join("::") == @target.fully_qualified_name
         @references << Reference.new(name, constant_path.location, declaration: true)
@@ -146,7 +146,7 @@ module RubyIndexer
     def on_module_node_enter(node)
       constant_path = node.constant_path
       name = constant_path.slice
-      nesting = actual_nesting(name)
+      nesting = Index.actual_nesting(@stack, name)
 
       if @target.is_a?(ConstTarget) && nesting.join("::") == @target.fully_qualified_name
         @references << Reference.new(name, constant_path.location, declaration: true)
@@ -319,20 +319,6 @@ module RubyIndexer
     end
 
     private
-
-    sig { params(name: String).returns(T::Array[String]) }
-    def actual_nesting(name)
-      nesting = @stack + [name]
-      corrected_nesting = []
-
-      nesting.reverse_each do |name|
-        corrected_nesting.prepend(name.delete_prefix("::"))
-
-        break if name.start_with?("::")
-      end
-
-      corrected_nesting
-    end
 
     sig { params(name: String, location: Prism::Location).void }
     def collect_constant_references(name, location)

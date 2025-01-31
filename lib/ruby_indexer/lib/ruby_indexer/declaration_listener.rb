@@ -91,7 +91,7 @@ module RubyIndexer
     def on_class_node_enter(node)
       constant_path = node.constant_path
       superclass = node.superclass
-      nesting = actual_nesting(constant_path.slice)
+      nesting = Index.actual_nesting(@stack, constant_path.slice)
 
       parent_class = case superclass
       when Prism::ConstantReadNode, Prism::ConstantPathNode
@@ -144,7 +144,7 @@ module RubyIndexer
       if current_owner
         expression = node.expression
         name = (expression.is_a?(Prism::SelfNode) ? "<Class:#{last_name_in_stack}>" : "<Class:#{expression.slice}>")
-        real_nesting = actual_nesting(name)
+        real_nesting = Index.actual_nesting(@stack, name)
 
         existing_entries = T.cast(@index[real_nesting.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
 
@@ -516,7 +516,7 @@ module RubyIndexer
       name_loc = Location.from_prism_location(name_location, @code_units_cache)
 
       entry = Entry::Module.new(
-        actual_nesting(name),
+        Index.actual_nesting(@stack, name),
         @uri,
         location,
         name_loc,
@@ -536,7 +536,7 @@ module RubyIndexer
       ).void
     end
     def add_class(name_or_nesting, full_location, name_location, parent_class_name: nil, comments: nil)
-      nesting = name_or_nesting.is_a?(Array) ? name_or_nesting : actual_nesting(name_or_nesting)
+      nesting = name_or_nesting.is_a?(Array) ? name_or_nesting : Index.actual_nesting(@stack, name_or_nesting)
       entry = Entry::Class.new(
         nesting,
         @uri,
@@ -1102,20 +1102,6 @@ module RubyIndexer
         names_with_commas = names.join(", ")
         :"(#{names_with_commas})"
       end
-    end
-
-    sig { params(name: String).returns(T::Array[String]) }
-    def actual_nesting(name)
-      nesting = @stack + [name]
-      corrected_nesting = []
-
-      nesting.reverse_each do |name|
-        corrected_nesting.prepend(name.delete_prefix("::"))
-
-        break if name.start_with?("::")
-      end
-
-      corrected_nesting
     end
 
     sig { params(short_name: String, entry: Entry::Namespace).void }
