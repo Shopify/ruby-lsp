@@ -16,6 +16,7 @@ const STOPPED_SERVER_OPTIONS = [
 const STARTED_SERVER_OPTIONS = [
   { label: "Ruby LSP: Stop", description: Command.Stop },
   { label: "Ruby LSP: Restart", description: Command.Restart },
+  { label: "Ruby LSP: Show changelog", description: Command.Changelog },
 ];
 
 export abstract class StatusItem {
