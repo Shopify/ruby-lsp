@@ -1,0 +1,47 @@
+{
+  "params": {
+    "kind": "",
+    "title": "Create Attribute Writer",
+    "data": {
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 0
+        },
+        "end": {
+          "line": 4,
+          "character": 0
+        }
+      },
+      "uri": "file:///fake"
+    }
+  },
+  "result": {
+    "title": "Create Attribute Writer",
+    "edit": {
+      "documentChanges": [
+        {
+          "textDocument": {
+            "uri": "file:///fake",
+            "version": null
+          },
+          "edits": [
+            {
+              "range": {
+                "start": {
+                  "line": 2,
+                  "character": 0
+                },
+                "end": {
+                  "line": 2,
+                  "character": 0
+                }
+              },
+              "newText": "    attr_writer :foo\n\n"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
