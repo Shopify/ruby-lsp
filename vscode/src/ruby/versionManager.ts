@@ -14,29 +14,29 @@ export interface ActivationResult {
   gemPath: string[];
 }
 
+// Changes to either one of these values have to be synchronized with a corresponding update in `activation.rb`
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
+export const VALUE_SEPARATOR = "RUBY_LSP_VS";
+export const FIELD_SEPARATOR = "RUBY_LSP_FS";
 
 export abstract class VersionManager {
-  public activationScript = [
-    `STDERR.print("${ACTIVATION_SEPARATOR}" + `,
-    "{ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION, gemPath: Gem.path }.to_json + ",
-    `"${ACTIVATION_SEPARATOR}")`,
-  ].join("");
-
   protected readonly outputChannel: WorkspaceChannel;
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
   protected readonly manuallySelectRuby: () => Promise<void>;
 
+  private readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
 
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    context: vscode.ExtensionContext,
     manuallySelectRuby: () => Promise<void>,
   ) {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
+    this.context = context;
     this.manuallySelectRuby = manuallySelectRuby;
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -59,28 +59,33 @@ export abstract class VersionManager {
   // language server
   abstract activate(): Promise<ActivationResult>;
 
-  protected async runEnvActivationScript(activatedRuby: string) {
+  protected async runEnvActivationScript(
+    activatedRuby: string,
+  ): Promise<ActivationResult> {
+    const activationUri = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "activation.rb",
+    );
+
     const result = await this.runScript(
-      `${activatedRuby} -W0 -rjson -e '${this.activationScript}'`,
+      `${activatedRuby} -EUTF-8:UTF-8 '${activationUri.fsPath}'`,
     );
 
     const activationContent = new RegExp(
-      `${ACTIVATION_SEPARATOR}(.*)${ACTIVATION_SEPARATOR}`,
+      `${ACTIVATION_SEPARATOR}([^]*)${ACTIVATION_SEPARATOR}`,
     ).exec(result.stderr);
 
-    return this.parseWithErrorHandling(activationContent![1]);
-  }
+    const [version, gemPath, yjit, ...envEntries] =
+      activationContent![1].split(FIELD_SEPARATOR);
 
-  protected parseWithErrorHandling(json: string) {
-    try {
-      return JSON.parse(json);
-    } catch (error: any) {
-      this.outputChannel.error(
-        `Tried parsing invalid JSON environment: ${json}`,
-      );
-
-      throw error;
-    }
+    return {
+      version,
+      gemPath: gemPath.split(","),
+      yjit: yjit === "true",
+      env: Object.fromEntries(
+        envEntries.map((entry) => entry.split(VALUE_SEPARATOR)),
+      ),
+    };
   }
 
   // Runs the given command in the directory for the Bundle, using the user's preferred shell and inheriting the current
@@ -98,14 +103,12 @@ export abstract class VersionManager {
     this.outputChannel.info(
       `Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`,
     );
-    this.outputChannel.debug(
-      `Environment used for command: ${JSON.stringify(process.env)}`,
-    );
 
     return asyncExec(command, {
       cwd: this.bundleUri.fsPath,
       shell,
       env: process.env,
+      encoding: "utf-8",
     });
   }
 

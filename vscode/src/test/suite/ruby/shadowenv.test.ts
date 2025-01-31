@@ -30,6 +30,19 @@ suite("Shadowenv", () => {
     return;
   }
 
+  const extensionPath = path.dirname(
+    path.dirname(path.dirname(path.dirname(path.dirname(__dirname)))),
+  );
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.file(path.join(extensionPath, "vscode")),
+  } as unknown as vscode.ExtensionContext;
+
   let rootPath: string;
   let workspacePath: string;
   let workspaceFolder: vscode.WorkspaceFolder;
@@ -133,6 +146,7 @@ suite("Shadowenv", () => {
     const shadowenv = new Shadowenv(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await shadowenv.activate();
@@ -153,6 +167,7 @@ suite("Shadowenv", () => {
     const shadowenv = new Shadowenv(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await shadowenv.activate();
@@ -179,6 +194,7 @@ suite("Shadowenv", () => {
     const shadowenv = new Shadowenv(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await shadowenv.activate();
@@ -209,6 +225,7 @@ suite("Shadowenv", () => {
     const shadowenv = new Shadowenv(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
 
@@ -232,6 +249,7 @@ suite("Shadowenv", () => {
     const shadowenv = new Shadowenv(
       workspaceFolder,
       outputChannel,
+      context,
       async () => {},
     );
 
