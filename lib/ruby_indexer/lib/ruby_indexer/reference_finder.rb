@@ -306,20 +306,6 @@ module RubyIndexer
 
     private
 
-    sig { params(name: String).returns(T::Array[String]) }
-    def actual_nesting(name)
-      nesting = @stack + [name]
-      corrected_nesting = []
-
-      nesting.reverse_each do |name|
-        corrected_nesting.prepend(name.delete_prefix("::"))
-
-        break if name.start_with?("::")
-      end
-
-      corrected_nesting
-    end
-
     sig { params(name: String, location: Prism::Location).void }
     def collect_constant_references(name, location)
       return unless @target.is_a?(ConstTarget)

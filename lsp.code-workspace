@@ -7,11 +7,16 @@
         {
             "path": "vscode",
             "name": "extension"
+        },
+        {
+            "path": "jekyll",
+            "name": "jekyll"
         }
     ],
     "settings": {
         "files.exclude": {
             "vscode": true,
+            "jekyll": true,
             "**/out": true,
         },
         "search.exclude": {

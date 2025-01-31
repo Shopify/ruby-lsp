@@ -15,6 +15,27 @@ module RubyIndexer
     sig { returns(Configuration) }
     attr_reader :configuration
 
+    class << self
+      extend T::Sig
+
+      # Returns the real nesting of a constant name taking into account top level
+      # references that may be included anywhere in the name or nesting where that
+      # constant was found
+      sig { params(stack: T::Array[String], name: String).returns(T::Array[String]) }
+      def actual_nesting(stack, name)
+        nesting = stack + [name]
+        corrected_nesting = []
+
+        nesting.reverse_each do |name|
+          corrected_nesting.prepend(name.delete_prefix("::"))
+
+          break if name.start_with?("::")
+        end
+
+        corrected_nesting
+      end
+    end
+
     sig { void }
     def initialize
       # Holds all entries in the index using the following format:
@@ -601,7 +622,7 @@ module RubyIndexer
       entries = self[variable_name]&.grep(Entry::ClassVariable)
       return unless entries&.any?
 
-      ancestors = linearized_ancestors_of(owner_name)
+      ancestors = linearized_attached_ancestors(owner_name)
       return if ancestors.empty?
 
       entries.select { |e| ancestors.include?(e.owner&.name) }
@@ -609,12 +630,33 @@ module RubyIndexer
 
     # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
     # include the `@` prefix
-    sig { params(name: String, owner_name: String).returns(T::Array[Entry::InstanceVariable]) }
+    sig do
+      params(name: String, owner_name: String).returns(T::Array[T.any(Entry::InstanceVariable, Entry::ClassVariable)])
+    end
     def instance_variable_completion_candidates(name, owner_name)
-      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::InstanceVariable])
+      entries = T.cast(prefix_search(name).flatten, T::Array[T.any(Entry::InstanceVariable, Entry::ClassVariable)])
+      # Avoid wasting time linearizing ancestors if we didn't find anything
+      return entries if entries.empty?
+
       ancestors = linearized_ancestors_of(owner_name)
 
-      variables = entries.select { |e| ancestors.any?(e.owner&.name) }
+      instance_variables, class_variables = entries.partition { |e| e.is_a?(Entry::InstanceVariable) }
+      variables = instance_variables.select { |e| ancestors.any?(e.owner&.name) }
+
+      # Class variables are only owned by the attached class in our representation. If the owner is in a singleton
+      # context, we have to search for ancestors of the attached class
+      if class_variables.any?
+        name_parts = owner_name.split("::")
+
+        if name_parts.last&.start_with?("<Class:")
+          attached_name = T.must(name_parts[0..-2]).join("::")
+          attached_ancestors = linearized_ancestors_of(attached_name)
+          variables.concat(class_variables.select { |e| attached_ancestors.any?(e.owner&.name) })
+        else
+          variables.concat(class_variables.select { |e| ancestors.any?(e.owner&.name) })
+        end
+      end
+
       variables.uniq!(&:name)
       variables
     end
@@ -622,8 +664,10 @@ module RubyIndexer
     sig { params(name: String, owner_name: String).returns(T::Array[Entry::ClassVariable]) }
     def class_variable_completion_candidates(name, owner_name)
       entries = T.cast(prefix_search(name).flatten, T::Array[Entry::ClassVariable])
-      ancestors = linearized_ancestors_of(owner_name)
+      # Avoid wasting time linearizing ancestors if we didn't find anything
+      return entries if entries.empty?
 
+      ancestors = linearized_attached_ancestors(owner_name)
       variables = entries.select { |e| ancestors.any?(e.owner&.name) }
       variables.uniq!(&:name)
       variables
@@ -724,6 +768,20 @@ module RubyIndexer
     end
 
     private
+
+    # Always returns the linearized ancestors for the attached class, regardless of whether `name` refers to a singleton
+    # or attached namespace
+    sig { params(name: String).returns(T::Array[String]) }
+    def linearized_attached_ancestors(name)
+      name_parts = name.split("::")
+
+      if name_parts.last&.start_with?("<Class:")
+        attached_name = T.must(name_parts[0..-2]).join("::")
+        linearized_ancestors_of(attached_name)
+      else
+        linearized_ancestors_of(name)
+      end
+    end
 
     # Runs the registered included hooks
     sig { params(fully_qualified_name: String, nesting: T::Array[String]).void }
