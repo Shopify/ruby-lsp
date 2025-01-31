@@ -85,6 +85,7 @@ export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 export const FEATURE_FLAGS = {
   tapiocaAddon: 0.5,
   launcher: 0.1,
+  fullTestDiscovery: -1,
 };
 
 type FeatureFlagConfigurationKey = keyof typeof FEATURE_FLAGS | "all";
