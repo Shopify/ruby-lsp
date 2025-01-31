@@ -110,4 +110,32 @@ suite("Common", () => {
     stub.restore();
     assert.strictEqual(result, true);
   });
+
+  test("only returns true if explicitly opting into under development flags", () => {
+    (FEATURE_FLAGS as any).fakeFeature = -1;
+
+    // With only `all` enabled
+    const firstStub = sandbox
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: () => {
+          return { all: true };
+        },
+      } as any);
+
+    firstStub.restore();
+    assert.strictEqual(featureEnabled("fakeFeature" as any), false);
+
+    // With fakeFeature enabled
+    const secondStub = sandbox
+      .stub(vscode.workspace, "getConfiguration")
+      .returns({
+        get: () => {
+          return { all: true, fakeFeature: true };
+        },
+      } as any);
+
+    assert.strictEqual(featureEnabled("fakeFeature" as any), true);
+    secondStub.restore();
+  });
 });
