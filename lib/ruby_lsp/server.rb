@@ -16,7 +16,9 @@ module RubyLsp
         send_log_message("Initializing Ruby LSP v#{VERSION}...")
         run_initialize(message)
       when "initialized"
-        send_log_message("Finished initializing Ruby LSP!") unless @test_mode
+        send_log_message("Finished initializing Ruby LSP!
+                          To checkout what's new with this update, please visit
+                          https://github.com/Shopify/ruby-lsp/releases/tag/v#{VERSION}") unless @test_mode
 
         run_initialized
       when "textDocument/didOpen"
