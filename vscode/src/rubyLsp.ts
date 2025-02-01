@@ -248,6 +248,15 @@ export class RubyLsp {
         Command.ShowSyntaxTree,
         this.showSyntaxTree.bind(this),
       ),
+      vscode.commands.registerCommand(Command.ShowChangelog, () => {
+        const version = this.currentActiveWorkspace()?.lspClient?.serverVersion
+        return vscode.env.openExternal(
+          vscode.Uri.parse(
+            `https://github.com/Shopify/ruby-lsp/releases/tag/v${version}`
+          ),
+        );
+      }
+      ),
       vscode.commands.registerCommand(Command.FormatterHelp, () => {
         return vscode.env.openExternal(
           vscode.Uri.parse(
