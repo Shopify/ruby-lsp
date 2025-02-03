@@ -100,12 +100,9 @@ module RubyLsp
         end
 
         if node.nil?
-          start_index, _ = @document.find_index_by_position(@range[:start], @range[:end])
-          node_context = RubyDocument.locate(
-            @document.parse_result.value,
-            start_index,
-            node_types: INSTANCE_VARIABLE_NODES,
-            code_units_cache: @document.code_units_cache,
+          node_context = @document.locate_node(
+            @range[:start],
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
           )
           return [] unless INSTANCE_VARIABLE_NODES.include?(node_context.node.class)
         end

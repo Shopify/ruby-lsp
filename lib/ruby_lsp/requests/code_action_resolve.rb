@@ -342,12 +342,9 @@ module RubyLsp
         end
 
         if node.nil?
-          start_index, _ = @document.find_index_by_position(source_range[:start], source_range[:end])
-          node_context = RubyDocument.locate(
-            @document.parse_result.value,
-            start_index,
+          node_context = @document.locate_node(
+            source_range[:start],
             node_types: CodeActions::INSTANCE_VARIABLE_NODES,
-            code_units_cache: @document.code_units_cache,
           )
           node = node_context.node
 
