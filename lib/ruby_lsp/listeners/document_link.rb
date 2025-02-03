@@ -124,7 +124,16 @@ module RubyLsp
         match = comment.location.slice.match(%r{source://.*#\d+$})
         return unless match
 
-        uri = T.cast(URI(T.must(match[0])), URI::Source)
+        uri = T.cast(
+          begin
+            URI(T.must(match[0]))
+          rescue URI::Error
+            nil
+          end,
+          T.nilable(URI::Source),
+        )
+        return unless uri
+
         gem_version = resolve_version(uri)
         return if gem_version.nil?
 
