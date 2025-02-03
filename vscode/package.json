@@ -750,7 +750,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-electron": "^2.4.1",
-    "@vscode/vsce": "^3.2.1",
+    "@vscode/vsce": "^3.2.2",
     "esbuild": "^0.24.2",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.7.0",
