@@ -84,7 +84,7 @@ export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 // Note 2: -1 is a special value used to indicate under development features. Those can only be enabled explicitly and
 // are not impacted by the user's choice of opting into all flags
 export const FEATURE_FLAGS = {
-  tapiocaAddon: 0.5,
+  tapiocaAddon: 1.0,
   launcher: 0.1,
 };
 
