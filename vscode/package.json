@@ -87,7 +87,7 @@
       },
       {
         "command": "rubyLsp.showServerChangelog",
-        "title": "Show the server changelog",
+        "title": "Open server changelog in browser",
         "category": "Ruby LSP"
       },
       {
