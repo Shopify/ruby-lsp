@@ -473,11 +473,11 @@ module RubyLsp
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
-      if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
+      if document.is_a?(RubyDocument) && document.should_index?
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
         # updated on save
         @global_state.synchronize do
-          send_log_message("Detected that last edit may have modified declarations. Re-indexing #{uri}")
+          send_log_message("Determined that document should be indexed: #{uri}")
 
           @global_state.index.handle_change(uri) do |index|
             index.delete(uri, skip_require_paths_tree: true)
