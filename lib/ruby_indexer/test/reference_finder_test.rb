@@ -274,6 +274,30 @@ module RubyIndexer
       assert_equal(8, refs[1].location.start_line)
     end
 
+    def test_accounts_for_reopened_classes
+      refs = find_const_references("Foo", <<~RUBY)
+        class Foo
+        end
+        class Foo
+          class Bar
+          end
+        end
+
+        Foo.new
+      RUBY
+
+      assert_equal(3, refs.size)
+
+      assert_equal("Foo", refs[0].name)
+      assert_equal(1, refs[0].location.start_line)
+
+      assert_equal("Foo", refs[1].name)
+      assert_equal(3, refs[1].location.start_line)
+
+      assert_equal("Foo", refs[2].name)
+      assert_equal(8, refs[2].location.start_line)
+    end
+
     private
 
     def find_const_references(const_name, source)
@@ -293,11 +317,12 @@ module RubyIndexer
 
     def find_references(target, source)
       file_path = "/fake.rb"
+      uri = URI::Generic.from_path(path: file_path)
       index = Index.new
-      index.index_single(URI::Generic.from_path(path: file_path), source)
+      index.index_single(uri, source)
       parse_result = Prism.parse(source)
       dispatcher = Prism::Dispatcher.new
-      finder = ReferenceFinder.new(target, index, dispatcher)
+      finder = ReferenceFinder.new(target, index, dispatcher, uri)
       dispatcher.visit(parse_result.value)
       finder.references
     end

@@ -44,5 +44,17 @@ module RubyIndexer
       @start_column = start_column
       @end_column = end_column
     end
+
+    sig do
+      params(
+        other: T.any(Location, Prism::Location),
+      ).returns(T::Boolean)
+    end
+    def ==(other)
+      start_line == other.start_line &&
+        end_line == other.end_line &&
+        start_column == other.start_column &&
+        end_column == other.end_column
+    end
   end
 end

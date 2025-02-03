@@ -158,6 +158,7 @@ module RubyLsp
           target,
           @global_state.index,
           dispatcher,
+          uri,
           include_declarations: @params.dig(:context, :includeDeclaration) || true,
         )
         dispatcher.visit(parse_result.value)
