@@ -339,6 +339,7 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
       test("or assignment", () => {
         const ruby = "local ||= 1";
         const expectedTokens = [
@@ -354,6 +355,7 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
       test("and assignment in a condition", () => {
         const ruby = "if local &&= 1";
         const expectedTokens = [
@@ -371,6 +373,7 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
       test("assignment in a condition", () => {
         const ruby = "if (local = 1)";
         const expectedTokens = [
@@ -384,6 +387,7 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
       test("operation assignment in a condition", () => {
         const ruby = "if (local += 1)";
         const expectedTokens = [
@@ -395,6 +399,33 @@ suite("Grammars", () => {
           [" ", ["source.ruby"]],
           ["1", ["source.ruby", "constant.numeric.ruby"]],
           [")", ["source.ruby", "punctuation.section.function.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("assignment to a string with no spaces", () => {
+        const ruby = "local='string'";
+        const expectedTokens = [
+          ["local", ["source.ruby", "variable.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [
+            "'",
+            [
+              "source.ruby",
+              "string.quoted.single.ruby",
+              "punctuation.definition.string.begin.ruby",
+            ],
+          ],
+          ["string", ["source.ruby", "string.quoted.single.ruby"]],
+          [
+            "'",
+            [
+              "source.ruby",
+              "string.quoted.single.ruby",
+              "punctuation.definition.string.end.ruby",
+            ],
+          ],
         ];
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
