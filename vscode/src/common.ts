@@ -8,7 +8,7 @@ import { State } from "vscode-languageclient";
 export enum Command {
   Start = "rubyLsp.start",
   Stop = "rubyLsp.stop",
-  ShowChangelog = "rubyLsp.showChangelog",
+  ShowServerChangelog = "rubyLsp.showServerChangelog",
   Restart = "rubyLsp.restart",
   Update = "rubyLsp.update",
   ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",

@@ -86,8 +86,8 @@
         "category": "Ruby LSP"
       },
       {
-        "command": "rubyLsp.showChangelog",
-        "title": "Show the Changelog",
+        "command": "rubyLsp.showServerChangelog",
+        "title": "Show the server changelog",
         "category": "Ruby LSP"
       },
       {

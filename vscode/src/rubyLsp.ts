@@ -249,7 +249,11 @@ export class RubyLsp {
         this.showSyntaxTree.bind(this),
       ),
       vscode.commands.registerCommand(Command.ShowChangelog, () => {
-        const version = this.currentActiveWorkspace()?.lspClient?.serverVersion
+        const version = this.currentActiveWorkspace()?.lspClient?.serverVersion;
+        
+        if (!version) {
+          return;
+        }
         return vscode.env.openExternal(
           vscode.Uri.parse(
             `https://github.com/Shopify/ruby-lsp/releases/tag/v${version}`
