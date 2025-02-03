@@ -13,7 +13,7 @@ module RubyLsp
     def process_message(message)
       case message[:method]
       when "initialize"
-        send_log_message("Initializing Ruby LSP v#{VERSION}...")
+        send_log_message("Initializing Ruby LSP v#{VERSION} https://github.com/Shopify/ruby-lsp/releases/tag/v#{VERSION}....")
         run_initialize(message)
       when "initialized"
         send_log_message("Finished initializing Ruby LSP!") unless @test_mode

@@ -86,6 +86,11 @@
         "category": "Ruby LSP"
       },
       {
+        "command": "rubyLsp.showServerChangelog",
+        "title": "Open server changelog in browser",
+        "category": "Ruby LSP"
+      },
+      {
         "command": "rubyLsp.startServerInDebugMode",
         "title": "Debug the Ruby LSP server",
         "category": "Ruby LSP"
