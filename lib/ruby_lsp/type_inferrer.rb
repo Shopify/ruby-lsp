@@ -80,7 +80,7 @@ module RubyLsp
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
         # class/module
-        receiver_name = constant_name(receiver)
+        receiver_name = RubyIndexer::Index.constant_name(receiver)
         return unless receiver_name
 
         resolved_receiver = @index.resolve(receiver_name, node_context.nesting)
@@ -145,18 +145,6 @@ module RubyLsp
       # into its individual parts to build the correct singleton name
       parts = nesting.flat_map { |part| part.split("::") }
       Type.new("#{parts.join("::")}::<Class:#{parts.last}>")
-    end
-
-    sig do
-      params(
-        node: T.any(
-          Prism::ConstantPathNode,
-          Prism::ConstantReadNode,
-        ),
-      ).returns(T.nilable(String))
-    end
-    def constant_name(node)
-      RubyIndexer::Index.constant_name(node)
     end
 
     sig { params(node_context: NodeContext).returns(T.nilable(Type)) }

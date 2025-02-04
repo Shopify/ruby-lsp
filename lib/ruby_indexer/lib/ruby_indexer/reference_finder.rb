@@ -161,7 +161,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ConstantPathNode).void }
     def on_constant_path_node_enter(node)
-      name = constant_name(node)
+      name = Index.constant_name(node)
       return unless name
 
       collect_constant_references(name, node.location)
@@ -169,7 +169,7 @@ module RubyIndexer
 
     sig { params(node: Prism::ConstantReadNode).void }
     def on_constant_read_node_enter(node)
-      name = constant_name(node)
+      name = Index.constant_name(node)
       return unless name
 
       collect_constant_references(name, node.location)
@@ -190,7 +190,7 @@ module RubyIndexer
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
 
-      name = constant_name(target)
+      name = Index.constant_name(target)
       return unless name
 
       collect_constant_references(name, target.location)
@@ -201,7 +201,7 @@ module RubyIndexer
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
 
-      name = constant_name(target)
+      name = Index.constant_name(target)
       return unless name
 
       collect_constant_references(name, target.location)
@@ -212,7 +212,7 @@ module RubyIndexer
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
 
-      name = constant_name(target)
+      name = Index.constant_name(target)
       return unless name
 
       collect_constant_references(name, target.location)
@@ -223,7 +223,7 @@ module RubyIndexer
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
 
-      name = constant_name(target)
+      name = Index.constant_name(target)
       return unless name
 
       collect_constant_references(name, target.location)
@@ -340,19 +340,6 @@ module RubyIndexer
       return unless @target.is_a?(InstanceVariableTarget) && name == @target.name
 
       @references << Reference.new(name, location, declaration: declaration)
-    end
-
-    sig do
-      params(
-        node: T.any(
-          Prism::ConstantPathNode,
-          Prism::ConstantReadNode,
-          Prism::ConstantPathTargetNode,
-        ),
-      ).returns(T.nilable(String))
-    end
-    def constant_name(node)
-      Index.constant_name(node)
     end
   end
 end

@@ -65,7 +65,7 @@ module RubyLsp
           T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode),
         )
 
-        name = constant_name(target)
+        name = RubyIndexer::Index.constant_name(target)
         return unless name
 
         entries = @global_state.index.resolve(name, node_context.nesting)
