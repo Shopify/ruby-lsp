@@ -29,6 +29,13 @@ parser = OptionParser.new do |opts|
     options[:branch] = branch
   end
 
+  opts.on(
+    "--new-addon [NAME]",
+    "Create a new Ruby LSP add-on",
+  ) do |name|
+    options[:new_addon] = name
+  end
+
   opts.on("--doctor", "Run troubleshooting steps") do
     options[:doctor] = true
   end
