@@ -34,6 +34,23 @@ module RubyIndexer
 
         corrected_nesting
       end
+
+      # Returns the full namespace corresponding to a node, or nil if it cannot be determined.
+      sig do
+        params(
+          node: T.any(
+            Prism::ConstantPathNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathTargetNode,
+          ),
+        ).returns(T.nilable(String))
+      end
+      def constant_name(node)
+        node.full_name
+      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
+             Prism::ConstantPathNode::MissingNodesInConstantPathError
+        nil
+      end
     end
 
     sig { void }

@@ -352,10 +352,7 @@ module RubyIndexer
       ).returns(T.nilable(String))
     end
     def constant_name(node)
-      node.full_name
-    rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
-           Prism::ConstantPathNode::MissingNodesInConstantPathError
-      nil
+      Index.constant_name(node)
     end
   end
 end

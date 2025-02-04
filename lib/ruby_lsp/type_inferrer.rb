@@ -156,10 +156,7 @@ module RubyLsp
       ).returns(T.nilable(String))
     end
     def constant_name(node)
-      node.full_name
-    rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
-           Prism::ConstantPathNode::MissingNodesInConstantPathError
-      nil
+      RubyIndexer::Index.constant_name(node)
     end
 
     sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
