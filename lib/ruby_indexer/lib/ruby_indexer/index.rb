@@ -35,7 +35,7 @@ module RubyIndexer
         corrected_nesting
       end
 
-      # Returns the full namespace corresponding to a node, or nil if it cannot be determined.
+      # Returns the unresolved name for a constant reference including all parts of a constant path or nil if the constant contains dynamic or incomplete parts
       sig do
         params(
           node: T.any(
