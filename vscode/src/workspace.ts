@@ -80,7 +80,7 @@ export class Workspace implements WorkspaceInterface {
 
     this.registerCreateDeleteWatcher(
       rootGitUri,
-      ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}",
+      ".git/{rebase-merge,rebase-apply,index.lock,BISECT_START,CHERRY_PICK_HEAD}",
     );
 
     this.registerRestarts();
