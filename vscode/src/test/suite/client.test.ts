@@ -545,7 +545,10 @@ suite("Client", () => {
         textDocument: {
           uri: documentUri.toString(),
         },
-        range: { start: { line: 0 }, end: { line: 0 } },
+        range: {
+          start: { line: 0, character: 1 },
+          end: { line: 0, character: 2 },
+        },
         context: {
           diagnostics: [
             {
