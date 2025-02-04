@@ -293,11 +293,18 @@ module RubyLsp
     end
 
     sig { returns(T::Boolean) }
-    def last_edit_may_change_declarations?
+    def should_index?
       # This method controls when we should index documents. If there's no recent edit and the document has just been
       # opened, we need to index it
       return true unless @last_edit
 
+      last_edit_may_change_declarations?
+    end
+
+    private
+
+    sig { returns(T::Boolean) }
+    def last_edit_may_change_declarations?
       case @last_edit
       when Delete
         # Not optimized yet. It's not trivial to identify that a declaration has been removed since the source is no
@@ -309,8 +316,6 @@ module RubyLsp
         false
       end
     end
-
-    private
 
     sig { params(position: T::Hash[Symbol, Integer]).returns(T::Boolean) }
     def position_may_impact_declarations?(position)

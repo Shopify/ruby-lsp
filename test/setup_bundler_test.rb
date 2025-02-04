@@ -858,6 +858,24 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_only_returns_environment_if_bundle_was_composed_ahead_of_time
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        FileUtils.mkdir(".ruby-lsp")
+        FileUtils.touch(File.join(".ruby-lsp", "bundle_is_composed"))
+
+        require "bundler/cli/update"
+        require "bundler/cli/install"
+        Bundler::CLI::Update.expects(:new).never
+        Bundler::CLI::Install.expects(:new).never
+
+        assert_output("", "Ruby LSP> Composed bundle was set up ahead of time. Skipping...\n") do
+          refute_empty(RubyLsp::SetupBundler.new(dir, launcher: true).setup!)
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)

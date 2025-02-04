@@ -927,33 +927,33 @@ class RubyDocumentTest < Minitest::Test
     RUBY
   end
 
-  def test_last_edit_may_change_declarations_for_inserts
+  def test_should_index_for_inserts
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo
       end
     RUBY
-    assert_predicate(document, :last_edit_may_change_declarations?)
+    assert_predicate(document, :should_index?)
 
     range = { start: { line: 0, character: 9 }, end: { line: 0, character: 9 } }
     document.push_edits([{ range: range, text: "t" }], version: 2)
 
     assert_instance_of(RubyLsp::Document::Insert, document.last_edit)
-    assert_predicate(document, :last_edit_may_change_declarations?)
+    assert_predicate(document, :should_index?)
   end
 
-  def test_last_edit_may_change_declarations_for_replaces
+  def test_should_index_for_replaces
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo
       end
     RUBY
 
-    assert_predicate(document, :last_edit_may_change_declarations?)
+    assert_predicate(document, :should_index?)
 
     range = { start: { line: 0, character: 6 }, end: { line: 0, character: 9 } }
     document.push_edits([{ range: range, text: "Bar" }], version: 2)
 
     assert_instance_of(RubyLsp::Document::Replace, document.last_edit)
-    assert_predicate(document, :last_edit_may_change_declarations?)
+    assert_predicate(document, :should_index?)
   end
 
   private

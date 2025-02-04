@@ -1561,6 +1561,23 @@ module RubyIndexer
       assert_equal("Foo::Bar", entry.name)
     end
 
+    def test_first_unqualified_const_prefers_exact_matches
+      index(<<~RUBY)
+        module Foo
+          class ParseResultType
+          end
+        end
+
+        module Namespace
+          class Type
+          end
+        end
+      RUBY
+
+      entry = T.must(@index.first_unqualified_const("Type")&.first)
+      assert_equal("Namespace::Type", entry.name)
+    end
+
     def test_completion_does_not_duplicate_overridden_methods
       index(<<~RUBY)
         class Foo
@@ -2091,6 +2108,58 @@ module RubyIndexer
       entry = @index["Foo"]&.first
       refute_nil(entry, "Expected indexer to be able to handle unsaved URIs")
       assert_equal("I added this comment!", entry.comments)
+    end
+
+    def test_instance_variable_completion_returns_class_variables_too
+      index(<<~RUBY)
+        class Parent
+          @@abc = 123
+        end
+
+        class Child < Parent
+          @@adf = 123
+
+          def self.do
+          end
+        end
+      RUBY
+
+      abc, adf = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+
+      refute_nil(abc)
+      refute_nil(adf)
+
+      assert_equal("@@abc", abc.name)
+      assert_equal("@@adf", adf.name)
+    end
+
+    def test_class_variable_completion_from_singleton_context
+      index(<<~RUBY)
+        class Foo
+          @@hello = 123
+
+          def self.do
+          end
+        end
+      RUBY
+
+      candidates = @index.class_variable_completion_candidates("@@", "Foo::<Class:Foo>")
+      refute_empty(candidates)
+
+      assert_equal("@@hello", candidates.first&.name)
+    end
+
+    def test_resolve_class_variable_in_singleton_context
+      index(<<~RUBY)
+        class Foo
+          @@hello = 123
+        end
+      RUBY
+
+      candidates = @index.resolve_class_variable("@@hello", "Foo::<Class:Foo>")
+      refute_empty(candidates)
+
+      assert_equal("@@hello", candidates.first&.name)
     end
   end
 end

@@ -104,6 +104,7 @@ new H2 header in this file containing the instructions. -->
 - [Zed](#zed)
 - [RubyMine](#rubymine)
 - [Kate](#kate)
+- [Helix](#helix)
 
 ## Emacs Eglot
 
@@ -122,8 +123,8 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ### nvim-lspconfig
 
-The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_lsp.lua)
-plugin has support for Ruby LSP.
+The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/configs/ruby_lsp.lua) plugin has
+support for Ruby LSP.
 
 The Ruby LSP can be configured using the `init_options` key when setting up the LSP.
 
@@ -304,5 +305,22 @@ Kate will start an instance of the Ruby LSP server in the background for any Rub
 If starting Ruby LSP succeeds, the entries in the LSP-Client menu are activated.
 Otherwise the error output can be inspected in the Output window.
 
+## Helix
+
+To configure the Ruby LSP in Helix you first need to define it as a language server and then set it as the main language server for Ruby.
+This will also set ruby-lsp to be used as a formatter with its built-in rubocop integration.
+
+```toml
+# languages.toml
+
+[language-server.ruby-lsp]
+command = "ruby-lsp"
+config = { diagnostics = true, formatting = true }
+
+[[language]]
+name = "ruby"
+language-servers = ["ruby-lsp"]
+auto-format = true
+```
 
 [mason-abi]: https://github.com/williamboman/mason.nvim/issues/1292

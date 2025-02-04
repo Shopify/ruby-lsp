@@ -7,14 +7,25 @@
 # !!!!!!!
 
 setup_error = nil
+install_error = nil
+reboot = false
 
-# Read the initialize request before even starting the server. We need to do this to figure out the workspace URI.
-# Editors are not required to spawn the language server process on the same directory as the workspace URI, so we need
-# to ensure that we're setting up the bundle in the right place
-$stdin.binmode
-headers = $stdin.gets("\r\n\r\n")
-content_length = headers[/Content-Length: (\d+)/i, 1].to_i
-raw_initialize = $stdin.read(content_length)
+workspace_uri = ARGV.first
+
+raw_initialize = if workspace_uri && !workspace_uri.start_with?("--")
+  # If there's an argument without `--`, then it's the server asking to compose the bundle and passing to this
+  # executable the workspace URI. We can't require gems at this point, so we built a fake initialize request manually
+  reboot = true
+  "{\"params\":{\"workspaceFolders\":[{\"uri\":\"#{workspace_uri}\"}]}}"
+else
+  # Read the initialize request before even starting the server. We need to do this to figure out the workspace URI.
+  # Editors are not required to spawn the language server process on the same directory as the workspace URI, so we need
+  # to ensure that we're setting up the bundle in the right place
+  $stdin.binmode
+  headers = $stdin.gets("\r\n\r\n")
+  content_length = headers[/Content-Length: (\d+)/i, 1].to_i
+  $stdin.read(content_length)
+end
 
 # Compose the Ruby LSP bundle in a forked process so that we can require gems without polluting the main process
 # `$LOAD_PATH` and `Gem.loaded_specs`. Windows doesn't support forking, so we need a separate path to support it
@@ -40,15 +51,9 @@ end
 
 begin
   # Wait until the composed Bundle is finished
-  Process.wait(pid)
+  _, status = Process.wait2(pid)
 rescue Errno::ECHILD
   # In theory, the child process can finish before we even get to the wait call, but that is not an error
-end
-
-error_path = File.join(".ruby-lsp", "install_error")
-
-install_error = if File.exist?(error_path)
-  Marshal.load(File.read(error_path))
 end
 
 begin
@@ -67,6 +72,14 @@ begin
 
     require "bundler"
     Bundler.ui.level = :silent
+
+    # This Marshal load can only happen after requiring Bundler because it will load a custom error class from Bundler
+    # itself. If we try to load before requiring, the class will not be defined and loading will fail
+    error_path = File.join(".ruby-lsp", "install_error")
+    install_error = if File.exist?(error_path)
+      Marshal.load(File.read(error_path))
+    end
+
     Bundler.setup
     $stderr.puts("Composed Bundle set up successfully")
   end
@@ -86,6 +99,13 @@ rescue StandardError => e
   # If Bundler.setup fails, we need to restore the original $LOAD_PATH so that we can still require the Ruby LSP server
   # in degraded mode
   $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+end
+
+# When performing a lockfile re-boot, this executable is invoked to set up the composed bundle ahead of time. In this
+# flow, we are not booting the LSP yet, just checking if the bundle is valid before rebooting
+if reboot
+  # Use the exit status to signal to the server if composing the bundle succeeded
+  exit(install_error || setup_error ? 1 : status&.exitstatus || 0)
 end
 
 # Now that the bundle is set up, we can begin actually launching the server. Note that `Bundler.setup` will have already

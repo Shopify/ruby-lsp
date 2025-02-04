@@ -39,6 +39,12 @@ module RubyLsp
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
             Prism::ConstantPathTargetNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
             Prism::CallNode,
             Prism::DefNode,
           ],
@@ -62,6 +68,12 @@ module RubyLsp
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
             Prism::ConstantPathTargetNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
             Prism::CallNode,
             Prism::DefNode,
           ),
@@ -97,6 +109,12 @@ module RubyLsp
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
             Prism::ConstantPathTargetNode,
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
             Prism::CallNode,
             Prism::DefNode,
           ),
@@ -114,6 +132,14 @@ module RubyLsp
 
           fully_qualified_name = T.must(entries.first).name
           RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
+        when
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableReadNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode
+          RubyIndexer::ReferenceFinder::InstanceVariableTarget.new(target_node.name.to_s)
         when Prism::CallNode, Prism::DefNode
           RubyIndexer::ReferenceFinder::MethodTarget.new(target_node.name.to_s)
         end
@@ -132,6 +158,7 @@ module RubyLsp
           target,
           @global_state.index,
           dispatcher,
+          uri,
           include_declarations: @params.dig(:context, :includeDeclaration) || true,
         )
         dispatcher.visit(parse_result.value)

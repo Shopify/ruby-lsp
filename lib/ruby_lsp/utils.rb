@@ -25,7 +25,7 @@ module RubyLsp
     end,
     String,
   )
-  GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/design-and-roadmap.html#guessed-types"
+  GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
 
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
   # use this custom error class as a way to return a signal to the client that the request should be delegated to the
@@ -36,6 +36,8 @@ module RubyLsp
     # by the specification to avoid conflicting with other error types
     CODE = -32900
   end
+
+  BUNDLE_COMPOSE_FAILED_CODE = -33000
 
   # A notification to be sent to the client
   class Message
@@ -162,7 +164,9 @@ module RubyLsp
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
-      { method: @method, params: T.unsafe(@params).to_hash }
+      hash = { method: @method }
+      hash[:params] = T.unsafe(@params).to_hash if @params
+      hash
     end
   end
 
@@ -206,7 +210,9 @@ module RubyLsp
 
     sig { override.returns(T::Hash[Symbol, T.untyped]) }
     def to_hash
-      { id: @id, method: @method, params: T.unsafe(@params).to_hash }
+      hash = { id: @id, method: @method }
+      hash[:params] = T.unsafe(@params).to_hash if @params
+      hash
     end
   end
 

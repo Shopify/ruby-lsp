@@ -17,7 +17,7 @@ module RubyLsp
         sig { returns(Interface::SemanticTokensRegistrationOptions) }
         def provider
           Interface::SemanticTokensRegistrationOptions.new(
-            document_selector: [{ language: "ruby" }, { language: "erb" }],
+            document_selector: nil,
             legend: Interface::SemanticTokensLegend.new(
               token_types: ResponseBuilders::SemanticHighlighting::TOKEN_TYPES.keys,
               token_modifiers: ResponseBuilders::SemanticHighlighting::TOKEN_MODIFIERS.keys,

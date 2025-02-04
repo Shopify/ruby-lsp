@@ -2,7 +2,7 @@
   "name": "ruby-lsp",
   "displayName": "Ruby LSP",
   "description": "VS Code plugin for connecting with the Ruby LSP",
-  "version": "0.8.17",
+  "version": "0.8.20",
   "publisher": "Shopify",
   "repository": {
     "type": "git",
@@ -83,6 +83,11 @@
       {
         "command": "rubyLsp.stop",
         "title": "Stop",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.showServerChangelog",
+        "title": "Open server changelog in browser",
         "category": "Ruby LSP"
       },
       {
@@ -373,6 +378,7 @@
           "enum": [
             "auto",
             "rubocop",
+            "rubocop_internal",
             "syntax_tree",
             "standard",
             "rubyfmt",
@@ -381,6 +387,7 @@
           "enumDescriptions": [
             "Automatically detect formatter",
             "RuboCop",
+            "Ruby LSP RuboCop integration",
             "Syntax Tree",
             "Standard (supported by community addon)",
             "Rubyfmt (supported by community addon)",
@@ -393,7 +400,7 @@
           "type": "array",
           "examples": [
             [
-              "rubocop"
+              "rubocop_internal"
             ]
           ],
           "default": null
@@ -726,7 +733,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile",
     "format": "eslint '**/*.ts' --fix && prettier '**/*.{json,md,yaml,yml}' --write",
-    "lint": "eslint '**/*.ts' && prettier '**/*.{json,md,yaml,yml}' --check",
+    "lint": "eslint '**/*.ts' --max-warnings=0 && prettier '**/*.{json,md,yaml,yml}' --check",
     "test": "node ./out/test/runTest.js"
   },
   "resolutions": {
@@ -735,9 +742,9 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
+    "@babel/core": "^7.26.7",
     "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.17.0",
+    "@eslint/js": "^9.19.0",
     "@shopify/eslint-plugin": "^46.0.0",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
@@ -748,16 +755,16 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vscode/test-electron": "^2.4.1",
-    "@vscode/vsce": "^3.2.1",
+    "@vscode/vsce": "^3.2.2",
     "esbuild": "^0.24.2",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.7.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "glob": "^11.0.0",
-    "mocha": "^11.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "glob": "^11.0.1",
+    "mocha": "^11.1.0",
     "ovsx": "^0.10.1",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "sinon": "^19.0.2",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.2.0"

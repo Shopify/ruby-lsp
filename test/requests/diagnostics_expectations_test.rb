@@ -10,10 +10,10 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
     @global_state.apply_options({
-      initializationOptions: { linters: ["rubocop"] },
+      initializationOptions: { linters: ["rubocop_internal"] },
     })
     @global_state.register_formatter(
-      "rubocop",
+      "rubocop_internal",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
 

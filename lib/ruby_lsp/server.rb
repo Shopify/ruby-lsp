@@ -13,7 +13,7 @@ module RubyLsp
     def process_message(message)
       case message[:method]
       when "initialize"
-        send_log_message("Initializing Ruby LSP v#{VERSION}...")
+        send_log_message("Initializing Ruby LSP v#{VERSION} https://github.com/Shopify/ruby-lsp/releases/tag/v#{VERSION}....")
         run_initialize(message)
       when "initialized"
         send_log_message("Finished initializing Ruby LSP!") unless @test_mode
@@ -106,6 +106,8 @@ module RubyLsp
               end,
           ),
         )
+      when "rubyLsp/composeBundle"
+        compose_bundle(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -283,6 +285,7 @@ module RubyLsp
           document_range_formatting_provider: true,
           experimental: {
             addon_detection: true,
+            compose_bundle: true,
           },
         ),
         serverInfo: {
@@ -338,8 +341,8 @@ module RubyLsp
       unless @setup_error
         if defined?(Requests::Support::RuboCopFormatter)
           begin
-            @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
-          rescue RuboCop::Error => e
+            @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
+          rescue ::RuboCop::Error => e
             # The user may have provided unknown config switches in .rubocop or
             # is trying to load a non-existent config file.
             send_message(Notification.window_show_message(
@@ -471,11 +474,11 @@ module RubyLsp
       code_lens = Requests::CodeLens.new(global_state, uri, document, dispatcher) if document.is_a?(RubyDocument)
       inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
 
-      if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
+      if document.is_a?(RubyDocument) && document.should_index?
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
         # updated on save
         @global_state.synchronize do
-          send_log_message("Detected that last edit may have modified declarations. Re-indexing #{uri}")
+          send_log_message("Determined that document should be indexed: #{uri}")
 
           @global_state.index.handle_change(uri) do |index|
             index.delete(uri, skip_require_paths_tree: true)
@@ -1034,21 +1037,29 @@ module RubyLsp
       when Constant::FileChangeType::DELETED
         index.delete(uri)
       end
+    rescue Errno::ENOENT
+      # If a file is created and then delete immediately afterwards, we will process the created notification before we
+      # receive the deleted one, but the file no longer exists. This may happen when running a test suite that creates
+      # and deletes files automatically.
     end
 
     sig { params(uri: URI::Generic).void }
     def handle_rubocop_config_change(uri)
       return unless defined?(Requests::Support::RuboCopFormatter)
 
-      send_log_message("Reloading RuboCop since #{uri} changed")
-      @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+      # Register a new runner to reload configurations
+      @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
 
-      # Clear all existing diagnostics since the config changed. This has to happen under a mutex because the `state`
-      # hash cannot be mutated during iteration or that will throw an error
+      # Clear all document caches for pull diagnostics
       @global_state.synchronize do
-        @store.each do |uri, _document|
-          send_message(Notification.publish_diagnostics(uri.to_s, []))
+        @store.each do |_uri, document|
+          document.cache_set("textDocument/diagnostic", Document::EMPTY_CACHE)
         end
+      end
+
+      # Request a pull diagnostic refresh from the editor
+      if @global_state.client_capabilities.supports_diagnostic_refresh
+        send_message(Request.new(id: @current_request_id, method: "workspace/diagnostic/refresh", params: nil))
       end
     end
 
@@ -1212,16 +1223,15 @@ module RubyLsp
     sig { void }
     def check_formatter_is_available
       return if @setup_error
-      # Warn of an unavailable `formatter` setting, e.g. `rubocop` on a project which doesn't have RuboCop.
-      # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
-      return unless @global_state.formatter == "rubocop"
+      # Warn of an unavailable `formatter` setting, e.g. `rubocop_internal` on a project which doesn't have RuboCop.
+      return unless @global_state.formatter == "rubocop_internal"
 
       unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
         @global_state.formatter = "none"
 
         send_message(
           Notification.window_show_message(
-            "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+            "Ruby LSP formatter is set to `rubocop_internal` but RuboCop was not found in the Gemfile or gemspec.",
             type: Constant::MessageType::ERROR,
           ),
         )
@@ -1279,6 +1289,55 @@ module RubyLsp
       return unless addon
 
       addon.handle_window_show_message_response(result[:title])
+    end
+
+    # NOTE: all servers methods are void because they can produce several messages for the client. The only reason this
+    # method returns the created thread is to that we can join it in tests and avoid flakiness. The implementation is
+    # not supposed to rely on the return of this method
+    sig { params(message: T::Hash[Symbol, T.untyped]).returns(T.nilable(Thread)) }
+    def compose_bundle(message)
+      already_composed_path = File.join(@global_state.workspace_path, ".ruby-lsp", "bundle_is_composed")
+      id = message[:id]
+
+      begin
+        Bundler.with_original_env do
+          Bundler::LockfileParser.new(Bundler.default_lockfile.read)
+        end
+      rescue Bundler::LockfileError => e
+        send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: e.message))
+        return
+      rescue Bundler::GemfileNotFound, Errno::ENOENT
+        # We still compose the bundle if there's no Gemfile or if the lockfile got deleted
+      end
+
+      # We compose the bundle in a thread so that the LSP continues to work while we're checking for its validity. Once
+      # we return the response back to the editor, then the restart is triggered
+      Thread.new do
+        send_log_message("Recomposing the bundle ahead of restart")
+
+        _stdout, stderr, status = Bundler.with_unbundled_env do
+          Open3.capture3(
+            Gem.ruby,
+            "-I",
+            File.dirname(T.must(__dir__)),
+            File.expand_path("../../exe/ruby-lsp-launcher", __dir__),
+            @global_state.workspace_uri.to_s,
+            chdir: @global_state.workspace_path,
+          )
+        end
+
+        if status&.exitstatus == 0
+          # Create a signal for the restart that it can skip composing the bundle and launch directly
+          FileUtils.touch(already_composed_path)
+          send_message(Result.new(id: id, response: { success: true }))
+        else
+          # This special error code makes the extension avoid restarting in case we already know that the composed
+          # bundle is not valid
+          send_message(
+            Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle\n#{stderr}"),
+          )
+        end
+      end
     end
   end
 end

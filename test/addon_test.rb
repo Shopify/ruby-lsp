@@ -54,7 +54,9 @@ module RubyLsp
 
     def test_addons_are_automatically_tracked
       Addon.load_addons(@global_state, @outgoing_queue)
-      assert_equal(123, T.unsafe(Addon.addons.first).field)
+
+      addon = Addon.addons.find { |addon| addon.is_a?(@addon) }
+      assert_equal(123, T.unsafe(addon).field)
     end
 
     def test_loading_addons_initializes_them
@@ -99,8 +101,8 @@ module RubyLsp
       end
 
       Addon.load_addons(@global_state, @outgoing_queue)
-      assert_equal(1, Addon.file_watcher_addons.length)
-      assert_instance_of(klass, Addon.file_watcher_addons.first)
+      addon = Addon.file_watcher_addons.find { |a| a.is_a?(klass) }
+      refute_nil(addon)
     end
 
     def test_get_an_addon_by_name

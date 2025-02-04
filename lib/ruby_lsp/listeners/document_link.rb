@@ -124,11 +124,26 @@ module RubyLsp
         match = comment.location.slice.match(%r{source://.*#\d+$})
         return unless match
 
-        uri = T.cast(URI(T.must(match[0])), URI::Source)
+        uri = T.cast(
+          begin
+            URI(T.must(match[0]))
+          rescue URI::Error
+            nil
+          end,
+          T.nilable(URI::Source),
+        )
+        return unless uri
+
         gem_version = resolve_version(uri)
         return if gem_version.nil?
 
-        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(uri.path))
+        path = uri.path
+        return unless path
+
+        gem_name = uri.gem_name
+        return unless gem_name
+
+        file_path = self.class.gem_paths.dig(gem_name, gem_version, CGI.unescape(path))
         return if file_path.nil?
 
         @response_builder << Interface::DocumentLink.new(
@@ -149,7 +164,10 @@ module RubyLsp
 
         return @gem_version unless @gem_version.nil? || @gem_version.empty?
 
-        GEM_TO_VERSION_MAP[uri.gem_name]
+        gem_name = uri.gem_name
+        return unless gem_name
+
+        GEM_TO_VERSION_MAP[gem_name]
       end
     end
   end

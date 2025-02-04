@@ -15,7 +15,7 @@ module RubyLsp
         sig { returns(Interface::DiagnosticRegistrationOptions) }
         def provider
           Interface::DiagnosticRegistrationOptions.new(
-            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            document_selector: nil,
             inter_file_dependencies: false,
             workspace_diagnostics: false,
           )

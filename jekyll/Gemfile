@@ -4,10 +4,10 @@
 source "https://rubygems.org"
 
 # We only need to use Jekyll with CRuby
-gem "jekyll", "~> 4.3.4"
+gem "jekyll", "~> 4.4.1"
 gem "jekyll-feed", "~> 0.12"
 
 # Theme
-gem "just-the-docs", "~> 0.10.0"
+gem "just-the-docs", "~> 0.10.1"
 gem "csv"
 gem "base64"

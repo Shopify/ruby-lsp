@@ -647,5 +647,24 @@ module RubyIndexer
       entry = @index["Foo"].first
       assert_empty(entry.comments)
     end
+
+    def test_singleton_inside_compact_namespace
+      index(<<~RUBY)
+        module Foo::Bar
+          class << self
+            def baz; end
+          end
+        end
+      RUBY
+
+      # Verify we didn't index the incorrect name
+      assert_nil(@index["Foo::Bar::<Class:Foo::Bar>"])
+
+      # Verify we indexed the correct name
+      assert_entry("Foo::Bar::<Class:Bar>", Entry::SingletonClass, "/fake/path/foo.rb:1-2:3-5")
+
+      method = @index["baz"]&.first
+      assert_equal("Foo::Bar::<Class:Bar>", method.owner.name)
+    end
   end
 end

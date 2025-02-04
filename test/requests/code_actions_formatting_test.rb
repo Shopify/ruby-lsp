@@ -70,10 +70,10 @@ class CodeActionsFormattingTest < Minitest::Test
   def assert_corrects_to_expected(diagnostic_code, code_action_title, source, expected)
     global_state = RubyLsp::GlobalState.new
     global_state.apply_options({
-      initializationOptions: { linters: ["rubocop"] },
+      initializationOptions: { linters: ["rubocop_internal"] },
     })
     global_state.register_formatter(
-      "rubocop",
+      "rubocop_internal",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
 

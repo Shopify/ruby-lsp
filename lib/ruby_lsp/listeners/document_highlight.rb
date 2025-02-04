@@ -120,7 +120,7 @@ module RubyLsp
             [target, node_value(target)]
           when Prism::ModuleNode, Prism::ClassNode, Prism::SingletonClassNode, Prism::DefNode, Prism::CaseNode,
             Prism::WhileNode, Prism::UntilNode, Prism::ForNode, Prism::IfNode, Prism::UnlessNode
-            target
+            [target, nil]
           end
 
         @target = T.let(highlight_target, T.nilable(Prism::Node))
@@ -620,7 +620,8 @@ module RubyLsp
 
       sig { params(keyword_loc: T.nilable(Prism::Location), end_loc: T.nilable(Prism::Location)).void }
       def add_matching_end_highlights(keyword_loc, end_loc)
-        return unless keyword_loc && end_loc && end_loc.length.positive?
+        return unless keyword_loc && end_loc
+        return unless end_loc.length.positive?
         return unless covers_target_position?(keyword_loc) || covers_target_position?(end_loc)
 
         add_highlight(Constant::DocumentHighlightKind::TEXT, keyword_loc)
