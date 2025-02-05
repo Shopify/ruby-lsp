@@ -135,6 +135,7 @@ export class Ruby implements RubyInterface {
         new None(
           this.workspaceFolder,
           this.outputChannel,
+          this.context,
           this.manuallySelectRuby.bind(this),
           workspaceRubyPath,
         ),
@@ -170,6 +171,7 @@ export class Ruby implements RubyInterface {
             new None(
               this.workspaceFolder,
               this.outputChannel,
+              this.context,
               this.manuallySelectRuby.bind(this),
               globalRubyPath,
             ),
@@ -323,6 +325,7 @@ export class Ruby implements RubyInterface {
           new Asdf(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -332,6 +335,7 @@ export class Ruby implements RubyInterface {
           new Chruby(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -341,6 +345,7 @@ export class Ruby implements RubyInterface {
           new Rbenv(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -350,6 +355,7 @@ export class Ruby implements RubyInterface {
           new Rvm(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -359,6 +365,7 @@ export class Ruby implements RubyInterface {
           new Mise(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -368,6 +375,7 @@ export class Ruby implements RubyInterface {
           new RubyInstaller(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -377,6 +385,7 @@ export class Ruby implements RubyInterface {
           new Custom(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -386,6 +395,7 @@ export class Ruby implements RubyInterface {
           new None(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );
@@ -395,6 +405,7 @@ export class Ruby implements RubyInterface {
           new Shadowenv(
             this.workspaceFolder,
             this.outputChannel,
+            this.context,
             this.manuallySelectRuby.bind(this),
           ),
         );

@@ -31,9 +31,10 @@ export class Chruby extends VersionManager {
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    context: vscode.ExtensionContext,
     manuallySelectRuby: () => Promise<void>,
   ) {
-    super(workspaceFolder, outputChannel, manuallySelectRuby);
+    super(workspaceFolder, outputChannel, context, manuallySelectRuby);
 
     const configuredRubies = vscode.workspace
       .getConfiguration("rubyLsp")
@@ -199,7 +200,7 @@ export class Chruby extends VersionManager {
     ].join(";");
 
     const result = await this.runScript(
-      `${rubyExecutableUri.fsPath} -W0 -e '${script}'`,
+      `${rubyExecutableUri.fsPath} -EUTF-8:UTF-8 -e '${script}'`,
     );
 
     const [defaultGems, gemHome, yjit, version] =

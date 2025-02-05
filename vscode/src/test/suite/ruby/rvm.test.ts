@@ -9,7 +9,11 @@ import sinon from "sinon";
 import { Rvm } from "../../../ruby/rvm";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  FIELD_SEPARATOR,
+  VALUE_SEPARATOR,
+} from "../../../ruby/versionManager";
 
 suite("RVM", () => {
   if (os.platform() === "win32") {
@@ -17,6 +21,16 @@ suite("RVM", () => {
     console.log("Skipping RVM tests on Windows");
     return;
   }
+
+  const context = {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions: [],
+    workspaceState: {
+      get: (_name: string) => undefined,
+      update: (_name: string, _value: any) => Promise.resolve(),
+    },
+    extensionUri: vscode.Uri.parse("file:///fake"),
+  } as unknown as vscode.ExtensionContext;
 
   test("Populates the gem env and path", async () => {
     const workspacePath = process.env.PWD!;
@@ -26,7 +40,12 @@ suite("RVM", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rvm = new Rvm(workspaceFolder, outputChannel, async () => {});
+    const rvm = new Rvm(
+      workspaceFolder,
+      outputChannel,
+      context,
+      async () => {},
+    );
 
     const installationPathStub = sinon
       .stub(rvm, "findRvmInstallation")
@@ -39,28 +58,28 @@ suite("RVM", () => {
         ),
       );
 
-    const envStub = {
-      env: {
-        ANY: "true",
-      },
-      yjit: true,
-      version: "3.0.0",
-    };
+    const envStub = [
+      "3.0.0",
+      "/path/to/gems",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
 
     const execStub = sinon.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${JSON.stringify(envStub)}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await rvm.activate();
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -W0 -rjson -e '${rvm.activationScript}'`,
+        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -EUTF-8:UTF-8 '/fake/activation.rb'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
           env: process.env,
+          encoding: "utf-8",
         },
       ),
     );
