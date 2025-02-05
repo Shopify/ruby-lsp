@@ -8,6 +8,7 @@ import { State } from "vscode-languageclient";
 export enum Command {
   Start = "rubyLsp.start",
   Stop = "rubyLsp.stop",
+  ShowServerChangelog = "rubyLsp.showServerChangelog",
   Restart = "rubyLsp.restart",
   Update = "rubyLsp.update",
   ToggleExperimentalFeatures = "rubyLsp.toggleExperimentalFeatures",
@@ -80,9 +81,11 @@ export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 // A list of feature flags where the key is the name and the value is the rollout percentage.
 //
 // Note: names added here should also be added to the `rubyLsp.optedOutFeatureFlags` enum in the `package.json` file
+// Note 2: -1 is a special value used to indicate under development features. Those can only be enabled explicitly and
+// are not impacted by the user's choice of opting into all flags
 export const FEATURE_FLAGS = {
-  tapiocaAddon: 0.0,
-  launcher: 0.05,
+  tapiocaAddon: 1.0,
+  launcher: 0.1,
 };
 
 type FeatureFlagConfigurationKey = keyof typeof FEATURE_FLAGS | "all";
@@ -127,12 +130,16 @@ export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
     return false;
   }
 
+  const percentage = FEATURE_FLAGS[feature];
+
   // If the user opted-in to all features, return true
-  if (flagConfiguration.all || flagConfiguration[feature]) {
+  if (
+    (flagConfiguration.all && percentage !== -1) ||
+    flagConfiguration[feature]
+  ) {
     return true;
   }
 
-  const percentage = FEATURE_FLAGS[feature];
   const machineId = vscode.env.machineId;
   // Create a digest of the concatenated machine ID and feature name, which will generate a unique hash for this
   // user-feature combination

@@ -113,7 +113,7 @@ module RubyLsp
         # no sigil, Sorbet will still provide completion for constants
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
-        name = constant_name(node)
+        name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
 
         range = range_from_location(node.location)
@@ -162,7 +162,7 @@ module RubyLsp
           if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
               node.call_operator == "::"
 
-            name = constant_name(receiver)
+            name = RubyIndexer::Index.constant_name(receiver)
 
             if name
               start_loc = node.location

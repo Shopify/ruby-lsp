@@ -57,6 +57,7 @@ module RubyLsp
       @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
       @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
       @error_path = T.let(@custom_dir + "install_error", Pathname)
+      @already_composed_path = T.let(@custom_dir + "bundle_is_composed", Pathname)
 
       dependencies, bundler_version = load_dependencies
       @dependencies = T.let(dependencies, T::Hash[String, T.untyped])
@@ -70,6 +71,23 @@ module RubyLsp
     sig { returns(T::Hash[String, String]) }
     def setup!
       raise BundleNotLocked if !@launcher && @gemfile&.exist? && !@lockfile&.exist?
+
+      # If the bundle was composed ahead of time using our custom `rubyLsp/composeBundle` request, then we can skip the
+      # entire process and just return the composed environment
+      if @already_composed_path.exist?
+        $stderr.puts("Ruby LSP> Composed bundle was set up ahead of time. Skipping...")
+        @already_composed_path.delete
+
+        env = bundler_settings_as_env
+        env["BUNDLE_GEMFILE"] = @custom_gemfile.exist? ? @custom_gemfile.to_s : @gemfile.to_s
+
+        if env["BUNDLE_PATH"]
+          env["BUNDLE_PATH"] = File.expand_path(env["BUNDLE_PATH"], @project_path)
+        end
+
+        env["BUNDLER_VERSION"] = @bundler_version.to_s if @bundler_version
+        return env
+      end
 
       # Automatically create and ignore the .ruby-lsp folder for users
       @custom_dir.mkpath unless @custom_dir.exist?
@@ -223,8 +241,7 @@ module RubyLsp
 
       # If either the Gemfile or the lockfile have been modified during the process of setting up the bundle, retry
       # composing the bundle from scratch
-
-      if @gemfile && @lockfile
+      if @gemfile&.exist? && @lockfile&.exist?
         current_gemfile_hash = Digest::SHA256.hexdigest(@gemfile.read)
         current_lockfile_hash = Digest::SHA256.hexdigest(@lockfile.read)
 

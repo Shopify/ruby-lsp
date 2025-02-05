@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 
 import { asyncExec, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
-import { Shadowenv } from "./ruby/shadowenv";
+import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
 import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
@@ -151,9 +151,14 @@ export class Ruby implements RubyInterface {
       try {
         await this.runManagerActivation();
       } catch (error: any) {
-        this.telemetry.logError(error, {
-          versionManager: this.versionManager.identifier,
-        });
+        if (!(error instanceof UntrustedWorkspaceError)) {
+          this.telemetry.logError(error, {
+            versionManager: this.versionManager.identifier,
+            workspace: new vscode.TelemetryTrustedValue(
+              this.workspaceFolder.name,
+            ),
+          });
+        }
 
         // If an error occurred and a global Ruby path is configured, then we can try to fallback to that
         const globalRubyPath = vscode.workspace
@@ -186,6 +191,20 @@ export class Ruby implements RubyInterface {
     if (!this.error) {
       this.fetchRubyVersionInfo();
       await this.setupBundlePath();
+
+      // When working on the Ruby LSP itself, we want to use the local version of our executables rather than the ones
+      // globally installed. That allows us to catch mistakes made in the launch process before they are released
+      if (
+        path.basename(this.workspaceFolder.uri.fsPath) === "ruby-lsp" &&
+        os.platform() !== "win32"
+      ) {
+        const localExecutablesUri = vscode.Uri.joinPath(
+          this.workspaceFolder.uri,
+          "exe",
+        );
+
+        this._env.PATH = `${localExecutablesUri.fsPath}${path.delimiter}${this._env.PATH}`;
+      }
     }
   }
 
@@ -246,8 +265,11 @@ export class Ruby implements RubyInterface {
 
     this.sanitizeEnvironment(env);
 
-    // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
-    process.env = env;
+    if (this.context.extensionMode !== vscode.ExtensionMode.Test) {
+      // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
+      process.env = env;
+    }
+
     this._env = env;
     this.rubyVersion = version;
     this.yjitEnabled = (yjit && major > 3) || (major === 3 && minor >= 2);

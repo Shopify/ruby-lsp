@@ -31,41 +31,10 @@ import { after, afterEach, before } from "mocha";
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import Client from "../../client";
 import { WorkspaceChannel } from "../../workspaceChannel";
-import { RUBY_VERSION, MAJOR, MINOR } from "../rubyVersion";
+import { MAJOR, MINOR } from "../rubyVersion";
 
-import { FAKE_TELEMETRY } from "./fakeTelemetry";
-
-class FakeLogger {
-  receivedMessages = "";
-
-  trace(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  debug(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  info(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  warn(message: string, ..._args: any[]): void {
-    this.receivedMessages += message;
-  }
-
-  error(error: string | Error, ..._args: any[]): void {
-    this.receivedMessages += error.toString();
-  }
-
-  append(value: string): void {
-    this.receivedMessages += value;
-  }
-
-  appendLine(value: string): void {
-    this.receivedMessages += value;
-  }
-}
+import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
+import { createRubySymlinks } from "./helpers";
 
 async function launchClient(workspaceUri: vscode.Uri) {
   const workspaceFolder: vscode.WorkspaceFolder = {
@@ -85,56 +54,23 @@ async function launchClient(workspaceUri: vscode.Uri) {
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
 
+  let managerConfig;
+
   // Ensure that we're activating the correct Ruby version on CI
   if (process.env.CI) {
-    if (os.platform() === "linux") {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.Chruby },
-          true,
-        );
+    await vscode.workspace
+      .getConfiguration("rubyLsp")
+      .update("formatter", "rubocop_internal", true);
+    await vscode.workspace
+      .getConfiguration("rubyLsp")
+      .update("linters", ["rubocop_internal"], true);
 
-      fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
-      fs.symlinkSync(
-        `/opt/hostedtoolcache/Ruby/${RUBY_VERSION}/x64`,
-        path.join(os.homedir(), ".rubies", RUBY_VERSION),
-      );
-    } else if (os.platform() === "darwin") {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.Chruby },
-          true,
-        );
+    createRubySymlinks();
 
-      fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
-      fs.symlinkSync(
-        `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64`,
-        path.join(os.homedir(), ".rubies", RUBY_VERSION),
-      );
+    if (os.platform() === "win32") {
+      managerConfig = { identifier: ManagerIdentifier.RubyInstaller };
     } else {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update(
-          "rubyVersionManager",
-          { identifier: ManagerIdentifier.RubyInstaller },
-          true,
-        );
-
-      fs.symlinkSync(
-        path.join(
-          "C:",
-          "hostedtoolcache",
-          "windows",
-          "Ruby",
-          RUBY_VERSION,
-          "x64",
-        ),
-        path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`),
-      );
+      managerConfig = { identifier: ManagerIdentifier.Chruby };
     }
   }
 
@@ -144,7 +80,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     outputChannel,
     FAKE_TELEMETRY,
   );
-  await ruby.activateRuby();
+  await ruby.activateRuby(managerConfig);
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 
   const virtualDocuments = new Map<string, string>();
@@ -507,7 +443,9 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("formatting", async () => {
-    const text = "  def foo\n end";
+    const text = ["# frozen_string_literal: true", "", "def foo", "end"]
+      .join("\n")
+      .trim();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -531,10 +469,11 @@ suite("Client", () => {
       "",
       "def foo",
       "end",
-      "",
-    ].join("\n");
+    ]
+      .join("\n")
+      .trim();
 
-    assert.strictEqual(response[0].newText, expected);
+    assert.strictEqual(response[0].newText.trim(), expected);
   }).timeout(20000);
 
   test("selection range", async () => {

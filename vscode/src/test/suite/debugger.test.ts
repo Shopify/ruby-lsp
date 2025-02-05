@@ -4,7 +4,7 @@ import * as path from "path";
 import * as os from "os";
 
 import * as vscode from "vscode";
-import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Debugger } from "../../debugger";
 import { Ruby, ManagerIdentifier } from "../../ruby";
@@ -14,8 +14,25 @@ import { LOG_CHANNEL, asyncExec } from "../../common";
 import { RUBY_VERSION } from "../rubyVersion";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { createRubySymlinks } from "./helpers";
 
 suite("Debugger", () => {
+  const original = vscode.workspace
+    .getConfiguration("debug")
+    .get("saveBeforeStart");
+
+  beforeEach(async () => {
+    await vscode.workspace
+      .getConfiguration("debug")
+      .update("saveBeforeStart", "none", true);
+  });
+
+  afterEach(async () => {
+    await vscode.workspace
+      .getConfiguration("debug")
+      .update("saveBeforeStart", original, true);
+  });
+
   test("Provide debug configurations returns the default configs", () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const debug = new Debugger(context, () => {
@@ -161,26 +178,15 @@ suite("Debugger", () => {
   });
 
   test("Launching the debugger", async () => {
+    const manager =
+      os.platform() === "win32"
+        ? { identifier: ManagerIdentifier.None }
+        : { identifier: ManagerIdentifier.Chruby };
+
     // eslint-disable-next-line no-process-env
-    const manager = process.env.CI
-      ? ManagerIdentifier.None
-      : ManagerIdentifier.Chruby;
-
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) => {
-          if (name === "rubyVersionManager") {
-            return { identifier: manager };
-          } else if (name === "bundleGemfile") {
-            return "";
-          } else if (name === "saveBeforeStart") {
-            return "none";
-          }
-
-          return undefined;
-        },
-      } as unknown as vscode.WorkspaceConfiguration);
+    if (process.env.CI) {
+      createRubySymlinks();
+    }
 
     const tmpPath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-debugger"),
@@ -205,13 +211,14 @@ suite("Debugger", () => {
       name: path.basename(tmpPath),
       index: 0,
     };
+
     const ruby = new Ruby(
       context,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
     );
-    await ruby.activateRuby();
+    await ruby.activateRuby(manager);
 
     try {
       await asyncExec("bundle install", { env: ruby.env, cwd: tmpPath });
@@ -247,13 +254,13 @@ suite("Debugger", () => {
     // the termination callback or else we try to dispose of the debugger client too early, but we need to wait for that
     // so that we can clean up stubs otherwise they leak into other tests.
     await new Promise<void>((resolve) => {
-      vscode.debug.onDidTerminateDebugSession((_session) => {
-        configStub.restore();
+      const callback = vscode.debug.onDidTerminateDebugSession((_session) => {
         debug.dispose();
         context.subscriptions.forEach((subscription) => subscription.dispose());
         fs.rmSync(tmpPath, { recursive: true, force: true });
+        callback.dispose();
         resolve();
       });
     });
-  }).timeout(45000);
+  }).timeout(90000);
 });

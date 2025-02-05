@@ -15,7 +15,7 @@ for Ruby, used to improve rich features in editors. It is a part of a wider goal
 experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
 
 Want to discuss Ruby developer experience? Consider joining the public
-[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA).
 
 ## Table of Contents
 
@@ -69,7 +69,7 @@ If using VS Code, all you have to do is install the [Ruby LSP
 extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
 editor. Do not install the `ruby-lsp` gem manually.
 
-For more information on using and configuring the extension, see the extension's [README.md](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md).
+For more information on using and configuring the extension, see the [extension page](vscode-extension.html).
 
 ### With other editors
 
@@ -446,6 +446,8 @@ Rename allows developers to rename all occurrences of the entity under the curso
 renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
 
+Rename is currently only supported for constants, module names and class names.
+
 ![Rename demo](images/rename.gif)
 
 ### Find references
@@ -529,7 +531,7 @@ requirements
 ## Experimental Features
 
 Ruby LSP also provides experimental features that are not enabled by default. If you have feedback about these features,
-you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
+you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
 ### Ancestors Hierarchy Request
 

@@ -94,12 +94,20 @@ module RubyLsp
       @workspace_uri = URI(workspace_uri) if workspace_uri
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
+      rubocop_has_addon = defined?(::RuboCop::Version::STRING) &&
+        Gem::Requirement.new(">= 1.70.0").satisfied_by?(Gem::Version.new(::RuboCop::Version::STRING))
 
       if specified_formatter
         @formatter = specified_formatter
 
         if specified_formatter != "auto"
           notifications << Notification.window_log_message("Using formatter specified by user: #{@formatter}")
+        end
+
+        # If the user had originally configured to use `rubocop`, but their version doesn't provide the add-on yet,
+        # fallback to the internal integration
+        if specified_formatter == "rubocop" && !rubocop_has_addon
+          @formatter = "rubocop_internal"
         end
       end
 
@@ -109,6 +117,23 @@ module RubyLsp
       end
 
       specified_linters = options.dig(:initializationOptions, :linters)
+
+      if specified_formatter == "rubocop" || specified_linters&.include?("rubocop")
+        notifications << Notification.window_log_message(<<~MESSAGE, type: Constant::MessageType::WARNING)
+          Formatter is configured to be `rubocop`. As of RuboCop v1.70.0, this identifier activates the add-on
+          implemented in the rubocop gem itself instead of the internal integration provided by the Ruby LSP.
+
+          If you wish to use the internal integration, please configure the formatter as `rubocop_internal`.
+        MESSAGE
+      end
+
+      # If the user had originally configured to use `rubocop`, but their version doesn't provide the add-on yet,
+      # fall back to the internal integration
+      if specified_linters&.include?("rubocop") && !rubocop_has_addon
+        specified_linters.delete("rubocop")
+        specified_linters << "rubocop_internal"
+      end
+
       @linters = specified_linters || detect_linters(direct_dependencies, all_dependencies)
 
       notifications << if specified_linters
@@ -185,13 +210,13 @@ module RubyLsp
     sig { params(direct_dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(String) }
     def detect_formatter(direct_dependencies, all_dependencies)
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-      return "rubocop" if direct_dependencies.any?(/^rubocop/)
+      return "rubocop_internal" if direct_dependencies.any?(/^rubocop/)
 
       syntax_tree_is_direct_dependency = direct_dependencies.include?("syntax_tree")
       return "syntax_tree" if syntax_tree_is_direct_dependency
 
       rubocop_is_transitive_dependency = all_dependencies.include?("rubocop")
-      return "rubocop" if dot_rubocop_yml_present && rubocop_is_transitive_dependency
+      return "rubocop_internal" if dot_rubocop_yml_present && rubocop_is_transitive_dependency
 
       "none"
     end
@@ -203,7 +228,7 @@ module RubyLsp
       linters = []
 
       if dependencies.any?(/^rubocop/) || (all_dependencies.include?("rubocop") && dot_rubocop_yml_present)
-        linters << "rubocop"
+        linters << "rubocop_internal"
       end
 
       linters

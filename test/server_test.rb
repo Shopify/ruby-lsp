@@ -171,7 +171,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_server_info_includes_formatter
-    @server.global_state.expects(:formatter).twice.returns("rubocop")
+    @server.global_state.expects(:formatter).twice.returns("rubocop_internal")
     capture_subprocess_io do
       @server.process_message({
         id: 1,
@@ -185,7 +185,7 @@ class ServerTest < Minitest::Test
 
     result = find_message(RubyLsp::Result, id: 1)
     hash = JSON.parse(result.response.to_json)
-    assert_equal("rubocop", hash.dig("formatter"))
+    assert_equal("rubocop_internal", hash.dig("formatter"))
   end
 
   def test_initialized_recovers_from_indexing_failures
@@ -375,10 +375,14 @@ class ServerTest < Minitest::Test
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
     capture_subprocess_io do
       @server.process_message(id: 1, method: "initialize", params: {
-        initializationOptions: { formatter: "rubocop" },
+        initializationOptions: { formatter: "rubocop_internal" },
       })
 
-      @server.global_state.register_formatter("rubocop", RubyLsp::Requests::Support::RuboCopFormatter.new)
+      @server.global_state.register_formatter("rubocop_internal", RubyLsp::Requests::Support::RuboCopFormatter.new)
+
+      # Avoid trying to load add-ons because the RuboCop add-on will crash when the gem is artificially unloaded
+      @server.expects(:load_addons)
+
       with_uninstalled_rubocop do
         @server.process_message({ method: "initialized" })
       end
@@ -388,7 +392,7 @@ class ServerTest < Minitest::Test
       notification = find_message(RubyLsp::Notification, "window/showMessage")
 
       assert_equal(
-        "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+        "Ruby LSP formatter is set to `rubocop_internal` but RuboCop was not found in the Gemfile or gemspec.",
         T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
       )
     end
@@ -482,6 +486,27 @@ class ServerTest < Minitest::Test
     FileUtils.rm(T.must(path))
   end
 
+  def test_did_change_watched_files_does_not_fail_for_non_existing_files
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI::Generic.from_path(path: File.join(Dir.pwd, "lib", "non_existing.rb")).to_s,
+            type: RubyLsp::Constant::FileChangeType::CREATED,
+          },
+        ],
+      },
+    })
+
+    assert_raises(Timeout::Error) do
+      Timeout.timeout(0.5) do
+        notification = find_message(RubyLsp::Notification, "window/logMessage")
+        flunk(notification.params.message)
+      end
+    end
+  end
+
   def test_workspace_addons
     create_test_addons
     @server.load_addons
@@ -492,6 +517,7 @@ class ServerTest < Minitest::Test
     assert_equal("window/showMessage", addon_error_notification.method)
     assert_equal("Error loading add-ons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
     addons_info = @server.pop_response.response
+    addons_info.delete_if { |addon_info| addon_info[:name] == "RuboCop" }
 
     assert_equal("Foo", addons_info[0][:name])
     assert_equal("0.1.0", addons_info[0][:version])
@@ -995,6 +1021,162 @@ class ServerTest < Minitest::Test
     assert_equal(1, entries.length)
   end
 
+  def test_rubocop_config_changes_trigger_workspace_diagnostic_refresh
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, ".rubocop.yml"))
+
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {
+          general: {
+            positionEncodings: ["utf-8"],
+          },
+          workspace: { diagnostics: { refreshSupport: true } },
+        },
+      },
+    })
+
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: uri,
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+
+    request = find_message(RubyLsp::Request)
+    assert_equal("workspace/diagnostic/refresh", request.method)
+  end
+
+  def test_compose_bundle_creates_file_to_skip_next_compose
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
+        assert_path_exists(File.join(dir, ".ruby-lsp", "bundle_is_composed"))
+      end
+    end
+  end
+
+  def test_compose_bundle_detects_syntax_errors_in_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        # Write a lockfile that has a git conflict marker
+        lockfile_contents = <<~LOCKFILE
+          GEM
+            remote: https://rubygems.org/
+            specs:
+              <<<<<<< HEAD
+              stringio (3.1.0)
+              >>>>>> 12345
+
+          PLATFORMS
+            arm64-darwin-23
+            ruby
+
+          DEPENDENCIES
+            stringio
+
+          BUNDLED WITH
+            2.5.7
+        LOCKFILE
+        File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+      end
+
+      error = find_message(RubyLsp::Error)
+      assert_match("Your Gemfile.lock contains merge conflicts.", error.message)
+    end
+  end
+
+  def test_compose_bundle_does_not_fail_if_bundle_is_missing
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
+      end
+    end
+  end
+
+  def test_compose_bundle_does_not_fail_if_restarting_on_lockfile_deletion
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
+      end
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
@@ -1070,6 +1252,10 @@ class ServerTest < Minitest::Test
     until message.is_a?(desired_class) && (!desired_method || T.unsafe(message).method == desired_method) &&
         (!id || T.unsafe(message).id == id)
       message = @server.pop_response
+
+      if message.is_a?(RubyLsp::Error) && desired_class != RubyLsp::Error
+        flunk("Unexpected error: #{message.message}")
+      end
     end
 
     message

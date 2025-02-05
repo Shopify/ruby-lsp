@@ -4,7 +4,7 @@
 source "https://rubygems.org"
 
 # We only need to use Jekyll with CRuby
-gem "jekyll", "~> 4.3.4"
+gem "jekyll", "~> 4.4.1"
 gem "jekyll-feed", "~> 0.12"
 
 # Theme
