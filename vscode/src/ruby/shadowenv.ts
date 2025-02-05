@@ -9,6 +9,8 @@ import { VersionManager, ActivationResult } from "./versionManager";
 // which Ruby version should be used for each project, in addition to other customizations such as GEM_HOME.
 //
 // Learn more: https://github.com/Shopify/shadowenv
+export class UntrustedWorkspaceError extends Error {}
+
 export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     try {
@@ -57,7 +59,7 @@ export class Shadowenv extends VersionManager {
           return this.activate();
         }
 
-        throw new Error(
+        throw new UntrustedWorkspaceError(
           "Cannot activate Ruby environment in an untrusted workspace",
         );
       }

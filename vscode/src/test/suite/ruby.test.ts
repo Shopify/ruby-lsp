@@ -11,6 +11,7 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
 import { ACTIVATION_SEPARATOR } from "../../ruby/versionManager";
+import { Shadowenv, UntrustedWorkspaceError } from "../../ruby/shadowenv";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
@@ -209,4 +210,21 @@ suite("Ruby environment activation", () => {
 
     configStub.restore();
   }).timeout(10000);
+
+  test("Ignores untrusted workspace for telemetry", async () => {
+    const telemetry = { ...FAKE_TELEMETRY, logError: sinon.stub() };
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, telemetry);
+
+    const failureStub = sinon
+      .stub(Shadowenv.prototype, "activate")
+      .rejects(new UntrustedWorkspaceError());
+
+    await assert.rejects(async () => {
+      await ruby.activateRuby({ identifier: ManagerIdentifier.Shadowenv });
+    });
+
+    assert.ok(!telemetry.logError.called);
+
+    failureStub.restore();
+  });
 });

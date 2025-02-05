@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 
 import { asyncExec, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
-import { Shadowenv } from "./ruby/shadowenv";
+import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
 import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
@@ -151,9 +151,14 @@ export class Ruby implements RubyInterface {
       try {
         await this.runManagerActivation();
       } catch (error: any) {
-        this.telemetry.logError(error, {
-          versionManager: this.versionManager.identifier,
-        });
+        if (!(error instanceof UntrustedWorkspaceError)) {
+          this.telemetry.logError(error, {
+            versionManager: this.versionManager.identifier,
+            workspace: new vscode.TelemetryTrustedValue(
+              this.workspaceFolder.name,
+            ),
+          });
+        }
 
         // If an error occurred and a global Ruby path is configured, then we can try to fallback to that
         const globalRubyPath = vscode.workspace
