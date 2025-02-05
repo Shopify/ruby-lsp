@@ -34,6 +34,24 @@ module RubyIndexer
 
         corrected_nesting
       end
+
+      # Returns the unresolved name for a constant reference including all parts of a constant path, or `nil` if the
+      # constant contains dynamic or incomplete parts
+      sig do
+        params(
+          node: T.any(
+            Prism::ConstantPathNode,
+            Prism::ConstantReadNode,
+            Prism::ConstantPathTargetNode,
+          ),
+        ).returns(T.nilable(String))
+      end
+      def constant_name(node)
+        node.full_name
+      rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
+             Prism::ConstantPathNode::MissingNodesInConstantPathError
+        nil
+      end
     end
 
     sig { void }

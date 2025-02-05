@@ -114,7 +114,7 @@ module RubyLsp
       def on_constant_read_node_enter(node)
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
-        name = constant_name(node)
+        name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
 
         generate_hover(name, node.location)
@@ -131,7 +131,7 @@ module RubyLsp
       def on_constant_path_node_enter(node)
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
-        name = constant_name(node)
+        name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
 
         generate_hover(name, node.location)

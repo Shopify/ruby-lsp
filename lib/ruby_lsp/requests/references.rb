@@ -124,7 +124,7 @@ module RubyLsp
       def create_reference_target(target_node, node_context)
         case target_node
         when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
-          name = constant_name(target_node)
+          name = RubyIndexer::Index.constant_name(target_node)
           return unless name
 
           entries = @global_state.index.resolve(name, node_context.nesting)
