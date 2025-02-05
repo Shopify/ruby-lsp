@@ -6,6 +6,7 @@ gemspec
 
 gem "bundler", "~> 2.5"
 gem "minitest", "~> 5.25"
+gem "minitest-difftastic"
 
 group :development do
   gem "debug", "~> 1.9", require: false
