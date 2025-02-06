@@ -320,6 +320,27 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_composed_bundle_points_to_gemfile_in_enclosing_dir
+    Dir.mktmpdir do |dir|
+      FileUtils.touch(File.join(dir, "Gemfile"))
+      FileUtils.touch(File.join(dir, "Gemfile.lock"))
+
+      project_dir = File.join(dir, "proj")
+      Dir.mkdir(project_dir)
+
+      Dir.chdir(project_dir) do
+        Bundler.with_unbundled_env do
+          stub_bundle_with_env(bundle_env(project_dir, ".ruby-lsp/Gemfile"))
+          Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
+          run_script(project_dir)
+        end
+
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match("eval_gemfile(File.expand_path(\"../../Gemfile\", __dir__))", File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end
+
   def test_ensures_lockfile_remotes_are_relative_to_default_gemfile
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
