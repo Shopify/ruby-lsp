@@ -42,6 +42,10 @@ module RubyLsp
           refactor_method
         when CodeActions::TOGGLE_BLOCK_STYLE_TITLE
           switch_block_style
+        when CodeActions::CREATE_ATTRIBUTE_READER,
+             CodeActions::CREATE_ATTRIBUTE_WRITER,
+             CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+          create_attribute_accessor
         else
           Error::UnknownCodeAction
         end
@@ -324,6 +328,90 @@ module RubyLsp
         end
 
         indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
+      end
+
+      sig { returns(T.any(Interface::CodeAction, Error)) }
+      def create_attribute_accessor
+        source_range = @code_action.dig(:data, :range)
+
+        node = if source_range[:start] != source_range[:end]
+          @document.locate_first_within_range(
+            @code_action.dig(:data, :range),
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+          )
+        end
+
+        if node.nil?
+          node_context = @document.locate_node(
+            source_range[:start],
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+          )
+          node = node_context.node
+
+          return Error::EmptySelection unless CodeActions::INSTANCE_VARIABLE_NODES.include?(node.class)
+        end
+
+        node = T.cast(
+          node,
+          T.any(
+            Prism::InstanceVariableAndWriteNode,
+            Prism::InstanceVariableOperatorWriteNode,
+            Prism::InstanceVariableOrWriteNode,
+            Prism::InstanceVariableReadNode,
+            Prism::InstanceVariableTargetNode,
+            Prism::InstanceVariableWriteNode,
+          ),
+        )
+
+        node_context = @document.locate_node(
+          {
+            line: node.location.start_line,
+            character: node.location.start_character_column,
+          },
+          node_types: [
+            Prism::ClassNode,
+            Prism::ModuleNode,
+            Prism::SingletonClassNode,
+          ],
+        )
+        closest_node = node_context.node
+        return Error::InvalidTargetRange if closest_node.nil?
+
+        attribute_name = node.name[1..]
+        indentation = " " * (closest_node.location.start_column + 2)
+        attribute_accessor_source = T.must(
+          case @code_action[:title]
+          when CodeActions::CREATE_ATTRIBUTE_READER
+            "#{indentation}attr_reader :#{attribute_name}\n\n"
+          when CodeActions::CREATE_ATTRIBUTE_WRITER
+            "#{indentation}attr_writer :#{attribute_name}\n\n"
+          when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+            "#{indentation}attr_accessor :#{attribute_name}\n\n"
+          end,
+        )
+
+        target_start_line = closest_node.location.start_line
+        target_range = {
+          start: { line: target_start_line, character: 0 },
+          end: { line: target_start_line, character: 0 },
+        }
+
+        Interface::CodeAction.new(
+          title: @code_action[:title],
+          edit: Interface::WorkspaceEdit.new(
+            document_changes: [
+              Interface::TextDocumentEdit.new(
+                text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                  uri: @code_action.dig(:data, :uri),
+                  version: nil,
+                ),
+                edits: [
+                  create_text_edit(target_range, attribute_accessor_source),
+                ],
+              ),
+            ],
+          ),
+        )
       end
     end
   end

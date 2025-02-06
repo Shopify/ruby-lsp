@@ -546,13 +546,16 @@ suite("Client", () => {
         textDocument: {
           uri: documentUri.toString(),
         },
-        range: { start: { line: 2 }, end: { line: 4 } },
+        range: {
+          start: { line: 0, character: 1 },
+          end: { line: 0, character: 2 },
+        },
         context: {
           diagnostics: [
             {
               range: {
-                start: { line: 2, character: 0 },
-                end: { line: 2, character: 0 },
+                start: { line: 0, character: 0 },
+                end: { line: 1, character: 2 },
               },
               message: "Layout/EmptyLines: Extra blank line detected.",
               data: {

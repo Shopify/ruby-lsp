@@ -8,7 +8,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActions, "code_actions"
 
   def run_expectations(source)
-    params = @__params&.any? ? @__params : default_args
+    params = @__params&.any? ? @__params : default_args(source)
     document = RubyLsp::RubyDocument.new(
       source: source,
       version: 1,
@@ -36,10 +36,11 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
 
   private
 
-  def default_args
+  def default_args(source)
+    end_position = source.lines.count > 1 ? { line: 1, character: 1 } : { line: 0, character: 1 }
     {
       range: {
-        start: { line: 0, character: 0 }, end: { line: 1, character: 1 },
+        start: { line: 0, character: 0 }, end: end_position,
       },
       context: {
         diagnostics: [],
@@ -52,7 +53,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
       .select { |action| action["kind"] == "quickfix" }
       .map { |action| code_action_for_diagnostic(action) }
     refactors = expectation
-      .select { |action| action["kind"].start_with?("refactor") }
+      .select { |action| action["kind"].start_with?("refactor") || action["kind"] == "" }
       .map { |action| code_action_for_refactor(action) }
     result = [*quickfixes, *refactors]
 
