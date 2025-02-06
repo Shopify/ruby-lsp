@@ -502,6 +502,10 @@
               "description": "Opt-in/out of the Tapioca add-on",
               "type": "boolean"
             },
+            "fullTestDiscovery": {
+              "description": "UNDER DEVEOPMENT. Opt-in/out of the full test discovery experience",
+              "type": "boolean"
+            },
             "launcher": {
               "description": "Opt-in/out of the new launcher mode",
               "type": "boolean"
