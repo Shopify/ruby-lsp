@@ -5,55 +5,6 @@ require "test_helper"
 
 module RubyLsp
   class GlobalStateTest < Minitest::Test
-    def test_detects_no_test_library_when_there_are_no_dependencies
-      stub_direct_dependencies({})
-
-      state = GlobalState.new
-      state.apply_options({})
-      assert_equal("unknown", state.test_library)
-    end
-
-    def test_detects_minitest
-      stub_direct_dependencies("minitest" => "1.2.3")
-
-      state = GlobalState.new
-      state.apply_options({})
-      assert_equal("minitest", state.test_library)
-    end
-
-    def test_does_not_detect_minitest_related_gems_as_minitest
-      stub_direct_dependencies("minitest-reporters" => "1.2.3")
-
-      state = GlobalState.new
-      state.apply_options({})
-      assert_equal("unknown", state.test_library)
-    end
-
-    def test_detects_test_unit
-      stub_direct_dependencies("test-unit" => "1.2.3")
-
-      state = GlobalState.new
-      state.apply_options({})
-      assert_equal("test-unit", state.test_library)
-    end
-
-    def test_detects_rails_if_minitest_is_present_and_bin_rails_exists
-      stub_direct_dependencies("minitest" => "1.2.3")
-
-      state = GlobalState.new
-      state.stubs(:bin_rails_present).returns(true)
-      state.apply_options({})
-      assert_equal("rails", state.test_library)
-    end
-
-    def test_detects_rspec_if_both_rails_and_rspec_are_present
-      stub_direct_dependencies("rspec" => "1.2.3")
-
-      state = GlobalState.new
-      state.apply_options({})
-      assert_equal("rspec", state.test_library)
-    end
-
     def test_apply_option_selects_formatter
       state = GlobalState.new
       state.apply_options({ initializationOptions: { formatter: "syntax_tree" } })
@@ -248,6 +199,27 @@ module RubyLsp
       })
 
       assert(state.enabled_feature?(:whatever))
+    end
+
+    # TODO: index tests only when open, and remove when closed
+
+    def test_test_library_for_group_for_minitest_test
+      # TODO: consider nesting
+      code = <<~RUBY
+        module MyTests
+          class TestFoo < Minitest::Test
+          end
+        end
+        class Minitest::Test
+        end
+      RUBY
+      first_class = Prism.parse(code).value.statements.body.first
+
+      state = GlobalState.new
+      uri = URI::Generic.from_path(path: "/test.rb")
+      state.index.index_single(uri, code)
+
+      assert_equal("minitest", state.test_library_for_group(first_class))
     end
 
     def test_notifies_the_user_when_using_rubocop_addon_through_linters
