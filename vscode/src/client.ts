@@ -321,6 +321,10 @@ export default class Client extends LanguageClient implements ClientInterface {
   private readonly workspaceOutputChannel: WorkspaceChannel;
   private readonly virtualDocuments = new Map<string, string>();
 
+  // List of all subscriptions that have to be disposed of when the client is disposed. That happens if the user
+  // requests that the LSP stops or in automated restarts
+  private subscriptions: vscode.Disposable[] = [];
+
   #context: vscode.ExtensionContext;
   #formatter: string;
 
@@ -365,27 +369,29 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.ruby = ruby;
     this.#formatter = "";
 
-    // When the server processes changes to an ERB document, it will send this custom notification to update the state
-    // of the virtual documents
-    this.onNotification("delegate/textDocument/virtualState", (params) => {
-      this.virtualDocuments.set(
-        params.textDocument.uri,
-        params.textDocument.text,
-      );
-    });
-
-    this.onTelemetry((event: ServerTelemetryEvent) => {
-      if (event.type === "error") {
-        this.telemetry.logError(
-          {
-            message: event.errorMessage,
-            name: event.errorClass,
-            stack: event.stack,
-          },
-          { serverVersion: this.serverVersion },
+    this.subscriptions.push(
+      // When the server processes changes to an ERB document, it will send this custom notification to update the state
+      // of the virtual documents
+      this.onNotification("delegate/textDocument/virtualState", (params) => {
+        this.virtualDocuments.set(
+          params.textDocument.uri,
+          params.textDocument.text,
         );
-      }
-    });
+      }),
+
+      this.onTelemetry((event: ServerTelemetryEvent) => {
+        if (event.type === "error") {
+          this.telemetry.logError(
+            {
+              message: event.errorMessage,
+              name: event.errorClass,
+              stack: event.stack,
+            },
+            { serverVersion: this.serverVersion },
+          );
+        }
+      }),
+    );
   }
 
   async afterStart() {
@@ -435,6 +441,12 @@ export default class Client extends LanguageClient implements ClientInterface {
       textDocument: { uri: uri.toString() },
       range,
     });
+  }
+
+  async dispose(timeout?: number): Promise<void> {
+    this.subscriptions.forEach((subscription) => subscription.dispose());
+    this.subscriptions = [];
+    return super.dispose(timeout);
   }
 
   private async benchmarkMiddleware<T>(

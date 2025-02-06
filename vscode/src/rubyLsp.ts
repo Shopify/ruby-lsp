@@ -48,7 +48,6 @@ export class RubyLsp {
     );
     this.debug = new Debugger(context, this.workspaceResolver.bind(this));
     this.rails = new Rails(this.showWorkspacePick.bind(this));
-    this.registerCommands(context);
 
     this.statusItems = new StatusItems();
     const dependenciesTree = new DependenciesTree();
@@ -114,6 +113,11 @@ export class RubyLsp {
         },
       }),
       LOG_CHANNEL,
+      vscode.workspace.registerTextDocumentContentProvider(
+        "ruby-lsp",
+        new DocumentProvider(),
+      ),
+      ...this.registerCommands(),
     );
   }
 
@@ -158,13 +162,6 @@ export class RubyLsp {
       }
     }
 
-    this.context.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-        "ruby-lsp",
-        new DocumentProvider(),
-      ),
-    );
-
     STATUS_EMITTER.fire(this.currentActiveWorkspace());
   }
 
@@ -173,6 +170,7 @@ export class RubyLsp {
   async deactivate() {
     for (const workspace of this.workspaces.values()) {
       await workspace.stop();
+      await workspace.dispose();
     }
   }
 
@@ -211,7 +209,6 @@ export class RubyLsp {
 
     await workspace.activate();
     await workspace.start();
-    this.context.subscriptions.push(workspace);
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
@@ -227,8 +224,8 @@ export class RubyLsp {
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For
   // creating multiple instances in tests, the `RubyLsp` object should be disposed of after each test to prevent double
   // command register errors
-  private registerCommands(context: vscode.ExtensionContext) {
-    context.subscriptions.push(
+  private registerCommands(): vscode.Disposable[] {
+    return [
       vscode.commands.registerCommand(Command.Update, async () => {
         const workspace = await this.showWorkspacePick();
 
@@ -247,7 +244,7 @@ export class RubyLsp {
       }),
       vscode.commands.registerCommand(Command.Stop, async () => {
         const workspace = await this.showWorkspacePick();
-        await workspace?.stop();
+        await workspace?.dispose();
       }),
       vscode.commands.registerCommand(
         Command.ShowSyntaxTree,
@@ -613,72 +610,72 @@ export class RubyLsp {
           await workspace?.start(true);
         },
       ),
-    );
-    vscode.commands.registerCommand(Command.ShowOutput, async () => {
-      LOG_CHANNEL.show();
-    });
-    vscode.commands.registerCommand(
-      Command.MigrateLaunchConfiguration,
-      async () => {
-        const workspace = await this.showWorkspacePick();
+      vscode.commands.registerCommand(Command.ShowOutput, async () => {
+        LOG_CHANNEL.show();
+      }),
+      vscode.commands.registerCommand(
+        Command.MigrateLaunchConfiguration,
+        async () => {
+          const workspace = await this.showWorkspacePick();
 
-        if (!workspace) {
-          return;
-        }
-
-        const launchConfig =
-          (vscode.workspace
-            .getConfiguration("launch")
-            ?.get("configurations") as any[]) || [];
-
-        const updatedLaunchConfig = launchConfig.map((config: any) => {
-          if (config.type === "rdbg") {
-            if (config.request === "launch") {
-              const newConfig = { ...config };
-              newConfig.type = "ruby_lsp";
-
-              if (newConfig.askParameters !== true) {
-                delete newConfig.rdbgPath;
-                delete newConfig.cwd;
-                delete newConfig.useBundler;
-
-                const command = (newConfig.command || "").replace(
-                  `\${workspaceRoot}/`,
-                  "",
-                );
-                const script = newConfig.script || "";
-                const args = (newConfig.args || []).join(" ");
-                newConfig.program = `${command} ${script} ${args}`.trim();
-
-                delete newConfig.command;
-                delete newConfig.script;
-                delete newConfig.args;
-                delete newConfig.askParameters;
-              }
-
-              return newConfig;
-            } else if (config.request === "attach") {
-              const newConfig = { ...config };
-              newConfig.type = "ruby_lsp";
-              // rdbg's `debugPort` could be a socket path, or port number, or host:port
-              // we don't do complex parsing here, just assume it's socket path
-              newConfig.debugSocketPath = config.debugPort;
-
-              return newConfig;
-            }
+          if (!workspace) {
+            return;
           }
-          return config;
-        });
 
-        await vscode.workspace
-          .getConfiguration("launch")
-          .update(
-            "configurations",
-            updatedLaunchConfig,
-            vscode.ConfigurationTarget.Workspace,
-          );
-      },
-    );
+          const launchConfig =
+            (vscode.workspace
+              .getConfiguration("launch")
+              ?.get("configurations") as any[]) || [];
+
+          const updatedLaunchConfig = launchConfig.map((config: any) => {
+            if (config.type === "rdbg") {
+              if (config.request === "launch") {
+                const newConfig = { ...config };
+                newConfig.type = "ruby_lsp";
+
+                if (newConfig.askParameters !== true) {
+                  delete newConfig.rdbgPath;
+                  delete newConfig.cwd;
+                  delete newConfig.useBundler;
+
+                  const command = (newConfig.command || "").replace(
+                    `\${workspaceRoot}/`,
+                    "",
+                  );
+                  const script = newConfig.script || "";
+                  const args = (newConfig.args || []).join(" ");
+                  newConfig.program = `${command} ${script} ${args}`.trim();
+
+                  delete newConfig.command;
+                  delete newConfig.script;
+                  delete newConfig.args;
+                  delete newConfig.askParameters;
+                }
+
+                return newConfig;
+              } else if (config.request === "attach") {
+                const newConfig = { ...config };
+                newConfig.type = "ruby_lsp";
+                // rdbg's `debugPort` could be a socket path, or port number, or host:port
+                // we don't do complex parsing here, just assume it's socket path
+                newConfig.debugSocketPath = config.debugPort;
+
+                return newConfig;
+              }
+            }
+            return config;
+          });
+
+          await vscode.workspace
+            .getConfiguration("launch")
+            .update(
+              "configurations",
+              updatedLaunchConfig,
+              vscode.ConfigurationTarget.Workspace,
+            );
+        },
+      ),
+    ];
   }
 
   // Get the current active workspace based on which file is opened in the editor

@@ -28,6 +28,11 @@ export class Workspace implements WorkspaceInterface {
   private readonly virtualDocuments = new Map<string, string>();
   private readonly restartDocumentShas = new Map<string, string>();
   private needsRestart = false;
+
+  // Holds all subscriptions that are related to this workspace and that should be disposed of if the workspace is
+  // deactivated. Notice that we do not dispose of the workspace when restarting the LSP client, we only dispose of the
+  // client itself
+  private subscriptions: vscode.Disposable[] = [];
   #inhibitRestart = false;
   #error = false;
 
@@ -144,8 +149,7 @@ export class Workspace implements WorkspaceInterface {
     // The `start` method can be invoked through commands - even if there's an LSP client already running. We need to
     // ensure that the existing client for this workspace has been stopped and disposed of before we create a new one
     if (this.lspClient) {
-      await this.lspClient.stop();
-      await this.lspClient.dispose();
+      await this.stop();
     }
 
     this.lspClient = new Client(
@@ -189,7 +193,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   async stop() {
-    await this.lspClient?.stop();
+    await this.lspClient?.dispose();
   }
 
   async restart() {
@@ -224,14 +228,13 @@ export class Workspace implements WorkspaceInterface {
 
           if (canRestart) {
             await this.stop();
-            await this.lspClient.dispose();
             this.lspClient = undefined;
             await this.start();
           }
           break;
         // If the server is already stopped, then we need to dispose it and start a new one
         case State.Stopped:
-          await this.lspClient.dispose();
+          await this.stop();
           this.lspClient = undefined;
           await this.start();
           break;
@@ -243,6 +246,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   async dispose() {
+    this.subscriptions.forEach((subscription) => subscription.dispose());
     await this.lspClient?.dispose();
   }
 
@@ -373,7 +377,7 @@ export class Workspace implements WorkspaceInterface {
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
-    this.context.subscriptions.push(
+    this.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration(async (event) => {
         if (event.affectsConfiguration("rubyLsp")) {
           await this.debouncedRestart("configuration changed");
@@ -404,7 +408,7 @@ export class Workspace implements WorkspaceInterface {
       await this.debouncedRestart(`${uri.fsPath} changed, matching ${pattern}`);
     };
 
-    this.context.subscriptions.push(
+    this.subscriptions.push(
       watcher,
       watcher.onDidChange(debouncedRestartWithHashCheck),
       // Interestingly, we are seeing create events being fired even when the file already exists. If a create event is
@@ -429,7 +433,7 @@ export class Workspace implements WorkspaceInterface {
       await this.debouncedRestart(`${uri.fsPath} changed, matching ${glob}`);
     };
 
-    this.context.subscriptions.push(
+    this.subscriptions.push(
       workspaceWatcher,
       // When one of the 'inhibit restart' files are created, we set this flag to prevent restarting during that action
       workspaceWatcher.onDidCreate(start),
