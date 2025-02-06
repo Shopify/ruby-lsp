@@ -435,6 +435,20 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_workspace_dependencies_does_not_fail_if_gems_are_not_installed
+    Bundler.expects(:definition).raises(Bundler::GemNotFound)
+    @server.process_message({ id: 1, method: "rubyLsp/workspace/dependencies" })
+
+    assert_empty(@server.pop_response.response)
+  end
+
+  def test_workspace_dependencies_returns_empty_list_when_there_is_no_bundle
+    @server.global_state.expects(:top_level_bundle).returns(false)
+    @server.process_message({ id: 1, method: "rubyLsp/workspace/dependencies" })
+
+    assert_empty(@server.pop_response.response)
+  end
+
   def test_backtrace_is_printed_to_stderr_on_exceptions
     @server.expects(:workspace_dependencies).raises(StandardError, "boom")
 

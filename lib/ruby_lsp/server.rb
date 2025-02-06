@@ -1131,7 +1131,12 @@ module RubyLsp
 
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_dependencies(message)
-      response = if @global_state.top_level_bundle
+      unless @global_state.top_level_bundle
+        send_message(Result.new(id: message[:id], response: []))
+        return
+      end
+
+      response = begin
         Bundler.with_original_env do
           definition = Bundler.definition
           dep_keys = definition.locked_deps.keys.to_set
@@ -1145,7 +1150,7 @@ module RubyLsp
             }
           end
         end
-      else
+      rescue Bundler::GemNotFound
         []
       end
 
