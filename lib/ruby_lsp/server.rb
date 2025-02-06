@@ -108,6 +108,8 @@ module RubyLsp
         )
       when "rubyLsp/composeBundle"
         compose_bundle(message)
+      when "experimental/gotoRelevantFile"
+        experimental_goto_relevant_file(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -286,6 +288,7 @@ module RubyLsp
           experimental: {
             addon_detection: true,
             compose_bundle: true,
+            goto_relevant_file: true,
           },
         ),
         serverInfo: {
@@ -1090,6 +1093,21 @@ module RubyLsp
           document,
           params[:range],
         ).perform,
+      }
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def experimental_goto_relevant_file(message)
+      path = message.dig(:params, :textDocument, :uri)&.path
+
+      unless path
+        send_empty_response(message[:id])
+        return
+      end
+
+      response = {
+        locations: Requests::GotoRelevantFile.new(path).perform,
       }
       send_message(Result.new(id: message[:id], response: response))
     end

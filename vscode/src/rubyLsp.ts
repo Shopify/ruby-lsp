@@ -613,6 +613,20 @@ export class RubyLsp {
           await workspace?.start(true);
         },
       ),
+      vscode.commands.registerCommand(Command.GotoRelevantFile, async () => {
+        const uri = vscode.window.activeTextEditor?.document.uri;
+        if (!uri) {
+          return;
+        }
+        const response: { locations: string[] } | null | undefined =
+          await this.currentActiveWorkspace()?.lspClient?.sendGotoRelevantFileRequest(
+            uri,
+          );
+
+        if (response) {
+          return openUris(response.locations);
+        }
+      }),
     );
     vscode.commands.registerCommand(Command.ShowOutput, async () => {
       LOG_CHANNEL.show();
