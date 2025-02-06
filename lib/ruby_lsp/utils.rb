@@ -176,11 +176,19 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      sig { params(id: Integer, pattern: T.any(Interface::RelativePattern, String), kind: Integer).returns(Request) }
+      sig do
+        params(
+          id: Integer,
+          pattern: T.any(Interface::RelativePattern, String),
+          kind: Integer,
+          registration_id: T.nilable(String),
+        ).returns(Request)
+      end
       def register_watched_files(
         id,
         pattern,
-        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE
+        kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
+        registration_id: nil
       )
         new(
           id: id,
@@ -188,7 +196,7 @@ module RubyLsp
           params: Interface::RegistrationParams.new(
             registrations: [
               Interface::Registration.new(
-                id: "workspace/didChangeWatchedFiles",
+                id: registration_id || SecureRandom.uuid,
                 method: "workspace/didChangeWatchedFiles",
                 register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
                   watchers: [

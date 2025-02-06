@@ -521,6 +521,25 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_did_change_watched_files_processes_unique_change_entries
+    @server.expects(:handle_rubocop_config_change).once
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: URI::Generic.from_path(path: File.join(Dir.pwd, ".rubocop.yml")).to_s,
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+          {
+            uri: URI::Generic.from_path(path: File.join(Dir.pwd, ".rubocop.yml")).to_s,
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+  end
+
   def test_workspace_addons
     create_test_addons
     @server.load_addons

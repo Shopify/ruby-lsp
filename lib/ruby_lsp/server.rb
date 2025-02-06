@@ -301,10 +301,19 @@ module RubyLsp
 
       # Not every client supports dynamic registration or file watching
       if @global_state.client_capabilities.supports_watching_files
-        send_message(Request.register_watched_files(@current_request_id, "**/*.rb"))
         send_message(Request.register_watched_files(
           @current_request_id,
-          Interface::RelativePattern.new(base_uri: @global_state.workspace_uri.to_s, pattern: ".rubocop.yml"),
+          "**/*.rb",
+          registration_id: "workspace-watcher",
+        ))
+
+        send_message(Request.register_watched_files(
+          @current_request_id,
+          Interface::RelativePattern.new(
+            base_uri: @global_state.workspace_uri.to_s,
+            pattern: "{.rubocop.yml,.rubocop}",
+          ),
+          registration_id: "rubocop-watcher",
         ))
       end
 
@@ -999,6 +1008,11 @@ module RubyLsp
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def workspace_did_change_watched_files(message)
       changes = message.dig(:params, :changes)
+      # We allow add-ons to register for watching files and we have no restrictions for what they register for. If the
+      # same pattern is registered more than once, the LSP will receive duplicate change notifications. Receiving them
+      # is fine, but we shouldn't process the same file changes more than once
+      changes.uniq!
+
       index = @global_state.index
       changes.each do |change|
         # File change events include folders, but we're only interested in files
