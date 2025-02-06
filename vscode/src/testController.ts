@@ -279,6 +279,12 @@ export class TestController {
           run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
           run.passed(test, Date.now() - start);
         } catch (err: any) {
+          run.appendOutput(
+            err.message.replace(/\r?\n/g, "\r\n"),
+            undefined,
+            test,
+          );
+
           const duration = Date.now() - start;
 
           if (err.killed) {
