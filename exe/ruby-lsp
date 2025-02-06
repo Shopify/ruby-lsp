@@ -31,7 +31,7 @@ parser = OptionParser.new do |opts|
 
   opts.on(
     "--new-addon [NAME]",
-    "Create a new Ruby LSP add-on",
+    "Create a new Ruby LSP add-on gem",
   ) do |name|
     options[:new_addon] = name
   end
@@ -154,6 +154,9 @@ if options[:doctor]
   return
 end
 
+if options[:new_addon]
+
+end
 # Ensure all output goes out stderr by default to allow puts/p/pp to work
 # without specifying output device.
 $> = $stderr
