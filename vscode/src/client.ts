@@ -50,7 +50,20 @@ interface ServerErrorTelemetryEvent {
   stack: string;
 }
 
-type ServerTelemetryEvent = ServerErrorTelemetryEvent;
+interface ServerDataTelemetryEvent {
+  type: "data";
+  eventName: string;
+  data: {
+    attributes: Record<string, string>;
+  } & (
+    | { type: "histogram"; value: number; bounds?: number[] }
+    | { type: "counter"; value?: number }
+  );
+}
+
+type ServerTelemetryEvent =
+  | ServerErrorTelemetryEvent
+  | ServerDataTelemetryEvent;
 
 function enabledFeatureFlags(): Record<string, boolean> {
   const allKeys = Object.keys(FEATURE_FLAGS) as (keyof typeof FEATURE_FLAGS)[];
@@ -389,6 +402,8 @@ export default class Client extends LanguageClient implements ClientInterface {
             },
             { serverVersion: this.serverVersion },
           );
+        } else if (event.type === "data" && this.validServerTelemetry(event)) {
+          this.telemetry.logUsage(event.eventName, event.data);
         }
       }),
     );
@@ -788,5 +803,20 @@ export default class Client extends LanguageClient implements ClientInterface {
         rubyVersion: this.ruby.rubyVersion,
       },
     });
+  }
+
+  // The server and add-ons can send any arbitrary data as part of their telemetry events, but we need to guarantee that
+  // they are valid before sending it to the logger
+  private validServerTelemetry(event: any) {
+    const {
+      eventName,
+      data: { type, value },
+    } = event;
+
+    return (
+      typeof eventName === "string" &&
+      ((type === "histogram" && typeof value === "number") ||
+        (type === "counter" && (typeof value === "number" || !value)))
+    );
   }
 }
