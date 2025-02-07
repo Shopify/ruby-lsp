@@ -471,6 +471,9 @@ module RubyLsp
             path_node_to_complete,
           )
         end
+      rescue Errno::EPERM
+        # If the user writes a relative require pointing to a path that the editor has no permissions to read, then glob
+        # might fail with EPERM
       end
 
       sig { params(node: Prism::CallNode, name: String).void }
