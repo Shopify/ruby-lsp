@@ -34,6 +34,9 @@ jobs:
       - name: Typecheck
         run: bundle exec srb tc
 
+      - name: Run check-shims
+        run: bin/tapioca check-shims
+
       - name: Lint Ruby files and RBI shims
         run: bundle exec rubocop
   build_ruby:
