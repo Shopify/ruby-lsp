@@ -30,6 +30,8 @@ module RubyLsp
         T::Array[Regexp],
       )
 
+      CLOSING_CHARACTERS = ["}", "]", ")"].freeze
+
       sig do
         params(
           document: RubyDocument,
@@ -125,21 +127,31 @@ module RubyLsp
         # If a keyword occurs in a line which appears be a comment or a string, we will not try to format it, since
         # it could be a coincidental match. This approach is not perfect, but it should cover most cases.
         return if @previous_line.start_with?(/["'#]/)
-
         return unless END_REGEXES.any? { |regex| regex.match?(@previous_line) }
 
+        # This is unintuitive, but the parser behaves differently whether or not the next character is a closing
+        # character or not. If it's a closing character, the remaining content on the line will be moved to the
+        # `next_line`. If it's not, the the remaining content remains on the `current_line`.
         indents = " " * @indentation
         current_line = @lines[@position[:line]]
         next_line = @lines[@position[:line] + 1]
 
-        if current_line.nil? || current_line.strip.empty? || current_line.include?(")") || current_line.include?("]")
-          add_edit_with_text("\n")
-          add_edit_with_text("#{indents}end")
-          move_cursor_to(@position[:line], @indentation + 2)
-        elsif next_line.nil? || next_line.strip.empty?
-          add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
-          move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
+        # Therefore, if the next line starts with a closing character, then we want to wrap the next line in the
+        # `keyword ... end` block.
+        if !next_line.nil? && CLOSING_CHARACTERS.include?(next_line.strip[0])
+          insert_after_line = @position[:line] + 1
+          insert_after_character_position = next_line.strip.length
+        else
+          # Otherwise, it is reasonable to expect the user would like any content after the newline wrapped in the
+          # `keyword ... end` block, so insert the `end` keyword at the end of the current line.
+          line_after_position = current_line&.slice(@position[:character]..)
+          insert_after_character_position = @position[:character] + (line_after_position&.length || 1)
+          insert_after_line = @position[:line]
         end
+
+        add_edit_with_text("\n", { line: insert_after_line, character: insert_after_character_position })
+        add_edit_with_text("#{indents}end", { line: insert_after_line, character: insert_after_character_position })
+        move_cursor_to(@position[:line], @indentation + 2)
       end
 
       sig { params(delimiter: String).void }
