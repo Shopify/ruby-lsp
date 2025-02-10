@@ -749,7 +749,7 @@
     "@babel/core": "^7.26.8",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.20.0",
-    "@shopify/eslint-plugin": "^46.0.0",
+    "@shopify/eslint-plugin": "^47.0.1",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.10",
