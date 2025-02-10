@@ -1032,7 +1032,14 @@ module RubyLsp
         end
       end
 
-      Addon.file_watcher_addons.each { |addon| T.unsafe(addon).workspace_did_change_watched_files(changes) }
+      Addon.file_watcher_addons.each do |addon|
+        T.unsafe(addon).workspace_did_change_watched_files(changes)
+      rescue => e
+        send_log_message(
+          "Error in #{addon.name} add-on while processing watched file notifications: #{e.full_message}",
+          type: Constant::MessageType::ERROR,
+        )
+      end
     end
 
     sig { params(index: RubyIndexer::Index, file_path: String, change_type: Integer).void }
