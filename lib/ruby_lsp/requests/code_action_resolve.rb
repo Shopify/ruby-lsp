@@ -272,6 +272,62 @@ module RubyLsp
         )
       end
 
+      sig do
+        params(
+          body_content: String,
+          body_loc: Prism::Location,
+          node: Prism::Node,
+          indentation: T.nilable(String),
+        ).returns(String)
+      end
+      def handle_nested_structure(body_content, body_loc, node, indentation)
+        location = node.location
+        correction_start = location.start_offset - body_loc.start_offset
+        correction_end = location.end_offset - body_loc.start_offset
+        next_indentation = indentation ? "#{indentation}  " : nil
+
+        transformed_content = if node.is_a?(Prism::HashNode)
+          transform_hash_node(node, next_indentation)
+        elsif node.is_a?(Prism::ArrayNode)
+          transform_array_node(node, next_indentation)
+        elsif node.is_a?(Prism::BlockNode)
+          recursively_switch_nested_block_styles(node, next_indentation)
+        else
+          raise "Unsupported node type: #{node.class.name}"
+        end
+
+        body_content[correction_start...correction_end] = transformed_content
+        body_content
+      end
+
+      sig { params(node: Prism::HashNode, indentation: T.nilable(String)).returns(String) }
+      def transform_hash_node(node, indentation)
+        elements = node.elements.map do |elem|
+          if elem.is_a?(Prism::AssocNode) && !elem.operator
+            "#{elem.key.slice} #{switch_block_body(elem.value, indentation).strip}"
+          elsif elem.is_a?(Prism::AssocNode) && elem.operator
+            "#{elem.key.slice} => #{switch_block_body(elem.value, indentation).strip}"
+          elsif elem.is_a?(Prism::AssocSplatNode)
+            "**#{elem.value&.slice}"
+          end
+        end
+        if indentation
+          "{\n#{indentation}  #{elements.join(",\n#{indentation}  ")},\n#{indentation}}"
+        else
+          "{ #{elements.join(", ")} } "
+        end
+      end
+
+      sig { params(node: Prism::ArrayNode, indentation: T.nilable(String)).returns(String) }
+      def transform_array_node(node, indentation)
+        elements = node.elements.map { |elem| switch_block_body(elem, indentation).strip }
+        if indentation
+          "[\n#{indentation}  #{elements.join(",\n#{indentation}  ")},\n#{indentation}]"
+        else
+          "[#{elements.join(", ")}]"
+        end
+      end
+
       sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
       def recursively_switch_nested_block_styles(node, indentation)
         parameters = node.parameters
@@ -295,7 +351,8 @@ module RubyLsp
           source << "{ "
           source << "#{parameters.slice} " if parameters
           source << switch_block_body(body, nil) if body
-          source << "}"
+          source << " }"
+          source = source.squeeze(" ").gsub("\n", ";")
         end
 
         source
@@ -310,24 +367,18 @@ module RubyLsp
             start: { line: body_loc.start_line - 1, character: body_loc.start_column },
             end: { line: body_loc.end_line - 1, character: body_loc.end_column },
           },
-          node_types: [Prism::BlockNode],
+          node_types: [Prism::BlockNode, Prism::HashNode, Prism::ArrayNode],
         )
 
         body_content = body.slice.dup
 
         # If there are nested blocks, then we change their style too and we have to mutate the string using the
         # relative position in respect to the beginning of the body
-        if nested_block.is_a?(Prism::BlockNode)
-          location = nested_block.location
-          correction_start = location.start_offset - body_loc.start_offset
-          correction_end = location.end_offset - body_loc.start_offset
-          next_indentation = indentation ? "#{indentation}  " : nil
-
-          body_content[correction_start...correction_end] =
-            recursively_switch_nested_block_styles(nested_block, next_indentation)
+        if nested_block.is_a?(Prism::HashNode) || nested_block.is_a?(Prism::ArrayNode) || nested_block.is_a?(Prism::BlockNode)
+          handle_nested_structure(body_content, body_loc, nested_block, indentation)
+        else
+          indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
         end
-
-        indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
       end
 
       sig { returns(T.any(Interface::CodeAction, Error)) }
