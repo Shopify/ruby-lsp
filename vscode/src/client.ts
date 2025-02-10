@@ -244,6 +244,7 @@ function collectClientOptions(
       indexing: configuration.get("indexing"),
       addonSettings: configuration.get("addonSettings"),
       enabledFeatureFlags: enabledFeatureFlags(),
+      telemetryMachineId: vscode.env.machineId,
     },
   };
 }

@@ -32,6 +32,9 @@ module RubyLsp
     sig { returns(URI::Generic) }
     attr_reader :workspace_uri
 
+    sig { returns(T.nilable(String)) }
+    attr_reader :telemetry_machine_id
+
     sig { void }
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
@@ -57,6 +60,7 @@ module RubyLsp
       @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
       @enabled_feature_flags = T.let({}, T::Hash[Symbol, T::Boolean])
       @mutex = T.let(Mutex.new, Mutex)
+      @telemetry_machine_id = T.let(nil, T.nilable(String))
     end
 
     sig { type_parameters(:T).params(block: T.proc.returns(T.type_parameter(:T))).returns(T.type_parameter(:T)) }
@@ -175,6 +179,7 @@ module RubyLsp
       enabled_flags = options.dig(:initializationOptions, :enabledFeatureFlags)
       @enabled_feature_flags = enabled_flags if enabled_flags
 
+      @telemetry_machine_id = options.dig(:initializationOptions, :telemetryMachineId)
       notifications
     end
 

@@ -302,6 +302,14 @@ module RubyLsp
       assert_equal("rubocop_internal", state.formatter)
     end
 
+    def test_saves_telemetry_machine_id
+      state = GlobalState.new
+      assert_nil(state.telemetry_machine_id)
+
+      state.apply_options({ initializationOptions: { telemetryMachineId: "test_machine_id" } })
+      assert_equal("test_machine_id", state.telemetry_machine_id)
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
