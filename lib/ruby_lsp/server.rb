@@ -1044,9 +1044,13 @@ module RubyLsp
 
       case change_type
       when Constant::FileChangeType::CREATED
-        index.index_single(uri, content)
+        # If we receive a late created notification for a file that has already been claimed by the client, we want to
+        # handle change for that URI so that the require path tree is updated
+        @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
       when Constant::FileChangeType::CHANGED
-        index.handle_change(uri, content)
+        # We only handle changes on file watched notifications if the client is not the one managing this URI.
+        # Otherwise, these changes are handled when running the combined requests
+        index.handle_change(uri, content) unless @store.key?(uri)
       when Constant::FileChangeType::DELETED
         index.delete(uri)
       end

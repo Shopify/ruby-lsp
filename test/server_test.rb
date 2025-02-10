@@ -1210,6 +1210,105 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_does_not_index_on_did_change_watched_files_if_document_is_managed_by_client
+    path = File.join(Dir.pwd, "lib", "foo.rb")
+    source = <<~RUBY
+      class Foo
+      end
+    RUBY
+    File.write(path, source)
+    uri = URI::Generic.from_path(path: path)
+
+    begin
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: source,
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      @server.global_state.index.expects(:handle_change).never
+      @server.process_message({
+        method: "workspace/didChangeWatchedFiles",
+        params: {
+          changes: [
+            {
+              uri: uri,
+              type: RubyLsp::Constant::FileChangeType::CHANGED,
+            },
+          ],
+        },
+      })
+
+      @server.global_state.index.expects(:handle_change).once
+      @server.process_message({
+        method: "textDocument/documentSymbol",
+        params: {
+          textDocument: {
+            uri: uri,
+          },
+        },
+      })
+    ensure
+      FileUtils.rm(T.must(path)) if File.exist?(path)
+    end
+  end
+
+  def test_receiving_a_created_file_watch_notification_after_did_open_uses_handle_change
+    path = File.join(Dir.pwd, "lib", "foo.rb")
+    source = <<~RUBY
+      class Foo
+      end
+    RUBY
+    File.write(path, source)
+    uri = URI::Generic.from_path(path: path)
+
+    begin
+      # Simulate the editor opening a document and then immediately firing a document symbol request
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: source,
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+      @server.process_message({
+        method: "textDocument/documentSymbol",
+        params: { textDocument: { uri: uri } },
+      })
+
+      # Then send a late did change watched files notification for the creation of the file
+      @server.process_message({
+        method: "workspace/didChangeWatchedFiles",
+        params: {
+          changes: [
+            {
+              uri: uri,
+              type: RubyLsp::Constant::FileChangeType::CREATED,
+            },
+          ],
+        },
+      })
+
+      entries = @server.global_state.index["Foo"]
+      assert_equal(1, entries&.length)
+
+      uris = @server.global_state.index.search_require_paths("foo")
+      assert_equal(["foo"], uris.map(&:require_path))
+    ensure
+      FileUtils.rm(T.must(path)) if File.exist?(path)
+    end
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
