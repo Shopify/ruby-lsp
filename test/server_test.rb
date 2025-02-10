@@ -521,6 +521,68 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_did_change_watched_files_reports_addon_errors
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue); end
+
+      def workspace_did_change_watched_files(changes)
+        raise StandardError, "boom"
+      end
+
+      def name
+        "Foo"
+      end
+
+      def deactivate; end
+
+      def version
+        "0.1.0"
+      end
+    end
+
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue); end
+
+      def workspace_did_change_watched_files(changes)
+      end
+
+      def name
+        "Bar"
+      end
+
+      def deactivate; end
+
+      def version
+        "0.1.0"
+      end
+    end
+
+    @server.load_addons
+
+    bar = RubyLsp::Addon.get("Bar", "0.1.0")
+    bar.expects(:workspace_did_change_watched_files).once
+
+    begin
+      @server.process_message({
+        method: "workspace/didChangeWatchedFiles",
+        params: {
+          changes: [
+            {
+              uri: URI::Generic.from_path(path: File.join(Dir.pwd, ".rubocop.yml")).to_s,
+              type: RubyLsp::Constant::FileChangeType::CREATED,
+            },
+          ],
+        },
+      })
+
+      message = @server.pop_response.params.message
+      assert_match("Error in Foo add-on while processing watched file notifications", message)
+      assert_match("boom", message)
+    ensure
+      RubyLsp::Addon.unload_addons
+    end
+  end
+
   def test_did_change_watched_files_processes_unique_change_entries
     @server.expects(:handle_rubocop_config_change).once
     @server.process_message({
