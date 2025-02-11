@@ -26,6 +26,11 @@ module RubyLsp
       File.exist?("Gemfile")
     end
 
+    sig { params(string: String).returns(String) }
+    def camelize(string)
+      string.split("_").map(&:capitalize).join
+    end
+
     sig { void }
     def create_addon_files
       addon_name = T.must(@addon_name)
@@ -40,9 +45,27 @@ module RubyLsp
 
           module RubyLsp
             module #{camelize(addon_name)}
-              class Addon
+              class Addon < ::RubyLsp::Addon
+                # Performs any activation that needs to happen once when the language server is booted
+                def activate(global_state, message_queue)
+                  # Add your logic here
+                end
 
-                # Your add-on logic here
+                # Performs any cleanup when shutting down the server, like terminating a subprocess
+                def deactivate
+                  # Add your logic here
+                end
+
+                # Returns the name of the add-on
+                def name
+                  "Ruby LSP My Gem"
+                end
+
+                # Defining a version for the add-on is mandatory. This version doesn't necessarily need to match the version of
+                # the gem it belongs to
+                def version
+                  "0.1.0"
+                end
               end
             end
           end
@@ -82,11 +105,6 @@ module RubyLsp
       Dir.chdir(addon_name) do
         create_addon_files
       end
-    end
-
-    sig { params(string: String).returns(String) }
-    def camelize(string)
-      string.split("_").map(&:capitalize).join
     end
   end
 end
