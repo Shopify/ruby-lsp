@@ -4,7 +4,6 @@ description: File a bug report about the Ruby LSP with non-VS Code editors
 labels:
   - bug
   - non-vscode
-  - help-wanted
 body:
   - type: markdown
     attributes:
