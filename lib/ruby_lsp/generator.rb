@@ -36,15 +36,11 @@ module RubyLsp
       File.write(
         "#{addon_dir}/addon.rb",
         <<~RUBY,
-          # typed: strict
           # frozen_string_literal: true
-
-          require 'sorbet-runtime'
 
           module RubyLsp
             module #{camelize(addon_name)}
               class Addon
-                extend T::Sig
 
                 # Your add-on logic here
               end
@@ -59,7 +55,6 @@ module RubyLsp
       File.write(
         "#{test_dir}/addon_test.rb",
         <<~RUBY,
-          # typed: strict
           # frozen_string_literal: true
 
           require "test_helper"
@@ -67,9 +62,7 @@ module RubyLsp
           module RubyLsp
             module #{camelize(addon_name)}
               class AddonTest < Minitest::Test
-                extend T::Sig
 
-                sig { void }
                 def test_example
                   assert true
                 end
@@ -84,17 +77,10 @@ module RubyLsp
 
     sig { void }
     def create_new_gem
-      puts "No existing project found. Would you like to create a new gem? (y/n)"
-      response = T.let(gets.chomp.downcase, String)
-
-      if response == "y"
-        addon_name = T.must(@addon_name)
-        system("bundle gem #{addon_name}")
-        Dir.chdir(addon_name) do
-          create_addon_files
-        end
-      else
-        puts "Exiting without creating a new gem."
+      addon_name = T.must(@addon_name)
+      system("bundle gem #{addon_name}")
+      Dir.chdir(addon_name) do
+        create_addon_files
       end
     end
 
