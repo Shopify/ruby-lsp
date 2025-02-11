@@ -87,7 +87,7 @@ module RubyIndexer
         # Find the group that is either immediately or two lines above the current entry
         correct_group = grouped.find do |group|
           comment_end_line = group.last.location.start_line
-          (comment_end_line - 1..comment_end_line).cover?(@location.start_line - 1)
+          (comment_end_line..comment_end_line + 1).cover?(@location.start_line - 1)
         end
 
         # If we found something, we join the comments together. Otherwise, the entry has no documentation and we don't
