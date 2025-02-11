@@ -360,7 +360,7 @@ module RubyLsp
       # setting name `e` is `path` with a value of `vendor/bundle`, then it will return `"BUNDLE_PATH" =>
       # "vendor/bundle"`
       settings.all.to_h do |e|
-        key = Bundler::Settings.key_for(e)
+        key = settings.key_for(e)
         value = Array(settings[e]).join(":").tr(" ", ":")
 
         [key, value]

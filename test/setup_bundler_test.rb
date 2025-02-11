@@ -939,7 +939,7 @@ class SetupBundlerTest < Minitest::Test
     end
 
     env = settings.all.to_h do |e|
-      key = Bundler::Settings.key_for(e)
+      key = settings.key_for(e)
       value = Array(settings[e]).join(":").tr(" ", ":")
 
       [key, value]
