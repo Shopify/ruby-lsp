@@ -666,5 +666,80 @@ module RubyIndexer
       method = @index["baz"]&.first
       assert_equal("Foo::Bar::<Class:Bar>", method.owner.name)
     end
+
+    def test_lazy_comments_with_spaces_are_properly_attributed
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source =  <<~RUBY
+        require "whatever"
+
+        # These comments belong to the declaration below
+        # They have to be associated with it
+
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"].first
+
+      begin
+        assert_equal(<<~COMMENTS.chomp, entry.comments)
+          These comments belong to the declaration below
+          They have to be associated with it
+        COMMENTS
+      ensure
+        FileUtils.rm(path)
+      end
+    end
+
+    def test_lazy_comments_with_no_spaces_are_properly_attributed
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source = <<~RUBY
+        require "whatever"
+
+        # These comments belong to the declaration below
+        # They have to be associated with it
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"].first
+
+      begin
+        assert_equal(<<~COMMENTS.chomp, entry.comments)
+          These comments belong to the declaration below
+          They have to be associated with it
+        COMMENTS
+      ensure
+        FileUtils.rm(path)
+      end
+    end
+
+    def test_lazy_comments_with_two_extra_spaces_are_properly_ignored
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source = <<~RUBY
+        require "whatever"
+
+        # These comments don't belong to the declaration below
+        # They will not be associated with it
+
+
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"].first
+
+      begin
+        assert_empty(entry.comments)
+      ensure
+        FileUtils.rm(path)
+      end
+    end
   end
 end
