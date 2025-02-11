@@ -54,7 +54,7 @@ body:
         4. See unexpected behavior
 
         **Code snippet or error message**
-        ```rubm
+        ```ruby
         ```
     validations:
       required: true
