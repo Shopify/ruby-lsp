@@ -72,30 +72,10 @@ module RubyLsp
         RUBY
       )
 
-      # Create a test file
-      test_dir = T.let("test/ruby_lsp/#{addon_name}", String)
-      FileUtils.mkdir_p(test_dir)
-      File.write(
-        "#{test_dir}/addon_test.rb",
-        <<~RUBY,
-          # frozen_string_literal: true
+      create_test_file
 
-          require "test_helper"
-
-          module RubyLsp
-            module #{camelize(addon_name)}
-              class AddonTest < Minitest::Test
-
-                def test_example
-                  assert true
-                end
-              end
-            end
-          end
-        RUBY
-      )
-
-      puts "Add-on '#{addon_name}' created successfully!"
+      puts "Add-on '#{addon_name}' created successfully! Please follow guidelines on https://shopify.github.io/ruby-lsp/add-ons.html
+      for best practice"
     end
 
     sig { void }
@@ -104,6 +84,80 @@ module RubyLsp
       system("bundle gem #{addon_name}")
       Dir.chdir(addon_name) do
         create_addon_files
+      end
+    end
+
+    sig { returns(Symbol) }
+    def check_test_framework
+      if File.exist?("Gemfile")
+        gemfile_content = T.let(File.read("Gemfile"), String)
+        if gemfile_content.include?("rspec")
+          :rspec
+        elsif gemfile_content.include?("minitest")
+          :minitest
+        elsif gemfile_content.include?("test-unit")
+          :test_unit
+        else
+          :minitest
+        end
+      else
+        :minitest
+      end
+    end
+
+    sig { void }
+    def create_test_file
+      addon_name = T.must(@addon_name)
+      test_dir = "test/ruby_lsp/#{@addon_name}"
+      spec_test_dir = "spec/ruby_lsp/#{@addon_name}"
+      test_framework = check_test_framework
+
+      case test_framework
+      when :rspec
+        FileUtils.mkdir_p(spec_test_dir)
+        File.write("#{spec_test_dir}/addon_spec.rb", <<~RUBY)
+          # frozen_string_literal: true
+
+          require "spec_helper"
+
+          RSpec.describe RubyLsp::#{camelize(addon_name)}::Addon do
+            it "does something useful" do
+              expect(true).to eq(true)
+            end
+          end
+        RUBY
+      when :minitest
+        FileUtils.mkdir_p(test_dir)
+        File.write("#{test_dir}/addon_test.rb", <<~RUBY)
+          # frozen_string_literal: true
+
+          require "test_helper"
+
+          module RubyLsp
+            module #{camelize(addon_name)}
+              class AddonTest < Minitest::Test
+                def test_example
+                  assert true
+                end
+              end
+            end
+          end
+        RUBY
+      when :test_unit
+        FileUtils.mkdir_p(test_dir)
+        File.write("#{test_dir}/addon_test.rb", <<~RUBY)
+          # frozen_string_literal: true
+
+          require "test_helper"
+
+          class AddonTest < Test::Unit::TestCase
+            def test_example
+              assert true
+            end
+          end
+        RUBY
+      else
+        raise "Unsupported test framework: #{test_framework}"
       end
     end
   end
