@@ -301,8 +301,8 @@ To use it with Ruby LSP, you can override particular configuration items in the 
 }
 ```
 
-In the Kate settings in tab "LSP-Client" the option "Incrementally synchronize documents with the LSP server" must be enabled.
-Otherwise errors like [this](https://github.com/Shopify/ruby-lsp/issues/3148) occur, when editing a ruby file.
+In the Kate settings, under the "LSP-Client" tab, the option "Incrementally synchronize documents with the LSP server" must be enabled. 
+Otherwise, errors like [this](https://github.com/Shopify/ruby-lsp/issues/3148) can occur when editing a Ruby file.
 
 Kate will start an instance of the Ruby LSP server in the background for any Ruby project matching the `rootIndicationFileNames`.
 If starting Ruby LSP succeeds, the entries in the LSP-Client menu are activated.
