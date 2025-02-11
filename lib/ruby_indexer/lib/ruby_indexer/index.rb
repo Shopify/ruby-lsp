@@ -21,9 +21,9 @@ module RubyIndexer
       # Returns the real nesting of a constant name taking into account top level
       # references that may be included anywhere in the name or nesting where that
       # constant was found
-      sig { params(stack: T::Array[String], name: String).returns(T::Array[String]) }
+      sig { params(stack: T::Array[String], name: T.nilable(String)).returns(T::Array[String]) }
       def actual_nesting(stack, name)
-        nesting = stack + [name]
+        nesting = name ? stack + [name] : stack
         corrected_nesting = []
 
         nesting.reverse_each do |name|

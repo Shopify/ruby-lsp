@@ -2161,5 +2161,12 @@ module RubyIndexer
 
       assert_equal("@@hello", candidates.first&.name)
     end
+
+    def test_actual_nesting
+      assert_equal(["Foo"], Index.actual_nesting([], "Foo"))
+      assert_equal(["TopLevel", "Foo"], Index.actual_nesting(["First", "::TopLevel"], "Foo"))
+      assert_equal(["TopLevel", "Another", "Foo"], Index.actual_nesting(["::TopLevel", "Another"], "Foo"))
+      assert_equal(["TopLevel"], Index.actual_nesting(["First", "::TopLevel"], nil))
+    end
   end
 end
