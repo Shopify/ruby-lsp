@@ -43,11 +43,18 @@ module RubyIndexer
             Prism::ConstantPathNode,
             Prism::ConstantReadNode,
             Prism::ConstantPathTargetNode,
+            Prism::CallNode,
+            Prism::MissingNode,
           ),
         ).returns(T.nilable(String))
       end
       def constant_name(node)
-        node.full_name
+        case node
+        when Prism::CallNode, Prism::MissingNode
+          nil
+        else
+          node.full_name
+        end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
         nil

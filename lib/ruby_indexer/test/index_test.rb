@@ -2168,5 +2168,19 @@ module RubyIndexer
       assert_equal(["TopLevel", "Another", "Foo"], Index.actual_nesting(["::TopLevel", "Another"], "Foo"))
       assert_equal(["TopLevel"], Index.actual_nesting(["First", "::TopLevel"], nil))
     end
+
+    def test_constant_name
+      node = Prism.parse("class var::Foo; end").value.statements.body.first.constant_path
+      assert_nil(Index.constant_name(node))
+
+      node = Prism.parse("class ; end").value.statements.body.first.constant_path
+      assert_nil(Index.constant_name(node))
+
+      node = Prism.parse("class method_call; end").value.statements.body.first.constant_path
+      assert_nil(Index.constant_name(node))
+
+      node = Prism.parse("class Foo; end").value.statements.body.first.constant_path
+      assert_equal("Foo", Index.constant_name(node))
+    end
   end
 end
