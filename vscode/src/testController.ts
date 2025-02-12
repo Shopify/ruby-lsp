@@ -495,7 +495,7 @@ export class TestController {
 
       // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
       // components, so we want to show each individual test directory as a separate item
-      const relativePath = vscode.workspace.asRelativePath(uri);
+      const relativePath = vscode.workspace.asRelativePath(uri, false);
       const pathParts = relativePath.split(path.sep);
       const dirPosition = this.testDirectoryPosition(pathParts);
       const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
