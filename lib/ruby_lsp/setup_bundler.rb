@@ -158,7 +158,8 @@ module RubyLsp
       # If there's a top level Gemfile, we want to evaluate from the composed bundle. We get the source from the top
       # level Gemfile, so if there isn't one we need to add a default source
       if @gemfile&.exist? && @lockfile&.exist?
-        parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
+        gemfile_path = @gemfile.relative_path_from(@custom_dir.realpath)
+        parts << "eval_gemfile(File.expand_path(\"#{gemfile_path}\", __dir__))"
       else
         parts.unshift('source "https://rubygems.org"')
       end
