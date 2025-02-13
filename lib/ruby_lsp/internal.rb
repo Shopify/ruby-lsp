@@ -50,6 +50,7 @@ require "ruby_lsp/response_builders/document_symbol"
 require "ruby_lsp/response_builders/hover"
 require "ruby_lsp/response_builders/semantic_highlighting"
 require "ruby_lsp/response_builders/signature_help"
+require "ruby_lsp/response_builders/test_collection"
 
 # Request support
 require "ruby_lsp/requests/support/selection_range"
@@ -60,6 +61,7 @@ require "ruby_lsp/requests/support/formatter"
 require "ruby_lsp/requests/support/rubocop_runner"
 require "ruby_lsp/requests/support/rubocop_formatter"
 require "ruby_lsp/requests/support/syntax_tree_formatter"
+require "ruby_lsp/requests/support/test_item"
 
 # Requests
 require "ruby_lsp/requests/request"
