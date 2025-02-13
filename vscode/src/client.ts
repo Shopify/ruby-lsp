@@ -43,6 +43,17 @@ import { WorkspaceChannel } from "./workspaceChannel";
 
 type EnabledFeatures = Record<string, boolean>;
 
+export interface ServerTestItem {
+  id: string;
+  label: string;
+  uri: string;
+  range: {
+    start: { line: number; column: number };
+    end: { line: number; column: number };
+  };
+  children: ServerTestItem[];
+}
+
 interface ServerErrorTelemetryEvent {
   type: "error";
   errorMessage: string;
@@ -456,6 +467,12 @@ export default class Client extends LanguageClient implements ClientInterface {
     return this.sendRequest("rubyLsp/textDocument/showSyntaxTree", {
       textDocument: { uri: uri.toString() },
       range,
+    });
+  }
+
+  async discoverTests(uri: vscode.Uri): Promise<ServerTestItem[]> {
+    return this.sendRequest("rubyLsp/discoverTests", {
+      textDocument: { uri: uri.toString() },
     });
   }
 
