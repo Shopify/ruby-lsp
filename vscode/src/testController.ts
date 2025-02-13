@@ -92,24 +92,6 @@ export class TestController {
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
-      vscode.window.onDidChangeActiveTextEditor(async (editor) => {
-        const uri = editor?.document.uri;
-
-        if (!uri) {
-          return;
-        }
-
-        const item = await this.getTestItem(uri);
-
-        if (!item) {
-          return;
-        }
-
-        await vscode.commands.executeCommand(
-          "vscode.revealTestInExplorer",
-          item,
-        );
-      }),
       vscode.workspace.onDidSaveTextDocument(async (document) => {
         const uri = document.uri;
         const item = await this.getParentTestItem(uri);
@@ -612,12 +594,6 @@ export class TestController {
     }
 
     return pathParts.indexOf("features");
-  }
-
-  // Finds a test item based on its URI taking all possible hierarchies into account
-  private async getTestItem(uri: vscode.Uri) {
-    const item = await this.getParentTestItem(uri);
-    return item?.children.get(uri.toString());
   }
 
   private async getParentTestItem(uri: vscode.Uri) {
