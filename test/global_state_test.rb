@@ -14,6 +14,7 @@ module RubyLsp
     end
 
     def test_detects_minitest
+      raise "x" # temporary to verify test reporter
       stub_direct_dependencies("minitest" => "1.2.3")
 
       state = GlobalState.new
@@ -22,6 +23,7 @@ module RubyLsp
     end
 
     def test_does_not_detect_minitest_related_gems_as_minitest
+      skip("no thank you") # temporary to verify test reporter
       stub_direct_dependencies("minitest-reporters" => "1.2.3")
 
       state = GlobalState.new
