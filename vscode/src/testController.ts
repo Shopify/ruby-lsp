@@ -7,6 +7,7 @@ import { CodeLens } from "vscode-languageclient/node";
 
 import { Workspace } from "./workspace";
 import { featureEnabled } from "./common";
+import { ServerTestItem } from "./client";
 
 const asyncExec = promisify(exec);
 
@@ -20,6 +21,7 @@ interface CodeLensData {
 
 const WORKSPACE_TAG = new vscode.TestTag("workspace");
 const TEST_DIR_TAG = new vscode.TestTag("test_dir");
+const TEST_GROUP_TAG = new vscode.TestTag("test_group");
 const DEBUG_TAG = new vscode.TestTag("debug");
 
 export class TestController {
@@ -36,15 +38,23 @@ export class TestController {
     .get("testTimeout") as number;
 
   private readonly currentWorkspace: () => Workspace | undefined;
+  private readonly getOrActivateWorkspace: (
+    workspaceFolder: vscode.WorkspaceFolder,
+  ) => Promise<Workspace>;
+
   private readonly fullDiscovery = featureEnabled("fullTestDiscovery");
 
   constructor(
     context: vscode.ExtensionContext,
     telemetry: vscode.TelemetryLogger,
     currentWorkspace: () => Workspace | undefined,
+    getOrActivateWorkspace: (
+      workspaceFolder: vscode.WorkspaceFolder,
+    ) => Promise<Workspace>,
   ) {
     this.telemetry = telemetry;
     this.currentWorkspace = currentWorkspace;
+    this.getOrActivateWorkspace = getOrActivateWorkspace;
     this.testController = vscode.tests.createTestController(
       "rubyTests",
       "Ruby Tests",
@@ -99,6 +109,19 @@ export class TestController {
           "vscode.revealTestInExplorer",
           item,
         );
+      }),
+      vscode.workspace.onDidSaveTextDocument(async (document) => {
+        const uri = document.uri;
+        const item = await this.getParentTestItem(uri);
+
+        if (item) {
+          const testFile = item.children.get(uri.toString());
+
+          if (testFile) {
+            testFile.children.replace([]);
+            await this.resolveHandler(testFile);
+          }
+        }
       }),
     );
   }
@@ -449,9 +472,13 @@ export class TestController {
       // If the item is a workspace, then we need to gather all test files inside of it
       if (item.tags.some((tag) => tag === WORKSPACE_TAG)) {
         await this.gatherWorkspaceTests(workspaceFolder, item);
-      } else {
-        // TODO: we are resolving the children of a specific test file. Here we will ask the server to parse the file,
-        // run all available listeners and then populate all available groups and examples
+      } else if (!item.tags.some((tag) => tag === TEST_GROUP_TAG)) {
+        const workspace = await this.getOrActivateWorkspace(workspaceFolder);
+        const testItems = await workspace.lspClient?.discoverTests(item.uri!);
+
+        if (testItems) {
+          this.addDiscoveredItems(testItems, item);
+        }
       }
     } else if (workspaceFolders.length === 1) {
       // If there's only one workspace, there's no point in nesting the tests under the workspace name
@@ -497,6 +524,13 @@ export class TestController {
       // components, so we want to show each individual test directory as a separate item
       const relativePath = vscode.workspace.asRelativePath(uri, false);
       const pathParts = relativePath.split(path.sep);
+
+      // Projects may have fixtures that are test files, but not real tests to be executed. We don't want to include
+      // those
+      if (pathParts.some((part) => part === "fixtures")) {
+        continue;
+      }
+
       const dirPosition = this.testDirectoryPosition(pathParts);
       const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
       const firstLevelUri = vscode.Uri.joinPath(
@@ -582,6 +616,11 @@ export class TestController {
 
   // Finds a test item based on its URI taking all possible hierarchies into account
   private async getTestItem(uri: vscode.Uri) {
+    const item = await this.getParentTestItem(uri);
+    return item?.children.get(uri.toString());
+  }
+
+  private async getParentTestItem(uri: vscode.Uri) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
       return undefined;
@@ -608,7 +647,7 @@ export class TestController {
       item = item?.children.get(secondLevelUri.toString());
     }
 
-    return item?.children.get(uri.toString());
+    return item;
   }
 
   private async directoryLevelUris(
@@ -639,5 +678,36 @@ export class TestController {
     }
 
     return { firstLevelUri, secondLevelUri: undefined };
+  }
+
+  private addDiscoveredItems(
+    testItems: ServerTestItem[],
+    parent: vscode.TestItem,
+  ) {
+    testItems.forEach((item) => {
+      const testItem = this.testController.createTestItem(
+        item.id,
+        item.label,
+        vscode.Uri.parse(item.uri),
+      );
+
+      testItem.canResolveChildren = item.children.length > 0;
+      const start = item.range.start;
+      const end = item.range.end;
+
+      testItem.range = new vscode.Range(
+        new vscode.Position(start.line, start.column),
+        new vscode.Position(end.line, end.column),
+      );
+      testItem.tags = testItem.canResolveChildren
+        ? [TEST_GROUP_TAG, DEBUG_TAG]
+        : [DEBUG_TAG];
+
+      parent.children.add(testItem);
+
+      if (testItem.canResolveChildren) {
+        this.addDiscoveredItems(item.children, testItem);
+      }
+    });
   }
 }

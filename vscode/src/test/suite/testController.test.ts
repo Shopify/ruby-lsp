@@ -10,6 +10,7 @@ import sinon from "sinon";
 
 import { TestController } from "../../testController";
 import * as common from "../../common";
+import { Workspace } from "../../workspace";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
@@ -31,6 +32,14 @@ suite("TestController", () => {
       update: (_name: string, _value: any) => Promise.resolve(),
     },
   } as unknown as vscode.ExtensionContext;
+  const workspace = new Workspace(
+    context,
+    workspaceFolder,
+    FAKE_TELEMETRY,
+    () => undefined,
+    new Map(),
+    true,
+  );
 
   afterEach(() => {
     context.subscriptions.forEach((subscription) => subscription.dispose());
@@ -41,6 +50,7 @@ suite("TestController", () => {
       context,
       FAKE_TELEMETRY,
       () => undefined,
+      () => Promise.resolve(workspace),
     );
 
     const codeLensItems: CodeLens[] = [
@@ -83,6 +93,7 @@ suite("TestController", () => {
       context,
       FAKE_TELEMETRY,
       () => undefined,
+      () => Promise.resolve(workspace),
     );
     stub.restore();
 
@@ -106,11 +117,19 @@ suite("TestController", () => {
       vscode.Uri.joinPath(workspaceUri, "test").toString(),
     );
     assert.ok(testDir);
+    assert.deepStrictEqual(
+      testDir!.tags.map((tag) => tag.id),
+      ["test_dir", "debug"],
+    );
 
     const serverTest = testDir!.children.get(
       vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
     );
     assert.ok(serverTest);
+    assert.deepStrictEqual(
+      serverTest!.tags.map((tag) => tag.id),
+      ["debug"],
+    );
   });
 
   test("makes the workspaces the top level when there's more than one", async () => {
@@ -119,6 +138,7 @@ suite("TestController", () => {
       context,
       FAKE_TELEMETRY,
       () => undefined,
+      () => Promise.resolve(workspace),
     );
     stub.restore();
 
@@ -171,27 +191,49 @@ suite("TestController", () => {
     // First workspace
     const workspaceItem = collection.get(workspaceUri.toString());
     assert.ok(workspaceItem);
+    assert.deepStrictEqual(
+      workspaceItem!.tags.map((tag) => tag.id),
+      ["workspace", "debug"],
+    );
+
     await controller.testController.resolveHandler!(workspaceItem);
 
     const testDir = workspaceItem!.children.get(
       vscode.Uri.joinPath(workspaceUri, "test").toString(),
     );
     assert.ok(testDir);
+    assert.deepStrictEqual(
+      testDir!.tags.map((tag) => tag.id),
+      ["test_dir", "debug"],
+    );
 
     const serverTest = testDir!.children.get(
       vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
     );
     assert.ok(serverTest);
+    assert.deepStrictEqual(
+      serverTest!.tags.map((tag) => tag.id),
+      ["debug"],
+    );
 
     // Second workspace
     const secondWorkspaceItem = collection.get(secondWorkspaceUri.toString());
     assert.ok(secondWorkspaceItem);
+    assert.deepStrictEqual(
+      secondWorkspaceItem!.tags.map((tag) => tag.id),
+      ["workspace", "debug"],
+    );
+
     await controller.testController.resolveHandler!(secondWorkspaceItem);
 
     const secondTestDir = secondWorkspaceItem!.children.get(
       vscode.Uri.joinPath(secondWorkspaceUri, "test").toString(),
     );
     assert.ok(secondTestDir);
+    assert.deepStrictEqual(
+      secondTestDir!.tags.map((tag) => tag.id),
+      ["test_dir", "debug"],
+    );
 
     const otherTest = secondTestDir!.children.get(
       vscode.Uri.joinPath(
@@ -201,8 +243,66 @@ suite("TestController", () => {
       ).toString(),
     );
     assert.ok(otherTest);
+    assert.deepStrictEqual(
+      otherTest!.tags.map((tag) => tag.id),
+      ["debug"],
+    );
+
     workspacesStub.restore();
     relativePathStub.restore();
     getWorkspaceStub.restore();
+  });
+
+  test("fires discover tests request when resolving a specific test file", async () => {
+    const stub = sinon.stub(common, "featureEnabled").returns(true);
+    const controller = new TestController(
+      context,
+      FAKE_TELEMETRY,
+      () => undefined,
+      () => Promise.resolve(workspace),
+    );
+    stub.restore();
+
+    const workspacesStub = sinon
+      .stub(vscode.workspace, "workspaceFolders")
+      .get(() => [workspaceFolder]);
+
+    const relativePathStub = sinon
+      .stub(vscode.workspace, "asRelativePath")
+      .callsFake((uri) =>
+        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
+      );
+
+    await controller.testController.resolveHandler!(undefined);
+
+    const collection = controller.testController.items;
+
+    const testDir = collection.get(
+      vscode.Uri.joinPath(workspaceUri, "test").toString(),
+    );
+    assert.ok(testDir);
+    assert.deepStrictEqual(
+      testDir!.tags.map((tag) => tag.id),
+      ["test_dir", "debug"],
+    );
+
+    const serverTest = testDir!.children.get(
+      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
+    );
+    assert.ok(serverTest);
+    assert.deepStrictEqual(
+      serverTest!.tags.map((tag) => tag.id),
+      ["debug"],
+    );
+
+    const fakeClient = {
+      discoverTests: sinon.stub().resolves([]),
+    };
+    workspace.lspClient = fakeClient as any;
+    await controller.testController.resolveHandler!(serverTest);
+    assert.strictEqual(fakeClient.discoverTests.callCount, 1);
+
+    workspacesStub.restore();
+    relativePathStub.restore();
   });
 });

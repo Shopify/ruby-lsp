@@ -45,6 +45,7 @@ export class RubyLsp {
       context,
       this.telemetry,
       this.currentActiveWorkspace.bind(this),
+      this.getOrActivateWorkspace.bind(this),
     );
     this.debug = new Debugger(context, this.workspaceResolver.bind(this));
     this.rails = new Rails(this.showWorkspacePick.bind(this));
@@ -174,10 +175,22 @@ export class RubyLsp {
     }
   }
 
+  // Overloaded signatures because when the workspace activation is lazy, it is guaranteed to return `Workspace`, which
+  // avoids checking for undefined in the caller
+  private async activateWorkspace(
+    workspaceFolder: vscode.WorkspaceFolder,
+    eager: true,
+  ): Promise<Workspace | undefined>;
+
+  private async activateWorkspace(
+    workspaceFolder: vscode.WorkspaceFolder,
+    eager: false,
+  ): Promise<Workspace>;
+
   private async activateWorkspace(
     workspaceFolder: vscode.WorkspaceFolder,
     eager: boolean,
-  ) {
+  ): Promise<Workspace | undefined> {
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("bundleGemfile")!;
@@ -219,6 +232,7 @@ export class RubyLsp {
     );
     await this.showFormatOnSaveModeWarning(workspace);
     this.workspacesBeingLaunched.delete(workspaceFolder.index);
+    return workspace;
   }
 
   // Registers all extension commands. Commands can only be registered once, so this happens in the constructor. For
@@ -700,6 +714,27 @@ export class RubyLsp {
     }
 
     return this.getWorkspace(workspaceFolder.uri);
+  }
+
+  private async getOrActivateWorkspace(
+    workspaceFolder: vscode.WorkspaceFolder,
+  ): Promise<Workspace> {
+    const workspace = this.getWorkspace(workspaceFolder.uri);
+
+    if (workspace) {
+      return workspace;
+    }
+
+    return vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `Workspace ${workspaceFolder.name} is not activated yet.`,
+      },
+      async (progress) => {
+        progress.report({ message: "Activating workspace..." });
+        return this.activateWorkspace(workspaceFolder, false);
+      },
+    );
   }
 
   private getWorkspace(uri: vscode.Uri): Workspace | undefined {
