@@ -108,6 +108,8 @@ module RubyLsp
         )
       when "rubyLsp/composeBundle"
         compose_bundle(message)
+      when "rubyLsp/diagnoseState"
+        diagnose_state(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -1367,6 +1369,25 @@ module RubyLsp
           )
         end
       end
+    end
+
+    # Returns internal state information for debugging purposes
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def diagnose_state(message)
+      documents = {}
+      @store.each { |uri, document| documents[uri] = document.source }
+
+      send_message(
+        Result.new(
+          id: message[:id],
+          response: {
+            workerAlive: @worker.alive?,
+            backtrace: @worker.backtrace,
+            documents: documents,
+            incomingQueueSize: @incoming_queue.length,
+          },
+        ),
+      )
     end
   end
 end

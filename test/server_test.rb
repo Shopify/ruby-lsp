@@ -1371,6 +1371,27 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_diagnose_state
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: URI::Generic.from_path(path: "/foo.rb"),
+          text: "class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    @server.process_message({ id: 1, method: "rubyLsp/diagnoseState", params: {} })
+    result = find_message(RubyLsp::Result, id: 1)
+
+    assert(result.response[:workerAlive])
+    assert_equal({ "file:///foo.rb" => "class Foo\nend" }, result.response[:documents])
+    assert(result.response.key?(:backtrace))
+    assert_equal(0, result.response[:incomingQueueSize])
+  end
+
   private
 
   def with_uninstalled_rubocop(&block)
