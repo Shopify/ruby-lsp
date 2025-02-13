@@ -141,6 +141,8 @@ module RubyLsp
               Prism::ConstantPathNode,
               Prism::ConstantReadNode,
               Prism::ConstantPathTargetNode,
+              Prism::CallNode,
+              Prism::MissingNode,
             ),
           ).returns(T.nilable(String))
         end

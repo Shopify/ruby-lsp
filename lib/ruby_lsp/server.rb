@@ -110,6 +110,8 @@ module RubyLsp
         compose_bundle(message)
       when "rubyLsp/diagnoseState"
         diagnose_state(message)
+      when "rubyLsp/discoverTests"
+        discover_tests(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -1388,6 +1390,29 @@ module RubyLsp
           },
         ),
       )
+    end
+
+    # Discovers all available test groups and examples in a given file taking into consideration the merged response of
+    # all add-ons
+    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    def discover_tests(message)
+      document = @store.get(message.dig(:params, :textDocument, :uri))
+
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      cached_response = document.cache_get("rubyLsp/discoverTests")
+      if cached_response != Document::EMPTY_CACHE
+        send_message(Result.new(id: message[:id], response: cached_response.map(&:to_hash)))
+        return
+      end
+
+      items = Requests::DiscoverTests.new(@global_state, document, Prism::Dispatcher.new).perform
+      document.cache_set("rubyLsp/discoverTests", items)
+
+      send_message(Result.new(id: message[:id], response: items.map(&:to_hash)))
     end
   end
 end
