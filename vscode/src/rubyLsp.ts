@@ -264,6 +264,10 @@ export class RubyLsp {
         Command.ShowSyntaxTree,
         this.showSyntaxTree.bind(this),
       ),
+      vscode.commands.registerCommand(
+        Command.DiagnoseState,
+        this.diagnoseState.bind(this),
+      ),
       vscode.commands.registerCommand(Command.ShowServerChangelog, () => {
         const version = this.currentActiveWorkspace()?.lspClient?.serverVersion;
 
@@ -777,6 +781,48 @@ export class RubyLsp {
     }
 
     return this.getWorkspace(workspaceFolder.uri);
+  }
+
+  private async diagnoseState() {
+    const workspace = await this.showWorkspacePick();
+
+    const response:
+      | {
+          workerAlive: boolean;
+          backtrace: string[];
+          documents: { uri: string; source: string };
+          incomingQueueSize: number;
+        }
+      | null
+      | undefined = await workspace?.lspClient?.sendRequest(
+      "rubyLsp/diagnoseState",
+    );
+
+    if (response) {
+      const documentData = Object.entries(response.documents);
+      const information = [
+        `Worker alive: ${response.workerAlive}`,
+        `Incoming queue size: ${response.incomingQueueSize}`,
+        `Backtrace:\n${response.backtrace.join("\n")}\n`,
+        `=========== Documents (${documentData.length}) ===========`,
+        ...documentData.map(
+          ([uri, source]) => `URI: ${uri}\n\n${source}\n===========`,
+        ),
+      ].join("\n");
+
+      const document = await vscode.workspace.openTextDocument(
+        vscode.Uri.from({
+          scheme: "ruby-lsp",
+          path: "show-diagnose-state",
+          query: information,
+        }),
+      );
+
+      await vscode.window.showTextDocument(document, {
+        viewColumn: vscode.ViewColumn.Beside,
+        preserveFocus: true,
+      });
+    }
   }
 
   // Show syntax tree command
