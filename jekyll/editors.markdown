@@ -142,6 +142,18 @@ lspconfig.ruby_lsp.setup({
 })
 ```
 
+To configure an add-on, add the configuration `addonSettings` within `init_options`, for example:
+
+```lua
+  init_options = {
+    addonSettings = {
+      ["Ruby LSP Rails"] = {
+        enablePendingMigrationsPrompt = false,
+      },
+    },
+  },
+```
+
 ### Mason
 
 You can use [mason.nvim](https://github.com/williamboman/mason.nvim),
