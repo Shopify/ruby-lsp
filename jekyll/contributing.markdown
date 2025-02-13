@@ -193,7 +193,7 @@ The VS Code extension currently has the following main parts:
 ### Testing changes
 
 {: .note }
-Open the `lsp.code-workspace` file instead of just opening the regular folder.  It contains
+Open the `ruby-lsp.code-workspace` file instead of just opening the regular folder. It contains
 contains the configuration needed for using 'Run and debug' as described below.
 
 We try to ensure thorough testing as much as possible. However, some tests are difficult to write, in particular those
