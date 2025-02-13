@@ -116,6 +116,7 @@ async function createLogger(context: vscode.ExtensionContext) {
     additionalCommonProperties: {
       extensionVersion: context.extension.packageJSON.version,
       environment: os.platform(),
+      machineId: vscode.env.machineId,
     },
   });
 }
