@@ -26,17 +26,18 @@ module RubyLsp
 
       sig do
         params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
           global_state: GlobalState,
-          uri: URI::Generic,
+          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
+          document: RubyDocument,
           dispatcher: Prism::Dispatcher,
         ).void
       end
-      def initialize(response_builder, global_state, uri, dispatcher)
-        @response_builder = response_builder
+      def initialize(global_state, response_builder, document, dispatcher)
         @global_state = global_state
-        @uri = T.let(uri, URI::Generic)
-        @path = T.let(uri.to_standardized_path, T.nilable(String))
+        @response_builder = response_builder
+        @uri = T.let(document.uri, URI::Generic)
+        # @test_library = T.let(document.test_library, String)
+        @path = T.let(@uri.to_standardized_path, T.nilable(String))
         # visibility_stack is a stack of [current_visibility, previous_visibility]
         @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
         @group_stack = T.let([], T::Array[String])
@@ -65,7 +66,20 @@ module RubyLsp
         class_name = node.constant_path.slice
         @group_stack.push(class_name)
 
-        if @path && class_name.end_with?("Test")
+        return unless @path # if file not yet saved
+
+        constant_path_node = node.constant_path
+        return if constant_path_node.is_a?(Prism::CallNode)
+
+        name = constant_name(constant_path_node)
+
+        return unless name
+
+        fully_qualified_name = actual_nesting(name).join("::")
+
+        ancestors = @global_state.index.linearized_ancestors_of(fully_qualified_name)
+
+        if ancestors.include?("Minitest::Test")
           add_test_code_lens(
             node,
             name: class_name,
@@ -77,6 +91,22 @@ module RubyLsp
           @group_id_stack.push(@group_id)
           @group_id += 1
         end
+      end
+
+      # TODO: move to index
+
+      sig { params(name: String).returns(T::Array[String]) }
+      def actual_nesting(name)
+        nesting = @stack + [name]
+        corrected_nesting = []
+
+        nesting.reverse_each do |name|
+          corrected_nesting.prepend(name.delete_prefix("::"))
+
+          break if name.start_with?("::")
+        end
+
+        corrected_nesting
       end
 
       sig { params(node: Prism::ClassNode).void }
@@ -178,7 +208,7 @@ module RubyLsp
       sig { params(node: Prism::Node, name: String, command: String, kind: Symbol, id: String).void }
       def add_test_code_lens(node, name:, command:, kind:, id: name)
         # don't add code lenses if the test library is not supported or unknown
-        return unless SUPPORTED_TEST_LIBRARIES.include?(@global_state.test_library) && @path
+        return unless SUPPORTED_TEST_LIBRARIES.include?(@test_library) && @path
 
         arguments = [
           @path,
@@ -235,7 +265,7 @@ module RubyLsp
         command += " -Ispec" if File.fnmatch?("**/spec/**/*", path, File::FNM_PATHNAME)
         command += " #{path}"
 
-        case @global_state.test_library
+        case @test_library
         when "minitest"
           last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
           command += if last_dynamic_reference_index
@@ -324,6 +354,44 @@ module RubyLsp
           group_stack.join("::")
         end
       end
+
+      # TODO: consider moving this to common.rb
+
+      # Returns the detected test library for a group of tests
+      # sig { params(node: T.any(Prism::CallNode, Prism::ClassNode)).returns(String) }
+      # def test_library_for_group(node)
+      #   if node.is_a?(Prism::CallNode)
+      #     receiver = node.receiver
+      #     if node.name == :describe && (!receiver.is_a?(Prism::ConstantReadNode) || receiver.name == :RSpec)
+      #       return "rspec"
+      #     end
+
+      #     return "unknown"
+      #   end
+
+      #   constant_path_node = node.constant_path
+      #   return "unknown" if constant_path_node.is_a?(Prism::CallNode)
+
+      #   class_name = constant_name(constant_path_node)
+      #   # binding.break
+      #   # TODO: handle errors, e.g. if something not indexed
+      #   return "unknown" unless class_name
+
+      #   ancestors = @index.linearized_ancestors_of(class_name)
+
+      #   # ancestors = class_entries
+      #   #   .map { @global_state.index.linearized_ancestors_of(_1.name) }.flatten
+
+      #   if ancestors.include?("ActiveSupport::TestCase") # or ActiveSupport::Testing::Declarative ?
+      #     "rails"
+      #   elsif ancestors.include?("Minitest::Test")
+      #     "minitest"
+      #   elsif ancestors.include?("Test::Unit::TestCase")
+      #     "test-unit"
+      #   else
+      #     "unknown"
+      #   end
+      # end
     end
   end
 end

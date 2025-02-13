@@ -152,6 +152,16 @@ module RubyLsp
       end
     end
 
+    sig { returns(T::Boolean) }
+    def test_file?
+      false
+    end
+
+    sig { returns(String) }
+    def test_library
+      ""
+    end
+
     private
 
     sig { returns(Scanner) }
