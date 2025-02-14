@@ -1,5 +1,3 @@
-import tsParser from "@typescript-eslint/parser";
-import tsPlugin from "@typescript-eslint/eslint-plugin";
 import shopifyPlugin from "@shopify/eslint-plugin";
 
 const config = [
@@ -8,24 +6,9 @@ const config = [
   ...shopifyPlugin.configs.prettier,
   {
     languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: "script",
-
       parserOptions: {
-        project: "tsconfig.json",
-      },
-    },
-
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-    },
-
-    settings: {
-      "import/resolver": {
-        typescript: {
-          project: "tsconfig.json",
-        },
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
 
