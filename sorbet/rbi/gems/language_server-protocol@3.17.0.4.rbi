@@ -2380,7 +2380,7 @@ class LanguageServer::Protocol::Interface::ColorPresentation
   def label; end
 
   # An [edit](#TextEdit) which is applied to a document when selecting
-  # this presentation for the color. When `falsy` the
+  # this presentation for the color. When omitted the
   # [label](#ColorPresentation.label) is used.
   #
   # @return [TextEdit]
@@ -2667,7 +2667,7 @@ class LanguageServer::Protocol::Interface::CompletionItem
   def documentation; end
 
   # A string that should be used when filtering a set of
-  # completion items. When `falsy` the label is used as the
+  # completion items. When omitted the label is used as the
   # filter text for this item.
   #
   # @return [string]
@@ -2676,7 +2676,7 @@ class LanguageServer::Protocol::Interface::CompletionItem
   def filter_text; end
 
   # A string that should be inserted into a document when selecting
-  # this completion. When `falsy` the label is used as the insert text
+  # this completion. When omitted the label is used as the insert text
   # for this item.
   #
   # The `insertText` is subject to interpretation by the client side.
@@ -2754,7 +2754,7 @@ class LanguageServer::Protocol::Interface::CompletionItem
   def preselect; end
 
   # A string that should be used when comparing this item
-  # with other items. When `falsy` the label is used
+  # with other items. When omitted the label is used
   # as the sort text for this item.
   #
   # @return [string]
@@ -14188,6 +14188,9 @@ class LanguageServer::Protocol::Transport::Io::Reader
   # source://language_server-protocol//lib/language_server/protocol/transport/io/reader.rb#10
   def initialize(io); end
 
+  # source://language_server-protocol//lib/language_server/protocol/transport/io/reader.rb#24
+  def close; end
+
   # source://language_server-protocol//lib/language_server/protocol/transport/io/reader.rb#15
   def read(&block); end
 
@@ -14195,7 +14198,7 @@ class LanguageServer::Protocol::Transport::Io::Reader
 
   # Returns the value of attribute io.
   #
-  # source://language_server-protocol//lib/language_server/protocol/transport/io/reader.rb#26
+  # source://language_server-protocol//lib/language_server/protocol/transport/io/reader.rb#30
   def io; end
 end
 
@@ -14205,6 +14208,9 @@ class LanguageServer::Protocol::Transport::Io::Writer
   #
   # source://language_server-protocol//lib/language_server/protocol/transport/io/writer.rb#8
   def initialize(io); end
+
+  # source://language_server-protocol//lib/language_server/protocol/transport/io/writer.rb#32
+  def close; end
 
   # Returns the value of attribute io.
   #

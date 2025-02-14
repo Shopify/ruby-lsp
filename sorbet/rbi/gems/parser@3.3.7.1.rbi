@@ -1555,57 +1555,63 @@ class Parser::ClobberingError < ::RuntimeError; end
 class Parser::Context
   # @return [Context] a new instance of Context
   #
-  # source://parser//lib/parser/context.rb#29
+  # source://parser//lib/parser/context.rb#30
   def initialize; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
+  def cant_return; end
+
+  # source://parser//lib/parser/context.rb#45
+  def cant_return=(_arg0); end
+
+  # source://parser//lib/parser/context.rb#45
   def in_argdef; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_argdef=(_arg0); end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_block; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_block=(_arg0); end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_class; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_class=(_arg0); end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_def; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_def=(_arg0); end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_defined; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_defined=(_arg0); end
 
   # @return [Boolean]
   #
-  # source://parser//lib/parser/context.rb#45
+  # source://parser//lib/parser/context.rb#47
   def in_dynamic_block?; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_kwarg; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_kwarg=(_arg0); end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_lambda; end
 
-  # source://parser//lib/parser/context.rb#43
+  # source://parser//lib/parser/context.rb#45
   def in_lambda=(_arg0); end
 
-  # source://parser//lib/parser/context.rb#33
+  # source://parser//lib/parser/context.rb#34
   def reset; end
 end
 
