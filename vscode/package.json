@@ -768,8 +768,9 @@
     "mocha": "^11.1.0",
     "ovsx": "^0.10.1",
     "prettier": "^3.5.0",
-    "typescript": "^5.7.3",
     "sinon": "^19.0.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "8",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.2.0"
   },
