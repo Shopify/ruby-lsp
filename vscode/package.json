@@ -139,6 +139,11 @@
         "category": "Ruby LSP"
       },
       {
+        "command": "rubyLsp.diagnoseState",
+        "title": "Diagnose language server state",
+        "category": "Ruby LSP"
+      },
+      {
         "command": "rubyLsp.railsGenerate",
         "title": "Rails generate",
         "category": "Ruby LSP"
