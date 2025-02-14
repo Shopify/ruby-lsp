@@ -155,7 +155,9 @@ if options[:doctor]
 end
 
 if options[:new_addon]
-
+  require "ruby_lsp/generator"
+  RubyLsp::Generator.new(options[:new_addon]).run
+  exit(0)
 end
 # Ensure all output goes out stderr by default to allow puts/p/pp to work
 # without specifying output device.

@@ -13,8 +13,10 @@ module RubyLsp
     sig { void }
     def run
       if inside_existing_project?
+        puts "Inside existing project. Creating add-on files..."
         create_addon_files
       else
+        puts "Not inside existing project. Prompting to create new gem..."
         create_new_gem
       end
     end
