@@ -28,6 +28,7 @@ import {
   FeatureState,
   ServerCapabilities,
   ErrorCodes,
+  WorkDoneProgress,
 } from "vscode-languageclient/node";
 
 import {
@@ -345,6 +346,7 @@ export default class Client extends LanguageClient implements ClientInterface {
   private readonly baseFolder;
   private readonly workspaceOutputChannel: WorkspaceChannel;
   private readonly virtualDocuments = new Map<string, string>();
+  private readonly indexingPromise;
 
   // List of all subscriptions that have to be disposed of when the client is disposed. That happens if the user
   // requests that the LSP stops or in automated restarts
@@ -419,6 +421,19 @@ export default class Client extends LanguageClient implements ClientInterface {
         }
       }),
     );
+
+    this.indexingPromise = new Promise<void>((resolve) => {
+      const disposable = this.onProgress(
+        WorkDoneProgress.type,
+        "indexing-progress",
+        (value: any) => {
+          if (value.kind === "end") {
+            disposable.dispose();
+            resolve();
+          }
+        },
+      );
+    });
   }
 
   async afterStart() {
@@ -446,6 +461,10 @@ export default class Client extends LanguageClient implements ClientInterface {
         );
       }
     }
+  }
+
+  async waitForIndexing() {
+    return this.indexingPromise;
   }
 
   get formatter(): string {
