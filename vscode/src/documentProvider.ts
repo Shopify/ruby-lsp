@@ -12,6 +12,9 @@ export default class DocumentProvider
       case "show-syntax-tree":
         response = uri.query;
         break;
+      case "show-diagnose-state":
+        response = uri.query;
+        break;
     }
 
     return response;
