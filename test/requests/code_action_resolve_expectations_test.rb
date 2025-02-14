@@ -107,6 +107,108 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
     assert_match_to_expected(source, expected)
   end
 
+  def test_toggle_block_do_end_with_hash_and_array_to_brackets
+    @__params = {
+      kind: "refactor.rewrite",
+      title: "Refactor: Toggle block style",
+      data: {
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 9, character: 3 },
+        },
+        uri: "file:///fake",
+      },
+    }
+    source = <<~RUBY
+      arr.map do |a|
+        {
+          id: a.id,
+          name: a.name,
+          items: [
+            { value: a.value },
+            { value: a.other_value }
+          ]
+        }
+      end
+    RUBY
+    expected = {
+      "title" => "Refactor: Toggle block style",
+      "edit" => {
+        "documentChanges" => [{
+          "textDocument": {
+            "uri": "file:///fake",
+            "version": nil,
+          },
+          "edits" => [{
+            "range" => {
+              "start" => { "line" => 0, "character" => 8 },
+              "end" => { "line" => 9, "character" => 3 },
+            },
+            "newText" => "{ |a| { id: a.id, name: a.name, items: [{ value: a.value }, { value: a.other_value }] } }",
+          }],
+        }],
+      },
+    }
+    assert_match_to_expected(source, expected)
+  end
+
+  def test_toggle_block_do_end_with_multiple_params_and_nested_structures
+    @__params = {
+      kind: "refactor.rewrite",
+      title: "Refactor: Toggle block style",
+      data: {
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 3, character: 3 },
+        },
+        uri: "file:///fake",
+      },
+    }
+    source = <<~RUBY
+      [].each do |a, b, c|
+        a = []
+        { b: [a] }
+      end
+    RUBY
+    expected = {
+      "title" => "Refactor: Toggle block style",
+      "edit" => {
+        "documentChanges" => [{
+          "textDocument" => {
+            "uri" => "file:///fake",
+            "version" => nil,
+          },
+          "edits" => [{
+            "range" => {
+              "start" => { "line" => 0, "character" => 8 },
+              "end" => { "line" => 3, "character" => 3 },
+            },
+            "newText" => "{ |a, b, c| a = []; { b: [a] } }",
+          }],
+        }],
+      },
+    }
+    assert_match_to_expected(source, expected)
+  end
+
+  def test_returns_error_when_selected_code_is_not_block_with_hash_and_array
+    @__params = {
+      kind: "refactor.rewrite",
+      title: "Refactor: Toggle block style",
+      data: {
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 0, character: 45 },
+        },
+        uri: "file:///fake",
+      },
+    }
+    source = <<~RUBY
+      { key1: [1, 2, 3], key2: { nested_key: "value" }}
+    RUBY
+    assert_equal(RubyLsp::Requests::CodeActionResolve::Error::InvalidTargetRange, run_expectations(source))
+  end
+
   private
 
   def default_args

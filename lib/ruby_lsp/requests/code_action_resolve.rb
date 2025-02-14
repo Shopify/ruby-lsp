@@ -374,7 +374,7 @@ module RubyLsp
 
         # If there are nested blocks, then we change their style too and we have to mutate the string using the
         # relative position in respect to the beginning of the body
-        if nested_block.is_a?(Prism::HashNode) || nested_block.is_a?(Prism::ArrayNode) || nested_block.is_a?(Prism::BlockNode)
+        if nested_block.is_a?(Prism::HashNode) || nested_block.is_a?(Prism::ArrayNode) || nested_block.is_a?(Prism::BlockNode) # rubocop:disable Layout/LineLength
           handle_nested_structure(body_content, body_loc, nested_block, indentation)
         else
           indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
