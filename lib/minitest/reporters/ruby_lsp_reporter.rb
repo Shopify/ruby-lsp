@@ -17,8 +17,7 @@ module Minitest
       sig { params(test: Minitest::Test).void }
       def before_test(test)
         @reporting.before_test(
-          class_name: T.must(test.class.name),
-          test_name: test.name,
+          id: id_from_test(test),
           file: file_for_class_name(test),
         )
         super
@@ -27,8 +26,7 @@ module Minitest
       sig { params(test: Minitest::Test).void }
       def after_test(test)
         @reporting.after_test(
-          class_name: T.must(test.class.name),
-          test_name: test.name,
+          id: id_from_test(test),
           file: file_for_class_name(test),
         )
         super
@@ -56,8 +54,7 @@ module Minitest
       sig { params(result: Minitest::Result).void }
       def record_pass(result)
         info = {
-          test_name: result.name,
-          class_name: result.klass,
+          id: id_from_result(result),
           file: result.source_location[0],
         }
         @reporting.record_pass(**info)
@@ -66,8 +63,7 @@ module Minitest
       sig { params(result: Minitest::Result).void }
       def record_skip(result)
         info = {
-          test_name: result.name,
-          class_name: result.klass,
+          id: id_from_result(result),
           message: result.failure.message,
           file: result.source_location[0],
         }
@@ -77,13 +73,24 @@ module Minitest
       sig { params(result: Minitest::Result).void }
       def record_fail(result)
         info = {
-          class_name: result.klass,
-          test_name: result.name,
+          id: id_from_result(result),
           type: result.failure.class.name,
           message: result.failure.message,
           file: result.source_location[0],
         }
         @reporting.record_fail(**info)
+      end
+
+      private
+
+      sig { params(test: Minitest::Test).returns(String) }
+      def id_from_test(test)
+        [test.class.name, test.name].join("#")
+      end
+
+      sig { params(result: Minitest::Result).returns(String) }
+      def id_from_result(result)
+        [result.name, result.klass].join("#")
       end
 
       sig { params(test: Minitest::Test).returns(String) }
