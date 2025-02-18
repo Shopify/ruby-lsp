@@ -1,7 +1,7 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "ruby_lsp/test_reporting"
+require "ruby_lsp/test_reporter"
 
 # NOTE: minitest-reporters mentioned an API change between minitest 5.10 and 5.11, so we should verify:
 # https://github.com/minitest-reporters/minitest-reporters/blob/265ff4b40d5827e84d7e902b808fbee860b61221/lib/minitest/reporters/base_reporter.rb#L82-L91
