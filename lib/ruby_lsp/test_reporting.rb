@@ -9,10 +9,10 @@ module RubyLsp
 
     sig { params(class_name: String, test_name: String, file: String).void }
     def before_test(class_name:, test_name:, file:)
-      full_name = "#{class_name}##{test_name}"
+      id = "#{class_name}##{test_name}"
       result = {
         event: "before_test",
-        full_name: full_name,
+        id: id,
         file: file,
       }
       puts result.to_json
@@ -20,10 +20,10 @@ module RubyLsp
 
     sig { params(class_name: String, test_name: String, file: String).void }
     def after_test(class_name:, test_name:, file:)
-      full_name = "#{class_name}##{test_name}"
+      id = "#{class_name}##{test_name}"
       result = {
         event: "after_test",
-        full_name: full_name,
+        id: id,
         file: file,
       }
       puts result.to_json
@@ -31,10 +31,10 @@ module RubyLsp
 
     sig { params(class_name: String, test_name: String, file: String).void }
     def record_pass(class_name:, test_name:, file:)
-      full_name = "#{class_name}##{test_name}"
+      id = "#{class_name}##{test_name}"
       result = {
         event: "pass",
-        full_name: full_name,
+        id: id,
         file: file,
       }
       puts result.to_json
