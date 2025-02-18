@@ -23,7 +23,7 @@ module Minitest
       def before_test(test)
         @reporting.before_test(
           id: id_from_test(test),
-          file: file_for_class_name(test),
+          file: file_for_test(test),
         )
         super
       end
@@ -32,7 +32,7 @@ module Minitest
       def after_test(test)
         @reporting.after_test(
           id: id_from_test(test),
-          file: file_for_class_name(test),
+          file: file_for_test(test),
         )
         super
       end
@@ -93,7 +93,7 @@ module Minitest
       end
 
       sig { params(test: Minitest::Test).returns(String) }
-      def file_for_class_name(test)
+      def file_for_test(test)
         T.must(Kernel.const_source_location(test.class_name)).first
       end
     end
