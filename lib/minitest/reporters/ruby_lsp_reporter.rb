@@ -8,6 +8,7 @@ require "ruby_lsp/test_reporting"
 
 module Minitest
   module Reporters
+    # TODO: consider if minitest-reporrters should be a dependency of ruby-lsp
     class RubyLspReporter < ::Minitest::Reporters::BaseReporter
       extend T::Sig
 
