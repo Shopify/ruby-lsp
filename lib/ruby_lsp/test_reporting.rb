@@ -4,7 +4,7 @@
 require "json"
 
 module RubyLsp
-  class TestReporting
+  class TestReporter
     extend T::Sig
 
     sig { params(id: String, file: String).void }

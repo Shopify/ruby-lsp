@@ -10,7 +10,7 @@ module Minitest
 
       sig { void }
       def initialize
-        @reporting = T.let(RubyLsp::TestReporting.new, RubyLsp::TestReporting)
+        @reporting = T.let(RubyLsp::TestReporter.new, RubyLsp::TestReporter)
         super
       end
 
