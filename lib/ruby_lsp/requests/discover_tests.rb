@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "ruby_lsp/listeners/test_style"
+require "ruby_lsp/listeners/spec_style"
 
 module RubyLsp
   module Requests
@@ -36,6 +37,7 @@ module RubyLsp
         # in the index first and then discover the tests, all in the same traversal.
         if @index.entries_for(uri.to_s)
           Listeners::TestStyle.new(@response_builder, @global_state, @dispatcher, @document.uri)
+          Listeners::SpecStyle.new(@response_builder, @global_state, @dispatcher, @document.uri)
           @dispatcher.visit(@document.parse_result.value)
         else
           @global_state.synchronize do
@@ -48,6 +50,7 @@ module RubyLsp
             )
 
             Listeners::TestStyle.new(@response_builder, @global_state, @dispatcher, @document.uri)
+            Listeners::SpecStyle.new(@response_builder, @global_state, @dispatcher, @document.uri)
 
             # Dispatch the events both for indexing the test file and discovering the tests. The order here is
             # important because we need the index to be aware of the existing classes/modules/methods before the test
