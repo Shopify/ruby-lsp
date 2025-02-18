@@ -7,6 +7,11 @@ module RubyLsp
   class TestReporter
     extend T::Sig
 
+    sig { params(io: IO).void }
+    def initialize(io: $stdout)
+      @io = io
+    end
+
     sig { params(id: String, file: String).void }
     def before_test(id:, file:)
       result = {
@@ -14,7 +19,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      puts result.to_json
+      io.puts result.to_json
     end
 
     sig { params(id: String, file: String).void }
@@ -24,7 +29,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      puts result.to_json
+      io.puts result.to_json
     end
 
     sig { params(id: String, file: String).void }
@@ -34,7 +39,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      puts result.to_json
+      io.puts result.to_json
     end
 
     sig do
@@ -53,7 +58,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      puts result.to_json
+      io.puts result.to_json
     end
 
     sig { params(id: String, message: T.nilable(String), file: String).void }
@@ -64,7 +69,12 @@ module RubyLsp
         id: id,
         file: file,
       }
-      puts result.to_json
+      io.puts result.to_json
     end
+
+    private
+
+    sig { returns(IO) }
+    attr_reader :io
   end
 end
