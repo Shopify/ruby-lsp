@@ -36,12 +36,6 @@ module Minitest
       def record(test)
         super
 
-        # This follows the pattern used by Minitest::Reporters::DefaultReporter
-        on_record(test)
-      end
-
-      sig { params(test: Minitest::Result).void }
-      def on_record(test)
         if test.passed?
           record_pass(test)
         elsif test.skipped?
