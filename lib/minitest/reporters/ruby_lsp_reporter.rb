@@ -7,6 +7,8 @@ require "ruby_lsp/test_reporter"
 # NOTE: minitest-reporters mentioned an API change between minitest 5.10 and 5.11, so we should verify:
 # https://github.com/minitest-reporters/minitest-reporters/blob/265ff4b40d5827e84d7e902b808fbee860b61221/lib/minitest/reporters/base_reporter.rb#L82-L91
 
+# TODO: the other reporters call print_info for formatting and backtrace filtering. Look into if we should also do that.
+
 module Minitest
   module Reporters
     # TODO: consider if minitest-reporrters should be a dependency of ruby-lsp
