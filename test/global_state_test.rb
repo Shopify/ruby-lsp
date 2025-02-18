@@ -310,6 +310,17 @@ module RubyLsp
       assert_equal("test_machine_id", state.telemetry_machine_id)
     end
 
+    class_eval <<~RUBY
+      class FooTest < ::Minitest::Test
+        def test_foo
+          puts "========================================="
+          puts Kernel.const_source_location("Foo::FooTest")
+          puts "========================================="
+          fail
+        end
+      end
+    RUBY
+
     private
 
     def stub_direct_dependencies(dependencies)

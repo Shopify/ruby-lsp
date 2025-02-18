@@ -94,7 +94,13 @@ module Minitest
 
       sig { params(test: Minitest::Test).returns(String) }
       def file_for_test(test)
-        T.must(Kernel.const_source_location(test.class_name)).first
+        location = Kernel.const_source_location(test.class_name)
+        return "" unless location # TODO: when might this be nil?
+
+        file, _line = location
+        return "" if file.start_with?("(eval at ") # test is dynamically defined (TODO: better way to check?)
+
+        file
       end
     end
   end
