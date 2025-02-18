@@ -45,6 +45,8 @@ module RubyLsp
         <<~RUBY,
           # frozen_string_literal: true
 
+          RubyLsp::Addon.depend_on_ruby_lsp!(">= 0.23.1", "< 0.24")
+
           module RubyLsp
             module #{camelize(addon_name)}
               class Addon < ::RubyLsp::Addon
@@ -84,9 +86,33 @@ module RubyLsp
     def create_new_gem
       addon_name = T.must(@addon_name)
       system("bundle gem #{addon_name}")
+      add_ruby_lsp_to_gemfile
       Dir.chdir(addon_name) do
         create_addon_files
       end
+    end
+
+    sig { void }
+    def add_ruby_lsp_to_gemfile
+      gemfile_path = "Gemfile"
+
+      unless File.exist?(gemfile_path)
+        puts "Gemfile not found. Please ensure you are in the root directory of your gem."
+        return
+      end
+
+      gemfile_content = File.read(gemfile_path)
+
+      if gemfile_content.include?("gem 'ruby-lsp'") || gemfile_content.include?('gem "ruby-lsp"')
+        puts "ruby-lsp is already in the Gemfile."
+        return
+      end
+
+      updated_content = gemfile_content + "\ngem \"ruby-lsp\", \">= 0.23.1\", group: :development\n"
+
+      File.write(gemfile_path, updated_content)
+
+      puts "Added ruby-lsp as a development dependency to the Gemfile."
     end
 
     sig { returns(Symbol) }
