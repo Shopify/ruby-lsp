@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { RubyLsp } from "./rubyLsp";
 import { LOG_CHANNEL } from "./common";
+import { RBS } from "./rbs";
 
 let extension: RubyLsp;
 
@@ -26,6 +27,9 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   await migrateExperimentalFeaturesSetting();
+
+  const rbs = new RBS();
+  context.subscriptions.push(rbs);
 
   const logger = await createLogger(context);
   context.subscriptions.push(logger);

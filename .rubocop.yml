@@ -87,3 +87,7 @@ Layout/ClassStructure:
       - include
       - prepend
       - extend
+
+Layout/LeadingCommentSpace:
+  Enabled: true
+  AllowRBSInlineAnnotation: true
