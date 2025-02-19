@@ -16,9 +16,9 @@ export class RBS {
   private disposables: vscode.Disposable[] = [];
 
   constructor() {
-    // Create decoration type with 50% opacity
+    // Create decoration type with 40% opacity
     this.decorationType = vscode.window.createTextEditorDecorationType({
-      opacity: "0.5",
+      opacity: "0.4",
     });
 
     // Register event handlers
