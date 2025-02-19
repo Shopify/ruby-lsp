@@ -55,6 +55,19 @@ authors to benefit from types declared by the Ruby LSP.
 As an example, check out [Ruby LSP Rails](https://github.com/Shopify/ruby-lsp-rails), which is a Ruby LSP add-on to
 provide Rails related features.
 
+### Creating a New Add-on
+
+The `ruby-lsp` executable now includes a `--new-addon` option to help you quickly create new Ruby LSP add-ons. This feature is designed to work in two scenarios:
+
+1. **Inside an existing project**: If you're already working in a project with a `Gemfile`, the tool will add the necessary files and directory structure for your new add-on.
+2. **Outside a project**: If you're not in a project, the tool will help you create a new gem and then set up the add-on inside it.
+
+To create a new add-on, run the following command:
+
+```bash
+ruby-lsp --new-addon ADDON_NAME
+```
+
 ### Activating the add-on
 
 The Ruby LSP discovers add-ons based on the existence of an `addon.rb` file placed inside a `ruby_lsp` folder.  For
