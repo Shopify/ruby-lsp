@@ -1,5 +1,16 @@
 import * as vscode from "vscode";
 
+// This class is used to dim RBS signatures in Ruby files
+// For example, these signatures will be dimmed:
+//
+//   #: (String) -> (String | nil)
+//   #: (String) { (String) -> boolish } -> void
+//   #: return: String
+//
+// However, this will not be dimmed:
+//
+//   attr_reader :name #: String
+//
 export class RBS {
   private decorationType: vscode.TextEditorDecorationType;
   private disposables: vscode.Disposable[] = [];
@@ -7,7 +18,7 @@ export class RBS {
   constructor() {
     // Create decoration type with 50% opacity
     this.decorationType = vscode.window.createTextEditorDecorationType({
-      opacity: "0.4",
+      opacity: "0.5",
     });
 
     // Register event handlers
