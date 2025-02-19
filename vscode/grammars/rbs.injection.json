@@ -40,7 +40,7 @@
           "name": "comment.line.number-sign.rbs"
         },
         {
-          "match": "[\\(\\)\\{\\},\\|&:?]",
+          "match": "[\\(\\)\\{\\},\\|\\*&:?]",
           "name": "comment.line.number-sign.rbs"
         }
       ]

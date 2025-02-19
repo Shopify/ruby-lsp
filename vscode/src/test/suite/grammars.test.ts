@@ -680,6 +680,107 @@ suite("Grammars", () => {
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
 
+      test("inline method signature * and **", () => {
+        const ruby = "#: (*Foo, **Bar) -> void";
+        const expectedTokens = [
+          [
+            "#:",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "(",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "*",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "Foo",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+          [
+            ",",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "*",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "*",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [
+            "Bar",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "variable.other.constant.rbs",
+            ],
+          ],
+          [
+            ")",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "->",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "comment.line.number-sign.rbs",
+            ],
+          ],
+          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [
+            "void",
+            [
+              "rbs-comment.injection",
+              "meta.type.signature.rbs",
+              "support.type.builtin.rbs",
+            ],
+          ],
+        ];
+
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
       test("inline method signature with keyword", () => {
         const ruby = "#: return: String";
         const expectedTokens = [
