@@ -22,20 +22,20 @@ module RubyLsp
 
       sig { override.returns(T::Array[String]) }
       def perform
-        find_relevant_paths(@path)
+        find_relevant_paths
       end
 
       private
 
-      sig { params(path: String).returns(T::Array[String]) }
-      def find_relevant_paths(path)
+      sig { returns(T::Array[String]) }
+      def find_relevant_paths
         workspace_path = Dir.pwd
-        relpath = path.delete_prefix(workspace_path)
+        relative_path = @path.delete_prefix(workspace_path)
 
-        candidate_paths = Dir.glob(File.join("**", relevant_filename_pattern(relpath)))
+        candidate_paths = Dir.glob(File.join("**", relevant_filename_pattern(relative_path)))
         return [] if candidate_paths.empty?
 
-        find_most_similar_with_jacaard(relpath, candidate_paths).map { File.join(workspace_path, _1) }
+        find_most_similar_with_jacaard(relative_path, candidate_paths).map { File.join(workspace_path, _1) }
       end
 
       sig { params(path: String).returns(String) }
