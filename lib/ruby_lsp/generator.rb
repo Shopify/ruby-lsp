@@ -30,7 +30,13 @@ module RubyLsp
 
     sig { params(string: String).returns(String) }
     def camelize(string)
-      string.split("_").map(&:capitalize).join
+      return string if string == "ruby-lsp"
+
+      string
+        .gsub("ruby-lsp-", "")
+        .split(/[-_]/)
+        .map(&:capitalize)
+        .join
     end
 
     sig { void }
@@ -78,8 +84,7 @@ module RubyLsp
 
       create_test_file
 
-      puts "Add-on '#{addon_name}' created successfully! Please follow guidelines on https://shopify.github.io/ruby-lsp/add-ons.html
-      for best practice"
+      puts "Add-on '#{addon_name}' created successfully! Please follow guidelines on https://shopify.github.io/ruby-lsp/add-ons.html"
     end
 
     sig { void }
