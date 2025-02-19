@@ -9,6 +9,11 @@ require "ruby_lsp/test_reporter"
 
 # TODO: the other reporters call print_info for formatting and backtrace filtering. Look into if we should also do that.
 
+unless defined?(Minitest::Reporters)
+  puts "Minitest::Reporters not defined. Please add `gem 'minitest-reporters'` to your Gemfile."
+  exit(1)
+end
+
 module Minitest
   module Reporters
     # TODO: consider if minitest-reporrters should be a dependency of ruby-lsp
