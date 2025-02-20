@@ -14,10 +14,10 @@ module RubyIndexer
     class ConstTarget < Target
       extend T::Sig
 
-      sig { returns(String) }
+      #: String
       attr_reader :fully_qualified_name
 
-      sig { params(fully_qualified_name: String).void }
+      #: (String fully_qualified_name) -> void
       def initialize(fully_qualified_name)
         super()
         @fully_qualified_name = fully_qualified_name
@@ -27,10 +27,10 @@ module RubyIndexer
     class MethodTarget < Target
       extend T::Sig
 
-      sig { returns(String) }
+      #: String
       attr_reader :method_name
 
-      sig { params(method_name: String).void }
+      #: (String method_name) -> void
       def initialize(method_name)
         super()
         @method_name = method_name
@@ -40,10 +40,10 @@ module RubyIndexer
     class InstanceVariableTarget < Target
       extend T::Sig
 
-      sig { returns(String) }
+      #: String
       attr_reader :name
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def initialize(name)
         super()
         @name = name
@@ -53,16 +53,16 @@ module RubyIndexer
     class Reference
       extend T::Sig
 
-      sig { returns(String) }
+      #: String
       attr_reader :name
 
-      sig { returns(Prism::Location) }
+      #: Prism::Location
       attr_reader :location
 
-      sig { returns(T::Boolean) }
+      #: bool
       attr_reader :declaration
 
-      sig { params(name: String, location: Prism::Location, declaration: T::Boolean).void }
+      #: (String name, Prism::Location location, declaration: bool) -> void
       def initialize(name, location, declaration:)
         @name = name
         @location = location
@@ -70,15 +70,7 @@ module RubyIndexer
       end
     end
 
-    sig do
-      params(
-        target: Target,
-        index: RubyIndexer::Index,
-        dispatcher: Prism::Dispatcher,
-        uri: URI::Generic,
-        include_declarations: T::Boolean,
-      ).void
-    end
+    #: (Target target, RubyIndexer::Index index, Prism::Dispatcher dispatcher, URI::Generic uri, ?include_declarations: bool) -> void
     def initialize(target, index, dispatcher, uri, include_declarations: true)
       @target = target
       @index = index
@@ -119,34 +111,34 @@ module RubyIndexer
       )
     end
 
-    sig { returns(T::Array[Reference]) }
+    #: -> Array[Reference]
     def references
       return @references if @include_declarations
 
       @references.reject(&:declaration)
     end
 
-    sig { params(node: Prism::ClassNode).void }
+    #: (Prism::ClassNode node) -> void
     def on_class_node_enter(node)
       @stack << node.constant_path.slice
     end
 
-    sig { params(node: Prism::ClassNode).void }
+    #: (Prism::ClassNode node) -> void
     def on_class_node_leave(node)
       @stack.pop
     end
 
-    sig { params(node: Prism::ModuleNode).void }
+    #: (Prism::ModuleNode node) -> void
     def on_module_node_enter(node)
       @stack << node.constant_path.slice
     end
 
-    sig { params(node: Prism::ModuleNode).void }
+    #: (Prism::ModuleNode node) -> void
     def on_module_node_leave(node)
       @stack.pop
     end
 
-    sig { params(node: Prism::SingletonClassNode).void }
+    #: (Prism::SingletonClassNode node) -> void
     def on_singleton_class_node_enter(node)
       expression = node.expression
       return unless expression.is_a?(Prism::SelfNode)
@@ -154,12 +146,12 @@ module RubyIndexer
       @stack << "<Class:#{@stack.last}>"
     end
 
-    sig { params(node: Prism::SingletonClassNode).void }
+    #: (Prism::SingletonClassNode node) -> void
     def on_singleton_class_node_leave(node)
       @stack.pop
     end
 
-    sig { params(node: Prism::ConstantPathNode).void }
+    #: (Prism::ConstantPathNode node) -> void
     def on_constant_path_node_enter(node)
       name = Index.constant_name(node)
       return unless name
@@ -167,7 +159,7 @@ module RubyIndexer
       collect_constant_references(name, node.location)
     end
 
-    sig { params(node: Prism::ConstantReadNode).void }
+    #: (Prism::ConstantReadNode node) -> void
     def on_constant_read_node_enter(node)
       name = Index.constant_name(node)
       return unless name
@@ -175,7 +167,7 @@ module RubyIndexer
       collect_constant_references(name, node.location)
     end
 
-    sig { params(node: Prism::MultiWriteNode).void }
+    #: (Prism::MultiWriteNode node) -> void
     def on_multi_write_node_enter(node)
       [*node.lefts, *node.rest, *node.rights].each do |target|
         case target
@@ -185,7 +177,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::ConstantPathWriteNode).void }
+    #: (Prism::ConstantPathWriteNode node) -> void
     def on_constant_path_write_node_enter(node)
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -196,7 +188,7 @@ module RubyIndexer
       collect_constant_references(name, target.location)
     end
 
-    sig { params(node: Prism::ConstantPathOrWriteNode).void }
+    #: (Prism::ConstantPathOrWriteNode node) -> void
     def on_constant_path_or_write_node_enter(node)
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -207,7 +199,7 @@ module RubyIndexer
       collect_constant_references(name, target.location)
     end
 
-    sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
+    #: (Prism::ConstantPathOperatorWriteNode node) -> void
     def on_constant_path_operator_write_node_enter(node)
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -218,7 +210,7 @@ module RubyIndexer
       collect_constant_references(name, target.location)
     end
 
-    sig { params(node: Prism::ConstantPathAndWriteNode).void }
+    #: (Prism::ConstantPathAndWriteNode node) -> void
     def on_constant_path_and_write_node_enter(node)
       target = node.target
       return unless target.parent.nil? || target.parent.is_a?(Prism::ConstantReadNode)
@@ -229,27 +221,27 @@ module RubyIndexer
       collect_constant_references(name, target.location)
     end
 
-    sig { params(node: Prism::ConstantWriteNode).void }
+    #: (Prism::ConstantWriteNode node) -> void
     def on_constant_write_node_enter(node)
       collect_constant_references(node.name.to_s, node.name_loc)
     end
 
-    sig { params(node: Prism::ConstantOrWriteNode).void }
+    #: (Prism::ConstantOrWriteNode node) -> void
     def on_constant_or_write_node_enter(node)
       collect_constant_references(node.name.to_s, node.name_loc)
     end
 
-    sig { params(node: Prism::ConstantAndWriteNode).void }
+    #: (Prism::ConstantAndWriteNode node) -> void
     def on_constant_and_write_node_enter(node)
       collect_constant_references(node.name.to_s, node.name_loc)
     end
 
-    sig { params(node: Prism::ConstantOperatorWriteNode).void }
+    #: (Prism::ConstantOperatorWriteNode node) -> void
     def on_constant_operator_write_node_enter(node)
       collect_constant_references(node.name.to_s, node.name_loc)
     end
 
-    sig { params(node: Prism::DefNode).void }
+    #: (Prism::DefNode node) -> void
     def on_def_node_enter(node)
       if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
         @references << Reference.new(name, node.name_loc, declaration: true)
@@ -260,44 +252,44 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::DefNode).void }
+    #: (Prism::DefNode node) -> void
     def on_def_node_leave(node)
       if node.receiver.is_a?(Prism::SelfNode)
         @stack.pop
       end
     end
 
-    sig { params(node: Prism::InstanceVariableReadNode).void }
+    #: (Prism::InstanceVariableReadNode node) -> void
     def on_instance_variable_read_node_enter(node)
       collect_instance_variable_references(node.name.to_s, node.location, false)
     end
 
-    sig { params(node: Prism::InstanceVariableWriteNode).void }
+    #: (Prism::InstanceVariableWriteNode node) -> void
     def on_instance_variable_write_node_enter(node)
       collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
-    sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+    #: (Prism::InstanceVariableAndWriteNode node) -> void
     def on_instance_variable_and_write_node_enter(node)
       collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
-    sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+    #: (Prism::InstanceVariableOperatorWriteNode node) -> void
     def on_instance_variable_operator_write_node_enter(node)
       collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
-    sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+    #: (Prism::InstanceVariableOrWriteNode node) -> void
     def on_instance_variable_or_write_node_enter(node)
       collect_instance_variable_references(node.name.to_s, node.name_loc, true)
     end
 
-    sig { params(node: Prism::InstanceVariableTargetNode).void }
+    #: (Prism::InstanceVariableTargetNode node) -> void
     def on_instance_variable_target_node_enter(node)
       collect_instance_variable_references(node.name.to_s, node.location, true)
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def on_call_node_enter(node)
       if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
         @references << Reference.new(name, T.must(node.message_loc), declaration: false)
@@ -306,7 +298,7 @@ module RubyIndexer
 
     private
 
-    sig { params(name: String, location: Prism::Location).void }
+    #: (String name, Prism::Location location) -> void
     def collect_constant_references(name, location)
       return unless @target.is_a?(ConstTarget)
 
@@ -335,7 +327,7 @@ module RubyIndexer
       @references << Reference.new(name, location, declaration: declaration)
     end
 
-    sig { params(name: String, location: Prism::Location, declaration: T::Boolean).void }
+    #: (String name, Prism::Location location, bool declaration) -> void
     def collect_instance_variable_references(name, location, declaration)
       return unless @target.is_a?(InstanceVariableTarget) && name == @target.name
 

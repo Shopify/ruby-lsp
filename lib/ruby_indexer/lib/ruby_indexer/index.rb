@@ -12,7 +12,7 @@ module RubyIndexer
     # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
     ENTRY_SIMILARITY_THRESHOLD = 0.7
 
-    sig { returns(Configuration) }
+    #: Configuration
     attr_reader :configuration
 
     class << self
@@ -21,7 +21,7 @@ module RubyIndexer
       # Returns the real nesting of a constant name taking into account top level
       # references that may be included anywhere in the name or nesting where that
       # constant was found
-      sig { params(stack: T::Array[String], name: T.nilable(String)).returns(T::Array[String]) }
+      #: (Array[String] stack, String? name) -> Array[String]
       def actual_nesting(stack, name)
         nesting = name ? stack + [name] : stack
         corrected_nesting = []
@@ -37,17 +37,7 @@ module RubyIndexer
 
       # Returns the unresolved name for a constant reference including all parts of a constant path, or `nil` if the
       # constant contains dynamic or incomplete parts
-      sig do
-        params(
-          node: T.any(
-            Prism::ConstantPathNode,
-            Prism::ConstantReadNode,
-            Prism::ConstantPathTargetNode,
-            Prism::CallNode,
-            Prism::MissingNode,
-          ),
-        ).returns(T.nilable(String))
-      end
+      #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String?
       def constant_name(node)
         case node
         when Prism::CallNode, Prism::MissingNode
@@ -61,7 +51,7 @@ module RubyIndexer
       end
     end
 
-    sig { void }
+    #: -> void
     def initialize
       # Holds all entries in the index using the following format:
       # {
@@ -99,12 +89,12 @@ module RubyIndexer
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
-    sig { params(module_name: String, hook: T.proc.params(index: Index, base: Entry::Namespace).void).void }
+    #: (String module_name) { (Index index, Entry::Namespace base) -> void } -> void
     def register_included_hook(module_name, &hook)
       (@included_hooks[module_name] ||= []) << hook
     end
 
-    sig { params(uri: URI::Generic, skip_require_paths_tree: T::Boolean).void }
+    #: (URI::Generic uri, ?skip_require_paths_tree: bool) -> void
     def delete(uri, skip_require_paths_tree: false)
       key = uri.to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
@@ -134,7 +124,7 @@ module RubyIndexer
       @require_paths_tree.delete(require_path) if require_path
     end
 
-    sig { params(entry: Entry, skip_prefix_tree: T::Boolean).void }
+    #: (Entry entry, ?skip_prefix_tree: bool) -> void
     def add(entry, skip_prefix_tree: false)
       name = entry.name
 
@@ -143,28 +133,19 @@ module RubyIndexer
       @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
     end
 
-    sig { params(fully_qualified_name: String).returns(T.nilable(T::Array[Entry])) }
+    #: (String fully_qualified_name) -> Array[Entry]?
     def [](fully_qualified_name)
       @entries[fully_qualified_name.delete_prefix("::")]
     end
 
-    sig { params(query: String).returns(T::Array[URI::Generic]) }
+    #: (String query) -> Array[URI::Generic]
     def search_require_paths(query)
       @require_paths_tree.search(query)
     end
 
     # Searches for a constant based on an unqualified name and returns the first possible match regardless of whether
     # there are more possible matching entries
-    sig do
-      params(
-        name: String,
-      ).returns(T.nilable(T::Array[T.any(
-        Entry::Namespace,
-        Entry::ConstantAlias,
-        Entry::UnresolvedConstantAlias,
-        Entry::Constant,
-      )]))
-    end
+    #: (String name) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant)]?
     def first_unqualified_const(name)
       # Look for an exact match first
       _name, entries = @entries.find do |const_name, _entries|
@@ -202,7 +183,7 @@ module RubyIndexer
     #   [#<Entry::Class name="Foo::Baz">],
     # ]
     # ```
-    sig { params(query: String, nesting: T.nilable(T::Array[String])).returns(T::Array[T::Array[Entry]]) }
+    #: (String query, ?Array[String]? nesting) -> Array[Array[Entry]]
     def prefix_search(query, nesting = nil)
       unless nesting
         results = @entries_tree.search(query)
@@ -221,7 +202,7 @@ module RubyIndexer
     end
 
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
-    sig { params(query: T.nilable(String)).returns(T::Array[Entry]) }
+    #: (String? query) -> Array[Entry]
     def fuzzy_search(query)
       unless query
         entries = @entries.filter_map do |_name, entries|
@@ -245,12 +226,7 @@ module RubyIndexer
       results.flat_map(&:first)
     end
 
-    sig do
-      params(
-        name: T.nilable(String),
-        receiver_name: String,
-      ).returns(T::Array[T.any(Entry::Member, Entry::MethodAlias)])
-    end
+    #: (String? name, String receiver_name) -> Array[(Entry::Member | Entry::MethodAlias)]
     def method_completion_candidates(name, receiver_name)
       ancestors = linearized_ancestors_of(receiver_name)
 
@@ -293,17 +269,7 @@ module RubyIndexer
       completion_items.values.map!(&:first)
     end
 
-    sig do
-      params(
-        name: String,
-        nesting: T::Array[String],
-      ).returns(T::Array[T::Array[T.any(
-        Entry::Constant,
-        Entry::ConstantAlias,
-        Entry::Namespace,
-        Entry::UnresolvedConstantAlias,
-      )]])
-    end
+    #: (String name, Array[String] nesting) -> Array[Array[(Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias)]]
     def constant_completion_candidates(name, nesting)
       # If we have a top level reference, then we don't need to include completions inside the current nesting
       if name.start_with?("::")
@@ -358,17 +324,7 @@ module RubyIndexer
     # nesting: the nesting structure where the reference was found (e.g.: ["Foo", "Bar"])
     # seen_names: this parameter should not be used by consumers of the api. It is used to avoid infinite recursion when
     # resolving circular references
-    sig do
-      params(
-        name: String,
-        nesting: T::Array[String],
-        seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[T.any(
-        Entry::Namespace,
-        Entry::ConstantAlias,
-        Entry::UnresolvedConstantAlias,
-      )]))
-    end
+    #: (String name, Array[String] nesting, ?Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
     def resolve(name, nesting, seen_names = [])
       # If we have a top level reference, then we just search for it straight away ignoring the nesting
       if name.start_with?("::")
@@ -404,12 +360,7 @@ module RubyIndexer
     # Index all files for the given URIs, which defaults to what is configured. A block can be used to track and control
     # indexing progress. That block is invoked with the current progress percentage and should return `true` to continue
     # indexing or `false` to stop indexing.
-    sig do
-      params(
-        uris: T::Array[URI::Generic],
-        block: T.nilable(T.proc.params(progress: Integer).returns(T::Boolean)),
-      ).void
-    end
+    #: (?uris: Array[URI::Generic]) ?{ (Integer progress) -> bool } -> void
     def index_all(uris: @configuration.indexable_uris, &block)
       # When troubleshooting an indexing issue, e.g. through irb, it's not obvious that `index_all` will augment the
       # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
@@ -435,7 +386,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(uri: URI::Generic, source: String, collect_comments: T::Boolean).void }
+    #: (URI::Generic uri, String source, ?collect_comments: bool) -> void
     def index_single(uri, source, collect_comments: true)
       dispatcher = Prism::Dispatcher.new
 
@@ -457,7 +408,7 @@ module RubyIndexer
     end
 
     # Indexes a File URI by reading the contents from disk
-    sig { params(uri: URI::Generic, collect_comments: T::Boolean).void }
+    #: (URI::Generic uri, ?collect_comments: bool) -> void
     def index_file(uri, collect_comments: true)
       index_single(uri, File.read(T.must(uri.full_path)), collect_comments: collect_comments)
     rescue Errno::EISDIR, Errno::ENOENT
@@ -475,7 +426,7 @@ module RubyIndexer
     # If we find an alias, then we want to follow its target. In the same example, if `Foo::Bar` is an alias to
     # `Something::Else`, then we first discover `Something::Else::Baz`. But `Something::Else::Baz` might contain other
     # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
-    sig { params(name: String, seen_names: T::Array[String]).returns(String) }
+    #: (String name, ?Array[String] seen_names) -> String
     def follow_aliased_namespace(name, seen_names = [])
       parts = name.split("::")
       real_parts = []
@@ -508,14 +459,7 @@ module RubyIndexer
     # Attempts to find methods for a resolved fully qualified receiver name. Do not provide the `seen_names` parameter
     # as it is used only internally to prevent infinite loops when resolving circular aliases
     # Returns `nil` if the method does not exist on that receiver
-    sig do
-      params(
-        method_name: String,
-        receiver_name: String,
-        seen_names: T::Array[String],
-        inherited_only: T::Boolean,
-      ).returns(T.nilable(T::Array[T.any(Entry::Member, Entry::MethodAlias)]))
-    end
+    #: (String method_name, String receiver_name, ?Array[String] seen_names, ?inherited_only: bool) -> Array[(Entry::Member | Entry::MethodAlias)]?
     def resolve_method(method_name, receiver_name, seen_names = [], inherited_only: false)
       method_entries = self[method_name]
       return unless method_entries
@@ -553,7 +497,7 @@ module RubyIndexer
     # module that prepends another module, then the prepend module appears before the included module.
     #
     # The order of ancestors is [linearized_prepends, self, linearized_includes, linearized_superclass]
-    sig { params(fully_qualified_name: String).returns(T::Array[String]) }
+    #: (String fully_qualified_name) -> Array[String]
     def linearized_ancestors_of(fully_qualified_name)
       # If we already computed the ancestors for this namespace, return it straight away
       cached_ancestors = @ancestors[fully_qualified_name]
@@ -631,7 +575,7 @@ module RubyIndexer
 
     # Resolves an instance variable name for a given owner name. This method will linearize the ancestors of the owner
     # and find inherited instance variables as well
-    sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::InstanceVariable])) }
+    #: (String variable_name, String owner_name) -> Array[Entry::InstanceVariable]?
     def resolve_instance_variable(variable_name, owner_name)
       entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
       return unless entries
@@ -642,7 +586,7 @@ module RubyIndexer
       entries.select { |e| ancestors.include?(e.owner&.name) }
     end
 
-    sig { params(variable_name: String, owner_name: String).returns(T.nilable(T::Array[Entry::ClassVariable])) }
+    #: (String variable_name, String owner_name) -> Array[Entry::ClassVariable]?
     def resolve_class_variable(variable_name, owner_name)
       entries = self[variable_name]&.grep(Entry::ClassVariable)
       return unless entries&.any?
@@ -655,9 +599,7 @@ module RubyIndexer
 
     # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
     # include the `@` prefix
-    sig do
-      params(name: String, owner_name: String).returns(T::Array[T.any(Entry::InstanceVariable, Entry::ClassVariable)])
-    end
+    #: (String name, String owner_name) -> Array[(Entry::InstanceVariable | Entry::ClassVariable)]
     def instance_variable_completion_candidates(name, owner_name)
       entries = T.cast(prefix_search(name).flatten, T::Array[T.any(Entry::InstanceVariable, Entry::ClassVariable)])
       # Avoid wasting time linearizing ancestors if we didn't find anything
@@ -686,7 +628,7 @@ module RubyIndexer
       variables
     end
 
-    sig { params(name: String, owner_name: String).returns(T::Array[Entry::ClassVariable]) }
+    #: (String name, String owner_name) -> Array[Entry::ClassVariable]
     def class_variable_completion_candidates(name, owner_name)
       entries = T.cast(prefix_search(name).flatten, T::Array[Entry::ClassVariable])
       # Avoid wasting time linearizing ancestors if we didn't find anything
@@ -702,9 +644,7 @@ module RubyIndexer
     # declarations removed and that the ancestor linearization cache is cleared if necessary. If a block is passed, the
     # consumer of this API has to handle deleting and inserting/updating entries in the index instead of passing the
     # document's source (used to handle unsaved changes to files)
-    sig do
-      params(uri: URI::Generic, source: T.nilable(String), block: T.nilable(T.proc.params(index: Index).void)).void
-    end
+    #: (URI::Generic uri, ?String? source) ?{ (Index index) -> void } -> void
     def handle_change(uri, source = nil, &block)
       key = uri.to_s
       original_entries = @uris_to_entries[key]
@@ -736,27 +676,27 @@ module RubyIndexer
       @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def empty?
       @entries.empty?
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def names
       @entries.keys
     end
 
-    sig { params(name: String).returns(T::Boolean) }
+    #: (String name) -> bool
     def indexed?(name)
       @entries.key?(name)
     end
 
-    sig { returns(Integer) }
+    #: -> Integer
     def length
       @entries.count
     end
 
-    sig { params(name: String).returns(Entry::SingletonClass) }
+    #: (String name) -> Entry::SingletonClass
     def existing_or_new_singleton_class(name)
       *_namespace, unqualified_name = name.split("::")
       full_singleton_name = "#{name}::<Class:#{unqualified_name}>"
@@ -779,12 +719,7 @@ module RubyIndexer
       singleton
     end
 
-    sig do
-      type_parameters(:T).params(
-        uri: String,
-        type: T.nilable(T::Class[T.all(T.type_parameter(:T), Entry)]),
-      ).returns(T.nilable(T.any(T::Array[Entry], T::Array[T.type_parameter(:T)])))
-    end
+    #: [T] (String uri, ?Class[(T & Entry)]? type) -> (Array[Entry] | Array[T])?
     def entries_for(uri, type = nil)
       entries = @uris_to_entries[uri.to_s]
       return entries unless type
@@ -796,7 +731,7 @@ module RubyIndexer
 
     # Always returns the linearized ancestors for the attached class, regardless of whether `name` refers to a singleton
     # or attached namespace
-    sig { params(name: String).returns(T::Array[String]) }
+    #: (String name) -> Array[String]
     def linearized_attached_ancestors(name)
       name_parts = name.split("::")
 
@@ -809,7 +744,7 @@ module RubyIndexer
     end
 
     # Runs the registered included hooks
-    sig { params(fully_qualified_name: String, nesting: T::Array[String]).void }
+    #: (String fully_qualified_name, Array[String] nesting) -> void
     def run_included_hooks(fully_qualified_name, nesting)
       return if @included_hooks.empty?
 
@@ -838,13 +773,7 @@ module RubyIndexer
 
     # Linearize mixins for an array of namespace entries. This method will mutate the `ancestors` array with the
     # linearized ancestors of the mixins
-    sig do
-      params(
-        ancestors: T::Array[String],
-        namespace_entries: T::Array[Entry::Namespace],
-        nesting: T::Array[String],
-      ).void
-    end
+    #: (Array[String] ancestors, Array[Entry::Namespace] namespace_entries, Array[String] nesting) -> void
     def linearize_mixins(ancestors, namespace_entries, nesting)
       mixin_operations = namespace_entries.flat_map(&:mixin_operations)
       main_namespace_index = 0
@@ -885,16 +814,7 @@ module RubyIndexer
 
     # Linearize the superclass of a given namespace (including modules with the implicit `Module` superclass). This
     # method will mutate the `ancestors` array with the linearized ancestors of the superclass
-    sig do
-      params(
-        ancestors: T::Array[String],
-        attached_class_name: String,
-        fully_qualified_name: String,
-        namespace_entries: T::Array[Entry::Namespace],
-        nesting: T::Array[String],
-        singleton_levels: Integer,
-      ).void
-    end
+    #: (Array[String] ancestors, String attached_class_name, String fully_qualified_name, Array[Entry::Namespace] namespace_entries, Array[String] nesting, Integer singleton_levels) -> void
     def linearize_superclass( # rubocop:disable Metrics/ParameterLists
       ancestors,
       attached_class_name,
@@ -962,12 +882,7 @@ module RubyIndexer
 
     # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
     # that doesn't exist, then we return the same UnresolvedAlias
-    sig do
-      params(
-        entry: Entry::UnresolvedConstantAlias,
-        seen_names: T::Array[String],
-      ).returns(T.any(Entry::ConstantAlias, Entry::UnresolvedConstantAlias))
-    end
+    #: (Entry::UnresolvedConstantAlias entry, Array[String] seen_names) -> (Entry::ConstantAlias | Entry::UnresolvedConstantAlias)
     def resolve_alias(entry, seen_names)
       alias_name = entry.name
       return entry if seen_names.include?(alias_name)
@@ -990,17 +905,7 @@ module RubyIndexer
       resolved_alias
     end
 
-    sig do
-      params(
-        name: String,
-        nesting: T::Array[String],
-        seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[T.any(
-        Entry::Namespace,
-        Entry::ConstantAlias,
-        Entry::UnresolvedConstantAlias,
-      )]))
-    end
+    #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
     def lookup_enclosing_scopes(name, nesting, seen_names)
       nesting.length.downto(1) do |i|
         namespace = T.must(nesting[0...i]).join("::")
@@ -1019,17 +924,7 @@ module RubyIndexer
       nil
     end
 
-    sig do
-      params(
-        name: String,
-        nesting: T::Array[String],
-        seen_names: T::Array[String],
-      ).returns(T.nilable(T::Array[T.any(
-        Entry::Namespace,
-        Entry::ConstantAlias,
-        Entry::UnresolvedConstantAlias,
-      )]))
-    end
+    #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
     def lookup_ancestor_chain(name, nesting, seen_names)
       *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
       return if nesting_parts.empty?
@@ -1049,17 +944,7 @@ module RubyIndexer
       nil
     end
 
-    sig do
-      params(
-        name: T.nilable(String),
-        nesting: T::Array[String],
-      ).returns(T::Array[T::Array[T.any(
-        Entry::Namespace,
-        Entry::ConstantAlias,
-        Entry::UnresolvedConstantAlias,
-        Entry::Constant,
-      )]])
-    end
+    #: (String? name, Array[String] nesting) -> Array[Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant)]]
     def inherited_constant_completion_candidates(name, nesting)
       namespace_entries = if name
         *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
@@ -1098,7 +983,7 @@ module RubyIndexer
     # inside of the ["A", "B"] nesting, then we should not concatenate the nesting with the name or else we'll end up
     # with `A::B::A::B::Foo`. This method will remove any redundant parts from the final name based on the reference and
     # the nesting
-    sig { params(name: String, nesting: T::Array[String]).returns(String) }
+    #: (String name, Array[String] nesting) -> String
     def build_non_redundant_full_name(name, nesting)
       # If there's no nesting, then we can just return the name as is
       return name if nesting.empty?
@@ -1119,18 +1004,7 @@ module RubyIndexer
       name_parts.join("::")
     end
 
-    sig do
-      params(
-        full_name: String,
-        seen_names: T::Array[String],
-      ).returns(
-        T.nilable(T::Array[T.any(
-          Entry::Namespace,
-          Entry::ConstantAlias,
-          Entry::UnresolvedConstantAlias,
-        )]),
-      )
-    end
+    #: (String full_name, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
     def direct_or_aliased_constant(full_name, seen_names)
       entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
 
@@ -1146,13 +1020,7 @@ module RubyIndexer
 
     # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
     # identify the target or the same unresolved alias entry if we couldn't
-    sig do
-      params(
-        entry: Entry::UnresolvedMethodAlias,
-        receiver_name: String,
-        seen_names: T::Array[String],
-      ).returns(T.any(Entry::MethodAlias, Entry::UnresolvedMethodAlias))
-    end
+    #: (Entry::UnresolvedMethodAlias entry, String receiver_name, Array[String] seen_names) -> (Entry::MethodAlias | Entry::UnresolvedMethodAlias)
     def resolve_method_alias(entry, receiver_name, seen_names)
       new_name = entry.new_name
       return entry if new_name == entry.old_name

@@ -18,13 +18,7 @@ module RubyLsp
 
       # Signals to the client that the request should be delegated to the language server server for the host language
       # in ERB files
-      sig do
-        params(
-          global_state: GlobalState,
-          document: Document[T.untyped],
-          char_position: Integer,
-        ).void
-      end
+      #: (GlobalState global_state, Document[untyped] document, Integer char_position) -> void
       def delegate_request_if_needed!(global_state, document, char_position)
         if global_state.client_capabilities.supports_request_delegation &&
             document.is_a?(ERBDocument) &&
@@ -34,7 +28,7 @@ module RubyLsp
       end
 
       # Checks if a location covers a position
-      sig { params(location: Prism::Location, position: T.untyped).returns(T::Boolean) }
+      #: (Prism::Location location, untyped position) -> bool
       def cover?(location, position)
         start_covered =
           location.start_line - 1 < position[:line] ||
@@ -61,13 +55,7 @@ module RubyLsp
       #  #   ^ Going to definition here should go to Foo::Bar
       # #^ Going to definition here should go to Foo
       # ```
-      sig do
-        params(
-          target: Prism::Node,
-          parent: Prism::Node,
-          position: T::Hash[Symbol, Integer],
-        ).returns(Prism::Node)
-      end
+      #: (Prism::Node target, Prism::Node parent, Hash[Symbol, Integer] position) -> Prism::Node
       def determine_target(target, parent, position)
         return target unless parent.is_a?(Prism::ConstantPathNode)
 
@@ -83,7 +71,7 @@ module RubyLsp
       end
 
       # Checks if a given location covers the position requested
-      sig { params(location: T.nilable(Prism::Location), position: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
+      #: (Prism::Location? location, Hash[Symbol, untyped] position) -> bool
       def covers_position?(location, position)
         return false unless location
 

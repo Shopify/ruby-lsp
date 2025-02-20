@@ -10,14 +10,7 @@ module RubyLsp
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::TestCollection,
-          global_state: GlobalState,
-          dispatcher: Prism::Dispatcher,
-          uri: URI::Generic,
-        ).void
-      end
+      #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         @response_builder = response_builder
         @uri = uri
@@ -37,7 +30,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         @visibility_stack << :public
         name = constant_name(node.constant_path)
@@ -67,7 +60,7 @@ module RubyLsp
         @nesting << name
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         @visibility_stack << :public
 
@@ -77,19 +70,19 @@ module RubyLsp
         @nesting << name
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_leave(node)
         @visibility_stack.pop
         @nesting.pop
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_leave(node)
         @visibility_stack.pop
         @nesting.pop
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         return if @visibility_stack.last != :public
 
@@ -112,7 +105,7 @@ module RubyLsp
         ))
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         name = node.name
         return unless ACCESS_MODIFIERS.include?(name)
@@ -120,7 +113,7 @@ module RubyLsp
         @visibility_stack << name
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_leave(node)
         name = node.name
         return unless ACCESS_MODIFIERS.include?(name)
@@ -131,7 +124,7 @@ module RubyLsp
 
       private
 
-      sig { params(attached_ancestors: T::Array[String], fully_qualified_name: String).returns(T::Boolean) }
+      #: (Array[String] attached_ancestors, String fully_qualified_name) -> bool
       def non_declarative_minitest?(attached_ancestors, fully_qualified_name)
         return false unless attached_ancestors.include?("Minitest::Test")
 
@@ -144,17 +137,7 @@ module RubyLsp
         true
       end
 
-      sig do
-        params(
-          node: T.any(
-            Prism::ConstantPathNode,
-            Prism::ConstantReadNode,
-            Prism::ConstantPathTargetNode,
-            Prism::CallNode,
-            Prism::MissingNode,
-          ),
-        ).returns(String)
-      end
+      #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String
       def name_with_dynamic_reference(node)
         slice = node.slice
         slice.gsub(/((?<=::)|^)[a-z]\w*/, DYNAMIC_REFERENCE_MARKER)

@@ -16,13 +16,13 @@ module RubyIndexer
       T::Hash[String, T.untyped],
     )
 
-    sig { params(workspace_path: String).void }
+    #: String
     attr_writer :workspace_path
 
-    sig { returns(Encoding) }
+    #: Encoding
     attr_accessor :encoding
 
-    sig { void }
+    #: -> void
     def initialize
       @workspace_path = T.let(Dir.pwd, String)
       @encoding = T.let(Encoding::UTF_8, Encoding)
@@ -66,7 +66,7 @@ module RubyIndexer
       )
     end
 
-    sig { returns(T::Array[URI::Generic]) }
+    #: -> Array[URI::Generic]
     def indexable_uris
       excluded_gems = @excluded_gems - @included_gems
       locked_gems = Bundler.locked_gems&.specs
@@ -177,12 +177,12 @@ module RubyIndexer
       uris
     end
 
-    sig { returns(Regexp) }
+    #: -> Regexp
     def magic_comment_regex
       @magic_comment_regex ||= T.let(/^#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
     end
 
-    sig { params(config: T::Hash[String, T.untyped]).void }
+    #: (Hash[String, untyped] config) -> void
     def apply_config(config)
       validate_config!(config)
 
@@ -195,7 +195,7 @@ module RubyIndexer
 
     private
 
-    sig { params(config: T::Hash[String, T.untyped]).void }
+    #: (Hash[String, untyped] config) -> void
     def validate_config!(config)
       errors = config.filter_map do |key, value|
         type = CONFIGURATION_SCHEMA[key]
@@ -210,7 +210,7 @@ module RubyIndexer
       raise ArgumentError, errors.join("\n") if errors.any?
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def initial_excluded_gems
       excluded, others = Bundler.definition.dependencies.partition do |dependency|
         dependency.groups == [:development]

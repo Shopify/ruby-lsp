@@ -8,15 +8,7 @@ module RubyIndexer
     class << self
       extend T::Sig
 
-      sig do
-        params(
-          prism_location: Prism::Location,
-          code_units_cache: T.any(
-            T.proc.params(arg0: Integer).returns(Integer),
-            Prism::CodeUnitsCache,
-          ),
-        ).returns(T.attached_class)
-      end
+      #: (Prism::Location prism_location, (^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache) -> instance
       def from_prism_location(prism_location, code_units_cache)
         new(
           prism_location.start_line,
@@ -27,17 +19,10 @@ module RubyIndexer
       end
     end
 
-    sig { returns(Integer) }
+    #: Integer
     attr_reader :start_line, :end_line, :start_column, :end_column
 
-    sig do
-      params(
-        start_line: Integer,
-        end_line: Integer,
-        start_column: Integer,
-        end_column: Integer,
-      ).void
-    end
+    #: (Integer start_line, Integer end_line, Integer start_column, Integer end_column) -> void
     def initialize(start_line, end_line, start_column, end_column)
       @start_line = start_line
       @end_line = end_line
@@ -45,11 +30,7 @@ module RubyIndexer
       @end_column = end_column
     end
 
-    sig do
-      params(
-        other: T.any(Location, Prism::Location),
-      ).returns(T::Boolean)
-    end
+    #: ((Location | Prism::Location) other) -> bool
     def ==(other)
       start_line == other.start_line &&
         end_line == other.end_line &&

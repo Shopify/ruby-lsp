@@ -15,14 +15,7 @@ module RubyLsp
     class DocumentHighlight < Request
       extend T::Sig
 
-      sig do
-        params(
-          global_state: GlobalState,
-          document: T.any(RubyDocument, ERBDocument),
-          position: T::Hash[Symbol, T.untyped],
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (GlobalState global_state, (RubyDocument | ERBDocument) document, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher) -> void
       def initialize(global_state, document, position, dispatcher)
         super()
         char_position, _ = document.find_index_by_position(position)
@@ -47,7 +40,8 @@ module RubyLsp
         )
       end
 
-      sig { override.returns(T::Array[Interface::DocumentHighlight]) }
+      # @override
+      #: -> Array[Interface::DocumentHighlight]
       def perform
         @response_builder.response
       end

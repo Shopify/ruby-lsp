@@ -18,13 +18,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::DocumentSymbolOptions) }
+        #: -> Interface::DocumentSymbolOptions
         def provider
           Interface::DocumentSymbolOptions.new
         end
       end
 
-      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher).void }
+      #: (URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(uri, dispatcher)
         super()
         @response_builder = T.let(ResponseBuilders::DocumentSymbol.new, ResponseBuilders::DocumentSymbol)
@@ -35,7 +35,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T::Array[Interface::DocumentSymbol]) }
+      # @override
+      #: -> Array[Interface::DocumentSymbol]
       def perform
         @response_builder.response
       end

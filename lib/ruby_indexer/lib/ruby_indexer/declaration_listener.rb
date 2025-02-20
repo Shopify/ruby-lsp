@@ -8,18 +8,10 @@ module RubyIndexer
     OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
     BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
 
-    sig { returns(T::Array[String]) }
+    #: Array[String]
     attr_reader :indexing_errors
 
-    sig do
-      params(
-        index: Index,
-        dispatcher: Prism::Dispatcher,
-        parse_result: Prism::ParseResult,
-        uri: URI::Generic,
-        collect_comments: T::Boolean,
-      ).void
-    end
+    #: (Index index, Prism::Dispatcher dispatcher, Prism::ParseResult parse_result, URI::Generic uri, ?collect_comments: bool) -> void
     def initialize(index, dispatcher, parse_result, uri, collect_comments: false)
       @index = index
       @uri = uri
@@ -87,7 +79,7 @@ module RubyIndexer
       )
     end
 
-    sig { params(node: Prism::ClassNode).void }
+    #: (Prism::ClassNode node) -> void
     def on_class_node_enter(node)
       constant_path = node.constant_path
       superclass = node.superclass
@@ -119,23 +111,23 @@ module RubyIndexer
       )
     end
 
-    sig { params(node: Prism::ClassNode).void }
+    #: (Prism::ClassNode node) -> void
     def on_class_node_leave(node)
       pop_namespace_stack
     end
 
-    sig { params(node: Prism::ModuleNode).void }
+    #: (Prism::ModuleNode node) -> void
     def on_module_node_enter(node)
       constant_path = node.constant_path
       add_module(constant_path.slice, node.location, constant_path.location, comments: collect_comments(node))
     end
 
-    sig { params(node: Prism::ModuleNode).void }
+    #: (Prism::ModuleNode node) -> void
     def on_module_node_leave(node)
       pop_namespace_stack
     end
 
-    sig { params(node: Prism::SingletonClassNode).void }
+    #: (Prism::SingletonClassNode node) -> void
     def on_singleton_class_node_enter(node)
       @visibility_stack.push(VisibilityScope.public_scope)
 
@@ -172,12 +164,12 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::SingletonClassNode).void }
+    #: (Prism::SingletonClassNode node) -> void
     def on_singleton_class_node_leave(node)
       pop_namespace_stack
     end
 
-    sig { params(node: Prism::MultiWriteNode).void }
+    #: (Prism::MultiWriteNode node) -> void
     def on_multi_write_node_enter(node)
       value = node.value
       values = value.is_a?(Prism::ArrayNode) && value.opening_loc ? value.elements : []
@@ -197,7 +189,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::ConstantPathWriteNode).void }
+    #: (Prism::ConstantPathWriteNode node) -> void
     def on_constant_path_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
@@ -207,7 +199,7 @@ module RubyIndexer
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantPathOrWriteNode).void }
+    #: (Prism::ConstantPathOrWriteNode node) -> void
     def on_constant_path_or_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
@@ -217,7 +209,7 @@ module RubyIndexer
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
+    #: (Prism::ConstantPathOperatorWriteNode node) -> void
     def on_constant_path_operator_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
@@ -227,7 +219,7 @@ module RubyIndexer
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantPathAndWriteNode).void }
+    #: (Prism::ConstantPathAndWriteNode node) -> void
     def on_constant_path_and_write_node_enter(node)
       # ignore variable constants like `var::FOO` or `self.class::FOO`
       target = node.target
@@ -237,31 +229,31 @@ module RubyIndexer
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantWriteNode).void }
+    #: (Prism::ConstantWriteNode node) -> void
     def on_constant_write_node_enter(node)
       name = fully_qualify_name(node.name.to_s)
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantOrWriteNode).void }
+    #: (Prism::ConstantOrWriteNode node) -> void
     def on_constant_or_write_node_enter(node)
       name = fully_qualify_name(node.name.to_s)
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantAndWriteNode).void }
+    #: (Prism::ConstantAndWriteNode node) -> void
     def on_constant_and_write_node_enter(node)
       name = fully_qualify_name(node.name.to_s)
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::ConstantOperatorWriteNode).void }
+    #: (Prism::ConstantOperatorWriteNode node) -> void
     def on_constant_operator_write_node_enter(node)
       name = fully_qualify_name(node.name.to_s)
       add_constant(node, name)
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def on_call_node_enter(node)
       message = node.name
 
@@ -299,7 +291,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def on_call_node_leave(node)
       message = node.name
       case message
@@ -320,7 +312,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::DefNode).void }
+    #: (Prism::DefNode node) -> void
     def on_def_node_enter(node)
       owner = @owner_stack.last
       return unless owner
@@ -379,7 +371,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::DefNode).void }
+    #: (Prism::DefNode node) -> void
     def on_def_node_leave(node)
       @inside_def = false
 
@@ -388,57 +380,57 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+    #: (Prism::GlobalVariableAndWriteNode node) -> void
     def on_global_variable_and_write_node_enter(node)
       handle_global_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+    #: (Prism::GlobalVariableOperatorWriteNode node) -> void
     def on_global_variable_operator_write_node_enter(node)
       handle_global_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+    #: (Prism::GlobalVariableOrWriteNode node) -> void
     def on_global_variable_or_write_node_enter(node)
       handle_global_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::GlobalVariableTargetNode).void }
+    #: (Prism::GlobalVariableTargetNode node) -> void
     def on_global_variable_target_node_enter(node)
       handle_global_variable(node, node.location)
     end
 
-    sig { params(node: Prism::GlobalVariableWriteNode).void }
+    #: (Prism::GlobalVariableWriteNode node) -> void
     def on_global_variable_write_node_enter(node)
       handle_global_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::InstanceVariableWriteNode).void }
+    #: (Prism::InstanceVariableWriteNode node) -> void
     def on_instance_variable_write_node_enter(node)
       handle_instance_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+    #: (Prism::InstanceVariableAndWriteNode node) -> void
     def on_instance_variable_and_write_node_enter(node)
       handle_instance_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+    #: (Prism::InstanceVariableOperatorWriteNode node) -> void
     def on_instance_variable_operator_write_node_enter(node)
       handle_instance_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+    #: (Prism::InstanceVariableOrWriteNode node) -> void
     def on_instance_variable_or_write_node_enter(node)
       handle_instance_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::InstanceVariableTargetNode).void }
+    #: (Prism::InstanceVariableTargetNode node) -> void
     def on_instance_variable_target_node_enter(node)
       handle_instance_variable(node, node.location)
     end
 
-    sig { params(node: Prism::AliasMethodNode).void }
+    #: (Prism::AliasMethodNode node) -> void
     def on_alias_method_node_enter(node)
       method_name = node.new_name.slice
       comments = collect_comments(node)
@@ -454,40 +446,32 @@ module RubyIndexer
       )
     end
 
-    sig { params(node: Prism::ClassVariableAndWriteNode).void }
+    #: (Prism::ClassVariableAndWriteNode node) -> void
     def on_class_variable_and_write_node_enter(node)
       handle_class_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+    #: (Prism::ClassVariableOperatorWriteNode node) -> void
     def on_class_variable_operator_write_node_enter(node)
       handle_class_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::ClassVariableOrWriteNode).void }
+    #: (Prism::ClassVariableOrWriteNode node) -> void
     def on_class_variable_or_write_node_enter(node)
       handle_class_variable(node, node.name_loc)
     end
 
-    sig { params(node: Prism::ClassVariableTargetNode).void }
+    #: (Prism::ClassVariableTargetNode node) -> void
     def on_class_variable_target_node_enter(node)
       handle_class_variable(node, node.location)
     end
 
-    sig { params(node: Prism::ClassVariableWriteNode).void }
+    #: (Prism::ClassVariableWriteNode node) -> void
     def on_class_variable_write_node_enter(node)
       handle_class_variable(node, node.name_loc)
     end
 
-    sig do
-      params(
-        name: String,
-        node_location: Prism::Location,
-        signatures: T::Array[Entry::Signature],
-        visibility: Entry::Visibility,
-        comments: T.nilable(String),
-      ).void
-    end
+    #: (String name, Prism::Location node_location, Array[Entry::Signature] signatures, ?visibility: Entry::Visibility, ?comments: String?) -> void
     def add_method(name, node_location, signatures, visibility: Entry::Visibility::PUBLIC, comments: nil)
       location = Location.from_prism_location(node_location, @code_units_cache)
 
@@ -503,14 +487,7 @@ module RubyIndexer
       ))
     end
 
-    sig do
-      params(
-        name: String,
-        full_location: Prism::Location,
-        name_location: Prism::Location,
-        comments: T.nilable(String),
-      ).void
-    end
+    #: (String name, Prism::Location full_location, Prism::Location name_location, ?comments: String?) -> void
     def add_module(name, full_location, name_location, comments: nil)
       location = Location.from_prism_location(full_location, @code_units_cache)
       name_loc = Location.from_prism_location(name_location, @code_units_cache)
@@ -526,15 +503,7 @@ module RubyIndexer
       advance_namespace_stack(name, entry)
     end
 
-    sig do
-      params(
-        name_or_nesting: T.any(String, T::Array[String]),
-        full_location: Prism::Location,
-        name_location: Prism::Location,
-        parent_class_name: T.nilable(String),
-        comments: T.nilable(String),
-      ).void
-    end
+    #: ((String | Array[String]) name_or_nesting, Prism::Location full_location, Prism::Location name_location, ?parent_class_name: String?, ?comments: String?) -> void
     def add_class(name_or_nesting, full_location, name_location, parent_class_name: nil, comments: nil)
       nesting = name_or_nesting.is_a?(Array) ? name_or_nesting : Index.actual_nesting(@stack, name_or_nesting)
       entry = Entry::Class.new(
@@ -549,7 +518,7 @@ module RubyIndexer
       advance_namespace_stack(T.must(nesting.last), entry)
     end
 
-    sig { params(block: T.proc.params(index: Index, base: Entry::Namespace).void).void }
+    #: { (Index index, Entry::Namespace base) -> void } -> void
     def register_included_hook(&block)
       owner = @owner_stack.last
       return unless owner
@@ -559,32 +528,21 @@ module RubyIndexer
       end
     end
 
-    sig { void }
+    #: -> void
     def pop_namespace_stack
       @stack.pop
       @owner_stack.pop
       @visibility_stack.pop
     end
 
-    sig { returns(T.nilable(Entry::Namespace)) }
+    #: -> Entry::Namespace?
     def current_owner
       @owner_stack.last
     end
 
     private
 
-    sig do
-      params(
-        node: T.any(
-          Prism::GlobalVariableAndWriteNode,
-          Prism::GlobalVariableOperatorWriteNode,
-          Prism::GlobalVariableOrWriteNode,
-          Prism::GlobalVariableTargetNode,
-          Prism::GlobalVariableWriteNode,
-        ),
-        loc: Prism::Location,
-      ).void
-    end
+    #: ((Prism::GlobalVariableAndWriteNode | Prism::GlobalVariableOperatorWriteNode | Prism::GlobalVariableOrWriteNode | Prism::GlobalVariableTargetNode | Prism::GlobalVariableWriteNode) node, Prism::Location loc) -> void
     def handle_global_variable(node, loc)
       name = node.name.to_s
       comments = collect_comments(node)
@@ -597,18 +555,7 @@ module RubyIndexer
       ))
     end
 
-    sig do
-      params(
-        node: T.any(
-          Prism::ClassVariableAndWriteNode,
-          Prism::ClassVariableOperatorWriteNode,
-          Prism::ClassVariableOrWriteNode,
-          Prism::ClassVariableTargetNode,
-          Prism::ClassVariableWriteNode,
-        ),
-        loc: Prism::Location,
-      ).void
-    end
+    #: ((Prism::ClassVariableAndWriteNode | Prism::ClassVariableOperatorWriteNode | Prism::ClassVariableOrWriteNode | Prism::ClassVariableTargetNode | Prism::ClassVariableWriteNode) node, Prism::Location loc) -> void
     def handle_class_variable(node, loc)
       name = node.name.to_s
       # Ignore incomplete class variable names, which aren't valid Ruby syntax.
@@ -633,18 +580,7 @@ module RubyIndexer
       ))
     end
 
-    sig do
-      params(
-        node: T.any(
-          Prism::InstanceVariableAndWriteNode,
-          Prism::InstanceVariableOperatorWriteNode,
-          Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableTargetNode,
-          Prism::InstanceVariableWriteNode,
-        ),
-        loc: Prism::Location,
-      ).void
-    end
+    #: ((Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode) node, Prism::Location loc) -> void
     def handle_instance_variable(node, loc)
       name = node.name.to_s
       return if name == "@"
@@ -666,7 +602,7 @@ module RubyIndexer
       ))
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def handle_private_constant(node)
       arguments = node.arguments&.arguments
       return unless arguments
@@ -691,7 +627,7 @@ module RubyIndexer
       entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def handle_alias_method(node)
       arguments = node.arguments&.arguments
       return unless arguments
@@ -730,24 +666,7 @@ module RubyIndexer
       )
     end
 
-    sig do
-      params(
-        node: T.any(
-          Prism::ConstantWriteNode,
-          Prism::ConstantOrWriteNode,
-          Prism::ConstantAndWriteNode,
-          Prism::ConstantOperatorWriteNode,
-          Prism::ConstantPathWriteNode,
-          Prism::ConstantPathOrWriteNode,
-          Prism::ConstantPathOperatorWriteNode,
-          Prism::ConstantPathAndWriteNode,
-          Prism::ConstantTargetNode,
-          Prism::ConstantPathTargetNode,
-        ),
-        name: String,
-        value: T.nilable(Prism::Node),
-      ).void
-    end
+    #: ((Prism::ConstantWriteNode | Prism::ConstantOrWriteNode | Prism::ConstantAndWriteNode | Prism::ConstantOperatorWriteNode | Prism::ConstantPathWriteNode | Prism::ConstantPathOrWriteNode | Prism::ConstantPathOperatorWriteNode | Prism::ConstantPathAndWriteNode | Prism::ConstantTargetNode | Prism::ConstantPathTargetNode) node, String name, ?Prism::Node? value) -> void
     def add_constant(node, name, value = nil)
       value = node.value unless node.is_a?(Prism::ConstantTargetNode) || node.is_a?(Prism::ConstantPathTargetNode)
       comments = collect_comments(node)
@@ -798,7 +717,7 @@ module RubyIndexer
       )
     end
 
-    sig { params(node: Prism::Node).returns(T.nilable(String)) }
+    #: (Prism::Node node) -> String?
     def collect_comments(node)
       return unless @collect_comments
 
@@ -826,12 +745,12 @@ module RubyIndexer
       comments
     end
 
-    sig { params(line: Integer).returns(T::Boolean) }
+    #: (Integer line) -> bool
     def comment_exists_at?(line)
       @comments_by_line.key?(line) || !@source_lines[line - 1].to_s.strip.empty?
     end
 
-    sig { params(name: String).returns(String) }
+    #: (String name) -> String
     def fully_qualify_name(name)
       if @stack.empty? || name.start_with?("::")
         name
@@ -840,7 +759,7 @@ module RubyIndexer
       end.delete_prefix("::")
     end
 
-    sig { params(node: Prism::CallNode, reader: T::Boolean, writer: T::Boolean).void }
+    #: (Prism::CallNode node, reader: bool, writer: bool) -> void
     def handle_attribute(node, reader:, writer:)
       arguments = node.arguments&.arguments
       return unless arguments
@@ -885,7 +804,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::CallNode, operation: Symbol).void }
+    #: (Prism::CallNode node, Symbol operation) -> void
     def handle_module_operation(node, operation)
       return if @inside_def
 
@@ -919,7 +838,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def handle_module_function(node)
       # Invoking `module_function` in a class raises
       owner = @owner_stack.last
@@ -970,7 +889,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::CallNode).void }
+    #: (Prism::CallNode node) -> void
     def handle_private_class_method(node)
       arguments = node.arguments&.arguments
       return unless arguments
@@ -1012,12 +931,12 @@ module RubyIndexer
       end
     end
 
-    sig { returns(VisibilityScope) }
+    #: -> VisibilityScope
     def current_visibility_scope
       T.must(@visibility_stack.last)
     end
 
-    sig { params(parameters_node: T.nilable(Prism::ParametersNode)).returns(T::Array[Entry::Parameter]) }
+    #: (Prism::ParametersNode? parameters_node) -> Array[Entry::Parameter]
     def list_params(parameters_node)
       return [] unless parameters_node
 
@@ -1079,7 +998,7 @@ module RubyIndexer
       parameters
     end
 
-    sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(Symbol)) }
+    #: (Prism::Node? node) -> Symbol?
     def parameter_name(node)
       case node
       when Prism::RequiredParameterNode, Prism::OptionalParameterNode,
@@ -1104,7 +1023,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(short_name: String, entry: Entry::Namespace).void }
+    #: (String short_name, Entry::Namespace entry) -> void
     def advance_namespace_stack(short_name, entry)
       @visibility_stack.push(VisibilityScope.public_scope)
       @owner_stack << entry
@@ -1114,7 +1033,7 @@ module RubyIndexer
 
     # Returns the last name in the stack not as we found it, but in terms of declared constants. For example, if the
     # last entry in the stack is a compact namespace like `Foo::Bar`, then the last name is `Bar`
-    sig { returns(T.nilable(String)) }
+    #: -> String?
     def last_name_in_stack
       name = @stack.last
       return unless name

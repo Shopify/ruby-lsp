@@ -11,7 +11,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::DocumentOnTypeFormattingRegistrationOptions) }
+        #: -> Interface::DocumentOnTypeFormattingRegistrationOptions
         def provider
           Interface::DocumentOnTypeFormattingRegistrationOptions.new(
             document_selector: nil,
@@ -30,14 +30,7 @@ module RubyLsp
         T::Array[Regexp],
       )
 
-      sig do
-        params(
-          document: RubyDocument,
-          position: T::Hash[Symbol, T.untyped],
-          trigger_character: String,
-          client_name: String,
-        ).void
-      end
+      #: (RubyDocument document, Hash[Symbol, untyped] position, String trigger_character, String client_name) -> void
       def initialize(document, position, trigger_character, client_name)
         super()
         @document = document
@@ -52,7 +45,8 @@ module RubyLsp
         @client_name = client_name
       end
 
-      sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
+      # @override
+      #: -> (Array[Interface::TextEdit] & Object)
       def perform
         case @trigger_character
         when "{"
@@ -84,7 +78,7 @@ module RubyLsp
 
       private
 
-      sig { void }
+      #: -> void
       def handle_pipe
         current_line = @lines[@position[:line]]
         return unless /((?<=do)|(?<={))\s+\|/.match?(current_line)
@@ -115,7 +109,7 @@ module RubyLsp
         move_cursor_to(@position[:line], @position[:character])
       end
 
-      sig { void }
+      #: -> void
       def handle_curly_brace
         return unless /".*#\{/.match?(@previous_line)
 
@@ -123,7 +117,7 @@ module RubyLsp
         move_cursor_to(@position[:line], @position[:character])
       end
 
-      sig { void }
+      #: -> void
       def handle_statement_end
         # If a keyword occurs in a line which appears be a comment or a string, we will not try to format it, since
         # it could be a coincidental match. This approach is not perfect, but it should cover most cases.
@@ -145,7 +139,7 @@ module RubyLsp
         end
       end
 
-      sig { params(delimiter: String).void }
+      #: (String delimiter) -> void
       def handle_heredoc_end(delimiter)
         indents = " " * @indentation
         add_edit_with_text("\n")
@@ -153,12 +147,12 @@ module RubyLsp
         move_cursor_to(@position[:line], @indentation + 2)
       end
 
-      sig { params(spaces: String).void }
+      #: (String spaces) -> void
       def handle_comment_line(spaces)
         add_edit_with_text("##{spaces}")
       end
 
-      sig { params(text: String, position: T::Hash[Symbol, T.untyped]).void }
+      #: (String text, ?Hash[Symbol, untyped] position) -> void
       def add_edit_with_text(text, position = @position)
         pos = Interface::Position.new(
           line: position[:line],
@@ -171,7 +165,7 @@ module RubyLsp
         )
       end
 
-      sig { params(line: Integer, character: Integer).void }
+      #: (Integer line, Integer character) -> void
       def move_cursor_to(line, character)
         return unless /Visual Studio Code|Cursor/.match?(@client_name)
 
@@ -192,7 +186,7 @@ module RubyLsp
         )
       end
 
-      sig { params(line: String).returns(Integer) }
+      #: (String line) -> Integer
       def find_indentation(line)
         count = 0
 
@@ -205,7 +199,7 @@ module RubyLsp
         count
       end
 
-      sig { void }
+      #: -> void
       def auto_indent_after_end_keyword
         current_line = @lines[@position[:line]]
         return unless current_line && current_line.strip == "end"

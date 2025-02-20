@@ -14,7 +14,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::SemanticTokensRegistrationOptions) }
+        #: -> Interface::SemanticTokensRegistrationOptions
         def provider
           Interface::SemanticTokensRegistrationOptions.new(
             document_selector: nil,
@@ -29,13 +29,7 @@ module RubyLsp
 
         # The compute_delta method receives the current semantic tokens and the previous semantic tokens and then tries
         # to compute the smallest possible semantic token edit that will turn previous into current
-        sig do
-          params(
-            current_tokens: T::Array[Integer],
-            previous_tokens: T::Array[Integer],
-            result_id: String,
-          ).returns(Interface::SemanticTokensDelta)
-        end
+        #: (Array[Integer] current_tokens, Array[Integer] previous_tokens, String result_id) -> Interface::SemanticTokensDelta
         def compute_delta(current_tokens, previous_tokens, result_id)
           # Find the index of the first token that is different between the two sets of tokens
           first_different_position = current_tokens.zip(previous_tokens).find_index { |new, old| new != old }
@@ -73,7 +67,7 @@ module RubyLsp
           )
         end
 
-        sig { returns(Integer) }
+        #: -> Integer
         def next_result_id
           @mutex.synchronize do
             @result_id += 1
@@ -84,15 +78,7 @@ module RubyLsp
       @result_id = T.let(0, Integer)
       @mutex = T.let(Mutex.new, Mutex)
 
-      sig do
-        params(
-          global_state: GlobalState,
-          dispatcher: Prism::Dispatcher,
-          document: T.any(RubyDocument, ERBDocument),
-          previous_result_id: T.nilable(String),
-          range: T.nilable(T::Range[Integer]),
-        ).void
-      end
+      #: (GlobalState global_state, Prism::Dispatcher dispatcher, (RubyDocument | ERBDocument) document, String? previous_result_id, ?range: T::Range[Integer]?) -> void
       def initialize(global_state, dispatcher, document, previous_result_id, range: nil)
         super()
 
@@ -111,7 +97,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T.any(Interface::SemanticTokens, Interface::SemanticTokensDelta)) }
+      # @override
+      #: -> (Interface::SemanticTokens | Interface::SemanticTokensDelta)
       def perform
         previous_tokens = @document.semantic_tokens
         tokens = @response_builder.response

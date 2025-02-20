@@ -93,12 +93,12 @@ module RuboCop
 
         private
 
-        sig { params(event_name: Symbol).returns(T::Boolean) }
+        #: (Symbol event_name) -> bool
         def valid_event_name?(event_name)
           /^on_.*(node_enter|node_leave)$/.match?(event_name)
         end
 
-        sig { params(listeners: T::Array[RuboCop::AST::SymbolNode], handlers: T::Array[RuboCop::AST::DefNode]).void }
+        #: (Array[RuboCop::AST::SymbolNode] listeners, Array[RuboCop::AST::DefNode] handlers) -> void
         def add_offense_to_listeners_without_handler(listeners, handlers)
           return if listeners.none?
 
@@ -107,7 +107,7 @@ module RuboCop
             .each { |node| add_offense(node, message: format(MSG_MISSING_HANDLER, listener: node.value)) }
         end
 
-        sig { params(listeners: T::Array[RuboCop::AST::SymbolNode], handlers: T::Array[RuboCop::AST::DefNode]).void }
+        #: (Array[RuboCop::AST::SymbolNode] listeners, Array[RuboCop::AST::DefNode] handlers) -> void
         def add_offense_handlers_without_listener(listeners, handlers)
           return if handlers.none?
 

@@ -9,18 +9,19 @@ module RubyLsp
 
       ResponseType = type_member { { upper: Object } }
 
-      sig { void }
+      #: -> void
       def initialize
         super
         @items = T.let([], T::Array[ResponseType])
       end
 
-      sig { params(item: ResponseType).void }
+      #: (ResponseType item) -> void
       def <<(item)
         @items << item
       end
 
-      sig { override.returns(T::Array[ResponseType]) }
+      # @override
+      #: -> Array[ResponseType]
       def response
         @items
       end

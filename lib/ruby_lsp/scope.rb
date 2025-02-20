@@ -5,10 +5,10 @@ module RubyLsp
   class Scope
     extend T::Sig
 
-    sig { returns(T.nilable(Scope)) }
+    #: Scope?
     attr_reader :parent
 
-    sig { params(parent: T.nilable(Scope)).void }
+    #: (?Scope? parent) -> void
     def initialize(parent = nil)
       @parent = parent
 
@@ -17,12 +17,12 @@ module RubyLsp
     end
 
     # Add a new local to this scope. The types should only be `:parameter` or `:variable`
-    sig { params(name: T.any(String, Symbol), type: Symbol).void }
+    #: ((String | Symbol) name, Symbol type) -> void
     def add(name, type)
       @locals[name.to_sym] = Local.new(type)
     end
 
-    sig { params(name: T.any(String, Symbol)).returns(T.nilable(Local)) }
+    #: ((String | Symbol) name) -> Local?
     def lookup(name)
       sym = name.to_sym
       entry = @locals[sym]
@@ -35,10 +35,10 @@ module RubyLsp
     class Local
       extend T::Sig
 
-      sig { returns(Symbol) }
+      #: Symbol
       attr_reader :type
 
-      sig { params(type: Symbol).void }
+      #: (Symbol type) -> void
       def initialize(type)
         @type = type
       end

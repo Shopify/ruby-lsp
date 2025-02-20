@@ -14,7 +14,7 @@ module RubyLsp
       extend T::Sig
       include Support::Common
 
-      sig { params(document: T.any(RubyDocument, ERBDocument)).void }
+      #: ((RubyDocument | ERBDocument) document) -> void
       def initialize(document)
         super()
         @document = document
@@ -22,7 +22,8 @@ module RubyLsp
         @stack = T.let([], T::Array[Support::SelectionRange])
       end
 
-      sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
+      # @override
+      #: -> (Array[Support::SelectionRange] & Object)
       def perform
         # [node, parent]
         queue = [[@document.parse_result.value, nil]]

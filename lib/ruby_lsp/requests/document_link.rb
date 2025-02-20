@@ -14,19 +14,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::DocumentLinkOptions) }
+        #: -> Interface::DocumentLinkOptions
         def provider
           Interface::DocumentLinkOptions.new(resolve_provider: false)
         end
       end
 
-      sig do
-        params(
-          uri: URI::Generic,
-          comments: T::Array[Prism::Comment],
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (URI::Generic uri, Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
       def initialize(uri, comments, dispatcher)
         super()
         @response_builder = T.let(
@@ -36,7 +30,8 @@ module RubyLsp
         Listeners::DocumentLink.new(@response_builder, uri, comments, dispatcher)
       end
 
-      sig { override.returns(T::Array[Interface::DocumentLink]) }
+      # @override
+      #: -> Array[Interface::DocumentLink]
       def perform
         @response_builder.response
       end

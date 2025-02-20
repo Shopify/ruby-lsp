@@ -10,14 +10,7 @@ module RubyLsp
       extend T::Sig
       include Support::Common
 
-      sig do
-        params(
-          global_state: GlobalState,
-          store: Store,
-          document: T.any(RubyDocument, ERBDocument),
-          params: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: (GlobalState global_state, Store store, (RubyDocument | ERBDocument) document, Hash[Symbol, untyped] params) -> void
       def initialize(global_state, store, document, params)
         super()
         @global_state = global_state
@@ -27,7 +20,8 @@ module RubyLsp
         @locations = T.let([], T::Array[Interface::Location])
       end
 
-      sig { override.returns(T::Array[Interface::Location]) }
+      # @override
+      #: -> Array[Interface::Location]
       def perform
         position = @params[:position]
         char_position, _ = @document.find_index_by_position(position)
@@ -103,24 +97,7 @@ module RubyLsp
 
       private
 
-      sig do
-        params(
-          target_node: T.any(
-            Prism::ConstantReadNode,
-            Prism::ConstantPathNode,
-            Prism::ConstantPathTargetNode,
-            Prism::InstanceVariableAndWriteNode,
-            Prism::InstanceVariableOperatorWriteNode,
-            Prism::InstanceVariableOrWriteNode,
-            Prism::InstanceVariableReadNode,
-            Prism::InstanceVariableTargetNode,
-            Prism::InstanceVariableWriteNode,
-            Prism::CallNode,
-            Prism::DefNode,
-          ),
-          node_context: NodeContext,
-        ).returns(T.nilable(RubyIndexer::ReferenceFinder::Target))
-      end
+      #: ((Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode) target_node, NodeContext node_context) -> RubyIndexer::ReferenceFinder::Target?
       def create_reference_target(target_node, node_context)
         case target_node
         when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
@@ -145,13 +122,7 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          target: RubyIndexer::ReferenceFinder::Target,
-          parse_result: Prism::ParseResult,
-          uri: URI::Generic,
-        ).void
-      end
+      #: (RubyIndexer::ReferenceFinder::Target target, Prism::ParseResult parse_result, URI::Generic uri) -> void
       def collect_references(target, parse_result, uri)
         dispatcher = Prism::Dispatcher.new
         finder = RubyIndexer::ReferenceFinder.new(

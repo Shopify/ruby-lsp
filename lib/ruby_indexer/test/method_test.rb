@@ -926,14 +926,14 @@ module RubyIndexer
 
     private
 
-    sig { params(entry: Entry::Method, call_string: String).void }
+    #: (Entry::Method entry, String call_string) -> void
     def assert_signature_matches(entry, call_string)
       sig = T.must(entry.signatures.first)
       arguments = parse_prism_args(call_string)
       assert(sig.matches?(arguments), "Expected #{call_string} to match #{entry.name}#{entry.decorated_parameters}")
     end
 
-    sig { params(entry: Entry::Method, call_string: String).void }
+    #: (Entry::Method entry, String call_string) -> void
     def refute_signature_matches(entry, call_string)
       sig = T.must(entry.signatures.first)
       arguments = parse_prism_args(call_string)
