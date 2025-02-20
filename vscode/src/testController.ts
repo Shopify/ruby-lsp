@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import path from "path";
 
@@ -309,13 +309,13 @@ export class TestController {
             continue;
           }
 
-          const output: string = await this.assertTestPasses(
+          this.assertTestPasses(
             test,
             workspace.workspaceFolder.uri.fsPath,
             workspace.ruby.env,
           );
 
-          run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
+          // run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
           run.passed(test, Date.now() - start);
         } catch (err: any) {
           const duration = Date.now() - start;
@@ -371,20 +371,40 @@ export class TestController {
     cwd: string,
     env: NodeJS.ProcessEnv,
   ) {
-    try {
-      const result = await asyncExec(this.testCommands.get(test)!, {
+    return new Promise((resolve, reject) => {
+      const testProcess = spawn(this.testCommands.get(test)!, {
         cwd,
         env,
         timeout: this.testTimeout * 1000,
       });
-      return result.stdout;
-    } catch (error: any) {
-      if (error.killed) {
-        throw error;
-      } else {
-        throw new Error(error.stdout);
-      }
-    }
+
+      let output = '';
+
+      // testProcess.stdout.on("data", (data) => {
+      //   const chunk = data.toString();
+      //   output += chunk;
+      //   console.log(chunk);
+      // });
+
+      // testProcess.stderr.on("data", (data) => {
+      //   const chunk = data.toString();
+      //   output += chunk;
+      //   console.log(chunk);
+      // });
+
+      // testProcess.on("close", (code) => {
+      //   console.log(`Test process exited with code ${code}`);
+      //   if (code === 0) {
+      //     // resolve(output);
+      //   } else {
+      //     reject(new Error(output));
+      //   }
+      // });
+
+      // testProcess.on("error", (err) => {
+      //   reject(err);
+      // });
+    });
   }
 
   private findTestById(

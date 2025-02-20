@@ -9,6 +9,7 @@ class CompletionTest < Minitest::Test
       foo d
     RUBY
 
+    sleep(3)
     with_server(source, stub_no_typechecker: true) do |server, uri|
       with_file_structure(server) do
         server.process_message(id: 1, method: "textDocument/completion", params: {
