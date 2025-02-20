@@ -292,6 +292,58 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, T.must(edits).to_json)
   end
 
+  def test_comment_continuation_does_not_apply_to_rbs_signatures
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "    #: (String) -> String",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 0, character: 14 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+    assert_empty(edits)
+  end
+
+  def test_comment_continuation_does_not_apply_to_trailing_rbs_signature
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "attr_reader :name #: String",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 0, character: 14 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+    assert_empty(edits)
+  end
+
   def test_keyword_handling
     document = RubyLsp::RubyDocument.new(
       source: +"",

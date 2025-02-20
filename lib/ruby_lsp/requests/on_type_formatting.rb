@@ -60,7 +60,10 @@ module RubyLsp
         when "|"
           handle_pipe if @document.syntax_error?
         when "\n"
-          if (comment_match = @previous_line.match(/^#(\s*)/))
+          # If the previous line is a simple comment, we'll add a comment continuation
+          # But if it's a RBS signature starting with `#:`, we'll ignore it
+          # so users can immediately continue typing the method definition
+          if (comment_match = @previous_line.match(/^#(?!:)(\s*)/))
             handle_comment_line(T.must(comment_match[1]))
           elsif @document.syntax_error?
             match = /(<<((-|~)?))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
