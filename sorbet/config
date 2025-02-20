@@ -6,3 +6,4 @@
 --ignore=test/expectations/
 --ignore=jekyll/
 --enable-experimental-requires-ancestor
+--enable-experimental-rbs-signatures
