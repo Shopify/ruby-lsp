@@ -8,9 +8,10 @@
   ],
   "repository": {
     "rbs-signature": {
-      "begin": "(#:)\\s*",
+      "begin": "(?m)(^[^#\"']*)(#:)",
       "beginCaptures": {
-        "1": { "name": "comment.line.number-sign.rbs" }
+        "1": { "name": "source.ruby" },
+        "2": { "name": "comment.line.number-sign.rbs" }
       },
       "end": "$",
       "name": "meta.type.signature.rbs",
