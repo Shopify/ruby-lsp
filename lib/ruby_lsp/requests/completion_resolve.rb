@@ -21,14 +21,15 @@ module RubyLsp
       # https://github.com/Shopify/ruby-lsp/pull/1798
       MAX_DOCUMENTATION_ENTRIES = 10
 
-      sig { params(global_state: GlobalState, item: T::Hash[Symbol, T.untyped]).void }
+      #: (GlobalState global_state, Hash[Symbol, untyped] item) -> void
       def initialize(global_state, item)
         super()
         @index = T.let(global_state.index, RubyIndexer::Index)
         @item = item
       end
 
-      sig { override.returns(T::Hash[Symbol, T.untyped]) }
+      # @override
+      #: -> Hash[Symbol, untyped]
       def perform
         return @item if @item.dig(:data, :skip_resolve)
 
@@ -78,7 +79,7 @@ module RubyLsp
 
       private
 
-      sig { params(item: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
+      #: (Hash[Symbol, untyped] item) -> Hash[Symbol, untyped]
       def keyword_resolve(item)
         keyword = item[:label]
         content = KEYWORD_DOCS[keyword]

@@ -37,17 +37,7 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      sig do
-        params(
-          node: Prism::Node,
-          char_position: Integer,
-          code_units_cache: T.any(
-            T.proc.params(arg0: Integer).returns(Integer),
-            Prism::CodeUnitsCache,
-          ),
-          node_types: T::Array[T.class_of(Prism::Node)],
-        ).returns(NodeContext)
-      end
+      #: (Prism::Node node, Integer char_position, code_units_cache: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache), ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
       def locate(node, char_position, code_units_cache:, node_types: [])
         queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
         closest = node
@@ -150,15 +140,10 @@ module RubyLsp
       end
     end
 
-    sig do
-      returns(T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
-    end
+    #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
       super
       @code_units_cache = T.let(@parse_result.code_units_cache(@encoding), T.any(
@@ -167,7 +152,8 @@ module RubyLsp
       ))
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def parse!
       return false unless @needs_parsing
 
@@ -177,17 +163,19 @@ module RubyLsp
       true
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def syntax_error?
       @parse_result.failure?
     end
 
-    sig { override.returns(LanguageId) }
+    # @override
+    #: -> LanguageId
     def language_id
       LanguageId::Ruby
     end
 
-    sig { returns(SorbetLevel) }
+    #: -> SorbetLevel
     def sorbet_level
       sigil = parse_result.magic_comments.find do |comment|
         comment.key == "typed"
@@ -207,12 +195,7 @@ module RubyLsp
       end
     end
 
-    sig do
-      params(
-        range: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(T.nilable(Prism::Node))
-    end
+    #: (Hash[Symbol, untyped] range, ?node_types: Array[singleton(Prism::Node)]) -> Prism::Node?
     def locate_first_within_range(range, node_types: [])
       start_position, end_position = find_index_by_position(range[:start], range[:end])
 
@@ -240,12 +223,7 @@ module RubyLsp
       end
     end
 
-    sig do
-      params(
-        position: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(NodeContext)
-    end
+    #: (Hash[Symbol, untyped] position, ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
     def locate_node(position, node_types: [])
       char_position, _ = find_index_by_position(position)
 
@@ -257,7 +235,7 @@ module RubyLsp
       )
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def should_index?
       # This method controls when we should index documents. If there's no recent edit and the document has just been
       # opened, we need to index it
@@ -268,7 +246,7 @@ module RubyLsp
 
     private
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def last_edit_may_change_declarations?
       case @last_edit
       when Delete
@@ -282,7 +260,7 @@ module RubyLsp
       end
     end
 
-    sig { params(position: T::Hash[Symbol, Integer]).returns(T::Boolean) }
+    #: (Hash[Symbol, Integer] position) -> bool
     def position_may_impact_declarations?(position)
       node_context = locate_node(position)
       node_at_edit = node_context.node

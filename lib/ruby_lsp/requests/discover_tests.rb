@@ -11,7 +11,7 @@ module RubyLsp
       extend T::Sig
       include Support::Common
 
-      sig { params(global_state: GlobalState, document: RubyDocument, dispatcher: Prism::Dispatcher).void }
+      #: (GlobalState global_state, RubyDocument document, Prism::Dispatcher dispatcher) -> void
       def initialize(global_state, document, dispatcher)
         super()
         @global_state = global_state
@@ -21,7 +21,8 @@ module RubyLsp
         @index = T.let(global_state.index, RubyIndexer::Index)
       end
 
-      sig { override.returns(T::Array[Support::TestItem]) }
+      # @override
+      #: -> Array[Support::TestItem]
       def perform
         uri = @document.uri
 

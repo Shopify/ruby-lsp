@@ -9,13 +9,7 @@ module RubyLsp
 
       RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
-          hints_configuration: RequestConfig,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint] response_builder, RequestConfig hints_configuration, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, hints_configuration, dispatcher)
         @response_builder = response_builder
         @hints_configuration = hints_configuration
@@ -23,7 +17,7 @@ module RubyLsp
         dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
       end
 
-      sig { params(node: Prism::RescueNode).void }
+      #: (Prism::RescueNode node) -> void
       def on_rescue_node_enter(node)
         return unless @hints_configuration.enabled?(:implicitRescue)
         return unless node.exceptions.empty?
@@ -38,7 +32,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ImplicitNode).void }
+      #: (Prism::ImplicitNode node) -> void
       def on_implicit_node_enter(node)
         return unless @hints_configuration.enabled?(:implicitHashValue)
 

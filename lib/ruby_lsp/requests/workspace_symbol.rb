@@ -10,7 +10,7 @@ module RubyLsp
       extend T::Sig
       include Support::Common
 
-      sig { params(global_state: GlobalState, query: T.nilable(String)).void }
+      #: (GlobalState global_state, String? query) -> void
       def initialize(global_state, query)
         super()
         @global_state = global_state
@@ -18,7 +18,8 @@ module RubyLsp
         @index = T.let(global_state.index, RubyIndexer::Index)
       end
 
-      sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
+      # @override
+      #: -> Array[Interface::WorkspaceSymbol]
       def perform
         @index.fuzzy_search(@query).filter_map do |entry|
           uri = entry.uri

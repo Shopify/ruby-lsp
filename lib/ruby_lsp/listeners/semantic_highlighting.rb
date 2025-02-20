@@ -18,12 +18,7 @@ module RubyLsp
         T::Array[String],
       )
 
-      sig do
-        params(
-          dispatcher: Prism::Dispatcher,
-          response_builder: ResponseBuilders::SemanticHighlighting,
-        ).void
-      end
+      #: (Prism::Dispatcher dispatcher, ResponseBuilders::SemanticHighlighting response_builder) -> void
       def initialize(dispatcher, response_builder)
         @response_builder = response_builder
         @special_methods = T.let(nil, T.nilable(T::Array[String]))
@@ -62,7 +57,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         return if @inside_implicit_node
 
@@ -85,7 +80,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::MatchWriteNode).void }
+      #: (Prism::MatchWriteNode node) -> void
       def on_match_write_node_enter(node)
         call = node.call
 
@@ -95,86 +90,86 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::MatchWriteNode).void }
+      #: (Prism::MatchWriteNode node) -> void
       def on_match_write_node_leave(node)
         @inside_regex_capture = true if node.call.message == "=~"
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         @current_scope = Scope.new(@current_scope)
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_leave(node)
         @current_scope = T.must(@current_scope.parent)
       end
 
-      sig { params(node: Prism::BlockNode).void }
+      #: (Prism::BlockNode node) -> void
       def on_block_node_enter(node)
         @current_scope = Scope.new(@current_scope)
       end
 
-      sig { params(node: Prism::BlockNode).void }
+      #: (Prism::BlockNode node) -> void
       def on_block_node_leave(node)
         @current_scope = T.must(@current_scope.parent)
       end
 
-      sig { params(node: Prism::BlockLocalVariableNode).void }
+      #: (Prism::BlockLocalVariableNode node) -> void
       def on_block_local_variable_node_enter(node)
         @response_builder.add_token(node.location, :variable)
       end
 
-      sig { params(node: Prism::BlockParameterNode).void }
+      #: (Prism::BlockParameterNode node) -> void
       def on_block_parameter_node_enter(node)
         name = node.name
         @current_scope.add(name.to_sym, :parameter) if name
       end
 
-      sig { params(node: Prism::RequiredKeywordParameterNode).void }
+      #: (Prism::RequiredKeywordParameterNode node) -> void
       def on_required_keyword_parameter_node_enter(node)
         @current_scope.add(node.name, :parameter)
       end
 
-      sig { params(node: Prism::OptionalKeywordParameterNode).void }
+      #: (Prism::OptionalKeywordParameterNode node) -> void
       def on_optional_keyword_parameter_node_enter(node)
         @current_scope.add(node.name, :parameter)
       end
 
-      sig { params(node: Prism::KeywordRestParameterNode).void }
+      #: (Prism::KeywordRestParameterNode node) -> void
       def on_keyword_rest_parameter_node_enter(node)
         name = node.name
         @current_scope.add(name.to_sym, :parameter) if name
       end
 
-      sig { params(node: Prism::OptionalParameterNode).void }
+      #: (Prism::OptionalParameterNode node) -> void
       def on_optional_parameter_node_enter(node)
         @current_scope.add(node.name, :parameter)
       end
 
-      sig { params(node: Prism::RequiredParameterNode).void }
+      #: (Prism::RequiredParameterNode node) -> void
       def on_required_parameter_node_enter(node)
         @current_scope.add(node.name, :parameter)
       end
 
-      sig { params(node: Prism::RestParameterNode).void }
+      #: (Prism::RestParameterNode node) -> void
       def on_rest_parameter_node_enter(node)
         name = node.name
         @current_scope.add(name.to_sym, :parameter) if name
       end
 
-      sig { params(node: Prism::SelfNode).void }
+      #: (Prism::SelfNode node) -> void
       def on_self_node_enter(node)
         @response_builder.add_token(node.location, :variable, [:default_library])
       end
 
-      sig { params(node: Prism::LocalVariableWriteNode).void }
+      #: (Prism::LocalVariableWriteNode node) -> void
       def on_local_variable_write_node_enter(node)
         local = @current_scope.lookup(node.name)
         @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
-      sig { params(node: Prism::LocalVariableReadNode).void }
+      #: (Prism::LocalVariableReadNode node) -> void
       def on_local_variable_read_node_enter(node)
         return if @inside_implicit_node
 
@@ -188,25 +183,25 @@ module RubyLsp
         @response_builder.add_token(node.location, local&.type || :variable)
       end
 
-      sig { params(node: Prism::LocalVariableAndWriteNode).void }
+      #: (Prism::LocalVariableAndWriteNode node) -> void
       def on_local_variable_and_write_node_enter(node)
         local = @current_scope.lookup(node.name)
         @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
-      sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
+      #: (Prism::LocalVariableOperatorWriteNode node) -> void
       def on_local_variable_operator_write_node_enter(node)
         local = @current_scope.lookup(node.name)
         @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
-      sig { params(node: Prism::LocalVariableOrWriteNode).void }
+      #: (Prism::LocalVariableOrWriteNode node) -> void
       def on_local_variable_or_write_node_enter(node)
         local = @current_scope.lookup(node.name)
         @response_builder.add_token(node.name_loc, :parameter) if local&.type == :parameter
       end
 
-      sig { params(node: Prism::LocalVariableTargetNode).void }
+      #: (Prism::LocalVariableTargetNode node) -> void
       def on_local_variable_target_node_enter(node)
         # If we're inside a regex capture, Prism will add LocalVariableTarget nodes for each captured variable.
         # Unfortunately, if the regex contains a backslash, the location will be incorrect and we'll end up highlighting
@@ -218,7 +213,7 @@ module RubyLsp
         @response_builder.add_token(node.location, local&.type || :variable)
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         constant_path = node.constant_path
 
@@ -257,7 +252,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         constant_path = node.constant_path
 
@@ -278,12 +273,12 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::ImplicitNode).void }
+      #: (Prism::ImplicitNode node) -> void
       def on_implicit_node_enter(node)
         @inside_implicit_node = true
       end
 
-      sig { params(node: Prism::ImplicitNode).void }
+      #: (Prism::ImplicitNode node) -> void
       def on_implicit_node_leave(node)
         @inside_implicit_node = false
       end
@@ -292,12 +287,12 @@ module RubyLsp
 
       # Textmate provides highlighting for a subset of these special Ruby-specific methods.  We want to utilize that
       # highlighting, so we avoid making a semantic token for it.
-      sig { params(method_name: String).returns(T::Boolean) }
+      #: (String method_name) -> bool
       def special_method?(method_name)
         SPECIAL_RUBY_METHODS.include?(method_name)
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def process_regexp_locals(node)
         receiver = node.receiver
 

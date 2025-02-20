@@ -7,13 +7,13 @@ module RubyLsp
 
     class NonExistingDocumentError < StandardError; end
 
-    sig { returns(T::Hash[Symbol, RequestConfig]) }
+    #: Hash[Symbol, RequestConfig]
     attr_accessor :features_configuration
 
-    sig { returns(String) }
+    #: String
     attr_accessor :client_name
 
-    sig { params(global_state: GlobalState).void }
+    #: (GlobalState global_state) -> void
     def initialize(global_state)
       @global_state = global_state
       @state = T.let({}, T::Hash[String, Document[T.untyped]])
@@ -30,7 +30,7 @@ module RubyLsp
       @client_name = T.let("Unknown", String)
     end
 
-    sig { params(uri: URI::Generic).returns(Document[T.untyped]) }
+    #: (URI::Generic uri) -> Document[untyped]
     def get(uri)
       document = @state[uri.to_s]
       return document unless document.nil?
@@ -56,14 +56,7 @@ module RubyLsp
       raise NonExistingDocumentError, uri.to_s
     end
 
-    sig do
-      params(
-        uri: URI::Generic,
-        source: String,
-        version: Integer,
-        language_id: Document::LanguageId,
-      ).returns(Document[T.untyped])
-    end
+    #: (uri: URI::Generic, source: String, version: Integer, language_id: Document::LanguageId) -> Document[untyped]
     def set(uri:, source:, version:, language_id:)
       @state[uri.to_s] = case language_id
       when Document::LanguageId::ERB
@@ -75,46 +68,39 @@ module RubyLsp
       end
     end
 
-    sig { params(uri: URI::Generic, edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
+    #: (uri: URI::Generic, edits: Array[Hash[Symbol, untyped]], version: Integer) -> void
     def push_edits(uri:, edits:, version:)
       T.must(@state[uri.to_s]).push_edits(edits, version: version)
     end
 
-    sig { void }
+    #: -> void
     def clear
       @state.clear
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def empty?
       @state.empty?
     end
 
-    sig { params(uri: URI::Generic).void }
+    #: (URI::Generic uri) -> void
     def delete(uri)
       @state.delete(uri.to_s)
     end
 
-    sig { params(uri: URI::Generic).returns(T::Boolean) }
+    #: (URI::Generic uri) -> bool
     def key?(uri)
       @state.key?(uri.to_s)
     end
 
-    sig { params(block: T.proc.params(uri: String, document: Document[T.untyped]).void).void }
+    #: { (String uri, Document[untyped] document) -> void } -> void
     def each(&block)
       @state.each do |uri, document|
         block.call(uri, document)
       end
     end
 
-    sig do
-      type_parameters(:T)
-        .params(
-          uri: URI::Generic,
-          request_name: String,
-          block: T.proc.params(document: Document[T.untyped]).returns(T.type_parameter(:T)),
-        ).returns(T.type_parameter(:T))
-    end
+    #: [T] (URI::Generic uri, String request_name) { (Document[untyped] document) -> T } -> T
     def cache_fetch(uri, request_name, &block)
       get(uri).cache_fetch(request_name, &block)
     end

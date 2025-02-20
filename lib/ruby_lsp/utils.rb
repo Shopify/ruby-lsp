@@ -44,15 +44,15 @@ module RubyLsp
     extend T::Sig
     extend T::Helpers
 
-    sig { returns(String) }
+    #: String
     attr_reader :method
 
-    sig { returns(Object) }
+    #: Object
     attr_reader :params
 
     abstract!
 
-    sig { params(method: String, params: Object).void }
+    #: (method: String, params: Object) -> void
     def initialize(method:, params:)
       @method = method
       @params = params
@@ -66,7 +66,7 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      sig { params(message: String, type: Integer).returns(Notification) }
+      #: (String message, ?type: Integer) -> Notification
       def window_show_message(message, type: Constant::MessageType::INFO)
         new(
           method: "window/showMessage",
@@ -74,7 +74,7 @@ module RubyLsp
         )
       end
 
-      sig { params(message: String, type: Integer).returns(Notification) }
+      #: (String message, ?type: Integer) -> Notification
       def window_log_message(message, type: Constant::MessageType::LOG)
         new(
           method: "window/logMessage",
@@ -82,7 +82,7 @@ module RubyLsp
         )
       end
 
-      sig { params(data: T::Hash[Symbol, T.untyped]).returns(Notification) }
+      #: (Hash[Symbol, untyped] data) -> Notification
       def telemetry(data)
         new(
           method: "telemetry/event",
@@ -90,14 +90,7 @@ module RubyLsp
         )
       end
 
-      sig do
-        params(
-          id: String,
-          title: String,
-          percentage: T.nilable(Integer),
-          message: T.nilable(String),
-        ).returns(Notification)
-      end
+      #: (String id, String title, ?percentage: Integer?, ?message: String?) -> Notification
       def progress_begin(id, title, percentage: nil, message: nil)
         new(
           method: "$/progress",
@@ -113,13 +106,7 @@ module RubyLsp
         )
       end
 
-      sig do
-        params(
-          id: String,
-          percentage: T.nilable(Integer),
-          message: T.nilable(String),
-        ).returns(Notification)
-      end
+      #: (String id, ?percentage: Integer?, ?message: String?) -> Notification
       def progress_report(id, percentage: nil, message: nil)
         new(
           method: "$/progress",
@@ -134,7 +121,7 @@ module RubyLsp
         )
       end
 
-      sig { params(id: String).returns(Notification) }
+      #: (String id) -> Notification
       def progress_end(id)
         Notification.new(
           method: "$/progress",
@@ -145,13 +132,7 @@ module RubyLsp
         )
       end
 
-      sig do
-        params(
-          uri: String,
-          diagnostics: T::Array[Interface::Diagnostic],
-          version: T.nilable(Integer),
-        ).returns(Notification)
-      end
+      #: (String uri, Array[Interface::Diagnostic] diagnostics, ?version: Integer?) -> Notification
       def publish_diagnostics(uri, diagnostics, version: nil)
         new(
           method: "textDocument/publishDiagnostics",
@@ -162,7 +143,8 @@ module RubyLsp
 
     extend T::Sig
 
-    sig { override.returns(T::Hash[Symbol, T.untyped]) }
+    # @override
+    #: -> Hash[Symbol, untyped]
     def to_hash
       hash = { method: @method }
       hash[:params] = T.unsafe(@params).to_hash if @params
@@ -176,14 +158,7 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      sig do
-        params(
-          id: Integer,
-          pattern: T.any(Interface::RelativePattern, String),
-          kind: Integer,
-          registration_id: T.nilable(String),
-        ).returns(Request)
-      end
+      #: (Integer id, (Interface::RelativePattern | String) pattern, ?kind: Integer, ?registration_id: String?) -> Request
       def register_watched_files(
         id,
         pattern,
@@ -210,13 +185,14 @@ module RubyLsp
       end
     end
 
-    sig { params(id: T.any(Integer, String), method: String, params: Object).void }
+    #: (id: (Integer | String), method: String, params: Object) -> void
     def initialize(id:, method:, params:)
       @id = id
       super(method: method, params: params)
     end
 
-    sig { override.returns(T::Hash[Symbol, T.untyped]) }
+    # @override
+    #: -> Hash[Symbol, untyped]
     def to_hash
       hash = { id: @id, method: @method }
       hash[:params] = T.unsafe(@params).to_hash if @params
@@ -227,13 +203,13 @@ module RubyLsp
   class Error
     extend T::Sig
 
-    sig { returns(String) }
+    #: String
     attr_reader :message
 
-    sig { returns(Integer) }
+    #: Integer
     attr_reader :code
 
-    sig { params(id: Integer, code: Integer, message: String, data: T.nilable(T::Hash[Symbol, T.untyped])).void }
+    #: (id: Integer, code: Integer, message: String, ?data: Hash[Symbol, untyped]?) -> void
     def initialize(id:, code:, message:, data: nil)
       @id = id
       @code = code
@@ -241,7 +217,7 @@ module RubyLsp
       @data = data
     end
 
-    sig { returns(T::Hash[Symbol, T.untyped]) }
+    #: -> Hash[Symbol, untyped]
     def to_hash
       {
         id: @id,
@@ -258,19 +234,19 @@ module RubyLsp
   class Result
     extend T::Sig
 
-    sig { returns(T.untyped) }
+    #: untyped
     attr_reader :response
 
-    sig { returns(Integer) }
+    #: Integer
     attr_reader :id
 
-    sig { params(id: Integer, response: T.untyped).void }
+    #: (id: Integer, response: untyped) -> void
     def initialize(id:, response:)
       @id = id
       @response = response
     end
 
-    sig { returns(T::Hash[Symbol, T.untyped]) }
+    #: -> Hash[Symbol, untyped]
     def to_hash
       { id: @id, result: @response }
     end
@@ -280,15 +256,15 @@ module RubyLsp
   class RequestConfig
     extend T::Sig
 
-    sig { returns(T::Hash[Symbol, T::Boolean]) }
+    #: Hash[Symbol, bool]
     attr_accessor :configuration
 
-    sig { params(configuration: T::Hash[Symbol, T::Boolean]).void }
+    #: (Hash[Symbol, bool] configuration) -> void
     def initialize(configuration)
       @configuration = configuration
     end
 
-    sig { params(feature: Symbol).returns(T.nilable(T::Boolean)) }
+    #: (Symbol feature) -> bool?
     def enabled?(feature)
       @configuration[:enableAll] || @configuration[feature]
     end

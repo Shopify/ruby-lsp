@@ -7,13 +7,7 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange],
-          comments: T::Array[Prism::Comment],
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange] response_builder, Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, comments, dispatcher)
         @response_builder = response_builder
         @requires = T.let([], T::Array[Prism::CallNode])
@@ -47,33 +41,33 @@ module RubyLsp
         )
       end
 
-      sig { void }
+      #: -> void
       def finalize_response!
         push_comment_ranges
         emit_requires_range
       end
 
-      sig { params(node: Prism::IfNode).void }
+      #: (Prism::IfNode node) -> void
       def on_if_node_enter(node)
         add_statements_range(node)
       end
 
-      sig { params(node: Prism::InNode).void }
+      #: (Prism::InNode node) -> void
       def on_in_node_enter(node)
         add_statements_range(node)
       end
 
-      sig { params(node: Prism::RescueNode).void }
+      #: (Prism::RescueNode node) -> void
       def on_rescue_node_enter(node)
         add_statements_range(node)
       end
 
-      sig { params(node: Prism::WhenNode).void }
+      #: (Prism::WhenNode node) -> void
       def on_when_node_enter(node)
         add_statements_range(node)
       end
 
-      sig { params(node: Prism::InterpolatedStringNode).void }
+      #: (Prism::InterpolatedStringNode node) -> void
       def on_interpolated_string_node_enter(node)
         opening_loc = node.opening_loc || node.location
         closing_loc = node.closing_loc || node.parts.last&.location || node.location
@@ -81,82 +75,82 @@ module RubyLsp
         add_lines_range(opening_loc.start_line, closing_loc.start_line - 1)
       end
 
-      sig { params(node: Prism::ArrayNode).void }
+      #: (Prism::ArrayNode node) -> void
       def on_array_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::BlockNode).void }
+      #: (Prism::BlockNode node) -> void
       def on_block_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::CaseNode).void }
+      #: (Prism::CaseNode node) -> void
       def on_case_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::CaseMatchNode).void }
+      #: (Prism::CaseMatchNode node) -> void
       def on_case_match_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::ForNode).void }
+      #: (Prism::ForNode node) -> void
       def on_for_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::HashNode).void }
+      #: (Prism::HashNode node) -> void
       def on_hash_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::SingletonClassNode).void }
+      #: (Prism::SingletonClassNode node) -> void
       def on_singleton_class_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::UnlessNode).void }
+      #: (Prism::UnlessNode node) -> void
       def on_unless_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::UntilNode).void }
+      #: (Prism::UntilNode node) -> void
       def on_until_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::WhileNode).void }
+      #: (Prism::WhileNode node) -> void
       def on_while_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::ElseNode).void }
+      #: (Prism::ElseNode node) -> void
       def on_else_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::EnsureNode).void }
+      #: (Prism::EnsureNode node) -> void
       def on_ensure_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::BeginNode).void }
+      #: (Prism::BeginNode node) -> void
       def on_begin_node_enter(node)
         add_simple_range(node)
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         params = node.parameters
         parameter_loc = params&.location
@@ -171,7 +165,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         # If we find a require, don't visit the child nodes (prevent `super`), so that we can keep accumulating into
         # the `@requires` array and then push the range whenever we find a node that isn't a CallNode
@@ -184,14 +178,14 @@ module RubyLsp
         add_lines_range(location.start_line, location.end_line - 1)
       end
 
-      sig { params(node: Prism::LambdaNode).void }
+      #: (Prism::LambdaNode node) -> void
       def on_lambda_node_enter(node)
         add_simple_range(node)
       end
 
       private
 
-      sig { void }
+      #: -> void
       def push_comment_ranges
         # Group comments that are on consecutive lines and then push ranges for each group that has at least 2 comments
         @comments.chunk_while do |this, other|
@@ -207,7 +201,7 @@ module RubyLsp
         end
       end
 
-      sig { void }
+      #: -> void
       def emit_requires_range
         if @requires.length > 1
           @response_builder << Interface::FoldingRange.new(
@@ -220,7 +214,7 @@ module RubyLsp
         @requires.clear
       end
 
-      sig { params(node: Prism::CallNode).returns(T::Boolean) }
+      #: (Prism::CallNode node) -> bool
       def require?(node)
         message = node.message
         return false unless message == "require" || message == "require_relative"
@@ -234,7 +228,7 @@ module RubyLsp
         arguments.length == 1 && arguments.first.is_a?(Prism::StringNode)
       end
 
-      sig { params(node: T.any(Prism::IfNode, Prism::InNode, Prism::RescueNode, Prism::WhenNode)).void }
+      #: ((Prism::IfNode | Prism::InNode | Prism::RescueNode | Prism::WhenNode) node) -> void
       def add_statements_range(node)
         statements = node.statements
         return unless statements
@@ -245,13 +239,13 @@ module RubyLsp
         add_lines_range(node.location.start_line, statement.location.end_line)
       end
 
-      sig { params(node: Prism::Node).void }
+      #: (Prism::Node node) -> void
       def add_simple_range(node)
         location = node.location
         add_lines_range(location.start_line, location.end_line - 1)
       end
 
-      sig { params(start_line: Integer, end_line: Integer).void }
+      #: (Integer start_line, Integer end_line) -> void
       def add_lines_range(start_line, end_line)
         emit_requires_range
         return if start_line >= end_line

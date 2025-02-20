@@ -14,13 +14,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(TrueClass) }
+        #: -> TrueClass
         def provider
           true
         end
       end
 
-      sig { params(global_state: GlobalState, document: RubyDocument).void }
+      #: (GlobalState global_state, RubyDocument document) -> void
       def initialize(global_state, document)
         super()
         @document = document
@@ -28,7 +28,8 @@ module RubyLsp
         @uri = T.let(document.uri, URI::Generic)
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
+      # @override
+      #: -> (Array[Interface::TextEdit] & Object)?
       def perform
         return unless @active_formatter
         return if @document.syntax_error?
