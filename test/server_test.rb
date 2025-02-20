@@ -521,7 +521,7 @@ class ServerTest < Minitest::Test
     end
   end
 
-  def test_did_change_watches_files_handles_deletions
+  def test_did_change_watched_files_handles_deletions
     path = File.join(Dir.pwd, "lib", "foo.rb")
 
     @server.global_state.index.expects(:delete).once.with do |uri|
