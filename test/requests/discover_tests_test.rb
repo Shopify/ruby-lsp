@@ -8,18 +8,7 @@ module RubyLsp
     def test_minitest
       source = File.read("test/fixtures/minitest_tests.rb")
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
-          textDocument: { uri: uri },
-        })
-
-        items = get_response(server)
+      with_minitest_test(source) do |items|
         assert_equal(["Test", "AnotherTest"], items.map { |i| i[:label] })
         assert_equal(
           [
@@ -38,18 +27,7 @@ module RubyLsp
     def test_minitest_with_nested_classes_and_modules
       source = File.read("test/fixtures/minitest_nested_classes_and_modules.rb")
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
-          textDocument: { uri: uri },
-        })
-
-        items = get_response(server)
+      with_minitest_test(source) do |items|
         assert_equal(
           [
             "Foo::FooTest",
@@ -74,18 +52,7 @@ module RubyLsp
     def test_minitest_with_dynamic_constant_path
       source = File.read("test/fixtures/minitest_with_dynamic_constant_path.rb")
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
-          textDocument: { uri: uri },
-        })
-
-        items = get_response(server)
+      with_minitest_test(source) do |items|
         assert_equal(
           [
             "<dynamic_reference>::Baz::Test",
@@ -118,20 +85,7 @@ module RubyLsp
         end
       RUBY
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Test
-            module Unit
-              class TestCase; end
-            end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
-          textDocument: { uri: uri },
-        })
-
-        items = get_response(server)
+      with_test_unit(source) do |items|
         assert_equal(["Foo::MyTest", "Foo::MyTest::NestedTest"], items.map { |i| i[:label] })
 
         assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
@@ -146,29 +100,8 @@ module RubyLsp
         end
       RUBY
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
-
-          module ActiveSupport
-            module Testing
-              module Declarative
-              end
-            end
-
-            class TestCase < Minitest::Test
-              extend Testing::Declarative
-            end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
-          textDocument: { uri: uri },
-        })
-
-        assert_empty(get_response(server))
+      with_active_support_declarative_tests(source) do |items|
+        assert_empty(items)
       end
     end
 
@@ -188,16 +121,7 @@ module RubyLsp
         end
       RUBY
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: { textDocument: { uri: uri } })
-
-        items = get_response(server)
+      with_minitest_test(source) do |items|
         assert_equal(
           ["<dynamic_reference>::Namespace::MyTest", "Foo::<dynamic_reference>::OtherTest"],
           items.map { |i| i[:label] },
@@ -224,18 +148,7 @@ module RubyLsp
         end
       RUBY
 
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Test
-            module Unit
-              class TestCase; end
-            end
-          end
-        RUBY
-
-        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: { textDocument: { uri: uri } })
-
-        items = get_response(server)
+      with_minitest_test(source) do |items|
         assert_equal(
           ["<dynamic_reference>::Namespace::MyTest", "Foo::<dynamic_reference>::OtherTest"],
           items.map { |i| i[:label] },
@@ -280,6 +193,73 @@ module RubyLsp
     end
 
     private
+
+    def with_minitest_test(source, &block)
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(uri, <<~RUBY)
+          module Minitest
+            class Test; end
+          end
+        RUBY
+
+        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
+          textDocument: { uri: uri },
+        })
+
+        items = get_response(server)
+
+        yield items
+      end
+    end
+
+    def with_test_unit(source, &block)
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(uri, <<~RUBY)
+          module Test
+            module Unit
+              class TestCase; end
+            end
+          end
+        RUBY
+
+        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
+          textDocument: { uri: uri },
+        })
+
+        items = get_response(server)
+
+        yield items
+      end
+    end
+
+    def with_active_support_declarative_tests(source, &block)
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(uri, <<~RUBY)
+          module Minitest
+            class Test; end
+          end
+
+          module ActiveSupport
+            module Testing
+              module Declarative
+              end
+            end
+
+            class TestCase < Minitest::Test
+              extend Testing::Declarative
+            end
+          end
+        RUBY
+
+        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
+          textDocument: { uri: uri },
+        })
+
+        items = get_response(server)
+
+        yield items
+      end
+    end
 
     def get_response(server)
       result = server.pop_response
