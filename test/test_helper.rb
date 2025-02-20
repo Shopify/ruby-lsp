@@ -42,12 +42,6 @@ else
 end
 Minitest::Reporters.use!(minitest_reporter)
 
-# Temporary for verification
-if ENV["RUBY_LSP"]
-  require "minitest/reporters/ruby_lsp_reporter"
-  Minitest::Reporters.use!(Minitest::Reporters::RubyLspReporter.new)
-end
-
 module Minitest
   class Test
     extend T::Sig
