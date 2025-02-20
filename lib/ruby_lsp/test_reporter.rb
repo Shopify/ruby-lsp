@@ -19,7 +19,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      io.puts result.to_json
+      puts result
     end
 
     sig { params(id: String, file: String).void }
@@ -29,7 +29,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      io.puts result.to_json
+      puts result
     end
 
     sig { params(id: String, file: String).void }
@@ -39,7 +39,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      io.puts result.to_json
+      puts result
     end
 
     sig do
@@ -58,7 +58,7 @@ module RubyLsp
         id: id,
         file: file,
       }
-      io.puts result.to_json
+      puts result
     end
 
     sig { params(id: String, message: T.nilable(String), file: String).void }
@@ -69,7 +69,13 @@ module RubyLsp
         id: id,
         file: file,
       }
+      puts result
+    end
+
+    sig { params(result: T::Hash[Symbol, T.untyped]).void }
+    def puts(result)
       io.puts result.to_json
+      io.flush
     end
 
     private
