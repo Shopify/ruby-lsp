@@ -94,7 +94,7 @@ export class ServerStatus extends StatusItem {
     switch (workspace.lspClient.state) {
       case State.Running: {
         this.item.text = workspace.lspClient.serverVersion
-          ? `Ruby LSP v${workspace.lspClient.serverVersion}: Running`
+          ? `Ruby LSP server v${workspace.lspClient.serverVersion}: Running`
           : "Ruby LSP: Running";
 
         if (workspace.lspClient.degraded) {

@@ -99,7 +99,7 @@ suite("StatusItems", () => {
     test("Refresh when server is running", () => {
       workspace.lspClient!.state = State.Running;
       status.refresh(workspace);
-      assert.strictEqual(status.item.text, "Ruby LSP v1.0.0: Running");
+      assert.strictEqual(status.item.text, "Ruby LSP server v1.0.0: Running");
       assert.strictEqual(
         status.item.severity,
         vscode.LanguageStatusSeverity.Information,
@@ -134,7 +134,7 @@ suite("StatusItems", () => {
       status.refresh(workspace);
       assert.strictEqual(
         status.item.text,
-        "Ruby LSP v1.0.0: Running (degraded)",
+        "Ruby LSP server v1.0.0: Running (degraded)",
       );
       assert.strictEqual(
         status.item.severity,
