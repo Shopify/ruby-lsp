@@ -1051,14 +1051,14 @@ module RubyLsp
       load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
       uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
 
-      content = File.read(file_path)
-
       case change_type
       when Constant::FileChangeType::CREATED
+        content = File.read(file_path)
         # If we receive a late created notification for a file that has already been claimed by the client, we want to
         # handle change for that URI so that the require path tree is updated
         @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
       when Constant::FileChangeType::CHANGED
+        content = File.read(file_path)
         # We only handle changes on file watched notifications if the client is not the one managing this URI.
         # Otherwise, these changes are handled when running the combined requests
         index.handle_change(uri, content) unless @store.key?(uri)

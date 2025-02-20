@@ -521,6 +521,32 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_did_change_watches_files_handles_deletions
+    path = File.join(Dir.pwd, "lib", "foo.rb")
+    FileUtils.touch(path)
+    FileUtils.rm(path)
+
+    @server.global_state.index.expects(:delete).once.with do |uri|
+      uri.full_path == path
+    end
+
+    uri = URI::Generic.from_path(path: path)
+
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: uri,
+            type: RubyLsp::Constant::FileChangeType::DELETED,
+          },
+        ],
+      },
+    })
+  ensure
+    FileUtils.rm(T.must(path)) if File.exist?(path)
+  end
+
   def test_did_change_watched_files_reports_addon_errors
     Class.new(RubyLsp::Addon) do
       def activate(global_state, outgoing_queue); end
