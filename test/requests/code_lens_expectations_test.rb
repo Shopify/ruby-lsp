@@ -85,6 +85,28 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     )
   end
 
+  def test_command_generation_for_minitest_spec_handles_specify_alias_for_it
+    stub_test_library("minitest")
+    source = <<~RUBY
+      class FooTest < MiniTest::Test
+        describe "a" do
+          specify "b"
+        end
+      end
+    RUBY
+    uri = URI("file:///spec/fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    response = listener.perform
+
+    # 3 for the class, 3 for the describe, 3 for the specify
+    assert_equal(9, response.size)
+  end
+
   def test_command_generation_for_test_unit
     stub_test_library("test-unit")
     source = <<~RUBY
