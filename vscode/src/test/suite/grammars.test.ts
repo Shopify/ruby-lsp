@@ -344,91 +344,27 @@ suite("Grammars", () => {
       test("inline method signature", () => {
         const ruby = "#: (String) -> (String | nil)";
         const expectedTokens = [
-          [
-            "#:",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "(",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
+          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
           [
             "String",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [
-            ")",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "(",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
+          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
           [
             "String",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "|",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "nil",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "support.type.builtin.rbs",
-            ],
-          ],
-          [
-            ")",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
+          [" ", ["meta.type.signature.rbs"]],
+          ["|", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["nil", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
+          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -437,118 +373,33 @@ suite("Grammars", () => {
       test("inline method signature with block", () => {
         const ruby = "#: (String) { (String) -> boolish } -> void";
         const expectedTokens = [
-          [
-            "#:",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "(",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
+          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
           [
             "String",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [
-            ")",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "{",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "(",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
+          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["{", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
           [
             "String",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [
-            ")",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "boolish",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "support.type.builtin.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "}",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "void",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "support.type.builtin.rbs",
-            ],
-          ],
+          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["boolish", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["}", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -557,124 +408,29 @@ suite("Grammars", () => {
       test("inline method signature with &", () => {
         const ruby = "#: [X] (X & Object) -> Class[X]";
         const expectedTokens = [
-          [
-            "#:",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "[",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            "X",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            "]",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "(",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [
-            "X",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "&",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["[", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          ["]", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["&", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
           [
             "Object",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [
-            ")",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "Class",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            "[",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            "X",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            "]",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
+          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["Class", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          ["[", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          ["]", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -683,98 +439,21 @@ suite("Grammars", () => {
       test("inline method signature * and **", () => {
         const ruby = "#: (*Foo, **Bar) -> void";
         const expectedTokens = [
-          [
-            "#:",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "(",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [
-            "*",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [
-            "Foo",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            ",",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "*",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [
-            "*",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [
-            "Bar",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
-          ],
-          [
-            ")",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
-          [
-            "void",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "support.type.builtin.rbs",
-            ],
-          ],
+          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["*", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["Foo", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [",", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["*", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["*", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["Bar", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
 
         const actualTokens = tokenizeRBS(ruby);
@@ -784,31 +463,48 @@ suite("Grammars", () => {
       test("inline method signature with keyword", () => {
         const ruby = "#: return: String";
         const expectedTokens = [
-          [
-            "#:",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "comment.line.number-sign.rbs",
-            ],
-          ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
           [
             "return:",
             [
-              "rbs-comment.injection",
               "meta.type.signature.rbs",
               "constant.other.symbol.hashkey.parameter.function.rbs",
             ],
           ],
-          [" ", ["rbs-comment.injection", "meta.type.signature.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
           [
             "String",
-            [
-              "rbs-comment.injection",
-              "meta.type.signature.rbs",
-              "variable.other.constant.rbs",
-            ],
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
+          ],
+        ];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("grammar is not applied to `#:` in comments", () => {
+        const ruby = "# some comments says #: foo";
+        const expectedTokens = [["# some comments says #: foo", []]];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("grammar is not applied to `#:` in Ruby code", () => {
+        const ruby = '"#: foo"';
+        const expectedTokens = [['"#: foo"', []]];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("grammar is applied to `#:` in trailing comments", () => {
+        const ruby = "attr_reader :name #: String";
+        const expectedTokens = [
+          ["attr_reader :name ", ["meta.type.signature.rbs", "source.ruby"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          [
+            "String",
+            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
         ];
         const actualTokens = tokenizeRBS(ruby);
@@ -938,7 +634,12 @@ suite("Grammars", () => {
 
         return lineTokens.tokens.map((token) => {
           const tokenString = line.substring(token.startIndex, token.endIndex);
-          const pair: [string, string[]] = [tokenString, token.scopes];
+          const pair: [string, string[]] = [
+            tokenString,
+            // Remove the `rbs-comment` scope from the token scopes as in the test setup,
+            // the `rbs-comment` scope is applied to all the tokens in the line
+            token.scopes.filter((scope) => !scope.startsWith("rbs-comment")),
+          ];
           return pair;
         });
       });
