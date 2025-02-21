@@ -111,6 +111,7 @@ module RubyLsp
       when "rubyLsp/diagnoseState"
         diagnose_state(message)
       when "rubyLsp/discoverTests"
+        send_log_message("got rubyLsp/discoverTests")
         discover_tests(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
@@ -1057,6 +1058,10 @@ module RubyLsp
         # If we receive a late created notification for a file that has already been claimed by the client, we want to
         # handle change for that URI so that the require path tree is updated
         @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
+        if file_path.include?("test/") # TODO: improve check
+          send_log_message("new test: #{uri}")
+          discover_tests(params: { textDocument: { uri: uri } })
+        end
       when Constant::FileChangeType::CHANGED
         content = File.read(file_path)
         # We only handle changes on file watched notifications if the client is not the one managing this URI.
@@ -1064,6 +1069,10 @@ module RubyLsp
         index.handle_change(uri, content) unless @store.key?(uri)
       when Constant::FileChangeType::DELETED
         index.delete(uri)
+        if file_path.include?("test/") # TODO: improve check
+          send_log_message("test deleted: #{uri}")
+          discover_tests(params: { textDocument: { uri: uri } })
+        end
       end
     rescue Errno::ENOENT
       # If a file is created and then delete immediately afterwards, we will process the created notification before we
@@ -1396,7 +1405,14 @@ module RubyLsp
     # all add-ons
     sig { params(message: T::Hash[Symbol, T.untyped]).void }
     def discover_tests(message)
-      document = @store.get(message.dig(:params, :textDocument, :uri))
+      send_log_message("*** discover_tests: #{message}")
+
+      begin
+        document = @store.get(message.dig(:params, :textDocument, :uri))
+      rescue RubyLsp::Store::NonExistingDocumentError
+        send_log_message("deosn't exist")
+        return
+      end
 
       unless document.is_a?(RubyDocument)
         send_empty_response(message[:id])
