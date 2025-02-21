@@ -149,16 +149,13 @@ module RubyLsp
           return
         end
 
-        # `specify` is an alias for `it`
-        if [:describe, :it, :specify].include?(name)
-          case name
-          when :describe
-            add_spec_code_lens(node, kind: :group)
-            @group_id_stack.push(@group_id)
-            @group_id += 1
-          when :it, :specify
-            add_spec_code_lens(node, kind: :example)
-          end
+        case name
+        when :describe
+          add_spec_code_lens(node, kind: :group)
+          @group_id_stack.push(@group_id)
+          @group_id += 1
+        when :it, :specify # `specify` is an alias for `it`
+          add_spec_code_lens(node, kind: :example)
         end
       end
 

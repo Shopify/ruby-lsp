@@ -51,7 +51,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   def test_command_generation_for_minitest_spec
     stub_test_library("minitest")
     source = <<~RUBY
-      class FooTest < MiniTest::Test
+      class FooTest < MiniTest::Spec
         describe "a" do
           it "b"
         end
@@ -88,10 +88,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   def test_command_generation_for_minitest_spec_handles_specify_alias_for_it
     stub_test_library("minitest")
     source = <<~RUBY
-      class FooTest < MiniTest::Test
-        describe "a" do
-          specify "b"
-        end
+      describe "a" do
+        specify "b"
       end
     RUBY
     uri = URI("file:///spec/fake.rb")
@@ -103,8 +101,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
-    # 3 for the class, 3 for the describe, 3 for the specify
-    assert_equal(9, response.size)
+    # 3 for the describe, 3 for the specify
+    assert_equal(6, response.size)
   end
 
   def test_command_generation_for_test_unit
