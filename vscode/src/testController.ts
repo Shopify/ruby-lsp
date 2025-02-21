@@ -456,10 +456,15 @@ export class TestController {
         await this.gatherWorkspaceTests(workspaceFolder, item);
       } else if (!item.tags.some((tag) => tag === TEST_GROUP_TAG)) {
         const workspace = await this.getOrActivateWorkspace(workspaceFolder);
-        const testItems = await workspace.lspClient?.discoverTests(item.uri!);
+        const lspClient = workspace.lspClient;
 
-        if (testItems) {
-          this.addDiscoveredItems(testItems, item);
+        if (lspClient) {
+          await lspClient.waitForIndexing();
+          const testItems = await lspClient.discoverTests(item.uri!);
+
+          if (testItems) {
+            this.addDiscoveredItems(testItems, item);
+          }
         }
       }
     } else if (workspaceFolders.length === 1) {

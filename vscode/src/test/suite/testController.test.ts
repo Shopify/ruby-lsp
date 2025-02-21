@@ -297,6 +297,7 @@ suite("TestController", () => {
 
     const fakeClient = {
       discoverTests: sinon.stub().resolves([]),
+      waitForIndexing: sinon.stub().resolves(),
     };
     workspace.lspClient = fakeClient as any;
     await controller.testController.resolveHandler!(serverTest);
