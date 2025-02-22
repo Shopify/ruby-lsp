@@ -31,11 +31,8 @@ module RubyIndexer
 
       @excluded_patterns = T.let(
         [
-          File.join("**", "*_test.rb"),
-          File.join("node_modules", "**", "*"),
-          File.join("spec", "**", "*"),
-          File.join("test", "**", "*"),
-          File.join("tmp", "**", "*"),
+          "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}",
+          "**/fixtures/**/*",
         ],
         T::Array[String],
       )
@@ -44,10 +41,21 @@ module RubyIndexer
       if path
         # Substitute Windows backslashes into forward slashes, which are used in glob patterns
         glob = path.gsub(/[\\]+/, "/")
-        @excluded_patterns << File.join(glob, "**", "*.rb")
+        glob.delete_suffix!("/")
+        @excluded_patterns << "#{glob}/**/*.rb"
       end
 
-      @included_patterns = T.let([File.join("**", "*.rb")], T::Array[String])
+      excluded_directories = ["tmp", "node_modules", "sorbet"]
+      top_level_directories = Dir.glob("#{Dir.pwd}/*").filter_map do |path|
+        dir_name = File.basename(path)
+        next unless File.directory?(path) && !excluded_directories.include?(dir_name)
+
+        dir_name
+      end
+
+      # We start the included patterns with only the non excluded directories so that we can avoid paying the price of
+      # traversing large directories that don't include Ruby files like `node_modules`
+      @included_patterns = T.let(["{#{top_level_directories.join(",")}}/**/*.rb", "*.rb"], T::Array[String])
       @excluded_magic_comments = T.let(
         [
           "frozen_string_literal:",
@@ -66,21 +74,6 @@ module RubyIndexer
       )
     end
 
-    sig { returns(String) }
-    def merged_excluded_file_pattern
-      # This regex looks for @excluded_patterns that follow the format of "something/**/*", where
-      # "something" is one or more non-"/"
-      #
-      # Returns "/path/to/workspace/{tmp,node_modules}/**/*"
-      @excluded_patterns
-        .filter_map do |pattern|
-          next if File.absolute_path?(pattern)
-
-          pattern.match(%r{\A([^/]+)/\*\*/\*\z})&.captures&.first
-        end
-        .then { |dirs| File.join(@workspace_path, "{#{dirs.join(",")}}/**/*") }
-    end
-
     sig { returns(T::Array[URI::Generic]) }
     def indexable_uris
       excluded_gems = @excluded_gems - @included_gems
@@ -91,51 +84,19 @@ module RubyIndexer
 
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
 
-      # In order to speed up indexing, only traverse into top-level directories that are not entirely excluded.
-      # For example, if "tmp/**/*" is excluded, we don't need to traverse into "tmp" at all. However, if
-      # "vendor/bundle/**/*" is excluded, we will traverse all of "vendor" and `reject!` out all "vendor/bundle" entries
-      # later.
-      excluded_pattern = merged_excluded_file_pattern
-      included_paths = Dir.glob(File.join(@workspace_path, "*/"), flags)
-        .filter_map do |included_path|
-          next if File.fnmatch?(excluded_pattern, included_path, flags)
-
-          relative_path = included_path
-            .delete_prefix(@workspace_path)
-            .tap { |path| path.delete_prefix!("/") }
-
-          [included_path, relative_path]
-        end
-
-      uris = T.let([], T::Array[URI::Generic])
-
-      # Handle top level files separately. The path below is an optimization to prevent descending down directories that
-      # are going to be excluded anyway, so we need to handle top level scripts separately
-      Dir.glob(File.join(@workspace_path, "*.rb"), flags).each do |path|
-        uris << URI::Generic.from_path(path: path)
-      end
-
-      # Add user specified patterns
-      @included_patterns.each do |pattern|
+      uris = @included_patterns.flat_map do |pattern|
         load_path_entry = T.let(nil, T.nilable(String))
 
-        included_paths.each do |included_path, relative_path|
-          relative_pattern = pattern.delete_prefix(File.join(relative_path, "/"))
-
-          next unless pattern.start_with?("**") || pattern.start_with?(relative_path)
-
-          Dir.glob(File.join(included_path, relative_pattern), flags).each do |path|
-            path = File.expand_path(path)
-            # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
-            # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This
-            # happens on repositories that define multiple gems, like Rails. All frameworks are defined inside the
-            # current workspace directory, but each one of them belongs to a different $LOAD_PATH entry
-            if load_path_entry.nil? || !path.start_with?(load_path_entry)
-              load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
-            end
-
-            uris << URI::Generic.from_path(path: path, load_path_entry: load_path_entry)
+        Dir.glob(File.join(@workspace_path, pattern), flags).map! do |path|
+          # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
+          # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
+          # on repositories that define multiple gems, like Rails. All frameworks are defined inside the current
+          # workspace directory, but each one of them belongs to a different $LOAD_PATH entry
+          if load_path_entry.nil? || !path.start_with?(load_path_entry)
+            load_path_entry = $LOAD_PATH.find { |load_path| path.start_with?(load_path) }
           end
+
+          URI::Generic.from_path(path: path, load_path_entry: load_path_entry)
         end
       end
 
@@ -149,11 +110,23 @@ module RubyIndexer
         end
       end
 
+      # These file names match our exclude regex, but often define important test parent classes that we need for
+      # ancestor linearization to provide test explorer functionality
+      excluded_from_ignore_test_files = ["test_case.rb", "test_helper.rb"]
+
       # Remove user specified patterns
+      bundle_path = Bundler.settings["path"]&.gsub(/[\\]+/, "/")
       uris.reject! do |indexable|
-        excluded_patterns.any? do |pattern|
-          File.fnmatch?(pattern, T.must(indexable.full_path), File::FNM_PATHNAME | File::FNM_EXTGLOB)
+        path = T.must(indexable.full_path)
+
+        # Don't exclude the special files, unless they are under fixtures or inside a gem installed inside of the
+        # workspace
+        if excluded_from_ignore_test_files.include?(File.basename(path)) &&
+            !File.fnmatch?("**/fixtures/**/*", path, flags) && (!bundle_path || !path.start_with?(bundle_path))
+          next false
         end
+
+        excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
       end
 
       # Add default gems to the list of files to be indexed
