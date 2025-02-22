@@ -12,16 +12,7 @@ module RubyLsp
 
     requires_ancestor { Kernel }
 
-    sig do
-      type_parameters(:T)
-        .params(
-          source: T.nilable(String),
-          uri: URI::Generic,
-          stub_no_typechecker: T::Boolean,
-          load_addons: T::Boolean,
-          block: T.proc.params(server: RubyLsp::Server, uri: URI::Generic).returns(T.type_parameter(:T)),
-        ).returns(T.type_parameter(:T))
-    end
+    #: [T] (?String? source, ?URI::Generic uri, ?stub_no_typechecker: bool, ?load_addons: bool) { (RubyLsp::Server server, URI::Generic uri) -> T } -> T
     def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: true,
       &block)
       server = RubyLsp::Server.new(test_mode: true)
@@ -58,7 +49,7 @@ module RubyLsp
       end
     end
 
-    sig { params(server: RubyLsp::Server).returns(RubyLsp::Result) }
+    #: (RubyLsp::Server server) -> RubyLsp::Result
     def pop_result(server)
       result = server.pop_response
       result = server.pop_response until result.is_a?(RubyLsp::Result) || result.is_a?(RubyLsp::Error)

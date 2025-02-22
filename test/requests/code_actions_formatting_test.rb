@@ -59,14 +59,7 @@ class CodeActionsFormattingTest < Minitest::Test
     )
   end
 
-  sig do
-    params(
-      diagnostic_code: String,
-      code_action_title: String,
-      source: String,
-      expected: String,
-    ).returns(T.untyped)
-  end
+  #: (String diagnostic_code, String code_action_title, String source, String expected) -> untyped
   def assert_corrects_to_expected(diagnostic_code, code_action_title, source, expected)
     global_state = RubyLsp::GlobalState.new
     global_state.apply_options({
@@ -119,7 +112,7 @@ class CodeActionsFormattingTest < Minitest::Test
     assert_equal(document.source, expected)
   end
 
-  sig { params(name: String).returns([String, String]) }
+  #: (String name) -> [String, String]
   def load_expectation(name)
     source = File.read(File.join(TEST_FIXTURES_DIR, "#{name}.rb"))
     expected = File.read(File.join(TEST_EXP_DIR, "#{name}.exp.rb"))

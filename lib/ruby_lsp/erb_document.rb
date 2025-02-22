@@ -8,18 +8,13 @@ module RubyLsp
 
     ParseResultType = type_member { { fixed: Prism::ParseResult } }
 
-    sig { returns(String) }
+    #: String
     attr_reader :host_language_source
 
-    sig do
-      returns(T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
-    end
+    #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
       # This has to be initialized before calling super because we call `parse` in the parent constructor, which
       # overrides this with the proper virtual host language source
@@ -31,7 +26,8 @@ module RubyLsp
       ))
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def parse!
       return false unless @needs_parsing
 
@@ -46,22 +42,19 @@ module RubyLsp
       true
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def syntax_error?
       @parse_result.failure?
     end
 
-    sig { override.returns(LanguageId) }
+    # @override
+    #: -> LanguageId
     def language_id
       LanguageId::ERB
     end
 
-    sig do
-      params(
-        position: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(NodeContext)
-    end
+    #: (Hash[Symbol, untyped] position, ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
     def locate_node(position, node_types: [])
       char_position, _ = find_index_by_position(position)
 
@@ -73,7 +66,7 @@ module RubyLsp
       )
     end
 
-    sig { params(char_position: Integer).returns(T.nilable(T::Boolean)) }
+    #: (Integer char_position) -> bool?
     def inside_host_language?(char_position)
       char = @host_language_source[char_position]
       char && char != " "
@@ -82,10 +75,10 @@ module RubyLsp
     class ERBScanner
       extend T::Sig
 
-      sig { returns(String) }
+      #: String
       attr_reader :ruby, :host_language
 
-      sig { params(source: String).void }
+      #: (String source) -> void
       def initialize(source)
         @source = source
         @host_language = T.let(+"", String)
@@ -94,7 +87,7 @@ module RubyLsp
         @inside_ruby = T.let(false, T::Boolean)
       end
 
-      sig { void }
+      #: -> void
       def scan
         while @current_pos < @source.length
           scan_char
@@ -104,7 +97,7 @@ module RubyLsp
 
       private
 
-      sig { void }
+      #: -> void
       def scan_char
         char = @source[@current_pos]
 
@@ -159,7 +152,7 @@ module RubyLsp
         end
       end
 
-      sig { params(char: String).void }
+      #: (String char) -> void
       def push_char(char)
         if @inside_ruby
           @ruby << char
@@ -170,7 +163,7 @@ module RubyLsp
         end
       end
 
-      sig { returns(String) }
+      #: -> String
       def next_char
         @source[@current_pos + 1] || ""
       end

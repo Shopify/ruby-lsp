@@ -7,12 +7,12 @@ module RubyLsp
   class TypeInferrer
     extend T::Sig
 
-    sig { params(index: RubyIndexer::Index).void }
+    #: (RubyIndexer::Index index) -> void
     def initialize(index)
       @index = index
     end
 
-    sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
+    #: (NodeContext node_context) -> Type?
     def infer_receiver_type(node_context)
       node = node_context.node
 
@@ -31,7 +31,7 @@ module RubyLsp
 
     private
 
-    sig { params(node: Prism::CallNode, node_context: NodeContext).returns(T.nilable(Type)) }
+    #: (Prism::CallNode node, NodeContext node_context) -> Type?
     def infer_receiver_for_call_node(node, node_context)
       receiver = node.receiver
 
@@ -114,7 +114,7 @@ module RubyLsp
       end
     end
 
-    sig { params(raw_receiver: String, nesting: T::Array[String]).returns(T.nilable(GuessedType)) }
+    #: (String raw_receiver, Array[String] nesting) -> GuessedType?
     def guess_type(raw_receiver, nesting)
       guessed_name = raw_receiver
         .delete_prefix("@")
@@ -130,7 +130,7 @@ module RubyLsp
       GuessedType.new(name)
     end
 
-    sig { params(node_context: NodeContext).returns(Type) }
+    #: (NodeContext node_context) -> Type
     def self_receiver_handling(node_context)
       nesting = node_context.nesting
       # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
@@ -147,7 +147,7 @@ module RubyLsp
       Type.new("#{parts.join("::")}::<Class:#{parts.last}>")
     end
 
-    sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
+    #: (NodeContext node_context) -> Type?
     def infer_receiver_for_class_variables(node_context)
       nesting_parts = node_context.nesting.dup
 
@@ -170,16 +170,16 @@ module RubyLsp
     class Type
       extend T::Sig
 
-      sig { returns(String) }
+      #: String
       attr_reader :name
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def initialize(name)
         @name = name
       end
 
       # Returns the attached version of this type by removing the `<Class:...>` part from its name
-      sig { returns(Type) }
+      #: -> Type
       def attached
         Type.new(T.must(@name.split("::")[..-2]).join("::"))
       end

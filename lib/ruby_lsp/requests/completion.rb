@@ -13,7 +13,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::CompletionOptions) }
+        #: -> Interface::CompletionOptions
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
@@ -25,15 +25,7 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          global_state: GlobalState,
-          params: T::Hash[Symbol, T.untyped],
-          sorbet_level: RubyDocument::SorbetLevel,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] params, RubyDocument::SorbetLevel sorbet_level, Prism::Dispatcher dispatcher) -> void
       def initialize(document, global_state, params, sorbet_level, dispatcher)
         super()
         @target = T.let(nil, T.nilable(Prism::Node))
@@ -102,7 +94,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T::Array[Interface::CompletionItem]) }
+      # @override
+      #: -> Array[Interface::CompletionItem]
       def perform
         return [] unless @target
 

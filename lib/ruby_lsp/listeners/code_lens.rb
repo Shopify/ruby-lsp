@@ -24,14 +24,7 @@ module RubyLsp
       IT_KEYWORD = T.let(:it, Symbol)
       DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-          global_state: GlobalState,
-          uri: URI::Generic,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens] response_builder, GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, global_state, uri, dispatcher)
         @response_builder = response_builder
         @global_state = global_state
@@ -59,7 +52,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         @visibility_stack.push([:public, :public])
         class_name = node.constant_path.slice
@@ -79,7 +72,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_leave(node)
         @visibility_stack.pop
         @group_stack.pop
@@ -91,7 +84,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         @def_depth += 1
         return if @def_depth > 1
@@ -114,12 +107,12 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_leave(node)
         @def_depth -= 1
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         if (path = namespace_constant_name(node))
           @group_stack.push(path)
@@ -128,12 +121,12 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_leave(node)
         @group_stack.pop
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         name = node.name
         arguments = node.arguments
@@ -163,7 +156,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_leave(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
@@ -175,7 +168,7 @@ module RubyLsp
 
       private
 
-      sig { params(node: Prism::Node, name: String, command: String, kind: Symbol, id: String).void }
+      #: (Prism::Node node, name: String, command: String, kind: Symbol, ?id: String) -> void
       def add_test_code_lens(node, name:, command:, kind:, id: name)
         # don't add code lenses if the test library is not supported or unknown
         return unless SUPPORTED_TEST_LIBRARIES.include?(@global_state.test_library) && @path
@@ -221,13 +214,7 @@ module RubyLsp
         )
       end
 
-      sig do
-        params(
-          group_stack: T::Array[String],
-          spec_name: T.nilable(String),
-          method_name: T.nilable(String),
-        ).returns(String)
-      end
+      #: (?group_stack: Array[String], ?spec_name: String?, ?method_name: String?) -> String
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
         path = T.must(@path)
         command = BASE_COMMAND
@@ -274,7 +261,7 @@ module RubyLsp
         command
       end
 
-      sig { params(node: Prism::CallNode, kind: Symbol).void }
+      #: (Prism::CallNode node, kind: Symbol) -> void
       def add_spec_code_lens(node, kind:)
         arguments = node.arguments
         return unless arguments
@@ -312,7 +299,7 @@ module RubyLsp
         end
       end
 
-      sig { params(group_stack: T::Array[String], method_name: T.nilable(String)).returns(String) }
+      #: (group_stack: Array[String], ?method_name: String?) -> String
       def generate_fully_qualified_id(group_stack:, method_name: nil)
         if method_name
           # For tests, this will be the test class and method name: `Foo::BarTest#test_baz`.

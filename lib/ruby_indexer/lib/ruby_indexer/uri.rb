@@ -13,14 +13,7 @@ module URI
     class << self
       extend T::Sig
 
-      sig do
-        params(
-          path: String,
-          fragment: T.nilable(String),
-          scheme: String,
-          load_path_entry: T.nilable(String),
-        ).returns(URI::Generic)
-      end
+      #: (path: String, ?fragment: String?, ?scheme: String, ?load_path_entry: String?) -> URI::Generic
       def from_path(path:, fragment: nil, scheme: "file", load_path_entry: nil)
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
@@ -45,7 +38,7 @@ module URI
     sig { returns(T.nilable(String)) }
     attr_accessor :require_path
 
-    sig { params(load_path_entry: String).void }
+    #: (String load_path_entry) -> void
     def add_require_path_from_load_entry(load_path_entry)
       path = to_standardized_path
       return unless path
@@ -53,7 +46,7 @@ module URI
       self.require_path = path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb")
     end
 
-    sig { returns(T.nilable(String)) }
+    #: -> String?
     def to_standardized_path
       parsed_path = path
       return unless parsed_path

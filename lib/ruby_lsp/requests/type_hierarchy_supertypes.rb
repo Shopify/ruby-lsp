@@ -11,7 +11,7 @@ module RubyLsp
 
       include Support::Common
 
-      sig { params(index: RubyIndexer::Index, item: T::Hash[Symbol, T.untyped]).void }
+      #: (RubyIndexer::Index index, Hash[Symbol, untyped] item) -> void
       def initialize(index, item)
         super()
 
@@ -19,7 +19,8 @@ module RubyLsp
         @item = item
       end
 
-      sig { override.returns(T.nilable(T::Array[Interface::TypeHierarchyItem])) }
+      # @override
+      #: -> Array[Interface::TypeHierarchyItem]?
       def perform
         name = @item[:name]
         entries = @index[name]
@@ -60,7 +61,7 @@ module RubyLsp
 
       private
 
-      sig { params(entry: RubyIndexer::Entry).returns(Interface::TypeHierarchyItem) }
+      #: (RubyIndexer::Entry entry) -> Interface::TypeHierarchyItem
       def hierarchy_item(entry)
         Interface::TypeHierarchyItem.new(
           name: entry.name,

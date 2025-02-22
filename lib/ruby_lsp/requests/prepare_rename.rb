@@ -10,19 +10,15 @@ module RubyLsp
       extend T::Sig
       include Support::Common
 
-      sig do
-        params(
-          document: RubyDocument,
-          position: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: (RubyDocument document, Hash[Symbol, untyped] position) -> void
       def initialize(document, position)
         super()
         @document = document
         @position = T.let(position, T::Hash[Symbol, Integer])
       end
 
-      sig { override.returns(T.nilable(Interface::Range)) }
+      # @override
+      #: -> Interface::Range?
       def perform
         char_position, _ = @document.find_index_by_position(@position)
 

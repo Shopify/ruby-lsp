@@ -14,7 +14,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::SignatureHelpOptions) }
+        #: -> Interface::SignatureHelpOptions
         def provider
           # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :
           Interface::SignatureHelpOptions.new(
@@ -23,16 +23,7 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          global_state: GlobalState,
-          position: T::Hash[Symbol, T.untyped],
-          context: T.nilable(T::Hash[Symbol, T.untyped]),
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Hash[Symbol, untyped]? context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         super()
 
@@ -54,7 +45,8 @@ module RubyLsp
         Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, sorbet_level)
       end
 
-      sig { override.returns(T.nilable(Interface::SignatureHelp)) }
+      # @override
+      #: -> Interface::SignatureHelp?
       def perform
         return unless @target
 
@@ -70,13 +62,7 @@ module RubyLsp
       # foo(another_method_call)
       #
       # In that case, we want to provide signature help for `foo` and not `another_method_call`.
-      sig do
-        params(
-          target: T.nilable(Prism::Node),
-          parent: T.nilable(Prism::Node),
-          position: T::Hash[Symbol, T.untyped],
-        ).returns(T.nilable(Prism::Node))
-      end
+      #: (Prism::Node? target, Prism::Node? parent, Hash[Symbol, untyped] position) -> Prism::Node?
       def adjust_for_nested_target(target, parent, position)
         # If the parent node is not a method call, then make no adjustments
         return target unless parent.is_a?(Prism::CallNode)
@@ -92,7 +78,7 @@ module RubyLsp
         arguments.nil? || !node_covers?(arguments, position) ? parent : target
       end
 
-      sig { params(node: Prism::Node, position: T::Hash[Symbol, T.untyped]).returns(T::Boolean) }
+      #: (Prism::Node node, Hash[Symbol, untyped] position) -> bool
       def node_covers?(node, position)
         location = node.location
         start_line = location.start_line - 1
