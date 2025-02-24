@@ -53,6 +53,7 @@ export interface ServerTestItem {
     end: { line: number; column: number };
   };
   children: ServerTestItem[];
+  tags: string[];
 }
 
 interface ServerErrorTelemetryEvent {
@@ -492,6 +493,14 @@ export default class Client extends LanguageClient implements ClientInterface {
   async discoverTests(uri: vscode.Uri): Promise<ServerTestItem[]> {
     return this.sendRequest("rubyLsp/discoverTests", {
       textDocument: { uri: uri.toString() },
+    });
+  }
+
+  async resolveTestCommand(
+    items: vscode.TestItem[],
+  ): Promise<{ command: string }> {
+    return this.sendRequest("rubyLsp/resolveTestCommand", {
+      items,
     });
   }
 
