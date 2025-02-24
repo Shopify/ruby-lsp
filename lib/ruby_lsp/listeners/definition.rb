@@ -9,20 +9,7 @@ module RubyLsp
 
       MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER = 10
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[T.any(
-            Interface::Location,
-            Interface::LocationLink,
-          )],
-          global_state: GlobalState,
-          language_id: Document::LanguageId,
-          uri: URI::Generic,
-          node_context: NodeContext,
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)] response_builder, GlobalState global_state, Document::LanguageId language_id, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
@@ -64,7 +51,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         # Sorbet can handle go to definition for methods invoked on self on typed true or higher
         return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
@@ -83,7 +70,7 @@ module RubyLsp
         handle_method_definition(message, inferrer_receiver_type)
       end
 
-      sig { params(node: Prism::StringNode).void }
+      #: (Prism::StringNode node) -> void
       def on_string_node_enter(node)
         enclosing_call = @node_context.call_node
         return unless enclosing_call
@@ -94,7 +81,7 @@ module RubyLsp
         handle_require_definition(node, name)
       end
 
-      sig { params(node: Prism::SymbolNode).void }
+      #: (Prism::SymbolNode node) -> void
       def on_symbol_node_enter(node)
         enclosing_call = @node_context.call_node
         return unless enclosing_call
@@ -105,7 +92,7 @@ module RubyLsp
         handle_autoload_definition(enclosing_call)
       end
 
-      sig { params(node: Prism::BlockArgumentNode).void }
+      #: (Prism::BlockArgumentNode node) -> void
       def on_block_argument_node_enter(node)
         expression = node.expression
         return unless expression.is_a?(Prism::SymbolNode)
@@ -116,7 +103,7 @@ module RubyLsp
         handle_method_definition(value, nil)
       end
 
-      sig { params(node: Prism::ConstantPathNode).void }
+      #: (Prism::ConstantPathNode node) -> void
       def on_constant_path_node_enter(node)
         name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
@@ -124,7 +111,7 @@ module RubyLsp
         find_in_index(name)
       end
 
-      sig { params(node: Prism::ConstantReadNode).void }
+      #: (Prism::ConstantReadNode node) -> void
       def on_constant_read_node_enter(node)
         name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
@@ -132,109 +119,109 @@ module RubyLsp
         find_in_index(name)
       end
 
-      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      #: (Prism::GlobalVariableAndWriteNode node) -> void
       def on_global_variable_and_write_node_enter(node)
         handle_global_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      #: (Prism::GlobalVariableOperatorWriteNode node) -> void
       def on_global_variable_operator_write_node_enter(node)
         handle_global_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      #: (Prism::GlobalVariableOrWriteNode node) -> void
       def on_global_variable_or_write_node_enter(node)
         handle_global_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableReadNode).void }
+      #: (Prism::GlobalVariableReadNode node) -> void
       def on_global_variable_read_node_enter(node)
         handle_global_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      #: (Prism::GlobalVariableTargetNode node) -> void
       def on_global_variable_target_node_enter(node)
         handle_global_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      #: (Prism::GlobalVariableWriteNode node) -> void
       def on_global_variable_write_node_enter(node)
         handle_global_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableReadNode).void }
+      #: (Prism::InstanceVariableReadNode node) -> void
       def on_instance_variable_read_node_enter(node)
         handle_instance_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      #: (Prism::InstanceVariableWriteNode node) -> void
       def on_instance_variable_write_node_enter(node)
         handle_instance_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      #: (Prism::InstanceVariableAndWriteNode node) -> void
       def on_instance_variable_and_write_node_enter(node)
         handle_instance_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      #: (Prism::InstanceVariableOperatorWriteNode node) -> void
       def on_instance_variable_operator_write_node_enter(node)
         handle_instance_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      #: (Prism::InstanceVariableOrWriteNode node) -> void
       def on_instance_variable_or_write_node_enter(node)
         handle_instance_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      #: (Prism::InstanceVariableTargetNode node) -> void
       def on_instance_variable_target_node_enter(node)
         handle_instance_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::SuperNode).void }
+      #: (Prism::SuperNode node) -> void
       def on_super_node_enter(node)
         handle_super_node_definition
       end
 
-      sig { params(node: Prism::ForwardingSuperNode).void }
+      #: (Prism::ForwardingSuperNode node) -> void
       def on_forwarding_super_node_enter(node)
         handle_super_node_definition
       end
 
-      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      #: (Prism::ClassVariableAndWriteNode node) -> void
       def on_class_variable_and_write_node_enter(node)
         handle_class_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      #: (Prism::ClassVariableOperatorWriteNode node) -> void
       def on_class_variable_operator_write_node_enter(node)
         handle_class_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      #: (Prism::ClassVariableOrWriteNode node) -> void
       def on_class_variable_or_write_node_enter(node)
         handle_class_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableTargetNode).void }
+      #: (Prism::ClassVariableTargetNode node) -> void
       def on_class_variable_target_node_enter(node)
         handle_class_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableReadNode).void }
+      #: (Prism::ClassVariableReadNode node) -> void
       def on_class_variable_read_node_enter(node)
         handle_class_variable_definition(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableWriteNode).void }
+      #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         handle_class_variable_definition(node.name.to_s)
       end
 
       private
 
-      sig { void }
+      #: -> void
       def handle_super_node_definition
         # Sorbet can handle super hover on typed true or higher
         return if sorbet_level_true_or_higher?(@sorbet_level)
@@ -249,7 +236,7 @@ module RubyLsp
         )
       end
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def handle_global_variable_definition(name)
         entries = @index[name]
 
@@ -268,7 +255,7 @@ module RubyLsp
         end
       end
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def handle_class_variable_definition(name)
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -286,7 +273,7 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def handle_instance_variable_definition(name)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
@@ -313,7 +300,7 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(message: String, receiver_type: T.nilable(TypeInferrer::Type), inherited_only: T::Boolean).void }
+      #: (String message, TypeInferrer::Type? receiver_type, ?inherited_only: bool) -> void
       def handle_method_definition(message, receiver_type, inherited_only: false)
         methods = if receiver_type
           @index.resolve_method(message, receiver_type.name, inherited_only: inherited_only)
@@ -341,7 +328,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::StringNode, message: Symbol).void }
+      #: (Prism::StringNode node, Symbol message) -> void
       def handle_require_definition(node, message)
         case message
         when :require
@@ -378,7 +365,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def handle_autoload_definition(node)
         argument = node.arguments&.arguments&.first
         return unless argument.is_a?(Prism::SymbolNode)
@@ -389,7 +376,7 @@ module RubyLsp
         find_in_index(constant_name)
       end
 
-      sig { params(value: String).void }
+      #: (String value) -> void
       def find_in_index(value)
         entries = @index.resolve(value, @node_context.nesting)
         return unless entries

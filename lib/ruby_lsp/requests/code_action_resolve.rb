@@ -23,7 +23,7 @@ module RubyLsp
         end
       end
 
-      sig { params(document: RubyDocument, global_state: GlobalState, code_action: T::Hash[Symbol, T.untyped]).void }
+      #: (RubyDocument document, GlobalState global_state, Hash[Symbol, untyped] code_action) -> void
       def initialize(document, global_state, code_action)
         super()
         @document = document
@@ -31,7 +31,8 @@ module RubyLsp
         @code_action = code_action
       end
 
-      sig { override.returns(T.any(Interface::CodeAction, Error)) }
+      # @override
+      #: -> (Interface::CodeAction | Error)
       def perform
         return Error::EmptySelection if @document.source.empty?
 
@@ -53,7 +54,7 @@ module RubyLsp
 
       private
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction | Error)
       def switch_block_style
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
@@ -91,7 +92,7 @@ module RubyLsp
         )
       end
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction | Error)
       def refactor_variable
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
@@ -189,7 +190,7 @@ module RubyLsp
         )
       end
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction | Error)
       def refactor_method
         source_range = @code_action.dig(:data, :range)
         return Error::EmptySelection if source_range[:start] == source_range[:end]
@@ -261,7 +262,7 @@ module RubyLsp
         )
       end
 
-      sig { params(range: T::Hash[Symbol, T.untyped], new_text: String).returns(Interface::TextEdit) }
+      #: (Hash[Symbol, untyped] range, String new_text) -> Interface::TextEdit
       def create_text_edit(range, new_text)
         Interface::TextEdit.new(
           range: Interface::Range.new(
@@ -272,7 +273,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
+      #: (Prism::BlockNode node, String? indentation) -> String
       def recursively_switch_nested_block_styles(node, indentation)
         parameters = node.parameters
         body = node.body
@@ -301,7 +302,7 @@ module RubyLsp
         source
       end
 
-      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(String) }
+      #: (Prism::Node body, String? indentation) -> String
       def switch_block_body(body, indentation)
         # Check if there are any nested blocks inside of the current block
         body_loc = body.location
@@ -330,7 +331,7 @@ module RubyLsp
         indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
       end
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction | Error)
       def create_attribute_accessor
         source_range = @code_action.dig(:data, :range)
 

@@ -12,15 +12,7 @@ module RubyLsp
       extend T::Sig
       extend T::Generic
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          global_state: GlobalState,
-          position: T::Hash[Symbol, T.untyped],
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
         @response_builder = T.let(
@@ -103,7 +95,8 @@ module RubyLsp
         @target = T.let(target, T.nilable(Prism::Node))
       end
 
-      sig { override.returns(T::Array[T.any(Interface::Location, Interface::LocationLink)]) }
+      # @override
+      #: -> Array[(Interface::Location | Interface::LocationLink)]
       def perform
         @dispatcher.dispatch_once(@target) if @target
         @response_builder.response
@@ -111,7 +104,7 @@ module RubyLsp
 
       private
 
-      sig { params(position: T::Hash[Symbol, T.untyped], target: T.nilable(Prism::Node)).returns(T::Boolean) }
+      #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool
       def position_outside_target?(position, target)
         case target
         when Prism::GlobalVariableAndWriteNode,

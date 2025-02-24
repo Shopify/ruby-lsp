@@ -14,19 +14,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::InlayHintOptions) }
+        #: -> Interface::InlayHintOptions
         def provider
           Interface::InlayHintOptions.new(resolve_provider: false)
         end
       end
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          hints_configuration: RequestConfig,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, RequestConfig hints_configuration, Prism::Dispatcher dispatcher) -> void
       def initialize(document, hints_configuration, dispatcher)
         super()
 
@@ -37,7 +31,8 @@ module RubyLsp
         Listeners::InlayHints.new(@response_builder, hints_configuration, dispatcher)
       end
 
-      sig { override.returns(T::Array[Interface::InlayHint]) }
+      # @override
+      #: -> Array[Interface::InlayHint]
       def perform
         @response_builder.response
       end

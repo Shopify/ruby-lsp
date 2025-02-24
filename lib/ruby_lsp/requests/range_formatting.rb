@@ -8,7 +8,7 @@ module RubyLsp
     class RangeFormatting < Request
       extend T::Sig
 
-      sig { params(global_state: GlobalState, document: RubyDocument, params: T::Hash[Symbol, T.untyped]).void }
+      #: (GlobalState global_state, RubyDocument document, Hash[Symbol, untyped] params) -> void
       def initialize(global_state, document, params)
         super()
         @document = document
@@ -17,7 +17,8 @@ module RubyLsp
         @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
       end
 
-      sig { override.returns(T.nilable(T::Array[Interface::TextEdit])) }
+      # @override
+      #: -> Array[Interface::TextEdit]?
       def perform
         return unless @active_formatter
         return if @document.syntax_error?

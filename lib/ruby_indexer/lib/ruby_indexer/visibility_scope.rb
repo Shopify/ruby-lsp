@@ -10,24 +10,24 @@ module RubyIndexer
     class << self
       extend T::Sig
 
-      sig { returns(T.attached_class) }
+      #: -> instance
       def module_function_scope
         new(module_func: true, visibility: Entry::Visibility::PRIVATE)
       end
 
-      sig { returns(T.attached_class) }
+      #: -> instance
       def public_scope
         new
       end
     end
 
-    sig { returns(Entry::Visibility) }
+    #: Entry::Visibility
     attr_reader :visibility
 
-    sig { returns(T::Boolean) }
+    #: bool
     attr_reader :module_func
 
-    sig { params(visibility: Entry::Visibility, module_func: T::Boolean).void }
+    #: (?visibility: Entry::Visibility, ?module_func: bool) -> void
     def initialize(visibility: Entry::Visibility::PUBLIC, module_func: false)
       @visibility = visibility
       @module_func = module_func

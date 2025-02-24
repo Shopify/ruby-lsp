@@ -19,7 +19,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(T::Hash[String, T::Hash[String, T::Hash[String, String]]]) }
+        #: -> Hash[String, Hash[String, Hash[String, String]]]
         def gem_paths
           @gem_paths ||= T.let(
             begin
@@ -57,14 +57,7 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink],
-          uri: URI::Generic,
-          comments: T::Array[Prism::Comment],
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink] response_builder, URI::Generic uri, Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, uri, comments, dispatcher)
         # Match the version based on the version in the RBI file name. Notice that the `@` symbol is sanitized to `%40`
         # in the URI
@@ -89,34 +82,34 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: Prism::ConstantWriteNode).void }
+      #: (Prism::ConstantWriteNode node) -> void
       def on_constant_write_node_enter(node)
         extract_document_link(node)
       end
 
-      sig { params(node: Prism::ConstantPathWriteNode).void }
+      #: (Prism::ConstantPathWriteNode node) -> void
       def on_constant_path_write_node_enter(node)
         extract_document_link(node)
       end
 
       private
 
-      sig { params(node: Prism::Node).void }
+      #: (Prism::Node node) -> void
       def extract_document_link(node)
         comment = @lines_to_comments[node.location.start_line - 1]
         return unless comment
@@ -157,7 +150,7 @@ module RubyLsp
       # 1. The version in the URI
       # 2. The version in the RBI file name
       # 3. The version from the gemspec
-      sig { params(uri: URI::Source).returns(T.nilable(String)) }
+      #: (URI::Source uri) -> String?
       def resolve_version(uri)
         version = uri.gem_version
         return version unless version.nil? || version.empty?

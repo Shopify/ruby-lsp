@@ -25,28 +25,28 @@ module RubyLsp
 
     abstract!
 
-    sig { returns(ParseResultType) }
+    #: ParseResultType
     attr_reader :parse_result
 
-    sig { returns(String) }
+    #: String
     attr_reader :source
 
-    sig { returns(Integer) }
+    #: Integer
     attr_reader :version
 
-    sig { returns(URI::Generic) }
+    #: URI::Generic
     attr_reader :uri
 
-    sig { returns(Encoding) }
+    #: Encoding
     attr_reader :encoding
 
-    sig { returns(T.nilable(Edit)) }
+    #: Edit?
     attr_reader :last_edit
 
-    sig { returns(T.any(Interface::SemanticTokens, Object)) }
+    #: (Interface::SemanticTokens | Object)
     attr_accessor :semantic_tokens
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
       @source = source
       @version = version
@@ -61,7 +61,7 @@ module RubyLsp
       parse!
     end
 
-    sig { params(other: Document[T.untyped]).returns(T::Boolean) }
+    #: (Document[untyped] other) -> bool
     def ==(other)
       self.class == other.class && uri == other.uri && @source == other.source
     end
@@ -69,13 +69,7 @@ module RubyLsp
     sig { abstract.returns(LanguageId) }
     def language_id; end
 
-    sig do
-      type_parameters(:T)
-        .params(
-          request_name: String,
-          block: T.proc.params(document: Document[ParseResultType]).returns(T.type_parameter(:T)),
-        ).returns(T.type_parameter(:T))
-    end
+    #: [T] (String request_name) { (Document[ParseResultType] document) -> T } -> T
     def cache_fetch(request_name, &block)
       cached = @cache[request_name]
       return cached if cached != EMPTY_CACHE
@@ -85,17 +79,17 @@ module RubyLsp
       result
     end
 
-    sig { type_parameters(:T).params(request_name: String, value: T.type_parameter(:T)).returns(T.type_parameter(:T)) }
+    #: [T] (String request_name, T value) -> T
     def cache_set(request_name, value)
       @cache[request_name] = value
     end
 
-    sig { params(request_name: String).returns(T.untyped) }
+    #: (String request_name) -> untyped
     def cache_get(request_name)
       @cache[request_name]
     end
 
-    sig { params(edits: T::Array[T::Hash[Symbol, T.untyped]], version: Integer).void }
+    #: (Array[Hash[Symbol, untyped]] edits, version: Integer) -> void
     def push_edits(edits, version:)
       edits.each do |edit|
         range = edit[:range]
@@ -132,17 +126,12 @@ module RubyLsp
     sig { abstract.returns(T::Boolean) }
     def syntax_error?; end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def past_expensive_limit?
       @source.length > MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES
     end
 
-    sig do
-      params(
-        start_pos: T::Hash[Symbol, T.untyped],
-        end_pos: T.nilable(T::Hash[Symbol, T.untyped]),
-      ).returns([Integer, T.nilable(Integer)])
-    end
+    #: (Hash[Symbol, untyped] start_pos, ?Hash[Symbol, untyped]? end_pos) -> [Integer, Integer?]
     def find_index_by_position(start_pos, end_pos = nil)
       @global_state.synchronize do
         scanner = create_scanner
@@ -154,7 +143,7 @@ module RubyLsp
 
     private
 
-    sig { returns(Scanner) }
+    #: -> Scanner
     def create_scanner
       Scanner.new(@source, @encoding)
     end
@@ -165,10 +154,10 @@ module RubyLsp
 
       abstract!
 
-      sig { returns(T::Hash[Symbol, T.untyped]) }
+      #: Hash[Symbol, untyped]
       attr_reader :range
 
-      sig { params(range: T::Hash[Symbol, T.untyped]).void }
+      #: (Hash[Symbol, untyped] range) -> void
       def initialize(range)
         @range = range
       end
@@ -185,7 +174,7 @@ module RubyLsp
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = T.let(0xFFFF, Integer)
 
-      sig { params(source: String, encoding: Encoding).void }
+      #: (String source, Encoding encoding) -> void
       def initialize(source, encoding)
         @current_line = T.let(0, Integer)
         @pos = T.let(0, Integer)
@@ -194,7 +183,7 @@ module RubyLsp
       end
 
       # Finds the character index inside the source string for a given line and column
-      sig { params(position: T::Hash[Symbol, T.untyped]).returns(Integer) }
+      #: (Hash[Symbol, untyped] position) -> Integer
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]
@@ -224,7 +213,7 @@ module RubyLsp
 
       # Subtract 1 for each character after 0xFFFF in the current line from the column position, so that we hit the
       # right character in the UTF-8 representation
-      sig { params(current_position: Integer, requested_position: Integer).returns(Integer) }
+      #: (Integer current_position, Integer requested_position) -> Integer
       def utf_16_character_position_correction(current_position, requested_position)
         utf16_unicode_correction = 0
 

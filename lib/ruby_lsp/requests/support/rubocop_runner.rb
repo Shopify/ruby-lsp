@@ -40,7 +40,7 @@ module RubyLsp
           For more details, run RuboCop on the command line.
         EOS
 
-        sig { params(rubocop_error: T.any(::RuboCop::ErrorWithAnalyzedFileLocation, StandardError)).void }
+        #: ((::RuboCop::ErrorWithAnalyzedFileLocation | StandardError) rubocop_error) -> void
         def initialize(rubocop_error)
           message = case rubocop_error
           when ::RuboCop::ErrorWithAnalyzedFileLocation
@@ -68,10 +68,10 @@ module RubyLsp
           T::Array[String],
         )
 
-        sig { returns(T::Array[::RuboCop::Cop::Offense]) }
+        #: Array[::RuboCop::Cop::Offense]
         attr_reader :offenses
 
-        sig { returns(::RuboCop::Config) }
+        #: ::RuboCop::Config
         attr_reader :config_for_working_directory
 
         begin
@@ -82,7 +82,7 @@ module RubyLsp
         end
         DEFAULT_ARGS.freeze
 
-        sig { params(args: String).void }
+        #: (*String args) -> void
         def initialize(*args)
           @options = T.let({}, T::Hash[Symbol, T.untyped])
           @offenses = T.let([], T::Array[::RuboCop::Cop::Offense])
@@ -99,7 +99,7 @@ module RubyLsp
           super(rubocop_options, config_store)
         end
 
-        sig { params(path: String, contents: String).void }
+        #: (String path, String contents) -> void
         def run(path, contents)
           # Clear Runner state between runs since we get a single instance of this class
           # on every use site.
@@ -121,7 +121,7 @@ module RubyLsp
           raise InternalRuboCopError, error
         end
 
-        sig { returns(String) }
+        #: -> String
         def formatted_source
           @options[:stdin]
         end
@@ -129,14 +129,14 @@ module RubyLsp
         class << self
           extend T::Sig
 
-          sig { params(cop_name: String).returns(T.nilable(T.class_of(::RuboCop::Cop::Base))) }
+          #: (String cop_name) -> singleton(::RuboCop::Cop::Base)?
           def find_cop_by_name(cop_name)
             cop_registry[cop_name]&.first
           end
 
           private
 
-          sig { returns(T::Hash[String, [T.class_of(::RuboCop::Cop::Base)]]) }
+          #: -> Hash[String, [singleton(::RuboCop::Cop::Base)]]
           def cop_registry
             @cop_registry ||= T.let(
               ::RuboCop::Cop::Registry.global.to_h,
@@ -147,7 +147,7 @@ module RubyLsp
 
         private
 
-        sig { params(_file: String, offenses: T::Array[::RuboCop::Cop::Offense]).void }
+        #: (String _file, Array[::RuboCop::Cop::Offense] offenses) -> void
         def file_finished(_file, offenses)
           @offenses = offenses
         end

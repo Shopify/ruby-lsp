@@ -7,34 +7,19 @@ module RubyLsp
   class NodeContext
     extend T::Sig
 
-    sig { returns(T.nilable(Prism::Node)) }
+    #: Prism::Node?
     attr_reader :node, :parent
 
-    sig { returns(T::Array[String]) }
+    #: Array[String]
     attr_reader :nesting
 
-    sig { returns(T.nilable(Prism::CallNode)) }
+    #: Prism::CallNode?
     attr_reader :call_node
 
-    sig { returns(T.nilable(String)) }
+    #: String?
     attr_reader :surrounding_method
 
-    sig do
-      params(
-        node: T.nilable(Prism::Node),
-        parent: T.nilable(Prism::Node),
-        nesting_nodes: T::Array[T.any(
-          Prism::ClassNode,
-          Prism::ModuleNode,
-          Prism::SingletonClassNode,
-          Prism::DefNode,
-          Prism::BlockNode,
-          Prism::LambdaNode,
-          Prism::ProgramNode,
-        )],
-        call_node: T.nilable(Prism::CallNode),
-      ).void
-    end
+    #: (Prism::Node? node, Prism::Node? parent, Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nesting_nodes, Prism::CallNode? call_node) -> void
     def initialize(node, parent, nesting_nodes, call_node)
       @node = node
       @parent = parent
@@ -46,12 +31,12 @@ module RubyLsp
       @surrounding_method = T.let(surrounding_method, T.nilable(String))
     end
 
-    sig { returns(String) }
+    #: -> String
     def fully_qualified_name
       @fully_qualified_name ||= T.let(@nesting.join("::"), T.nilable(String))
     end
 
-    sig { returns(T::Array[Symbol]) }
+    #: -> Array[Symbol]
     def locals_for_scope
       locals = []
 
@@ -69,17 +54,7 @@ module RubyLsp
 
     private
 
-    sig do
-      params(nodes: T::Array[T.any(
-        Prism::ClassNode,
-        Prism::ModuleNode,
-        Prism::SingletonClassNode,
-        Prism::DefNode,
-        Prism::BlockNode,
-        Prism::LambdaNode,
-        Prism::ProgramNode,
-      )]).returns([T::Array[String], T.nilable(String)])
-    end
+    #: (Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nodes) -> [Array[String], String?]
     def handle_nesting_nodes(nodes)
       nesting = []
       surrounding_method = T.let(nil, T.nilable(String))

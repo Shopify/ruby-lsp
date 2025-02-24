@@ -37,30 +37,24 @@ module RubyLsp
     class << self
       extend T::Sig
 
-      sig { returns(T::Array[Addon]) }
+      #: Array[Addon]
       attr_accessor :addons
 
-      sig { returns(T::Array[Addon]) }
+      #: Array[Addon]
       attr_accessor :file_watcher_addons
 
-      sig { returns(T::Array[T.class_of(Addon)]) }
+      #: Array[singleton(Addon)]
       attr_reader :addon_classes
 
       # Automatically track and instantiate add-on classes
-      sig { params(child_class: T.class_of(Addon)).void }
+      #: (singleton(Addon) child_class) -> void
       def inherited(child_class)
         addon_classes << child_class
         super
       end
 
       # Discovers and loads all add-ons. Returns a list of errors when trying to require add-ons
-      sig do
-        params(
-          global_state: GlobalState,
-          outgoing_queue: Thread::Queue,
-          include_project_addons: T::Boolean,
-        ).returns(T::Array[StandardError])
-      end
+      #: (GlobalState global_state, Thread::Queue outgoing_queue, ?include_project_addons: bool) -> Array[StandardError]
       def load_addons(global_state, outgoing_queue, include_project_addons: true)
         # Require all add-ons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb` or in the workspace under
@@ -98,7 +92,7 @@ module RubyLsp
       end
 
       # Unloads all add-ons. Only intended to be invoked once when shutting down the Ruby LSP server
-      sig { void }
+      #: -> void
       def unload_addons
         @addons.each(&:deactivate)
         @addons.clear
@@ -112,7 +106,7 @@ module RubyLsp
       # Important: if the add-on is not found, AddonNotFoundError will be raised. If the add-on is found, but its
       # current version does not satisfy the given version constraint, then IncompatibleApiError will be raised. It is
       # the responsibility of the add-ons using this API to handle these errors appropriately.
-      sig { params(addon_name: String, version_constraints: String).returns(Addon) }
+      #: (String addon_name, *String version_constraints) -> Addon
       def get(addon_name, *version_constraints)
         if version_constraints.empty?
           raise IncompatibleApiError, "Must specify version constraints when accessing other add-ons"
@@ -144,7 +138,7 @@ module RubyLsp
       #   end
       # end
       # ```
-      sig { params(version_constraints: String).void }
+      #: (*String version_constraints) -> void
       def depend_on_ruby_lsp!(*version_constraints)
         version_object = Gem::Version.new(RubyLsp::VERSION)
 
@@ -155,23 +149,23 @@ module RubyLsp
       end
     end
 
-    sig { void }
+    #: -> void
     def initialize
       @errors = T.let([], T::Array[StandardError])
     end
 
-    sig { params(error: StandardError).returns(T.self_type) }
+    #: (StandardError error) -> self
     def add_error(error)
       @errors << error
       self
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def error?
       @errors.any?
     end
 
-    sig { returns(String) }
+    #: -> String
     def formatted_errors
       <<~ERRORS
         #{name}:
@@ -179,7 +173,7 @@ module RubyLsp
       ERRORS
     end
 
-    sig { returns(String) }
+    #: -> String
     def errors_details
       @errors.map(&:full_message).join("\n\n")
     end
@@ -207,69 +201,37 @@ module RubyLsp
     # original request so that the response is delegated to the correct add-on and must override this method to handle
     # the response
     # https://microsoft.github.io/language-server-protocol/specification#window_showMessageRequest
-    sig { overridable.params(title: String).void }
+    # @overridable
+    #: (String title) -> void
     def handle_window_show_message_response(title); end
 
     # Creates a new CodeLens listener. This method is invoked on every CodeLens request
-    sig do
-      overridable.params(
-        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-        uri: URI::Generic,
-        dispatcher: Prism::Dispatcher,
-      ).void
-    end
+    # @overridable
+    #: (ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens] response_builder, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
     def create_code_lens_listener(response_builder, uri, dispatcher); end
 
     # Creates a new Hover listener. This method is invoked on every Hover request
-    sig do
-      overridable.params(
-        response_builder: ResponseBuilders::Hover,
-        node_context: NodeContext,
-        dispatcher: Prism::Dispatcher,
-      ).void
-    end
+    # @overridable
+    #: (ResponseBuilders::Hover response_builder, NodeContext node_context, Prism::Dispatcher dispatcher) -> void
     def create_hover_listener(response_builder, node_context, dispatcher); end
 
     # Creates a new DocumentSymbol listener. This method is invoked on every DocumentSymbol request
-    sig do
-      overridable.params(
-        response_builder: ResponseBuilders::DocumentSymbol,
-        dispatcher: Prism::Dispatcher,
-      ).void
-    end
+    # @overridable
+    #: (ResponseBuilders::DocumentSymbol response_builder, Prism::Dispatcher dispatcher) -> void
     def create_document_symbol_listener(response_builder, dispatcher); end
 
-    sig do
-      overridable.params(
-        response_builder: ResponseBuilders::SemanticHighlighting,
-        dispatcher: Prism::Dispatcher,
-      ).void
-    end
+    # @overridable
+    #: (ResponseBuilders::SemanticHighlighting response_builder, Prism::Dispatcher dispatcher) -> void
     def create_semantic_highlighting_listener(response_builder, dispatcher); end
 
     # Creates a new Definition listener. This method is invoked on every Definition request
-    sig do
-      overridable.params(
-        response_builder: ResponseBuilders::CollectionResponseBuilder[T.any(
-          Interface::Location,
-          Interface::LocationLink,
-        )],
-        uri: URI::Generic,
-        node_context: NodeContext,
-        dispatcher: Prism::Dispatcher,
-      ).void
-    end
+    # @overridable
+    #: (ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)] response_builder, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher) -> void
     def create_definition_listener(response_builder, uri, node_context, dispatcher); end
 
     # Creates a new Completion listener. This method is invoked on every Completion request
-    sig do
-      overridable.params(
-        response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        node_context: NodeContext,
-        dispatcher: Prism::Dispatcher,
-        uri: URI::Generic,
-      ).void
-    end
+    # @overridable
+    #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, NodeContext node_context, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
     def create_completion_listener(response_builder, node_context, dispatcher, uri); end
   end
 end

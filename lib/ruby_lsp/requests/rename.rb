@@ -15,20 +15,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::RenameOptions) }
+        #: -> Interface::RenameOptions
         def provider
           Interface::RenameOptions.new(prepare_provider: true)
         end
       end
 
-      sig do
-        params(
-          global_state: GlobalState,
-          store: Store,
-          document: T.any(RubyDocument, ERBDocument),
-          params: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: (GlobalState global_state, Store store, (RubyDocument | ERBDocument) document, Hash[Symbol, untyped] params) -> void
       def initialize(global_state, store, document, params)
         super()
         @global_state = global_state
@@ -38,7 +31,8 @@ module RubyLsp
         @new_name = T.let(params[:newName], String)
       end
 
-      sig { override.returns(T.nilable(Interface::WorkspaceEdit)) }
+      # @override
+      #: -> Interface::WorkspaceEdit?
       def perform
         char_position, _ = @document.find_index_by_position(@position)
 
@@ -100,12 +94,7 @@ module RubyLsp
 
       private
 
-      sig do
-        params(
-          fully_qualified_name: String,
-          document_changes: T::Array[T.any(Interface::RenameFile, Interface::TextDocumentEdit)],
-        ).void
-      end
+      #: (String fully_qualified_name, Array[(Interface::RenameFile | Interface::TextDocumentEdit)] document_changes) -> void
       def collect_file_renames(fully_qualified_name, document_changes)
         # Check if the declarations of the symbol being renamed match the file name. In case they do, we automatically
         # rename the files for the user.
@@ -139,12 +128,7 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          target: RubyIndexer::ReferenceFinder::Target,
-          name: String,
-        ).returns(T::Hash[String, T::Array[Interface::TextEdit]])
-      end
+      #: (RubyIndexer::ReferenceFinder::Target target, String name) -> Hash[String, Array[Interface::TextEdit]]
       def collect_text_edits(target, name)
         changes = {}
 
@@ -169,14 +153,7 @@ module RubyLsp
         changes
       end
 
-      sig do
-        params(
-          target: RubyIndexer::ReferenceFinder::Target,
-          parse_result: Prism::ParseResult,
-          name: String,
-          uri: URI::Generic,
-        ).returns(T::Array[Interface::TextEdit])
-      end
+      #: (RubyIndexer::ReferenceFinder::Target target, Prism::ParseResult parse_result, String name, URI::Generic uri) -> Array[Interface::TextEdit]
       def collect_changes(target, parse_result, name, uri)
         dispatcher = Prism::Dispatcher.new
         finder = RubyIndexer::ReferenceFinder.new(target, @global_state.index, dispatcher, uri)
@@ -187,7 +164,7 @@ module RubyLsp
         end
       end
 
-      sig { params(name: String, reference: RubyIndexer::ReferenceFinder::Reference).returns(Interface::TextEdit) }
+      #: (String name, RubyIndexer::ReferenceFinder::Reference reference) -> Interface::TextEdit
       def adjust_reference_for_edit(name, reference)
         # The reference may include a namespace in front. We need to check if the rename new name includes namespaces
         # and then adjust both the text and the location to produce the correct edit
@@ -197,7 +174,7 @@ module RubyLsp
         Interface::TextEdit.new(range: range_from_location(location), new_text: new_text)
       end
 
-      sig { params(constant_name: String).returns(String) }
+      #: (String constant_name) -> String
       def file_from_constant_name(constant_name)
         constant_name
           .gsub(/([a-z])([A-Z])|([A-Z])([A-Z][a-z])/, '\1\3_\2\4')
