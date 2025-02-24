@@ -25,7 +25,7 @@ import {
   ShowMessageParams,
   MessageType,
 } from "vscode-languageclient/node";
-import { after, afterEach, before } from "mocha";
+import { after, afterEach, before, setup } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import Client from "../../client";
@@ -984,4 +984,74 @@ suite("Client", () => {
 
     assert.ok(response.length > 0);
   }).timeout(20000);
+
+  suite("goto relevant file", () => {
+    let testUri: vscode.Uri;
+    let implUri: vscode.Uri;
+
+    setup(() => {
+      testUri = vscode.Uri.joinPath(
+        workspaceUri,
+        "test",
+        "requests",
+        "goto_relevant_file_test.rb",
+      );
+      implUri = vscode.Uri.joinPath(
+        workspaceUri,
+        "lib",
+        "ruby_lsp",
+        "requests",
+        "goto_relevant_file.rb",
+      );
+    });
+
+    test("for test file", async () => {
+      const response: { locations: string[] } = await client.sendRequest(
+        "experimental/gotoRelevantFile",
+        {
+          textDocument: {
+            uri: testUri.toString(),
+          },
+        },
+      );
+
+      assert.ok(response.locations.length === 1);
+      assert.match(
+        response.locations[0],
+        /lib\/ruby_lsp\/requests\/goto_relevant_file\.rb$/,
+      );
+    }).timeout(20000);
+
+    test("for implementation file", async () => {
+      const response: { locations: string[] } = await client.sendRequest(
+        "experimental/gotoRelevantFile",
+        {
+          textDocument: {
+            uri: implUri.toString(),
+          },
+        },
+      );
+
+      assert.ok(response.locations.length === 1);
+      assert.match(
+        response.locations[0],
+        /test\/requests\/goto_relevant_file_test\.rb$/,
+      );
+    }).timeout(20000);
+
+    test("returns empty array for invalid file", async () => {
+      const uri = vscode.Uri.joinPath(workspaceUri, "nonexistent", "file.rb");
+
+      const response: { locations: string[] } = await client.sendRequest(
+        "experimental/gotoRelevantFile",
+        {
+          textDocument: {
+            uri: uri.toString(),
+          },
+        },
+      );
+
+      assert.deepStrictEqual(response, { locations: [] });
+    }).timeout(20000);
+  });
 });
