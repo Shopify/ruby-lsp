@@ -12,7 +12,7 @@ module RubyIndexer
     end
 
     def test_load_configuration_executes_configure_block
-      @config.apply_config({ "excluded_patterns" => ["**/fixtures/**/*.rb"] })
+      @config.apply_config({ "excluded_patterns" => ["**/fixtures/**/*"] })
       uris = @config.indexable_uris
 
       bundle_path = Bundler.bundle_path.join("gems")
@@ -39,7 +39,11 @@ module RubyIndexer
         next if lazy_spec.name == "ruby-lsp"
 
         spec = Gem::Specification.find_by_name(lazy_spec.name)
-        assert(uris.none? { |uri| uri.full_path.start_with?("#{spec.full_gem_path}/test/") })
+
+        test_uris = uris.select do |uri|
+          File.fnmatch?(File.join(spec.full_gem_path, "test/**/*"), uri.full_path, File::Constants::FNM_PATHNAME)
+        end
+        assert_empty(test_uris)
       rescue Gem::MissingSpecError
         # Transitive dependencies might be missing when running tests on Windows
       end
@@ -233,6 +237,32 @@ module RubyIndexer
             assert_empty(stderr)
           end
         end
+      end
+    end
+
+    def test_indexables_include_non_test_files_in_test_directories
+      # In order to linearize test parent classes and accurately detect the framework being used, then intermediate
+      # parent classes _must_ also be indexed. Otherwise, we have no way of linearizing the rest of the ancestors to
+      # determine what the test class ultimately inherits from.
+      #
+      # Therefore, we need to ensure that test files are excluded, but non test files inside test directories have to be
+      # indexed
+      FileUtils.touch("test/test_case.rb")
+
+      uris = @config.indexable_uris
+      project_paths = uris.filter_map do |uri|
+        path = uri.full_path
+        next if path.start_with?(Bundler.bundle_path.to_s) || path.start_with?(RbConfig::CONFIG["rubylibdir"])
+
+        Pathname.new(path).relative_path_from(Dir.pwd).to_s
+      end
+
+      begin
+        assert_includes(project_paths, "test/requests/support/expectations_test_runner.rb")
+        assert_includes(project_paths, "test/test_helper.rb")
+        assert_includes(project_paths, "test/test_case.rb")
+      ensure
+        FileUtils.rm("test/test_case.rb")
       end
     end
   end
