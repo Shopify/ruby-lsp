@@ -53,6 +53,34 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_activation_script_succeeds_on_invalid_unicode
+    ENV["LC_ALL"] = "C"
+    ENV["LANG"] = "C"
+    ENV["INVALID_UTF8"] = "\xE2\x80".b
+
+    _stdout, stderr, status = Open3.capture3(
+      "ruby",
+      "-EUTF-8:UTF-8",
+      File.join(__dir__, "..", "vscode", "activation.rb"),
+    )
+
+    assert_equal(0, status.exitstatus, stderr)
+
+    activation_string = T.must(/RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr))[1]
+    version, gem_path, yjit, *fields = T.must(activation_string).split("RUBY_LSP_FS")
+
+    assert_equal(RUBY_VERSION, version)
+    refute_nil(gem_path)
+    assert(yjit)
+
+    fields.each do |field|
+      key, value = field.split("RUBY_LSP_VS")
+      refute_equal(key, "INVALID_UTF8")
+      refute_equal(key.encoding, Encoding::BINARY) if key
+      refute_equal(value.encoding, Encoding::BINARY) if value
+    end
+  end
+
   def test_uses_same_bundler_version_as_main_app
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~RUBY)
