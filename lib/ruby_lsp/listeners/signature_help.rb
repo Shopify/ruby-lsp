@@ -7,15 +7,7 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::SignatureHelp,
-          global_state: GlobalState,
-          node_context: NodeContext,
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: (ResponseBuilders::SignatureHelp response_builder, GlobalState global_state, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, node_context, dispatcher, sorbet_level)
         @sorbet_level = sorbet_level
         @response_builder = response_builder
@@ -26,7 +18,7 @@ module RubyLsp
         dispatcher.register(self, :on_call_node_enter)
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         return if sorbet_level_true_or_higher?(@sorbet_level)
 
@@ -67,9 +59,7 @@ module RubyLsp
 
       private
 
-      sig do
-        params(node: Prism::CallNode, signatures: T::Array[RubyIndexer::Entry::Signature]).returns([Integer, Integer])
-      end
+      #: (Prism::CallNode node, Array[RubyIndexer::Entry::Signature] signatures) -> [Integer, Integer]
       def determine_active_signature_and_parameter(node, signatures)
         arguments_node = node.arguments
         arguments = arguments_node&.arguments || []
@@ -93,15 +83,7 @@ module RubyLsp
         [active_sig_index, active_parameter]
       end
 
-      sig do
-        params(
-          signatures: T::Array[RubyIndexer::Entry::Signature],
-          method_name: String,
-          methods: T::Array[RubyIndexer::Entry],
-          title: String,
-          extra_links: T.nilable(String),
-        ).returns(T::Array[Interface::SignatureInformation])
-      end
+      #: (Array[RubyIndexer::Entry::Signature] signatures, String method_name, Array[RubyIndexer::Entry] methods, String title, String? extra_links) -> Array[Interface::SignatureInformation]
       def generate_signatures(signatures, method_name, methods, title, extra_links)
         signatures.map do |signature|
           Interface::SignatureInformation.new(

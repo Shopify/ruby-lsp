@@ -5,37 +5,37 @@ module RubyLsp
   class GlobalState
     extend T::Sig
 
-    sig { returns(String) }
+    #: String
     attr_reader :test_library
 
-    sig { returns(String) }
+    #: String
     attr_accessor :formatter
 
-    sig { returns(T::Boolean) }
+    #: bool
     attr_reader :has_type_checker
 
-    sig { returns(RubyIndexer::Index) }
+    #: RubyIndexer::Index
     attr_reader :index
 
-    sig { returns(Encoding) }
+    #: Encoding
     attr_reader :encoding
 
-    sig { returns(T::Boolean) }
+    #: bool
     attr_reader :top_level_bundle
 
-    sig { returns(TypeInferrer) }
+    #: TypeInferrer
     attr_reader :type_inferrer
 
-    sig { returns(ClientCapabilities) }
+    #: ClientCapabilities
     attr_reader :client_capabilities
 
-    sig { returns(URI::Generic) }
+    #: URI::Generic
     attr_reader :workspace_uri
 
-    sig { returns(T.nilable(String)) }
+    #: String?
     attr_reader :telemetry_machine_id
 
-    sig { void }
+    #: -> void
     def initialize
       @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
       @encoding = T.let(Encoding::UTF_8, Encoding)
@@ -63,33 +63,33 @@ module RubyLsp
       @telemetry_machine_id = T.let(nil, T.nilable(String))
     end
 
-    sig { type_parameters(:T).params(block: T.proc.returns(T.type_parameter(:T))).returns(T.type_parameter(:T)) }
+    #: [T] { -> T } -> T
     def synchronize(&block)
       @mutex.synchronize(&block)
     end
 
-    sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
+    #: (String addon_name) -> Hash[Symbol, untyped]?
     def settings_for_addon(addon_name)
       @addon_settings[addon_name]
     end
 
-    sig { params(identifier: String, instance: Requests::Support::Formatter).void }
+    #: (String identifier, Requests::Support::Formatter instance) -> void
     def register_formatter(identifier, instance)
       @supported_formatters[identifier] = instance
     end
 
-    sig { returns(T.nilable(Requests::Support::Formatter)) }
+    #: -> Requests::Support::Formatter?
     def active_formatter
       @supported_formatters[@formatter]
     end
 
-    sig { returns(T::Array[Requests::Support::Formatter]) }
+    #: -> Array[Requests::Support::Formatter]
     def active_linters
       @linters.filter_map { |name| @supported_formatters[name] }
     end
 
     # Applies the options provided by the editor and returns an array of notifications to send back to the client
-    sig { params(options: T::Hash[Symbol, T.untyped]).returns(T::Array[Notification]) }
+    #: (Hash[Symbol, untyped] options) -> Array[Notification]
     def apply_options(options)
       notifications = []
       direct_dependencies = gather_direct_dependencies
@@ -183,17 +183,17 @@ module RubyLsp
       notifications
     end
 
-    sig { params(flag: Symbol).returns(T.nilable(T::Boolean)) }
+    #: (Symbol flag) -> bool?
     def enabled_feature?(flag)
       @enabled_feature_flags[:all] || @enabled_feature_flags[flag]
     end
 
-    sig { returns(String) }
+    #: -> String
     def workspace_path
       T.must(@workspace_uri.to_standardized_path)
     end
 
-    sig { returns(String) }
+    #: -> String
     def encoding_name
       case @encoding
       when Encoding::UTF_8
@@ -205,14 +205,14 @@ module RubyLsp
       end
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def supports_watching_files
       @client_capabilities.supports_watching_files
     end
 
     private
 
-    sig { params(direct_dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(String) }
+    #: (Array[String] direct_dependencies, Array[String] all_dependencies) -> String
     def detect_formatter(direct_dependencies, all_dependencies)
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
       return "rubocop_internal" if direct_dependencies.any?(/^rubocop/)
@@ -228,7 +228,7 @@ module RubyLsp
 
     # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
     # single linter. To have multiple linters running, the user must configure them manually
-    sig { params(dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(T::Array[String]) }
+    #: (Array[String] dependencies, Array[String] all_dependencies) -> Array[String]
     def detect_linters(dependencies, all_dependencies)
       linters = []
 
@@ -239,7 +239,7 @@ module RubyLsp
       linters
     end
 
-    sig { params(dependencies: T::Array[String]).returns(String) }
+    #: (Array[String] dependencies) -> String
     def detect_test_library(dependencies)
       if dependencies.any?(/^rspec/)
         "rspec"
@@ -259,7 +259,7 @@ module RubyLsp
       end
     end
 
-    sig { params(dependencies: T::Array[String]).returns(T::Boolean) }
+    #: (Array[String] dependencies) -> bool
     def detect_typechecker(dependencies)
       return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
 
@@ -268,17 +268,17 @@ module RubyLsp
       false
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def bin_rails_present
       File.exist?(File.join(workspace_path, "bin/rails"))
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def dot_rubocop_yml_present
       File.exist?(File.join(workspace_path, ".rubocop.yml"))
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def gather_direct_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
 
@@ -288,14 +288,14 @@ module RubyLsp
       []
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def gemspec_dependencies
       (Bundler.locked_gems&.sources || [])
         .grep(Bundler::Source::Gemspec)
         .flat_map { _1.gemspec&.dependencies&.map(&:name) }
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def gather_direct_and_indirect_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
       Bundler.locked_gems&.specs&.map(&:name) || []

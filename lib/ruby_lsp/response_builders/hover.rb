@@ -9,7 +9,7 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: String } }
 
-      sig { void }
+      #: -> void
       def initialize
         super
 
@@ -23,7 +23,7 @@ module RubyLsp
         )
       end
 
-      sig { params(content: String, category: Symbol).void }
+      #: (String content, category: Symbol) -> void
       def push(content, category:)
         hover_content = @response[category]
         if hover_content
@@ -31,12 +31,13 @@ module RubyLsp
         end
       end
 
-      sig { returns(T::Boolean) }
+      #: -> bool
       def empty?
         @response.values.all?(&:empty?)
       end
 
-      sig { override.returns(ResponseType) }
+      # @override
+      #: -> ResponseType
       def response
         result = T.must(@response[:title])
         result << "\n" << @response[:links] if @response[:links]

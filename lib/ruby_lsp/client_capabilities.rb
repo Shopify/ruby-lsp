@@ -7,14 +7,14 @@ module RubyLsp
   class ClientCapabilities
     extend T::Sig
 
-    sig { returns(T::Boolean) }
+    #: bool
     attr_reader :supports_watching_files,
       :supports_request_delegation,
       :window_show_message_supports_extra_properties,
       :supports_progress,
       :supports_diagnostic_refresh
 
-    sig { void }
+    #: -> void
     def initialize
       # The editor supports watching files. This requires two capabilities: dynamic registration and relative pattern
       # support
@@ -38,7 +38,7 @@ module RubyLsp
       @supports_diagnostic_refresh = T.let(false, T::Boolean)
     end
 
-    sig { params(capabilities: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] capabilities) -> void
     def apply_client_capabilities(capabilities)
       workspace_capabilities = capabilities[:workspace] || {}
 
@@ -65,7 +65,7 @@ module RubyLsp
       @supports_diagnostic_refresh = workspace_capabilities.dig(:diagnostics, :refreshSupport) || false
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def supports_rename?
       @supported_resource_operations.include?("rename")
     end

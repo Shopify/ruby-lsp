@@ -1470,13 +1470,7 @@ class ServerTest < Minitest::Test
     end
   end
 
-  sig do
-    params(
-      desired_class: Class,
-      desired_method: T.nilable(String),
-      id: T.nilable(Integer),
-    ).returns(T.untyped)
-  end
+  #: (Class desired_class, ?String? desired_method, ?id: Integer?) -> untyped
   def find_message(desired_class, desired_method = nil, id: nil)
     message = T.let(
       @server.pop_response, T.any(

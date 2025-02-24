@@ -22,6 +22,12 @@ AllCops:
     - "test/expectations/**/*"
     - "jekyll/**/*"
 
+Layout/LeadingCommentSpace:
+  AllowRBSInlineAnnotation: true
+
+Layout/LineLength:
+  AllowedPatterns: ['\A\s*#:']
+
 Minitest/AssertPredicate:
   Enabled: true
 
@@ -87,7 +93,3 @@ Layout/ClassStructure:
       - include
       - prepend
       - extend
-
-Layout/LeadingCommentSpace:
-  Enabled: true
-  AllowRBSInlineAnnotation: true

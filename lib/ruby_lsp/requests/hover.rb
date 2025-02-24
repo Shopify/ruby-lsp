@@ -14,7 +14,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::HoverOptions) }
+        #: -> Interface::HoverOptions
         def provider
           Interface::HoverOptions.new
         end
@@ -22,15 +22,7 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          global_state: GlobalState,
-          position: T::Hash[Symbol, T.untyped],
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
 
@@ -70,7 +62,8 @@ module RubyLsp
         @dispatcher = dispatcher
       end
 
-      sig { override.returns(ResponseType) }
+      # @override
+      #: -> ResponseType
       def perform
         return unless @target
 
@@ -88,14 +81,14 @@ module RubyLsp
 
       private
 
-      sig { params(parent: T.nilable(Prism::Node), target: T.nilable(Prism::Node)).returns(T::Boolean) }
+      #: (Prism::Node? parent, Prism::Node? target) -> bool
       def should_refine_target?(parent, target)
         (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
         !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
           (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
       end
 
-      sig { params(position: T::Hash[Symbol, T.untyped], target: T.nilable(Prism::Node)).returns(T::Boolean) }
+      #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool
       def position_outside_target?(position, target)
         case target
         when Prism::GlobalVariableAndWriteNode,

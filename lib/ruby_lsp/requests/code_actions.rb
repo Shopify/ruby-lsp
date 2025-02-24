@@ -31,7 +31,7 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::CodeActionRegistrationOptions) }
+        #: -> Interface::CodeActionRegistrationOptions
         def provider
           Interface::CodeActionRegistrationOptions.new(
             document_selector: nil,
@@ -40,13 +40,7 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          range: T::Hash[Symbol, T.untyped],
-          context: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, Hash[Symbol, untyped] range, Hash[Symbol, untyped] context) -> void
       def initialize(document, range, context)
         super()
         @document = document
@@ -55,7 +49,8 @@ module RubyLsp
         @context = context
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::CodeAction], Object))) }
+      # @override
+      #: -> (Array[Interface::CodeAction] & Object)?
       def perform
         diagnostics = @context[:diagnostics]
 
@@ -88,7 +83,7 @@ module RubyLsp
 
       private
 
-      sig { returns(T::Array[Interface::CodeAction]) }
+      #: -> Array[Interface::CodeAction]
       def attribute_actions
         return [] unless @document.is_a?(RubyDocument)
 

@@ -40,11 +40,7 @@ module RubyLsp
             T::Hash[Symbol, Annotation],
           )
 
-          sig do
-            params(
-              node: Prism::CallNode,
-            ).returns(T::Boolean)
-          end
+          #: (Prism::CallNode node) -> bool
           def annotation?(node)
             !!ANNOTATIONS[node.name]&.match?(node)
           end

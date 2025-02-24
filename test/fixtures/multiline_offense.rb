@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 # rubocop:enable Metrics/MethodLength
-sig { void }
+#: -> void
 def very_complex_method
   if foo
     do_something

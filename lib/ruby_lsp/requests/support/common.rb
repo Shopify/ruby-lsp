@@ -13,7 +13,7 @@ module RubyLsp
 
         requires_ancestor { Kernel }
 
-        sig { params(node: Prism::Node).returns(Interface::Range) }
+        #: (Prism::Node node) -> Interface::Range
         def range_from_node(node)
           loc = node.location
 
@@ -26,7 +26,7 @@ module RubyLsp
           )
         end
 
-        sig { params(location: T.any(Prism::Location, RubyIndexer::Location)).returns(Interface::Range) }
+        #: ((Prism::Location | RubyIndexer::Location) location) -> Interface::Range
         def range_from_location(location)
           Interface::Range.new(
             start: Interface::Position.new(
@@ -37,15 +37,7 @@ module RubyLsp
           )
         end
 
-        sig do
-          params(
-            node: Prism::Node,
-            title: String,
-            command_name: String,
-            arguments: T.nilable(T::Array[T.untyped]),
-            data: T.nilable(T::Hash[T.untyped, T.untyped]),
-          ).returns(Interface::CodeLens)
-        end
+        #: (Prism::Node node, title: String, command_name: String, arguments: Array[untyped]?, data: Hash[untyped, untyped]?) -> Interface::CodeLens
         def create_code_lens(node, title:, command_name:, arguments:, data:)
           range = range_from_node(node)
 
@@ -60,26 +52,20 @@ module RubyLsp
           )
         end
 
-        sig { params(file_path: String).returns(T.nilable(T::Boolean)) }
+        #: (String file_path) -> bool?
         def not_in_dependencies?(file_path)
           BUNDLE_PATH &&
             !file_path.start_with?(T.must(BUNDLE_PATH)) &&
             !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
         end
 
-        sig { params(node: Prism::CallNode).returns(T::Boolean) }
+        #: (Prism::CallNode node) -> bool
         def self_receiver?(node)
           receiver = node.receiver
           receiver.nil? || receiver.is_a?(Prism::SelfNode)
         end
 
-        sig do
-          params(
-            title: String,
-            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
-            max_entries: T.nilable(Integer),
-          ).returns(T::Hash[Symbol, String])
-        end
+        #: (String title, (Array[RubyIndexer::Entry] | RubyIndexer::Entry) entries, ?Integer? max_entries) -> Hash[Symbol, String]
         def categorized_markdown_from_index_entries(title, entries, max_entries = nil)
           markdown_title = "```ruby\n#{title}\n```"
           definitions = []
@@ -112,14 +98,7 @@ module RubyLsp
           }
         end
 
-        sig do
-          params(
-            title: String,
-            entries: T.any(T::Array[RubyIndexer::Entry], RubyIndexer::Entry),
-            max_entries: T.nilable(Integer),
-            extra_links: T.nilable(String),
-          ).returns(String)
-        end
+        #: (String title, (Array[RubyIndexer::Entry] | RubyIndexer::Entry) entries, ?Integer? max_entries, ?extra_links: String?) -> String
         def markdown_from_index_entries(title, entries, max_entries = nil, extra_links: nil)
           categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
 
@@ -135,22 +114,12 @@ module RubyLsp
           MARKDOWN
         end
 
-        sig do
-          params(
-            node: T.any(
-              Prism::ConstantPathNode,
-              Prism::ConstantReadNode,
-              Prism::ConstantPathTargetNode,
-              Prism::CallNode,
-              Prism::MissingNode,
-            ),
-          ).returns(T.nilable(String))
-        end
+        #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String?
         def constant_name(node)
           RubyIndexer::Index.constant_name(node)
         end
 
-        sig { params(node: T.any(Prism::ModuleNode, Prism::ClassNode)).returns(T.nilable(String)) }
+        #: ((Prism::ModuleNode | Prism::ClassNode) node) -> String?
         def namespace_constant_name(node)
           path = node.constant_path
           case path
@@ -162,12 +131,7 @@ module RubyLsp
         # Iterates over each part of a constant path, so that we can easily push response items for each section of the
         # name. For example, for `Foo::Bar::Baz`, this method will invoke the block with `Foo`, then `Bar` and finally
         # `Baz`.
-        sig do
-          params(
-            node: Prism::Node,
-            block: T.proc.params(part: Prism::Node).void,
-          ).void
-        end
+        #: (Prism::Node node) { (Prism::Node part) -> void } -> void
         def each_constant_path_part(node, &block)
           current = T.let(node, T.nilable(Prism::Node))
 
@@ -177,7 +141,7 @@ module RubyLsp
           end
         end
 
-        sig { params(entry: RubyIndexer::Entry).returns(T.nilable(Integer)) }
+        #: (RubyIndexer::Entry entry) -> Integer?
         def kind_for_entry(entry)
           case entry
           when RubyIndexer::Entry::Class
@@ -195,7 +159,7 @@ module RubyLsp
           end
         end
 
-        sig { params(sorbet_level: RubyDocument::SorbetLevel).returns(T::Boolean) }
+        #: (RubyDocument::SorbetLevel sorbet_level) -> bool
         def sorbet_level_true_or_higher?(sorbet_level)
           sorbet_level == RubyDocument::SorbetLevel::True || sorbet_level == RubyDocument::SorbetLevel::Strict
         end

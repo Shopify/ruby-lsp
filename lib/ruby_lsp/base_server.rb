@@ -8,7 +8,7 @@ module RubyLsp
 
     abstract!
 
-    sig { params(options: T.untyped).void }
+    #: (**untyped options) -> void
     def initialize(**options)
       @test_mode = T.let(options[:test_mode], T.nilable(T::Boolean))
       @setup_error = T.let(options[:setup_error], T.nilable(StandardError))
@@ -41,7 +41,7 @@ module RubyLsp
       process_message(initialize_request) if initialize_request
     end
 
-    sig { void }
+    #: -> void
     def start
       @reader.read do |message|
         method = message[:method]
@@ -108,7 +108,7 @@ module RubyLsp
       end
     end
 
-    sig { void }
+    #: -> void
     def run_shutdown
       @incoming_queue.clear
       @outgoing_queue.clear
@@ -122,13 +122,13 @@ module RubyLsp
     end
 
     # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
-    sig { returns(T.untyped) }
+    #: -> untyped
     def pop_response
       @outgoing_queue.pop
     end
 
     # This method is only intended to be used in tests! Pushes a message to the incoming queue directly
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def push_message(message)
       @incoming_queue << message
     end
@@ -139,13 +139,13 @@ module RubyLsp
     sig { abstract.void }
     def shutdown; end
 
-    sig { params(id: Integer, message: String, type: Integer).void }
+    #: (Integer id, String message, ?type: Integer) -> void
     def fail_request_and_notify(id, message, type: Constant::MessageType::INFO)
       send_message(Error.new(id: id, code: Constant::ErrorCodes::REQUEST_FAILED, message: message))
       send_message(Notification.window_show_message(message, type: type))
     end
 
-    sig { returns(Thread) }
+    #: -> Thread
     def new_worker
       Thread.new do
         while (message = T.let(@incoming_queue.pop, T.nilable(T::Hash[Symbol, T.untyped])))
@@ -165,7 +165,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T.any(Result, Error, Notification, Request)).void }
+    #: ((Result | Error | Notification | Request) message) -> void
     def send_message(message)
       # When we're shutting down the server, there's a small race condition between closing the thread queues and
       # finishing remaining requests. We may close the queue in the middle of processing a request, which will then fail
@@ -176,12 +176,12 @@ module RubyLsp
       @current_request_id += 1 if message.is_a?(Request)
     end
 
-    sig { params(id: Integer).void }
+    #: (Integer id) -> void
     def send_empty_response(id)
       send_message(Result.new(id: id, response: nil))
     end
 
-    sig { params(message: String, type: Integer).void }
+    #: (String message, ?type: Integer) -> void
     def send_log_message(message, type: Constant::MessageType::LOG)
       send_message(Notification.window_log_message(message, type: Constant::MessageType::LOG))
     end

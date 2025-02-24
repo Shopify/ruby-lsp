@@ -9,7 +9,7 @@ module RubyLsp
     class ShowSyntaxTree < Request
       extend T::Sig
 
-      sig { params(document: RubyDocument, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
+      #: (RubyDocument document, Hash[Symbol, untyped]? range) -> void
       def initialize(document, range)
         super()
         @document = document
@@ -17,7 +17,8 @@ module RubyLsp
         @tree = T.let(document.parse_result.value, Prism::ProgramNode)
       end
 
-      sig { override.returns(String) }
+      # @override
+      #: -> String
       def perform
         return ast_for_range if @range
 
@@ -28,7 +29,7 @@ module RubyLsp
 
       private
 
-      sig { returns(String) }
+      #: -> String
       def ast_for_range
         range = T.must(@range)
         start_char, end_char = @document.find_index_by_position(range[:start], range[:end])

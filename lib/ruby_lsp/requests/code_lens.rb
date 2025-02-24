@@ -16,19 +16,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(Interface::CodeLensOptions) }
+        #: -> Interface::CodeLensOptions
         def provider
           Interface::CodeLensOptions.new(resolve_provider: false)
         end
       end
 
-      sig do
-        params(
-          global_state: GlobalState,
-          uri: URI::Generic,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(global_state, uri, dispatcher)
         @response_builder = T.let(
           ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens].new,
@@ -42,7 +36,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T::Array[Interface::CodeLens]) }
+      # @override
+      #: -> Array[Interface::CodeLens]
       def perform
         @response_builder.response
       end

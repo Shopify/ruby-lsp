@@ -6,10 +6,11 @@ module RubyLsp
     extend T::Sig
 
     # Only for testing
-    sig { returns(GlobalState) }
+    #: GlobalState
     attr_reader :global_state
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    # @override
+    #: (Hash[Symbol, untyped] message) -> void
     def process_message(message)
       case message[:method]
       when "initialize"
@@ -161,7 +162,7 @@ module RubyLsp
     end
 
     # Process responses to requests that were sent to the client
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def process_response(message)
       case message.dig(:result, :method)
       when "window/showMessageRequest"
@@ -169,7 +170,7 @@ module RubyLsp
       end
     end
 
-    sig { params(include_project_addons: T::Boolean).void }
+    #: (?include_project_addons: bool) -> void
     def load_addons(include_project_addons: true)
       # If invoking Bundler.setup failed, then the load path will not be configured properly and trying to load add-ons
       # with Gem.find_files will find every single version installed of an add-on, leading to requiring several
@@ -209,7 +210,7 @@ module RubyLsp
 
     private
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def run_initialize(message)
       options = message[:params]
       global_state_notifications = @global_state.apply_options(options)
@@ -346,7 +347,7 @@ module RubyLsp
       end
     end
 
-    sig { void }
+    #: -> void
     def run_initialized
       load_addons
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
@@ -373,7 +374,7 @@ module RubyLsp
       check_formatter_is_available
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_open(message)
       @global_state.synchronize do
         text_document = message.dig(:params, :textDocument)
@@ -412,7 +413,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_close(message)
       @global_state.synchronize do
         uri = message.dig(:params, :textDocument, :uri)
@@ -423,7 +424,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_change(message)
       params = message[:params]
       text_document = params[:textDocument]
@@ -433,7 +434,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_selection_range(message)
       uri = message.dig(:params, :textDocument, :uri)
       ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
@@ -459,7 +460,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def run_combined_requests(message)
       uri = URI(message.dig(:params, :textDocument, :uri))
       document = @store.get(uri)
@@ -518,7 +519,7 @@ module RubyLsp
     alias_method :text_document_code_lens, :run_combined_requests
     alias_method :text_document_folding_range, :run_combined_requests
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_semantic_tokens_full(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
@@ -539,7 +540,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: semantic_highlighting.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_semantic_tokens_delta(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
@@ -564,7 +565,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_semantic_tokens_range(message)
       params = message[:params]
       range = params[:range]
@@ -593,7 +594,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_range_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       if @global_state.formatter == "none"
@@ -621,7 +622,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       if @global_state.formatter == "none"
@@ -665,7 +666,7 @@ module RubyLsp
       send_empty_response(message[:id])
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_document_highlight(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -681,7 +682,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_on_type_formatting(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -704,7 +705,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_hover(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -729,7 +730,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_rename(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -749,7 +750,7 @@ module RubyLsp
       send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::REQUEST_FAILED, message: e.message))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_prepare_rename(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -767,7 +768,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_references(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -785,7 +786,7 @@ module RubyLsp
       )
     end
 
-    sig { params(document: Document[T.untyped]).returns(RubyDocument::SorbetLevel) }
+    #: (Document[untyped] document) -> RubyDocument::SorbetLevel
     def sorbet_level(document)
       return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
       return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
@@ -793,7 +794,7 @@ module RubyLsp
       document.sorbet_level
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_inlay_hint(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -827,7 +828,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: result.select { |hint| range.cover?(hint.position[:line]) }))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_code_action(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -849,7 +850,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def code_action_resolve(message)
       params = message[:params]
       uri = URI(params.dig(:data, :uri))
@@ -874,7 +875,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_diagnostic(message)
       # Do not compute diagnostics for files outside of the workspace. For example, if someone is looking at a gem's
       # source code, we don't want to show diagnostics for it
@@ -914,7 +915,7 @@ module RubyLsp
       send_empty_response(message[:id])
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_completion(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -939,7 +940,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_completion_item_resolve(message)
       # When responding to a delegated completion request, it means we're handling a completion item that isn't related
       # to Ruby (probably related to an ERB host language like HTML). We need to return the original completion item
@@ -958,7 +959,7 @@ module RubyLsp
       ))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_signature_help(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -984,7 +985,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_definition(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -1009,7 +1010,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def workspace_did_change_watched_files(message)
       changes = message.dig(:params, :changes)
       # We allow add-ons to register for watching files and we have no restrictions for what they register for. If the
@@ -1046,7 +1047,7 @@ module RubyLsp
       end
     end
 
-    sig { params(index: RubyIndexer::Index, file_path: String, change_type: Integer).void }
+    #: (RubyIndexer::Index index, String file_path, Integer change_type) -> void
     def handle_ruby_file_change(index, file_path, change_type)
       load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
       uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
@@ -1071,7 +1072,7 @@ module RubyLsp
       # and deletes files automatically.
     end
 
-    sig { params(uri: URI::Generic).void }
+    #: (URI::Generic uri) -> void
     def handle_rubocop_config_change(uri)
       return unless defined?(Requests::Support::RuboCopFormatter)
 
@@ -1091,7 +1092,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def workspace_symbol(message)
       send_message(
         Result.new(
@@ -1104,7 +1105,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_show_syntax_tree(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -1123,7 +1124,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_prepare_type_hierarchy(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -1142,7 +1143,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def type_hierarchy_supertypes(message)
       response = Requests::TypeHierarchySupertypes.new(
         @global_state.index,
@@ -1151,14 +1152,14 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def type_hierarchy_subtypes(message)
       # TODO: implement subtypes
       # The current index representation doesn't allow us to find the children of an entry.
       send_message(Result.new(id: message[:id], response: nil))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def workspace_dependencies(message)
       unless @global_state.top_level_bundle
         send_message(Result.new(id: message[:id], response: []))
@@ -1186,12 +1187,13 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { override.void }
+    # @override
+    #: -> void
     def shutdown
       Addon.unload_addons
     end
 
-    sig { void }
+    #: -> void
     def perform_initial_indexing
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
@@ -1223,7 +1225,7 @@ module RubyLsp
       end
     end
 
-    sig { params(id: String, title: String, percentage: Integer).void }
+    #: (String id, String title, ?percentage: Integer) -> void
     def begin_progress(id, title, percentage: 0)
       return unless @global_state.client_capabilities.supports_progress
 
@@ -1236,14 +1238,14 @@ module RubyLsp
       send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
     end
 
-    sig { params(id: String, percentage: Integer).void }
+    #: (String id, Integer percentage) -> void
     def progress(id, percentage)
       return unless @global_state.client_capabilities.supports_progress
 
       send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
     end
 
-    sig { params(id: String).void }
+    #: (String id) -> void
     def end_progress(id)
       return unless @global_state.client_capabilities.supports_progress
 
@@ -1253,7 +1255,7 @@ module RubyLsp
       # notification
     end
 
-    sig { void }
+    #: -> void
     def check_formatter_is_available
       return if @setup_error
       # Warn of an unavailable `formatter` setting, e.g. `rubocop_internal` on a project which doesn't have RuboCop.
@@ -1271,7 +1273,7 @@ module RubyLsp
       end
     end
 
-    sig { params(indexing_options: T.nilable(T::Hash[Symbol, T.untyped])).void }
+    #: (Hash[Symbol, untyped]? indexing_options) -> void
     def process_indexing_configuration(indexing_options)
       # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
       index_path = File.join(@global_state.workspace_path, ".index.yml")
@@ -1312,7 +1314,7 @@ module RubyLsp
       configuration.apply_config(indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase })
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def window_show_message_request(message)
       result = message[:result]
       return unless result
@@ -1327,7 +1329,7 @@ module RubyLsp
     # NOTE: all servers methods are void because they can produce several messages for the client. The only reason this
     # method returns the created thread is to that we can join it in tests and avoid flakiness. The implementation is
     # not supposed to rely on the return of this method
-    sig { params(message: T::Hash[Symbol, T.untyped]).returns(T.nilable(Thread)) }
+    #: (Hash[Symbol, untyped] message) -> Thread?
     def compose_bundle(message)
       already_composed_path = File.join(@global_state.workspace_path, ".ruby-lsp", "bundle_is_composed")
       id = message[:id]
@@ -1374,7 +1376,7 @@ module RubyLsp
     end
 
     # Returns internal state information for debugging purposes
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def diagnose_state(message)
       documents = {}
       @store.each { |uri, document| documents[uri] = document.source }
@@ -1394,7 +1396,7 @@ module RubyLsp
 
     # Discovers all available test groups and examples in a given file taking into consideration the merged response of
     # all add-ons
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def discover_tests(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 

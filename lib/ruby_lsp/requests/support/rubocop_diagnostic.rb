@@ -31,14 +31,14 @@ module RubyLsp
 
         # TODO: avoid passing document once we have alternative ways to get at
         # encoding and file source
-        sig { params(document: RubyDocument, offense: ::RuboCop::Cop::Offense, uri: URI::Generic).void }
+        #: (RubyDocument document, ::RuboCop::Cop::Offense offense, URI::Generic uri) -> void
         def initialize(document, offense, uri)
           @document = document
           @offense = offense
           @uri = uri
         end
 
-        sig { returns(T::Array[Interface::CodeAction]) }
+        #: -> Array[Interface::CodeAction]
         def to_lsp_code_actions
           code_actions = []
 
@@ -48,7 +48,7 @@ module RubyLsp
           code_actions
         end
 
-        sig { params(config: ::RuboCop::Config).returns(Interface::Diagnostic) }
+        #: (::RuboCop::Config config) -> Interface::Diagnostic
         def to_lsp_diagnostic(config)
           # highlighted_area contains the begin and end position of the first line
           # This ensures that multiline offenses don't clutter the editor
@@ -78,19 +78,19 @@ module RubyLsp
 
         private
 
-        sig { returns(String) }
+        #: -> String
         def message
           message  = @offense.message
           message += "\n\nThis offense is not auto-correctable.\n" unless correctable?
           message
         end
 
-        sig { returns(T.nilable(Integer)) }
+        #: -> Integer?
         def severity
           RUBOCOP_TO_LSP_SEVERITY[@offense.severity.name]
         end
 
-        sig { params(config: ::RuboCop::Config).returns(T.nilable(Interface::CodeDescription)) }
+        #: (::RuboCop::Config config) -> Interface::CodeDescription?
         def code_description(config)
           cop = RuboCopRunner.find_cop_by_name(@offense.cop_name)
           return unless cop
@@ -103,7 +103,7 @@ module RubyLsp
           Interface::CodeDescription.new(href: doc_url) if doc_url
         end
 
-        sig { returns(Interface::CodeAction) }
+        #: -> Interface::CodeAction
         def autocorrect_action
           Interface::CodeAction.new(
             title: "Autocorrect #{@offense.cop_name}",
@@ -123,7 +123,7 @@ module RubyLsp
           )
         end
 
-        sig { returns(T::Array[Interface::TextEdit]) }
+        #: -> Array[Interface::TextEdit]
         def offense_replacements
           @offense.corrector.as_replacements.map do |range, replacement|
             Interface::TextEdit.new(
@@ -136,7 +136,7 @@ module RubyLsp
           end
         end
 
-        sig { returns(Interface::CodeAction) }
+        #: -> Interface::CodeAction
         def disable_line_action
           Interface::CodeAction.new(
             title: "Disable #{@offense.cop_name} for this line",
@@ -155,7 +155,7 @@ module RubyLsp
           )
         end
 
-        sig { returns(T::Array[Interface::TextEdit]) }
+        #: -> Array[Interface::TextEdit]
         def line_disable_comment
           new_text = if @offense.source_line.include?(" # rubocop:disable ")
             ",#{@offense.cop_name}"
@@ -178,7 +178,7 @@ module RubyLsp
           [inline_comment]
         end
 
-        sig { params(line: String).returns(Integer) }
+        #: (String line) -> Integer
         def length_of_line(line)
           if @document.encoding == Encoding::UTF_16LE
             line_length = 0
@@ -197,7 +197,7 @@ module RubyLsp
         # When `RuboCop::LSP.enable` is called, contextual autocorrect will not offer itself
         # as `correctable?` to prevent annoying changes while typing. Instead check if
         # a corrector is present. If it is, then that means some code transformation can be applied.
-        sig { returns(T::Boolean) }
+        #: -> bool
         def correctable?
           !@offense.corrector.nil?
         end

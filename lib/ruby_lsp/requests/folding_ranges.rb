@@ -13,13 +13,13 @@ module RubyLsp
       class << self
         extend T::Sig
 
-        sig { returns(TrueClass) }
+        #: -> TrueClass
         def provider
           true
         end
       end
 
-      sig { params(comments: T::Array[Prism::Comment], dispatcher: Prism::Dispatcher).void }
+      #: (Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
       def initialize(comments, dispatcher)
         super()
         @response_builder = T.let(
@@ -32,7 +32,8 @@ module RubyLsp
         )
       end
 
-      sig { override.returns(T::Array[Interface::FoldingRange]) }
+      # @override
+      #: -> Array[Interface::FoldingRange]
       def perform
         @listener.finalize_response!
         @response_builder.response

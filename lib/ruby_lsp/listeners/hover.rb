@@ -49,16 +49,7 @@ module RubyLsp
         T::Array[String],
       )
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::Hover,
-          global_state: GlobalState,
-          uri: URI::Generic,
-          node_context: NodeContext,
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: (ResponseBuilders::Hover response_builder, GlobalState global_state, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
@@ -100,17 +91,17 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::StringNode).void }
+      #: (Prism::StringNode node) -> void
       def on_string_node_enter(node)
         generate_heredoc_hover(node)
       end
 
-      sig { params(node: Prism::InterpolatedStringNode).void }
+      #: (Prism::InterpolatedStringNode node) -> void
       def on_interpolated_string_node_enter(node)
         generate_heredoc_hover(node)
       end
 
-      sig { params(node: Prism::ConstantReadNode).void }
+      #: (Prism::ConstantReadNode node) -> void
       def on_constant_read_node_enter(node)
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
@@ -120,14 +111,14 @@ module RubyLsp
         generate_hover(name, node.location)
       end
 
-      sig { params(node: Prism::ConstantWriteNode).void }
+      #: (Prism::ConstantWriteNode node) -> void
       def on_constant_write_node_enter(node)
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
         generate_hover(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::ConstantPathNode).void }
+      #: (Prism::ConstantPathNode node) -> void
       def on_constant_path_node_enter(node)
         return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
 
@@ -137,7 +128,7 @@ module RubyLsp
         generate_hover(name, node.location)
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         if @path && File.basename(@path) == GEMFILE_NAME && node.name == :gem
           generate_gem_hover(node)
@@ -152,114 +143,114 @@ module RubyLsp
         handle_method_hover(message)
       end
 
-      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      #: (Prism::GlobalVariableAndWriteNode node) -> void
       def on_global_variable_and_write_node_enter(node)
         handle_global_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      #: (Prism::GlobalVariableOperatorWriteNode node) -> void
       def on_global_variable_operator_write_node_enter(node)
         handle_global_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      #: (Prism::GlobalVariableOrWriteNode node) -> void
       def on_global_variable_or_write_node_enter(node)
         handle_global_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableReadNode).void }
+      #: (Prism::GlobalVariableReadNode node) -> void
       def on_global_variable_read_node_enter(node)
         handle_global_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      #: (Prism::GlobalVariableTargetNode node) -> void
       def on_global_variable_target_node_enter(node)
         handle_global_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      #: (Prism::GlobalVariableWriteNode node) -> void
       def on_global_variable_write_node_enter(node)
         handle_global_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableReadNode).void }
+      #: (Prism::InstanceVariableReadNode node) -> void
       def on_instance_variable_read_node_enter(node)
         handle_instance_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      #: (Prism::InstanceVariableWriteNode node) -> void
       def on_instance_variable_write_node_enter(node)
         handle_instance_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      #: (Prism::InstanceVariableAndWriteNode node) -> void
       def on_instance_variable_and_write_node_enter(node)
         handle_instance_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      #: (Prism::InstanceVariableOperatorWriteNode node) -> void
       def on_instance_variable_operator_write_node_enter(node)
         handle_instance_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      #: (Prism::InstanceVariableOrWriteNode node) -> void
       def on_instance_variable_or_write_node_enter(node)
         handle_instance_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      #: (Prism::InstanceVariableTargetNode node) -> void
       def on_instance_variable_target_node_enter(node)
         handle_instance_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::SuperNode).void }
+      #: (Prism::SuperNode node) -> void
       def on_super_node_enter(node)
         handle_super_node_hover
       end
 
-      sig { params(node: Prism::ForwardingSuperNode).void }
+      #: (Prism::ForwardingSuperNode node) -> void
       def on_forwarding_super_node_enter(node)
         handle_super_node_hover
       end
 
-      sig { params(node: Prism::YieldNode).void }
+      #: (Prism::YieldNode node) -> void
       def on_yield_node_enter(node)
         handle_keyword_documentation(node.keyword)
       end
 
-      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      #: (Prism::ClassVariableAndWriteNode node) -> void
       def on_class_variable_and_write_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      #: (Prism::ClassVariableOperatorWriteNode node) -> void
       def on_class_variable_operator_write_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      #: (Prism::ClassVariableOrWriteNode node) -> void
       def on_class_variable_or_write_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableTargetNode).void }
+      #: (Prism::ClassVariableTargetNode node) -> void
       def on_class_variable_target_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableReadNode).void }
+      #: (Prism::ClassVariableReadNode node) -> void
       def on_class_variable_read_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
       end
 
-      sig { params(node: Prism::ClassVariableWriteNode).void }
+      #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
       end
 
       private
 
-      sig { params(node: T.any(Prism::InterpolatedStringNode, Prism::StringNode)).void }
+      #: ((Prism::InterpolatedStringNode | Prism::StringNode) node) -> void
       def generate_heredoc_hover(node)
         return unless node.heredoc?
 
@@ -284,7 +275,7 @@ module RubyLsp
         end
       end
 
-      sig { params(keyword: String).void }
+      #: (String keyword) -> void
       def handle_keyword_documentation(keyword)
         content = KEYWORD_DOCS[keyword]
         return unless content
@@ -296,7 +287,7 @@ module RubyLsp
         @response_builder.push(content, category: :documentation)
       end
 
-      sig { void }
+      #: -> void
       def handle_super_node_hover
         # Sorbet can handle super hover on typed true or higher
         return if sorbet_level_true_or_higher?(@sorbet_level)
@@ -307,7 +298,7 @@ module RubyLsp
         handle_method_hover(surrounding_method, inherited_only: true)
       end
 
-      sig { params(message: String, inherited_only: T::Boolean).void }
+      #: (String message, ?inherited_only: bool) -> void
       def handle_method_hover(message, inherited_only: false)
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -330,7 +321,7 @@ module RubyLsp
         end
       end
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def handle_instance_variable_hover(name)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
@@ -349,7 +340,7 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def handle_global_variable_hover(name)
         entries = @index[name]
         return unless entries
@@ -359,7 +350,7 @@ module RubyLsp
         end
       end
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def handle_class_variable_hover(name)
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -374,7 +365,7 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(name: String, location: Prism::Location).void }
+      #: (String name, Prism::Location location) -> void
       def generate_hover(name, location)
         entries = @index.resolve(name, @node_context.nesting)
         return unless entries
@@ -389,7 +380,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def generate_gem_hover(node)
         first_argument = node.arguments&.arguments&.first
         return unless first_argument.is_a?(Prism::StringNode)

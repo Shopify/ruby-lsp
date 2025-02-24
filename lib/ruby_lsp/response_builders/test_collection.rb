@@ -11,25 +11,26 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: Requests::Support::TestItem } }
 
-      sig { void }
+      #: -> void
       def initialize
         super
         @items = T.let({}, T::Hash[String, ResponseType])
       end
 
-      sig { params(item: ResponseType).void }
+      #: (ResponseType item) -> void
       def add(item)
         raise DuplicateIdError, "TestItem ID is already in use" if @items.key?(item.id)
 
         @items[item.id] = item
       end
 
-      sig { params(id: String).returns(T.nilable(ResponseType)) }
+      #: (String id) -> ResponseType?
       def [](id)
         @items[id]
       end
 
-      sig { override.returns(T::Array[ResponseType]) }
+      # @override
+      #: -> Array[ResponseType]
       def response
         @items.values
       end
