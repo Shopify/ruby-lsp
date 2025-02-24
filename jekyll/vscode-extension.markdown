@@ -58,7 +58,7 @@ As with most LLM chat functionality, suggestions may not be fully accurate, espe
 continue chatting with the `@ruby` agent to fine tune the suggestions given, before deciding to move forward with
 generation.
 
-If you have feedback about this feature, you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2yd77ayis-yAiVc1TX_kH0mHMBbi89dA) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new).
+If you have feedback about this feature, you can let us know in the [DX Slack](https://shopify.github.io/ruby-lsp/invite) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new).
 
 ## Usage
 

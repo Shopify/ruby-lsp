@@ -27,6 +27,7 @@ theme: just-the-docs
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-redirect-from
 destination: ../docs
 
 # Copied from just-the-docs's _config.yml
