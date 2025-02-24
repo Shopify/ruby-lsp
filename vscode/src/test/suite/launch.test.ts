@@ -4,7 +4,7 @@ import path from "path";
 import os from "os";
 
 import * as vscode from "vscode";
-import { State, WorkDoneProgress } from "vscode-languageclient/node";
+import { State } from "vscode-languageclient/node";
 import sinon from "sinon";
 import { beforeEach } from "mocha";
 
@@ -74,7 +74,7 @@ suite("Launch integrations", () => {
     return client;
   }
 
-  async function startClient(client: Client) {
+  async function startClient(client: Client): Promise<void> {
     try {
       await client.start();
     } catch (error: any) {
@@ -87,17 +87,7 @@ suite("Launch integrations", () => {
     // Wait for composing the bundle and indexing to finish. We don't _need_ the codebase to be indexed for these tests,
     // but trying to stop the server in the middle of composing the bundle may time out, so this makes the tests more
     // robust
-    return new Promise<Client>((resolve) => {
-      client.onProgress(
-        WorkDoneProgress.type,
-        "indexing-progress",
-        (value: any) => {
-          if (value.kind === "end") {
-            resolve(client);
-          }
-        },
-      );
-    });
+    await client.waitForIndexing();
   }
 
   beforeEach(() => {

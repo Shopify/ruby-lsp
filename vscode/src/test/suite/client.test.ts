@@ -10,7 +10,6 @@ import {
   State,
   DocumentHighlightKind,
   Hover,
-  WorkDoneProgress,
   SemanticTokens,
   DocumentLink,
   WorkspaceSymbol,
@@ -134,20 +133,8 @@ async function launchClient(workspaceUri: vscode.Uri) {
   }
 
   assert.strictEqual(client.state, State.Running);
-
-  // Wait for indexing to complete and only resolve the promise once we received the workdone progress end notification
-  // (signifying indexing is complete)
-  return new Promise<Client>((resolve) => {
-    client.onProgress(
-      WorkDoneProgress.type,
-      "indexing-progress",
-      (value: any) => {
-        if (value.kind === "end") {
-          resolve(client);
-        }
-      },
-    );
-  });
+  await client.waitForIndexing();
+  return client;
 }
 
 suite("Client", () => {

@@ -33,7 +33,10 @@ export class RubyLsp {
 
   // A URI => content map of virtual documents for delegate requests
   private readonly virtualDocuments = new Map<string, string>();
-  private readonly workspacesBeingLaunched: Set<number> = new Set();
+  private readonly workspacesBeingLaunched = new Map<
+    number,
+    Promise<Workspace | undefined>
+  >();
 
   constructor(
     context: vscode.ExtensionContext,
@@ -84,10 +87,7 @@ export class RubyLsp {
           document.uri,
         );
 
-        if (
-          !workspaceFolder ||
-          this.workspacesBeingLaunched.has(workspaceFolder.index)
-        ) {
+        if (!workspaceFolder) {
           return;
         }
 
@@ -95,7 +95,6 @@ export class RubyLsp {
 
         // If the workspace entry doesn't exist, then we haven't activated the workspace yet
         if (!workspace) {
-          this.workspacesBeingLaunched.add(workspaceFolder.index);
           await this.activateWorkspace(workspaceFolder, false);
         }
       }),
@@ -148,16 +147,12 @@ export class RubyLsp {
         activeDocument.uri,
       );
 
-      if (
-        workspaceFolder &&
-        !this.workspacesBeingLaunched.has(workspaceFolder.index)
-      ) {
+      if (workspaceFolder) {
         const existingWorkspace = this.workspaces.get(
           workspaceFolder.uri.toString(),
         );
 
-        if (workspaceFolder && !existingWorkspace) {
-          this.workspacesBeingLaunched.add(workspaceFolder.index);
+        if (!existingWorkspace) {
           await this.activateWorkspace(workspaceFolder, false);
         }
       }
@@ -191,6 +186,22 @@ export class RubyLsp {
     workspaceFolder: vscode.WorkspaceFolder,
     eager: boolean,
   ): Promise<Workspace | undefined> {
+    const existingActivationPromise = this.workspacesBeingLaunched.get(
+      workspaceFolder.index,
+    );
+    if (existingActivationPromise) {
+      return existingActivationPromise;
+    }
+
+    const activationPromise = this.runActivation(workspaceFolder, eager);
+    this.workspacesBeingLaunched.set(workspaceFolder.index, activationPromise);
+    return activationPromise;
+  }
+
+  private async runActivation(
+    workspaceFolder: vscode.WorkspaceFolder,
+    eager: boolean,
+  ) {
     const customBundleGemfile: string = vscode.workspace
       .getConfiguration("rubyLsp")
       .get("bundleGemfile")!;
@@ -218,10 +229,11 @@ export class RubyLsp {
       this.virtualDocuments,
       this.workspaces.size === 0,
     );
-    this.workspaces.set(workspaceFolder.uri.toString(), workspace);
 
     await workspace.activate();
     await workspace.start();
+
+    this.workspaces.set(workspaceFolder.uri.toString(), workspace);
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
