@@ -192,6 +192,29 @@ module RubyLsp
       FileUtils.rm(T.must(path))
     end
 
+    def test_does_not_raise_on_duplicate_test_ids
+      source = <<~RUBY
+        module Foo
+          class MyTest < Test::Unit::TestCase
+            def test_something; end
+
+            # This one gets picked
+            def test_something; end
+          end
+        end
+      RUBY
+
+      with_test_unit(source) do |items|
+        assert_equal(["Foo::MyTest"], items.map { |i| i[:label] })
+
+        children = items[0][:children]
+        assert_equal(1, children.length)
+
+        test_something = children[0]
+        assert_equal(5, test_something[:range].start.line)
+      end
+    end
+
     private
 
     def with_minitest_test(source, &block)
