@@ -15,12 +15,15 @@ module RubyLsp
         sig { returns(String) }
         attr_reader :id, :label
 
-        sig { params(id: String, label: String, uri: URI::Generic, range: Interface::Range).void }
-        def initialize(id, label, uri, range)
+        sig do
+          params(id: String, label: String, uri: URI::Generic, range: Interface::Range, tags: T::Array[Symbol]).void
+        end
+        def initialize(id, label, uri, range, tags: [])
           @id = id
           @label = label
           @uri = uri
           @range = range
+          @tags = tags
           @children = T.let({}, T::Hash[String, TestItem])
         end
 
@@ -41,6 +44,11 @@ module RubyLsp
         sig { returns(T::Array[TestItem]) }
         def children
           @children.values
+        end
+
+        sig { params(tag: Symbol).returns(T::Boolean) }
+        def tag?(tag)
+          @tags.include?(tag)
         end
 
         sig { returns(T::Hash[Symbol, T.untyped]) }

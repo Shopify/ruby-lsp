@@ -4,6 +4,15 @@
 module RubyLsp
   module Listeners
     class TestStyle
+      class << self
+        extend T::Sig
+
+        sig { params(items: T::Array[T::Hash[Symbol, T.untyped]]).returns(String) }
+        def resolve_test_command(items)
+          ""
+        end
+      end
+
       extend T::Sig
       include Requests::Support::Common
 
@@ -61,6 +70,7 @@ module RubyLsp
             fully_qualified_name,
             @uri,
             range_from_node(node),
+            tags: [:minitest],
           ))
         end
 
@@ -109,6 +119,7 @@ module RubyLsp
           name,
           @uri,
           range_from_node(node),
+          tags: [:minitest],
         ))
       end
 
