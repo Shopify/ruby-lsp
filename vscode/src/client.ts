@@ -44,17 +44,23 @@ import { WorkspaceChannel } from "./workspaceChannel";
 
 type EnabledFeatures = Record<string, boolean>;
 
-export interface ServerTestItem {
+export interface BasicTestItem {
   id: string;
   label: string;
   uri: string;
+  children: (ServerTestItem | BasicTestItem)[];
+  tags: string[];
+}
+
+export type ServerTestItem = BasicTestItem & {
+  children: ServerTestItem[];
   range: {
     start: { line: number; character: number };
     end: { line: number; character: number };
   };
-  children: ServerTestItem[];
-  tags: string[];
-}
+};
+
+export type LspTestItem = BasicTestItem | ServerTestItem;
 
 interface ServerErrorTelemetryEvent {
   type: "error";
@@ -496,10 +502,10 @@ export default class Client extends LanguageClient implements ClientInterface {
     });
   }
 
-  async resolveTestCommand(
-    items: vscode.TestItem[],
+  async resolveTestCommands(
+    items: LspTestItem[],
   ): Promise<{ command: string }> {
-    return this.sendRequest("rubyLsp/resolveTestCommand", {
+    return this.sendRequest("rubyLsp/resolveTestCommands", {
       items,
     });
   }
