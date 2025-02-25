@@ -26,10 +26,6 @@ module RubyLsp
 
         #: (TestItem item) -> void
         def add(item)
-          if @children.key?(item.id)
-            raise ResponseBuilders::TestCollection::DuplicateIdError, "TestItem ID is already in use"
-          end
-
           @children[item.id] = item
         end
 
