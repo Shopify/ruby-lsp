@@ -23,6 +23,7 @@ const WORKSPACE_TAG = new vscode.TestTag("workspace");
 const TEST_DIR_TAG = new vscode.TestTag("test_dir");
 const TEST_GROUP_TAG = new vscode.TestTag("test_group");
 const DEBUG_TAG = new vscode.TestTag("debug");
+const TEST_FILE_TAG = new vscode.TestTag("test_file");
 
 export class TestController {
   // Only public for testing
@@ -575,7 +576,7 @@ export class TestController {
         uri,
       );
       testItem.canResolveChildren = true;
-      testItem.tags = [DEBUG_TAG];
+      testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
       finalCollection.add(testItem);
     }
   }
@@ -680,9 +681,12 @@ export class TestController {
         new vscode.Position(start.line, start.column),
         new vscode.Position(end.line, end.column),
       );
+
+      const serverTags = item.tags.map((tag) => new vscode.TestTag(tag));
+
       testItem.tags = testItem.canResolveChildren
-        ? [TEST_GROUP_TAG, DEBUG_TAG]
-        : [DEBUG_TAG];
+        ? [TEST_GROUP_TAG, DEBUG_TAG, ...serverTags]
+        : [DEBUG_TAG, ...serverTags];
 
       parent.children.add(testItem);
 
