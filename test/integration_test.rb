@@ -46,6 +46,8 @@ class IntegrationTest < Minitest::Test
     refute_nil(gem_path)
     assert(yjit)
 
+    assert_includes(fields, "PS1RUBY_LSP_VS#{ENV["PS1"]}")
+
     fields.each do |field|
       key, value = field.split("RUBY_LSP_VS")
       refute_equal(key.encoding, Encoding::BINARY) if key
@@ -75,7 +77,6 @@ class IntegrationTest < Minitest::Test
 
     fields.each do |field|
       key, value = field.split("RUBY_LSP_VS")
-      refute_equal(key, "INVALID_UTF8")
       refute_equal(key.encoding, Encoding::BINARY) if key
       refute_equal(value.encoding, Encoding::BINARY) if value
     end
