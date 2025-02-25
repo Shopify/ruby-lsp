@@ -15,12 +15,13 @@ module RubyLsp
         #: String
         attr_reader :id, :label
 
-        #: (String id, String label, URI::Generic uri, Interface::Range range) -> void
-        def initialize(id, label, uri, range)
+        #: (String id, String label, URI::Generic uri, Interface::Range range, Array[Symbol] tags) -> void
+        def initialize(id, label, uri, range, tags: [])
           @id = id
           @label = label
           @uri = uri
           @range = range
+          @tags = tags
           @children = T.let({}, T::Hash[String, TestItem])
         end
 
@@ -37,6 +38,11 @@ module RubyLsp
         #: -> Array[TestItem]
         def children
           @children.values
+        end
+
+        #: (Symbol) -> bool
+        def tag?(tag)
+          @tags.include?(tag)
         end
 
         #: -> Hash[Symbol, untyped]

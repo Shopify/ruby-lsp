@@ -113,6 +113,8 @@ module RubyLsp
         diagnose_state(message)
       when "rubyLsp/discoverTests"
         discover_tests(message)
+      when "rubyLsp/resolveTestCommands"
+        resolve_test_commands(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -1415,6 +1417,16 @@ module RubyLsp
       document.cache_set("rubyLsp/discoverTests", items)
 
       send_message(Result.new(id: message[:id], response: items.map(&:to_hash)))
+    end
+
+    #: (Hash[Symbol, untyped] message) -> void
+    def resolve_test_commands(message)
+      items = message.dig(:params, :items)
+
+      send_message(Result.new(
+        id: message[:id],
+        response: { commands: Listeners::TestStyle.resolve_test_commands(items) },
+      ))
     end
   end
 end
