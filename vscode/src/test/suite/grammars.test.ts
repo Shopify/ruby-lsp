@@ -344,27 +344,48 @@ suite("Grammars", () => {
       test("inline method signature", () => {
         const ruby = "#: (String) -> (String | nil)";
         const expectedTokens = [
-          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [
             "String",
             ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "->",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.signature.return.rbs",
+            ],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [
             "String",
             ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
           [" ", ["meta.type.signature.rbs"]],
-          ["|", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "|",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
           ["nil", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
-          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -373,31 +394,61 @@ suite("Grammars", () => {
       test("inline method signature with block", () => {
         const ruby = "#: (String) { (String) -> boolish } -> void";
         const expectedTokens = [
-          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [
             "String",
             ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["{", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "{",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [
             "String",
             ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "->",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.signature.return.rbs",
+            ],
+          ],
           [" ", ["meta.type.signature.rbs"]],
           ["boolish", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          ["}", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "}",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "->",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.signature.return.rbs",
+            ],
+          ],
           [" ", ["meta.type.signature.rbs"]],
           ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
@@ -408,29 +459,68 @@ suite("Grammars", () => {
       test("inline method signature with &", () => {
         const ruby = "#: [X] (X & Object) -> Class[X]";
         const expectedTokens = [
-          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          ["[", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [
+            "[",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.type_parameters.rbs",
+            ],
+          ],
           ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          ["]", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [
+            "]",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.type_parameters.rbs",
+            ],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          ["&", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "&",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
           [
             "Object",
             ["meta.type.signature.rbs", "variable.other.constant.rbs"],
           ],
-          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "->",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.signature.return.rbs",
+            ],
+          ],
           [" ", ["meta.type.signature.rbs"]],
           ["Class", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          ["[", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [
+            "[",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.type_parameters.rbs",
+            ],
+          ],
           ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          ["]", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [
+            "]",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.type_parameters.rbs",
+            ],
+          ],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -439,19 +529,43 @@ suite("Grammars", () => {
       test("inline method signature * and **", () => {
         const ruby = "#: (*Foo, **Bar) -> void";
         const expectedTokens = [
-          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          ["(", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
-          ["*", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
+          [
+            "*",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           ["Foo", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [",", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ",",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["*", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
-          ["*", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "*",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
+          [
+            "*",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           ["Bar", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [")", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
           [" ", ["meta.type.signature.rbs"]],
-          ["->", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          [
+            "->",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.signature.return.rbs",
+            ],
+          ],
           [" ", ["meta.type.signature.rbs"]],
           ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
@@ -463,14 +577,18 @@ suite("Grammars", () => {
       test("inline method signature with keyword", () => {
         const ruby = "#: return: String";
         const expectedTokens = [
-          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           [
-            "return:",
+            "return",
             [
               "meta.type.signature.rbs",
               "constant.other.symbol.hashkey.parameter.function.rbs",
             ],
+          ],
+          [
+            ":",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
           ],
           [" ", ["meta.type.signature.rbs"]],
           [
@@ -500,7 +618,7 @@ suite("Grammars", () => {
         const ruby = "attr_reader :name #: String";
         const expectedTokens = [
           ["attr_reader :name ", ["meta.type.signature.rbs", "source.ruby"]],
-          ["#:", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           [
             "String",

@@ -8,10 +8,14 @@
   ],
   "repository": {
     "rbs-signature": {
-      "begin": "(?m)(^[^#\"']*)(#:)",
+      "begin": "(^[^#\"']*)(#:)",
       "beginCaptures": {
-        "1": { "name": "source.ruby" },
-        "2": { "name": "comment.line.number-sign.rbs" }
+        "1": {
+          "name": "source.ruby"
+        },
+        "2": {
+          "name": "comment.line.signature.rbs"
+        }
       },
       "end": "$",
       "name": "meta.type.signature.rbs",
@@ -21,28 +25,28 @@
           "name": "support.type.builtin.rbs"
         },
         {
-          "match": "\\b[A-Z][A-Za-z0-9_]*(\\?|\\b)",
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b",
           "name": "variable.other.constant.rbs"
         },
         {
           "match": "[\\[\\]]",
-          "name": "variable.other.constant.rbs"
+          "name": "punctuation.section.type_parameters.rbs"
         },
         {
-          "match": "(\\?|\\b)[a-z][A-Za-z0-9_]*:",
+          "match": "\\b[a-z][A-Za-z0-9_]*(?=:)",
           "name": "constant.other.symbol.hashkey.parameter.function.rbs"
         },
         {
-          "match": "(\\?|\\b)[a-z][A-Za-z0-9_]*\\b",
+          "match": "\\b[a-z][A-Za-z0-9_]*\\b",
           "name": "variable.parameter.function.rbs"
         },
         {
           "match": "->",
-          "name": "comment.line.number-sign.rbs"
+          "name": "punctuation.section.signature.return.rbs"
         },
         {
           "match": "[\\(\\)\\{\\},\\|\\*&:?]",
-          "name": "comment.line.number-sign.rbs"
+          "name": "punctuation.section.signature.rbs"
         }
       ]
     }
