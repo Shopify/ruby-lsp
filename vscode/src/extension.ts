@@ -29,7 +29,15 @@ export async function activate(context: vscode.ExtensionContext) {
   await migrateExperimentalFeaturesSetting();
 
   const rbs = new RBS();
-  context.subscriptions.push(rbs);
+
+  context.subscriptions.push(
+    rbs,
+    vscode.workspace.onDidChangeConfiguration(async (event) => {
+      if (event.affectsConfiguration("rubyLsp.sigOpacityLevel")) {
+        rbs.reload();
+      }
+    }),
+  );
 
   const logger = await createLogger(context);
   context.subscriptions.push(logger);
