@@ -52,6 +52,7 @@ module RubyLsp
             label: @label,
             uri: @uri,
             range: @range,
+            tags: @tags,
             children: children.map(&:to_hash),
           }
         end

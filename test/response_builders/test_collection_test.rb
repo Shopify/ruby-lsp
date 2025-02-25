@@ -46,7 +46,7 @@ module RubyLsp
     private
 
     def assert_expected_fields(hash)
-      [:id, :label, :uri, :range, :children].each do |field|
+      [:id, :label, :uri, :range, :children, :tags].each do |field|
         assert(hash[field])
       end
 
