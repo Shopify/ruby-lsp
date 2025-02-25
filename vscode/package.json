@@ -517,6 +517,11 @@
             }
           },
           "default": {}
+        },
+        "rubyLsp.sigOpacityLevel": {
+          "description": "Controls the level of opacity for inline RBS comment signatures",
+          "type": "string",
+          "default": "1"
         }
       }
     },

@@ -16,9 +16,10 @@ export class RBS {
   private disposables: vscode.Disposable[] = [];
 
   constructor() {
-    // Create decoration type with 40% opacity
     this.decorationType = vscode.window.createTextEditorDecorationType({
-      opacity: "0.4",
+      opacity: vscode.workspace
+        .getConfiguration("rubyLsp")
+        .get<string>("sigOpacityLevel")!,
     });
 
     // Register event handlers
@@ -28,6 +29,18 @@ export class RBS {
     );
 
     // Initial update
+    this.updateDecorations();
+  }
+
+  reload() {
+    const opacity = vscode.workspace
+      .getConfiguration("rubyLsp")
+      .get<string>("sigOpacityLevel")!;
+
+    this.decorationType.dispose();
+    this.decorationType = vscode.window.createTextEditorDecorationType({
+      opacity,
+    });
     this.updateDecorations();
   }
 
