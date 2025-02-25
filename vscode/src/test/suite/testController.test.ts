@@ -379,4 +379,124 @@ suite("TestController", () => {
     workspacesStub.restore();
     relativePathStub.restore();
   });
+
+  test("takes inclusions and exclusions into account", async () => {
+    const stub = sinon.stub(common, "featureEnabled").returns(true);
+    const controller = new TestController(
+      context,
+      FAKE_TELEMETRY,
+      () => undefined,
+      () => Promise.resolve(workspace),
+    );
+    stub.restore();
+
+    const workspacesStub = sinon
+      .stub(vscode.workspace, "workspaceFolders")
+      .get(() => [workspaceFolder]);
+
+    const relativePathStub = sinon
+      .stub(vscode.workspace, "asRelativePath")
+      .callsFake((uri) =>
+        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
+      );
+
+    await controller.testController.resolveHandler!(undefined);
+
+    const collection = controller.testController.items;
+    const testDir = collection.get(
+      vscode.Uri.joinPath(workspaceUri, "test").toString(),
+    );
+    const serverTest = testDir!.children.get(
+      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
+    )!;
+    const storeTest = testDir!.children.get(
+      vscode.Uri.joinPath(workspaceUri, "test", "store_test.rb").toString(),
+    )!;
+    let fakeClient = {
+      discoverTests: sinon.stub().resolves([
+        {
+          id: "ServerTest",
+          uri: "file:///test/server_test.rb",
+          label: "ServerTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 30, character: 3 },
+          },
+          tags: ["minitest"],
+          children: [
+            {
+              id: "ServerTest#test_server",
+              uri: "file:///test/server_test.rb",
+              label: "test_server",
+              range: {
+                start: { line: 1, character: 2 },
+                end: { line: 10, character: 3 },
+              },
+              tags: ["minitest"],
+              children: [],
+            },
+          ],
+        },
+      ]),
+      waitForIndexing: sinon.stub().resolves(),
+    };
+
+    workspace.lspClient = fakeClient as any;
+    await controller.testController.resolveHandler!(serverTest);
+
+    fakeClient = {
+      discoverTests: sinon.stub().resolves([
+        {
+          id: "StoreTest",
+          uri: "file:///test/store_test.rb",
+          label: "StoreTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 30, character: 3 },
+          },
+          tags: ["minitest"],
+          children: [
+            {
+              id: "StoreTest#test_store",
+              uri: "file:///test/store_test.rb",
+              label: "test_store",
+              range: {
+                start: { line: 1, character: 2 },
+                end: { line: 10, character: 3 },
+              },
+              tags: ["minitest"],
+              children: [],
+            },
+          ],
+        },
+      ]),
+      waitForIndexing: sinon.stub().resolves(),
+    };
+
+    workspace.lspClient = fakeClient as any;
+    await controller.testController.resolveHandler!(storeTest);
+
+    const excludedExample = serverTest.children
+      .get("ServerTest")!
+      .children.get("ServerTest#test_server")!;
+    assert.ok(excludedExample);
+
+    const filteredItems = controller.buildRequestTestItems(
+      [serverTest, storeTest],
+      [excludedExample],
+    );
+
+    assert.strictEqual(filteredItems.length, 1);
+    assert.strictEqual(filteredItems[0].id, storeTest.id);
+    assert.strictEqual(filteredItems[0].children.length, 1);
+    assert.strictEqual(filteredItems[0].children[0].id, "StoreTest");
+    assert.strictEqual(filteredItems[0].children[0].children.length, 1);
+    assert.strictEqual(
+      filteredItems[0].children[0].children[0].id,
+      "StoreTest#test_store",
+    );
+
+    workspacesStub.restore();
+    relativePathStub.restore();
+  });
 });

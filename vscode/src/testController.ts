@@ -7,7 +7,7 @@ import { CodeLens } from "vscode-languageclient/node";
 
 import { Workspace } from "./workspace";
 import { featureEnabled } from "./common";
-import { ServerTestItem } from "./client";
+import { LspTestItem, ServerTestItem } from "./client";
 
 const asyncExec = promisify(exec);
 
@@ -235,6 +235,29 @@ export class TestController {
       program: command,
       env: { ...workspace.ruby.env, DISABLE_SPRING: "1" },
     });
+  }
+
+  // Public for testing purposes. Receives the controller's inclusions and exclusions and builds request test items for
+  // the server to resolve the command
+  buildRequestTestItems(
+    inclusions: vscode.TestItem[],
+    exclusions: ReadonlyArray<vscode.TestItem> | undefined,
+  ): LspTestItem[] {
+    if (!exclusions) {
+      return inclusions.map((item) => this.testItemToServerItem(item));
+    }
+
+    const filtered: vscode.TestItem[] = [];
+
+    inclusions.forEach((item) => {
+      const includedItem = this.recursivelyFilter(item, exclusions);
+
+      if (includedItem) {
+        filtered.push(includedItem);
+      }
+    });
+
+    return filtered.map((item) => this.testItemToServerItem(item));
   }
 
   // Get an existing terminal or create a new one. For multiple workspaces, it's important to create a new terminal for
@@ -697,5 +720,68 @@ export class TestController {
         this.addDiscoveredItems(item.children, testItem);
       }
     });
+  }
+
+  private recursivelyFilter(
+    item: vscode.TestItem,
+    exclusions: ReadonlyArray<vscode.TestItem>,
+  ): vscode.TestItem | null {
+    // If the item is excluded, then remove it directly
+    if (exclusions.includes(item)) {
+      return null;
+    }
+
+    const childItems: vscode.TestItem[] = [];
+
+    // Recursively filter the children
+    item.children.forEach((child) => {
+      const filteredChild = this.recursivelyFilter(child, exclusions);
+
+      if (filteredChild) {
+        childItems.push(filteredChild);
+      }
+    });
+
+    // If this current item had children, but they were all filtered out by exclusions, then we cannot add this item to
+    // the included list or we're going to run unintended tests. For example, if all examples have been filtered out for
+    // a particular file, we should not include the test item for the file itself in the list, or else we will run all
+    // tests for that file and disregard the exclusions
+    if (item.children.size > 0 && childItems.length === 0) {
+      return null;
+    }
+
+    item.children.replace(childItems);
+    return item;
+  }
+
+  private testItemToServerItem(item: vscode.TestItem): LspTestItem {
+    const children: LspTestItem[] = [];
+
+    item.children.forEach((child) => {
+      children.push(this.testItemToServerItem(child));
+    });
+
+    let range;
+    if (item.range) {
+      range = {
+        start: {
+          line: item.range.start.line,
+          character: item.range.start.character,
+        },
+        end: {
+          line: item.range.end.line,
+          character: item.range.end.character,
+        },
+      };
+    }
+
+    return {
+      id: item.id,
+      label: item.label,
+      uri: item.uri!.toString(),
+      range,
+      children,
+      tags: item.tags.map((tag) => tag.id),
+    };
   }
 }
