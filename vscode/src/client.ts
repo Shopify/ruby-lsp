@@ -49,8 +49,8 @@ export interface ServerTestItem {
   label: string;
   uri: string;
   range: {
-    start: { line: number; column: number };
-    end: { line: number; column: number };
+    start: { line: number; character: number };
+    end: { line: number; character: number };
   };
   children: ServerTestItem[];
   tags: string[];

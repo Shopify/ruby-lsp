@@ -609,18 +609,21 @@ export class TestController {
     }
 
     let initialCollection = this.testController.items;
+    let workspaceFolder = workspaceFolders[0];
 
     // If there's more than one workspace folder, then the first level is the workspace
     if (workspaceFolders.length > 1) {
+      workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)!;
+
       initialCollection = initialCollection.get(
-        vscode.workspace.getWorkspaceFolder(uri)!.uri.toString(),
+        workspaceFolder.uri.toString(),
       )!.children;
     }
 
     // There's always a first level, but not always a second level
     const { firstLevelUri, secondLevelUri } = await this.directoryLevelUris(
       uri,
-      workspaceFolders[0],
+      workspaceFolder,
     );
 
     let item = initialCollection.get(firstLevelUri.toString());
@@ -678,8 +681,8 @@ export class TestController {
       const end = item.range.end;
 
       testItem.range = new vscode.Range(
-        new vscode.Position(start.line, start.column),
-        new vscode.Position(end.line, end.column),
+        new vscode.Position(start.line, start.character),
+        new vscode.Position(end.line, end.character),
       );
 
       const serverTags = item.tags.map((tag) => new vscode.TestTag(tag));
