@@ -2246,7 +2246,7 @@
       ]
     },
     {
-      "begin": "(?<={|{\\s|[^A-Za-z0-9_:@$]do|^do|[^A-Za-z0-9_:@$]do\\s|^do\\s)(\\|)",
+      "begin": "(?<={|{\\s+|[^A-Za-z0-9_:@$]do|^do|[^A-Za-z0-9_:@$]do\\s+|^do\\s+)(\\|)",
       "name": "meta.block.parameters.ruby",
       "captures": {
         "1": {
@@ -2260,7 +2260,7 @@
           "end": "(?=,|\\|\\s*)",
           "patterns": [
             {
-              "match": "\\G([&*]?)([a-zA-Z_][\\w_]*)",
+              "match": "\\G((?:&|\\*\\*?)?)([a-zA-Z_][\\w_]*)",
               "captures": {
                 "1": {
                   "name": "storage.type.variable.ruby"
