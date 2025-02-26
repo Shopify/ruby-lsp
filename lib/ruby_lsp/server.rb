@@ -498,11 +498,11 @@ module RubyLsp
           @global_state.index.handle_change(uri) do |index|
             index.delete(uri, skip_require_paths_tree: true)
             RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
-            dispatcher.dispatch(parse_result.value)
+            dispatcher.dispatch(document.ast)
           end
         end
       else
-        dispatcher.dispatch(parse_result.value)
+        dispatcher.dispatch(document.ast)
       end
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -537,7 +537,7 @@ module RubyLsp
 
       dispatcher = Prism::Dispatcher.new
       semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher, document, nil)
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
 
       send_message(Result.new(id: message[:id], response: semantic_highlighting.perform))
     end
@@ -563,7 +563,7 @@ module RubyLsp
         document,
         message.dig(:params, :previousResultId),
       )
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
@@ -592,7 +592,7 @@ module RubyLsp
         nil,
         range: range.dig(:start, :line)..range.dig(:end, :line),
       )
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
@@ -680,7 +680,7 @@ module RubyLsp
       end
 
       request = Requests::DocumentHighlight.new(@global_state, document, params[:position], dispatcher)
-      dispatcher.dispatch(document.parse_result.value)
+      dispatcher.dispatch(document.ast)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
@@ -823,7 +823,7 @@ module RubyLsp
       end
 
       request = Requests::InlayHints.new(document, hints_configurations, dispatcher)
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
       result = request.perform
       document.cache_set("textDocument/inlayHint", result)
 

@@ -14,7 +14,7 @@ module RubyLsp
         super()
         @document = document
         @range = range
-        @tree = T.let(document.parse_result.value, Prism::ProgramNode)
+        @tree = T.let(document.ast, Prism::ProgramNode)
       end
 
       # @override
