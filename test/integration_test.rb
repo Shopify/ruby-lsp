@@ -29,7 +29,7 @@ class IntegrationTest < Minitest::Test
   def test_activation_script_succeeds_even_on_binary_encoding
     ENV["LC_ALL"] = "C"
     ENV["LANG"] = "C"
-    ENV["PS1"] = "\xE2".b
+    ENV["PS1"] = "\xE2\x96\xB7".b
 
     _stdout, stderr, status = Open3.capture3(
       "ruby",
@@ -39,7 +39,36 @@ class IntegrationTest < Minitest::Test
 
     assert_equal(0, status.exitstatus, stderr)
 
-    activation_string = T.must(/RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/.match(stderr))[1]
+    activation_string = T.must(/RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr))[1]
+    version, gem_path, yjit, *fields = T.must(activation_string).split("RUBY_LSP_FS")
+
+    assert_equal(RUBY_VERSION, version)
+    refute_nil(gem_path)
+    assert(yjit)
+
+    assert_includes(fields, "PS1RUBY_LSP_VS#{ENV["PS1"]}")
+
+    fields.each do |field|
+      key, value = field.split("RUBY_LSP_VS")
+      refute_equal(key.encoding, Encoding::BINARY) if key
+      refute_equal(value.encoding, Encoding::BINARY) if value
+    end
+  end
+
+  def test_activation_script_succeeds_on_invalid_unicode
+    ENV["LC_ALL"] = "C"
+    ENV["LANG"] = "C"
+    ENV["INVALID_UTF8"] = "\xE2\x80".b
+
+    _stdout, stderr, status = Open3.capture3(
+      "ruby",
+      "-EUTF-8:UTF-8",
+      File.join(__dir__, "..", "vscode", "activation.rb"),
+    )
+
+    assert_equal(0, status.exitstatus, stderr)
+
+    activation_string = T.must(/RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr))[1]
     version, gem_path, yjit, *fields = T.must(activation_string).split("RUBY_LSP_FS")
 
     assert_equal(RUBY_VERSION, version)
