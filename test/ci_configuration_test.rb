@@ -5,6 +5,18 @@ require "test_helper"
 require "yaml"
 
 class CiConfigurationTest < Minitest::Test
+  def test_matrix_includes_minimum_ruby_version
+    minimum_ruby_version = minimum_ruby_version_from_gemspec
+
+    each_ci_matrix_ruby_entry do |matrix_ruby_versions, path|
+      assert_includes(
+        matrix_ruby_versions,
+        minimum_ruby_version,
+        "CI matrix #{path.join(".")} does not include minimum required ruby version #{minimum_ruby_version}",
+      )
+    end
+  end
+
   def test_matrix_includes_development_ruby_version
     development_ruby_version = development_ruby_version_from_dot_ruby_version_file
 
@@ -18,6 +30,14 @@ class CiConfigurationTest < Minitest::Test
   end
 
   private
+
+  def minimum_ruby_version_from_gemspec
+    minimum_ruby_version = File.read("ruby-lsp.gemspec")[/(?<=required_ruby_version = ">= ).*(?="$)/]
+
+    return minimum_ruby_version unless minimum_ruby_version.nil?
+
+    flunk("Failed to extract required_ruby_version from gemspec")
+  end
 
   def development_ruby_version_from_dot_ruby_version_file
     contents = File.read(".ruby-version").chomp
