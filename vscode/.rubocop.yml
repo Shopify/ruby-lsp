@@ -1,4 +1,7 @@
 inherit_from: ../.rubocop.yml
 
+AllCops:
+  TargetRubyVersion: 2.0 # We don't know the user's Ruby version yet, so we should support the oldest version we can
+
 Sorbet:
   Enabled: false

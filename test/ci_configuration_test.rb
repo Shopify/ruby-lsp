@@ -5,6 +5,14 @@ require "test_helper"
 require "yaml"
 
 class CiConfigurationTest < Minitest::Test
+  # As the VSCode extension activation script runs before we've checked the user's Ruby version
+  # (its purpose is to get that version so we can check it for compatibility), we need to test
+  # that the activation script works with the oldest Ruby version the user might have installed,
+  # regardless of if the current project is a Ruby project at all.
+  #
+  # 2.0 is the oldest Ruby version supported by RuboCop's TargetRubyVersion config, so we use that.
+  VSCODE_EXTENSION_ACTIVATION_RUBY_VERSION = "2.0"
+
   def test_matrix_includes_minimum_ruby_version
     minimum_ruby_version = minimum_ruby_version_from_gemspec
 
@@ -29,6 +37,14 @@ class CiConfigurationTest < Minitest::Test
     end
   end
 
+  def test_vscode_rubocop_config_targets_ancient_ruby_version
+    assert_equal(
+      target_ruby_version_from_vscode_rubocop_yml,
+      VSCODE_EXTENSION_ACTIVATION_RUBY_VERSION,
+      "VSCode rubocop config must target ruby version #{VSCODE_EXTENSION_ACTIVATION_RUBY_VERSION} to ensure activation works regardless of user's Ruby version",
+    )
+  end
+
   private
 
   def minimum_ruby_version_from_gemspec
@@ -47,6 +63,13 @@ class CiConfigurationTest < Minitest::Test
     flunk("Failed to extract major and minor version from .ruby-version file") if major_and_minor_only.nil?
 
     major_and_minor_only
+  end
+
+  def target_ruby_version_from_vscode_rubocop_yml
+    version = YAML.load_file("vscode/.rubocop.yml").dig("AllCops", "TargetRubyVersion")
+    flunk("Failed to extract target ruby version from vscode/.rubocop.yml file") if version.nil?
+
+    version.to_s
   end
 
   def each_ci_matrix_ruby_entry(&block)
