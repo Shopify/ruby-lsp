@@ -43,7 +43,7 @@ module RubyLsp
             addon.create_discover_tests_listener(@response_builder, @dispatcher, @document.uri)
           end
 
-          @dispatcher.visit(@document.parse_result.value)
+          @dispatcher.visit(@document.ast)
         else
           @global_state.synchronize do
             RubyIndexer::DeclarationListener.new(
@@ -64,7 +64,7 @@ module RubyLsp
             # Dispatch the events both for indexing the test file and discovering the tests. The order here is
             # important because we need the index to be aware of the existing classes/modules/methods before the test
             # listeners can do their work
-            @dispatcher.visit(@document.parse_result.value)
+            @dispatcher.visit(@document.ast)
           end
         end
 

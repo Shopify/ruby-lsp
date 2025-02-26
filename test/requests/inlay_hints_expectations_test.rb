@@ -15,7 +15,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
     request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     range = params.first
     ruby_range = range.dig(:start, :line)..range.dig(:end, :line)
 
@@ -37,7 +37,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: false })
     request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     assert_empty(request.perform)
   end
 
@@ -52,7 +52,7 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true })
     request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     assert_empty(request.perform)
   end
 end

@@ -12,7 +12,7 @@ module RubyLsp
         super()
         @document = document
         @range = range
-        @tree = document.parse_result.value #: Prism::ProgramNode
+        @tree = document.ast #: Prism::ProgramNode
       end
 
       # @override

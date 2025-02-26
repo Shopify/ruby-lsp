@@ -100,7 +100,7 @@ module RubyLsp
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = RubyDocument
-          .locate(@document.parse_result.value,
+          .locate(@document.ast,
             start_index,
             node_types: [
               Prism::StatementsNode,
@@ -207,7 +207,7 @@ module RubyLsp
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
         node_context = RubyDocument.locate(
-          @document.parse_result.value,
+          @document.ast,
           start_index,
           node_types: [Prism::DefNode],
           code_units_cache: @document.code_units_cache,

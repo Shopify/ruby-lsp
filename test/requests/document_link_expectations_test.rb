@@ -27,7 +27,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     parse_result = document.parse_result
     listener = RubyLsp::Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
-    dispatcher.dispatch(parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
