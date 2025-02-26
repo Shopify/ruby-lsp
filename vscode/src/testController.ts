@@ -247,7 +247,7 @@ export class TestController {
       return inclusions.map((item) => this.testItemToServerItem(item));
     }
 
-    const filtered: vscode.TestItem[] = [];
+    const filtered: LspTestItem[] = [];
 
     inclusions.forEach((item) => {
       const includedItem = this.recursivelyFilter(item, exclusions);
@@ -257,7 +257,7 @@ export class TestController {
       }
     });
 
-    return filtered.map((item) => this.testItemToServerItem(item));
+    return filtered;
   }
 
   // Get an existing terminal or create a new one. For multiple workspaces, it's important to create a new terminal for
@@ -725,13 +725,13 @@ export class TestController {
   private recursivelyFilter(
     item: vscode.TestItem,
     exclusions: ReadonlyArray<vscode.TestItem>,
-  ): vscode.TestItem | null {
+  ): LspTestItem | null {
     // If the item is excluded, then remove it directly
     if (exclusions.includes(item)) {
       return null;
     }
 
-    const childItems: vscode.TestItem[] = [];
+    const childItems: LspTestItem[] = [];
 
     // Recursively filter the children
     item.children.forEach((child) => {
@@ -750,8 +750,38 @@ export class TestController {
       return null;
     }
 
-    item.children.replace(childItems);
-    return item;
+    const lspTestItem: LspTestItem = {
+      id: item.id,
+      label: item.label,
+      uri: item.uri!.toString(),
+      tags: item.tags.map((tag) => tag.id),
+      children: [],
+    };
+
+    if (item.range) {
+      (lspTestItem as ServerTestItem).range = {
+        start: {
+          line: item.range.start.line,
+          character: item.range.start.character,
+        },
+        end: {
+          line: item.range.end.line,
+          character: item.range.end.character,
+        },
+      };
+    }
+
+    // If none of the item's children were excluded, then we want to execute that entire group of tests in one go. For
+    // example, if a test class has 3 examples and none of them were excluded, we can simply execute the test class
+    // entirely.
+    //
+    // If the children of the item have been partially filtered, then we need to include which items we should execute
+    // in the list
+    if (item.children.size !== childItems.length) {
+      lspTestItem.children = childItems;
+    }
+
+    return lspTestItem;
   }
 
   private testItemToServerItem(item: vscode.TestItem): LspTestItem {
