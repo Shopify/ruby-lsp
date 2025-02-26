@@ -37,6 +37,14 @@ class CiConfigurationTest < Minitest::Test
     end
   end
 
+  def test_activation_matrix_includes_ancient_ruby_version
+    assert_includes(
+      activation_matrix_ruby_versions,
+      VSCODE_EXTENSION_ACTIVATION_RUBY_VERSION,
+      "VSCode extension activation CI matrix must include #{VSCODE_EXTENSION_ACTIVATION_RUBY_VERSION} to ensure activation works regardless of user's Ruby version",
+    )
+  end
+
   def test_vscode_rubocop_config_targets_ancient_ruby_version
     assert_equal(
       target_ruby_version_from_vscode_rubocop_yml,
@@ -70,6 +78,13 @@ class CiConfigurationTest < Minitest::Test
     flunk("Failed to extract target ruby version from vscode/.rubocop.yml file") if version.nil?
 
     version.to_s
+  end
+
+  def activation_matrix_ruby_versions
+    versions = read_ci_workflow.dig("jobs", "verify_vscode_ruby_activation", "strategy", "matrix", "ruby")
+    flunk("Failed to extract ruby versions from activation matrix") if versions.nil?
+
+    versions
   end
 
   def each_ci_matrix_ruby_entry(&block)
