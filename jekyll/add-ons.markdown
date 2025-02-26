@@ -286,13 +286,13 @@ class MyIndexingEnhancement < RubyIndexer::Enhancement
     # Create the array of signatures that this method will accept. Every signatures is composed of a list of
     # parameters. The parameter classes represent each type of parameter
     signatures = [
-      RubyIndexer::Entry::Signature.new([RubyIndexer::Entry::RequiredParameter.new(name: :a)])
+      RubyIndexer::Entry::Signature.new([RubyIndexer::Entry::RequiredParameter.new(name: :a)]),
     ]
 
     @listener.add_method(
       "new_method", # Name of the method
       location,     # Prism location for the node defining this method
-      signatures    # Signatures available to invoke this method
+      signatures,   # Signatures available to invoke this method
     )
   end
 
@@ -576,7 +576,7 @@ require "ruby_lsp/test_helper"
 
 class MyAddonTest < Minitest::Test
   def test_my_addon_works
-    source =  <<~RUBY
+    source = <<~RUBY
       # Some test code that allows you to trigger your add-on's contribution
       class Foo
         def something
@@ -595,9 +595,9 @@ class MyAddonTest < Minitest::Test
           },
           position: {
             line: 3,
-            character: 5
-          }
-        }
+            character: 5,
+          },
+        },
       )
 
       # Pop the server's response to the definition request
