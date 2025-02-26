@@ -14,7 +14,7 @@ class FoldingRangesExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     parse_result = document.parse_result
     listener = RubyLsp::Requests::FoldingRanges.new(parse_result.comments, dispatcher)
-    dispatcher.dispatch(parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 end
