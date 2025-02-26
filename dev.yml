@@ -3,6 +3,7 @@ name: ruby-lsp
 type: ruby
 
 up:
+  - submodules
   - ruby
   - bundler
   - node:
