@@ -190,7 +190,6 @@ module RubyLsp
     class Addon < ::RubyLsp::Addon
       def activate(global_state, message_queue)
         @message_queue = message_queue
-        @config = SomeConfiguration.new
       end
 
       def deactivate
@@ -207,7 +206,7 @@ module RubyLsp
       def create_hover_listener(response_builder, node_context, dispatcher)
         # Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any
         # pre-computed information in the add-on. These factory methods are invoked on every request
-        Hover.new(response_builder, @config, dispatcher)
+        Hover.new(response_builder, dispatcher)
       end
     end
 
@@ -222,9 +221,8 @@ module RubyLsp
       # to this object, which will then build the Ruby LSP's response.
       # Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).
       # See "Sending notifications to the client" for more information.
-      def initialize(response_builder, config, dispatcher)
+      def initialize(response_builder, dispatcher)
         @response_builder = response_builder
-        @config = config
 
         # Register that this listener will handle `on_constant_read_node_enter` events (i.e.: whenever a constant read
         # is found in the code)
