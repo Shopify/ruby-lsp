@@ -317,7 +317,7 @@ repository is.
 Consider a project where the top level of the repository is a Rails application and a sub-directory called `frontend`
 contains a React application that implements the frontend layer.
 
-```
+```txt
 my_project/
   frontend/
   Gemfile
@@ -354,7 +354,7 @@ A possible configuration for the `super_awesome_project` would be this:
 
 Now consider a monorepo where both the client and the server are under sub-directories.
 
-```
+```txt
 my_project/
   client/
   server/

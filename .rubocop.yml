@@ -16,11 +16,10 @@ AllCops:
     - "sorbet/rbi/shims/**/*.rbi"
   Exclude:
     - "vendor/**/*"
-    - "vscode/**/*"
+    - "vscode/node_modules/**/*"
     - "features/**/*"
     - "test/fixtures/**/*"
     - "test/expectations/**/*"
-    - "jekyll/**/*"
 
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true
