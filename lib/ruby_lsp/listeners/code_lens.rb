@@ -20,8 +20,6 @@ module RubyLsp
       )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
       SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
-      DESCRIBE_KEYWORD = T.let(:describe, Symbol)
-      IT_KEYWORD = T.let(:it, Symbol)
       DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
 
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens] response_builder, GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
@@ -144,15 +142,13 @@ module RubyLsp
           return
         end
 
-        if [DESCRIBE_KEYWORD, IT_KEYWORD].include?(name)
-          case name
-          when DESCRIBE_KEYWORD
-            add_spec_code_lens(node, kind: :group)
-            @group_id_stack.push(@group_id)
-            @group_id += 1
-          when IT_KEYWORD
-            add_spec_code_lens(node, kind: :example)
-          end
+        case name
+        when :describe
+          add_spec_code_lens(node, kind: :group)
+          @group_id_stack.push(@group_id)
+          @group_id += 1
+        when :it, :specify # `specify` is an alias for `it`
+          add_spec_code_lens(node, kind: :example)
         end
       end
 
@@ -160,7 +156,7 @@ module RubyLsp
       def on_call_node_leave(node)
         _, prev_visibility = @visibility_stack.pop
         @visibility_stack.push([prev_visibility, prev_visibility])
-        if node.name == DESCRIBE_KEYWORD
+        if node.name == :describe
           @group_id_stack.pop
           @group_stack.pop
         end

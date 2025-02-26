@@ -51,7 +51,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
   def test_command_generation_for_minitest_spec
     stub_test_library("minitest")
     source = <<~RUBY
-      class FooTest < MiniTest::Test
+      class FooTest < MiniTest::Spec
         describe "a" do
           it "b"
         end
@@ -83,6 +83,26 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       "bundle exec ruby -Ispec /spec/fake.rb --name \"/^FooTest::a#test_0001_b$/\"",
       T.must(response[7]).command.arguments[2],
     )
+  end
+
+  def test_command_generation_for_minitest_spec_handles_specify_alias_for_it
+    stub_test_library("minitest")
+    source = <<~RUBY
+      describe "a" do
+        specify "b"
+      end
+    RUBY
+    uri = URI("file:///spec/fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    dispatcher.dispatch(document.parse_result.value)
+    response = listener.perform
+
+    # 3 for the describe, 3 for the specify
+    assert_equal(6, response.size)
   end
 
   def test_command_generation_for_test_unit
