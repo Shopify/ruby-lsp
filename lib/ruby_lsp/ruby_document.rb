@@ -5,7 +5,7 @@ module RubyLsp
   class RubyDocument < Document
     extend T::Generic
 
-    ParseResultType = type_member { { fixed: Prism::ParseResult } }
+    ParseResultType = type_member { { fixed: Prism::ParseLexResult } }
 
     METHODS_THAT_CHANGE_DECLARATIONS = [
       :private_constant,
@@ -142,9 +142,14 @@ module RubyLsp
       return false unless @needs_parsing
 
       @needs_parsing = false
-      @parse_result = Prism.parse(@source)
+      @parse_result = Prism.parse_lex(@source)
       @code_units_cache = @parse_result.code_units_cache(@encoding)
       true
+    end
+
+    #: -> Prism::ProgramNode
+    def ast
+      @parse_result.value.first
     end
 
     # @override
@@ -184,7 +189,7 @@ module RubyLsp
       start_position, end_position = find_index_by_position(range[:start], range[:end])
 
       desired_range = (start_position...end_position)
-      queue = @parse_result.value.child_nodes.compact #: Array[Prism::Node?]
+      queue = ast.child_nodes.compact #: Array[Prism::Node?]
 
       until queue.empty?
         candidate = queue.shift
@@ -212,7 +217,7 @@ module RubyLsp
       char_position, _ = find_index_by_position(position)
 
       RubyDocument.locate(
-        @parse_result.value,
+        ast,
         char_position,
         code_units_cache: @code_units_cache,
         node_types: node_types,
