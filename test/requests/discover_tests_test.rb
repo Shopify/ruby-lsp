@@ -215,6 +215,93 @@ module RubyLsp
       end
     end
 
+    def test_discovers_top_level_specs
+      source = File.read("test/fixtures/minitest_spec_simple.rb")
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["BogusSpec"], items.map { |i| i[:label] })
+      end
+    end
+
+    def test_discovers_nested_specs
+      source = File.read("test/fixtures/minitest_spec_nested.rb")
+
+      with_minitest_spec_configured(source) do |items|
+        top_level_specs = items[0][:children]
+        assert_equal(
+          ["First Spec"],
+          top_level_specs.map { |i| i[:label] },
+        )
+
+        nested_specs = top_level_specs[0][:children]
+        assert_equal(
+          ["test one", "test two", "test three"],
+          nested_specs.map { |i| i[:label] },
+        )
+      end
+    end
+
+    def test_discovers_specs_without_class
+      source = File.read("test/fixtures/minitest_spec_tests.rb")
+
+      with_minitest_spec_configured(source) do |items|
+        top_level_specs = items
+        assert_equal(
+          ["Foo", "Foo::Bar", "Baz"],
+          top_level_specs.map { |i| i[:label] },
+        )
+
+        nested_specs = top_level_specs[0][:children]
+        assert_equal(
+          ["it_level_one", "nested", "it_level_one_again"],
+          nested_specs.map { |i| i[:label] },
+        )
+      end
+    end
+
+    def test_discovers_dynamic_spec_names
+      source = File.read("test/fixtures/minitest_spec_dynamic_name.rb")
+
+      with_minitest_spec_configured(source) do |items|
+        nested_specs = items[0][:children][0][:children]
+        assert_equal(
+          ["dynamic_name"],
+          nested_specs.map { |i| i[:label] },
+        )
+      end
+    end
+
+    def test_handles_empty_specs
+      source = File.read("test/fixtures/minitest_spec_simple.rb")
+
+      with_minitest_spec_configured(source) do |items|
+        nested_specs = items[0][:children][0][:children]
+        assert_empty(nested_specs)
+      end
+    end
+
+    def test_handles_mixed_testing_styles_in_single_file
+      source = <<~RUBY
+        class FooSpec < Minitest::Spec
+          it "does something" do
+          end
+
+          def test_also_valid; end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["FooSpec"], items.map { |i| i[:label] })
+        assert_equal(
+          [
+            "does something",
+            "test_also_valid",
+          ],
+          items[0][:children].map { |i| i[:label] },
+        )
+      end
+    end
+
     private
 
     def with_minitest_test(source, &block)
@@ -271,6 +358,25 @@ module RubyLsp
             class TestCase < Minitest::Test
               extend Testing::Declarative
             end
+          end
+        RUBY
+
+        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
+          textDocument: { uri: uri },
+        })
+
+        items = get_response(server)
+
+        yield items
+      end
+    end
+
+    def with_minitest_spec_configured(source, &block)
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(uri, <<~RUBY)
+          module Minitest
+            class Test; end
+            class Spec < Test; end
           end
         RUBY
 
