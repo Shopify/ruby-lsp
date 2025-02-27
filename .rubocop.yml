@@ -52,7 +52,6 @@ Sorbet/TrueSigil:
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
   Exclude:
     - "**/*.rake"
-    - "lib/**/*.rb"
 
 Sorbet/StrictSigil:
   Enabled: true
