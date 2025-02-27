@@ -4,7 +4,6 @@
 module RubyLsp
   module ResponseBuilders
     class CollectionResponseBuilder < ResponseBuilder
-      extend T::Sig
       extend T::Generic
 
       ResponseType = type_member { { upper: Object } }

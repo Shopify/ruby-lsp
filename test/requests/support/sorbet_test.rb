@@ -4,8 +4,6 @@
 require "test_helper"
 
 class SorbetTest < Minitest::Test
-  extend T::Sig
-
   def test_abstract!
     assert(annotation?("abstract!"))
     assert(annotation?("abstract!()"))

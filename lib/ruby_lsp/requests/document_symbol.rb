@@ -13,11 +13,7 @@ module RubyLsp
     # In VS Code, symbol search known as 'Go To Symbol in Editor' and can be accessed with Ctrl/Cmd-Shift-O,
     # or by opening the command palette and inserting an `@` symbol.
     class DocumentSymbol < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::DocumentSymbolOptions
         def provider
           Interface::DocumentSymbolOptions.new

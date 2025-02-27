@@ -9,7 +9,6 @@ module RubyLsp
   module Requests
     module Support
       class RuboCopFormatter
-        extend T::Sig
         include Formatter
 
         #: -> void

@@ -4,8 +4,6 @@
 module RubyLsp
   module ResponseBuilders
     class SignatureHelp < ResponseBuilder
-      extend T::Sig
-
       ResponseType = type_member { { fixed: T.nilable(Interface::SignatureHelp) } }
 
       #: -> void

@@ -3,7 +3,6 @@
 
 module RubyLsp
   class RubyDocument < Document
-    extend T::Sig
     extend T::Generic
 
     ParseResultType = type_member { { fixed: Prism::ParseResult } }
@@ -35,8 +34,6 @@ module RubyLsp
     end
 
     class << self
-      extend T::Sig
-
       #: (Prism::Node node, Integer char_position, code_units_cache: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache), ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
       def locate(node, char_position, code_units_cache:, node_types: [])
         queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])

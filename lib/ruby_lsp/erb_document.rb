@@ -3,7 +3,6 @@
 
 module RubyLsp
   class ERBDocument < Document
-    extend T::Sig
     extend T::Generic
 
     ParseResultType = type_member { { fixed: Prism::ParseResult } }
@@ -73,8 +72,6 @@ module RubyLsp
     end
 
     class ERBScanner
-      extend T::Sig
-
       #: String
       attr_reader :ruby, :host_language
 

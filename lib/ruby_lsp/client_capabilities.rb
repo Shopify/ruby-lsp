@@ -5,8 +5,6 @@ module RubyLsp
   # This class stores all client capabilities that the Ruby LSP and its add-ons depend on to ensure that we're
   # not enabling functionality unsupported by the editor connecting to the server
   class ClientCapabilities
-    extend T::Sig
-
     #: bool
     attr_reader :supports_watching_files,
       :supports_request_delegation,

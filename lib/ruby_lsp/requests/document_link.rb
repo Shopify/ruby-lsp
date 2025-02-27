@@ -9,11 +9,7 @@ module RubyLsp
     # makes `# source://PATH_TO_FILE#line` comments in a Ruby/RBI file clickable if the file exists.
     # When the user clicks the link, it'll open that location.
     class DocumentLink < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::DocumentLinkOptions
         def provider
           Interface::DocumentLinkOptions.new(resolve_provider: false)

@@ -7,8 +7,6 @@ module RubyLsp
     # request informs the editor of RuboCop quick fixes that can be applied. These are accessible by hovering over a
     # specific diagnostic.
     class CodeActions < Request
-      extend T::Sig
-
       EXTRACT_TO_VARIABLE_TITLE = "Refactor: Extract Variable"
       EXTRACT_TO_METHOD_TITLE = "Refactor: Extract Method"
       TOGGLE_BLOCK_STYLE_TITLE = "Refactor: Toggle block style"
@@ -29,8 +27,6 @@ module RubyLsp
       )
 
       class << self
-        extend T::Sig
-
         #: -> Interface::CodeActionRegistrationOptions
         def provider
           Interface::CodeActionRegistrationOptions.new(

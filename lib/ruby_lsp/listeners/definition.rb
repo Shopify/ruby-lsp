@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class Definition
-      extend T::Sig
       include Requests::Support::Common
 
       MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER = 10

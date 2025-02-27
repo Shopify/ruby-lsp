@@ -3,7 +3,6 @@
 
 module RubyLsp
   class RBSDocument < Document
-    extend T::Sig
     extend T::Generic
 
     ParseResultType = type_member { { fixed: T::Array[RBS::AST::Declarations::Base] } }

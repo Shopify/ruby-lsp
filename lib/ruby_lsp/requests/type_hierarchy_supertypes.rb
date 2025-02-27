@@ -7,8 +7,6 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#typeHierarchy_supertypes)
     # displays the list of ancestors (supertypes) for the selected type.
     class TypeHierarchySupertypes < Request
-      extend T::Sig
-
       include Support::Common
 
       #: (RubyIndexer::Index index, Hash[Symbol, untyped] item) -> void

@@ -14,7 +14,6 @@ module RubyLsp
     # At most 10 definitions are included, to ensure low latency during request processing and rendering the completion
     # item.
     class CompletionResolve < Request
-      extend T::Sig
       include Requests::Support::Common
 
       # set a limit on the number of documentation entries returned, to avoid rendering performance issues

@@ -7,14 +7,11 @@ module RubyLsp
     # [rename](https://microsoft.github.io/language-server-protocol/specification#textDocument_rename)
     # request renames all instances of a symbol in a document.
     class Rename < Request
-      extend T::Sig
       include Support::Common
 
       class InvalidNameError < StandardError; end
 
       class << self
-        extend T::Sig
-
         #: -> Interface::RenameOptions
         def provider
           Interface::RenameOptions.new(prepare_provider: true)

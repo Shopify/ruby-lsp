@@ -3,8 +3,6 @@
 
 module RubyLsp
   class Store
-    extend T::Sig
-
     class NonExistingDocumentError < StandardError; end
 
     #: Hash[Symbol, RequestConfig]

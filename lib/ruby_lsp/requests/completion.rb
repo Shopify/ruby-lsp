@@ -8,11 +8,7 @@ module RubyLsp
     # The [completion](https://microsoft.github.io/language-server-protocol/specification#textDocument_completion)
     # suggests possible completions according to what the developer is typing.
     class Completion < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::CompletionOptions
         def provider
           Interface::CompletionOptions.new(

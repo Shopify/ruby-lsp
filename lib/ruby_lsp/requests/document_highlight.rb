@@ -13,8 +13,6 @@ module RubyLsp
     # For writable elements like constants or variables, their read/write occurrences should be highlighted differently.
     # This is achieved by sending different "kind" attributes to the editor (2 for read and 3 for write).
     class DocumentHighlight < Request
-      extend T::Sig
-
       #: (GlobalState global_state, (RubyDocument | ERBDocument) document, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher) -> void
       def initialize(global_state, document, position, dispatcher)
         super()

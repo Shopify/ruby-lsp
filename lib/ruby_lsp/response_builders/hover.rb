@@ -4,7 +4,6 @@
 module RubyLsp
   module ResponseBuilders
     class Hover < ResponseBuilder
-      extend T::Sig
       extend T::Generic
 
       ResponseType = type_member { { fixed: String } }

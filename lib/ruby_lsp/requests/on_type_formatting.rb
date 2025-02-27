@@ -6,11 +6,7 @@ module RubyLsp
     # The [on type formatting](https://microsoft.github.io/language-server-protocol/specification#textDocument_onTypeFormatting)
     # request formats code as the user is typing. For example, automatically adding `end` to class definitions.
     class OnTypeFormatting < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::DocumentOnTypeFormattingRegistrationOptions
         def provider
           Interface::DocumentOnTypeFormattingRegistrationOptions.new(

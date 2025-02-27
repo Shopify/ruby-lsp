@@ -3,8 +3,6 @@
 
 module RubyLsp
   class Server < BaseServer
-    extend T::Sig
-
     # Only for testing
     #: GlobalState
     attr_reader :global_state

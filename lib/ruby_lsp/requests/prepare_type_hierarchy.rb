@@ -9,13 +9,9 @@ module RubyLsp
     #
     # Currently only supports supertypes due to a limitation of the index.
     class PrepareTypeHierarchy < Request
-      extend T::Sig
-
       include Support::Common
 
       class << self
-        extend T::Sig
-
         #: -> Interface::TypeHierarchyOptions
         def provider
           Interface::TypeHierarchyOptions.new

@@ -9,11 +9,7 @@ module RubyLsp
     # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
     # request informs the editor of the correct token types to provide consistent and accurate highlighting for themes.
     class SemanticHighlighting < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::SemanticTokensRegistrationOptions
         def provider
           Interface::SemanticTokensRegistrationOptions.new(

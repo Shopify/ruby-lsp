@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class FoldingRanges
-      extend T::Sig
       include Requests::Support::Common
 
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange] response_builder, Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void

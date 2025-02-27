@@ -6,7 +6,6 @@ require "shellwords"
 module RubyLsp
   module Listeners
     class CodeLens
-      extend T::Sig
       include Requests::Support::Common
 
       BASE_COMMAND = T.let(

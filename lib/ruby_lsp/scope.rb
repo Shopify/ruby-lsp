@@ -3,8 +3,6 @@
 
 module RubyLsp
   class Scope
-    extend T::Sig
-
     #: Scope?
     attr_reader :parent
 
@@ -33,8 +31,6 @@ module RubyLsp
     end
 
     class Local
-      extend T::Sig
-
       #: Symbol
       attr_reader :type
 

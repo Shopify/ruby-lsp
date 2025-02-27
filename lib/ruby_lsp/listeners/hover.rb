@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class Hover
-      extend T::Sig
       include Requests::Support::Common
 
       ALLOWED_TARGETS = T.let(

@@ -64,8 +64,6 @@ module RubyLsp
 
   class Notification < Message
     class << self
-      extend T::Sig
-
       #: (String message, ?type: Integer) -> Notification
       def window_show_message(message, type: Constant::MessageType::INFO)
         new(
@@ -141,8 +139,6 @@ module RubyLsp
       end
     end
 
-    extend T::Sig
-
     # @override
     #: -> Hash[Symbol, untyped]
     def to_hash
@@ -153,11 +149,7 @@ module RubyLsp
   end
 
   class Request < Message
-    extend T::Sig
-
     class << self
-      extend T::Sig
-
       #: (Integer id, (Interface::RelativePattern | String) pattern, ?kind: Integer, ?registration_id: String?) -> Request
       def register_watched_files(
         id,
@@ -201,8 +193,6 @@ module RubyLsp
   end
 
   class Error
-    extend T::Sig
-
     #: String
     attr_reader :message
 
@@ -232,8 +222,6 @@ module RubyLsp
 
   # The final result of running a request before its IO is finalized
   class Result
-    extend T::Sig
-
     #: untyped
     attr_reader :response
 
@@ -254,8 +242,6 @@ module RubyLsp
 
   # A request configuration, to turn on/off features
   class RequestConfig
-    extend T::Sig
-
     #: Hash[Symbol, bool]
     attr_accessor :configuration
 

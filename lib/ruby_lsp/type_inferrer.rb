@@ -5,8 +5,6 @@ module RubyLsp
   # A minimalistic type checker to try to resolve types that can be inferred without requiring a type system or
   # annotations
   class TypeInferrer
-    extend T::Sig
-
     #: (RubyIndexer::Index index) -> void
     def initialize(index)
       @index = index
@@ -168,8 +166,6 @@ module RubyLsp
 
     # A known type
     class Type
-      extend T::Sig
-
       #: String
       attr_reader :name
 

@@ -5,8 +5,6 @@ module RubyLsp
   module Requests
     module Support
       class SelectionRange < Interface::SelectionRange
-        extend T::Sig
-
         #: (Hash[Symbol, untyped] position) -> bool
         def cover?(position)
           start_covered = range.start.line < position[:line] ||

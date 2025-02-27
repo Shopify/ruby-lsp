@@ -3,8 +3,6 @@
 
 module RubyIndexer
   class Configuration
-    extend T::Sig
-
     CONFIGURATION_SCHEMA = T.let(
       {
         "excluded_gems" => Array,

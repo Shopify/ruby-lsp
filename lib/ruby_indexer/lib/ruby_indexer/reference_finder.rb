@@ -3,8 +3,6 @@
 
 module RubyIndexer
   class ReferenceFinder
-    extend T::Sig
-
     class Target
       extend T::Helpers
 
@@ -12,8 +10,6 @@ module RubyIndexer
     end
 
     class ConstTarget < Target
-      extend T::Sig
-
       #: String
       attr_reader :fully_qualified_name
 
@@ -25,8 +21,6 @@ module RubyIndexer
     end
 
     class MethodTarget < Target
-      extend T::Sig
-
       #: String
       attr_reader :method_name
 
@@ -38,8 +32,6 @@ module RubyIndexer
     end
 
     class InstanceVariableTarget < Target
-      extend T::Sig
-
       #: String
       attr_reader :name
 
@@ -51,8 +43,6 @@ module RubyIndexer
     end
 
     class Reference
-      extend T::Sig
-
       #: String
       attr_reader :name
 

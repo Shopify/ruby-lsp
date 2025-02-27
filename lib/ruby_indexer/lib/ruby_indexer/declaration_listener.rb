@@ -3,8 +3,6 @@
 
 module RubyIndexer
   class DeclarationListener
-    extend T::Sig
-
     OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
     BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
 

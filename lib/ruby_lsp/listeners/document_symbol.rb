@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class DocumentSymbol
-      extend T::Sig
       include Requests::Support::Common
 
       ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])

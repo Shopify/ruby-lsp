@@ -3,8 +3,6 @@
 
 module RubyLsp
   class GlobalState
-    extend T::Sig
-
     #: String
     attr_reader :test_library
 
