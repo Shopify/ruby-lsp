@@ -264,14 +264,14 @@ module RubyIndexer
     # Checks if the test file is never supposed to be ignored from indexing despite matching exclusion patterns, like
     # `test_helper.rb` or `test_case.rb`. Also takes into consideration the possibility of finding these files under
     # fixtures or inside gem source code if the bundle path points to a directory inside the workspace
-    sig { params(path: String, bundle_path: T.nilable(String)).returns(T::Boolean) }
+    #: (String path, String? bundle_path) -> bool
     def test_files_ignored_from_exclusion?(path, bundle_path)
       ["test_case.rb", "test_helper.rb"].include?(File.basename(path)) &&
         !File.fnmatch?("**/fixtures/**/*", path, File::FNM_PATHNAME | File::FNM_EXTGLOB) &&
         (!bundle_path || !path.start_with?(bundle_path))
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def top_level_directories
       excluded_directories = ["tmp", "node_modules", "sorbet"]
 

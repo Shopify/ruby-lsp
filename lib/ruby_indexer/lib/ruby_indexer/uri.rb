@@ -35,7 +35,7 @@ module URI
       end
     end
 
-    sig { returns(T.nilable(String)) }
+    #: String?
     attr_accessor :require_path
 
     #: (String load_path_entry) -> void
