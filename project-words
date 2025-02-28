@@ -100,6 +100,9 @@ subexpression
 supertypes
 Supertypes
 suppo
+testresult
+testrunner
+testrunnermediator
 truffleruby
 unaliased
 unindexed

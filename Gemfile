@@ -21,6 +21,7 @@ group :development do
   gem "rubocop", "~> 1.70"
   gem "simplecov", require: false
   gem "syntax_tree", ">= 6.1.1", "< 7"
+  gem "test-unit", require: false
 
   platforms :ruby do # C Ruby (MRI), Rubinius or TruffleRuby, but NOT Windows
     # sorbet-static is not available on Windows. We also skip Tapioca since it depends on sorbet-static-and-runtime

@@ -67,6 +67,7 @@ Sorbet/StrictSigil:
     - "lib/ruby_lsp/load_sorbet.rb"
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
     - "lib/ruby_lsp/test_helper.rb"
+    - "lib/ruby_lsp/test_unit_test_runner.rb" # runs as part of host app where sorbet-runtime may not be available
 
 Layout/ClassStructure:
   Enabled: true
