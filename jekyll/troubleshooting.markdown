@@ -156,8 +156,8 @@ One scenario where this is useful is if the user doesn't have permissions for th
 `gem install` fails. For example, when using the system Ruby on certain Linux distributions.
 
 {: .note }
-Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
-Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
+> Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
+> Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
 > (and potentially other version managers) override `GEM_HOME` to include the version patch resulting in
 > `~/.gem/ruby/3.3.1`. When you install a gem using `gem install --user-install`, RubyGems ignores the `GEM_HOME`
 > override and installs the gem inside `~/.gem/ruby/3.3.0`. This results in executables not being found because `chruby`
