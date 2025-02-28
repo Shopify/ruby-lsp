@@ -233,5 +233,10 @@ module RubyLsp
     # @overridable
     #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, NodeContext node_context, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
     def create_completion_listener(response_builder, node_context, dispatcher, uri); end
+
+    # Creates a new Discover Tests listener. This method is invoked on every DiscoverTests request
+    # @overridable
+    #: (ResponseBuilders::TestCollection response_builder, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
+    def create_discover_tests_listener(response_builder, dispatcher, uri); end
   end
 end

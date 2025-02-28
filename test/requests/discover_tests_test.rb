@@ -316,7 +316,109 @@ module RubyLsp
       end
     end
 
+    def test_discover_tests_addons
+      source = <<~RUBY
+        class MyTest
+          test "should do something" do
+          end
+
+          test "should do something else" do
+          end
+        end
+      RUBY
+
+      begin
+        create_test_discovery_addon
+
+        with_server(source) do |server, uri|
+          server.process_message({
+            id: 1,
+            method: "rubyLsp/discoverTests",
+            params: { textDocument: { uri: uri } },
+          })
+
+          response = pop_result(server)
+
+          assert_instance_of(RubyLsp::Result, response)
+          items = response.response
+
+          test_classes = items.map { |i| i[:label] }
+          assert_equal(["MyTest"], test_classes)
+
+          test_methods = items[0][:children].map { |i| i[:label] }
+          assert_equal(["should do something", "should do something else"], test_methods)
+        end
+      ensure
+        RubyLsp::Addon.addon_classes.clear
+      end
+    end
+
     private
+
+    def create_test_discovery_addon
+      Class.new(RubyLsp::Addon) do
+        def create_discover_tests_listener(response_builder, dispatcher, uri)
+          klass = Class.new do
+            include RubyLsp::Requests::Support::Common
+
+            def initialize(response_builder, dispatcher, uri)
+              @response_builder = response_builder
+              @uri = uri
+              @current_class = nil
+              dispatcher.register(self, :on_call_node_enter, :on_class_node_enter)
+            end
+
+            def on_class_node_enter(node)
+              T.bind(self, RubyLsp::Requests::Support::Common)
+
+              class_name = node.constant_path.slice
+
+              if class_name == "MyTest"
+                @current_class = RubyLsp::Requests::Support::TestItem.new(
+                  class_name,
+                  class_name,
+                  @uri,
+                  range_from_node(node),
+                  tags: [:custom_addon],
+                )
+
+                @response_builder.add(@current_class)
+              end
+            end
+
+            def on_call_node_enter(node)
+              T.bind(self, RubyLsp::Requests::Support::Common)
+
+              arguments = node.arguments&.arguments
+              first_arg = arguments&.first
+              return unless first_arg.is_a?(Prism::StringNode)
+
+              test_name = first_arg.content
+
+              @current_class.add(RubyLsp::Requests::Support::TestItem.new(
+                "#{@current_class.id}##{test_name}",
+                test_name,
+                @uri,
+                range_from_node(node),
+                tags: [:custom_addon],
+              ))
+            end
+          end
+
+          klass.new(response_builder, dispatcher, uri)
+        end
+
+        def activate; end
+
+        def deactivate; end
+
+        def name; end
+
+        def version
+          "0.1.0"
+        end
+      end
+    end
 
     def assert_all_items_tagged_with(items, tag)
       items.each do |item|
