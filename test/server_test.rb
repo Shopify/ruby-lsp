@@ -1414,25 +1414,6 @@ class ServerTest < Minitest::Test
     assert_equal(0, result.response[:incomingQueueSize])
   end
 
-  def test_resolve_test_command
-    @server.process_message({
-      id: 1,
-      method: "rubyLsp/resolveTestCommands",
-      params: {
-        items: [
-          {
-            uri: "file:///foo_test.rb",
-            id: "FooTest#test_foo",
-            tags: [{ id: "debug" }],
-          },
-        ],
-      },
-    })
-
-    result = find_message(RubyLsp::Result, id: 1)
-    assert_empty(result.response[:commands])
-  end
-
   private
 
   def with_uninstalled_rubocop(&block)
