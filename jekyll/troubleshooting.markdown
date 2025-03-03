@@ -172,7 +172,7 @@ One scenario where this is useful is if the user doesn't have permissions for th
 
 ### Developing on containers
 
-See the [documentation](https://github.com/Shopify/ruby-lsp/tree/main/vscode#developing-on-containers).
+See the [documentation](https://shopify.github.io/ruby-lsp/vscode-extension.html#developing-on-containers).
 
 ## Diagnosing the problem
 
@@ -201,7 +201,7 @@ Did it select your preferred version manager? You can define which version manag
 ### Enable logging
 
 You can enable logging to the VS Code output tab,
-[as described in the CONTRIBUTING](https://github.com/Shopify/ruby-lsp/blob/main/CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
+[as described in the Contributing](https://shopify.github.io/ruby-lsp/contributing.html#tracing-lsp-requests-and-responses) docs.
 
 ### Environment activation failed
 
