@@ -21,6 +21,7 @@ module RubyLsp
           items[0][:children].map { |i| i[:label] },
         )
         assert_equal(["test_public", "test_public_2"], items[1][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -46,6 +47,7 @@ module RubyLsp
         assert_equal(["test_baz"], items[3][:children].map { |i| i[:label] })
         assert_equal(["test_foo_bar", "test_foo_bar_2"], items[4][:children].map { |i| i[:label] })
         assert_equal(["test_foo_bar_baz"], items[5][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -65,6 +67,7 @@ module RubyLsp
         assert_equal(["test_something", "test_something_else"], items[0][:children].map { |i| i[:label] })
         assert_equal(["test_nested"], items[1][:children].map { |i| i[:label] })
         assert_equal(["test_stuff", "test_other_stuff"], items[2][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -90,6 +93,7 @@ module RubyLsp
 
         assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
         assert_equal(["test_hello"], items[1][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :test_unit)
       end
     end
 
@@ -128,6 +132,7 @@ module RubyLsp
         )
         assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
         assert_equal(["test_something"], items[1][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -155,6 +160,7 @@ module RubyLsp
         )
         assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
         assert_equal(["test_something"], items[1][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :test_unit)
       end
     end
 
@@ -187,6 +193,7 @@ module RubyLsp
           items.map { |i| i[:label] },
         )
         assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :test_unit)
       end
     ensure
       FileUtils.rm(T.must(path))
@@ -212,6 +219,7 @@ module RubyLsp
 
         test_something = children[0]
         assert_equal(5, test_something[:range].start.line)
+        assert_all_items_tagged_with(items, :test_unit)
       end
     end
 
@@ -220,6 +228,7 @@ module RubyLsp
 
       with_minitest_spec_configured(source) do |items|
         assert_equal(["BogusSpec"], items.map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -238,6 +247,7 @@ module RubyLsp
           ["test one", "test two", "test three"],
           nested_specs.map { |i| i[:label] },
         )
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -256,6 +266,7 @@ module RubyLsp
           ["it_level_one", "nested", "it_level_one_again"],
           nested_specs.map { |i| i[:label] },
         )
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -268,6 +279,7 @@ module RubyLsp
           ["dynamic_name"],
           nested_specs.map { |i| i[:label] },
         )
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -277,6 +289,7 @@ module RubyLsp
       with_minitest_spec_configured(source) do |items|
         nested_specs = items[0][:children][0][:children]
         assert_empty(nested_specs)
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
@@ -299,10 +312,19 @@ module RubyLsp
           ],
           items[0][:children].map { |i| i[:label] },
         )
+        assert_all_items_tagged_with(items, :minitest)
       end
     end
 
     private
+
+    def assert_all_items_tagged_with(items, tag)
+      items.each do |item|
+        assert_includes(item[:tags], tag)
+        children = item[:children]
+        assert_all_items_tagged_with(children, tag) unless children.empty?
+      end
+    end
 
     def with_minitest_test(source, &block)
       with_server(source) do |server, uri|

@@ -103,6 +103,7 @@ module RubyLsp
         @index = T.let(global_state.index, RubyIndexer::Index)
         @visibility_stack = T.let([:public], T::Array[Symbol])
         @nesting = T.let([], T::Array[String])
+        @framework_tag = T.let(:minitest, Symbol)
 
         dispatcher.register(
           self,
@@ -132,15 +133,15 @@ module RubyLsp
           [node.superclass&.slice].compact
         end
 
-        if attached_ancestors.include?("Test::Unit::TestCase") ||
-            non_declarative_minitest?(attached_ancestors, fully_qualified_name)
+        @framework_tag = :test_unit if attached_ancestors.include?("Test::Unit::TestCase")
 
+        if @framework_tag == :test_unit || non_declarative_minitest?(attached_ancestors, fully_qualified_name)
           @response_builder.add(Requests::Support::TestItem.new(
             fully_qualified_name,
             fully_qualified_name,
             @uri,
             range_from_node(node),
-            tags: [:minitest],
+            tags: [@framework_tag],
           ))
         end
 
@@ -189,7 +190,7 @@ module RubyLsp
           name,
           @uri,
           range_from_node(node),
-          tags: [:minitest],
+          tags: [@framework_tag],
         ))
       end
 

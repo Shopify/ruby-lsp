@@ -109,6 +109,7 @@ module RubyLsp
             description,
             @uri,
             range_from_node(node),
+            tags: [:minitest],
           )
           @response_builder.add(test_item)
         else
@@ -140,6 +141,7 @@ module RubyLsp
           description,
           @uri,
           range_from_node(node),
+          tags: [:minitest],
         )
         parent_test_group.add(test_item)
       end
