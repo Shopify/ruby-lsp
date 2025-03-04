@@ -1012,6 +1012,21 @@ module RubyLsp
 
     #: (Hash[Symbol, untyped] message) -> void
     def workspace_did_change_watched_files(message)
+      # If indexing is not complete yet, delay processing did change watched file notifications. We need initial
+      # indexing to be in place so that we can handle file changes appropriately without risking duplicates. We also
+      # have to sleep before re-inserting the notification in the queue otherwise the worker can get stuck in its own
+      # loop of pushing and popping the same notification
+      unless @global_state.index.initial_indexing_completed
+        Thread.new do
+          sleep(2)
+          # We have to ensure that the queue is not closed yet, since nothing stops the user from saving a file and then
+          # immediately telling the LSP to shutdown
+          @incoming_queue << message unless @incoming_queue.closed?
+        end
+
+        return
+      end
+
       changes = message.dig(:params, :changes)
       # We allow add-ons to register for watching files and we have no restrictions for what they register for. If the
       # same pattern is registered more than once, the LSP will receive duplicate change notifications. Receiving them
@@ -1049,27 +1064,29 @@ module RubyLsp
 
     #: (RubyIndexer::Index index, String file_path, Integer change_type) -> void
     def handle_ruby_file_change(index, file_path, change_type)
-      load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-      uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
+      @global_state.synchronize do
+        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
+        uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
 
-      case change_type
-      when Constant::FileChangeType::CREATED
-        content = File.read(file_path)
-        # If we receive a late created notification for a file that has already been claimed by the client, we want to
-        # handle change for that URI so that the require path tree is updated
-        @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
-      when Constant::FileChangeType::CHANGED
-        content = File.read(file_path)
-        # We only handle changes on file watched notifications if the client is not the one managing this URI.
-        # Otherwise, these changes are handled when running the combined requests
-        index.handle_change(uri, content) unless @store.key?(uri)
-      when Constant::FileChangeType::DELETED
-        index.delete(uri)
+        case change_type
+        when Constant::FileChangeType::CREATED
+          content = File.read(file_path)
+          # If we receive a late created notification for a file that has already been claimed by the client, we want to
+          # handle change for that URI so that the require path tree is updated
+          @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
+        when Constant::FileChangeType::CHANGED
+          content = File.read(file_path)
+          # We only handle changes on file watched notifications if the client is not the one managing this URI.
+          # Otherwise, these changes are handled when running the combined requests
+          index.handle_change(uri, content) unless @store.key?(uri)
+        when Constant::FileChangeType::DELETED
+          index.delete(uri)
+        end
+      rescue Errno::ENOENT
+        # If a file is created and then delete immediately afterwards, we will process the created notification before
+        # we receive the deleted one, but the file no longer exists. This may happen when running a test suite that
+        # creates and deletes files automatically.
       end
-    rescue Errno::ENOENT
-      # If a file is created and then delete immediately afterwards, we will process the created notification before we
-      # receive the deleted one, but the file no longer exists. This may happen when running a test suite that creates
-      # and deletes files automatically.
     end
 
     #: (URI::Generic uri) -> void

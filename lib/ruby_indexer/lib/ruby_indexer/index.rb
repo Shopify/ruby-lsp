@@ -13,6 +13,9 @@ module RubyIndexer
     #: Configuration
     attr_reader :configuration
 
+    #: bool
+    attr_reader :initial_indexing_completed
+
     class << self
       # Returns the real nesting of a constant name taking into account top level
       # references that may be included anywhere in the name or nesting where that
@@ -366,8 +369,6 @@ module RubyIndexer
           "The index is not empty. To prevent invalid entries, `index_all` can only be called once."
       end
 
-      @initial_indexing_completed = true
-
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
       progress_step = (uris.length / 100.0).ceil
@@ -380,6 +381,8 @@ module RubyIndexer
 
         index_file(uri, collect_comments: false)
       end
+
+      @initial_indexing_completed = true
     end
 
     #: (URI::Generic uri, String source, ?collect_comments: bool) -> void

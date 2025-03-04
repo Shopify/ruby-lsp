@@ -475,6 +475,7 @@ class ServerTest < Minitest::Test
     path = File.join(Dir.pwd, "lib", "foo.rb")
     File.write(path, "class Foo\nend")
 
+    @server.global_state.index.index_all(uris: [])
     @server.global_state.index.expects(:index_single).once.with do |uri|
       uri.full_path == path
     end
@@ -501,6 +502,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_did_change_watched_files_does_not_fail_for_non_existing_files
+    @server.global_state.index.index_all(uris: [])
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",
       params: {
@@ -530,6 +532,7 @@ class ServerTest < Minitest::Test
 
     uri = URI::Generic.from_path(path: path)
 
+    @server.global_state.index.index_all(uris: [])
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",
       params: {
@@ -585,6 +588,7 @@ class ServerTest < Minitest::Test
     bar.expects(:workspace_did_change_watched_files).once
 
     begin
+      @server.global_state.index.index_all(uris: [])
       @server.process_message({
         method: "workspace/didChangeWatchedFiles",
         params: {
@@ -606,6 +610,7 @@ class ServerTest < Minitest::Test
   end
 
   def test_did_change_watched_files_processes_unique_change_entries
+    @server.global_state.index.index_all(uris: [])
     @server.expects(:handle_rubocop_config_change).once
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",
@@ -1155,6 +1160,7 @@ class ServerTest < Minitest::Test
       },
     })
 
+    @server.global_state.index.index_all(uris: [])
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",
       params: {
@@ -1316,6 +1322,7 @@ class ServerTest < Minitest::Test
         },
       })
 
+      @server.global_state.index.index_all(uris: [])
       @server.global_state.index.expects(:handle_change).never
       @server.process_message({
         method: "workspace/didChangeWatchedFiles",
@@ -1370,6 +1377,7 @@ class ServerTest < Minitest::Test
         params: { textDocument: { uri: uri } },
       })
 
+      @server.global_state.index.index_all(uris: [])
       # Then send a late did change watched files notification for the creation of the file
       @server.process_message({
         method: "workspace/didChangeWatchedFiles",
@@ -1414,7 +1422,58 @@ class ServerTest < Minitest::Test
     assert_equal(0, result.response[:incomingQueueSize])
   end
 
+  def test_modifying_files_during_initial_indexing_does_not_duplicate_entries
+    path = File.join(Dir.pwd, "lib", "foo.rb")
+    uri = URI::Generic.from_path(path: path)
+
+    begin
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: {},
+          capabilities: { general: { positionEncodings: ["utf-8"] }, window: { workDoneProgress: true } },
+        },
+      })
+
+      # Start indexing
+      File.write(path, "class Foo\nend")
+      @server.process_message({ method: "initialized", params: {} })
+
+      # Then immediately notify that a file was modified before indexing is finished
+      File.write(path, "class Foo\n  def bar\n  end\nend")
+      @server.process_message({
+        method: "workspace/didChangeWatchedFiles",
+        params: {
+          changes: [
+            {
+              uri: uri.to_s,
+              type: RubyLsp::Constant::FileChangeType::CHANGED,
+            },
+          ],
+        },
+      })
+
+      wait_for_indexing
+
+      # There should not be a duplicate declaration
+      index = @server.global_state.index
+      assert_equal(1, index["Foo"]&.length)
+    ensure
+      FileUtils.rm(path)
+    end
+  end
+
   private
+
+  def wait_for_indexing
+    message = @server.pop_response
+    until message.is_a?(RubyLsp::Notification) && message.method == "$/progress" &&
+        T.unsafe(message).params.value.kind == "end"
+
+      message = @server.pop_response
+    end
+  end
 
   def with_uninstalled_rubocop(&block)
     rubocop_paths = $LOAD_PATH.select { |path| path.include?("gems/rubocop") }
