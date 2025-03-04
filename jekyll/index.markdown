@@ -15,7 +15,7 @@ for Ruby, used to improve rich features in editors. It is a part of a wider goal
 experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
 
 Want to discuss Ruby developer experience? Consider joining the public
-[Ruby DX Slack workspace](https://shopify.github.io/ruby-lsp/invite).
+[Ruby DX Slack workspace](invite).
 
 ## Table of Contents
 
@@ -531,7 +531,7 @@ requirements
 ## Experimental Features
 
 Ruby LSP also provides experimental features that are not enabled by default. If you have feedback about these features,
-you can let us know in the [DX Slack](https://shopify.github.io/ruby-lsp/invite) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
+you can let us know in the [DX Slack](invite) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
 ### Ancestors Hierarchy Request
 
@@ -571,7 +571,7 @@ default gems, except for
 - Gems that only appear under the `:development` group
 - All Ruby files under `test/**/*.rb`
 
-This behavior can be overridden and tuned. Learn how to configure it [for VS Code](https://shopify.github.io/ruby-lsp/vscode-extension.html#indexing-configuration).
+This behavior can be overridden and tuned. Learn how to configure it [for VS Code](vscode-extension.html#indexing-configuration).
 
 Note that indexing-dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by
 the configuration changes.

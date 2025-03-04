@@ -11,7 +11,7 @@ parent: Ruby LSP
 > The Ruby LSP add-on system is currently experimental and subject to changes in the API
 
 Need help writing add-ons? Consider joining the `#ruby-lsp-addons` channel in the [Ruby DX Slack
-workspace](https://shopify.github.io/ruby-lsp/invite).
+workspace](invite).
 
 ## Motivation and goals
 
