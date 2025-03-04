@@ -13,7 +13,7 @@ module RubyLsp
           # where we will need more complex regexes to execute it all at the same time
           aggregated_tests = Hash.new do |hash, key|
             hash[key] = Hash.new do |inner_h, inner_k|
-              inner_h[inner_k] = { tags: [], examples: [] }
+              inner_h[inner_k] = { tags: Set.new, examples: [] }
             end
           end
 
@@ -23,7 +23,7 @@ module RubyLsp
 
           until queue.empty?
             item = T.must(queue.shift)
-            tags = item[:tags]
+            tags = Set.new(item[:tags])
 
             children = item[:children]
             uri = URI(item[:uri])
@@ -40,44 +40,79 @@ module RubyLsp
               unless children.any? && children.all? { |child| child[:tags].include?("test_group") }
                 aggregated_tests[path][item[:label]] = { tags: tags, examples: [] }
               end
-            elsif tags.include?("minitest")
+            elsif tags.include?("minitest") || tags.include?("test_unit")
               class_name, method_name = item[:id].split("#")
               aggregated_tests[path][class_name][:examples] << method_name
+              aggregated_tests[path][class_name][:tags].merge(tags)
             end
 
             queue.concat(children) unless children.empty?
           end
 
-          commands = aggregated_tests.map do |file_path, groups_and_examples|
-            command = +"#{BASE_COMMAND} -Itest #{file_path}"
+          commands = []
 
-            unless groups_and_examples.empty?
-              regexes = groups_and_examples.flat_map do |group, info|
-                examples = info[:examples]
-                group_regex = Shellwords.escape(group).gsub(Shellwords.escape(DYNAMIC_REFERENCE_MARKER), ".*")
-                if examples.empty?
-                  "^#{group_regex}(#|::)"
-                elsif examples.length == 1
-                  "^#{group_regex}##{examples[0]}$"
-                else
-                  "^#{group_regex}#(#{examples.join("|")})$"
-                end
-              end
-
-              regex = if regexes.length == 1
-                regexes[0]
-              else
-                "(#{regexes.join("|")})"
-              end
-
-              command << " --name \"/#{regex}/\""
+          aggregated_tests.each do |file_path, groups_and_examples|
+            # Separate groups into Minitest and Test Unit. You can have both frameworks in the same file, but you cannot
+            # have a group belongs to both at the same time
+            minitest_groups, test_unit_groups = groups_and_examples.partition do |_, info|
+              info[:tags].include?("minitest")
             end
 
-            command
+            if minitest_groups.any?
+              commands << handle_minitest_groups(file_path, minitest_groups)
+            end
+
+            if test_unit_groups.any?
+              commands.concat(handle_test_unit_groups(file_path, test_unit_groups))
+            end
           end
 
           commands << "#{BASE_COMMAND} -Itest #{full_files.join(" ")}" unless full_files.empty?
           commands
+        end
+
+        private
+
+        #: (String, Hash[String, Hash[Symbol, untyped]]) -> String
+        def handle_minitest_groups(file_path, groups_and_examples)
+          regexes = groups_and_examples.flat_map do |group, info|
+            examples = info[:examples]
+            group_regex = Shellwords.escape(group).gsub(Shellwords.escape(DYNAMIC_REFERENCE_MARKER), ".*")
+            if examples.empty?
+              "^#{group_regex}(#|::)"
+            elsif examples.length == 1
+              "^#{group_regex}##{examples[0]}$"
+            else
+              "^#{group_regex}#(#{examples.join("|")})$"
+            end
+          end
+
+          regex = if regexes.length == 1
+            regexes[0]
+          else
+            "(#{regexes.join("|")})"
+          end
+
+          "#{BASE_COMMAND} -Itest #{file_path} --name \"/#{regex}/\""
+        end
+
+        #: (String, Hash[String, Hash[Symbol, untyped]]) -> Array[String]
+        def handle_test_unit_groups(file_path, groups_and_examples)
+          groups_and_examples.map do |group, info|
+            examples = info[:examples]
+            group_regex = Shellwords.escape(group).gsub(Shellwords.escape(DYNAMIC_REFERENCE_MARKER), ".*")
+            command = +"#{BASE_COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}$/\""
+
+            unless examples.empty?
+              command << if examples.length == 1
+                " --name \"/#{examples[0]}$/\""
+              else
+                " --name \"/(#{examples.join("|")})$/\""
+              end
+            end
+
+            command
+          end
         end
       end
 
