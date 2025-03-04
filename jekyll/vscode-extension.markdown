@@ -32,7 +32,7 @@ The Ruby LSP features include
 See complete information about features [here](https://shopify.github.io/ruby-lsp).
 
 If you experience issues, please see the [troubleshooting
-guide](troubleshooting.html).
+guide](troubleshooting).
 
 ### [Experimental] GitHub Copilot chat agent
 
@@ -128,7 +128,7 @@ default shell.
 
 {: .note }
 > For manager-specific notes, setting up custom activation for managers not listed above and community-contributed
-> examples, please see [version managers](version-managers.html).
+> examples, please see [version managers](version-managers).
 
 #### Configuring a formatter
 
