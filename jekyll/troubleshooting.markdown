@@ -30,7 +30,7 @@ As an example, the activation script for `zsh` using `rbenv` as a version manage
 
 After activating the Ruby version, we then proceed to boot the server gem (`ruby-lsp`). To avoid having users include
 the `ruby-lsp` in their `Gemfile`, we create a [composed
-bundle](https://shopify.github.io/ruby-lsp/composed-bundle.html) under the `.ruby-lsp` directory inside your project.
+bundle](composed-bundle) under the `.ruby-lsp` directory inside your project.
 
 ## Common issues
 
@@ -172,7 +172,7 @@ One scenario where this is useful is if the user doesn't have permissions for th
 
 ### Developing on containers
 
-See the [documentation](https://github.com/Shopify/ruby-lsp/tree/main/vscode#developing-on-containers).
+See the [documentation](vscode-extension#developing-on-containers).
 
 ## Diagnosing the problem
 
@@ -184,7 +184,7 @@ manner. Please include the steps taken to diagnose in your bug report.
 
 Check the [status center](https://github.com/Shopify/ruby-lsp/blob/main/vscode/extras/ruby_lsp_status_center.png).
 Does the server status say it's running? If it is running, but you are missing certain features, please check our
-[features documentation](https://shopify.github.io/ruby-lsp/#general-features) to ensure we already added support for it.
+[features documentation](index#general-features) to ensure we already added support for it.
 
 If the feature is listed as fully supported, but not working for you, report [an
 issue](https://github.com/Shopify/ruby-lsp/issues/new/choose) so that we can
@@ -201,7 +201,7 @@ Did it select your preferred version manager? You can define which version manag
 ### Enable logging
 
 You can enable logging to the VS Code output tab,
-[as described in the CONTRIBUTING](https://github.com/Shopify/ruby-lsp/blob/main/CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
+[as described in the Contributing](contributing#tracing-lsp-requests-and-responses) docs.
 
 ### Environment activation failed
 
