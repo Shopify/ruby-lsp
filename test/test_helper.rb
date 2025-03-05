@@ -48,6 +48,17 @@ module Minitest
     include RubyLsp::TestHelper
 
     Minitest::Test.make_my_diffs_pretty!
+
+    #: (IO output) -> Array[Hash[String, untyped]]
+    def parse_json_api_stream(output)
+      output.each_line("\r\n\r\n").map do |headers|
+        content_length = headers[/Content-Length: (\d+)/i, 1]
+        raise "Error reading response" unless content_length
+
+        data = output.read(Integer(content_length))
+        JSON.parse(T.must(data))
+      end
+    end
   end
 end
 
