@@ -81,31 +81,28 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    begin
-      create_document_symbol_addon
-      with_server(source) do |server, uri|
-        server.process_message({
-          id: 1,
-          method: "textDocument/documentSymbol",
-          params: { textDocument: { uri: uri } },
-        })
+    create_document_symbol_addon
 
-        # Pop the re-indexing notification
-        server.pop_response
+    with_server(source) do |server, uri|
+      server.process_message({
+        id: 1,
+        method: "textDocument/documentSymbol",
+        params: { textDocument: { uri: uri } },
+      })
 
-        result = server.pop_response
-        assert_instance_of(RubyLsp::Result, result)
+      # Pop the re-indexing notification
+      server.pop_response
 
-        response = result.response
+      result = server.pop_response
+      assert_instance_of(RubyLsp::Result, result)
 
-        assert_equal(1, response.count)
-        assert_equal("Foo", response.first.name)
+      response = result.response
 
-        test_symbol = response.first.children.first
-        assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
-      end
-    ensure
-      RubyLsp::Addon.addon_classes.clear
+      assert_equal(1, response.count)
+      assert_equal("Foo", response.first.name)
+
+      test_symbol = response.first.children.first
+      assert_equal(LanguageServer::Protocol::Constant::SymbolKind::METHOD, test_symbol.kind)
     end
   end
 

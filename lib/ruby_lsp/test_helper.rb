@@ -43,6 +43,7 @@ module RubyLsp
       ensure
         if load_addons
           RubyLsp::Addon.addons.each(&:deactivate)
+          RubyLsp::Addon.addon_classes.clear
           RubyLsp::Addon.addons.clear
         end
         server.run_shutdown

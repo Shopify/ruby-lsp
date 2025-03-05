@@ -226,32 +226,28 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       RubyLsp
     RUBY
 
-    begin
-      create_definition_addon
+    create_definition_addon
 
-      with_server(source, stub_no_typechecker: true) do |server, uri|
-        server.global_state.index.index_file(
-          URI::Generic.from_path(
-            load_path_entry: "#{Dir.pwd}/lib",
-            path: File.expand_path(
-              "../../test/fixtures/class_reference_target.rb",
-              __dir__,
-            ),
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.global_state.index.index_file(
+        URI::Generic.from_path(
+          load_path_entry: "#{Dir.pwd}/lib",
+          path: File.expand_path(
+            "../../test/fixtures/class_reference_target.rb",
+            __dir__,
           ),
-        )
-        server.process_message(
-          id: 1,
-          method: "textDocument/definition",
-          params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
-        )
-        response = server.pop_response.response
+        ),
+      )
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
+      response = server.pop_response.response
 
-        assert_equal(2, response.size)
-        assert_match("class_reference_target.rb", response[0].target_uri)
-        assert_match("generated_by_addon.rb", response[1].uri)
-      end
-    ensure
-      RubyLsp::Addon.addon_classes.clear
+      assert_equal(2, response.size)
+      assert_match("class_reference_target.rb", response[0].target_uri)
+      assert_match("generated_by_addon.rb", response[1].uri)
     end
   end
 
