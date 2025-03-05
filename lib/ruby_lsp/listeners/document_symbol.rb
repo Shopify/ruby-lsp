@@ -79,7 +79,21 @@ module RubyLsp
 
       #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
+        # Working in here as it seems like the correct place to work "upstream" of the `on_def_node_enter` method.
         node_name = node.name
+
+        # TODO: Pull into a constant and look more closely at the CodeLens implementation
+        if [:private, :protected].include?(node_name) && node.arguments.nil?
+          # TODO: Is this disgusting? It creates an "empty" container but that means I'm changing the hierarchy in the outline.
+          @response_builder << create_document_symbol(
+            name: node_name.to_s,
+            kind: Constant::SymbolKind::NAMESPACE,
+            range_location: node.location,
+            selection_range_location: node.message_loc || node.location,
+          )
+          return # TODO: Is this a hack? I want to return and not interrupt the rest of the response builder doing its thing.
+        end
+
         if ATTR_ACCESSORS.include?(node_name)
           handle_attr_accessor(node)
         elsif node_name == :alias_method
@@ -96,6 +110,12 @@ module RubyLsp
         return unless rake?
 
         if node.name == :namespace && !node.receiver
+          @response_builder.pop
+        end
+
+        # TODO: Currently exiting the container here using the same `pop` as above but is this correct in this context?
+        # TODO: Investigate how CodeLens is handling this. I can see it doing `#pop` off the modifier constant.
+        if [:private, :protected].include?(node.name) && node.arguments.nil?
           @response_builder.pop
         end
       end
@@ -229,6 +249,17 @@ module RubyLsp
         else
           name = node.name.to_s
           kind = name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
+        end
+
+        # TODO: Use the stuff we set up in the `on_call_node_enter` method to prefix the modifier.
+        # This can definitely be tidied up, if only because it's a nested `if` statement and I'm reassigning `name`. Grim.
+        # Not really sure I really understand the current/previous visibility stuff, just copying the bit above.
+        if previous_symbol.is_a?(Interface::DocumentSymbol) && previous_symbol.respond_to?(:name)
+          if previous_symbol.name == "private"
+            name = "(private) #{name}"
+          elsif previous_symbol.name == "protected"
+            name = "(protected) #{name}"
+          end
         end
 
         symbol = create_document_symbol(
