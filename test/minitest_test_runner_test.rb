@@ -78,7 +78,7 @@ module RubyLsp
           "method" => "error",
           "params" => {
             "id" => "Sample#test_that_raises",
-            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:23:in 'Sample#test_that_raises'",
+            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:23:in #{error_location}",
             "uri" => uri,
           },
         },
@@ -95,6 +95,18 @@ module RubyLsp
         flunk("Error reading response") unless content_length
         data = output.read(Integer(content_length))
         JSON.parse(data)
+      end
+    end
+
+    def error_location
+      ruby_version = Gem::Version.new(RUBY_VERSION)
+
+      # TODO: confirm when this behavior changed
+      # Also note the difference in the initial character.
+      if ruby_version >= Gem::Version.new("3.4")
+        "'Sample#test_that_raises'"
+      else
+        "`test_that_raises'"
       end
     end
   end
