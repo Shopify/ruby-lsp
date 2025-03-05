@@ -90,15 +90,12 @@ module RubyLsp
     private
 
     def parse_output(output)
-      result = []
-      while (headers = output.gets("\r\n\r\n"))
+      output.each_line("\r\n\r\n").map do |headers|
         content_length = headers[/Content-Length: (\d+)/i, 1]
         flunk("Error reading response") unless content_length
         data = output.read(Integer(content_length))
-        json = JSON.parse(T.must(data))
-        result << json
+        JSON.parse(data)
       end
-      result
     end
   end
 end
