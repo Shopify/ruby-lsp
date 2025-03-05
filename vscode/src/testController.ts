@@ -1,7 +1,8 @@
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import path from "path";
 
+import * as rpc from "vscode-jsonrpc/node";
 import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
 
@@ -24,6 +25,21 @@ const TEST_DIR_TAG = new vscode.TestTag("test_dir");
 const TEST_GROUP_TAG = new vscode.TestTag("test_group");
 const DEBUG_TAG = new vscode.TestTag("debug");
 const TEST_FILE_TAG = new vscode.TestTag("test_file");
+
+interface TestEventId {
+  uri: string;
+  id: string;
+}
+type TestEventWithMessage = TestEventId & { message: string };
+
+// All notification types that may be produce by our custom JSON test reporter
+const NOTIFICATION_TYPES = {
+  start: new rpc.NotificationType<TestEventId>("start"),
+  pass: new rpc.NotificationType<TestEventId>("pass"),
+  skip: new rpc.NotificationType<TestEventId>("skip"),
+  fail: new rpc.NotificationType<TestEventWithMessage>("fail"),
+  error: new rpc.NotificationType<TestEventWithMessage>("error"),
+};
 
 export class TestController {
   // Only public for testing
@@ -70,9 +86,7 @@ export class TestController {
     this.testRunProfile = this.testController.createRunProfile(
       "Run",
       vscode.TestRunProfileKind.Run,
-      async (request, token) => {
-        await this.runHandler(request, token);
-      },
+      this.fullDiscovery ? this.runTest.bind(this) : this.runHandler.bind(this),
       true,
     );
 
@@ -260,6 +274,95 @@ export class TestController {
     return filtered;
   }
 
+  async runTest(
+    request: vscode.TestRunRequest,
+    _token: vscode.CancellationToken,
+  ) {
+    const run = this.testController.createTestRun(request, undefined, true);
+
+    // Gather all included test items
+    const items: vscode.TestItem[] = [];
+    if (request.include) {
+      request.include.forEach((test) => items.push(test));
+    } else {
+      this.testController.items.forEach((test) => items.push(test));
+    }
+
+    const workspaceToTestItems = new Map<
+      vscode.WorkspaceFolder,
+      vscode.TestItem[]
+    >();
+
+    // Organize the tests based on their workspace folder. Each workspace has their own LSP server running and may be
+    // using a different test framework, so we need to use the workspace associated with each item
+    items.forEach((item) => {
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(item.uri!)!;
+      const existingEntry = workspaceToTestItems.get(workspaceFolder);
+
+      if (existingEntry) {
+        existingEntry.push(item);
+      } else {
+        workspaceToTestItems.set(workspaceFolder, [item]);
+      }
+    });
+
+    for (const [workspaceFolder, testItems] of workspaceToTestItems) {
+      // Build the test item parameters that we send to the server, filtering out exclusions. Then ask the server for
+      // the resolved test commands
+      const requestTestItems = this.buildRequestTestItems(
+        testItems,
+        request.exclude,
+      );
+      const workspace = await this.getOrActivateWorkspace(workspaceFolder);
+      const response =
+        await workspace.lspClient?.resolveTestCommands(requestTestItems);
+
+      if (!response) {
+        testItems.forEach((test) =>
+          run.errored(
+            test,
+            new vscode.TestMessage(
+              "Could not resolve test command to run selected tests",
+            ),
+          ),
+        );
+        continue;
+      }
+
+      // Enqueue all of the test we're about to run
+      testItems.forEach((test) => run.enqueued(test));
+
+      // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
+      // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
+      // file path for Minitest, it will fail with unrecognized argument errors
+      const rubyOpt = workspace.ruby.env.RUBYOPT
+        ? `${workspace.ruby.env.RUBYOPT} ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`
+        : response.reporterPaths?.map((path) => `-r${path}`).join(" ");
+
+      // For each command reported by the server spawn a new process with streaming updates
+      for (const command of response.commands) {
+        try {
+          await this.runCommandWithStreamingUpdates(
+            run,
+            command,
+            {
+              ...workspace.ruby.env,
+              RUBY_LSP_TEST_RUNNER: "true",
+              RUBYOPT: rubyOpt,
+            },
+            workspace.workspaceFolder.uri.fsPath,
+          );
+        } catch (error: any) {
+          await vscode.window.showErrorMessage(
+            `Running ${command} failed: ${error.message}`,
+          );
+        }
+      }
+    }
+
+    run.end();
+  }
+
   // Public for testing purposes. Finds a test item based on its ID and URI
   async findTestItem(id: string, uri: vscode.Uri) {
     const parentItem = await this.getParentTestItem(uri);
@@ -267,9 +370,17 @@ export class TestController {
       return;
     }
 
+    if (parentItem.id === id) {
+      return parentItem;
+    }
+
     const testFileItem = parentItem.children.get(uri.toString());
     if (!testFileItem) {
       return;
+    }
+
+    if (testFileItem.id === id) {
+      return testFileItem;
     }
 
     // If we find an exact match for this ID, then return it right away
@@ -540,9 +651,11 @@ export class TestController {
       }
     } else if (workspaceFolders.length === 1) {
       // If there's only one workspace, there's no point in nesting the tests under the workspace name
+      await vscode.commands.executeCommand("testing.clearTestResults");
       await this.gatherWorkspaceTests(workspaceFolders[0], undefined);
     } else {
       // If there's more than one workspace, we use them as the top level items
+      await vscode.commands.executeCommand("testing.clearTestResults");
       for (const workspaceFolder of workspaceFolders) {
         // Check if there is at least one Ruby test file in the workspace, otherwise we don't consider it
         const pattern = this.testPattern(workspaceFolder);
@@ -724,12 +837,17 @@ export class TestController {
     const secondLevelName = pathParts
       .slice(dirPosition + 1, dirPosition + 2)
       .join(path.sep);
-    const secondLevelUri = vscode.Uri.joinPath(firstLevelUri, secondLevelName);
 
-    const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
+    if (secondLevelName.length > 0) {
+      const secondLevelUri = vscode.Uri.joinPath(
+        firstLevelUri,
+        secondLevelName,
+      );
 
-    if (fileStat.type === vscode.FileType.Directory) {
-      return { firstLevelUri, secondLevelUri };
+      const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
+      if (fileStat.type === vscode.FileType.Directory) {
+        return { firstLevelUri, secondLevelUri };
+      }
     }
 
     return { firstLevelUri, secondLevelUri: undefined };
@@ -860,5 +978,125 @@ export class TestController {
       children,
       tags: item.tags.map((tag) => tag.id),
     };
+  }
+
+  // This method spawns the process that will run tests and registers a JSON RPC connection to listen for events about
+  // what's happening during the execution, updating the state of test items in the run
+  private async runCommandWithStreamingUpdates(
+    run: vscode.TestRun,
+    command: string,
+    env: NodeJS.ProcessEnv,
+    cwd: string,
+  ) {
+    await new Promise<void>((resolve, reject) => {
+      // Use JSON RPC to communicate with the process executing the tests
+      const testProcess = spawn(command, {
+        env,
+        stdio: ["pipe", "pipe", "pipe"],
+        shell: true,
+        cwd,
+      });
+      const connection = rpc.createMessageConnection(
+        new rpc.StreamMessageReader(testProcess.stdout),
+        new rpc.StreamMessageWriter(testProcess.stdin),
+      );
+
+      const disposables: vscode.Disposable[] = [];
+      let errorMessage = "";
+
+      testProcess.stderr.on("data", (data) => {
+        const stringData = data.toString();
+        errorMessage += stringData;
+        run.appendOutput(stringData);
+      });
+
+      // Handle the execution end
+      testProcess.on("exit", (code) => {
+        // The JSON RPC package buffers messages, but does not provide a way to wait until all messages have been
+        // handled or to check the size of the queues. This means that if we resolve the promise immediately on exit, we
+        // may miss some updates and then the UI is not updated.
+        //
+        // This delay is here to give JSON RPC enough time to process all buffered messages before resolving the promise
+        setTimeout(() => {
+          disposables.forEach((disposable) => disposable.dispose());
+          connection.end();
+          connection.dispose();
+
+          if (code === 0) {
+            resolve();
+          } else {
+            reject(
+              new Error(
+                `Test process exited with code ${code}\n${errorMessage}`,
+              ),
+            );
+          }
+        }, 250);
+      });
+
+      // Handle the JSON events being emitted by the tests
+      disposables.push(
+        connection.onNotification(NOTIFICATION_TYPES.start, async (params) => {
+          const test = await this.findTestItem(
+            params.id,
+            vscode.Uri.parse(params.uri),
+          );
+          if (test) {
+            run.started(test);
+          }
+        }),
+      );
+
+      disposables.push(
+        connection.onNotification(NOTIFICATION_TYPES.pass, async (params) => {
+          const test = await this.findTestItem(
+            params.id,
+            vscode.Uri.parse(params.uri),
+          );
+          if (test) {
+            run.passed(test);
+          }
+        }),
+      );
+
+      disposables.push(
+        connection.onNotification(NOTIFICATION_TYPES.fail, async (params) => {
+          const test = await this.findTestItem(
+            params.id,
+            vscode.Uri.parse(params.uri),
+          );
+          if (test) {
+            run.failed(test, new vscode.TestMessage(params.message));
+          }
+        }),
+      );
+
+      disposables.push(
+        connection.onNotification(NOTIFICATION_TYPES.error, async (params) => {
+          const test = await this.findTestItem(
+            params.id,
+            vscode.Uri.parse(params.uri),
+          );
+          if (test) {
+            run.errored(test, new vscode.TestMessage(params.message));
+          }
+        }),
+      );
+
+      disposables.push(
+        connection.onNotification(NOTIFICATION_TYPES.skip, async (params) => {
+          const test = await this.findTestItem(
+            params.id,
+            vscode.Uri.parse(params.uri),
+          );
+          if (test) {
+            run.skipped(test);
+          }
+        }),
+      );
+
+      // Start listening for events
+      connection.listen();
+    });
   }
 }
