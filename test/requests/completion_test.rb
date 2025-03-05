@@ -1002,22 +1002,18 @@ class CompletionTest < Minitest::Test
       R
     RUBY
 
-    begin
-      create_completion_addon
+    create_completion_addon
 
-      with_server(source) do |server, uri|
-        server.process_message(
-          id: 1,
-          method: "textDocument/completion",
-          params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
-        )
-        response = server.pop_response.response
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/completion",
+        params: { textDocument: { uri: uri }, position: { character: 1, line: 0 } },
+      )
+      response = server.pop_response.response
 
-        assert_equal(1, response.size)
-        assert_match("MyCompletion", response[0].label)
-      end
-    ensure
-      RubyLsp::Addon.addon_classes.clear
+      assert_equal(1, response.size)
+      assert_match("MyCompletion", response[0].label)
     end
   end
 

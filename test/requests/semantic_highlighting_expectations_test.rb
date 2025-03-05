@@ -49,36 +49,32 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       end
     RUBY
 
-    begin
-      create_semantic_highlighting_addon
+    create_semantic_highlighting_addon
 
-      with_server(source) do |server, uri|
-        server.process_message({
-          id: 1,
-          method: "textDocument/semanticTokens/full",
-          params: { textDocument: { uri: uri } },
-        })
+    with_server(source) do |server, uri|
+      server.process_message({
+        id: 1,
+        method: "textDocument/semanticTokens/full",
+        params: { textDocument: { uri: uri } },
+      })
 
-        result = server.pop_response
-        assert_instance_of(RubyLsp::Result, result)
+      result = server.pop_response
+      assert_instance_of(RubyLsp::Result, result)
 
-        decoded_response = decode_tokens(result.response.data)
-        assert_equal(
-          { delta_line: 0, delta_start_char: 6, length: 4, token_type: 2, token_modifiers: 1 },
-          decoded_response[0],
-        )
-        assert_equal(
-          { delta_line: 1, delta_start_char: 2, length: 13, token_type: 13, token_modifiers: 0 },
-          decoded_response[1],
-        )
-        # This is the token modified by the add-on
-        assert_equal(
-          { delta_line: 1, delta_start_char: 2, length: 13, token_type: 15, token_modifiers: 1 },
-          decoded_response[2],
-        )
-      end
-    ensure
-      RubyLsp::Addon.addon_classes.clear
+      decoded_response = decode_tokens(result.response.data)
+      assert_equal(
+        { delta_line: 0, delta_start_char: 6, length: 4, token_type: 2, token_modifiers: 1 },
+        decoded_response[0],
+      )
+      assert_equal(
+        { delta_line: 1, delta_start_char: 2, length: 13, token_type: 13, token_modifiers: 0 },
+        decoded_response[1],
+      )
+      # This is the token modified by the add-on
+      assert_equal(
+        { delta_line: 1, delta_start_char: 2, length: 13, token_type: 15, token_modifiers: 1 },
+        decoded_response[2],
+      )
     end
   end
 
