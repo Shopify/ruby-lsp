@@ -260,6 +260,47 @@ export class TestController {
     return filtered;
   }
 
+  // Public for testing purposes. Finds a test item based on its ID and URI
+  async findTestItem(id: string, uri: vscode.Uri) {
+    const parentItem = await this.getParentTestItem(uri);
+    if (!parentItem) {
+      return;
+    }
+
+    const testFileItem = parentItem.children.get(uri.toString());
+    if (!testFileItem) {
+      return;
+    }
+
+    // If we find an exact match for this ID, then return it right away
+    const groupOrItem = testFileItem.children.get(id);
+    if (groupOrItem) {
+      return groupOrItem;
+    }
+
+    // If not, the ID might be nested under groups
+    return this.findTestInGroup(id, testFileItem);
+  }
+
+  private findTestInGroup(
+    id: string,
+    group: vscode.TestItem,
+  ): vscode.TestItem | undefined {
+    let found: vscode.TestItem | undefined;
+
+    group.children.forEach((item) => {
+      if (id.startsWith(`${item.id}#`) || id.startsWith(`${item.id}::`)) {
+        found = item;
+      }
+    });
+
+    if (!found) {
+      return;
+    }
+
+    return found.children.get(id) ?? this.findTestInGroup(id, found);
+  }
+
   // Get an existing terminal or create a new one. For multiple workspaces, it's important to create a new terminal for
   // each workspace because they might be using different Ruby versions. If there's no workspace, we fallback to a
   // generic name

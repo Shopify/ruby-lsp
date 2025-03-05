@@ -690,4 +690,195 @@ suite("TestController", () => {
     workspacesStub.restore();
     relativePathStub.restore();
   });
+
+  test("find test items recursively searches children based on URI and ID", async () => {
+    const stub = sinon.stub(common, "featureEnabled").returns(true);
+    const controller = new TestController(
+      context,
+      FAKE_TELEMETRY,
+      () => undefined,
+      () => Promise.resolve(workspace),
+    );
+    stub.restore();
+
+    const workspacesStub = sinon
+      .stub(vscode.workspace, "workspaceFolders")
+      .get(() => [workspaceFolder]);
+
+    const relativePathStub = sinon
+      .stub(vscode.workspace, "asRelativePath")
+      .callsFake((uri) =>
+        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
+      );
+
+    await controller.testController.resolveHandler!(undefined);
+    const collection = controller.testController.items;
+    const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
+    const testDir = collection.get(testDirUri.toString());
+    assert.ok(testDir);
+
+    const serverTestUri = vscode.Uri.joinPath(
+      workspaceUri,
+      "test",
+      "server_test.rb",
+    );
+    const serverTest = testDir.children.get(serverTestUri.toString());
+    assert.ok(serverTest);
+
+    const fakeClient = {
+      discoverTests: sinon.stub().resolves([
+        {
+          id: "ServerTest",
+          uri: serverTestUri.toString(),
+          label: "ServerTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 12, character: 10 },
+          },
+          tags: ["minitest"],
+          children: [
+            {
+              id: "ServerTest#test_something",
+              uri: serverTestUri.toString(),
+              label: "test_something",
+              range: {
+                start: { line: 2, character: 0 },
+                end: { line: 10, character: 10 },
+              },
+              tags: ["minitest"],
+              children: [],
+            },
+          ],
+        },
+      ]),
+      waitForIndexing: sinon.stub().resolves(),
+    };
+    workspace.lspClient = fakeClient as any;
+    await controller.testController.resolveHandler!(serverTest);
+    assert.strictEqual(fakeClient.discoverTests.callCount, 1);
+
+    const group = serverTest.children.get("ServerTest");
+    assert.ok(group);
+
+    const example = group.children.get("ServerTest#test_something");
+    assert.ok(example);
+
+    assert.strictEqual(
+      group,
+      await controller.findTestItem(group.id, group.uri!),
+    );
+    assert.strictEqual(
+      example,
+      await controller.findTestItem(example.id, example.uri!),
+    );
+
+    workspacesStub.restore();
+    relativePathStub.restore();
+  });
+
+  test("find test items based on URI and ID when nested groups exist", async () => {
+    const stub = sinon.stub(common, "featureEnabled").returns(true);
+    const controller = new TestController(
+      context,
+      FAKE_TELEMETRY,
+      () => undefined,
+      () => Promise.resolve(workspace),
+    );
+    stub.restore();
+
+    const workspacesStub = sinon
+      .stub(vscode.workspace, "workspaceFolders")
+      .get(() => [workspaceFolder]);
+
+    const relativePathStub = sinon
+      .stub(vscode.workspace, "asRelativePath")
+      .callsFake((uri) =>
+        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
+      );
+
+    await controller.testController.resolveHandler!(undefined);
+    const collection = controller.testController.items;
+    const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
+    const testDir = collection.get(testDirUri.toString());
+    assert.ok(testDir);
+
+    const serverTestUri = vscode.Uri.joinPath(
+      workspaceUri,
+      "test",
+      "server_test.rb",
+    );
+    const serverTest = testDir.children.get(serverTestUri.toString());
+    assert.ok(serverTest);
+
+    const fakeClient = {
+      discoverTests: sinon.stub().resolves([
+        {
+          id: "ServerTest",
+          uri: serverTestUri.toString(),
+          label: "ServerTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 12, character: 10 },
+          },
+          tags: ["minitest"],
+          children: [
+            {
+              id: "ServerTest::NestedTest",
+              uri: serverTestUri.toString(),
+              label: "NestedTest",
+              range: {
+                start: { line: 2, character: 0 },
+                end: { line: 10, character: 10 },
+              },
+              tags: ["minitest"],
+              children: [
+                {
+                  id: "ServerTest::NestedTest#test_something",
+                  uri: serverTestUri.toString(),
+                  label: "test_something",
+                  range: {
+                    start: { line: 2, character: 0 },
+                    end: { line: 10, character: 10 },
+                  },
+                  tags: ["minitest"],
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+      waitForIndexing: sinon.stub().resolves(),
+    };
+    workspace.lspClient = fakeClient as any;
+    await controller.testController.resolveHandler!(serverTest);
+    assert.strictEqual(fakeClient.discoverTests.callCount, 1);
+
+    const group = serverTest.children.get("ServerTest");
+    assert.ok(group);
+
+    const nestedGroup = group.children.get("ServerTest::NestedTest");
+    assert.ok(nestedGroup);
+
+    const example = nestedGroup.children.get(
+      "ServerTest::NestedTest#test_something",
+    );
+    assert.ok(example);
+
+    assert.strictEqual(
+      group,
+      await controller.findTestItem(group.id, group.uri!),
+    );
+    assert.strictEqual(
+      nestedGroup,
+      await controller.findTestItem(nestedGroup.id, nestedGroup.uri!),
+    );
+    assert.strictEqual(
+      example,
+      await controller.findTestItem(example.id, example.uri!),
+    );
+
+    workspacesStub.restore();
+    relativePathStub.restore();
+  });
 });
