@@ -9,6 +9,14 @@ module RubyLsp
     #: GlobalState
     attr_reader :global_state
 
+    def process_mcp_message(message)
+      case message[:method]
+      when "initialize"
+        # Instead of sending a message through the queue, return the response directly
+        { capabilities: { textDocumentSync: 1 } }
+      end
+    end
+
     # @override
     #: (Hash[Symbol, untyped] message) -> void
     def process_message(message)
