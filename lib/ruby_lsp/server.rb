@@ -9,6 +9,13 @@ module RubyLsp
     #: GlobalState
     attr_reader :global_state
 
+    def process_mcp_message(message)
+      case message[:method]
+      when "initialize"
+        send_message(Result.new(id: message[:id], response: {}))
+      end
+    end
+
     # @override
     #: (Hash[Symbol, untyped] message) -> void
     def process_message(message)

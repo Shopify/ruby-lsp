@@ -33,12 +33,39 @@ module RubyLsp
         Thread,
       )
 
+      @mcp_server_thread = T.let(
+        Thread.new do
+          start_mcp
+        end,
+        Thread,
+      )
+
       Thread.main.priority = 1
 
       # We read the initialize request in `exe/ruby-lsp` to be able to determine the workspace URI where Bundler should
       # be set up
       initialize_request = options[:initialize_request]
       process_message(initialize_request) if initialize_request
+    end
+
+    #: -> void
+    def start_mcp
+      server_io = TCPServer.new("localhost", 4444)
+
+      loop do
+        socket = server_io.accept
+        headers = socket.gets("\r\n\r\n")
+        length = headers[/Content-Length: (\d+)/i, 1]
+        raw_message = socket.read(length)
+        message = JSON.parse(raw_message, symbolize_names: true)
+
+        case message[:method]
+        when "initialize"
+          process_mcp_message(message)
+        end
+
+        socket.close
+      end
     end
 
     #: -> void
