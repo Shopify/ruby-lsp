@@ -13,36 +13,7 @@ module RubyLsp
         @response_builder = response_builder
         @uri = uri
 
-        dispatcher.register(
-          self,
-          :on_class_node_enter,
-          :on_class_node_leave,
-          :on_call_node_enter,
-          :on_call_node_leave,
-          :on_constant_path_write_node_enter,
-          :on_constant_write_node_enter,
-          :on_constant_path_or_write_node_enter,
-          :on_constant_path_operator_write_node_enter,
-          :on_constant_path_and_write_node_enter,
-          :on_constant_or_write_node_enter,
-          :on_constant_operator_write_node_enter,
-          :on_constant_and_write_node_enter,
-          :on_constant_target_node_enter,
-          :on_constant_path_target_node_enter,
-          :on_def_node_enter,
-          :on_def_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
-          :on_instance_variable_write_node_enter,
-          :on_instance_variable_target_node_enter,
-          :on_instance_variable_operator_write_node_enter,
-          :on_instance_variable_or_write_node_enter,
-          :on_instance_variable_and_write_node_enter,
-          :on_class_variable_write_node_enter,
-          :on_singleton_class_node_enter,
-          :on_singleton_class_node_leave,
-          :on_alias_method_node_enter,
-        )
+        dispatcher.register(self)
       end
 
       #: (Prism::ClassNode node) -> void

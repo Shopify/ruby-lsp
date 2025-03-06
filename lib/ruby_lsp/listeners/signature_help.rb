@@ -14,7 +14,7 @@ module RubyLsp
         @index = T.let(global_state.index, RubyIndexer::Index)
         @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
         @node_context = node_context
-        dispatcher.register(self, :on_call_node_enter)
+        dispatcher.register(self)
       end
 
       #: (Prism::CallNode node) -> void

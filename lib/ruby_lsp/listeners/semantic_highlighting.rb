@@ -25,35 +25,7 @@ module RubyLsp
         @inside_regex_capture = T.let(false, T::Boolean)
         @inside_implicit_node = T.let(false, T::Boolean)
 
-        dispatcher.register(
-          self,
-          :on_call_node_enter,
-          :on_class_node_enter,
-          :on_def_node_enter,
-          :on_def_node_leave,
-          :on_block_node_enter,
-          :on_block_node_leave,
-          :on_self_node_enter,
-          :on_module_node_enter,
-          :on_local_variable_write_node_enter,
-          :on_local_variable_read_node_enter,
-          :on_block_parameter_node_enter,
-          :on_required_keyword_parameter_node_enter,
-          :on_optional_keyword_parameter_node_enter,
-          :on_keyword_rest_parameter_node_enter,
-          :on_optional_parameter_node_enter,
-          :on_required_parameter_node_enter,
-          :on_rest_parameter_node_enter,
-          :on_local_variable_and_write_node_enter,
-          :on_local_variable_operator_write_node_enter,
-          :on_local_variable_or_write_node_enter,
-          :on_local_variable_target_node_enter,
-          :on_block_local_variable_node_enter,
-          :on_match_write_node_enter,
-          :on_match_write_node_leave,
-          :on_implicit_node_enter,
-          :on_implicit_node_leave,
-        )
+        dispatcher.register(self)
       end
 
       #: (Prism::CallNode node) -> void

@@ -69,36 +69,7 @@ module RubyIndexer
       @stack = T.let([], T::Array[String])
       @references = T.let([], T::Array[Reference])
 
-      dispatcher.register(
-        self,
-        :on_class_node_enter,
-        :on_class_node_leave,
-        :on_module_node_enter,
-        :on_module_node_leave,
-        :on_singleton_class_node_enter,
-        :on_singleton_class_node_leave,
-        :on_def_node_enter,
-        :on_def_node_leave,
-        :on_multi_write_node_enter,
-        :on_constant_path_write_node_enter,
-        :on_constant_path_or_write_node_enter,
-        :on_constant_path_operator_write_node_enter,
-        :on_constant_path_and_write_node_enter,
-        :on_constant_or_write_node_enter,
-        :on_constant_path_node_enter,
-        :on_constant_read_node_enter,
-        :on_constant_write_node_enter,
-        :on_constant_or_write_node_enter,
-        :on_constant_and_write_node_enter,
-        :on_constant_operator_write_node_enter,
-        :on_instance_variable_read_node_enter,
-        :on_instance_variable_write_node_enter,
-        :on_instance_variable_and_write_node_enter,
-        :on_instance_variable_operator_write_node_enter,
-        :on_instance_variable_or_write_node_enter,
-        :on_instance_variable_target_node_enter,
-        :on_call_node_enter,
-      )
+      dispatcher.register(self)
     end
 
     #: -> Array[Reference]

@@ -69,30 +69,7 @@ module RubyLsp
         @uri = uri
         @trigger_character = trigger_character
 
-        dispatcher.register(
-          self,
-          :on_constant_path_node_enter,
-          :on_constant_read_node_enter,
-          :on_call_node_enter,
-          :on_global_variable_and_write_node_enter,
-          :on_global_variable_operator_write_node_enter,
-          :on_global_variable_or_write_node_enter,
-          :on_global_variable_read_node_enter,
-          :on_global_variable_target_node_enter,
-          :on_global_variable_write_node_enter,
-          :on_instance_variable_read_node_enter,
-          :on_instance_variable_write_node_enter,
-          :on_instance_variable_and_write_node_enter,
-          :on_instance_variable_operator_write_node_enter,
-          :on_instance_variable_or_write_node_enter,
-          :on_instance_variable_target_node_enter,
-          :on_class_variable_and_write_node_enter,
-          :on_class_variable_operator_write_node_enter,
-          :on_class_variable_or_write_node_enter,
-          :on_class_variable_read_node_enter,
-          :on_class_variable_target_node_enter,
-          :on_class_variable_write_node_enter,
-        )
+        dispatcher.register(self)
       end
 
       # Handle completion on regular constant references (e.g. `Bar`)

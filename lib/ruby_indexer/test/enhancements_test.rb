@@ -12,7 +12,7 @@ module RubyIndexer
 
     def test_enhancing_indexing_included_hook
       Class.new(Enhancement) do
-        def on_call_node_enter(call_node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_enter(call_node)
           owner = @listener.current_owner
           return unless owner
           return unless call_node.name == :extend
@@ -95,7 +95,7 @@ module RubyIndexer
 
     def test_enhancing_indexing_configuration_dsl
       Class.new(Enhancement) do
-        def on_call_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_enter(node)
           return unless @listener.current_owner
 
           name = node.name
@@ -148,7 +148,7 @@ module RubyIndexer
 
     def test_error_handling_in_on_call_node_enter_enhancement
       Class.new(Enhancement) do
-        def on_call_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_enter(node)
           raise "Error"
         end
 
@@ -181,7 +181,7 @@ module RubyIndexer
 
     def test_error_handling_in_on_call_node_leave_enhancement
       Class.new(Enhancement) do
-        def on_call_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_leave(node)
           raise "Error"
         end
 
@@ -214,7 +214,7 @@ module RubyIndexer
 
     def test_advancing_namespace_stack_from_enhancement
       Class.new(Enhancement) do
-        def on_call_node_enter(call_node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_enter(call_node)
           owner = @listener.current_owner
           return unless owner
 
@@ -243,7 +243,7 @@ module RubyIndexer
           end
         end
 
-        def on_call_node_leave(call_node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_leave(call_node)
           return unless call_node.name == :class_methods
 
           @listener.pop_namespace_stack
@@ -289,7 +289,7 @@ module RubyIndexer
 
     def test_creating_anonymous_classes_from_enhancement
       Class.new(Enhancement) do
-        def on_call_node_enter(call_node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_enter(call_node)
           case call_node.name
           when :context
             arguments = call_node.arguments&.arguments
@@ -306,7 +306,7 @@ module RubyIndexer
           end
         end
 
-        def on_call_node_leave(call_node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        def on_call_node_leave(call_node)
           return unless call_node.name == :context
 
           @listener.pop_namespace_stack

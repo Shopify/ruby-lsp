@@ -361,7 +361,7 @@ module RubyLsp
               @response_builder = response_builder
               @uri = uri
               @current_class = nil
-              dispatcher.register(self, :on_call_node_enter, :on_class_node_enter)
+              dispatcher.register(self)
             end
 
             def on_class_node_enter(node)

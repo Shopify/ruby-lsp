@@ -88,7 +88,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
 
           def initialize(response_builder, dispatcher)
             @response_builder = response_builder
-            dispatcher.register(self, :on_call_node_enter)
+            dispatcher.register(self)
           end
 
           def on_call_node_enter(node)

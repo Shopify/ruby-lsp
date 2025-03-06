@@ -69,14 +69,7 @@ module RubyLsp
           T::Hash[Integer, Prism::Comment],
         )
 
-        dispatcher.register(
-          self,
-          :on_def_node_enter,
-          :on_class_node_enter,
-          :on_module_node_enter,
-          :on_constant_write_node_enter,
-          :on_constant_path_write_node_enter,
-        )
+        dispatcher.register(self)
       end
 
       #: (Prism::DefNode node) -> void
