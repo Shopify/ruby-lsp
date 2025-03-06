@@ -18,7 +18,7 @@ module RubyLsp
       stdout.binmode
       stdout.sync = true
 
-      actual = parse_output(stdout)
+      actual = parse_json_api_stream(stdout)
 
       uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/test_unit_example.rb").to_s
       expected = [
@@ -83,19 +83,6 @@ module RubyLsp
         },
       ]
       assert_equal(expected, actual)
-    end
-
-    private
-
-    def parse_output(output)
-      result = []
-      while (headers = output.gets("\r\n\r\n"))
-        content_length = headers[/Content-Length: (\d+)/i, 1]
-        data = output.read(Integer(content_length))
-        json = JSON.parse(T.must(data))
-        result << json
-      end
-      result
     end
   end
 end
