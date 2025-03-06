@@ -9,11 +9,7 @@ module RubyLsp
     # are labels added directly in the code that explicitly show the user something that might
     # otherwise just be implied.
     class InlayHints < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::InlayHintOptions
         def provider
           Interface::InlayHintOptions.new(resolve_provider: false)

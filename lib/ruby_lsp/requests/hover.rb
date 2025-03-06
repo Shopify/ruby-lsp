@@ -8,12 +8,9 @@ module RubyLsp
     # The [hover request](https://microsoft.github.io/language-server-protocol/specification#textDocument_hover)
     # displays the documentation for the symbol currently under the cursor.
     class Hover < Request
-      extend T::Sig
       extend T::Generic
 
       class << self
-        extend T::Sig
-
         #: -> Interface::HoverOptions
         def provider
           Interface::HoverOptions.new

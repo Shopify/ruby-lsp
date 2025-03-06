@@ -3,8 +3,6 @@
 
 module RubyIndexer
   class Index
-    extend T::Sig
-
     class UnresolvableAliasError < StandardError; end
     class NonExistingNamespaceError < StandardError; end
     class IndexNotEmptyError < StandardError; end
@@ -16,8 +14,6 @@ module RubyIndexer
     attr_reader :configuration
 
     class << self
-      extend T::Sig
-
       # Returns the real nesting of a constant name taking into account top level
       # references that may be included anywhere in the name or nesting where that
       # constant was found

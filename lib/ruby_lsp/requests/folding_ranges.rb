@@ -8,11 +8,7 @@ module RubyLsp
     # The [folding ranges](https://microsoft.github.io/language-server-protocol/specification#textDocument_foldingRange)
     # request informs the editor of the ranges where and how code can be folded.
     class FoldingRanges < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> TrueClass
         def provider
           true

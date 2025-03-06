@@ -7,8 +7,6 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#requestMessage) that displays the AST
     # for the current document or for the current selection in a new tab.
     class ShowSyntaxTree < Request
-      extend T::Sig
-
       #: (RubyDocument document, Hash[Symbol, untyped]? range) -> void
       def initialize(document, range)
         super()

@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class InlayHints
-      extend T::Sig
       include Requests::Support::Common
 
       RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)

@@ -9,7 +9,6 @@ module RubyLsp
     # This is a custom request to ask the server to parse a test file and discover all available examples in it. Add-ons
     # can augment the behavior through listeners, allowing them to handle discovery for different frameworks
     class DiscoverTests < Request
-      extend T::Sig
       include Support::Common
 
       #: (GlobalState global_state, RubyDocument document, Prism::Dispatcher dispatcher) -> void

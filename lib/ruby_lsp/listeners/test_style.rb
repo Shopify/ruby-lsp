@@ -116,7 +116,6 @@ module RubyLsp
         end
       end
 
-      extend T::Sig
       include Requests::Support::Common
 
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze

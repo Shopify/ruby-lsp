@@ -11,8 +11,6 @@ module RubyIndexer
       end
     end
 
-    extend T::Sig
-
     #: String
     attr_reader :name
 
@@ -171,8 +169,6 @@ module RubyIndexer
     end
 
     class Class < Namespace
-      extend T::Sig
-
       # The unresolved name of the parent class. This may return `nil`, which indicates the lack of an explicit parent
       # and therefore ::Object is the correct parent class
       #: String?
@@ -192,8 +188,6 @@ module RubyIndexer
     end
 
     class SingletonClass < Class
-      extend T::Sig
-
       #: (Location location, Location name_location, String? comments) -> void
       def update_singleton_information(location, name_location, comments)
         @location = location
@@ -282,7 +276,6 @@ module RubyIndexer
       DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
 
       class << self
-        extend T::Sig
         #: -> BlockParameter
         def anonymous
           new(name: DEFAULT_NAME)
@@ -298,8 +291,6 @@ module RubyIndexer
 
     # A forwarding method parameter, e.g. `def foo(...)`
     class ForwardingParameter < Parameter
-      extend T::Sig
-
       #: -> void
       def initialize
         # You can't name a forwarding parameter, it's always called `...`
@@ -349,8 +340,6 @@ module RubyIndexer
     end
 
     class Accessor < Member
-      extend T::Sig
-
       # @override
       #: -> Array[Signature]
       def signatures
@@ -366,8 +355,6 @@ module RubyIndexer
     end
 
     class Method < Member
-      extend T::Sig
-
       #: Array[Signature]
       attr_reader :signatures
 
@@ -394,8 +381,6 @@ module RubyIndexer
     # target in [rdoc-ref:Index#resolve]. If the right hand side contains a constant that doesn't exist, then it's not
     # possible to resolve the alias and it will remain an UnresolvedAlias until the right hand side constant exists
     class UnresolvedConstantAlias < Entry
-      extend T::Sig
-
       #: String
       attr_reader :target
 
@@ -413,8 +398,6 @@ module RubyIndexer
 
     # Alias represents a resolved alias, which points to an existing constant target
     class ConstantAlias < Entry
-      extend T::Sig
-
       #: String
       attr_reader :target
 
@@ -463,8 +446,6 @@ module RubyIndexer
     # example, if we have `alias a b`, we create an unresolved alias for `a` because we aren't sure immediate what `b`
     # is referring to
     class UnresolvedMethodAlias < Entry
-      extend T::Sig
-
       #: String
       attr_reader :new_name, :old_name
 
@@ -483,8 +464,6 @@ module RubyIndexer
 
     # A method alias is a resolved alias entry that points to the exact method target it refers to
     class MethodAlias < Entry
-      extend T::Sig
-
       #: (Member | MethodAlias)
       attr_reader :target
 
@@ -528,8 +507,6 @@ module RubyIndexer
     # However RBS can represent the concept of method overloading, with different return types based on the arguments
     # passed, so we need to store all the signatures.
     class Signature
-      extend T::Sig
-
       #: Array[Parameter]
       attr_reader :parameters
 

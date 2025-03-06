@@ -5,8 +5,6 @@ module RubyLsp
   module Requests
     module Support
       class RuboCopDiagnostic
-        extend T::Sig
-
         RUBOCOP_TO_LSP_SEVERITY = T.let(
           {
             info: Constant::DiagnosticSeverity::HINT,

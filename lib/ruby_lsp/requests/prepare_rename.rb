@@ -7,7 +7,6 @@ module RubyLsp
     # [prepare_rename](https://microsoft.github.io/language-server-protocol/specification#textDocument_prepareRename)
     # # request checks the validity of a rename operation at a given location.
     class PrepareRename < Request
-      extend T::Sig
       include Support::Common
 
       #: (RubyDocument document, Hash[Symbol, untyped] position) -> void

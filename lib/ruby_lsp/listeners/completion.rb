@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class Completion
-      extend T::Sig
       include Requests::Support::Common
 
       KEYWORDS = [

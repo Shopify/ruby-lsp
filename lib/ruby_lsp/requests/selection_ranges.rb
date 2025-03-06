@@ -11,7 +11,6 @@ module RubyLsp
     #
     # Note that if using VSCode Neovim, you will need to be in Insert mode for this to work correctly.
     class SelectionRanges < Request
-      extend T::Sig
       include Support::Common
 
       #: ((RubyDocument | ERBDocument) document) -> void

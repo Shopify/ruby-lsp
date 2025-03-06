@@ -32,8 +32,6 @@ module RubyLsp
   module Requests
     module Support
       class InternalRuboCopError < StandardError
-        extend T::Sig
-
         MESSAGE = <<~EOS
           An internal error occurred %s.
           Updating to a newer version of RuboCop may solve this.
@@ -54,8 +52,6 @@ module RubyLsp
 
       # :nodoc:
       class RuboCopRunner < ::RuboCop::Runner
-        extend T::Sig
-
         class ConfigurationError < StandardError; end
 
         DEFAULT_ARGS = T.let(
@@ -127,8 +123,6 @@ module RubyLsp
         end
 
         class << self
-          extend T::Sig
-
           #: (String cop_name) -> singleton(::RuboCop::Cop::Base)?
           def find_cop_by_name(cop_name)
             cop_registry[cop_name]&.first

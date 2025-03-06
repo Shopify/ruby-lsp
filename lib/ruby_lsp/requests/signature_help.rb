@@ -9,11 +9,7 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#textDocument_signatureHelp) displays
     # information about the parameters of a method as you type an invocation.
     class SignatureHelp < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::SignatureHelpOptions
         def provider
           # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :

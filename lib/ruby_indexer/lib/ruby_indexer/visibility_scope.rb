@@ -5,11 +5,7 @@ module RubyIndexer
   # Represents the visibility scope in a Ruby namespace. This keeps track of whether methods are in a public, private or
   # protected section, and whether they are module functions.
   class VisibilityScope
-    extend T::Sig
-
     class << self
-      extend T::Sig
-
       #: -> instance
       def module_function_scope
         new(module_func: true, visibility: Entry::Visibility::PRIVATE)

@@ -7,7 +7,6 @@ module RubyLsp
     # request allows fuzzy searching declarations in the entire project. On VS Code, use CTRL/CMD + T to search for
     # symbols.
     class WorkspaceSymbol < Request
-      extend T::Sig
       include Support::Common
 
       #: (GlobalState global_state, String? query) -> void

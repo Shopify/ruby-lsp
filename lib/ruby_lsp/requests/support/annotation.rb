@@ -5,7 +5,6 @@ module RubyLsp
   module Requests
     module Support
       class Annotation
-        extend T::Sig
         #: (arity: (Integer | T::Range[Integer]), ?receiver: bool) -> void
         def initialize(arity:, receiver: false)
           @arity = arity

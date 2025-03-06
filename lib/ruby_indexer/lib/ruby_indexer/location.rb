@@ -3,11 +3,7 @@
 
 module RubyIndexer
   class Location
-    extend T::Sig
-
     class << self
-      extend T::Sig
-
       #: (Prism::Location prism_location, (^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache) -> instance
       def from_prism_location(prism_location, code_units_cache)
         new(

@@ -4,7 +4,6 @@
 module RubyLsp
   module ResponseBuilders
     class TestCollection < ResponseBuilder
-      extend T::Sig
       extend T::Generic
 
       ResponseType = type_member { { fixed: Requests::Support::TestItem } }

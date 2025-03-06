@@ -63,8 +63,6 @@ module RuboCop
       #   end
       # end
       class UseRegisterWithHandlerMethod < RuboCop::Cop::Base
-        extend T::Sig
-
         MSG_MISSING_HANDLER = "Registered to `%{listener}` without a handler defined."
         MSG_MISSING_LISTENER = "Created a handler without registering the associated `%{listener}` event."
 

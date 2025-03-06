@@ -33,7 +33,6 @@ module RubyIndexer
   #
   # See https://en.wikipedia.org/wiki/Trie for more information
   class PrefixTree
-    extend T::Sig
     extend T::Generic
 
     Value = type_member
@@ -108,7 +107,6 @@ module RubyIndexer
     end
 
     class Node
-      extend T::Sig
       extend T::Generic
 
       Value = type_member

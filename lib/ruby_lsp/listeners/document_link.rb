@@ -6,7 +6,6 @@ require "ruby_lsp/requests/support/source_uri"
 module RubyLsp
   module Listeners
     class DocumentLink
-      extend T::Sig
       include Requests::Support::Common
 
       GEM_TO_VERSION_MAP = T.let(
@@ -17,8 +16,6 @@ module RubyLsp
       )
 
       class << self
-        extend T::Sig
-
         #: -> Hash[String, Hash[String, Hash[String, String]]]
         def gem_paths
           @gem_paths ||= T.let(

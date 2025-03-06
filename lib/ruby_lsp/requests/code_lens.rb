@@ -11,11 +11,7 @@ module RubyLsp
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
     # request informs the editor of runnable commands such as testing and debugging.
     class CodeLens < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::CodeLensOptions
         def provider
           Interface::CodeLensOptions.new(resolve_provider: false)

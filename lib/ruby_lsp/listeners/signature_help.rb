@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class SignatureHelp
-      extend T::Sig
       include Requests::Support::Common
 
       #: (ResponseBuilders::SignatureHelp response_builder, GlobalState global_state, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void

@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class DocumentHighlight
-      extend T::Sig
       include Requests::Support::Common
 
       GLOBAL_VARIABLE_NODES = T.let(

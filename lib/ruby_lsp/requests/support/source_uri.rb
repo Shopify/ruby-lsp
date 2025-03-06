@@ -6,8 +6,6 @@ require "uri/file"
 module URI
   # Must be kept in sync with the one in Tapioca
   class Source < URI::File
-    extend T::Sig
-
     COMPONENT = T.let(
       [
         :scheme,
@@ -33,8 +31,6 @@ module URI
     attr_reader :gem_version
 
     class << self
-      extend T::Sig
-
       #: (gem_name: String, gem_version: String?, path: String, line_number: String?) -> URI::Source
       def build(gem_name:, gem_version:, path:, line_number:)
         super(

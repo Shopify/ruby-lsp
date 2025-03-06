@@ -35,8 +35,6 @@ module RubyLsp
     class IncompatibleApiError < StandardError; end
 
     class << self
-      extend T::Sig
-
       #: Array[Addon]
       attr_accessor :addons
 

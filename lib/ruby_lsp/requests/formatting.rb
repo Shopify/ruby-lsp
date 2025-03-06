@@ -7,13 +7,9 @@ module RubyLsp
     # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
     # registering the ruby-lsp as the Ruby formatter.
     class Formatting < Request
-      extend T::Sig
-
       class Error < StandardError; end
 
       class << self
-        extend T::Sig
-
         #: -> TrueClass
         def provider
           true

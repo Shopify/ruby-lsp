@@ -6,8 +6,6 @@ module RubyLsp
     class SemanticHighlighting < ResponseBuilder
       class UndefinedTokenType < StandardError; end
 
-      extend T::Sig
-
       TOKEN_TYPES = T.let(
         {
           namespace: 0,
@@ -99,8 +97,6 @@ module RubyLsp
       end
 
       class SemanticToken
-        extend T::Sig
-
         #: Integer
         attr_reader :start_line
 
@@ -145,8 +141,6 @@ module RubyLsp
       end
 
       class SemanticTokenEncoder
-        extend T::Sig
-
         #: -> void
         def initialize
           @current_row = T.let(0, Integer)

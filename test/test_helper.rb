@@ -44,7 +44,6 @@ Minitest::Reporters.use!(minitest_reporter)
 
 module Minitest
   class Test
-    extend T::Sig
     include RubyLsp::TestHelper
 
     Minitest::Test.make_my_diffs_pretty!

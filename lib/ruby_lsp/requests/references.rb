@@ -7,7 +7,6 @@ module RubyLsp
     # [references](https://microsoft.github.io/language-server-protocol/specification#textDocument_references)
     # request finds all references for the selected symbol.
     class References < Request
-      extend T::Sig
       include Support::Common
 
       #: (GlobalState global_state, Store store, (RubyDocument | ERBDocument) document, Hash[Symbol, untyped] params) -> void

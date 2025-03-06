@@ -10,8 +10,6 @@ module RubyLsp
       # Note: this test item object can only represent test groups or examples discovered inside files. It cannot be
       # used to represent test files, directories or workspaces
       class TestItem
-        extend T::Sig
-
         #: String
         attr_reader :id, :label
 

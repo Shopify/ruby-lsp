@@ -6,8 +6,6 @@ module RubyLsp
     module Support
       class Sorbet
         class << self
-          extend T::Sig
-
           ANNOTATIONS = T.let(
             {
               abstract!: Annotation.new(arity: 0),

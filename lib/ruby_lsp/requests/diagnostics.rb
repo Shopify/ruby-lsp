@@ -7,11 +7,7 @@ module RubyLsp
     # [diagnostics](https://microsoft.github.io/language-server-protocol/specification#textDocument_publishDiagnostics)
     # request informs the editor of RuboCop offenses for a given file.
     class Diagnostics < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
         #: -> Interface::DiagnosticRegistrationOptions
         def provider
           Interface::DiagnosticRegistrationOptions.new(

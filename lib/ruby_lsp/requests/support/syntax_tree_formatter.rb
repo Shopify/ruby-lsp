@@ -13,7 +13,6 @@ module RubyLsp
     module Support
       # :nodoc:
       class SyntaxTreeFormatter
-        extend T::Sig
         include Support::Formatter
 
         #: -> void
