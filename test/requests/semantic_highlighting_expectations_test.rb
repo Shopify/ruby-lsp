@@ -32,7 +32,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       range: processed_range,
     )
 
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
