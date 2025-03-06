@@ -19,7 +19,7 @@ module RubyLsp
       stdout.binmode
       stdout.sync = true
 
-      actual = parse_output(stdout)
+      actual = parse_json_api_stream(stdout)
 
       uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_example.rb").to_s
       expected = [
@@ -88,15 +88,6 @@ module RubyLsp
     end
 
     private
-
-    def parse_output(output)
-      output.each_line("\r\n\r\n").map do |headers|
-        content_length = headers[/Content-Length: (\d+)/i, 1]
-        flunk("Error reading response") unless content_length
-        data = output.read(Integer(content_length))
-        JSON.parse(data)
-      end
-    end
 
     def error_location
       ruby_version = Gem::Version.new(RUBY_VERSION)
