@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "rubyMcp": {
+      "command": "/Users/hung-wulo/src/github.com/Shopify/ruby-lsp/exe/ruby-mcp-bridge",
+      "args": [
+        "ruby-lsp"
+      ]
+    }
+  }
+}

@@ -375,6 +375,17 @@ module RubyLsp
 
       perform_initial_indexing
       check_formatter_is_available
+
+      @mcp_server_thread = T.let(
+        Thread.new do
+          @mcp_server = T.let(MCPServer.new(@global_state), T.nilable(MCPServer))
+          T.must(@mcp_server).start
+        rescue => exception
+          puts "Error starting MCP server: #{exception.message}"
+          puts exception.backtrace&.join("\n")
+        end,
+        T.nilable(Thread),
+      )
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1230,6 +1241,8 @@ module RubyLsp
     #: -> void
     def shutdown
       Addon.unload_addons
+      @mcp_server&.stop
+      @mcp_server_thread&.kill
     end
 
     #: -> void

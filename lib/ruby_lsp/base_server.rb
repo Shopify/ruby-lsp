@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/mcp_server"
+
 module RubyLsp
   class BaseServer
     extend T::Sig
