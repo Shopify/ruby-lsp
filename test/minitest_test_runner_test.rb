@@ -92,8 +92,6 @@ module RubyLsp
     def error_location
       ruby_version = Gem::Version.new(RUBY_VERSION)
 
-      # TODO: confirm when this behavior changed
-      # Also note the difference in the initial character.
       if ruby_version >= Gem::Version.new("3.4")
         "'SampleTest#test_that_raises'"
       else
