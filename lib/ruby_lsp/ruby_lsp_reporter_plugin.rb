@@ -39,6 +39,8 @@ module Minitest
         end
       end
 
+      private
+
       #: (Minitest::Result result) -> void
       def record_pass(result)
         RubyLsp::TestReporter.record_pass(
@@ -73,8 +75,6 @@ module Minitest
           message: result.failures.first.message,
         )
       end
-
-      private
 
       #: (Minitest::Result result) -> String
       def id_from_result(result)
