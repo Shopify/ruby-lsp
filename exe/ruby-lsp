@@ -29,6 +29,13 @@ parser = OptionParser.new do |opts|
     options[:branch] = branch
   end
 
+  opts.on(
+    "--new-addon [NAME]",
+    "Create a new Ruby LSP add-on gem",
+  ) do |name|
+    options[:new_addon] = name
+  end
+
   opts.on("--doctor", "Run troubleshooting steps") do
     options[:doctor] = true
   end
@@ -147,6 +154,11 @@ if options[:doctor]
   return
 end
 
+if options[:new_addon]
+  require "ruby_lsp/generator"
+  RubyLsp::Generator.new(options[:new_addon]).run
+  exit(0)
+end
 # Ensure all output goes out stderr by default to allow puts/p/pp to work
 # without specifying output device.
 $> = $stderr
