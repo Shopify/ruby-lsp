@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Determine script location and workspace path
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_RUBY_LSP_DIR="$(dirname "$SCRIPT_DIR")/.ruby-lsp"
+PORT_FILE="$WORKSPACE_RUBY_LSP_DIR/mcp-port"
+LOG_PATH="$WORKSPACE_RUBY_LSP_DIR/mcp-bridge.log"
+
+# Ensure log directory exists
+mkdir -p "$WORKSPACE_RUBY_LSP_DIR"
+
+# Check if port file exists
+if [ ! -f "$PORT_FILE" ]; then
+  echo "Error: MCP port file not found at $PORT_FILE" >&2
+  echo "MCP server may not be running." >&2
+  exit 1
+fi
+
+# Read port from file
+PORT=$(cat "$PORT_FILE")
+
+echo "Bridge started using port $PORT" >> "$LOG_PATH"
+
+while IFS= read -r line; do
+  echo "================================" >> "$LOG_PATH"
+  echo "Input JSON: $line" >> "$LOG_PATH"
+
+  # Send HTTP request to the WEBrick server
+  response=$(curl -s -X POST -H "Content-Type: application/json" \
+    -H "Content-Length: ${#line}" \
+    --data "$line" \
+    "http://127.0.0.1:$PORT/mcp" 2>$LOG_PATH) || {
+    echo "HTTP request failed" >> "$LOG_PATH"
+    continue
+  }
+
+  echo "--------------------------------" >> "$LOG_PATH"
+  echo "Response JSON: $response" >> "$LOG_PATH"
+
+  echo "$response"
+done

@@ -33,6 +33,9 @@ module RubyLsp
     #: String?
     attr_reader :telemetry_machine_id
 
+    #: bool
+    attr_reader :uses_ruby_mcp
+
     #: -> void
     def initialize
       @workspace_uri = URI::Generic.from_path(path: Dir.pwd) #: URI::Generic
@@ -56,6 +59,7 @@ module RubyLsp
       @enabled_feature_flags = {} #: Hash[Symbol, bool]
       @mutex = Mutex.new #: Mutex
       @telemetry_machine_id = nil #: String?
+      @uses_ruby_mcp = false #: bool
     end
 
     #: [T] { -> T } -> T
@@ -151,6 +155,9 @@ module RubyLsp
         )
       end
 
+      @uses_ruby_mcp = detects_ruby_mcp
+      notifications << Notification.window_log_message("Uses Ruby MCP: #{@uses_ruby_mcp}")
+
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?
         Encoding::UTF_16LE
@@ -205,7 +212,29 @@ module RubyLsp
       @client_capabilities.supports_watching_files
     end
 
+    #: -> bool
+    def detects_ruby_mcp
+      check_mcp_file(".vscode/mcp.json", ["servers", "rubyMcp"]) ||
+        check_mcp_file(".cursor/mcp.json", ["mcpServers", "rubyMcp"])
+    end
+
     private
+
+    # Helper method to check for rubyMcp configuration in a specific file
+    #: (String relative_path, Array[String] keys_to_check) -> bool
+    def check_mcp_file(relative_path, keys_to_check)
+      file_path = File.join(workspace_path, relative_path)
+      return false unless File.exist?(file_path)
+
+      begin
+        config = JSON.parse(File.read(file_path))
+        # Check if the nested keys exist
+        !!config.dig(*keys_to_check)
+      rescue JSON::ParserError
+        # If JSON parsing fails, consider it not configured
+        false
+      end
+    end
 
     #: (Array[String] direct_dependencies, Array[String] all_dependencies) -> String
     def detect_formatter(direct_dependencies, all_dependencies)
