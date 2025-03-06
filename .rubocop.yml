@@ -38,6 +38,10 @@ RubyLsp/UseLanguageServerAliases:
   Exclude:
     - "test/**/*.rb"
 
+RubyLsp/UseRegisterWithHandlerMethod:
+  Exclude:
+    - "jekyll/add-ons.markdown" # this cop doesn't apply to enhancements
+
 Sorbet/FalseSigil:
   Enabled: false
 
