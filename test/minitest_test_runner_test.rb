@@ -34,7 +34,7 @@ module RubyLsp
           "method" => "fail",
           "params" => {
             "id" => "SampleTest#test_that_fails",
-            "message" => "--- expected\n+++ actual\n@@ -1 +1 @@\n-1\n+2\n",
+            "message" => "Expected: 1\n  Actual: 2",
             "uri" => uri,
           },
         },
@@ -78,7 +78,7 @@ module RubyLsp
           "method" => "error",
           "params" => {
             "id" => "SampleTest#test_that_raises",
-            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:23:in #{error_location}",
+            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:24:in #{error_location}",
             "uri" => uri,
           },
         },

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require "test_helper"
+require "minitest/autorun"
+require_relative "../../lib/ruby_indexer/lib/ruby_indexer/uri"
 
 # We are only testing the output of the runner, there's no need for to be random.
 Minitest::Test.i_suck_and_my_tests_are_order_dependent!
