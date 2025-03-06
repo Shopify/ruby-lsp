@@ -35,13 +35,12 @@ require "debug/prelude"
 require "debug/config"
 DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + SORBET_PATHS
 
-# TODO: figure out how to re-enable (enabling it breaks minitest_test_runner_test)
-# minitest_reporter = if ENV["SPEC_REPORTER"]
-#   Minitest::Reporters::SpecReporter.new(color: true)
-# else
-#   Minitest::Reporters::DefaultReporter.new(color: true)
-# end
-# Minitest::Reporters.use!(minitest_reporter)
+minitest_reporter = if ENV["SPEC_REPORTER"]
+  Minitest::Reporters::SpecReporter.new(color: true)
+else
+  Minitest::Reporters::DefaultReporter.new(color: true)
+end
+Minitest::Reporters.use!(minitest_reporter)
 
 module Minitest
   class Test
