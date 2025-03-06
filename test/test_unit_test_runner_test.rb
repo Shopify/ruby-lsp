@@ -25,14 +25,14 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_fails",
+            "id" => "SampleTest#test_that_fails",
             "uri" => uri,
           },
         },
         {
           "method" => "fail",
           "params" => {
-            "id" => "Sample#test_that_fails",
+            "id" => "SampleTest#test_that_fails",
             "message" => "<1> expected but was\n<2>.",
             "uri" => uri,
           },
@@ -40,14 +40,14 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_is_pending",
+            "id" => "SampleTest#test_that_is_pending",
             "uri" => uri,
           },
         },
         {
           "method" => "skip",
           "params" => {
-            "id" => "Sample#test_that_is_pending",
+            "id" => "SampleTest#test_that_is_pending",
             "message" => "pending test",
             "uri" => uri,
           },
@@ -55,28 +55,28 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_passes",
+            "id" => "SampleTest#test_that_passes",
             "uri" => uri,
           },
         },
         {
           "method" => "pass",
           "params" => {
-            "id" => "Sample#test_that_passes",
+            "id" => "SampleTest#test_that_passes",
             "uri" => uri,
           },
         },
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_raises",
+            "id" => "SampleTest#test_that_raises",
             "uri" => uri,
           },
         },
         {
           "method" => "error",
           "params" => {
-            "id" => "Sample#test_that_raises",
+            "id" => "SampleTest#test_that_raises",
             "message" => "RuntimeError: oops",
             "uri" => uri,
           },

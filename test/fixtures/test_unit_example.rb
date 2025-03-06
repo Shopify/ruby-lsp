@@ -4,7 +4,7 @@
 require "test-unit"
 require "ruby_lsp/test_unit_test_runner"
 
-class Sample < Test::Unit::TestCase
+class SampleTest < Test::Unit::TestCase
   def test_that_passes
     assert_equal(1, 1)
     assert_equal(2, 2)

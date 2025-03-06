@@ -26,14 +26,14 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_fails",
+            "id" => "SampleTest#test_that_fails",
             "uri" => uri,
           },
         },
         {
           "method" => "fail",
           "params" => {
-            "id" => "Sample#test_that_fails",
+            "id" => "SampleTest#test_that_fails",
             "message" => "--- expected\n+++ actual\n@@ -1 +1 @@\n-1\n+2\n",
             "uri" => uri,
           },
@@ -41,14 +41,14 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_is_pending",
+            "id" => "SampleTest#test_that_is_pending",
             "uri" => uri,
           },
         },
         {
           "method" => "skip",
           "params" => {
-            "id" => "Sample#test_that_is_pending",
+            "id" => "SampleTest#test_that_is_pending",
             "message" => "pending test",
             "uri" => uri,
           },
@@ -56,28 +56,28 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_passes",
+            "id" => "SampleTest#test_that_passes",
             "uri" => uri,
           },
         },
         {
           "method" => "pass",
           "params" => {
-            "id" => "Sample#test_that_passes",
+            "id" => "SampleTest#test_that_passes",
             "uri" => uri,
           },
         },
         {
           "method" => "start",
           "params" => {
-            "id" => "Sample#test_that_raises",
+            "id" => "SampleTest#test_that_raises",
             "uri" => uri,
           },
         },
         {
           "method" => "error",
           "params" => {
-            "id" => "Sample#test_that_raises",
+            "id" => "SampleTest#test_that_raises",
             "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:23:in #{error_location}",
             "uri" => uri,
           },
@@ -104,7 +104,7 @@ module RubyLsp
       # TODO: confirm when this behavior changed
       # Also note the difference in the initial character.
       if ruby_version >= Gem::Version.new("3.4")
-        "'Sample#test_that_raises'"
+        "'SampleTest#test_that_raises'"
       else
         "`test_that_raises'"
       end
