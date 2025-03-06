@@ -28,8 +28,6 @@ module Minitest
 
       #: (Minitest::Result result) -> void
       def record(result)
-        super
-
         if result.error?
           record_error(result)
         elsif result.passed?
