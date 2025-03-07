@@ -53,7 +53,6 @@ Sorbet/TrueSigil:
     - "lib/ruby_lsp/test_unit_test_runner.rb"
   Exclude:
     - "**/*.rake"
-    - "lib/**/*.rb"
 
 Sorbet/StrictSigil:
   Enabled: true
