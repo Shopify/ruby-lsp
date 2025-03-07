@@ -897,6 +897,51 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_ignores_bundle_bin
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            system("bundle", "config", "set", "--local", "bin", "bin")
+            system("bundle", "install")
+
+            assert_path_exists(File.join(dir, "bin"))
+
+            env = RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            refute_includes(env.keys, "BUNDLE_BIN")
+          end
+        end
+      end
+    end
+  end
+
+  def test_ignores_bundle_package
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            system("bundle", "install")
+            system("bundle", "package")
+
+            env = RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            refute_includes(env.keys, "BUNDLE_CACHE_ALL")
+            refute_includes(env.keys, "BUNDLE_CACHE_ALL_PLATFORMS")
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)

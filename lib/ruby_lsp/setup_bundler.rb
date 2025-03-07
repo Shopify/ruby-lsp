@@ -357,10 +357,17 @@ module RubyLsp
         Bundler::Settings.new
       end
 
+      # List of Bundler settings that don't make sense for the composed bundle and are better controlled manually by the
+      # user
+      ignored_settings = ["bin", "cache_all", "cache_all_platforms"]
+
       # Map all settings to their environment variable names with `key_for` and their values. For example, the if the
       # setting name `e` is `path` with a value of `vendor/bundle`, then it will return `"BUNDLE_PATH" =>
       # "vendor/bundle"`
-      settings.all.to_h do |e|
+      settings
+        .all
+        .reject { |setting| ignored_settings.include?(setting) }
+        .to_h do |e|
         key = settings.key_for(e)
         value = Array(settings[e]).join(":").tr(" ", ":")
 
