@@ -8,12 +8,9 @@
   ],
   "repository": {
     "rbs-signature": {
-      "begin": "(^[^#\"']*)(#:)",
+      "begin": "(?<![\"'][^\"']*)(#:)",
       "beginCaptures": {
         "1": {
-          "name": "source.ruby"
-        },
-        "2": {
           "name": "comment.line.signature.rbs"
         }
       },
@@ -47,6 +44,10 @@
         {
           "match": "[\\(\\)\\{\\},\\|\\*&:?]",
           "name": "punctuation.section.signature.rbs"
+        },
+        {
+          "match": "#.*$",
+          "name": "comment.line.number-sign.rbs"
         }
       ]
     }

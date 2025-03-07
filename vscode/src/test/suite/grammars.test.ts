@@ -601,8 +601,29 @@ suite("Grammars", () => {
       });
 
       test("grammar is not applied to `#:` in comments", () => {
-        const ruby = "# some comments says #: foo";
-        const expectedTokens = [["# some comments says #: foo", []]];
+        const ruby = "# some comments says #: Foo";
+        const expectedTokens = [
+          ["# some comments says ", []],
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["Foo", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+        ];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("grammar is applied to comments inside RBS comments", () => {
+        const ruby = "#: Foo # some comments";
+        const expectedTokens = [
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          ["Foo", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          [
+            "# some comments",
+            ["meta.type.signature.rbs", "comment.line.number-sign.rbs"],
+          ],
+        ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
@@ -617,7 +638,7 @@ suite("Grammars", () => {
       test("grammar is applied to `#:` in trailing comments", () => {
         const ruby = "attr_reader :name #: String";
         const expectedTokens = [
-          ["attr_reader :name ", ["meta.type.signature.rbs", "source.ruby"]],
+          ["attr_reader :name ", []],
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           [
