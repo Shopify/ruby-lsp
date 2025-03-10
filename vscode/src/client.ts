@@ -516,6 +516,14 @@ export default class Client extends LanguageClient implements ClientInterface {
     return super.dispose(timeout);
   }
 
+  async sendGoToRelevantFileRequest(
+    uri: vscode.Uri,
+  ): Promise<{ locations: string[] } | null> {
+    return this.sendRequest("experimental/goToRelevantFile", {
+      textDocument: { uri: uri.toString() },
+    });
+  }
+
   private async benchmarkMiddleware<T>(
     type: string | MessageSignature,
     params: any,
