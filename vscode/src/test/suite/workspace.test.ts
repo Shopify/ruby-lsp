@@ -67,7 +67,7 @@ suite("Workspace", () => {
     }
 
     // Give enough time for all watchers to fire and all debounces to run off
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     startStub.restore();
     restartSpy.restore();
