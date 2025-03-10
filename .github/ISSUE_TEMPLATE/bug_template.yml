@@ -1,0 +1,60 @@
+---
+name: Ruby LSP bug
+description: File a bug report about the Ruby LSP
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for filing a bug report! Please answer the following questions to help us understand the issue.
+
+        Note that the maintainers only have bandwidth to prioritize VS Code support and lean on the community to
+        assist with supporting other editors.
+
+        ### Before submitting
+
+        First, check the instructions on [troubleshooting](https://shopify.github.io/ruby-lsp/troubleshooting.html).
+
+        If using VS Code, ensure you are:
+
+        * On the latest version of the [Ruby LSP VS Code extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp)
+        * On the latest version of the [Ruby LSP server gem](https://rubygems.org/gems/ruby-lsp)
+        * On the latest version of VS Code
+
+        If you are using another editor:
+
+        * Check if the editor and LSP plugin you use are up to date, and if they support the latest
+          [Language Server Protocol Specification](https://microsoft.github.io/language-server-protocol).
+        * Seek community help from the
+          [Ruby DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+        * Seek help in the related editor/plugin's issue tracker.
+
+  - type: textarea
+    attributes:
+      label: Description
+      description: Reproduction steps
+      value: |
+        ### Ruby LSP Information
+
+        <!--For VS Code, please run `Collect Ruby LSP information for issue reporting` from VS Code's command palette
+        and paste the result here.
+
+        For other editors, please provide as much detail about your development setup as possible. Often issues with the
+        Ruby LSP are specific to a combination of operating system, Ruby version, Ruby version manager, the editor being
+        used and project setup. The easier it is to reproduce the problem, the quicker it will likely take to fix
+        it. -->
+
+        ### Reproduction steps
+
+        <!-- Suggested structure -->
+        1. Start the Ruby LSP using a certain editor
+        2. Open a Ruby file
+        3. Do something
+        4. See unexpected behavior
+
+        **Code snippet or error message**
+        ```ruby
+        ```
+    validations:
+      required: true
