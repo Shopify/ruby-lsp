@@ -3,26 +3,26 @@
 
 require "test_helper"
 
-class GotoRelevantFileTest < Minitest::Test
+class GoToRelevantFileTest < Minitest::Test
   def test_when_input_is_test_file_returns_array_of_implementation_file_locations
-    stub_glob_pattern("**/goto_relevant_file.rb", ["lib/ruby_lsp/requests/goto_relevant_file.rb"])
+    stub_glob_pattern("**/go_to_relevant_file.rb", ["lib/ruby_lsp/requests/go_to_relevant_file.rb"])
 
-    test_file_path = "/workspace/test/requests/goto_relevant_file_test.rb"
-    expected = ["/workspace/lib/ruby_lsp/requests/goto_relevant_file.rb"]
+    test_file_path = "/workspace/test/requests/go_to_relevant_file_test.rb"
+    expected = ["/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_file_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_file_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
   def test_when_input_is_implementation_file_returns_array_of_test_file_locations
     pattern =
-      "**/{{test_,spec_,integration_test_}goto_relevant_file,goto_relevant_file{_test,_spec,_integration_test}}.rb"
-    stub_glob_pattern(pattern, ["test/requests/goto_relevant_file_test.rb"])
+      "**/{{test_,spec_,integration_test_}go_to_relevant_file,go_to_relevant_file{_test,_spec,_integration_test}}.rb"
+    stub_glob_pattern(pattern, ["test/requests/go_to_relevant_file_test.rb"])
 
-    impl_path = "/workspace/lib/ruby_lsp/requests/goto_relevant_file.rb"
-    expected = ["/workspace/test/requests/goto_relevant_file_test.rb"]
+    impl_path = "/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"
+    expected = ["/workspace/test/requests/go_to_relevant_file_test.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(impl_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -40,7 +40,7 @@ class GotoRelevantFileTest < Minitest::Test
       "/workspace/test/integration/some_feature_test.rb",
     ]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(impl_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
     assert_equal(expected.sort, result.sort)
   end
 
@@ -49,7 +49,7 @@ class GotoRelevantFileTest < Minitest::Test
     stub_glob_pattern(pattern, [])
 
     file_path = "/workspace/lib/ruby_lsp/requests/nonexistent_file.rb"
-    result = RubyLsp::Requests::GotoRelevantFile.new(file_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(file_path, "/workspace").perform
     assert_empty(result)
   end
 
@@ -59,7 +59,7 @@ class GotoRelevantFileTest < Minitest::Test
     test_path = "/workspace/test/feature_test.rb"
     expected = ["/workspace/lib/feature.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -69,7 +69,7 @@ class GotoRelevantFileTest < Minitest::Test
     test_path = "/workspace/spec/feature_spec.rb"
     expected = ["/workspace/lib/feature.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -79,7 +79,7 @@ class GotoRelevantFileTest < Minitest::Test
     test_path = "/workspace/test/feature_integration_test.rb"
     expected = ["/workspace/lib/feature.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -89,7 +89,7 @@ class GotoRelevantFileTest < Minitest::Test
     test_path = "/workspace/test/test_feature.rb"
     expected = ["/workspace/lib/feature.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -99,7 +99,7 @@ class GotoRelevantFileTest < Minitest::Test
     test_path = "/workspace/test/spec_feature.rb"
     expected = ["/workspace/lib/feature.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -109,7 +109,7 @@ class GotoRelevantFileTest < Minitest::Test
     test_path = "/workspace/test/integration_test_feature.rb"
     expected = ["/workspace/lib/feature.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(test_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -120,7 +120,7 @@ class GotoRelevantFileTest < Minitest::Test
     impl_path = "/workspace/lib/feature.rb"
     expected = ["/workspace/test/feature_test.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(impl_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -131,7 +131,7 @@ class GotoRelevantFileTest < Minitest::Test
     impl_path = "/workspace/lib/feature.rb"
     expected = ["/workspace/spec/feature_spec.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(impl_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
     assert_equal(expected, result)
   end
 
@@ -142,7 +142,7 @@ class GotoRelevantFileTest < Minitest::Test
     impl_path = "/workspace/lib/feature.rb"
     expected = ["/workspace/test/feature_integration_test.rb"]
 
-    result = RubyLsp::Requests::GotoRelevantFile.new(impl_path, "/workspace").perform
+    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
     assert_equal(expected, result)
   end
 

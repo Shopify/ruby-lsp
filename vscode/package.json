@@ -61,7 +61,7 @@
           "group": "navigation"
         },
         {
-          "command": "rubyLsp.gotoRelevantFile",
+          "command": "rubyLsp.goToRelevantFile",
           "when": "rubyLsp.activated && view == 'workbench.explorer.fileView'",
           "group": "navigation"
         }
@@ -73,7 +73,7 @@
           "group": "2_workspace"
         },
         {
-          "command": "rubyLsp.gotoRelevantFile",
+          "command": "rubyLsp.goToRelevantFile",
           "when": "rubyLsp.activated",
           "group": "2_workspace"
         }
@@ -170,8 +170,8 @@
         "icon": "$(ruby)"
       },
       {
-        "command": "rubyLsp.gotoRelevantFile",
-        "title": "Goto relevant file (test <> source code)",
+        "command": "rubyLsp.goToRelevantFile",
+        "title": "Go to relevant file (test <> source code)",
         "category": "Ruby LSP"
       },
       {

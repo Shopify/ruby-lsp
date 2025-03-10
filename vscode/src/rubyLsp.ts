@@ -705,13 +705,13 @@ export class RubyLsp {
             );
         },
       ),
-      vscode.commands.registerCommand(Command.GotoRelevantFile, async () => {
+      vscode.commands.registerCommand(Command.GoToRelevantFile, async () => {
         const uri = vscode.window.activeTextEditor?.document.uri;
         if (!uri) {
           return;
         }
         const response: { locations: string[] } | null | undefined =
-          await this.currentActiveWorkspace()?.lspClient?.sendGotoRelevantFileRequest(
+          await this.currentActiveWorkspace()?.lspClient?.sendGoToRelevantFileRequest(
             uri,
           );
 

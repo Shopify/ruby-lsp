@@ -994,20 +994,20 @@ suite("Client", () => {
         workspaceUri,
         "test",
         "requests",
-        "goto_relevant_file_test.rb",
+        "go_to_relevant_file_test.rb",
       );
       implUri = vscode.Uri.joinPath(
         workspaceUri,
         "lib",
         "ruby_lsp",
         "requests",
-        "goto_relevant_file.rb",
+        "go_to_relevant_file.rb",
       );
     });
 
     test("for test file", async () => {
       const response: { locations: string[] } = await client.sendRequest(
-        "experimental/gotoRelevantFile",
+        "experimental/goToRelevantFile",
         {
           textDocument: {
             uri: testUri.toString(),
@@ -1018,13 +1018,13 @@ suite("Client", () => {
       assert.ok(response.locations.length === 1);
       assert.match(
         response.locations[0],
-        /lib\/ruby_lsp\/requests\/goto_relevant_file\.rb$/,
+        /lib\/ruby_lsp\/requests\/go_to_relevant_file\.rb$/,
       );
     }).timeout(20000);
 
     test("for implementation file", async () => {
       const response: { locations: string[] } = await client.sendRequest(
-        "experimental/gotoRelevantFile",
+        "experimental/goToRelevantFile",
         {
           textDocument: {
             uri: implUri.toString(),
@@ -1035,7 +1035,7 @@ suite("Client", () => {
       assert.ok(response.locations.length === 1);
       assert.match(
         response.locations[0],
-        /test\/requests\/goto_relevant_file_test\.rb$/,
+        /test\/requests\/go_to_relevant_file_test\.rb$/,
       );
     }).timeout(20000);
 
@@ -1043,7 +1043,7 @@ suite("Client", () => {
       const uri = vscode.Uri.joinPath(workspaceUri, "nonexistent", "file.rb");
 
       const response: { locations: string[] } = await client.sendRequest(
-        "experimental/gotoRelevantFile",
+        "experimental/goToRelevantFile",
         {
           textDocument: {
             uri: uri.toString(),

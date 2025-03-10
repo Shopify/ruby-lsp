@@ -33,7 +33,7 @@ export enum Command {
   StartServerInDebugMode = "rubyLsp.startServerInDebugMode",
   ShowOutput = "rubyLsp.showOutput",
   MigrateLaunchConfiguration = "rubyLsp.migrateLaunchConfiguration",
-  GotoRelevantFile = "rubyLsp.gotoRelevantFile",
+  GoToRelevantFile = "rubyLsp.goToRelevantFile",
 }
 
 export interface RubyInterface {

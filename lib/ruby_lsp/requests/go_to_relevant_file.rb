@@ -3,11 +3,11 @@
 
 module RubyLsp
   module Requests
-    # Goto Relevant File is a custom [LSP
+    # GoTo Relevant File is a custom [LSP
     # request](https://microsoft.github.io/language-server-protocol/specification#requestMessage)
     # that navigates to the relevant file for the current document.
     # Currently, it supports source code file <> test file navigation.
-    class GotoRelevantFile < Request
+    class GoToRelevantFile < Request
       extend T::Sig
 
       TEST_KEYWORDS = ["test", "spec", "integration_test"]
