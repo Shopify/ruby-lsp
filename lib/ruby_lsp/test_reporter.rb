@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "json"
+require "delegate"
 
 $stdout.binmode
 $stdout.sync = true
@@ -58,12 +59,39 @@ module RubyLsp
         send_message("error", params)
       end
 
+      #: (message: String) -> void
+      def write_stdout(message:)
+        params = {
+          message: message,
+        }
+        send_message("write_stdout", params)
+      end
+
       private
 
       #: (method_name: String?, params: Hash[String, untyped]) -> void
       def send_message(method_name, params)
         json_message = { method: method_name, params: params }.to_json
         $stdout.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
+      end
+    end
+
+    class IOWrapper < SimpleDelegator
+      #: (Array[String]) -> void
+      def puts(*args)
+        args.each { |arg| log("#{arg}\n") }
+      end
+
+      #: (Array[String]) -> void
+      def print(*args)
+        args.each { |arg| log(arg.to_s) }
+      end
+
+      private
+
+      #: (String) -> void
+      def log(message)
+        TestReporter.write_stdout(message: message)
       end
     end
   end

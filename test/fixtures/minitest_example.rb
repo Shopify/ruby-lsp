@@ -23,4 +23,8 @@ class SampleTest < Minitest::Test
   def test_that_raises
     raise "oops"
   end
+
+  def test_with_output
+    $stdout.puts "hello from stdout"
+  end
 end

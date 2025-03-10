@@ -16,6 +16,9 @@ module Minitest
       class << self
         #: (Hash[untyped, untyped]) -> void
         def minitest_plugin_init(_options)
+          # We wrap the default output stream so that we can capture anything written to stdout and emit it as part of
+          # the JSON event stream.
+          $> = RubyLsp::TestReporter::IOWrapper.new($stdout)
           Minitest.reporter.reporters = [RubyLspReporter.new]
         end
       end

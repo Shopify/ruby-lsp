@@ -84,8 +84,28 @@ module RubyLsp
             "uri" => uri,
           },
         },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_with_output",
+            "uri" => uri,
+          },
+        },
+        {
+          "method" => "write_stdout",
+          "params" => {
+            "message" => "hello from stdout\n",
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "SampleTest#test_with_output",
+            "uri" => uri,
+          },
+        },
       ]
-      assert_equal(8, actual.size)
+      assert_equal(2 + 2 + 2 + 2 + 3, actual.size)
       assert_equal(expected, actual)
     end
 
