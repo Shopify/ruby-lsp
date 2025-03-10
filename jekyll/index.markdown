@@ -106,8 +106,9 @@ Additionally, some tools may include a Ruby LSP add-on directly, like
 
 - [Standard Ruby (from v1.39.1)](https://github.com/standardrb/standard/wiki/IDE:-vscode#using-ruby-lsp)
 
-Other community driven add-ons can be found in [awesome-ruby-lsp](https://github.com/johansenja/awesome-ruby-lsp) or by
-searching on [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) for the `ruby-lsp` prefix.
+Other community driven add-ons can be found:
+- by searching [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) for the `ruby-lsp` prefix
+- in the community driven list of [awesome-ruby-lsp](https://github.com/johansenja/awesome-ruby-lsp)
 
 For instructions on how to create add-ons, see the [add-ons documentation](add-ons).
 
