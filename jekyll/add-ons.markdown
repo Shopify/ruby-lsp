@@ -302,33 +302,7 @@ class MyIndexingEnhancement < RubyIndexer::Enhancement
 end
 ```
 
-Finally, we need to register our enhancement in the index once during the add-on's activation.
-
-```ruby
-module RubyLsp
-  module MyLibrary
-    class Addon < ::RubyLsp::Addon
-      def activate(global_state, message_queue)
-        # Register the enhancement as part of the indexing process
-        global_state.index.register_enhancement(MyIndexingEnhancement.new(global_state.index))
-      end
-
-      def deactivate
-      end
-
-      def name
-        "MyLibrary"
-      end
-
-      def version
-        "0.1.0"
-      end
-    end
-  end
-end
-```
-
-Done! With this the Ruby LSP should automatically handle calls to `my_dsl_that_creates_methods` and create an accurate
+With this the Ruby LSP should automatically handle calls to `my_dsl_that_creates_methods` and create an accurate
 representation of the declarations that will be available in the runtime.
 
 ### Registering formatters
