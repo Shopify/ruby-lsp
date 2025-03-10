@@ -772,7 +772,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.9",
     "@eslint/eslintrc": "^3.3.0",
-    "@eslint/js": "^9.21.0",
+    "@eslint/js": "^9.22.0",
     "@shopify/eslint-plugin": "^47.0.1",
     "@shopify/prettier-config": "^1.1.2",
     "@types/glob": "^8.1.0",
