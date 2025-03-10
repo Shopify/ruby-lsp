@@ -1,6 +1,7 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/listeners/discover_tests"
 require "ruby_lsp/listeners/test_style"
 require "ruby_lsp/listeners/spec_style"
 

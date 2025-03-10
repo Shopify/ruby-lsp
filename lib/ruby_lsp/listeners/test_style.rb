@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Listeners
-    class TestStyle
+    class TestStyle < DiscoverTests
       class << self
         # Resolves the minimal set of commands required to execute the requested tests
         #: (Array[Hash[Symbol, untyped]]) -> Array[String]
@@ -116,8 +116,6 @@ module RubyLsp
         end
       end
 
-      include Requests::Support::Common
-
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
       BASE_COMMAND = T.let(
@@ -132,11 +130,8 @@ module RubyLsp
 
       #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
-        @response_builder = response_builder
-        @uri = uri
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @visibility_stack = T.let([:public], T::Array[Symbol])
-        @nesting = T.let([], T::Array[String])
+        super
+
         @framework_tag = T.let(:minitest, Symbol)
 
         dispatcher.register(
@@ -153,55 +148,34 @@ module RubyLsp
 
       #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
-        @visibility_stack << :public
-        name = constant_name(node.constant_path)
-        name ||= name_with_dynamic_reference(node.constant_path)
+        super
 
-        fully_qualified_name = RubyIndexer::Index.actual_nesting(@nesting, name).join("::")
+        @framework_tag = :test_unit if @attached_ancestors.include?("Test::Unit::TestCase")
 
-        attached_ancestors = begin
-          @index.linearized_ancestors_of(fully_qualified_name)
-        rescue RubyIndexer::Index::NonExistingNamespaceError
-          # When there are dynamic parts in the constant path, we will not have indexed the namespace. We can still
-          # provide test functionality if the class inherits directly from Test::Unit::TestCase or Minitest::Test
-          [node.superclass&.slice].compact
-        end
-
-        @framework_tag = :test_unit if attached_ancestors.include?("Test::Unit::TestCase")
-
-        if @framework_tag == :test_unit || non_declarative_minitest?(attached_ancestors, fully_qualified_name)
+        if @framework_tag == :test_unit || non_declarative_minitest?(@attached_ancestors, @fully_qualified_name)
           @response_builder.add(Requests::Support::TestItem.new(
-            fully_qualified_name,
-            fully_qualified_name,
+            @fully_qualified_name,
+            @fully_qualified_name,
             @uri,
             range_from_node(node),
             tags: [@framework_tag],
           ))
         end
-
-        @nesting << name
-      end
-
-      #: (Prism::ModuleNode node) -> void
-      def on_module_node_enter(node)
-        @visibility_stack << :public
-
-        name = constant_name(node.constant_path)
-        name ||= name_with_dynamic_reference(node.constant_path)
-
-        @nesting << name
-      end
-
-      #: (Prism::ModuleNode node) -> void
-      def on_module_node_leave(node)
-        @visibility_stack.pop
-        @nesting.pop
       end
 
       #: (Prism::ClassNode node) -> void
       def on_class_node_leave(node)
-        @visibility_stack.pop
-        @nesting.pop
+        super
+      end
+
+      #: (Prism::ModuleNode node) -> void
+      def on_module_node_enter(node)
+        super
+      end
+
+      #: (Prism::ModuleNode node) -> void
+      def on_module_node_leave(node)
+        super
       end
 
       #: (Prism::DefNode node) -> void
@@ -258,12 +232,6 @@ module RubyLsp
         !@index.linearized_ancestors_of(singleton_name).include?("ActiveSupport::Testing::Declarative")
       rescue RubyIndexer::Index::NonExistingNamespaceError
         true
-      end
-
-      #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String
-      def name_with_dynamic_reference(node)
-        slice = node.slice
-        slice.gsub(/((?<=::)|^)[a-z]\w*/, DYNAMIC_REFERENCE_MARKER)
       end
     end
   end
