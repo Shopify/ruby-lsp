@@ -5,7 +5,7 @@ module RubyLsp
   class ERBDocument < Document
     extend T::Generic
 
-    ParseResultType = type_member { { fixed: Prism::ParseResult } }
+    ParseResultType = type_member { { fixed: Prism::ParseLexResult } }
 
     #: String
     attr_reader :host_language_source
@@ -36,9 +36,14 @@ module RubyLsp
       @host_language_source = scanner.host_language
       # Use partial script to avoid syntax errors in ERB files where keywords may be used without the full context in
       # which they will be evaluated
-      @parse_result = Prism.parse(scanner.ruby, partial_script: true)
+      @parse_result = Prism.parse_lex(scanner.ruby, partial_script: true)
       @code_units_cache = @parse_result.code_units_cache(@encoding)
       true
+    end
+
+    #: -> Prism::ProgramNode
+    def ast
+      @parse_result.value.first
     end
 
     # @override
@@ -58,7 +63,7 @@ module RubyLsp
       char_position, _ = find_index_by_position(position)
 
       RubyDocument.locate(
-        @parse_result.value,
+        ast,
         char_position,
         code_units_cache: @code_units_cache,
         node_types: node_types,
