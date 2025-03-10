@@ -16,11 +16,10 @@ AllCops:
     - "sorbet/rbi/shims/**/*.rbi"
   Exclude:
     - "vendor/**/*"
-    - "vscode/**/*"
+    - "vscode/node_modules/**/*"
     - "features/**/*"
     - "test/fixtures/**/*"
     - "test/expectations/**/*"
-    - "jekyll/**/*"
 
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true
@@ -38,6 +37,10 @@ Naming/FileName:
 RubyLsp/UseLanguageServerAliases:
   Exclude:
     - "test/**/*.rb"
+
+RubyLsp/UseRegisterWithHandlerMethod:
+  Exclude:
+    - "jekyll/add-ons.markdown" # this cop doesn't apply to enhancements
 
 Sorbet/FalseSigil:
   Enabled: false
