@@ -21,4 +21,4 @@ require "rubocop/rake_task"
 
 RuboCop::RakeTask.new
 
-task default: ["test:indexer", :test]
+task default: [:test, "test:indexer"]
