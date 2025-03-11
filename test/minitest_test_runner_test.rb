@@ -7,7 +7,8 @@ module RubyLsp
   class MinitestTestRunnerTest < Minitest::Test
     def test_minitest_output
       plugin_path = "lib/ruby_lsp/ruby_lsp_reporter_plugin.rb"
-      env = { "RUBYOPT" => "-r./#{plugin_path}" }
+      # In Ruby 3.1, the require fails unless Bundler is set up.
+      env = { "RUBYOPT" => "-rbundler/setup -r./#{plugin_path}" }
       _stdin, stdout, stderr, wait_thr = T.unsafe(Open3).popen3(
         env,
         "bundle",
