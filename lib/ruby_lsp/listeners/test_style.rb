@@ -163,21 +163,6 @@ module RubyLsp
         end
       end
 
-      #: (Prism::ClassNode node) -> void
-      def on_class_node_leave(node)
-        super
-      end
-
-      #: (Prism::ModuleNode node) -> void
-      def on_module_node_enter(node)
-        super
-      end
-
-      #: (Prism::ModuleNode node) -> void
-      def on_module_node_leave(node)
-        super
-      end
-
       #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         return if @visibility_stack.last != :public
