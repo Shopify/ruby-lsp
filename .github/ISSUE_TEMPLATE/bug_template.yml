@@ -26,8 +26,7 @@ body:
 
         * Check if the editor and LSP plugin you use are up to date, and if they support the latest
           [Language Server Protocol Specification](https://microsoft.github.io/language-server-protocol).
-        * Seek community help from the
-          [Ruby DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+        * Seek community help from the [Ruby DX Slack](https://shopify.github.io/ruby-lsp/invite).
         * Seek help in the related editor/plugin's issue tracker.
 
   - type: textarea
