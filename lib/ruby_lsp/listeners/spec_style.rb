@@ -41,16 +41,6 @@ module RubyLsp
         @spec_class_stack.pop
       end
 
-      #: (node: Prism::ModuleNode) -> void
-      def on_module_node_enter(node)
-        super
-      end
-
-      #: (node: Prism::ModuleNode) -> void
-      def on_module_node_leave(node)
-        super
-      end
-
       #: (node: Prism::CallNode) -> void
       def on_call_node_enter(node)
         case node.name

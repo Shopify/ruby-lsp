@@ -57,12 +57,6 @@ module RubyLsp
         @nesting.pop
       end
 
-      #: (Prism::CallNode node) -> void
-      def on_call_node_enter(node); end
-
-      #: (Prism::CallNode node) -> void
-      def on_call_node_leave(node); end
-
       private
 
       #: (String? name) -> String
