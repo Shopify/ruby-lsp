@@ -8,7 +8,7 @@ module RubyLsp
     def test_minitest_output
       plugin_path = "lib/ruby_lsp/ruby_lsp_reporter_plugin.rb"
       env = { "RUBYOPT" => "-r./#{plugin_path}" }
-      _stdin, stdout, _stderr, _wait_thr = T.unsafe(Open3).popen3(
+      _stdin, stdout, stderr, wait_thr = T.unsafe(Open3).popen3(
         env,
         "bundle",
         "exec",
@@ -16,6 +16,8 @@ module RubyLsp
         "-Itest",
         "test/fixtures/minitest_example.rb",
       )
+      flunk("command failed: #{stderr.read}") unless wait_thr.value.success?
+
       stdout.binmode
       stdout.sync = true
 
