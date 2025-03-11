@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require_relative "test_reporter"
+require "ruby_indexer/lib/ruby_indexer/uri"
 
 require "minitest"
 
