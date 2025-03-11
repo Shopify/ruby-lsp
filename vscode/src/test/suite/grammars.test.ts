@@ -37,6 +37,10 @@ const EMBEDDED_HEREDOC_LANGUAGES: InferrableLanguageConfigOrLabel[] = [
     label: "C++",
   },
   {
+    label: "ERB",
+    contentName: "text.html.erb",
+  },
+  {
     label: "GraphQL",
     delimiters: ["GRAPHQL", "GQL"],
   },

@@ -1692,6 +1692,44 @@
       ]
     },
     {
+      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)ERB)\\b\\1))",
+      "comment": "Heredoc with embedded ERB",
+      "end": "(?!\\G)",
+      "name": "meta.embedded.block.erb",
+      "patterns": [
+        {
+          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)ERB)\\b\\1)",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.ruby"
+            }
+          },
+          "contentName": "text.html.erb",
+          "end": "^\\s*\\2$\\n?",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.ruby"
+            }
+          },
+          "name": "string.unquoted.heredoc.ruby",
+          "patterns": [
+            {
+              "include": "#heredoc"
+            },
+            {
+              "include": "#interpolated_ruby"
+            },
+            {
+              "include": "text.html.erb"
+            },
+            {
+              "include": "#escaped_char"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)XML)\\b\\1))",
       "comment": "Heredoc with embedded XML",
       "end": "(?!\\G)",
