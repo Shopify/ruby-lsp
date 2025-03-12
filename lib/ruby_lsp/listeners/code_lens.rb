@@ -18,8 +18,7 @@ module RubyLsp
         String,
       )
       ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
-      SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
-      DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
+      SUPPORTED_TEST_LIBRARIES = ["minitest", "test-unit"]
 
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens] response_builder, GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, global_state, uri, dispatcher)

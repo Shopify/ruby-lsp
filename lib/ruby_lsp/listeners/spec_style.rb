@@ -7,8 +7,6 @@ module RubyLsp
       extend T::Sig
       include Requests::Support::Common
 
-      DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
-
       #: (response_builder: ResponseBuilders::TestCollection, global_state: GlobalState, dispatcher: Prism::Dispatcher, uri: URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         @response_builder = response_builder
