@@ -24,7 +24,7 @@ module RubyLsp
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_enter(node)
+      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack << :public
         name = constant_name(node.constant_path)
         name ||= name_with_dynamic_reference(node.constant_path)
@@ -36,7 +36,7 @@ module RubyLsp
       end
 
       #: (Prism::ModuleNode node) -> void
-      def on_module_node_enter(node)
+      def on_module_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack << :public
 
         name = constant_name(node.constant_path)
@@ -46,13 +46,13 @@ module RubyLsp
       end
 
       #: (Prism::ModuleNode node) -> void
-      def on_module_node_leave(node)
+      def on_module_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack.pop
         @nesting.pop
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_leave(node)
+      def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack.pop
         @nesting.pop
       end

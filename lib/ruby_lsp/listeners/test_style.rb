@@ -137,9 +137,9 @@ module RubyLsp
         dispatcher.register(
           self,
           :on_class_node_enter,
-          :on_class_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
+          :on_class_node_leave, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+          :on_module_node_enter, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+          :on_module_node_leave, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
           :on_def_node_enter,
           :on_call_node_enter,
           :on_call_node_leave,
