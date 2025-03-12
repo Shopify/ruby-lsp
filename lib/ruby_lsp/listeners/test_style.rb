@@ -145,10 +145,7 @@ module RubyLsp
 
         dispatcher.register(
           self,
-          :on_class_node_enter,
-          :on_class_node_leave, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-          :on_module_node_enter, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-          :on_module_node_leave, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+          # Common handlers registered in parent class
           :on_def_node_enter,
           :on_call_node_enter,
           :on_call_node_leave,
@@ -156,7 +153,7 @@ module RubyLsp
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_enter(node)
+      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         super
 
         @framework_tag = :test_unit if @attached_ancestors.include?("Test::Unit::TestCase")

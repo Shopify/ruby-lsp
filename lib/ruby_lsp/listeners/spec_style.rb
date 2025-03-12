@@ -15,17 +15,14 @@ module RubyLsp
 
         dispatcher.register(
           self,
-          :on_class_node_enter,
-          :on_class_node_leave,
-          :on_module_node_enter, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-          :on_module_node_leave, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+          # Common handlers registered in parent class
           :on_call_node_enter, # e.g. `describe` or `it`
           :on_call_node_leave,
         )
       end
 
       #: (node: Prism::ClassNode) -> void
-      def on_class_node_enter(node)
+      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         super
 
         is_spec = @attached_ancestors.include?("Minitest::Spec")
@@ -33,7 +30,7 @@ module RubyLsp
       end
 
       #: (node: Prism::ClassNode) -> void
-      def on_class_node_leave(node)
+      def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         super
 
         @spec_class_stack.pop

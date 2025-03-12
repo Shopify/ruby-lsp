@@ -21,10 +21,18 @@ module RubyLsp
 
         @fully_qualified_name = T.let("", String)
         @attached_ancestors = T.let([], T::Array[String])
+
+        dispatcher.register(
+          self,
+          :on_class_node_enter,
+          :on_class_node_leave,
+          :on_module_node_enter,
+          :on_module_node_leave,
+        )
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+      def on_class_node_enter(node)
         @visibility_stack << :public
         name = constant_name(node.constant_path)
         name ||= name_with_dynamic_reference(node.constant_path)
@@ -36,7 +44,7 @@ module RubyLsp
       end
 
       #: (Prism::ModuleNode node) -> void
-      def on_module_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+      def on_module_node_enter(node)
         @visibility_stack << :public
 
         name = constant_name(node.constant_path)
@@ -46,13 +54,13 @@ module RubyLsp
       end
 
       #: (Prism::ModuleNode node) -> void
-      def on_module_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+      def on_module_node_leave(node)
         @visibility_stack.pop
         @nesting.pop
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+      def on_class_node_leave(node)
         @visibility_stack.pop
         @nesting.pop
       end
