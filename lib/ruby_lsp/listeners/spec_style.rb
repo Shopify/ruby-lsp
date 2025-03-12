@@ -6,8 +6,6 @@ module RubyLsp
     class SpecStyle < DiscoverTests
       extend T::Sig
 
-      DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
-
       #: (response_builder: ResponseBuilders::TestCollection, global_state: GlobalState, dispatcher: Prism::Dispatcher, uri: URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         super

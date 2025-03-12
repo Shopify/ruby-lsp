@@ -77,7 +77,10 @@ module RubyLsp
         def handle_minitest_groups(file_path, groups_and_examples)
           regexes = groups_and_examples.flat_map do |group, info|
             examples = info[:examples]
-            group_regex = Shellwords.escape(group).gsub(Shellwords.escape(DYNAMIC_REFERENCE_MARKER), ".*")
+            group_regex = Shellwords.escape(group).gsub(
+              Shellwords.escape(DiscoverTests::DYNAMIC_REFERENCE_MARKER),
+              ".*",
+            )
             if examples.empty?
               "^#{group_regex}(#|::)"
             elsif examples.length == 1
@@ -100,7 +103,10 @@ module RubyLsp
         def handle_test_unit_groups(file_path, groups_and_examples)
           groups_and_examples.map do |group, info|
             examples = info[:examples]
-            group_regex = Shellwords.escape(group).gsub(Shellwords.escape(DYNAMIC_REFERENCE_MARKER), ".*")
+            group_regex = Shellwords.escape(group).gsub(
+              Shellwords.escape(DiscoverTests::DYNAMIC_REFERENCE_MARKER),
+              ".*",
+            )
             command = +"#{BASE_COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}$/\""
 
             unless examples.empty?
@@ -117,7 +123,6 @@ module RubyLsp
       end
 
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
-      DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
       BASE_COMMAND = T.let(
         begin
           Bundler.with_original_env { Bundler.default_lockfile }
