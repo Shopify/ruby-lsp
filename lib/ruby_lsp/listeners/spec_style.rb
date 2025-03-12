@@ -19,8 +19,8 @@ module RubyLsp
           self,
           :on_class_node_enter,
           :on_class_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
+          :on_module_node_enter, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+          :on_module_node_leave, # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
           :on_call_node_enter, # e.g. `describe` or `it`
           :on_call_node_leave,
         )
