@@ -1,7 +1,7 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "bundler"
+require "bundler/setup"
 require "sorbet-runtime"
 require "bundler/cli"
 require "bundler/cli/install"
