@@ -11,6 +11,16 @@ module RubyLsp
 
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
 
+      class << self
+        #: (Array[Hash[Symbol, untyped]] items) -> Array[String]
+        def resolve_test_commands(items)
+          # TODO: implement for SpecStyle
+          # SpecStyle.resolve_test_commands(items)
+          TestStyle.resolve_test_commands(items)
+          # TODO: what about addons
+        end
+      end
+
       #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         @response_builder = response_builder

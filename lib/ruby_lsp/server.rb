@@ -1423,7 +1423,7 @@ module RubyLsp
 
       send_message(Result.new(
         id: message[:id],
-        response: { commands: Listeners::TestStyle.resolve_test_commands(items) },
+        response: { commands: Listeners::DiscoverTests.resolve_test_commands(items) },
       ))
     end
   end
