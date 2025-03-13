@@ -3,4 +3,5 @@
 
 module RubyLsp
   VERSION = File.read(File.expand_path("../VERSION", __dir__)).strip
+  DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
 end

@@ -119,7 +119,6 @@ module RubyLsp
       include Requests::Support::Common
 
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
-      DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
       BASE_COMMAND = T.let(
         begin
           Bundler.with_original_env { Bundler.default_lockfile }
