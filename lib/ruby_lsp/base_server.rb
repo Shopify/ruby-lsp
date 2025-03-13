@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "ruby_lsp/mcp_server"
+
 module RubyLsp
   class BaseServer
     extend T::Sig
@@ -36,10 +38,14 @@ module RubyLsp
       @mcp_server_thread = T.let(
         Thread.new do
           puts "Starting MCP server on port 4444..."
-          start_mcp
-        rescue => e
-          puts "Error starting MCP server: #{e.message}"
-          puts e.backtrace.join("\n")
+          begin
+            # Create MCP server and start it
+            mcp_server = MCPServer.new(4444)
+            mcp_server.start
+          rescue => e
+            puts "Error starting MCP server: #{e.message}"
+            puts e.backtrace.join("\n")
+          end
         end,
         Thread,
       )
@@ -50,81 +56,6 @@ module RubyLsp
       # be set up
       initialize_request = options[:initialize_request]
       process_message(initialize_request) if initialize_request
-    end
-
-    #: -> void
-    def start_mcp
-      server_io = TCPServer.new("localhost", 4444)
-      puts "MCP server listening on port 4444..."
-
-      loop do
-        socket = server_io.accept
-        puts "Accepted connection from #{socket.remote_address.inspect}"
-
-        headers = socket.gets("\r\n\r\n")
-        puts "Received headers: #{headers.inspect}"
-
-        length = headers[/Content-Length: (\d+)/i, 1].to_i
-        puts "Content length: #{length}"
-
-        raw_message = socket.read(length)
-        puts "Received message: #{raw_message.inspect}"
-
-        message = JSON.parse(raw_message, symbolize_names: true)
-        puts "Parsed message: #{message.inspect}"
-
-        # Handle specific requests
-        response = case message[:method]
-        when "getClassAncestors"
-          class_name = message.dig(:params, :className)
-          if class_name.nil?
-            {
-              jsonrpc: "2.0",
-              error: { code: -32602, message: "Missing className parameter" },
-              id: message[:id]
-            }
-          else
-            begin
-              # Find the class and return its ancestors
-              klass = Object.const_get(class_name)
-              unless klass.is_a?(Class)
-                {
-                  jsonrpc: "2.0",
-                  error: { code: -32602, message: "#{class_name} is not a class" },
-                  id: message[:id]
-                }
-              else
-                ancestors = klass.ancestors.map(&:to_s)
-                {
-                  jsonrpc: "2.0",
-                  result: { ancestors: ancestors },
-                  id: message[:id]
-                }
-              end
-            rescue NameError => e
-              {
-                jsonrpc: "2.0",
-                error: { code: -32602, message: "Class not found: #{e.message}" },
-                id: message[:id]
-              }
-            end
-          end
-        else
-          # Default hello world response for other requests
-          {
-            jsonrpc: "2.0",
-            result: { message: "Hello world!" },
-            id: message[:id]
-          }
-        end
-
-        response_json = JSON.generate(response)
-        response_headers = "Content-Length: #{response_json.bytesize}\r\n\r\n"
-
-        puts "Sending response: #{response.inspect}"
-        socket.write(response_headers + response_json)
-        socket.close
-      end
     end
 
     #: -> void
