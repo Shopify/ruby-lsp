@@ -58,36 +58,7 @@ module RubyLsp
         @node_context = node_context
         @sorbet_level = sorbet_level
 
-        dispatcher.register(
-          self,
-          :on_constant_read_node_enter,
-          :on_constant_write_node_enter,
-          :on_constant_path_node_enter,
-          :on_call_node_enter,
-          :on_global_variable_and_write_node_enter,
-          :on_global_variable_operator_write_node_enter,
-          :on_global_variable_or_write_node_enter,
-          :on_global_variable_read_node_enter,
-          :on_global_variable_target_node_enter,
-          :on_global_variable_write_node_enter,
-          :on_instance_variable_read_node_enter,
-          :on_instance_variable_write_node_enter,
-          :on_instance_variable_and_write_node_enter,
-          :on_instance_variable_operator_write_node_enter,
-          :on_instance_variable_or_write_node_enter,
-          :on_instance_variable_target_node_enter,
-          :on_super_node_enter,
-          :on_forwarding_super_node_enter,
-          :on_string_node_enter,
-          :on_interpolated_string_node_enter,
-          :on_yield_node_enter,
-          :on_class_variable_and_write_node_enter,
-          :on_class_variable_operator_write_node_enter,
-          :on_class_variable_or_write_node_enter,
-          :on_class_variable_read_node_enter,
-          :on_class_variable_target_node_enter,
-          :on_class_variable_write_node_enter,
-        )
+        dispatcher.register(self)
       end
 
       #: (Prism::StringNode node) -> void

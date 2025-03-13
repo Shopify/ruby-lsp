@@ -13,7 +13,7 @@ module RubyLsp
         @response_builder = response_builder
         @hints_configuration = hints_configuration
 
-        dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
+        dispatcher.register(self)
       end
 
       #: (Prism::RescueNode node) -> void

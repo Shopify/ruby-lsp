@@ -12,32 +12,7 @@ module RubyLsp
         @requires = T.let([], T::Array[Prism::CallNode])
         @comments = comments
 
-        dispatcher.register(
-          self,
-          :on_if_node_enter,
-          :on_in_node_enter,
-          :on_rescue_node_enter,
-          :on_when_node_enter,
-          :on_interpolated_string_node_enter,
-          :on_array_node_enter,
-          :on_block_node_enter,
-          :on_case_node_enter,
-          :on_case_match_node_enter,
-          :on_class_node_enter,
-          :on_module_node_enter,
-          :on_for_node_enter,
-          :on_hash_node_enter,
-          :on_singleton_class_node_enter,
-          :on_unless_node_enter,
-          :on_until_node_enter,
-          :on_while_node_enter,
-          :on_else_node_enter,
-          :on_ensure_node_enter,
-          :on_begin_node_enter,
-          :on_def_node_enter,
-          :on_call_node_enter,
-          :on_lambda_node_enter,
-        )
+        dispatcher.register(self)
       end
 
       #: -> void

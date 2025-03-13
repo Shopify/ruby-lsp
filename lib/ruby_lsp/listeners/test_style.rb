@@ -139,16 +139,7 @@ module RubyLsp
         @nesting = T.let([], T::Array[String])
         @framework_tag = T.let(:minitest, Symbol)
 
-        dispatcher.register(
-          self,
-          :on_class_node_enter,
-          :on_class_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
-          :on_def_node_enter,
-          :on_call_node_enter,
-          :on_call_node_leave,
-        )
+        dispatcher.register(self)
       end
 
       #: (Prism::ClassNode node) -> void

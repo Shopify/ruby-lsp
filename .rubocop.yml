@@ -7,7 +7,6 @@ require:
   - rubocop-minitest
   - rubocop-rake
   - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
-  - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
 
 AllCops:
   NewCops: disable

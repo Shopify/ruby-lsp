@@ -271,7 +271,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
           def initialize(response_builder, uri, dispatcher)
             @response_builder = response_builder
-            dispatcher.register(self, :on_class_node_enter)
+            dispatcher.register(self)
           end
 
           def on_class_node_enter(node)

@@ -20,7 +20,6 @@ $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 require "ruby_lsp/internal"
 require "ruby_lsp/test_helper"
 require "rubocop/cop/ruby_lsp/use_language_server_aliases"
-require "rubocop/cop/ruby_lsp/use_register_with_handler_method"
 
 require "minitest/autorun"
 require "minitest/reporters"
