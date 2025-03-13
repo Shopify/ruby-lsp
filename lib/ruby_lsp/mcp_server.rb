@@ -42,20 +42,20 @@ module RubyLsp
       headers = {}
       while (line = socket.gets) && (line != "\r\n")
         key, value = line.split(": ", 2)
-        headers[key] = value.strip
+        headers[key.downcase] = value.strip
       end
 
       puts "[MCP] Received headers: #{headers.inspect}"
       puts "[MCP] Received method: #{method}"
       puts "[MCP] Received path: #{path}"
+
       if method == "GET"
         handle_sse_connection(socket)
       elsif method == "POST"
-        content_length = headers["Content-Length"].to_i
-        body = socket.read(content_length)
+        content_length = headers["content-length"].to_i
+        body = read_request_body(socket, content_length)
         handle_post_request(socket, body)
       else
-        puts "[MCP] Received unknown method: #{method}"
         respond(socket, 404, "Not Found")
       end
     rescue => e
@@ -69,6 +69,8 @@ module RubyLsp
       session_id = SecureRandom.uuid
       @sessions[session_id] = socket
 
+      puts "[MCP] Established SSE connection with session_id=#{session_id}"
+
       socket.write("HTTP/1.1 200 OK\r\n")
       socket.write("Content-Type: text/event-stream\r\n")
       socket.write("Cache-Control: no-cache\r\n")
@@ -76,33 +78,37 @@ module RubyLsp
       socket.write("\r\n")
       socket.flush
 
-      # Immediately send the required endpoint event
-      send_sse_event(socket, "endpoint", "/sse/messages?session_id=#{session_id}")
+      endpoint_url = "/messages"
+      puts "[MCP] Sending endpoint event: #{endpoint_url}"
+      send_sse_event(socket, "endpoint", endpoint_url)
 
-      # Keep-alive loop
       loop do
         sleep(15)
         socket.write(": ping - #{Time.now}\n\n")
         socket.flush
+        puts "[MCP] Sent SSE keep-alive ping for session_id=#{session_id}"
       end
-    rescue IOError, Errno::EPIPE
-      puts "[MCP] SSE client disconnected"
+    rescue IOError, Errno::EPIPE => e
+      puts "[MCP] SSE client disconnected: #{e.message}"
     ensure
       @sessions.delete(session_id)
       socket.close unless socket.closed?
+      puts "[MCP] Closed SSE connection for session_id=#{session_id}"
     end
 
     def handle_post_request(socket, body)
       if body.nil? || body.strip.empty?
-        # MCP Inspector expects a simple empty JSON response for initial empty POST requests
+        puts "[MCP] Received empty POST request body, responding with empty JSON"
         respond(socket, 200, "{}")
         return
       end
 
       request = JSON.parse(body, symbolize_names: true)
+      puts "[MCP] Parsed JSON-RPC request: #{request.inspect}"
 
       case request[:method]
       when "initialize"
+        puts "[MCP] Handling initialize request"
         respond(socket, 200, {
           jsonrpc: "2.0",
           id: request[:id],
@@ -124,24 +130,21 @@ module RubyLsp
             tools: [],
           },
         }.to_json)
-      when "class/getAncestors"
-        class_name = request.dig(:params, :className)
-        ancestors = fetch_class_ancestors(class_name)
-        respond(socket, 200, {
-          jsonrpc: "2.0",
-          id: request[:id],
-          result: { ancestors: ancestors },
-        }.to_json)
+        puts "[MCP] Sent initialize response"
       else
+        puts "[MCP] Received unknown method: #{request[:method]}"
         respond(socket, 200, {
           jsonrpc: "2.0",
           id: request[:id],
           error: { code: -32601, message: "Method not found" },
         }.to_json)
+        puts "[MCP] Sent method not found error response"
       end
     rescue JSON::ParserError => e
+      puts "[MCP] JSON parsing error: #{e.message}"
       respond(socket, 400, { error: "Invalid JSON: #{e.message}" }.to_json)
     rescue => e
+      puts "[MCP] Internal server error: #{e.message}"
       respond(socket, 500, { error: e.message }.to_json)
     end
 
@@ -159,11 +162,20 @@ module RubyLsp
       socket.flush
     end
 
-    def fetch_class_ancestors(class_name)
-      klass = Object.const_get(class_name)
-      klass.ancestors.map(&:to_s)
-    rescue NameError
-      []
+    def read_request_body(socket, content_length)
+      body = +""
+      remaining = content_length
+
+      while remaining > 0
+        chunk = socket.readpartial(remaining)
+        body << chunk
+        remaining -= chunk.bytesize
+      end
+
+      body
+    rescue EOFError => e
+      puts "[MCP] Error reading request body: #{e.message}"
+      ""
     end
   end
 end
