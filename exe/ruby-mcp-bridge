@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "Bridge started" >> bridge.log
+
+while IFS= read -r line; do
+  echo "================================" >> bridge.log
+  echo "Input JSON: $line" >> bridge.log
+
+  response=$(echo "$line" | curl -X POST http://localhost:4444/mcp \
+    -H "Content-Type: application/json" \
+    --data-binary @- \
+    2>/dev/null) || { echo "curl failed" >> bridge.log; continue; }
+
+  echo "--------------------------------" >> bridge.log
+  echo "Response JSON: $response" >> bridge.log
+
+  echo "$response"
+done

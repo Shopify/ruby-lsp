@@ -35,21 +35,6 @@ module RubyLsp
         Thread,
       )
 
-      @mcp_server_thread = T.let(
-        Thread.new do
-          puts "Starting MCP server on port 4444..."
-          begin
-            # Create MCP server and start it
-            mcp_server = MCPServer.new(4444)
-            mcp_server.start
-          rescue => e
-            puts "Error starting MCP server: #{e.message}"
-            puts e.backtrace.join("\n")
-          end
-        end,
-        Thread,
-      )
-
       Thread.main.priority = 1
 
       # We read the initialize request in `exe/ruby-lsp` to be able to determine the workspace URI where Bundler should

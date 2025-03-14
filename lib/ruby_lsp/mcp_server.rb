@@ -1,21 +1,23 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "net/http"
-require "uri"
 require "socket"
 require "json"
-require "securerandom"
+require "sorbet-runtime"
 
 module RubyLsp
   class MCPServer
-    def initialize(port = 4444)
-      @port = port
-      @server = TCPServer.new("0.0.0.0", @port)
-      @running = false
-      @sessions = {}
+    extend T::Sig
+
+    sig { params(index: RubyIndexer::Index, port: Integer).void }
+    def initialize(index, port = 4444)
+      @port = T.let(port, Integer)
+      @server = T.let(TCPServer.new("0.0.0.0", @port), TCPServer)
+      @running = T.let(false, T::Boolean)
+      @index = T.let(index, RubyIndexer::Index)
     end
 
+    sig { void }
     def start
       @running = true
       puts "[MCP] Server started on port #{@port}"
@@ -27,6 +29,7 @@ module RubyLsp
       end
     end
 
+    sig { void }
     def stop
       @running = false
       @server.close
@@ -34,6 +37,7 @@ module RubyLsp
 
     private
 
+    sig { params(socket: Socket).void }
     def handle_connection(socket)
       request_line = socket.gets
       return unless request_line
@@ -42,112 +46,111 @@ module RubyLsp
       headers = {}
       while (line = socket.gets) && (line != "\r\n")
         key, value = line.split(": ", 2)
-        headers[key.downcase] = value.strip
+        headers[key.downcase] = value.strip if key && value
       end
 
-      puts "[MCP] Received headers: #{headers.inspect}"
-      puts "[MCP] Received method: #{method}"
-      puts "[MCP] Received path: #{path}"
+      puts "[MCP] Received: #{method} #{path}"
 
-      if method == "GET"
-        handle_sse_connection(socket)
-      elsif method == "POST"
+      if method == "POST" && path == "/mcp"
         content_length = headers["content-length"].to_i
         body = read_request_body(socket, content_length)
-        handle_post_request(socket, body)
+        handle_mcp_request(socket, body)
       else
-        respond(socket, 404, "Not Found")
+        respond(socket, 404, { error: "Not Found" }.to_json)
       end
     rescue => e
       puts "[MCP] Connection error: #{e.message}"
-      puts e.backtrace.join("\n")
+      puts e.backtrace.join("\n") if e.backtrace
     ensure
       socket.close unless socket.closed?
     end
 
-    def handle_sse_connection(socket)
-      session_id = SecureRandom.uuid
-      @sessions[session_id] = socket
-
-      puts "[MCP] Established SSE connection with session_id=#{session_id}"
-
-      socket.write("HTTP/1.1 200 OK\r\n")
-      socket.write("Content-Type: text/event-stream\r\n")
-      socket.write("Cache-Control: no-cache\r\n")
-      socket.write("Connection: keep-alive\r\n")
-      socket.write("\r\n")
-      socket.flush
-
-      endpoint_url = "/messages"
-      puts "[MCP] Sending endpoint event: #{endpoint_url}"
-      send_sse_event(socket, "endpoint", endpoint_url)
-
-      loop do
-        sleep(15)
-        socket.write(": ping - #{Time.now}\n\n")
-        socket.flush
-        puts "[MCP] Sent SSE keep-alive ping for session_id=#{session_id}"
-      end
-    rescue IOError, Errno::EPIPE => e
-      puts "[MCP] SSE client disconnected: #{e.message}"
-    ensure
-      @sessions.delete(session_id)
-      socket.close unless socket.closed?
-      puts "[MCP] Closed SSE connection for session_id=#{session_id}"
-    end
-
-    def handle_post_request(socket, body)
+    sig { params(socket: Socket, body: String).void }
+    def handle_mcp_request(socket, body)
       if body.nil? || body.strip.empty?
-        puts "[MCP] Received empty POST request body, responding with empty JSON"
-        respond(socket, 200, "{}")
+        puts "[MCP] Received empty MCP request body"
+        respond(socket, 400, { error: "Empty request body" }.to_json)
         return
       end
 
-      request = JSON.parse(body, symbolize_names: true)
-      puts "[MCP] Parsed JSON-RPC request: #{request.inspect}"
+      puts "[MCP] Received request: #{body}"
 
+      begin
+        request = JSON.parse(body, symbolize_names: true)
+        response = process_jsonrpc_request(request)
+        respond(socket, 200, response.to_json)
+        puts "[MCP] Sent response: #{response.inspect}"
+      rescue JSON::ParserError => e
+        puts "[MCP] JSON parsing error: #{e.message}"
+        respond(socket, 400, {
+          jsonrpc: "2.0",
+          id: nil,
+          error: { code: -32700, message: "Parse error: #{e.message}" },
+        }.to_json)
+      rescue => e
+        puts "[MCP] Internal error: #{e.message}"
+        respond(socket, 500, {
+          jsonrpc: "2.0",
+          id: request ? request[:id] : nil,
+          error: { code: -32603, message: "Internal error: #{e.message}" },
+        }.to_json)
+      end
+    end
+
+    sig { params(request: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
+    def process_jsonrpc_request(request)
       case request[:method]
       when "initialize"
-        puts "[MCP] Handling initialize request"
-        respond(socket, 200, {
+        puts "[MCP] Processing initialize request"
+        {
           jsonrpc: "2.0",
           id: request[:id],
           result: {
             protocolVersion: "2024-11-05",
             capabilities: {
-              tools: { listChanged: true },
-              resources: { listChanged: true, subscribe: true },
-              prompts: { listChanged: true },
-              logging: true,
-              roots: { listChanged: true },
-              sampling: true,
+              resources: {},
             },
             serverInfo: {
               name: "ruby-lsp-mcp-server",
               version: "0.1.0",
             },
-            offerings: [],
-            tools: [],
           },
-        }.to_json)
-        puts "[MCP] Sent initialize response"
-      else
-        puts "[MCP] Received unknown method: #{request[:method]}"
-        respond(socket, 200, {
+        }
+      when "initialized"
+        puts "[MCP] Received initialized notification"
+        # This is a notification, no response needed
+        {}
+      when "resources/list"
+        puts "[MCP] Received resources/list request"
+
+        resources = @index.instance_variable_get(:@entries).values.flatten.select do |entry|
+          entry.is_a?(RubyIndexer::Entry::Class)
+        end.map do |entry|
+          {
+            uri: "ruby-index://class/#{entry.name}",
+            name: "Class: #{entry.name}",
+            mimeType: "text/plain",
+          }
+        end
+
+        # Add class structure as resources
+
+        {
           jsonrpc: "2.0",
           id: request[:id],
-          error: { code: -32601, message: "Method not found" },
-        }.to_json)
-        puts "[MCP] Sent method not found error response"
+          result: { resources: resources },
+        }
+      else
+        puts "[MCP] Unknown method: #{request[:method]}"
+        {
+          jsonrpc: "2.0",
+          id: request[:id],
+          error: { code: -32601, message: "Method not found: #{request[:method]}" },
+        }
       end
-    rescue JSON::ParserError => e
-      puts "[MCP] JSON parsing error: #{e.message}"
-      respond(socket, 400, { error: "Invalid JSON: #{e.message}" }.to_json)
-    rescue => e
-      puts "[MCP] Internal server error: #{e.message}"
-      respond(socket, 500, { error: e.message }.to_json)
     end
 
+    sig { params(socket: Socket, status: Integer, body: String).void }
     def respond(socket, status, body)
       socket.write("HTTP/1.1 #{status}\r\n")
       socket.write("Content-Type: application/json\r\n")
@@ -156,12 +159,7 @@ module RubyLsp
       socket.write(body)
     end
 
-    def send_sse_event(socket, event, data)
-      socket.write("event: #{event}\n")
-      socket.write("data: #{data}\n\n")
-      socket.flush
-    end
-
+    sig { params(socket: Socket, content_length: Integer).returns(String) }
     def read_request_body(socket, content_length)
       body = +""
       remaining = content_length
