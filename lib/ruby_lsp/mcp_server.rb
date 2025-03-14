@@ -9,22 +9,24 @@ module RubyLsp
   class MCPServer
     extend T::Sig
 
-    sig { params(index: RubyIndexer::Index, port: Integer).void }
-    def initialize(index, port = 4444)
-      @port = T.let(port, Integer)
-      @server = T.let(TCPServer.new("0.0.0.0", @port), TCPServer)
+    sig { params(global_state: GlobalState).void }
+    def initialize(global_state)
+      @socket_name = T.let(File.basename(global_state.workspace_path), String)
+      @socket_path = T.let(File.join("/tmp/ruby-mcp-socket", @socket_name), String)
+      @server = T.let(Socket.unix_server_socket(@socket_path), Socket)
       @running = T.let(false, T::Boolean)
-      @index = T.let(index, RubyIndexer::Index)
+      @global_state = T.let(global_state, GlobalState)
+      @index = T.let(global_state.index, RubyIndexer::Index)
     end
 
     sig { void }
     def start
       @running = true
-      puts "[MCP] Server started on port #{@port}"
+      puts "[MCP] Server started on socket #{@socket_path}"
 
       while @running
         Thread.start(@server.accept) do |socket|
-          handle_connection(socket)
+          handle_connection(socket.first)
         end
       end
     end
@@ -77,7 +79,7 @@ module RubyLsp
 
     sig { params(socket: Socket, body: String).void }
     def handle_mcp_request(socket, body)
-      if body.nil? || body.strip.empty?
+      if body.strip.empty?
         puts "[MCP] Received empty MCP request body"
         error_response = {
           jsonrpc: "2.0",
