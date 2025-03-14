@@ -56,7 +56,17 @@ module RubyLsp
         body = read_request_body(socket, content_length)
         handle_mcp_request(socket, body)
       else
-        respond(socket, 404, { error: "Not Found" }.to_json)
+        # Proper JSON-RPC error for unknown endpoint
+        error_response = {
+          jsonrpc: "2.0",
+          id: 0, # Use a default ID for requests without an ID
+          error: {
+            code: -32601,
+            message: "Method not found",
+            data: "Endpoint not found: #{path}",
+          },
+        }
+        respond(socket, 404, error_response.to_json)
       end
     rescue => e
       puts "[MCP] Connection error: #{e.message}"
@@ -69,7 +79,16 @@ module RubyLsp
     def handle_mcp_request(socket, body)
       if body.nil? || body.strip.empty?
         puts "[MCP] Received empty MCP request body"
-        respond(socket, 400, { error: "Empty request body" }.to_json)
+        error_response = {
+          jsonrpc: "2.0",
+          id: 0, # Use a default ID since we couldn't parse one
+          error: {
+            code: -32700,
+            message: "Parse error",
+            data: "Empty request body",
+          },
+        }
+        respond(socket, 400, error_response.to_json)
         return
       end
 
@@ -82,33 +101,46 @@ module RubyLsp
         puts "[MCP] Sent response: #{response.inspect}"
       rescue JSON::ParserError => e
         puts "[MCP] JSON parsing error: #{e.message}"
-        respond(socket, 400, {
+        error_response = {
           jsonrpc: "2.0",
-          id: nil,
-          error: { code: -32700, message: "Parse error: #{e.message}" },
-        }.to_json)
+          id: 0, # Use a default ID since we couldn't parse one
+          error: {
+            code: -32700,
+            message: "Parse error",
+            data: e.message,
+          },
+        }
+        respond(socket, 400, error_response.to_json)
       rescue => e
         puts "[MCP] Internal error: #{e.message}"
-        respond(socket, 500, {
+        error_response = {
           jsonrpc: "2.0",
-          id: request ? request[:id] : nil,
-          error: { code: -32603, message: "Internal error: #{e.message}" },
-        }.to_json)
+          id: request ? request[:id] || 0 : 0,
+          error: {
+            code: -32603,
+            message: "Internal error",
+            data: e.message,
+          },
+        }
+        respond(socket, 500, error_response.to_json)
       end
     end
 
     sig { params(request: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
     def process_jsonrpc_request(request)
+      puts "[MCP] Processing request: #{request.inspect}"
+      request_id = request[:id] || 0
+
       case request[:method]
       when "initialize"
         puts "[MCP] Processing initialize request"
         {
           jsonrpc: "2.0",
-          id: request[:id],
+          id: request_id,
           result: {
             protocolVersion: "2024-11-05",
             capabilities: {
-              resources: {},
+              resources: { listChanged: true, subscribe: true },
             },
             serverInfo: {
               name: "ruby-lsp-mcp-server",
@@ -116,10 +148,14 @@ module RubyLsp
             },
           },
         }
-      when "initialized"
+      when "initialized", "notifications/initialized"
         puts "[MCP] Received initialized notification"
-        # This is a notification, no response needed
-        {}
+        # Return a proper JSON-RPC response even for notifications
+        {
+          jsonrpc: "2.0",
+          id: request_id,
+          result: {}, # Empty result for notifications
+        }
       when "resources/list"
         puts "[MCP] Received resources/list request"
 
@@ -133,19 +169,21 @@ module RubyLsp
           }
         end
 
-        # Add class structure as resources
-
         {
           jsonrpc: "2.0",
-          id: request[:id],
+          id: request_id,
           result: { resources: resources },
         }
       else
         puts "[MCP] Unknown method: #{request[:method]}"
         {
           jsonrpc: "2.0",
-          id: request[:id],
-          error: { code: -32601, message: "Method not found: #{request[:method]}" },
+          id: request_id,
+          error: {
+            code: -32601,
+            message: "Method not found",
+            data: "Method not supported: #{request[:method]}",
+          },
         }
       end
     end
