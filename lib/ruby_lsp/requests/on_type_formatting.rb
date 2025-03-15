@@ -163,7 +163,7 @@ module RubyLsp
 
       #: (Integer line, Integer character) -> void
       def move_cursor_to(line, character)
-        return unless /Visual Studio Code|Cursor/.match?(@client_name)
+        return unless /Visual Studio Code|Cursor|VSCodium/.match?(@client_name)
 
         position = Interface::Position.new(
           line: line,
