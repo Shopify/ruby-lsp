@@ -184,8 +184,18 @@ export class TestController {
       this.terminal = this.getTerminal();
     }
 
+    const activeEditor = vscode.window.activeTextEditor;
     this.terminal.show();
     this.terminal.sendText(command);
+    if (activeEditor) {
+      setTimeout(() => {
+        vscode.window.showTextDocument(
+          activeEditor.document,
+          activeEditor.viewColumn,
+          false,
+        );
+      }, 100);
+    }
 
     this.telemetry.logUsage("ruby_lsp.code_lens", {
       type: "counter",
