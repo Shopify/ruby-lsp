@@ -8,7 +8,7 @@
             "type": "ruby_lsp",
             "name": "Debug",
             "request": "launch",
-            "program": "ruby ${file}",
+            "program": "ruby ${file}"
         },
         {
             "type": "ruby_lsp",
@@ -19,7 +19,7 @@
         {
             "type": "ruby_lsp",
             "request": "attach",
-            "name": "Attach to existing server",
+            "name": "Attach to existing server"
         }
     ]
 }
