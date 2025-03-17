@@ -151,5 +151,13 @@
     "prefix": ["if"],
     "body": ["if $1", "  $0", "elsif $2", "  $0", "end"],
     "description": "New if statement with elsif."
+  },
+  "binding.break (using `debug.gem`)": {
+    "prefix": "bb",
+    "body": "binding.break"
+  },
+  "binding.irb": {
+    "prefix": "bi",
+    "body": "binding.irb"
   }
 }
