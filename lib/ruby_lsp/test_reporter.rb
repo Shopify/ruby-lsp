@@ -96,3 +96,7 @@ module RubyLsp
     end
   end
 end
+
+# We wrap the default output stream so that we can capture anything written to stdout and emit it as part of
+# the JSON event stream.
+$> = RubyLsp::TestReporter::IOWrapper.new($stdout)
