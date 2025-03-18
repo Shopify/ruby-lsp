@@ -60,11 +60,11 @@ module RubyLsp
       end
 
       #: (message: String) -> void
-      def write_stdout(message:)
+      def append_output(message:)
         params = {
           message: message,
         }
-        send_message("write_stdout", params)
+        send_message("append_output", params)
       end
 
       private
@@ -91,7 +91,7 @@ module RubyLsp
 
       #: (String) -> void
       def log(message)
-        TestReporter.write_stdout(message: message)
+        TestReporter.append_output(message: message)
       end
     end
   end

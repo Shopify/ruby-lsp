@@ -92,7 +92,7 @@ module RubyLsp
           },
         },
         {
-          "method" => "write_stdout",
+          "method" => "append_output",
           "params" => {
             "message" => "hello from stdout\n",
           },
