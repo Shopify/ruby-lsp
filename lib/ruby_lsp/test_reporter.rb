@@ -82,7 +82,7 @@ module RubyLsp
         args.each { |arg| log("#{arg}\n") }
       end
 
-      #: (Array[String]) -> void
+      #: (String) -> void
       def print(*args)
         args.each { |arg| log(arg.to_s) }
       end
