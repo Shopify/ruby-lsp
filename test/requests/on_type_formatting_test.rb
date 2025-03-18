@@ -996,7 +996,7 @@ class OnTypeFormattingTest < Minitest::Test
       document,
       { line: 2, character: 4 },
       "\n",
-      "Visual Studio Code - Insiders",
+      "Visual Studio Code",
     ).perform
 
     assert_empty(edits)
@@ -1023,7 +1023,7 @@ class OnTypeFormattingTest < Minitest::Test
       document,
       { line: 1, character: 2 },
       "\n",
-      "Visual Studio Code - Insiders",
+      "Visual Studio Code",
     ).perform
 
     expected_edits = [
