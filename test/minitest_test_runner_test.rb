@@ -94,7 +94,13 @@ module RubyLsp
         {
           "method" => "append_output",
           "params" => {
-            "message" => "hello from stdout\n",
+            "message" => "hello from $stdout.puts\n",
+          },
+        },
+        {
+          "method" => "append_output",
+          "params" => {
+            "message" => "hello from puts\n",
           },
         },
         {
@@ -105,7 +111,7 @@ module RubyLsp
           },
         },
       ]
-      assert_equal(2 + 2 + 2 + 2 + 3, actual.size)
+      assert_equal(2 + 2 + 2 + 2 + 4, actual.size)
       assert_equal(expected, actual)
     end
 
