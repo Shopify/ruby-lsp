@@ -118,6 +118,8 @@ module RubyLsp
 
       include Requests::Support::Common
 
+      MINITEST_REPORTER_PATH = T.let(File.expand_path("ruby_lsp_reporter_plugin.rb", __dir__), String)
+      TEST_UNIT_REPORTER_PATH = T.let(File.expand_path("test_unit_test_runner.rb", __dir__), String)
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
       BASE_COMMAND = T.let(

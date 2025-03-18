@@ -23,24 +23,31 @@ require "rubocop/cop/ruby_lsp/use_language_server_aliases"
 require "rubocop/cop/ruby_lsp/use_register_with_handler_method"
 
 require "minitest/autorun"
-require "minitest/reporters"
 require "tempfile"
 require "mocha/minitest"
 
-SORBET_PATHS = T.let(Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze, T::Array[String])
+# Do not require minitest-reporters when running tests via the Ruby LSP's test explorer. Invoking
+# `Minitest::Reporters.use!` overrides our reporter customizations and breaks the integrations.
+#
+# We also don't need debug related things
+unless ENV["RUBY_LSP_TEST_RUNNER"] == "true"
+  SORBET_PATHS = T.let(Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze, T::Array[String])
 
-# Define breakpoint methods without actually activating the debugger
-require "debug/prelude"
-# Load the debugger configuration to skip Sorbet paths. But this still doesn't activate the debugger
-require "debug/config"
-DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + SORBET_PATHS
+  # Define breakpoint methods without actually activating the debugger
+  require "debug/prelude"
+  # Load the debugger configuration to skip Sorbet paths. But this still doesn't activate the debugger
+  require "debug/config"
+  DEBUGGER__::CONFIG[:skip_path] = Array(DEBUGGER__::CONFIG[:skip_path]) + SORBET_PATHS
 
-minitest_reporter = if ENV["SPEC_REPORTER"]
-  Minitest::Reporters::SpecReporter.new(color: true)
-else
-  Minitest::Reporters::DefaultReporter.new(color: true)
+  require "minitest/reporters"
+  minitest_reporter = if ENV["SPEC_REPORTER"]
+    Minitest::Reporters::SpecReporter.new(color: true)
+  else
+    Minitest::Reporters::DefaultReporter.new(color: true)
+  end
+
+  Minitest::Reporters.use!(minitest_reporter)
 end
-Minitest::Reporters.use!(minitest_reporter)
 
 module Minitest
   class Test

@@ -147,17 +147,26 @@ module RubyIndexer
         uris = @config.indexable_uris
         assert(uris.none? { |uri| uri.full_path.start_with?(File.join(dir, "ignore")) })
 
+        # The regular default gem path is ~/.rubies/3.4.1/lib/ruby/3.4.0
+        # The alternative default gem path is ~/.rubies/3.4.1/lib/ruby/gems/3.4.0
+        # Here part_1 contains ~/.rubies/3.4.1/lib/ruby/ and part_2 contains 3.4.0, so that we can turn it into the
+        # alternative path
+        part_1, part_2 = Pathname.new(RbConfig::CONFIG["rubylibdir"]).split
+        other_default_gem_dir = part_1.join("gems").join(part_2).to_s
+
         # After switching the workspace path, all indexable URIs will be found in one of these places:
         # - The new workspace path
         # - The Ruby LSP's own code (because Bundler is requiring the dependency from source)
         # - Bundled gems
         # - Default gems
+        # - Other default gem directory
         assert(
           uris.all? do |u|
             u.full_path.start_with?(dir) ||
             u.full_path.start_with?(File.join(Dir.pwd, "lib")) ||
             u.full_path.start_with?(Bundler.bundle_path.to_s) ||
-            u.full_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+            u.full_path.start_with?(RbConfig::CONFIG["rubylibdir"]) ||
+            u.full_path.start_with?(other_default_gem_dir)
           end,
         )
       end

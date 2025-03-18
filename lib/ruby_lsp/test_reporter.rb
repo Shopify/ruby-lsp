@@ -39,11 +39,10 @@ module RubyLsp
         send_message("fail", params)
       end
 
-      #: (id: String, message: String?, uri: URI::Generic) -> void
-      def record_skip(id:, message:, uri:)
+      #: (id: String, uri: URI::Generic) -> void
+      def record_skip(id:, uri:)
         params = {
           id: id,
-          message: message,
           uri: uri.to_s,
         }
         send_message("skip", params)

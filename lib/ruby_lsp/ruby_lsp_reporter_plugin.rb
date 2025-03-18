@@ -1,10 +1,14 @@
 # typed: strict
 # frozen_string_literal: true
 
+begin
+  require "minitest"
+rescue LoadError
+  return
+end
+
 require_relative "test_reporter"
 require "ruby_indexer/lib/ruby_indexer/uri"
-
-require "minitest"
 
 module Minitest
   module Reporters
@@ -54,7 +58,6 @@ module Minitest
       def record_skip(result)
         RubyLsp::TestReporter.record_skip(
           id: id_from_result(result),
-          message: result.failure.message,
           uri: uri_from_result(result),
         )
       end

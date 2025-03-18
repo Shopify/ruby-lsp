@@ -48,7 +48,6 @@ module RubyLsp
           "method" => "skip",
           "params" => {
             "id" => "SampleTest#test_that_is_pending",
-            "message" => "pending test",
             "uri" => uri,
           },
         },

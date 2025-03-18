@@ -1,9 +1,14 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test/unit"
-require "test/unit/ui/testrunner"
-require "ruby_lsp/test_reporter"
+begin
+  require "test/unit"
+  require "test/unit/ui/testrunner"
+rescue LoadError
+  return
+end
+
+require_relative "test_reporter"
 require "ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
@@ -65,11 +70,7 @@ module RubyLsp
 
     #: (::Test::Unit::Pending pending) -> void
     def record_skip(pending)
-      TestReporter.record_skip(
-        id: @current_test_id,
-        message: pending.message,
-        uri: @current_uri,
-      )
+      TestReporter.record_skip(id: @current_test_id, uri: @current_uri)
     end
 
     #: (::Test::Unit::TestCase test) -> URI::Generic?
@@ -94,3 +95,4 @@ module RubyLsp
 end
 
 Test::Unit::AutoRunner.register_runner(:ruby_lsp) { |_auto_runner| RubyLsp::TestRunner }
+Test::Unit::AutoRunner.default_runner = :ruby_lsp
