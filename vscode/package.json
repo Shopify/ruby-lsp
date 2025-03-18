@@ -814,6 +814,7 @@
     "vscode-textmate": "^9.2.0"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^9.0.1",
+    "vscode-jsonrpc": "^8.2.1"
   }
 }

@@ -504,7 +504,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   async resolveTestCommands(
     items: LspTestItem[],
-  ): Promise<{ command: string }> {
+  ): Promise<{ commands: string[]; reporterPaths: string[] | undefined }> {
     return this.sendRequest("rubyLsp/resolveTestCommands", {
       items,
     });
