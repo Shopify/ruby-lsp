@@ -16,7 +16,7 @@ module Minitest
       class << self
         #: (Hash[untyped, untyped]) -> void
         def minitest_plugin_init(_options)
-          Minitest.reporter.reporters = [RubyLspReporter.new]
+          Minitest.reporter.reporters << RubyLspReporter.new
         end
       end
 
