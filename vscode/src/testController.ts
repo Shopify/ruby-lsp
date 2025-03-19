@@ -711,37 +711,45 @@ export class TestController {
     const pattern = this.testPattern(workspaceFolder);
 
     for (const uri of await vscode.workspace.findFiles(pattern)) {
-      const fileName = path.basename(uri.fsPath);
-      const relativePath = vscode.workspace.asRelativePath(uri, false);
-      const pathParts = relativePath.split(path.sep);
-
-      if (this.shouldSkipTestFile(fileName, pathParts)) {
-        continue;
-      }
-
-      // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
-      // components, so we want to show each individual test directory as a separate item
-      const dirPosition = this.testDirectoryPosition(pathParts);
-
-      // Get or create the first level test directory item
-      const { firstLevel, firstLevelUri } = this.getOrCreateFirstLevelItem(
-        pathParts,
-        dirPosition,
-        workspaceFolder,
-        initialCollection,
-      );
-
-      // Get or create the second level test directory item if applicable
-      const finalCollection = await this.getOrCreateSecondLevelItem(
-        pathParts,
-        dirPosition,
-        firstLevelUri,
-        firstLevel,
-      );
-
-      // Add the test file to the appropriate collection
-      this.addTestFileItem(uri, fileName, finalCollection);
+      await this.addTestItemsForFile(uri, workspaceFolder, initialCollection);
     }
+  }
+
+  private async addTestItemsForFile(
+    uri: vscode.Uri,
+    workspaceFolder: vscode.WorkspaceFolder,
+    collection: vscode.TestItemCollection,
+  ) {
+    const fileName = path.basename(uri.fsPath);
+    const relativePath = vscode.workspace.asRelativePath(uri, false);
+    const pathParts = relativePath.split(path.sep);
+
+    if (this.shouldSkipTestFile(fileName, pathParts)) {
+      return;
+    }
+
+    // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
+    // components, so we want to show each individual test directory as a separate item
+    const dirPosition = this.testDirectoryPosition(pathParts);
+
+    // Get or create the first level test directory item
+    const { firstLevel, firstLevelUri } = this.getOrCreateFirstLevelItem(
+      pathParts,
+      dirPosition,
+      workspaceFolder,
+      collection,
+    );
+
+    // Get or create the second level test directory item if applicable
+    const finalCollection = await this.getOrCreateSecondLevelItem(
+      pathParts,
+      dirPosition,
+      firstLevelUri,
+      firstLevel,
+    );
+
+    // Add the test file to the appropriate collection
+    this.addTestFileItem(uri, fileName, finalCollection);
   }
 
   private addTestFileItem(
