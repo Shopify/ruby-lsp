@@ -829,7 +829,7 @@ export class TestController {
     firstLevelUri: vscode.Uri;
     secondLevelUri: vscode.Uri | undefined;
   }> {
-    const relativePath = vscode.workspace.asRelativePath(uri);
+    const relativePath = vscode.workspace.asRelativePath(uri, false);
     const pathParts = relativePath.split(path.sep);
     const dirPosition = this.testDirectoryPosition(pathParts);
     const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
