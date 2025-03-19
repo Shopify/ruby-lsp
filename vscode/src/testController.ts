@@ -585,7 +585,7 @@ export class TestController {
     for (const uri of await vscode.workspace.findFiles(pattern)) {
       const fileName = path.basename(uri.fsPath);
 
-      if (fileName === "test_helper.rb") {
+      if (this.shouldSkipTestFile(fileName)) {
         continue;
       }
 
@@ -660,6 +660,14 @@ export class TestController {
       testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
       finalCollection.add(testItem);
     }
+  }
+
+  private shouldSkipTestFile(fileName: string): boolean {
+    if (fileName === "test_helper.rb") {
+      return true;
+    }
+
+    return false;
   }
 
   private testPattern(workspaceFolder: vscode.WorkspaceFolder) {
