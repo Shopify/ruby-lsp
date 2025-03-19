@@ -562,12 +562,15 @@ export class TestController {
           continue;
         }
 
-        this.addTestItem(
-          workspaceFolder.uri,
+        const uri = workspaceFolder.uri;
+        const testItem = this.testController.createTestItem(
+          uri.toString(),
           workspaceFolder.name,
-          this.testController.items,
-          [WORKSPACE_TAG, DEBUG_TAG],
+          uri,
         );
+        testItem.canResolveChildren = true;
+        testItem.tags = [WORKSPACE_TAG, DEBUG_TAG];
+        this.testController.items.add(testItem);
       }
     }
   }
@@ -609,30 +612,24 @@ export class TestController {
       );
 
       // Add the test file to the appropriate collection
-      this.addTestItem(
-        uri,
-        fileName,
-        finalCollection,
-        [TEST_FILE_TAG, DEBUG_TAG],
-      );
+      this.addTestFileItem(uri, fileName, finalCollection);
     }
   }
 
-  private addTestItem(
+  private addTestFileItem(
     uri: vscode.Uri,
-    name: string,
-    collection: vscode.TestItemCollection,
-    tags: vscode.TestTag[],
+    fileName: string,
+    collection: vscode.TestItemCollection
   ) {
     // Finally, add the test file to whatever is the final collection, which may be the first level test directory or
     // a second level like models
     const testItem = this.testController.createTestItem(
       uri.toString(),
-      name,
+      fileName,
       uri,
     );
     testItem.canResolveChildren = true;
-    testItem.tags = tags;
+    testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
     collection.add(testItem);
   }
 
