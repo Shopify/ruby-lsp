@@ -94,13 +94,13 @@ module RubyLsp
         {
           "method" => "append_output",
           "params" => {
-            "message" => "hello from $stdout.puts\n",
+            "message" => "hello from $stdout.puts\r\n",
           },
         },
         {
           "method" => "append_output",
           "params" => {
-            "message" => "hello from puts\n",
+            "message" => "hello from puts\r\n",
           },
         },
         {

@@ -79,7 +79,7 @@ module RubyLsp
     class IOWrapper < SimpleDelegator
       #: (String) -> void
       def puts(*args)
-        args.each { |arg| log("#{arg}\n") }
+        args.each { |arg| log("#{arg}\r\n") }
       end
 
       #: (String) -> void
