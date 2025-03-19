@@ -712,22 +712,15 @@ export class TestController {
 
     for (const uri of await vscode.workspace.findFiles(pattern)) {
       const fileName = path.basename(uri.fsPath);
+      const relativePath = vscode.workspace.asRelativePath(uri, false);
+      const pathParts = relativePath.split(path.sep);
 
-      if (this.shouldSkipTestFile(fileName)) {
+      if (this.shouldSkipTestFile(fileName, pathParts)) {
         continue;
       }
 
       // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
       // components, so we want to show each individual test directory as a separate item
-      const relativePath = vscode.workspace.asRelativePath(uri, false);
-      const pathParts = relativePath.split(path.sep);
-
-      // Projects may have fixtures that are test files, but not real tests to be executed. We don't want to include
-      // those
-      if (pathParts.some((part) => part === "fixtures")) {
-        continue;
-      }
-
       const dirPosition = this.testDirectoryPosition(pathParts);
       const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
       const firstLevelUri = vscode.Uri.joinPath(
@@ -790,8 +783,14 @@ export class TestController {
     }
   }
 
-  private shouldSkipTestFile(fileName: string): boolean {
+  private shouldSkipTestFile(fileName: string, pathParts: string[]) {
     if (fileName === "test_helper.rb") {
+      return true;
+    }
+
+    // Projects may have fixtures that are test files, but not real tests to be executed. We don't want to include
+    // those
+    if (pathParts.some((part) => part === "fixtures")) {
       return true;
     }
 
