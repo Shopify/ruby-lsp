@@ -731,36 +731,13 @@ export class TestController {
         initialCollection,
       );
 
-      // In Rails apps, it's also very common to divide the test directory into a second hierarchy level, like models or
-      // controllers. Here we try to find out if there is a second level, allowing users to run all tests for models for
-      // example
-      const secondLevelName = pathParts
-        .slice(dirPosition + 1, dirPosition + 2)
-        .join(path.sep);
-      const secondLevelUri = vscode.Uri.joinPath(
+      // Get or create the second level test directory item if applicable
+      const finalCollection = await this.getOrCreateSecondLevelItem(
+        pathParts,
+        dirPosition,
         firstLevelUri,
-        secondLevelName,
+        firstLevel,
       );
-
-      const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
-      let finalCollection = firstLevel.children;
-
-      // We only consider something to be another level of hierarchy if it's a directory
-      if (fileStat.type === vscode.FileType.Directory) {
-        let secondLevel = firstLevel.children.get(secondLevelUri.toString());
-
-        if (!secondLevel) {
-          secondLevel = this.testController.createTestItem(
-            secondLevelUri.toString(),
-            secondLevelName,
-            secondLevelUri,
-          );
-          secondLevel.tags = [TEST_DIR_TAG, DEBUG_TAG];
-          firstLevel.children.add(secondLevel);
-        }
-
-        finalCollection = secondLevel.children;
-      }
 
       // Finally, add the test file to whatever is the final collection, which may be the first level test directory or
       // a second level like models
@@ -799,6 +776,46 @@ export class TestController {
     }
 
     return { firstLevel, firstLevelUri };
+  }
+
+  private async getOrCreateSecondLevelItem(
+    pathParts: string[],
+    dirPosition: number,
+    firstLevelUri: vscode.Uri,
+    firstLevel: vscode.TestItem,
+  ): Promise<vscode.TestItemCollection> {
+    // In Rails apps, it's also very common to divide the test directory into a second hierarchy level, like models or
+    // controllers. Here we try to find out if there is a second level, allowing users to run all tests for models for
+    // example
+    const secondLevelName = pathParts
+      .slice(dirPosition + 1, dirPosition + 2)
+      .join(path.sep);
+    const secondLevelUri = vscode.Uri.joinPath(firstLevelUri, secondLevelName);
+
+    try {
+      const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
+
+      // We only consider something to be another level of hierarchy if it's a directory
+      if (fileStat.type === vscode.FileType.Directory) {
+        let secondLevel = firstLevel.children.get(secondLevelUri.toString());
+
+        if (!secondLevel) {
+          secondLevel = this.testController.createTestItem(
+            secondLevelUri.toString(),
+            secondLevelName,
+            secondLevelUri,
+          );
+          secondLevel.tags = [TEST_DIR_TAG, DEBUG_TAG];
+          firstLevel.children.add(secondLevel);
+        }
+
+        return secondLevel.children;
+      }
+    } catch (error: any) {
+      // Do nothing
+    }
+
+    return firstLevel.children;
   }
 
   private shouldSkipTestFile(fileName: string, pathParts: string[]) {
