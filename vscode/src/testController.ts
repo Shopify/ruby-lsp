@@ -993,6 +993,7 @@ export class TestController {
     cwd: string,
   ) {
     await new Promise<void>((resolve, reject) => {
+      const promises: Promise<void>[] = [];
       // Use JSON RPC to communicate with the process executing the tests
       const testProcess = spawn(command, {
         env,
@@ -1016,86 +1017,95 @@ export class TestController {
 
       // Handle the execution end
       testProcess.on("exit", (code) => {
-        // The JSON RPC package buffers messages, but does not provide a way to wait until all messages have been
-        // handled or to check the size of the queues. This means that if we resolve the promise immediately on exit, we
-        // may miss some updates and then the UI is not updated.
-        //
-        // This delay is here to give JSON RPC enough time to process all buffered messages before resolving the promise
-        setTimeout(() => {
-          disposables.forEach((disposable) => disposable.dispose());
-          connection.end();
-          connection.dispose();
+        Promise.all(promises)
+          .then(() => {
+            disposables.forEach((disposable) => disposable.dispose());
+            connection.end();
+            connection.dispose();
 
-          if (code === 0) {
-            resolve();
-          } else {
-            reject(
-              new Error(
-                `Test process exited with code ${code}\n${errorMessage}`,
-              ),
-            );
-          }
-        }, 250);
+            if (code === 0) {
+              resolve();
+            } else {
+              reject(
+                new Error(
+                  `Test process exited with code ${code}\n${errorMessage}`,
+                ),
+              );
+            }
+          })
+          .catch((err) => {
+            reject(err);
+          });
       });
 
       // Handle the JSON events being emitted by the tests
       disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.start, async (params) => {
-          const test = await this.findTestItem(
-            params.id,
-            vscode.Uri.parse(params.uri),
+        connection.onNotification(NOTIFICATION_TYPES.start, (params) => {
+          promises.push(
+            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
+              (test) => {
+                if (test) {
+                  run.started(test);
+                }
+              },
+            ),
           );
-          if (test) {
-            run.started(test);
-          }
         }),
       );
 
       disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.pass, async (params) => {
-          const test = await this.findTestItem(
-            params.id,
-            vscode.Uri.parse(params.uri),
+        connection.onNotification(NOTIFICATION_TYPES.pass, (params) => {
+          promises.push(
+            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
+              (test) => {
+                if (test) {
+                  run.passed(test);
+                }
+              },
+            ),
           );
-          if (test) {
-            run.passed(test);
-          }
         }),
       );
 
       disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.fail, async (params) => {
-          const test = await this.findTestItem(
-            params.id,
-            vscode.Uri.parse(params.uri),
+        connection.onNotification(NOTIFICATION_TYPES.fail, (params) => {
+          promises.push(
+            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
+              (test) => {
+                if (test) {
+                  run.failed(test, new vscode.TestMessage(params.message));
+                }
+              },
+            ),
           );
-          if (test) {
-            run.failed(test, new vscode.TestMessage(params.message));
-          }
         }),
       );
 
       disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.error, async (params) => {
-          const test = await this.findTestItem(
-            params.id,
-            vscode.Uri.parse(params.uri),
+        connection.onNotification(NOTIFICATION_TYPES.error, (params) => {
+          promises.push(
+            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
+              (test) => {
+                if (test) {
+                  run.errored(test, new vscode.TestMessage(params.message));
+                }
+              },
+            ),
           );
-          if (test) {
-            run.errored(test, new vscode.TestMessage(params.message));
-          }
         }),
       );
 
       disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.skip, async (params) => {
-          const test = await this.findTestItem(
-            params.id,
-            vscode.Uri.parse(params.uri),
+        connection.onNotification(NOTIFICATION_TYPES.skip, (params) => {
+          promises.push(
+            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
+              (test) => {
+                if (test) {
+                  run.skipped(test);
+                }
+              },
+            ),
           );
-          if (test) {
-            run.skipped(test);
-          }
         }),
       );
 
