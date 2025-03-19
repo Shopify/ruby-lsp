@@ -23,4 +23,10 @@ class SampleTest < Minitest::Test
   def test_that_raises
     raise "oops"
   end
+
+  def test_with_output
+    $stdout.puts "hello from $stdout.puts\nanother line"
+    puts "hello from puts\nanother line"
+    $stdout.write "hello from write\nanother line"
+  end
 end
