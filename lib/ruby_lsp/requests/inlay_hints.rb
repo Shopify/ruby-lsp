@@ -20,7 +20,8 @@ module RubyLsp
       def initialize(document, hints_configuration, dispatcher)
         super()
 
-        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint].new #: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint]
+        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint]
+          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint]
         Listeners::InlayHints.new(@response_builder, hints_configuration, dispatcher)
       end
 

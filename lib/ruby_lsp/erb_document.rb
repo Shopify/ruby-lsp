@@ -19,7 +19,8 @@ module RubyLsp
       # overrides this with the proper virtual host language source
       @host_language_source = "" #: String
       super
-      @code_units_cache = @parse_result.code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
+      @code_units_cache =
+        @parse_result.code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     end
 
     # @override
