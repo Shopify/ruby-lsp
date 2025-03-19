@@ -54,14 +54,16 @@
           "group": "9_cutcopypaste"
         }
       ],
+      "editor/title": [
+        {
+          "command": "rubyLsp.goToRelevantFile",
+          "when": "rubyLsp.activated",
+          "group": "navigation"
+        }
+      ],
       "view/title": [
         {
           "command": "rubyLsp.fileOperation",
-          "when": "rubyLsp.activated && view == 'workbench.explorer.fileView'",
-          "group": "navigation"
-        },
-        {
-          "command": "rubyLsp.goToRelevantFile",
           "when": "rubyLsp.activated && view == 'workbench.explorer.fileView'",
           "group": "navigation"
         }
@@ -172,7 +174,8 @@
       {
         "command": "rubyLsp.goToRelevantFile",
         "title": "Go to relevant file (test <> source code)",
-        "category": "Ruby LSP"
+        "category": "Ruby LSP",
+        "icon": "$(arrow-swap)"
       },
       {
         "command": "rubyLsp.collectRubyLspInfo",
