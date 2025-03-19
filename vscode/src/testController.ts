@@ -98,6 +98,32 @@ export class TestController {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
       testFileWatcher,
+      testFileWatcher.onDidCreate(async (uri) => {
+        const fileName = path.basename(uri.fsPath);
+        const relativePath = vscode.workspace.asRelativePath(uri, false);
+        const pathParts = relativePath.split(path.sep);
+
+        if (this.shouldSkipTestFile(fileName, pathParts)) {
+          return;
+        }
+
+        const parentItem = await this.getParentTestItem(uri);
+
+        if (parentItem) {
+          this.addTestFileItem(
+            uri,
+            fileName,
+            parentItem.children,
+          );
+
+          const testFile = parentItem.children.get(uri.toString());
+          if (testFile) {
+            await this.resolveHandler(testFile);
+          }
+        } else {
+         // TODO
+        }
+      }),
       testFileWatcher.onDidChange(async (uri) => {
         const item = await this.getParentTestItem(uri);
 
