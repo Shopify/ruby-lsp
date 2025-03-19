@@ -112,8 +112,8 @@ export class TestController {
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
-      vscode.workspace.onDidSaveTextDocument(async (document) => {
-        const uri = document.uri;
+      testFileWatcher,
+      testFileWatcher.onDidChange(async (uri) => {
         const item = await this.getParentTestItem(uri);
 
         if (item) {
@@ -863,9 +863,13 @@ export class TestController {
         secondLevelName,
       );
 
-      const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
-      if (fileStat.type === vscode.FileType.Directory) {
-        return { firstLevelUri, secondLevelUri };
+      try {
+        const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
+        if (fileStat.type === vscode.FileType.Directory) {
+          return { firstLevelUri, secondLevelUri };
+        }
+      } catch (error: any) {
+        // Do nothing
       }
     }
 
