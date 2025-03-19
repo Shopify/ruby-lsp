@@ -12,14 +12,11 @@ module RubyLsp
       def initialize
         super
 
-        @response = T.let(
-          {
-            title: +"",
-            links: +"",
-            documentation: +"",
-          },
-          T::Hash[Symbol, String],
-        )
+        @response = {
+          title: +"",
+          links: +"",
+          documentation: +"",
+        } #: Hash[Symbol, String]
       end
 
       #: (String content, category: Symbol) -> void

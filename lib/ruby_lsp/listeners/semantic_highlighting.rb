@@ -6,24 +6,21 @@ module RubyLsp
     class SemanticHighlighting
       include Requests::Support::Common
 
-      SPECIAL_RUBY_METHODS = T.let(
-        [
-          Module.instance_methods(false),
-          Kernel.instance_methods(false),
-          Kernel.methods(false),
-          Bundler::Dsl.instance_methods(false),
-          Module.private_instance_methods(false),
-        ].flatten.map(&:to_s).freeze,
-        T::Array[String],
-      )
+      SPECIAL_RUBY_METHODS = [
+        Module.instance_methods(false),
+        Kernel.instance_methods(false),
+        Kernel.methods(false),
+        Bundler::Dsl.instance_methods(false),
+        Module.private_instance_methods(false),
+      ].flatten.map(&:to_s).freeze #: Array[String]
 
       #: (Prism::Dispatcher dispatcher, ResponseBuilders::SemanticHighlighting response_builder) -> void
       def initialize(dispatcher, response_builder)
         @response_builder = response_builder
-        @special_methods = T.let(nil, T.nilable(T::Array[String]))
-        @current_scope = T.let(Scope.new, Scope)
-        @inside_regex_capture = T.let(false, T::Boolean)
-        @inside_implicit_node = T.let(false, T::Boolean)
+        @special_methods = nil #: Array[String]?
+        @current_scope = Scope.new #: Scope
+        @inside_regex_capture = false #: bool
+        @inside_implicit_node = false #: bool
 
         dispatcher.register(
           self,

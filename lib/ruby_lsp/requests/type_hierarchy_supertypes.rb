@@ -23,7 +23,7 @@ module RubyLsp
         name = @item[:name]
         entries = @index[name]
 
-        parents = T.let(Set.new, T::Set[RubyIndexer::Entry::Namespace])
+        parents = Set.new #: Set[RubyIndexer::Entry::Namespace]
         return unless entries&.any?
 
         entries.each do |entry|

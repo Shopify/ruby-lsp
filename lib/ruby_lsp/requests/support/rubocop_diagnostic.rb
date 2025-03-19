@@ -5,27 +5,21 @@ module RubyLsp
   module Requests
     module Support
       class RuboCopDiagnostic
-        RUBOCOP_TO_LSP_SEVERITY = T.let(
-          {
-            info: Constant::DiagnosticSeverity::HINT,
-            refactor: Constant::DiagnosticSeverity::INFORMATION,
-            convention: Constant::DiagnosticSeverity::INFORMATION,
-            warning: Constant::DiagnosticSeverity::WARNING,
-            error: Constant::DiagnosticSeverity::ERROR,
-            fatal: Constant::DiagnosticSeverity::ERROR,
-          }.freeze,
-          T::Hash[Symbol, Integer],
-        )
+        RUBOCOP_TO_LSP_SEVERITY = {
+          info: Constant::DiagnosticSeverity::HINT,
+          refactor: Constant::DiagnosticSeverity::INFORMATION,
+          convention: Constant::DiagnosticSeverity::INFORMATION,
+          warning: Constant::DiagnosticSeverity::WARNING,
+          error: Constant::DiagnosticSeverity::ERROR,
+          fatal: Constant::DiagnosticSeverity::ERROR,
+        }.freeze #: Hash[Symbol, Integer]
 
-        ENHANCED_DOC_URL = T.let(
-          begin
-            gem("rubocop", ">= 1.64.0")
-            true
-          rescue LoadError
-            false
-          end,
-          T::Boolean,
-        )
+        ENHANCED_DOC_URL = begin
+          gem("rubocop", ">= 1.64.0")
+          true
+        rescue LoadError
+          false
+        end #: bool
 
         # TODO: avoid passing document once we have alternative ways to get at
         # encoding and file source

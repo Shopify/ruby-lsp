@@ -25,10 +25,7 @@ module RubyLsp
           code_units_cache: document.code_units_cache,
         )
 
-        @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
-        )
+        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight].new #: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight]
         Listeners::DocumentHighlight.new(
           @response_builder,
           node_context.node,

@@ -971,7 +971,7 @@ class SetupBundlerTest < Minitest::Test
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
   def run_script(path = Dir.pwd, expected_path: nil, **options)
-    env = T.let({}, T::Hash[String, String])
+    env = {} #: Hash[String, String]
 
     stdout, _stderr = capture_subprocess_io do
       env = RubyLsp::SetupBundler.new(path, **options).setup!

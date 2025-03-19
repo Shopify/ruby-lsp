@@ -25,13 +25,13 @@ module RubyLsp
       @call_node = call_node
 
       nesting, surrounding_method = handle_nesting_nodes(nesting_nodes)
-      @nesting = T.let(nesting, T::Array[String])
-      @surrounding_method = T.let(surrounding_method, T.nilable(String))
+      @nesting = nesting #: Array[String]
+      @surrounding_method = surrounding_method #: String?
     end
 
     #: -> String
     def fully_qualified_name
-      @fully_qualified_name ||= T.let(@nesting.join("::"), T.nilable(String))
+      @fully_qualified_name ||= @nesting.join("::") #: String?
     end
 
     #: -> Array[Symbol]
@@ -55,7 +55,7 @@ module RubyLsp
     #: (Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nodes) -> [Array[String], String?]
     def handle_nesting_nodes(nodes)
       nesting = []
-      surrounding_method = T.let(nil, T.nilable(String))
+      surrounding_method = nil #: String?
 
       @nesting_nodes.each do |node|
         case node

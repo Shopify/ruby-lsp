@@ -17,12 +17,9 @@ module RubyLsp
     def initialize(source:, version:, uri:, global_state:)
       # This has to be initialized before calling super because we call `parse` in the parent constructor, which
       # overrides this with the proper virtual host language source
-      @host_language_source = T.let("", String)
+      @host_language_source = "" #: String
       super
-      @code_units_cache = T.let(@parse_result.code_units_cache(@encoding), T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
+      @code_units_cache = @parse_result.code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     end
 
     # @override
@@ -78,10 +75,10 @@ module RubyLsp
       #: (String source) -> void
       def initialize(source)
         @source = source
-        @host_language = T.let(+"", String)
-        @ruby = T.let(+"", String)
-        @current_pos = T.let(0, Integer)
-        @inside_ruby = T.let(false, T::Boolean)
+        @host_language = +"" #: String
+        @ruby = +"" #: String
+        @current_pos = 0 #: Integer
+        @inside_ruby = false #: bool
       end
 
       #: -> void

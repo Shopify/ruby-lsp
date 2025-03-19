@@ -24,8 +24,8 @@ module RubyLsp
         @global_state = global_state
         @store = store
         @document = document
-        @position = T.let(params[:position], T::Hash[Symbol, Integer])
-        @new_name = T.let(params[:newName], String)
+        @position = params[:position] #: Hash[Symbol, Integer]
+        @new_name = params[:newName] #: String
       end
 
       # @override

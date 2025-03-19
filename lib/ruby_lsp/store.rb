@@ -14,18 +14,15 @@ module RubyLsp
     #: (GlobalState global_state) -> void
     def initialize(global_state)
       @global_state = global_state
-      @state = T.let({}, T::Hash[String, Document[T.untyped]])
-      @features_configuration = T.let(
-        {
-          inlayHint: RequestConfig.new({
-            enableAll: false,
-            implicitRescue: false,
-            implicitHashValue: false,
-          }),
-        },
-        T::Hash[Symbol, RequestConfig],
-      )
-      @client_name = T.let("Unknown", String)
+      @state = {} #: Hash[String, Document[untyped]]
+      @features_configuration = {
+        inlayHint: RequestConfig.new({
+          enableAll: false,
+          implicitRescue: false,
+          implicitHashValue: false,
+        }),
+      } #: Hash[Symbol, RequestConfig]
+      @client_name = "Unknown" #: String
     end
 
     #: (URI::Generic uri) -> Document[untyped]

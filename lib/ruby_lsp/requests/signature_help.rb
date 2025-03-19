@@ -35,9 +35,9 @@ module RubyLsp
 
         target = adjust_for_nested_target(node_context.node, node_context.parent, position)
 
-        @target = T.let(target, T.nilable(Prism::Node))
+        @target = target #: Prism::Node?
         @dispatcher = dispatcher
-        @response_builder = T.let(ResponseBuilders::SignatureHelp.new, ResponseBuilders::SignatureHelp)
+        @response_builder = ResponseBuilders::SignatureHelp.new #: ResponseBuilders::SignatureHelp
         Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, sorbet_level)
       end
 

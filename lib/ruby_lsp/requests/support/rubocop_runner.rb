@@ -54,15 +54,12 @@ module RubyLsp
       class RuboCopRunner < ::RuboCop::Runner
         class ConfigurationError < StandardError; end
 
-        DEFAULT_ARGS = T.let(
-          [
-            "--stderr", # Print any output to stderr so that our stdout does not get polluted
-            "--force-exclusion",
-            "--format",
-            "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-          ],
-          T::Array[String],
-        )
+        DEFAULT_ARGS = [
+          "--stderr", # Print any output to stderr so that our stdout does not get polluted
+          "--force-exclusion",
+          "--format",
+          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
+        ] #: Array[String]
 
         #: Array[::RuboCop::Cop::Offense]
         attr_reader :offenses
@@ -80,17 +77,17 @@ module RubyLsp
 
         #: (*String args) -> void
         def initialize(*args)
-          @options = T.let({}, T::Hash[Symbol, T.untyped])
-          @offenses = T.let([], T::Array[::RuboCop::Cop::Offense])
-          @errors = T.let([], T::Array[String])
-          @warnings = T.let([], T::Array[String])
+          @options = {} #: Hash[Symbol, untyped]
+          @offenses = [] #: Array[::RuboCop::Cop::Offense]
+          @errors = [] #: Array[String]
+          @warnings = [] #: Array[String]
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
 
           config_store = ::RuboCop::ConfigStore.new
           config_store.options_config = rubocop_options[:config] if rubocop_options[:config]
-          @config_for_working_directory = T.let(config_store.for_pwd, ::RuboCop::Config)
+          @config_for_working_directory = config_store.for_pwd #: ::RuboCop::Config
 
           super(rubocop_options, config_store)
         end
@@ -132,10 +129,7 @@ module RubyLsp
 
           #: -> Hash[String, [singleton(::RuboCop::Cop::Base)]]
           def cop_registry
-            @cop_registry ||= T.let(
-              ::RuboCop::Cop::Registry.global.to_h,
-              T.nilable(T::Hash[String, [T.class_of(::RuboCop::Cop::Base)]]),
-            )
+            @cop_registry ||= ::RuboCop::Cop::Registry.global.to_h #: Hash[String, [singleton(::RuboCop::Cop::Base)]]?
           end
         end
 

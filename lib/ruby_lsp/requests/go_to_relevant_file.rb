@@ -16,15 +16,15 @@ module RubyLsp
       TEST_SUFFIX_PATTERN = /(_#{TEST_KEYWORDS.join("|_")})$/
       TEST_PATTERN = /#{TEST_PREFIX_PATTERN}|#{TEST_SUFFIX_PATTERN}/
 
-      TEST_PREFIX_GLOB = T.let("#{TEST_KEYWORDS.join("_,")}_", String)
-      TEST_SUFFIX_GLOB = T.let("_#{TEST_KEYWORDS.join(",_")}", String)
+      TEST_PREFIX_GLOB = "#{TEST_KEYWORDS.join("_,")}_" #: String
+      TEST_SUFFIX_GLOB = "_#{TEST_KEYWORDS.join(",_")}" #: String
 
       #: (String path, String workspace_path) -> void
       def initialize(path, workspace_path)
         super()
 
         @workspace_path = workspace_path
-        @path = T.let(path.delete_prefix(workspace_path), String)
+        @path = path.delete_prefix(workspace_path) #: String
       end
 
       # @override

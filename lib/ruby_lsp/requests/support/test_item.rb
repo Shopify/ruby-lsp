@@ -20,7 +20,7 @@ module RubyLsp
           @uri = uri
           @range = range
           @tags = tags
-          @children = T.let({}, T::Hash[String, TestItem])
+          @children = {} #: Hash[String, TestItem]
         end
 
         #: (TestItem item) -> void

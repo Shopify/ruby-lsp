@@ -6,50 +6,44 @@ module RubyLsp
     class SemanticHighlighting < ResponseBuilder
       class UndefinedTokenType < StandardError; end
 
-      TOKEN_TYPES = T.let(
-        {
-          namespace: 0,
-          type: 1,
-          class: 2,
-          enum: 3,
-          interface: 4,
-          struct: 5,
-          typeParameter: 6,
-          parameter: 7,
-          variable: 8,
-          property: 9,
-          enumMember: 10,
-          event: 11,
-          function: 12,
-          method: 13,
-          macro: 14,
-          keyword: 15,
-          modifier: 16,
-          comment: 17,
-          string: 18,
-          number: 19,
-          regexp: 20,
-          operator: 21,
-          decorator: 22,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
+      TOKEN_TYPES = {
+        namespace: 0,
+        type: 1,
+        class: 2,
+        enum: 3,
+        interface: 4,
+        struct: 5,
+        typeParameter: 6,
+        parameter: 7,
+        variable: 8,
+        property: 9,
+        enumMember: 10,
+        event: 11,
+        function: 12,
+        method: 13,
+        macro: 14,
+        keyword: 15,
+        modifier: 16,
+        comment: 17,
+        string: 18,
+        number: 19,
+        regexp: 20,
+        operator: 21,
+        decorator: 22,
+      }.freeze #: Hash[Symbol, Integer]
 
-      TOKEN_MODIFIERS = T.let(
-        {
-          declaration: 0,
-          definition: 1,
-          readonly: 2,
-          static: 3,
-          deprecated: 4,
-          abstract: 5,
-          async: 6,
-          modification: 7,
-          documentation: 8,
-          default_library: 9,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
+      TOKEN_MODIFIERS = {
+        declaration: 0,
+        definition: 1,
+        readonly: 2,
+        static: 3,
+        deprecated: 4,
+        abstract: 5,
+        async: 6,
+        modification: 7,
+        documentation: 8,
+        default_library: 9,
+      }.freeze #: Hash[Symbol, Integer]
 
       ResponseType = type_member { { fixed: Interface::SemanticTokens } }
 
@@ -57,7 +51,7 @@ module RubyLsp
       def initialize(code_units_cache)
         super()
         @code_units_cache = code_units_cache
-        @stack = T.let([], T::Array[SemanticToken])
+        @stack = [] #: Array[SemanticToken]
       end
 
       #: (Prism::Location location, Symbol type, ?Array[Symbol] modifiers) -> void
@@ -143,8 +137,8 @@ module RubyLsp
       class SemanticTokenEncoder
         #: -> void
         def initialize
-          @current_row = T.let(0, Integer)
-          @current_column = T.let(0, Integer)
+          @current_row = 0 #: Integer
+          @current_column = 0 #: Integer
         end
 
         #: (Array[SemanticToken] tokens) -> Array[Integer]

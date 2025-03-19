@@ -21,7 +21,7 @@ module RubyLsp
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code
     MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
-    EMPTY_CACHE = T.let(Object.new.freeze, Object)
+    EMPTY_CACHE = Object.new.freeze #: Object
 
     abstract!
 
@@ -51,13 +51,13 @@ module RubyLsp
       @source = source
       @version = version
       @global_state = global_state
-      @cache = T.let(Hash.new(EMPTY_CACHE), T::Hash[String, T.untyped])
-      @semantic_tokens = T.let(EMPTY_CACHE, T.any(Interface::SemanticTokens, Object))
-      @encoding = T.let(global_state.encoding, Encoding)
-      @uri = T.let(uri, URI::Generic)
-      @needs_parsing = T.let(true, T::Boolean)
-      @parse_result = T.let(T.unsafe(nil), ParseResultType)
-      @last_edit = T.let(nil, T.nilable(Edit))
+      @cache = Hash.new(EMPTY_CACHE) #: Hash[String, untyped]
+      @semantic_tokens = EMPTY_CACHE #: (Interface::SemanticTokens | Object)
+      @encoding = global_state.encoding #: Encoding
+      @uri = uri #: URI::Generic
+      @needs_parsing = true #: bool
+      @parse_result = T.unsafe(nil) #: ParseResultType
+      @last_edit = nil #: Edit?
       parse!
     end
 
@@ -170,15 +170,15 @@ module RubyLsp
     class Scanner
       extend T::Sig
 
-      LINE_BREAK = T.let(0x0A, Integer)
+      LINE_BREAK = 0x0A #: Integer
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
-      SURROGATE_PAIR_START = T.let(0xFFFF, Integer)
+      SURROGATE_PAIR_START = 0xFFFF #: Integer
 
       #: (String source, Encoding encoding) -> void
       def initialize(source, encoding)
-        @current_line = T.let(0, Integer)
-        @pos = T.let(0, Integer)
-        @source = T.let(source.codepoints, T::Array[Integer])
+        @current_line = 0 #: Integer
+        @pos = 0 #: Integer
+        @source = source.codepoints #: Array[Integer]
         @encoding = encoding
       end
 
