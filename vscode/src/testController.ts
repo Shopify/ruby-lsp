@@ -722,22 +722,14 @@ export class TestController {
       // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
       // components, so we want to show each individual test directory as a separate item
       const dirPosition = this.testDirectoryPosition(pathParts);
-      const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
-      const firstLevelUri = vscode.Uri.joinPath(
-        workspaceFolder.uri,
-        firstLevelName,
-      );
 
-      let firstLevel = initialCollection.get(firstLevelUri.toString());
-      if (!firstLevel) {
-        firstLevel = this.testController.createTestItem(
-          firstLevelUri.toString(),
-          firstLevelName,
-          firstLevelUri,
-        );
-        firstLevel.tags = [TEST_DIR_TAG, DEBUG_TAG];
-        initialCollection.add(firstLevel);
-      }
+      // Get or create the first level test directory item
+      const { firstLevel, firstLevelUri } = this.getOrCreateFirstLevelItem(
+        pathParts,
+        dirPosition,
+        workspaceFolder,
+        initialCollection,
+      );
 
       // In Rails apps, it's also very common to divide the test directory into a second hierarchy level, like models or
       // controllers. Here we try to find out if there is a second level, allowing users to run all tests for models for
@@ -781,6 +773,32 @@ export class TestController {
       testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
       finalCollection.add(testItem);
     }
+  }
+
+  private getOrCreateFirstLevelItem(
+    pathParts: string[],
+    dirPosition: number,
+    workspaceFolder: vscode.WorkspaceFolder,
+    initialCollection: vscode.TestItemCollection,
+  ): { firstLevel: vscode.TestItem; firstLevelUri: vscode.Uri } {
+    const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
+    const firstLevelUri = vscode.Uri.joinPath(
+      workspaceFolder.uri,
+      firstLevelName,
+    );
+
+    let firstLevel = initialCollection.get(firstLevelUri.toString());
+    if (!firstLevel) {
+      firstLevel = this.testController.createTestItem(
+        firstLevelUri.toString(),
+        firstLevelName,
+        firstLevelUri,
+      );
+      firstLevel.tags = [TEST_DIR_TAG, DEBUG_TAG];
+      initialCollection.add(firstLevel);
+    }
+
+    return { firstLevel, firstLevelUri };
   }
 
   private shouldSkipTestFile(fileName: string, pathParts: string[]) {
