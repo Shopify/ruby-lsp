@@ -101,6 +101,10 @@ export class TestController {
       DEBUG_TAG,
     );
 
+    const testFileWatcher = vscode.workspace.createFileSystemWatcher(
+      "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}",
+    );
+
     context.subscriptions.push(
       this.testController,
       this.testDebugProfile,
