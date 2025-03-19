@@ -8,7 +8,7 @@ module RubyIndexer
 
     abstract!
 
-    @enhancements = T.let([], T::Array[T::Class[Enhancement]])
+    @enhancements = [] #: Array[Class[Enhancement]]
 
     class << self
       extend T::Sig

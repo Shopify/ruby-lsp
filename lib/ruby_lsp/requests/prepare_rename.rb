@@ -13,7 +13,7 @@ module RubyLsp
       def initialize(document, position)
         super()
         @document = document
-        @position = T.let(position, T::Hash[Symbol, Integer])
+        @position = position #: Hash[Symbol, Integer]
       end
 
       # @override

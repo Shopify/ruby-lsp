@@ -10,9 +10,9 @@ module RubyLsp
       def initialize(global_state, document, params)
         super()
         @document = document
-        @uri = T.let(document.uri, URI::Generic)
+        @uri = document.uri #: URI::Generic
         @params = params
-        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
+        @active_formatter = global_state.active_formatter #: Support::Formatter?
       end
 
       # @override

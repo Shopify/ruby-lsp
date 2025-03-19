@@ -17,15 +17,11 @@ module RubyLsp
 
         #: -> void
         def initialize
-          @options =
-            T.let(
-              begin
-                opts = SyntaxTree::CLI::Options.new
-                opts.parse(SyntaxTree::CLI::ConfigFile.new.arguments)
-                opts
-              end,
-              SyntaxTree::CLI::Options,
-            )
+          @options = begin
+            opts = SyntaxTree::CLI::Options.new
+            opts.parse(SyntaxTree::CLI::ConfigFile.new.arguments)
+            opts
+          end #: SyntaxTree::CLI::Options
         end
 
         # @override

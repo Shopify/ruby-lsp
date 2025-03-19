@@ -35,30 +35,27 @@ module RubyLsp
 
     #: -> void
     def initialize
-      @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
-      @encoding = T.let(Encoding::UTF_8, Encoding)
+      @workspace_uri = URI::Generic.from_path(path: Dir.pwd) #: URI::Generic
+      @encoding = Encoding::UTF_8 #: Encoding
 
-      @formatter = T.let("auto", String)
-      @linters = T.let([], T::Array[String])
-      @test_library = T.let("minitest", String)
-      @has_type_checker = T.let(true, T::Boolean)
-      @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
-      @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
-      @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
-      @addon_settings = T.let({}, T::Hash[String, T.untyped])
-      @top_level_bundle = T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_gemfile }
-          true
-        rescue Bundler::GemfileNotFound, Bundler::GitError
-          false
-        end,
-        T::Boolean,
-      )
-      @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
-      @enabled_feature_flags = T.let({}, T::Hash[Symbol, T::Boolean])
-      @mutex = T.let(Mutex.new, Mutex)
-      @telemetry_machine_id = T.let(nil, T.nilable(String))
+      @formatter = "auto" #: String
+      @linters = [] #: Array[String]
+      @test_library = "minitest" #: String
+      @has_type_checker = true #: bool
+      @index = RubyIndexer::Index.new #: RubyIndexer::Index
+      @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
+      @type_inferrer = TypeInferrer.new(@index) #: TypeInferrer
+      @addon_settings = {} #: Hash[String, untyped]
+      @top_level_bundle = begin
+        Bundler.with_original_env { Bundler.default_gemfile }
+        true
+      rescue Bundler::GemfileNotFound, Bundler::GitError
+        false
+      end #: bool
+      @client_capabilities = ClientCapabilities.new #: ClientCapabilities
+      @enabled_feature_flags = {} #: Hash[Symbol, bool]
+      @mutex = Mutex.new #: Mutex
+      @telemetry_machine_id = nil #: String?
     end
 
     #: [T] { -> T } -> T

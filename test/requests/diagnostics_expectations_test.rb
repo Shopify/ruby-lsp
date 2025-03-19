@@ -8,7 +8,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Diagnostics, "diagnostics"
 
   def run_expectations(source)
-    result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
+    result = nil #: Array[RubyLsp::Interface::Diagnostic]?
     @global_state.apply_options({
       initializationOptions: { linters: ["rubocop_internal"] },
     })
@@ -38,7 +38,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   end
 
   def assert_expectations(source, expected)
-    actual = T.let(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::Diagnostic])
+    actual = run_expectations(source) #: Array[LanguageServer::Protocol::Interface::Diagnostic]
 
     # Sanitize the URI keys so that it matches file:///fake and not a real path in the user machine
     actual.each do |diagnostic|

@@ -3,7 +3,7 @@
 
 module RubyIndexer
   class RBSIndexer
-    HAS_UNTYPED_FUNCTION = T.let(!!defined?(RBS::Types::UntypedFunction), T::Boolean)
+    HAS_UNTYPED_FUNCTION = !!defined?(RBS::Types::UntypedFunction) #: bool
 
     #: (Index index) -> void
     def initialize(index)

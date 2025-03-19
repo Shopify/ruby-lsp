@@ -16,24 +16,24 @@ module RubyLsp
     def initialize
       # The editor supports watching files. This requires two capabilities: dynamic registration and relative pattern
       # support
-      @supports_watching_files = T.let(false, T::Boolean)
+      @supports_watching_files = false #: bool
 
       # The editor supports request delegation. This is an experimental capability since request delegation has not been
       # standardized into the LSP spec yet
-      @supports_request_delegation = T.let(false, T::Boolean)
+      @supports_request_delegation = false #: bool
 
       # The editor supports extra arbitrary properties for `window/showMessageRequest`. Necessary for add-ons to show
       # dialogs with user interactions
-      @window_show_message_supports_extra_properties = T.let(false, T::Boolean)
+      @window_show_message_supports_extra_properties = false #: bool
 
       # Which resource operations the editor supports, like renaming files
-      @supported_resource_operations = T.let([], T::Array[String])
+      @supported_resource_operations = [] #: Array[String]
 
       # The editor supports displaying progress requests
-      @supports_progress = T.let(false, T::Boolean)
+      @supports_progress = false #: bool
 
       # The editor supports server initiated refresh for diagnostics
-      @supports_diagnostic_refresh = T.let(false, T::Boolean)
+      @supports_diagnostic_refresh = false #: bool
     end
 
     #: (Hash[Symbol, untyped] capabilities) -> void

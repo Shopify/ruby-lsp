@@ -55,14 +55,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         response.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
       when Array
         response.each do |location|
-          attributes = T.let(location.attributes, T.untyped)
+          attributes = location.attributes #: untyped
 
           case location
           when RubyLsp::Interface::LocationLink
-            fake_path = T.let(attributes[:targetUri].split("/").last(2).join("/"), String)
+            fake_path = attributes[:targetUri].split("/").last(2).join("/") #: String
             location.instance_variable_set(:@attributes, attributes.merge("targetUri" => "file:///#{fake_path}"))
           else
-            fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
+            fake_path = attributes[:uri].split("/").last(2).join("/") #: String
             location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
           end
         end

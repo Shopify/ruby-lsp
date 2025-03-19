@@ -21,9 +21,9 @@ module RubyLsp
       #: (GlobalState global_state, RubyDocument document) -> void
       def initialize(global_state, document)
         super()
-        @active_linters = T.let(global_state.active_linters, T::Array[Support::Formatter])
+        @active_linters = global_state.active_linters #: Array[Support::Formatter]
         @document = document
-        @uri = T.let(document.uri, URI::Generic)
+        @uri = document.uri #: URI::Generic
       end
 
       # @override

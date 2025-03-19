@@ -24,7 +24,7 @@ module RubyLsp
       #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] params, RubyDocument::SorbetLevel sorbet_level, Prism::Dispatcher dispatcher) -> void
       def initialize(document, global_state, params, sorbet_level, dispatcher)
         super()
-        @target = T.let(nil, T.nilable(Prism::Node))
+        @target = nil #: Prism::Node?
         @dispatcher = dispatcher
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
@@ -60,10 +60,8 @@ module RubyLsp
           ],
           code_units_cache: document.code_units_cache,
         )
-        @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        )
+        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
+          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
 
         Listeners::Completion.new(
           @response_builder,

@@ -736,7 +736,7 @@ class ServerTest < Minitest::Test
 
     # Even if the thread technique, this test is not 100% reliable since it's trying to emulate a concurrency issue. If
     # we tried to always expect an error back, we would likely get infinite loops
-    error = T.let(nil, T.nilable(T.any(RubyLsp::Error, RubyLsp::Message)))
+    error = nil #: (RubyLsp::Error | RubyLsp::Message)?
 
     10.times do
       error = @server.pop_response
@@ -1546,13 +1546,7 @@ class ServerTest < Minitest::Test
 
   #: (Class desired_class, ?String? desired_method, ?id: Integer?) -> untyped
   def find_message(desired_class, desired_method = nil, id: nil)
-    message = T.let(
-      @server.pop_response, T.any(
-        RubyLsp::Result,
-        RubyLsp::Message,
-        RubyLsp::Error,
-      )
-    )
+    message = @server.pop_response #: (RubyLsp::Result | RubyLsp::Message | RubyLsp::Error)
 
     until message.is_a?(desired_class) && (!desired_method || T.unsafe(message).method == desired_method) &&
         (!id || T.unsafe(message).id == id)

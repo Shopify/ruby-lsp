@@ -6,84 +6,66 @@ module RubyLsp
     class DocumentHighlight
       include Requests::Support::Common
 
-      GLOBAL_VARIABLE_NODES = T.let(
-        [
-          Prism::GlobalVariableAndWriteNode,
-          Prism::GlobalVariableOperatorWriteNode,
-          Prism::GlobalVariableOrWriteNode,
-          Prism::GlobalVariableReadNode,
-          Prism::GlobalVariableTargetNode,
-          Prism::GlobalVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      GLOBAL_VARIABLE_NODES = [
+        Prism::GlobalVariableAndWriteNode,
+        Prism::GlobalVariableOperatorWriteNode,
+        Prism::GlobalVariableOrWriteNode,
+        Prism::GlobalVariableReadNode,
+        Prism::GlobalVariableTargetNode,
+        Prism::GlobalVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      INSTANCE_VARIABLE_NODES = T.let(
-        [
-          Prism::InstanceVariableAndWriteNode,
-          Prism::InstanceVariableOperatorWriteNode,
-          Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableReadNode,
-          Prism::InstanceVariableTargetNode,
-          Prism::InstanceVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      INSTANCE_VARIABLE_NODES = [
+        Prism::InstanceVariableAndWriteNode,
+        Prism::InstanceVariableOperatorWriteNode,
+        Prism::InstanceVariableOrWriteNode,
+        Prism::InstanceVariableReadNode,
+        Prism::InstanceVariableTargetNode,
+        Prism::InstanceVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      CONSTANT_NODES = T.let(
-        [
-          Prism::ConstantAndWriteNode,
-          Prism::ConstantOperatorWriteNode,
-          Prism::ConstantOrWriteNode,
-          Prism::ConstantReadNode,
-          Prism::ConstantTargetNode,
-          Prism::ConstantWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      CONSTANT_NODES = [
+        Prism::ConstantAndWriteNode,
+        Prism::ConstantOperatorWriteNode,
+        Prism::ConstantOrWriteNode,
+        Prism::ConstantReadNode,
+        Prism::ConstantTargetNode,
+        Prism::ConstantWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      CONSTANT_PATH_NODES = T.let(
-        [
-          Prism::ConstantPathAndWriteNode,
-          Prism::ConstantPathNode,
-          Prism::ConstantPathOperatorWriteNode,
-          Prism::ConstantPathOrWriteNode,
-          Prism::ConstantPathTargetNode,
-          Prism::ConstantPathWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      CONSTANT_PATH_NODES = [
+        Prism::ConstantPathAndWriteNode,
+        Prism::ConstantPathNode,
+        Prism::ConstantPathOperatorWriteNode,
+        Prism::ConstantPathOrWriteNode,
+        Prism::ConstantPathTargetNode,
+        Prism::ConstantPathWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      CLASS_VARIABLE_NODES = T.let(
-        [
-          Prism::ClassVariableAndWriteNode,
-          Prism::ClassVariableOperatorWriteNode,
-          Prism::ClassVariableOrWriteNode,
-          Prism::ClassVariableReadNode,
-          Prism::ClassVariableTargetNode,
-          Prism::ClassVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      CLASS_VARIABLE_NODES = [
+        Prism::ClassVariableAndWriteNode,
+        Prism::ClassVariableOperatorWriteNode,
+        Prism::ClassVariableOrWriteNode,
+        Prism::ClassVariableReadNode,
+        Prism::ClassVariableTargetNode,
+        Prism::ClassVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      LOCAL_NODES = T.let(
-        [
-          Prism::LocalVariableAndWriteNode,
-          Prism::LocalVariableOperatorWriteNode,
-          Prism::LocalVariableOrWriteNode,
-          Prism::LocalVariableReadNode,
-          Prism::LocalVariableTargetNode,
-          Prism::LocalVariableWriteNode,
-          Prism::BlockParameterNode,
-          Prism::RequiredParameterNode,
-          Prism::RequiredKeywordParameterNode,
-          Prism::OptionalKeywordParameterNode,
-          Prism::RestParameterNode,
-          Prism::OptionalParameterNode,
-          Prism::KeywordRestParameterNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      LOCAL_NODES = [
+        Prism::LocalVariableAndWriteNode,
+        Prism::LocalVariableOperatorWriteNode,
+        Prism::LocalVariableOrWriteNode,
+        Prism::LocalVariableReadNode,
+        Prism::LocalVariableTargetNode,
+        Prism::LocalVariableWriteNode,
+        Prism::BlockParameterNode,
+        Prism::RequiredParameterNode,
+        Prism::RequiredKeywordParameterNode,
+        Prism::OptionalKeywordParameterNode,
+        Prism::RestParameterNode,
+        Prism::OptionalParameterNode,
+        Prism::KeywordRestParameterNode,
+      ] #: Array[singleton(Prism::Node)]
 
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight] response_builder, Prism::Node? target, Prism::Node? parent, Prism::Dispatcher dispatcher, Hash[Symbol, untyped] position) -> void
       def initialize(response_builder, target, parent, dispatcher, position)
@@ -114,8 +96,8 @@ module RubyLsp
             [target, nil]
           end
 
-        @target = T.let(highlight_target, T.nilable(Prism::Node))
-        @target_value = T.let(highlight_target_value, T.nilable(String))
+        @target = highlight_target #: Prism::Node?
+        @target_value = highlight_target_value #: String?
         @target_position = position
 
         if @target

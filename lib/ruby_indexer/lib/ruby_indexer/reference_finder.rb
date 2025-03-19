@@ -66,8 +66,8 @@ module RubyIndexer
       @index = index
       @uri = uri
       @include_declarations = include_declarations
-      @stack = T.let([], T::Array[String])
-      @references = T.let([], T::Array[Reference])
+      @stack = [] #: Array[String]
+      @references = [] #: Array[Reference]
 
       dispatcher.register(
         self,

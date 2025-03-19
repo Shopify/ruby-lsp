@@ -14,17 +14,14 @@ module RubyLsp
       CREATE_ATTRIBUTE_WRITER = "Create Attribute Writer"
       CREATE_ATTRIBUTE_ACCESSOR = "Create Attribute Accessor"
 
-      INSTANCE_VARIABLE_NODES = T.let(
-        [
-          Prism::InstanceVariableAndWriteNode,
-          Prism::InstanceVariableOperatorWriteNode,
-          Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableReadNode,
-          Prism::InstanceVariableTargetNode,
-          Prism::InstanceVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      INSTANCE_VARIABLE_NODES = [
+        Prism::InstanceVariableAndWriteNode,
+        Prism::InstanceVariableOperatorWriteNode,
+        Prism::InstanceVariableOrWriteNode,
+        Prism::InstanceVariableReadNode,
+        Prism::InstanceVariableTargetNode,
+        Prism::InstanceVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
       class << self
         #: -> Interface::CodeActionRegistrationOptions
@@ -40,7 +37,7 @@ module RubyLsp
       def initialize(document, range, context)
         super()
         @document = document
-        @uri = T.let(document.uri, URI::Generic)
+        @uri = document.uri #: URI::Generic
         @range = range
         @context = context
       end

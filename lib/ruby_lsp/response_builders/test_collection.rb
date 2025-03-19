@@ -11,7 +11,7 @@ module RubyLsp
       #: -> void
       def initialize
         super
-        @items = T.let({}, T::Hash[String, ResponseType])
+        @items = {} #: Hash[String, ResponseType]
       end
 
       #: (ResponseType item) -> void

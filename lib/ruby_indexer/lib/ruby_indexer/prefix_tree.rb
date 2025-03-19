@@ -39,7 +39,7 @@ module RubyIndexer
 
     #: -> void
     def initialize
-      @root = T.let(Node.new("", ""), Node[Value])
+      @root = Node.new("", "") #: Node[Value]
     end
 
     # Search the PrefixTree based on a given `prefix`. If `foo` is an entry in the tree, then searching for `fo` will
@@ -78,7 +78,7 @@ module RubyIndexer
       return unless node
 
       # Remove the node from the tree and then go up the parents to remove any of them with empty children
-      parent = T.let(T.must(node.parent), T.nilable(Node[Value]))
+      parent = T.must(node.parent) #: Node[Value]?
 
       while parent
         parent.children.delete(node.key)

@@ -118,28 +118,25 @@ module RubyLsp
 
       include Requests::Support::Common
 
-      MINITEST_REPORTER_PATH = T.let(File.expand_path("../ruby_lsp_reporter_plugin.rb", __dir__), String)
-      TEST_UNIT_REPORTER_PATH = T.let(File.expand_path("../test_unit_test_runner.rb", __dir__), String)
+      MINITEST_REPORTER_PATH = File.expand_path("../ruby_lsp_reporter_plugin.rb", __dir__) #: String
+      TEST_UNIT_REPORTER_PATH = File.expand_path("../test_unit_test_runner.rb", __dir__) #: String
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
-      BASE_COMMAND = T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_lockfile }
-          "bundle exec ruby"
-        rescue Bundler::GemfileNotFound
-          "ruby"
-        end,
-        String,
-      )
+      BASE_COMMAND = begin
+        Bundler.with_original_env { Bundler.default_lockfile }
+        "bundle exec ruby"
+      rescue Bundler::GemfileNotFound
+        "ruby"
+      end #: String
 
       #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         @response_builder = response_builder
         @uri = uri
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @visibility_stack = T.let([:public], T::Array[Symbol])
-        @nesting = T.let([], T::Array[String])
-        @framework_tag = T.let(:minitest, Symbol)
+        @index = global_state.index #: RubyIndexer::Index
+        @visibility_stack = [:public] #: Array[Symbol]
+        @nesting = [] #: Array[String]
+        @framework_tag = :minitest #: Symbol
 
         dispatcher.register(
           self,
