@@ -145,7 +145,7 @@ module RubyLsp
     #: -> Thread
     def new_worker
       Thread.new do
-        while (message = T.let(@incoming_queue.pop, T.nilable(T::Hash[Symbol, T.untyped])))
+        while (message = @incoming_queue.pop)
           id = message[:id]
 
           # Check if the request was cancelled before trying to process it
