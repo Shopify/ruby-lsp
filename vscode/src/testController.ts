@@ -39,6 +39,7 @@ const NOTIFICATION_TYPES = {
   skip: new rpc.NotificationType<TestEventId>("skip"),
   fail: new rpc.NotificationType<TestEventWithMessage>("fail"),
   error: new rpc.NotificationType<TestEventWithMessage>("error"),
+  appendOutput: new rpc.NotificationType<{ message: string }>("append_output"),
 };
 
 export class TestController {
@@ -342,6 +343,9 @@ export class TestController {
       // For each command reported by the server spawn a new process with streaming updates
       for (const command of response.commands) {
         try {
+          workspace.outputChannel.debug(
+            `Running tests: "RUBYOPT=${rubyOpt} ${command}"`,
+          );
           await this.runCommandWithStreamingUpdates(
             run,
             command,
@@ -1092,6 +1096,12 @@ export class TestController {
           if (test) {
             run.skipped(test);
           }
+        }),
+      );
+
+      disposables.push(
+        connection.onNotification(NOTIFICATION_TYPES.appendOutput, (params) => {
+          run.appendOutput(params.message);
         }),
       );
 
