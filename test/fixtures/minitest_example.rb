@@ -25,7 +25,8 @@ class SampleTest < Minitest::Test
   end
 
   def test_with_output
-    $stdout.puts "hello from $stdout.puts"
-    puts "hello from puts"
+    $stdout.puts "hello from $stdout.puts\nanother line"
+    puts "hello from puts\nanother line"
+    $stdout.write "hello from write\nanother line"
   end
 end

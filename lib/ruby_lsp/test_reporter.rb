@@ -72,22 +72,34 @@ module RubyLsp
       #: (method_name: String?, params: Hash[String, untyped]) -> void
       def send_message(method_name, params)
         json_message = { method: method_name, params: params }.to_json
-        $stdout.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
+        ORIGINAL_STDOUT.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
       end
     end
 
+    ORIGINAL_STDOUT = $stdout #: IO
+
     class IOWrapper < SimpleDelegator
-      #: (String) -> void
+      #: (Object) -> void
       def puts(*args)
-        args.each { |arg| log("#{arg}\r\n") }
+        args.each { |arg| log(convert_line_breaks(arg) + "\r\n") }
       end
 
-      #: (String) -> void
+      #: (Object) -> void
       def print(*args)
-        args.each { |arg| log(arg.to_s) }
+        args.each { |arg| log(convert_line_breaks(arg)) }
+      end
+
+      #: (Object) -> void
+      def write(*args)
+        args.each { |arg| log(convert_line_breaks(arg)) }
       end
 
       private
+
+      #: (Object) -> String
+      def convert_line_breaks(message)
+        message.to_s.gsub("\n", "\r\n")
+      end
 
       #: (String) -> void
       def log(message)
