@@ -739,17 +739,26 @@ export class TestController {
         firstLevel,
       );
 
-      // Finally, add the test file to whatever is the final collection, which may be the first level test directory or
-      // a second level like models
-      const testItem = this.testController.createTestItem(
-        uri.toString(),
-        fileName,
-        uri,
-      );
-      testItem.canResolveChildren = true;
-      testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
-      finalCollection.add(testItem);
+      // Add the test file to the appropriate collection
+      this.addTestFileItem(uri, fileName, finalCollection);
     }
+  }
+
+  private addTestFileItem(
+    uri: vscode.Uri,
+    fileName: string,
+    collection: vscode.TestItemCollection,
+  ) {
+    // Finally, add the test file to whatever is the final collection, which may be the first level test directory or
+    // a second level like models
+    const testItem = this.testController.createTestItem(
+      uri.toString(),
+      fileName,
+      uri,
+    );
+    testItem.canResolveChildren = true;
+    testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
+    collection.add(testItem);
   }
 
   private getOrCreateFirstLevelItem(
