@@ -125,6 +125,13 @@ export class TestController {
           }
         }
       }),
+      testFileWatcher.onDidDelete(async (uri) => {
+        const item = await this.getParentTestItem(uri);
+
+        if (item) {
+          item.children.delete(uri.toString());
+        }
+      }),
     );
   }
 
