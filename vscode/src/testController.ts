@@ -1016,22 +1016,13 @@ export class TestController {
       });
 
       // Handle the execution end
-      testProcess.on("exit", (code) => {
+      testProcess.on("exit", () => {
         Promise.all(promises)
           .then(() => {
             disposables.forEach((disposable) => disposable.dispose());
             connection.end();
             connection.dispose();
-
-            if (code === 0) {
-              resolve();
-            } else {
-              reject(
-                new Error(
-                  `Test process exited with code ${code}\n${errorMessage}`,
-                ),
-              );
-            }
+            resolve();
           })
           .catch((err) => {
             reject(err);
