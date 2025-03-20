@@ -112,10 +112,10 @@ export class Debugger
 
     if (debugConfiguration.env) {
       // If the user has their own debug launch configurations, we still need to inject the Ruby environment
-      debugConfiguration.env = Object.assign(
-        debugConfiguration.env,
-        workspace.ruby.env,
-      );
+      debugConfiguration.env = {
+        ...workspace.ruby.env,
+        ...debugConfiguration.env,
+      };
     } else {
       debugConfiguration.env = workspace.ruby.env;
     }
