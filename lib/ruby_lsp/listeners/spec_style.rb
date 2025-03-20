@@ -19,15 +19,7 @@ module RubyLsp
         @describe_block_nesting = T.let([], T::Array[String])
         @spec_class_stack = T.let([], T::Array[T::Boolean])
 
-        dispatcher.register(
-          self,
-          :on_class_node_enter,
-          :on_class_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
-          :on_call_node_enter, # e.g. `describe` or `it`
-          :on_call_node_leave,
-        )
+        dispatcher.register(self)
       end
 
       #: (node: Prism::ClassNode) -> void

@@ -41,10 +41,10 @@ module RubyIndexer
     # `ClassMethods` modules
     # @overridable
     #: (Prism::CallNode node) -> void
-    def on_call_node_enter(node); end # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+    def on_call_node_enter(node); end
 
     # @overridable
     #: (Prism::CallNode node) -> void
-    def on_call_node_leave(node); end # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+    def on_call_node_leave(node); end
   end
 end

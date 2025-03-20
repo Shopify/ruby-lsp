@@ -984,7 +984,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
         klass = Class.new do
           def initialize(response_builder, dispatcher)
             @response_builder = response_builder
-            dispatcher.register(self, :on_constant_read_node_enter)
+            dispatcher.register(self)
           end
 
           def on_constant_read_node_enter(node)
