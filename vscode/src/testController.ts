@@ -387,6 +387,12 @@ export class TestController {
       return testFileItem;
     }
 
+    // If we're trying to find a test item inside a file that has never been expanded, then we never discovered its
+    // children and need to do so before trying to access them
+    if (testFileItem.children.size === 0) {
+      await this.resolveHandler(testFileItem);
+    }
+
     // If we find an exact match for this ID, then return it right away
     const groupOrItem = testFileItem.children.get(id);
     if (groupOrItem) {

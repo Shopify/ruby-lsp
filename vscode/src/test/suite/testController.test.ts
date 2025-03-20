@@ -872,6 +872,89 @@ suite("TestController", () => {
     });
   });
 
+  test("finding an item inside a test file that was never expanded automatically discovers children", async () => {
+    const commonStub = sinon.stub(common, "featureEnabled").returns(true);
+    const controller = new TestController(
+      context,
+      FAKE_TELEMETRY,
+      () => undefined,
+      () => Promise.resolve(workspace),
+    );
+    commonStub.restore();
+
+    const workspacesStub = sinon
+      .stub(vscode.workspace, "workspaceFolders")
+      .get(() => [workspaceFolder]);
+
+    const relativePathStub = sinon
+      .stub(vscode.workspace, "asRelativePath")
+      .callsFake((uri) =>
+        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
+      );
+
+    await controller.testController.resolveHandler!(undefined);
+    const collection = controller.testController.items;
+    const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
+    const testDir = collection.get(testDirUri.toString());
+    assert.ok(testDir);
+
+    const serverTestUri = vscode.Uri.joinPath(
+      workspaceUri,
+      "test",
+      "server_test.rb",
+    );
+    const serverTest = testDir.children.get(serverTestUri.toString());
+    assert.ok(serverTest);
+
+    const fakeClient = {
+      discoverTests: sinon.stub().resolves([
+        {
+          id: "ServerTest",
+          uri: serverTestUri.toString(),
+          label: "ServerTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 12, character: 10 },
+          },
+          tags: ["minitest"],
+          children: [
+            {
+              id: "ServerTest::NestedTest",
+              uri: serverTestUri.toString(),
+              label: "NestedTest",
+              range: {
+                start: { line: 2, character: 0 },
+                end: { line: 10, character: 10 },
+              },
+              tags: ["minitest"],
+              children: [
+                {
+                  id: "ServerTest::NestedTest#test_something",
+                  uri: serverTestUri.toString(),
+                  label: "test_something",
+                  range: {
+                    start: { line: 2, character: 0 },
+                    end: { line: 10, character: 10 },
+                  },
+                  tags: ["minitest"],
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+      waitForIndexing: sinon.stub().resolves(),
+    };
+    workspace.lspClient = fakeClient as any;
+
+    await controller.findTestItem("ServerTest", serverTestUri);
+    assert.strictEqual(fakeClient.discoverTests.callCount, 1);
+
+    workspacesStub.restore();
+    relativePathStub.restore();
+  });
+
   test("running a test", async () => {
     await withController(async (controller) => {
       const uri = vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb");
