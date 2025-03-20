@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Listeners
-    class SpecStyle < DiscoverTests
+    class SpecStyle < TestDiscovery
       extend T::Sig
 
       #: (response_builder: ResponseBuilders::TestCollection, global_state: GlobalState, dispatcher: Prism::Dispatcher, uri: URI::Generic) -> void

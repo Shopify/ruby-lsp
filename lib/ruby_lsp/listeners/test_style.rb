@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Listeners
-    class TestStyle < DiscoverTests
+    class TestStyle < TestDiscovery
       class << self
         # Resolves the minimal set of commands required to execute the requested tests
         #: (Array[Hash[Symbol, untyped]]) -> Array[String]
@@ -78,7 +78,7 @@ module RubyLsp
           regexes = groups_and_examples.flat_map do |group, info|
             examples = info[:examples]
             group_regex = Shellwords.escape(group).gsub(
-              Shellwords.escape(DiscoverTests::DYNAMIC_REFERENCE_MARKER),
+              Shellwords.escape(TestDiscovery::DYNAMIC_REFERENCE_MARKER),
               ".*",
             )
             if examples.empty?
@@ -104,7 +104,7 @@ module RubyLsp
           groups_and_examples.map do |group, info|
             examples = info[:examples]
             group_regex = Shellwords.escape(group).gsub(
-              Shellwords.escape(DiscoverTests::DYNAMIC_REFERENCE_MARKER),
+              Shellwords.escape(TestDiscovery::DYNAMIC_REFERENCE_MARKER),
               ".*",
             )
             command = +"#{BASE_COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}$/\""

@@ -3,7 +3,7 @@
 
 module RubyLsp
   module Listeners
-    class DiscoverTests
+    class TestDiscovery
       extend T::Helpers
       abstract!
 
