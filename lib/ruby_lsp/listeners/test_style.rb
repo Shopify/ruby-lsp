@@ -146,6 +146,7 @@ module RubyLsp
         dispatcher.register(
           self,
           # Common handlers registered in parent class
+          :on_class_node_enter,
           :on_def_node_enter,
           :on_call_node_enter,
           :on_call_node_leave,
@@ -153,19 +154,19 @@ module RubyLsp
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-        super
+      def on_class_node_enter(node)
+        with_test_ancestor_tracking(node) do |name, ancestors|
+          @framework_tag = :test_unit if ancestors.include?("Test::Unit::TestCase")
 
-        @framework_tag = :test_unit if @attached_ancestors.include?("Test::Unit::TestCase")
-
-        if @framework_tag == :test_unit || non_declarative_minitest?(@attached_ancestors, @fully_qualified_name)
-          @response_builder.add(Requests::Support::TestItem.new(
-            @fully_qualified_name,
-            @fully_qualified_name,
-            @uri,
-            range_from_node(node),
-            tags: [@framework_tag],
-          ))
+          if @framework_tag == :test_unit || non_declarative_minitest?(ancestors, name)
+            @response_builder.add(Requests::Support::TestItem.new(
+              name,
+              name,
+              @uri,
+              range_from_node(node),
+              tags: [@framework_tag],
+            ))
+          end
         end
       end
 

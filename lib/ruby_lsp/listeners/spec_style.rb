@@ -16,17 +16,18 @@ module RubyLsp
         dispatcher.register(
           self,
           # Common handlers registered in parent class
+          :on_class_node_enter,
           :on_call_node_enter, # e.g. `describe` or `it`
           :on_call_node_leave,
         )
       end
 
       #: (node: Prism::ClassNode) -> void
-      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-        super
-
-        is_spec = @attached_ancestors.include?("Minitest::Spec")
-        @spec_class_stack.push(is_spec)
+      def on_class_node_enter(node)
+        with_test_ancestor_tracking(node) do |_, ancestors|
+          is_spec = ancestors.include?("Minitest::Spec")
+          @spec_class_stack.push(is_spec)
+        end
       end
 
       #: (node: Prism::ClassNode) -> void
