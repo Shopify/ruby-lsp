@@ -153,7 +153,6 @@ module RubyLsp
           result: {
             protocolVersion: "2024-11-05",
             capabilities: {
-              resources: {},
               tools: {},
             },
             serverInfo: {
@@ -178,11 +177,27 @@ module RubyLsp
           result: {
             tools: [
               {
-                name: "all_classes",
-                description: "Show all the indexed classes in the current project",
+                name: "all_classes_entries",
+                description: "Show all the indexed classes entries in the current project",
                 inputSchema: {
                   type: "object",
                   properties: {},
+                },
+              },
+              {
+                name: "fuzzy_search_entries",
+                description: <<~DESCRIPTION,
+                  Fuzzy search for class/module/method/constant entries in the current project and its dependencies
+                  (gems).
+                DESCRIPTION
+                inputSchema: {
+                  type: "object",
+                  properties: {
+                    query: {
+                      type: "string",
+                    },
+                  },
+                  required: ["query"],
                 },
               },
               {
@@ -205,7 +220,7 @@ module RubyLsp
         puts "[MCP] Received tools/call request"
         params = request[:params]
         case params[:name]
-        when "all_classes"
+        when "all_classes_entries"
           puts "[MCP] Received all_classes tool request"
           {
             jsonrpc: "2.0",
@@ -218,7 +233,24 @@ module RubyLsp
                   type: "text",
                   text: entry.name,
                 }
-              end.uniq,
+              end,
+            },
+          }
+        when "fuzzy_search_entries"
+          puts "[MCP] Received fuzzy_search_entries tool request"
+          query = params.dig(:arguments, :query)
+          entries = @index.prefix_search(query).flatten
+          entries = @index.fuzzy_search(query) if entries.empty?
+          {
+            jsonrpc: "2.0",
+            id: request_id,
+            result: {
+              content: entries.map do |entry|
+                {
+                  type: "text",
+                  text: generate_entry_text(entry),
+                }
+              end,
             },
           }
         when "list_ancestors"
@@ -289,6 +321,21 @@ module RubyLsp
     rescue EOFError => e
       puts "[MCP] Error reading request body: #{e.message}"
       ""
+    end
+
+    #: (RubyIndexer::Entry) -> String
+    def generate_entry_text(entry)
+      case entry
+      when RubyIndexer::Entry::Class, RubyIndexer::Entry::Module
+        <<~TEXT
+          type: #{entry.is_a?(RubyIndexer::Entry::Class) ? "class" : "module"}
+          name: #{entry.name}
+          comments: #{entry.comments}
+          uri: #{entry.uri}
+        TEXT
+      else
+        entry.name
+      end
     end
   end
 end
