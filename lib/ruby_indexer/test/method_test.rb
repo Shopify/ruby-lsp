@@ -924,6 +924,32 @@ module RubyIndexer
       RUBY
     end
 
+    def test_changing_visibility_post_definition
+      index(<<~RUBY)
+        class Foo
+          def bar; end
+          private :bar
+
+          def baz; end
+          protected :baz
+
+          private
+          def qux; end
+
+          public :qux
+        end
+      RUBY
+
+      entry = T.must(@index["bar"].first)
+      assert_predicate(entry, :private?)
+
+      entry = T.must(@index["baz"].first)
+      assert_predicate(entry, :protected?)
+
+      entry = T.must(@index["qux"].first)
+      assert_predicate(entry, :public?)
+    end
+
     private
 
     #: (Entry::Method entry, String call_string) -> void
