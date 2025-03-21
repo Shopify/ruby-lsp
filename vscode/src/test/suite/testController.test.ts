@@ -843,18 +843,19 @@ suite("TestController", () => {
         }),
       } as any;
 
+      const cancellationSource = new vscode.CancellationTokenSource();
       const runStub = {
         started: sinon.stub(),
         passed: sinon.stub(),
         enqueued: sinon.stub(),
         end: sinon.stub(),
+        token: cancellationSource.token,
       } as any;
       const createRunStub = sinon
         .stub(controller.testController, "createTestRun")
         .returns(runStub);
 
       const runRequest = new vscode.TestRunRequest([testItem]);
-      const cancellationSource = new vscode.CancellationTokenSource();
       await controller.runTest(runRequest, cancellationSource.token);
 
       assert.ok(runStub.enqueued.calledWith(testItem));
@@ -893,18 +894,19 @@ suite("TestController", () => {
         }),
       } as any;
 
+      const cancellationSource = new vscode.CancellationTokenSource();
       const runStub = {
         started: sinon.stub(),
         passed: sinon.stub(),
         enqueued: sinon.stub(),
         end: sinon.stub(),
+        token: cancellationSource.token,
       } as any;
       const createRunStub = sinon
         .stub(controller.testController, "createTestRun")
         .returns(runStub);
 
       const debug = new Debugger(context, () => workspace);
-      const cancellationSource = new vscode.CancellationTokenSource();
       const startDebuggingSpy = sinon.spy(vscode.debug, "startDebugging");
 
       const runRequest = new vscode.TestRunRequest(
@@ -968,6 +970,7 @@ suite("TestController", () => {
         }),
       } as any;
 
+      const cancellationSource = new vscode.CancellationTokenSource();
       const runStub = {
         started: sinon.stub(),
         passed: sinon.stub(),
@@ -975,6 +978,7 @@ suite("TestController", () => {
         end: sinon.stub(),
         addCoverage: sinon.stub(),
         appendOutput: sinon.stub(),
+        token: cancellationSource.token,
       } as any;
       const createRunStub = sinon
         .stub(controller.testController, "createTestRun")
@@ -985,7 +989,6 @@ suite("TestController", () => {
         [],
         controller.coverageProfile,
       );
-      const cancellationSource = new vscode.CancellationTokenSource();
       const fakeFileContents = Buffer.from(
         JSON.stringify({
           // eslint-disable-next-line @typescript-eslint/naming-convention

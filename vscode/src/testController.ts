@@ -9,6 +9,7 @@ import { CodeLens } from "vscode-languageclient/node";
 import { Workspace } from "./workspace";
 import { featureEnabled } from "./common";
 import { LspTestItem, ResolvedCommands, ServerTestItem } from "./client";
+import { LinkedCancellationSource } from "./linkedCancellationSource";
 
 const asyncExec = promisify(exec);
 
@@ -402,8 +403,13 @@ export class TestController {
       }
     });
 
+    const linkedCancellationSource = new LinkedCancellationSource(
+      token,
+      run.token,
+    );
+
     for (const [workspaceFolder, testItems] of workspaceToTestItems) {
-      if (token.isCancellationRequested) {
+      if (linkedCancellationSource.isCancellationRequested()) {
         break;
       }
 
@@ -444,14 +450,20 @@ export class TestController {
           workspace,
           run,
           profile,
-          token,
+          linkedCancellationSource,
         );
       } else if (profile.label === DEBUG_PROFILE_LABEL) {
-        await this.debugTestCommands(response, workspace, run, token);
+        await this.debugTestCommands(
+          response,
+          workspace,
+          run,
+          linkedCancellationSource,
+        );
       }
     }
 
     run.end();
+    linkedCancellationSource.dispose();
   }
 
   // Public for testing purposes. Finds a test item based on its ID and URI
@@ -497,7 +509,7 @@ export class TestController {
     workspace: Workspace,
     run: vscode.TestRun,
     profile: vscode.TestRunProfile | undefined,
-    token: vscode.CancellationToken,
+    linkedCancellationSource: LinkedCancellationSource,
   ) {
     // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
     // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
@@ -522,7 +534,7 @@ export class TestController {
             RUBYOPT: rubyOpt,
           },
           workspace.workspaceFolder.uri.fsPath,
-          token,
+          linkedCancellationSource,
         );
       } catch (error: any) {
         await vscode.window.showErrorMessage(
@@ -543,10 +555,10 @@ export class TestController {
     response: ResolvedCommands,
     workspace: Workspace,
     run: vscode.TestRun,
-    token: vscode.CancellationToken,
+    linkedCancellationSource: LinkedCancellationSource,
   ) {
     for (const command of response.commands) {
-      if (token.isCancellationRequested) {
+      if (linkedCancellationSource.isCancellationRequested()) {
         break;
       }
 
@@ -556,8 +568,11 @@ export class TestController {
       // `vscode.debug.startDebugging` resolve immediately after successfully starting the debugger, not after it
       // finishes
       await new Promise<void>((resolve, reject) => {
+        linkedCancellationSource.onCancellationRequested(
+          vscode.debug.stopDebugging,
+        );
+
         disposables.push(
-          token.onCancellationRequested(vscode.debug.stopDebugging),
           vscode.debug.onDidTerminateDebugSession(() => {
             disposables.forEach((disposable) => disposable.dispose());
             resolve();
@@ -1271,7 +1286,7 @@ export class TestController {
     command: string,
     env: NodeJS.ProcessEnv,
     cwd: string,
-    token: vscode.CancellationToken,
+    linkedCancellationSource: LinkedCancellationSource,
   ) {
     await new Promise<void>((resolve, reject) => {
       const promises: Promise<void>[] = [];
@@ -1286,7 +1301,8 @@ export class TestController {
       };
 
       const abortController = new AbortController();
-      token.onCancellationRequested(() => {
+
+      linkedCancellationSource.onCancellationRequested(() => {
         run.appendOutput("\r\nTest run cancelled.");
         abortController.abort();
       });
