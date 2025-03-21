@@ -40,7 +40,7 @@ module RubyLsp
               unless children.any? && children.all? { |child| child[:tags].include?("test_group") }
                 aggregated_tests[path][item[:label]] = { tags: tags, examples: [] }
               end
-            elsif tags.include?("minitest") || tags.include?("test_unit")
+            elsif tags.include?("framework:minitest") || tags.include?("framework:test_unit")
               class_name, method_name = item[:id].split("#")
               aggregated_tests[path][class_name][:examples] << method_name
               aggregated_tests[path][class_name][:tags].merge(tags)
@@ -55,7 +55,7 @@ module RubyLsp
             # Separate groups into Minitest and Test Unit. You can have both frameworks in the same file, but you cannot
             # have a group belongs to both at the same time
             minitest_groups, test_unit_groups = groups_and_examples.partition do |_, info|
-              info[:tags].include?("minitest")
+              info[:tags].include?("framework:minitest")
             end
 
             if minitest_groups.any?
@@ -141,7 +141,7 @@ module RubyLsp
       def initialize(response_builder, global_state, dispatcher, uri)
         super
 
-        @framework_tag = T.let(:minitest, Symbol)
+        @framework = T.let(:minitest, Symbol)
 
         dispatcher.register(
           self,
@@ -156,15 +156,15 @@ module RubyLsp
       #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         with_test_ancestor_tracking(node) do |name, ancestors|
-          @framework_tag = :test_unit if ancestors.include?("Test::Unit::TestCase")
+          @framework = :test_unit if ancestors.include?("Test::Unit::TestCase")
 
-          if @framework_tag == :test_unit || non_declarative_minitest?(ancestors, name)
+          if @framework == :test_unit || non_declarative_minitest?(ancestors, name)
             @response_builder.add(Requests::Support::TestItem.new(
               name,
               name,
               @uri,
               range_from_node(node),
-              tags: [@framework_tag],
+              framework: @framework,
             ))
           end
         end
@@ -190,7 +190,7 @@ module RubyLsp
           name,
           @uri,
           range_from_node(node),
-          tags: [@framework_tag],
+          framework: @framework,
         ))
       end
 

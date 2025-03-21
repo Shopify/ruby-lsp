@@ -13,14 +13,14 @@ module RubyLsp
         #: String
         attr_reader :id, :label
 
-        #: (String id, String label, URI::Generic uri, Interface::Range range, Array[Symbol] tags) -> void
-        def initialize(id, label, uri, range, tags: [])
+        #: (String id, String label, URI::Generic uri, Interface::Range range, Symbol framework) -> void
+        def initialize(id, label, uri, range, framework:)
           @id = id
           @label = label
           @uri = uri
           @range = range
-          @tags = tags
-          @children = T.let({}, T::Hash[String, TestItem])
+          @tags = ["framework:#{framework}"] #: Array[String]
+          @children = {} #: Hash[String, TestItem]
         end
 
         #: (TestItem item) -> void
@@ -36,11 +36,6 @@ module RubyLsp
         #: -> Array[TestItem]
         def children
           @children.values
-        end
-
-        #: (Symbol) -> bool
-        def tag?(tag)
-          @tags.include?(tag)
         end
 
         #: -> Hash[Symbol, untyped]
