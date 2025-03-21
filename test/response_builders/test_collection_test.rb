@@ -15,8 +15,8 @@ module RubyLsp
 
     def test_allows_building_hierarchy_of_tests
       builder = ResponseBuilders::TestCollection.new
-      test_item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range)
-      nested_item = Requests::Support::TestItem.new("nested-id", "Nested label", @uri, @range)
+      test_item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range, framework: :minitest)
+      nested_item = Requests::Support::TestItem.new("nested-id", "Nested label", @uri, @range, framework: :minitest)
 
       builder.add(test_item)
       test_item.add(nested_item)
@@ -30,16 +30,28 @@ module RubyLsp
 
     def test_overrides_if_trying_to_add_item_with_same_id
       builder = ResponseBuilders::TestCollection.new
-      test_item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range)
-      nested_item = Requests::Support::TestItem.new("nested-id", "Nested label", @uri, @range)
+      test_item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range, framework: :minitest)
+      nested_item = Requests::Support::TestItem.new("nested-id", "Nested label", @uri, @range, framework: :minitest)
 
       builder.add(test_item)
       test_item.add(nested_item)
 
-      builder.add(Requests::Support::TestItem.new("my-id", "Other title, but same ID", @uri, @range))
+      builder.add(Requests::Support::TestItem.new(
+        "my-id",
+        "Other title, but same ID",
+        @uri,
+        @range,
+        framework: :minitest,
+      ))
       assert_equal("Other title, but same ID", T.must(builder["my-id"]).label)
 
-      test_item.add(Requests::Support::TestItem.new("nested-id", "Other title, but same ID", @uri, @range))
+      test_item.add(Requests::Support::TestItem.new(
+        "nested-id",
+        "Other title, but same ID",
+        @uri,
+        @range,
+        framework: :minitest,
+      ))
       assert_equal("Other title, but same ID", T.must(test_item["nested-id"]).label)
     end
 

@@ -20,7 +20,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "ServerTest#test_server",
@@ -30,7 +30,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -43,7 +43,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "StoreTest#test_store",
@@ -53,7 +53,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -88,7 +88,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [],
               },
               {
@@ -99,7 +99,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "StoreTest#test_store",
@@ -109,7 +109,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -144,7 +144,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "ServerTest#test_server",
@@ -154,7 +154,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                   {
@@ -165,7 +165,7 @@ module RubyLsp
                       start: { line: 12, character: 2 },
                       end: { line: 30, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -276,7 +276,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [],
               },
               {
@@ -287,7 +287,7 @@ module RubyLsp
                   start: { line: 32, character: 0 },
                   end: { line: 60, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [],
               },
             ],
@@ -319,7 +319,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "ServerTest#test_server",
@@ -329,7 +329,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                   {
@@ -340,7 +340,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -353,7 +353,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [],
               },
               {
@@ -364,7 +364,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "StoreTest#test_store",
@@ -374,7 +374,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -410,7 +410,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "<dynamic_reference>::ServerTest#test_server",
@@ -420,7 +420,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["minitest"],
+                    tags: ["framework:minitest"],
                     children: [],
                   },
                 ],
@@ -433,7 +433,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [],
               },
             ],
@@ -462,7 +462,7 @@ module RubyLsp
                 id: "CompletionTest#test_with_typed_false",
                 label: "test_with_typed_false",
                 uri: "file:///test/requests/completion_test.rb",
-                tags: ["debug", "minitest"],
+                tags: ["debug", "framework:minitest"],
                 children: [],
                 range: { start: { line: 704, character: 2 }, end: { line: 728, character: 5 } },
               },
@@ -470,7 +470,7 @@ module RubyLsp
                 id: "CompletionTest#test_with_typed_true",
                 label: "test_with_typed_true",
                 uri: "file:///test/requests/completion_test.rb",
-                tags: ["debug", "minitest"],
+                tags: ["debug", "framework:minitest"],
                 children: [],
                 range: { start: { line: 730, character: 2 }, end: { line: 754, character: 5 } },
               },
@@ -504,7 +504,7 @@ module RubyLsp
                   start: { line: 10, character: 2 },
                   end: { line: 20, character: 3 },
                 },
-                tags: ["minitest", "test_group"],
+                tags: ["framework:minitest", "test_group"],
                 children: [
                   {
                     id: "ServerTest::MainTest::NestedTest",
@@ -514,7 +514,7 @@ module RubyLsp
                       start: { line: 12, character: 4 },
                       end: { line: 14, character: 5 },
                     },
-                    tags: ["minitest", "test_group"],
+                    tags: ["framework:minitest", "test_group"],
                     children: [],
                   },
                 ],
@@ -555,7 +555,7 @@ module RubyLsp
                   start: { line: 1, character: 2 },
                   end: { line: 10, character: 3 },
                 },
-                tags: ["minitest"],
+                tags: ["framework:minitest"],
                 children: [],
               },
             ],
@@ -590,7 +590,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "ServerTest#test_server",
@@ -600,7 +600,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -613,7 +613,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "StoreTest#test_store",
@@ -623,7 +623,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -658,7 +658,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [],
               },
               {
@@ -669,7 +669,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "StoreTest#test_store",
@@ -679,7 +679,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -724,7 +724,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                   {
@@ -735,7 +735,7 @@ module RubyLsp
                       start: { line: 12, character: 2 },
                       end: { line: 30, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -770,7 +770,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [],
               },
               {
@@ -781,7 +781,7 @@ module RubyLsp
                   start: { line: 32, character: 0 },
                   end: { line: 60, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [],
               },
             ],
@@ -814,7 +814,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "ServerTest#test_server",
@@ -824,7 +824,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                   {
@@ -835,7 +835,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -848,7 +848,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [],
               },
               {
@@ -859,7 +859,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "StoreTest#test_store",
@@ -869,7 +869,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -906,7 +906,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "<dynamic_reference>::ServerTest#test_server",
@@ -916,7 +916,7 @@ module RubyLsp
                       start: { line: 1, character: 2 },
                       end: { line: 10, character: 3 },
                     },
-                    tags: ["test_unit"],
+                    tags: ["framework:test_unit"],
                     children: [],
                   },
                 ],
@@ -929,7 +929,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [],
               },
             ],
@@ -958,7 +958,7 @@ module RubyLsp
                 id: "CompletionTest#test_with_typed_false",
                 label: "test_with_typed_false",
                 uri: "file:///test/requests/completion_test.rb",
-                tags: ["debug", "test_unit"],
+                tags: ["debug", "framework:test_unit"],
                 children: [],
                 range: { start: { line: 704, character: 2 }, end: { line: 728, character: 5 } },
               },
@@ -966,7 +966,7 @@ module RubyLsp
                 id: "CompletionTest#test_with_typed_true",
                 label: "test_with_typed_true",
                 uri: "file:///test/requests/completion_test.rb",
-                tags: ["debug", "test_unit"],
+                tags: ["debug", "framework:test_unit"],
                 children: [],
                 range: { start: { line: 730, character: 2 }, end: { line: 754, character: 5 } },
               },
@@ -1000,7 +1000,7 @@ module RubyLsp
                   start: { line: 10, character: 2 },
                   end: { line: 20, character: 3 },
                 },
-                tags: ["test_unit", "test_group"],
+                tags: ["framework:test_unit", "test_group"],
                 children: [
                   {
                     id: "ServerTest::MainTest::NestedTest",
@@ -1010,7 +1010,7 @@ module RubyLsp
                       start: { line: 12, character: 4 },
                       end: { line: 14, character: 5 },
                     },
-                    tags: ["test_unit", "test_group"],
+                    tags: ["framework:test_unit", "test_group"],
                     children: [],
                   },
                 ],
@@ -1051,7 +1051,7 @@ module RubyLsp
                   start: { line: 1, character: 2 },
                   end: { line: 10, character: 3 },
                 },
-                tags: ["test_unit"],
+                tags: ["framework:test_unit"],
                 children: [],
               },
             ],

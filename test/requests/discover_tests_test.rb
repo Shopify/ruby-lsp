@@ -375,7 +375,7 @@ module RubyLsp
                   class_name,
                   @uri,
                   range_from_node(node),
-                  tags: [:custom_addon],
+                  framework: :custom_addon,
                 )
 
                 @response_builder.add(@current_class)
@@ -396,7 +396,7 @@ module RubyLsp
                 test_name,
                 @uri,
                 range_from_node(node),
-                tags: [:custom_addon],
+                framework: :custom_addon,
               ))
             end
           end
@@ -418,7 +418,7 @@ module RubyLsp
 
     def assert_all_items_tagged_with(items, tag)
       items.each do |item|
-        assert_includes(item[:tags], tag)
+        assert_includes(item[:tags], "framework:#{tag}")
         children = item[:children]
         assert_all_items_tagged_with(children, tag) unless children.empty?
       end
