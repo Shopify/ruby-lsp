@@ -1007,11 +1007,18 @@ export class TestController {
     await new Promise<void>((resolve, reject) => {
       const promises: Promise<void>[] = [];
 
+      const abortController = new AbortController();
+      token.onCancellationRequested(() => {
+        run.appendOutput("\r\nTest run cancelled.");
+        abortController.abort();
+      });
+
       // Use JSON RPC to communicate with the process executing the tests
       const testProcess = spawn(command, {
         env,
         stdio: ["pipe", "pipe", "pipe"],
         shell: true,
+        signal: abortController.signal,
         cwd,
       });
       const connection = rpc.createMessageConnection(
@@ -1040,15 +1047,6 @@ export class TestController {
           .catch((err) => {
             reject(err);
           });
-      });
-
-      // If the user requests to cancel the test run, resolve the promise immediately to stop running tests
-      token.onCancellationRequested(() => {
-        run.appendOutput("Test run cancelled");
-        disposables.forEach((disposable) => disposable.dispose());
-        connection.end();
-        connection.dispose();
-        resolve();
       });
 
       // Handle the JSON events being emitted by the tests
