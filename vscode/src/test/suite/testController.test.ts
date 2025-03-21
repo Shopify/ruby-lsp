@@ -995,7 +995,8 @@ suite("TestController", () => {
         .returns(runStub);
 
       const runRequest = new vscode.TestRunRequest([testItem]);
-      await controller.runTest(runRequest, {} as any);
+      const cancellationSource = new vscode.CancellationTokenSource();
+      await controller.runTest(runRequest, cancellationSource.token);
 
       assert.ok(runStub.enqueued.calledWithExactly(testItem));
       assert.ok(runStub.started.calledWithExactly(testItem));
