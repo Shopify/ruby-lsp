@@ -269,7 +269,7 @@ module RubyLsp
       T.unsafe(ENV).merge!(env)
 
       unless should_update && !force_install
-        Bundler::CLI::Install.new({}).run
+        Bundler::CLI::Install.new({ "no-cache" => true }).run
         correct_relative_remote_paths if @custom_lockfile.exist?
         return env
       end

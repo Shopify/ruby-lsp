@@ -246,6 +246,26 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_launch_mode_with_bundle_package
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        system("bundle", "install")
+        system("bundle", "package")
+
+        cached_gems = Dir.glob("#{dir}/vendor/cache/*.gem")
+        refute_empty(cached_gems)
+
+        launch(dir)
+        assert_empty(Dir.glob("#{dir}/vendor/cache/*.gem") - cached_gems)
+      end
+    end
+  end
+
   private
 
   def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})
