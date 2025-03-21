@@ -113,6 +113,24 @@ export class TestController {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
       testFileWatcher,
+      testFileWatcher.onDidCreate(async (uri) => {
+        const workspace = vscode.workspace.getWorkspaceFolder(uri);
+
+        if (!workspace || !vscode.workspace.workspaceFolders) {
+          return;
+        }
+
+        const initialCollection =
+          vscode.workspace.workspaceFolders.length === 1
+            ? this.testController.items
+            : this.testController.items.get(workspace.uri.toString())?.children;
+
+        if (!initialCollection) {
+          return;
+        }
+
+        await this.addTestItemsForFile(uri, workspace, initialCollection);
+      }),
       testFileWatcher.onDidChange(async (uri) => {
         const item = await this.getParentTestItem(uri);
 
