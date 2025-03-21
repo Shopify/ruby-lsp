@@ -984,18 +984,19 @@ suite("TestController", () => {
         }),
       } as any;
 
+      const cancellationSource = new vscode.CancellationTokenSource();
       const runStub = {
         started: sinon.stub(),
         passed: sinon.stub(),
         enqueued: sinon.stub(),
         end: sinon.stub(),
+        token: cancellationSource.token,
       } as any;
       const createRunStub = sinon
         .stub(controller.testController, "createTestRun")
         .returns(runStub);
 
       const runRequest = new vscode.TestRunRequest([testItem]);
-      const cancellationSource = new vscode.CancellationTokenSource();
       await controller.runTest(runRequest, cancellationSource.token);
 
       assert.ok(runStub.enqueued.calledWithExactly(testItem));
