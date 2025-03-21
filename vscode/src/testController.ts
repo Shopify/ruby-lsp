@@ -277,7 +277,7 @@ export class TestController {
 
   async runTest(
     request: vscode.TestRunRequest,
-    _token: vscode.CancellationToken,
+    token: vscode.CancellationToken,
   ) {
     const run = this.testController.createTestRun(request, undefined, true);
 
@@ -308,6 +308,10 @@ export class TestController {
     });
 
     for (const [workspaceFolder, testItems] of workspaceToTestItems) {
+      if (token.isCancellationRequested) {
+        break;
+      }
+
       // Build the test item parameters that we send to the server, filtering out exclusions. Then ask the server for
       // the resolved test commands
       const requestTestItems = this.buildRequestTestItems(
@@ -355,6 +359,7 @@ export class TestController {
               RUBYOPT: rubyOpt,
             },
             workspace.workspaceFolder.uri.fsPath,
+            token,
           );
         } catch (error: any) {
           await vscode.window.showErrorMessage(
@@ -997,9 +1002,11 @@ export class TestController {
     command: string,
     env: NodeJS.ProcessEnv,
     cwd: string,
+    token: vscode.CancellationToken,
   ) {
     await new Promise<void>((resolve, reject) => {
       const promises: Promise<void>[] = [];
+
       // Use JSON RPC to communicate with the process executing the tests
       const testProcess = spawn(command, {
         env,
@@ -1033,6 +1040,15 @@ export class TestController {
           .catch((err) => {
             reject(err);
           });
+      });
+
+      // If the user requests to cancel the test run, resolve the promise immediately to stop running tests
+      token.onCancellationRequested(() => {
+        run.appendOutput("Test run cancelled");
+        disposables.forEach((disposable) => disposable.dispose());
+        connection.end();
+        connection.dispose();
+        resolve();
       });
 
       // Handle the JSON events being emitted by the tests
