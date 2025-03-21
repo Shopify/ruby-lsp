@@ -3,28 +3,20 @@
 
 module RubyLsp
   module Listeners
-    class SpecStyle
+    class SpecStyle < TestDiscovery
       extend T::Sig
-      include Requests::Support::Common
-
-      DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
 
       #: (response_builder: ResponseBuilders::TestCollection, global_state: GlobalState, dispatcher: Prism::Dispatcher, uri: URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
-        @response_builder = response_builder
-        @uri = uri
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @visibility_stack = T.let([:public], T::Array[Symbol])
-        @nesting = T.let([], T::Array[String])
+        super
+
         @describe_block_nesting = T.let([], T::Array[String])
         @spec_class_stack = T.let([], T::Array[T::Boolean])
 
         dispatcher.register(
           self,
+          # Common handlers registered in parent class
           :on_class_node_enter,
-          :on_class_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
           :on_call_node_enter, # e.g. `describe` or `it`
           :on_call_node_leave,
         )
@@ -32,46 +24,16 @@ module RubyLsp
 
       #: (node: Prism::ClassNode) -> void
       def on_class_node_enter(node)
-        @visibility_stack << :public
-        name = constant_name(node.constant_path)
-        name ||= name_with_dynamic_reference(node.constant_path)
-
-        fully_qualified_name = RubyIndexer::Index.actual_nesting(@nesting, name).join("::")
-
-        attached_ancestors = begin
-          @index.linearized_ancestors_of(fully_qualified_name)
-        rescue RubyIndexer::Index::NonExistingNamespaceError
-          # When there are dynamic parts in the constant path, we will not have indexed the namespace. We can still
-          # provide test functionality if the class inherits directly from Test::Unit::TestCase or Minitest::Test
-          [node.superclass&.slice].compact
+        with_test_ancestor_tracking(node) do |_, ancestors|
+          is_spec = ancestors.include?("Minitest::Spec")
+          @spec_class_stack.push(is_spec)
         end
-
-        is_spec = attached_ancestors.include?("Minitest::Spec")
-        @spec_class_stack.push(is_spec)
-
-        @nesting << name
-      end
-
-      #: (node: Prism::ModuleNode) -> void
-      def on_module_node_enter(node)
-        @visibility_stack << :public
-
-        name = constant_name(node.constant_path)
-        name ||= name_with_dynamic_reference(node.constant_path)
-
-        @nesting << name
-      end
-
-      #: (node: Prism::ModuleNode) -> void
-      def on_module_node_leave(node)
-        @visibility_stack.pop
-        @nesting.pop
       end
 
       #: (node: Prism::ClassNode) -> void
-      def on_class_node_leave(node)
-        @visibility_stack.pop
-        @nesting.pop
+      def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        super
+
         @spec_class_stack.pop
       end
 
@@ -187,12 +149,6 @@ module RubyLsp
         return true if @nesting.empty?
 
         T.must(@spec_class_stack.last)
-      end
-
-      #: (node: Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) -> String
-      def name_with_dynamic_reference(node)
-        slice = node.slice
-        slice.gsub(/((?<=::)|^)[a-z]\w*/, DYNAMIC_REFERENCE_MARKER)
       end
     end
   end
