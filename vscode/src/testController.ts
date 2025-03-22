@@ -308,7 +308,7 @@ export class TestController {
     });
 
     for (const [workspaceFolder, testItems] of workspaceToTestItems) {
-      if (token.isCancellationRequested) {
+      if (token.isCancellationRequested || run.token?.isCancellationRequested) {
         break;
       }
 
@@ -359,7 +359,7 @@ export class TestController {
               RUBYOPT: rubyOpt,
             },
             workspace.workspaceFolder.uri.fsPath,
-            token,
+            [token, run.token],
           );
         } catch (error: any) {
           await vscode.window.showErrorMessage(
@@ -1002,15 +1002,17 @@ export class TestController {
     command: string,
     env: NodeJS.ProcessEnv,
     cwd: string,
-    token: vscode.CancellationToken,
+    tokens: vscode.CancellationToken[],
   ) {
     await new Promise<void>((resolve, reject) => {
       const promises: Promise<void>[] = [];
 
       const abortController = new AbortController();
-      token.onCancellationRequested(() => {
-        run.appendOutput("\r\nTest run cancelled.");
-        abortController.abort();
+      tokens.forEach((token) => {
+        token.onCancellationRequested(() => {
+          run.appendOutput("\r\nTest run cancelled.");
+          abortController.abort();
+        });
       });
 
       // Use JSON RPC to communicate with the process executing the tests
