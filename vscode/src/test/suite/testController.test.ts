@@ -45,13 +45,7 @@ suite("TestController", () => {
     true,
   );
 
-  afterEach(() => {
-    context.subscriptions.forEach((subscription) => subscription.dispose());
-  });
-
-  async function withController(
-    callback: (controller: TestController) => Promise<void>,
-  ) {
+  function createController() {
     const commonStub = sinon.stub(common, "featureEnabled").returns(true);
     const controller = new TestController(
       context,
@@ -60,7 +54,16 @@ suite("TestController", () => {
       () => Promise.resolve(workspace),
     );
     commonStub.restore();
+    return controller;
+  }
 
+  afterEach(() => {
+    context.subscriptions.forEach((subscription) => subscription.dispose());
+  });
+
+  async function withController(
+    callback: (controller: TestController) => Promise<void>,
+  ) {
     const workspacesStub = sinon
       .stub(vscode.workspace, "workspaceFolders")
       .get(() => [workspaceFolder]);
@@ -71,20 +74,13 @@ suite("TestController", () => {
         path.relative(workspacePath, (uri as vscode.Uri).fsPath),
       );
 
-    await controller.testController.resolveHandler!(undefined);
-    const collection = controller.testController.items;
+    const controller = createController();
     const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
-    const testDir = collection.get(testDirUri.toString());
-    assert.ok(testDir);
-
     const serverTestUri = vscode.Uri.joinPath(
       workspaceUri,
       "test",
       "server_test.rb",
     );
-    const serverTest = testDir.children.get(serverTestUri.toString());
-    assert.ok(serverTest);
-
     const fakeClient = {
       discoverTests: sinon.stub().resolves([
         {
@@ -95,7 +91,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 12, character: 10 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "ServerTest::NestedTest",
@@ -105,7 +101,7 @@ suite("TestController", () => {
                 start: { line: 2, character: 0 },
                 end: { line: 10, character: 10 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [
                 {
                   id: "ServerTest::NestedTest#test_something",
@@ -115,7 +111,7 @@ suite("TestController", () => {
                     start: { line: 2, character: 0 },
                     end: { line: 10, character: 10 },
                   },
-                  tags: ["minitest"],
+                  tags: ["framework:minitest"],
                   children: [],
                 },
               ],
@@ -126,8 +122,16 @@ suite("TestController", () => {
       waitForIndexing: sinon.stub().resolves(),
     };
     workspace.lspClient = fakeClient as any;
+    await controller.testController.resolveHandler!(undefined);
+    const collection = controller.testController.items;
+    const testDir = collection.get(testDirUri.toString());
+    assert.ok(testDir);
+
+    const serverTest = testDir.children.get(serverTestUri.toString());
+    assert.ok(serverTest);
+
     await controller.testController.resolveHandler!(serverTest);
-    assert.strictEqual(fakeClient.discoverTests.callCount, 1);
+    assert.ok(fakeClient.discoverTests.called);
 
     const group = serverTest.children.get("ServerTest");
     assert.ok(group);
@@ -160,14 +164,57 @@ suite("TestController", () => {
     );
   }
 
-  test("createTestItems doesn't break when there's a missing group", () => {
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
+  function createWorkspaceWithTestFile() {
+    const workspacePath = fs.mkdtempSync(
+      path.join(os.tmpdir(), "ruby-lsp-test-controller-"),
+    );
+    const workspaceUri = vscode.Uri.file(workspacePath);
+
+    fs.mkdirSync(path.join(workspaceUri.fsPath, "test"));
+    const testFilePath = path.join(workspaceUri.fsPath, "test", "foo_test.rb");
+    fs.writeFileSync(
+      testFilePath,
+      "require 'test_helper'\n\nclass FooTest < Minitest::Test; def test_foo; end; end",
     );
 
+    const workspaceFolder: vscode.WorkspaceFolder = {
+      uri: workspaceUri,
+      name: path.basename(workspacePath),
+      index: 1,
+    };
+
+    return { workspaceFolder, testFileUri: vscode.Uri.file(testFilePath) };
+  }
+
+  function stubWorkspaceOperations(...workspaces: vscode.WorkspaceFolder[]) {
+    const stubs = [];
+    stubs.push(
+      sinon.stub(vscode.workspace, "workspaceFolders").get(() => workspaces),
+    );
+
+    stubs.push(
+      sinon.stub(vscode.workspace, "asRelativePath").callsFake((uri) => {
+        const filePath = (uri as vscode.Uri).fsPath;
+
+        const correctWorkspace = workspaces.find((workspace) => {
+          return filePath.startsWith(workspace.uri.fsPath);
+        })!;
+
+        return path.relative(correctWorkspace.uri.fsPath, filePath);
+      }),
+    );
+
+    stubs.push(
+      sinon.stub(vscode.workspace, "getWorkspaceFolder").callsFake((uri) => {
+        return workspaces.find((workspace) => workspace.uri === uri);
+      }),
+    );
+
+    return stubs;
+  }
+
+  test("createTestItems doesn't break when there's a missing group", () => {
+    const controller = createController();
     const codeLensItems: CodeLens[] = [
       {
         range: new vscode.Range(0, 0, 10, 10),
@@ -202,137 +249,110 @@ suite("TestController", () => {
     });
   });
 
-  test("populates test structure directly if there's only one workspace", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    stub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
-    await controller.testController.resolveHandler!(undefined);
-    workspacesStub.restore();
-    relativePathStub.restore();
-
-    const collection = controller.testController.items;
-
-    const testDir = collection.get(
-      vscode.Uri.joinPath(workspaceUri, "test").toString(),
-    );
-    assert.ok(testDir);
-    assert.deepStrictEqual(
-      testDir!.tags.map((tag) => tag.id),
-      ["test_dir", "debug"],
-    );
-
-    const serverTest = testDir!.children.get(
-      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
-    );
-    assert.ok(serverTest);
-    assert.deepStrictEqual(
-      serverTest!.tags.map((tag) => tag.id),
-      ["test_file", "debug"],
-    );
-  });
-
   test("makes the workspaces the top level when there's more than one", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
+    const controller = createController();
+    const firstWorkspace = createWorkspaceWithTestFile();
+    const secondWorkspace = createWorkspaceWithTestFile();
+
+    const stubs = stubWorkspaceOperations(
+      firstWorkspace.workspaceFolder,
+      secondWorkspace.workspaceFolder,
     );
-    stub.restore();
-
-    const secondWorkspacePath = fs.mkdtempSync(
-      path.join(os.tmpdir(), "ruby-lsp-test-controller-"),
-    );
-    const secondWorkspaceUri = vscode.Uri.file(secondWorkspacePath);
-
-    fs.mkdirSync(path.join(secondWorkspaceUri.fsPath, "test"));
-    fs.writeFileSync(
-      path.join(secondWorkspaceUri.fsPath, "test", "other_test.rb"),
-      "require 'test_helper'\n\nclass OtherTest < Minitest::Test; end",
-    );
-
-    const secondWorkspaceFolder: vscode.WorkspaceFolder = {
-      uri: secondWorkspaceUri,
-      name: "second_workspace",
-      index: 1,
-    };
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder, secondWorkspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) => {
-        const filePath = (uri as vscode.Uri).fsPath;
-
-        if (path.basename(filePath) === "other_test.rb") {
-          return path.relative(secondWorkspacePath, filePath);
-        } else {
-          return path.relative(workspacePath, filePath);
-        }
-      });
-
-    const getWorkspaceStub = sinon
-      .stub(vscode.workspace, "getWorkspaceFolder")
-      .callsFake((uri) => {
-        if (uri === secondWorkspaceUri) {
-          return secondWorkspaceFolder;
-        } else {
-          return workspaceFolder;
-        }
-      });
 
     await controller.testController.resolveHandler!(undefined);
 
     const collection = controller.testController.items;
 
     // First workspace
-    const workspaceItem = collection.get(workspaceUri.toString());
+    const workspaceItem = collection.get(
+      firstWorkspace.workspaceFolder.uri.toString(),
+    );
     assert.ok(workspaceItem);
     assert.deepStrictEqual(
       workspaceItem!.tags.map((tag) => tag.id),
       ["workspace", "debug"],
     );
 
+    const fakeClient = {
+      discoverTests: (fileUri: vscode.Uri) => {
+        let uri;
+        if (
+          fileUri.fsPath.startsWith(firstWorkspace.workspaceFolder.uri.fsPath)
+        ) {
+          uri = firstWorkspace.testFileUri.toString();
+        } else {
+          uri = secondWorkspace.testFileUri.toString();
+        }
+
+        return [
+          {
+            id: "FooTest",
+            uri,
+            label: "FooTest",
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 12, character: 10 },
+            },
+            tags: ["framework:minitest"],
+            children: [
+              {
+                id: "FooTest::NestedTest",
+                uri,
+                label: "NestedTest",
+                range: {
+                  start: { line: 2, character: 0 },
+                  end: { line: 10, character: 10 },
+                },
+                tags: ["framework:minitest"],
+                children: [
+                  {
+                    id: "FooTest::NestedTest#test_something",
+                    uri,
+                    label: "test_something",
+                    range: {
+                      start: { line: 2, character: 0 },
+                      end: { line: 10, character: 10 },
+                    },
+                    tags: ["framework:minitest"],
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ];
+      },
+      waitForIndexing: sinon.stub().resolves(),
+    };
+    workspace.lspClient = fakeClient as any;
+
     await controller.testController.resolveHandler!(workspaceItem);
 
     const testDir = workspaceItem!.children.get(
-      vscode.Uri.joinPath(workspaceUri, "test").toString(),
+      vscode.Uri.joinPath(
+        firstWorkspace.workspaceFolder.uri,
+        "test",
+      ).toString(),
     );
     assert.ok(testDir);
     assert.deepStrictEqual(
       testDir!.tags.map((tag) => tag.id),
-      ["test_dir", "debug"],
+      ["test_dir", "debug", "framework:minitest"],
     );
 
-    const serverTest = testDir!.children.get(
-      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
+    const firstWorkspaceTest = testDir!.children.get(
+      firstWorkspace.testFileUri.toString(),
     );
-    assert.ok(serverTest);
+    assert.ok(firstWorkspaceTest);
     assert.deepStrictEqual(
-      serverTest!.tags.map((tag) => tag.id),
-      ["test_file", "debug"],
+      firstWorkspaceTest!.tags.map((tag) => tag.id),
+      ["test_file", "debug", "framework:minitest"],
     );
 
     // Second workspace
-    const secondWorkspaceItem = collection.get(secondWorkspaceUri.toString());
+    const secondWorkspaceItem = collection.get(
+      secondWorkspace.workspaceFolder.uri.toString(),
+    );
     assert.ok(secondWorkspaceItem);
     assert.deepStrictEqual(
       secondWorkspaceItem!.tags.map((tag) => tag.id),
@@ -342,143 +362,32 @@ suite("TestController", () => {
     await controller.testController.resolveHandler!(secondWorkspaceItem);
 
     const secondTestDir = secondWorkspaceItem!.children.get(
-      vscode.Uri.joinPath(secondWorkspaceUri, "test").toString(),
+      vscode.Uri.joinPath(
+        secondWorkspace.workspaceFolder.uri,
+        "test",
+      ).toString(),
     );
     assert.ok(secondTestDir);
     assert.deepStrictEqual(
       secondTestDir!.tags.map((tag) => tag.id),
-      ["test_dir", "debug"],
+      ["test_dir", "debug", "framework:minitest"],
     );
 
     const otherTest = secondTestDir!.children.get(
-      vscode.Uri.joinPath(
-        secondWorkspaceUri,
-        "test",
-        "other_test.rb",
-      ).toString(),
+      secondWorkspace.testFileUri.toString(),
     );
     assert.ok(otherTest);
     assert.deepStrictEqual(
       otherTest!.tags.map((tag) => tag.id),
-      ["test_file", "debug"],
+      ["test_file", "debug", "framework:minitest"],
     );
 
-    workspacesStub.restore();
-    relativePathStub.restore();
-    getWorkspaceStub.restore();
-  });
-
-  test("fires discover tests request when resolving a specific test file", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    stub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
-    await controller.testController.resolveHandler!(undefined);
-
-    const collection = controller.testController.items;
-
-    const testDir = collection.get(
-      vscode.Uri.joinPath(workspaceUri, "test").toString(),
-    );
-    assert.ok(testDir);
-    assert.deepStrictEqual(
-      testDir!.tags.map((tag) => tag.id),
-      ["test_dir", "debug"],
-    );
-
-    const serverTest = testDir!.children.get(
-      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
-    );
-    assert.ok(serverTest);
-    assert.deepStrictEqual(
-      serverTest!.tags.map((tag) => tag.id),
-      ["test_file", "debug"],
-    );
-
-    const fakeClient = {
-      discoverTests: sinon.stub().resolves([]),
-      waitForIndexing: sinon.stub().resolves(),
-    };
-    workspace.lspClient = fakeClient as any;
-    await controller.testController.resolveHandler!(serverTest);
-    assert.strictEqual(fakeClient.discoverTests.callCount, 1);
-
-    workspacesStub.restore();
-    relativePathStub.restore();
-  });
-
-  test("adds server tags to test items", async () => {
-    await withController(async (controller) => {
-      const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
-      await assertTags(testDirUri.toString(), testDirUri, controller, [
-        "test_dir",
-        "debug",
-      ]);
-
-      const serverFileUri = vscode.Uri.joinPath(
-        workspaceUri,
-        "test",
-        "server_test.rb",
-      );
-      await assertTags(serverFileUri.toString(), serverFileUri, controller, [
-        "test_file",
-        "debug",
-      ]);
-
-      await assertTags("ServerTest", serverFileUri, controller, [
-        "test_group",
-        "debug",
-        "minitest",
-      ]);
-      await assertTags("ServerTest::NestedTest", serverFileUri, controller, [
-        "test_group",
-        "debug",
-        "minitest",
-      ]);
-      await assertTags(
-        "ServerTest::NestedTest#test_something",
-        serverFileUri,
-        controller,
-        ["debug", "minitest"],
-      );
-    });
+    stubs.forEach((stub) => stub.restore());
   });
 
   test("takes inclusions and exclusions into account", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    stub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
+    const controller = createController();
+    const stubs = stubWorkspaceOperations(workspaceFolder);
     await controller.testController.resolveHandler!(undefined);
 
     const collection = controller.testController.items;
@@ -501,7 +410,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 30, character: 3 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "ServerTest#test_server",
@@ -511,7 +420,7 @@ suite("TestController", () => {
                 start: { line: 1, character: 2 },
                 end: { line: 10, character: 3 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
           ],
@@ -533,7 +442,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 30, character: 3 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "StoreTest#test_store",
@@ -543,7 +452,7 @@ suite("TestController", () => {
                 start: { line: 1, character: 2 },
                 end: { line: 10, character: 3 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
             {
@@ -554,7 +463,7 @@ suite("TestController", () => {
                 start: { line: 20, character: 2 },
                 end: { line: 30, character: 3 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
           ],
@@ -580,39 +489,12 @@ suite("TestController", () => {
     assert.strictEqual(filteredItems[0].id, storeTest.id);
     assert.strictEqual(filteredItems[0].children.length, 0);
 
-    workspacesStub.restore();
-    relativePathStub.restore();
+    stubs.forEach((stub) => stub.restore());
   });
 
   test("only includes test file item if none of the children are excluded", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    stub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
-    await controller.testController.resolveHandler!(undefined);
-
-    const collection = controller.testController.items;
-    const testDir = collection.get(
-      vscode.Uri.joinPath(workspaceUri, "test").toString(),
-    );
-    const serverTest = testDir!.children.get(
-      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
-    )!;
+    const controller = createController();
+    const stubs = stubWorkspaceOperations(workspaceFolder);
     const fakeClient = {
       discoverTests: sinon.stub().resolves([
         {
@@ -623,7 +505,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 30, character: 3 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "ServerTest#test_server",
@@ -633,7 +515,7 @@ suite("TestController", () => {
                 start: { line: 1, character: 2 },
                 end: { line: 10, character: 3 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
           ],
@@ -643,7 +525,29 @@ suite("TestController", () => {
     };
 
     workspace.lspClient = fakeClient as any;
+
+    await controller.testController.resolveHandler!(undefined);
+
+    const collection = controller.testController.items;
+    const testDir = collection.get(
+      vscode.Uri.joinPath(workspaceUri, "test").toString(),
+    );
+    assert.ok(testDir);
+    const serverTest = testDir!.children.get(
+      vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString(),
+    )!;
     await controller.testController.resolveHandler!(serverTest);
+
+    await assertTags(testDir.uri!.toString(), testDir.uri!, controller, [
+      "test_dir",
+      "debug",
+      "framework:minitest",
+    ]);
+    await assertTags(serverTest.uri!.toString(), serverTest.uri!, controller, [
+      "test_file",
+      "debug",
+      "framework:minitest",
+    ]);
 
     const filteredItems = controller.buildRequestTestItems([serverTest], []);
 
@@ -655,30 +559,12 @@ suite("TestController", () => {
     // However, the original item should not be mutated or else it will mess up the explorer tree structure
     assert.strictEqual(serverTest.children.size, 1);
 
-    workspacesStub.restore();
-    relativePathStub.restore();
+    stubs.forEach((stub) => stub.restore());
   });
 
   test("only includes test group item if none of the children are excluded", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    stub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
+    const controller = createController();
+    const stubs = stubWorkspaceOperations(workspaceFolder);
     await controller.testController.resolveHandler!(undefined);
 
     const collection = controller.testController.items;
@@ -698,7 +584,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 30, character: 3 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "ServerTest#test_server",
@@ -708,7 +594,7 @@ suite("TestController", () => {
                 start: { line: 1, character: 2 },
                 end: { line: 10, character: 3 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
           ],
@@ -721,7 +607,7 @@ suite("TestController", () => {
             start: { line: 32, character: 0 },
             end: { line: 60, character: 3 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "OtherServerTest#test_other_server",
@@ -731,7 +617,7 @@ suite("TestController", () => {
                 start: { line: 33, character: 2 },
                 end: { line: 58, character: 3 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
           ],
@@ -766,30 +652,12 @@ suite("TestController", () => {
     // However, the original item should not be mutated or else it will mess up the explorer tree structure
     assert.strictEqual(serverTest.children.get("ServerTest")!.children.size, 1);
 
-    workspacesStub.restore();
-    relativePathStub.restore();
+    stubs.forEach((stub) => stub.restore());
   });
 
   test("find test items recursively searches children based on URI and ID", async () => {
-    const stub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    stub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
+    const controller = createController();
+    const stubs = stubWorkspaceOperations(workspaceFolder);
     await controller.testController.resolveHandler!(undefined);
     const collection = controller.testController.items;
     const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
@@ -814,7 +682,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 12, character: 10 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "ServerTest#test_something",
@@ -824,7 +692,7 @@ suite("TestController", () => {
                 start: { line: 2, character: 0 },
                 end: { line: 10, character: 10 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [],
             },
           ],
@@ -851,8 +719,7 @@ suite("TestController", () => {
       await controller.findTestItem(example.id, example.uri!),
     );
 
-    workspacesStub.restore();
-    relativePathStub.restore();
+    stubs.forEach((stub) => stub.restore());
   });
 
   test("find test items based on URI and ID when nested groups exist", async () => {
@@ -877,38 +744,13 @@ suite("TestController", () => {
   });
 
   test("finding an item inside a test file that was never expanded automatically discovers children", async () => {
-    const commonStub = sinon.stub(common, "featureEnabled").returns(true);
-    const controller = new TestController(
-      context,
-      FAKE_TELEMETRY,
-      () => undefined,
-      () => Promise.resolve(workspace),
-    );
-    commonStub.restore();
-
-    const workspacesStub = sinon
-      .stub(vscode.workspace, "workspaceFolders")
-      .get(() => [workspaceFolder]);
-
-    const relativePathStub = sinon
-      .stub(vscode.workspace, "asRelativePath")
-      .callsFake((uri) =>
-        path.relative(workspacePath, (uri as vscode.Uri).fsPath),
-      );
-
-    await controller.testController.resolveHandler!(undefined);
-    const collection = controller.testController.items;
-    const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
-    const testDir = collection.get(testDirUri.toString());
-    assert.ok(testDir);
-
+    const controller = createController();
+    const stubs = stubWorkspaceOperations(workspaceFolder);
     const serverTestUri = vscode.Uri.joinPath(
       workspaceUri,
       "test",
       "server_test.rb",
     );
-    const serverTest = testDir.children.get(serverTestUri.toString());
-    assert.ok(serverTest);
 
     const fakeClient = {
       discoverTests: sinon.stub().resolves([
@@ -920,7 +762,7 @@ suite("TestController", () => {
             start: { line: 0, character: 0 },
             end: { line: 12, character: 10 },
           },
-          tags: ["minitest"],
+          tags: ["framework:minitest"],
           children: [
             {
               id: "ServerTest::NestedTest",
@@ -930,7 +772,7 @@ suite("TestController", () => {
                 start: { line: 2, character: 0 },
                 end: { line: 10, character: 10 },
               },
-              tags: ["minitest"],
+              tags: ["framework:minitest"],
               children: [
                 {
                   id: "ServerTest::NestedTest#test_something",
@@ -940,7 +782,7 @@ suite("TestController", () => {
                     start: { line: 2, character: 0 },
                     end: { line: 10, character: 10 },
                   },
-                  tags: ["minitest"],
+                  tags: ["framework:minitest"],
                   children: [],
                 },
               ],
@@ -952,11 +794,24 @@ suite("TestController", () => {
     };
     workspace.lspClient = fakeClient as any;
 
+    await controller.testController.resolveHandler!(undefined);
+    const collection = controller.testController.items;
+    const testDirUri = vscode.Uri.joinPath(workspaceUri, "test");
+    const testDir = collection.get(testDirUri.toString());
+    assert.ok(testDir);
+
+    const serverTest = testDir.children.get(serverTestUri.toString());
+    assert.ok(serverTest);
+
+    // The main explorer solution now auto-resolves at least one test file inside of each test dir. Here, we force the
+    // children to be empty so that this test is deterministic
+    serverTest.children.replace([]);
+    fakeClient.discoverTests.resetHistory();
+
     await controller.findTestItem("ServerTest", serverTestUri);
     assert.strictEqual(fakeClient.discoverTests.callCount, 1);
 
-    workspacesStub.restore();
-    relativePathStub.restore();
+    stubs.forEach((stub) => stub.restore());
   });
 
   test("running a test", async () => {
