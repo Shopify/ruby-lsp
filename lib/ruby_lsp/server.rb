@@ -1459,11 +1459,16 @@ module RubyLsp
     #: (Hash[Symbol, untyped] message) -> void
     def resolve_test_commands(message)
       items = message.dig(:params, :items)
+      commands = Listeners::TestStyle.resolve_test_commands(items)
+
+      Addon.addons.each do |addon|
+        commands.concat(addon.resolve_test_commands(items))
+      end
 
       send_message(Result.new(
         id: message[:id],
         response: {
-          commands: Listeners::TestStyle.resolve_test_commands(items),
+          commands: commands,
           reporterPaths: [Listeners::TestStyle::MINITEST_REPORTER_PATH, Listeners::TestStyle::TEST_UNIT_REPORTER_PATH],
         },
       ))
