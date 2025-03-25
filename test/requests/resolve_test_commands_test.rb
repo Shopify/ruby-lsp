@@ -195,14 +195,14 @@ module RubyLsp
                 id: "file:///test/server_test.rb",
                 uri: "file:///test/server_test.rb",
                 label: "/test/server_test.rb",
-                tags: ["test_file"],
+                tags: ["test_file", "framework:minitest"],
                 children: [],
               },
               {
                 id: "file:///test/store_test.rb",
                 uri: "file:///test/store_test.rb",
                 label: "/test/store_test.rb",
-                tags: ["test_file"],
+                tags: ["test_file", "framework:minitest"],
                 children: [],
               },
             ],
@@ -230,21 +230,21 @@ module RubyLsp
                 id: "file:///other/test",
                 uri: "file:///other/test",
                 label: "/other/test",
-                tags: ["test_dir"],
+                tags: ["test_dir", "framework:minitest"],
                 children: [],
               },
               {
                 id: "file:///test/server_test.rb",
                 uri: "file:///test/server_test.rb",
                 label: "/test/server_test.rb",
-                tags: ["test_file"],
+                tags: ["test_file", "framework:minitest"],
                 children: [],
               },
               {
                 id: "file:///test/store_test.rb",
                 uri: "file:///test/store_test.rb",
                 label: "/test/store_test.rb",
-                tags: ["test_file"],
+                tags: ["test_file", "framework:minitest"],
                 children: [],
               },
             ],
@@ -544,7 +544,7 @@ module RubyLsp
                 id: "file:///test/unit",
                 uri: "file:///test/unit",
                 label: "/test/unit",
-                tags: ["test_dir"],
+                tags: ["test_dir", "framework:minitest"],
                 children: [],
               },
               {
@@ -714,7 +714,7 @@ module RubyLsp
                   start: { line: 0, character: 0 },
                   end: { line: 30, character: 3 },
                 },
-                tags: ["test_uni", "test_group"],
+                tags: ["test_group", "framework:test_unit"],
                 children: [
                   {
                     id: "ServerTest#test_server",
@@ -1040,7 +1040,7 @@ module RubyLsp
                 id: "file:///test/unit",
                 uri: "file:///test/unit",
                 label: "/test/unit",
-                tags: ["test_dir"],
+                tags: ["test_dir", "framework:test_unit"],
                 children: [],
               },
               {
@@ -1066,6 +1066,70 @@ module RubyLsp
           ],
           result[:commands],
         )
+      end
+    end
+  end
+
+  class ResolveTestCommandsOtherFrameworksTest < Minitest::Test
+    def test_ignores_items_tagged_by_other_frameworks
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "ServerTest",
+                uri: "file:///test/server_test.rb",
+                label: "ServerTest",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:rails", "test_group"],
+                children: [
+                  {
+                    id: "ServerTest#test_server",
+                    uri: "file:///test/server_test.rb",
+                    label: "test_server",
+                    range: {
+                      start: { line: 1, character: 2 },
+                      end: { line: 10, character: 3 },
+                    },
+                    tags: ["framework:rails"],
+                    children: [],
+                  },
+                ],
+              },
+              {
+                id: "StoreTest",
+                uri: "file:///test/store_test.rb",
+                label: "StoreTest",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:rails", "test_group"],
+                children: [
+                  {
+                    id: "StoreTest#test_store",
+                    uri: "file:///test/store_test.rb",
+                    label: "test_store",
+                    range: {
+                      start: { line: 1, character: 2 },
+                      end: { line: 10, character: 3 },
+                    },
+                    tags: ["framework:rails"],
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_empty(result[:commands])
       end
     end
   end

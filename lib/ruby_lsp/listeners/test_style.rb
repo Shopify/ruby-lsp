@@ -24,6 +24,7 @@ module RubyLsp
           until queue.empty?
             item = T.must(queue.shift)
             tags = Set.new(item[:tags])
+            next unless tags.include?("framework:minitest") || tags.include?("framework:test_unit")
 
             children = item[:children]
             uri = URI(item[:uri])
@@ -40,7 +41,7 @@ module RubyLsp
               unless children.any? && children.all? { |child| child[:tags].include?("test_group") }
                 aggregated_tests[path][item[:label]] = { tags: tags, examples: [] }
               end
-            elsif tags.include?("framework:minitest") || tags.include?("framework:test_unit")
+            else
               class_name, method_name = item[:id].split("#")
               aggregated_tests[path][class_name][:examples] << method_name
               aggregated_tests[path][class_name][:tags].merge(tags)
