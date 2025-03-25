@@ -12,6 +12,9 @@ import { LspTestItem, ServerTestItem } from "./client";
 
 const asyncExec = promisify(exec);
 
+const TEST_FILE_PATTERN =
+  "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}";
+
 interface CodeLensData {
   type: string;
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -101,9 +104,8 @@ export class TestController {
       DEBUG_TAG,
     );
 
-    const testFileWatcher = vscode.workspace.createFileSystemWatcher(
-      "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}",
-    );
+    const testFileWatcher =
+      vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
 
     context.subscriptions.push(
       this.testController,
@@ -868,10 +870,7 @@ export class TestController {
   }
 
   private testPattern(workspaceFolder: vscode.WorkspaceFolder) {
-    return new vscode.RelativePattern(
-      workspaceFolder,
-      "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}",
-    );
+    return new vscode.RelativePattern(workspaceFolder, TEST_FILE_PATTERN);
   }
 
   private testDirectoryPosition(pathParts: string[]) {
