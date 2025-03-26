@@ -12,8 +12,8 @@ import { LspTestItem, ServerTestItem } from "./client";
 
 const asyncExec = promisify(exec);
 
-const TEST_FILE_PATTERN =
-  "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}";
+const NESTED_TEST_DIR_PATTERN = "**/{test,spec,features}/**/";
+const TEST_FILE_PATTERN = `${NESTED_TEST_DIR_PATTERN}{*_test.rb,test_*.rb,*_spec.rb,*.feature}`;
 
 interface CodeLensData {
   type: string;
@@ -106,6 +106,12 @@ export class TestController {
 
     const testFileWatcher =
       vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
+    const nestedTestDirWatcher = vscode.workspace.createFileSystemWatcher(
+      NESTED_TEST_DIR_PATTERN,
+      true,
+      true,
+      false,
+    );
 
     context.subscriptions.push(
       this.testController,
