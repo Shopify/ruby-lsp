@@ -1132,5 +1132,64 @@ module RubyLsp
         assert_empty(result[:commands])
       end
     end
+
+    def test_addons_can_support_other_frameworks
+      Class.new(RubyLsp::Addon) do
+        def activate(global_state, outgoing_queue); end
+
+        def name
+          "Rails add-on"
+        end
+
+        def deactivate; end
+
+        def version
+          "0.1.0"
+        end
+
+        def resolve_test_commands(items)
+          example = items.dig(0, :children, 0)
+          path = URI(example[:uri]).full_path
+          ["bin/rails test #{path}:#{example[:range][:start][:line] + 1}"]
+        end
+      end
+
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "ServerTest",
+                uri: "file:///test/server_test.rb",
+                label: "ServerTest",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:rails", "test_group"],
+                children: [
+                  {
+                    id: "ServerTest#test_server",
+                    uri: "file:///test/server_test.rb",
+                    label: "test_server",
+                    range: {
+                      start: { line: 1, character: 2 },
+                      end: { line: 10, character: 3 },
+                    },
+                    tags: ["framework:rails"],
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(["bin/rails test /test/server_test.rb:2"], result[:commands])
+      end
+    end
   end
 end

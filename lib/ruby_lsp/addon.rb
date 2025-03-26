@@ -236,5 +236,13 @@ module RubyLsp
     # @overridable
     #: (ResponseBuilders::TestCollection response_builder, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
     def create_discover_tests_listener(response_builder, dispatcher, uri); end
+
+    # Resolves the minimal set of commands required to execute the requested tests. Add-ons are responsible for only
+    # handling items related to the framework they add support for and have discovered themselves
+    # @overridable
+    #: (Array[Hash[Symbol, untyped]]) -> Array[String]
+    def resolve_test_commands(items)
+      []
+    end
   end
 end
