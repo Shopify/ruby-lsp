@@ -39,7 +39,7 @@ module RubyLsp
         queue = node.child_nodes.compact #: Array[Prism::Node?]
         closest = node
         parent = nil #: Prism::Node?
-        nesting_nodes = [] #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)]
+        nesting_nodes = [] #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] # rubocop:disable Layout/LineLength
 
         nesting_nodes << node if node.is_a?(Prism::ProgramNode)
         call_node = nil #: Prism::CallNode?
@@ -132,7 +132,8 @@ module RubyLsp
     #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
       super
-      @code_units_cache = @parse_result.code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
+      @code_units_cache = @parse_result
+        .code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     end
 
     # @override

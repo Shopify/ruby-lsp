@@ -14,7 +14,9 @@ module RubyLsp
       #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
-        @response_builder = ResponseBuilders::CollectionResponseBuilder[T.any(Interface::Location, Interface::LocationLink)].new #: ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)]
+        @response_builder = ResponseBuilders::CollectionResponseBuilder[
+          T.any(Interface::Location, Interface::LocationLink)
+        ].new #: ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)]
         @dispatcher = dispatcher
 
         char_position, _ = document.find_index_by_position(position)

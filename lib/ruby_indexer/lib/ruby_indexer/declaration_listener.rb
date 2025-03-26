@@ -19,7 +19,9 @@ module RubyIndexer
         [c.location.start_line, c]
       end #: Hash[Integer, Prism::Comment]
       @inside_def = false #: bool
-      @code_units_cache = parse_result.code_units_cache(@index.configuration.encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
+      @code_units_cache = parse_result
+        .code_units_cache(@index.configuration.encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
+
       @source_lines = parse_result.source.lines #: Array[String]
 
       # The nesting stack we're currently inside. Used to determine the fully qualified name of constants, but only
