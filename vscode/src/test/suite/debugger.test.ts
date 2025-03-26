@@ -70,7 +70,9 @@ suite("Debugger", () => {
 
   test("Resolve configuration injects Ruby environment", async () => {
     const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
-    const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
+    const ruby = {
+      env: { bogus: "hello!", overrideMe: "oldValue" },
+    } as unknown as Ruby;
     const workspaceFolder = {
       name: "fake",
       uri: vscode.Uri.file("fake"),
@@ -90,10 +92,14 @@ suite("Debugger", () => {
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
         program: "ruby ${file}",
+        env: {
+          overrideMe: "newValue",
+        },
       },
     );
 
-    assert.strictEqual(ruby.env, configs.env);
+    assert.strictEqual(configs.env.bogus, "hello!");
+    assert.strictEqual(configs.env.overrideMe, "newValue");
     debug.dispose();
     context.subscriptions.forEach((subscription) => subscription.dispose());
   });
