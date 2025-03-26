@@ -48,9 +48,9 @@ module RubyLsp
         # Don't need to instantiate any listeners if there's no target
         return unless target
 
-        @target = T.let(target, T.nilable(Prism::Node))
+        @target = target #: Prism::Node?
         uri = document.uri
-        @response_builder = T.let(ResponseBuilders::Hover.new, ResponseBuilders::Hover)
+        @response_builder = ResponseBuilders::Hover.new #: ResponseBuilders::Hover
         Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, sorbet_level)
         Addon.addons.each do |addon|
           addon.create_hover_listener(@response_builder, node_context, dispatcher)

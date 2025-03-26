@@ -71,8 +71,8 @@ module RubyLsp
         end
       end
 
-      @result_id = T.let(0, Integer)
-      @mutex = T.let(Mutex.new, Mutex)
+      @result_id = 0 #: Integer
+      @mutex = Mutex.new #: Mutex
 
       #: (GlobalState global_state, Prism::Dispatcher dispatcher, (RubyDocument | ERBDocument) document, String? previous_result_id, ?range: T::Range[Integer]?) -> void
       def initialize(global_state, dispatcher, document, previous_result_id, range: nil)
@@ -81,11 +81,8 @@ module RubyLsp
         @document = document
         @previous_result_id = previous_result_id
         @range = range
-        @result_id = T.let(SemanticHighlighting.next_result_id.to_s, String)
-        @response_builder = T.let(
-          ResponseBuilders::SemanticHighlighting.new(document.code_units_cache),
-          ResponseBuilders::SemanticHighlighting,
-        )
+        @result_id = SemanticHighlighting.next_result_id.to_s #: String
+        @response_builder = ResponseBuilders::SemanticHighlighting.new(document.code_units_cache) #: ResponseBuilders::SemanticHighlighting
         Listeners::SemanticHighlighting.new(dispatcher, @response_builder)
 
         Addon.addons.each do |addon|

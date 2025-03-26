@@ -62,8 +62,8 @@ module RubyLsp
       )
         @response_builder = response_builder
         @global_state = global_state
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
+        @index = global_state.index #: RubyIndexer::Index
+        @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @node_context = node_context
         @sorbet_level = sorbet_level
         @uri = uri

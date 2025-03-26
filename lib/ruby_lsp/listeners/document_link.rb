@@ -8,49 +8,43 @@ module RubyLsp
     class DocumentLink
       include Requests::Support::Common
 
-      GEM_TO_VERSION_MAP = T.let(
-        [*::Gem::Specification.default_stubs, *::Gem::Specification.stubs].map! do |s|
-          [s.name, s.version.to_s]
-        end.to_h.freeze,
-        T::Hash[String, String],
-      )
+      GEM_TO_VERSION_MAP = [*::Gem::Specification.default_stubs, *::Gem::Specification.stubs].map! do |s|
+        [s.name, s.version.to_s]
+      end.to_h.freeze #: Hash[String, String]
 
       class << self
         #: -> Hash[String, Hash[String, Hash[String, String]]]
         def gem_paths
-          @gem_paths ||= T.let(
-            begin
-              lookup = {}
+          @gem_paths ||= begin
+            lookup = {}
 
-              Gem::Specification.stubs.each do |stub|
-                spec = stub.to_spec
-                lookup[spec.name] = {}
-                lookup[spec.name][spec.version.to_s] = {}
+            Gem::Specification.stubs.each do |stub|
+              spec = stub.to_spec
+              lookup[spec.name] = {}
+              lookup[spec.name][spec.version.to_s] = {}
 
-                Dir.glob("**/*.rb", base: "#{spec.full_gem_path.delete_prefix("//?/")}/").each do |path|
-                  lookup[spec.name][spec.version.to_s][path] = "#{spec.full_gem_path}/#{path}"
-                end
+              Dir.glob("**/*.rb", base: "#{spec.full_gem_path.delete_prefix("//?/")}/").each do |path|
+                lookup[spec.name][spec.version.to_s][path] = "#{spec.full_gem_path}/#{path}"
               end
+            end
 
-              Gem::Specification.default_stubs.each do |stub|
-                spec = stub.to_spec
-                lookup[spec.name] = {}
-                lookup[spec.name][spec.version.to_s] = {}
-                prefix_matchers = Regexp.union(spec.require_paths.map do |rp|
-                                                 Regexp.new("^#{rp}/")
-                                               end)
-                prefix_matcher = Regexp.union(prefix_matchers, //)
+            Gem::Specification.default_stubs.each do |stub|
+              spec = stub.to_spec
+              lookup[spec.name] = {}
+              lookup[spec.name][spec.version.to_s] = {}
+              prefix_matchers = Regexp.union(spec.require_paths.map do |rp|
+                                               Regexp.new("^#{rp}/")
+                                             end)
+              prefix_matcher = Regexp.union(prefix_matchers, //)
 
-                spec.files.each do |file|
-                  path = file.sub(prefix_matcher, "")
-                  lookup[spec.name][spec.version.to_s][path] = "#{RbConfig::CONFIG["rubylibdir"]}/#{path}"
-                end
+              spec.files.each do |file|
+                path = file.sub(prefix_matcher, "")
+                lookup[spec.name][spec.version.to_s][path] = "#{RbConfig::CONFIG["rubylibdir"]}/#{path}"
               end
+            end
 
-              lookup
-            end,
-            T.nilable(T::Hash[String, T::Hash[String, T::Hash[String, String]]]),
-          )
+            lookup
+          end #: Hash[String, Hash[String, Hash[String, String]]]?
         end
       end
 
@@ -61,13 +55,10 @@ module RubyLsp
         @response_builder = response_builder
         path = uri.to_standardized_path
         version_match = path ? /(?<=%40)[\d.]+(?=\.rbi$)/.match(path) : nil
-        @gem_version = T.let(version_match && version_match[0], T.nilable(String))
-        @lines_to_comments = T.let(
-          comments.to_h do |comment|
-            [comment.location.end_line, comment]
-          end,
-          T::Hash[Integer, Prism::Comment],
-        )
+        @gem_version = version_match && version_match[0] #: String?
+        @lines_to_comments = comments.to_h do |comment|
+          [comment.location.end_line, comment]
+        end #: Hash[Integer, Prism::Comment]
 
         dispatcher.register(
           self,

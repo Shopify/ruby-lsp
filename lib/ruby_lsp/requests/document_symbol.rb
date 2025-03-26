@@ -23,7 +23,7 @@ module RubyLsp
       #: (URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(uri, dispatcher)
         super()
-        @response_builder = T.let(ResponseBuilders::DocumentSymbol.new, ResponseBuilders::DocumentSymbol)
+        @response_builder = ResponseBuilders::DocumentSymbol.new #: ResponseBuilders::DocumentSymbol
         Listeners::DocumentSymbol.new(@response_builder, uri, dispatcher)
 
         Addon.addons.each do |addon|

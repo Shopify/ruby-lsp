@@ -6,7 +6,7 @@ module RubyLsp
     class InlayHints
       include Requests::Support::Common
 
-      RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
+      RESCUE_STRING_LENGTH = "rescue".length #: Integer
 
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint] response_builder, RequestConfig hints_configuration, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, hints_configuration, dispatcher)

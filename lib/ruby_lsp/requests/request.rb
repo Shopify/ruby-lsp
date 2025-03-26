@@ -59,8 +59,8 @@ module RubyLsp
       def determine_target(target, parent, position)
         return target unless parent.is_a?(Prism::ConstantPathNode)
 
-        target = T.let(parent, Prism::Node)
-        parent = T.let(T.cast(target, Prism::ConstantPathNode).parent, T.nilable(Prism::Node))
+        target = parent #: Prism::Node
+        parent = T.cast(target, Prism::ConstantPathNode).parent #: Prism::Node?
 
         while parent && cover?(parent.location, position)
           target = parent

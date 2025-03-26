@@ -6,55 +6,49 @@ module RubyLsp
     class Hover
       include Requests::Support::Common
 
-      ALLOWED_TARGETS = T.let(
-        [
-          Prism::CallNode,
-          Prism::ConstantReadNode,
-          Prism::ConstantWriteNode,
-          Prism::ConstantPathNode,
-          Prism::GlobalVariableAndWriteNode,
-          Prism::GlobalVariableOperatorWriteNode,
-          Prism::GlobalVariableOrWriteNode,
-          Prism::GlobalVariableReadNode,
-          Prism::GlobalVariableTargetNode,
-          Prism::GlobalVariableWriteNode,
-          Prism::InstanceVariableReadNode,
-          Prism::InstanceVariableAndWriteNode,
-          Prism::InstanceVariableOperatorWriteNode,
-          Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableTargetNode,
-          Prism::InstanceVariableWriteNode,
-          Prism::SymbolNode,
-          Prism::StringNode,
-          Prism::InterpolatedStringNode,
-          Prism::SuperNode,
-          Prism::ForwardingSuperNode,
-          Prism::YieldNode,
-          Prism::ClassVariableAndWriteNode,
-          Prism::ClassVariableOperatorWriteNode,
-          Prism::ClassVariableOrWriteNode,
-          Prism::ClassVariableReadNode,
-          Prism::ClassVariableTargetNode,
-          Prism::ClassVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      ALLOWED_TARGETS = [
+        Prism::CallNode,
+        Prism::ConstantReadNode,
+        Prism::ConstantWriteNode,
+        Prism::ConstantPathNode,
+        Prism::GlobalVariableAndWriteNode,
+        Prism::GlobalVariableOperatorWriteNode,
+        Prism::GlobalVariableOrWriteNode,
+        Prism::GlobalVariableReadNode,
+        Prism::GlobalVariableTargetNode,
+        Prism::GlobalVariableWriteNode,
+        Prism::InstanceVariableReadNode,
+        Prism::InstanceVariableAndWriteNode,
+        Prism::InstanceVariableOperatorWriteNode,
+        Prism::InstanceVariableOrWriteNode,
+        Prism::InstanceVariableTargetNode,
+        Prism::InstanceVariableWriteNode,
+        Prism::SymbolNode,
+        Prism::StringNode,
+        Prism::InterpolatedStringNode,
+        Prism::SuperNode,
+        Prism::ForwardingSuperNode,
+        Prism::YieldNode,
+        Prism::ClassVariableAndWriteNode,
+        Prism::ClassVariableOperatorWriteNode,
+        Prism::ClassVariableOrWriteNode,
+        Prism::ClassVariableReadNode,
+        Prism::ClassVariableTargetNode,
+        Prism::ClassVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      ALLOWED_REMOTE_PROVIDERS = T.let(
-        [
-          "https://github.com",
-          "https://gitlab.com",
-        ].freeze,
-        T::Array[String],
-      )
+      ALLOWED_REMOTE_PROVIDERS = [
+        "https://github.com",
+        "https://gitlab.com",
+      ].freeze #: Array[String]
 
       #: (ResponseBuilders::Hover response_builder, GlobalState global_state, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
-        @path = T.let(uri.to_standardized_path, T.nilable(String))
+        @index = global_state.index #: RubyIndexer::Index
+        @type_inferrer = global_state.type_inferrer #: TypeInferrer
+        @path = uri.to_standardized_path #: String?
         @node_context = node_context
         @sorbet_level = sorbet_level
 
@@ -387,14 +381,11 @@ module RubyLsp
         spec = Gem::Specification.find_by_name(first_argument.content)
         return unless spec
 
-        info = T.let(
-          [
-            spec.description,
-            spec.summary,
-            "This rubygem does not have a description or summary.",
-          ].find { |text| !text.nil? && !text.empty? },
-          String,
-        )
+        info = [
+          spec.description,
+          spec.summary,
+          "This rubygem does not have a description or summary.",
+        ].find { |text| !text.nil? && !text.empty? } #: String
 
         # Remove leading whitespace if a heredoc was used for the summary or description
         info = info.gsub(/^ +/, "")

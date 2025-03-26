@@ -57,10 +57,10 @@ module RubyIndexer
       #  "Foo" => [#<Entry::Class>, #<Entry::Class>],
       #  "Foo::Bar" => [#<Entry::Class>],
       # }
-      @entries = T.let({}, T::Hash[String, T::Array[Entry]])
+      @entries = {} #: Hash[String, Array[Entry]]
 
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
-      @entries_tree = T.let(PrefixTree[T::Array[Entry]].new, PrefixTree[T::Array[Entry]])
+      @entries_tree = PrefixTree[T::Array[Entry]].new #: PrefixTree[Array[Entry]]
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
@@ -68,23 +68,20 @@ module RubyIndexer
       #  "file:///my/project/bar.rb" => [#<Entry::Class>],
       #  "untitled:Untitled-1" => [#<Entry::Class>],
       # }
-      @uris_to_entries = T.let({}, T::Hash[String, T::Array[Entry]])
+      @uris_to_entries = {} #: Hash[String, Array[Entry]]
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
-      @require_paths_tree = T.let(PrefixTree[URI::Generic].new, PrefixTree[URI::Generic])
+      @require_paths_tree = PrefixTree[URI::Generic].new #: PrefixTree[URI::Generic]
 
       # Holds the linearized ancestors list for every namespace
-      @ancestors = T.let({}, T::Hash[String, T::Array[String]])
+      @ancestors = {} #: Hash[String, Array[String]]
 
       # Map of module name to included hooks that have to be executed when we include the given module
-      @included_hooks = T.let(
-        {},
-        T::Hash[String, T::Array[T.proc.params(index: Index, base: Entry::Namespace).void]],
-      )
+      @included_hooks = {} #: Hash[String, Array[^(Index index, Entry::Namespace base) -> void]]
 
-      @configuration = T.let(RubyIndexer::Configuration.new, Configuration)
+      @configuration = RubyIndexer::Configuration.new #: Configuration
 
-      @initial_indexing_completed = T.let(false, T::Boolean)
+      @initial_indexing_completed = false #: bool
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace

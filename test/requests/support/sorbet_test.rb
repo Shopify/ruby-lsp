@@ -495,7 +495,7 @@ class SorbetTest < Minitest::Test
 
   #: (String source) -> Prism::CallNode
   def parse(source)
-    program = T.let(Prism.parse(source).value, Prism::Node)
+    program = Prism.parse(source).value #: Prism::Node
 
     select_relevant_node([program])
   end

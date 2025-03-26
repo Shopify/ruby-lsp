@@ -31,7 +31,7 @@ require "mocha/minitest"
 #
 # We also don't need debug related things
 unless ENV["RUBY_LSP_TEST_RUNNER"] == "true"
-  SORBET_PATHS = T.let(Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze, T::Array[String])
+  SORBET_PATHS = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze #: Array[String]
 
   # Define breakpoint methods without actually activating the debugger
   require "debug/prelude"

@@ -18,14 +18,8 @@ module RubyLsp
       #: (Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
       def initialize(comments, dispatcher)
         super()
-        @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange],
-        )
-        @listener = T.let(
-          Listeners::FoldingRanges.new(@response_builder, comments, dispatcher),
-          Listeners::FoldingRanges,
-        )
+        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange].new #: ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange]
+        @listener = Listeners::FoldingRanges.new(@response_builder, comments, dispatcher) #: Listeners::FoldingRanges
       end
 
       # @override

@@ -9,7 +9,7 @@ module RubyLsp
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange] response_builder, Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, comments, dispatcher)
         @response_builder = response_builder
-        @requires = T.let([], T::Array[Prism::CallNode])
+        @requires = [] #: Array[Prism::CallNode]
         @comments = comments
 
         dispatcher.register(

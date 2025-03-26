@@ -11,7 +11,7 @@ module RubyLsp
       @parent = parent
 
       # A hash of name => type
-      @locals = T.let({}, T::Hash[Symbol, Local])
+      @locals = {} #: Hash[Symbol, Local]
     end
 
     # Add a new local to this scope. The types should only be `:parameter` or `:variable`

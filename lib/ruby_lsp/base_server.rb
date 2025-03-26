@@ -10,28 +10,25 @@ module RubyLsp
 
     #: (**untyped options) -> void
     def initialize(**options)
-      @test_mode = T.let(options[:test_mode], T.nilable(T::Boolean))
-      @setup_error = T.let(options[:setup_error], T.nilable(StandardError))
-      @install_error = T.let(options[:install_error], T.nilable(StandardError))
-      @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
-      @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
-      @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)
-      @outgoing_queue = T.let(Thread::Queue.new, Thread::Queue)
-      @cancelled_requests = T.let([], T::Array[Integer])
-      @worker = T.let(new_worker, Thread)
-      @current_request_id = T.let(1, Integer)
-      @global_state = T.let(GlobalState.new, GlobalState)
-      @store = T.let(Store.new(@global_state), Store)
-      @outgoing_dispatcher = T.let(
-        Thread.new do
-          unless @test_mode
-            while (message = @outgoing_queue.pop)
-              @global_state.synchronize { @writer.write(message.to_hash) }
-            end
+      @test_mode = options[:test_mode] #: bool?
+      @setup_error = options[:setup_error] #: StandardError?
+      @install_error = options[:install_error] #: StandardError?
+      @writer = Transport::Stdio::Writer.new #: Transport::Stdio::Writer
+      @reader = Transport::Stdio::Reader.new #: Transport::Stdio::Reader
+      @incoming_queue = Thread::Queue.new #: Thread::Queue
+      @outgoing_queue = Thread::Queue.new #: Thread::Queue
+      @cancelled_requests = [] #: Array[Integer]
+      @worker = new_worker #: Thread
+      @current_request_id = 1 #: Integer
+      @global_state = GlobalState.new #: GlobalState
+      @store = Store.new(@global_state) #: Store
+      @outgoing_dispatcher = Thread.new do
+        unless @test_mode
+          while (message = @outgoing_queue.pop)
+            @global_state.synchronize { @writer.write(message.to_hash) }
           end
-        end,
-        Thread,
-      )
+        end
+      end #: Thread
 
       Thread.main.priority = 1
 

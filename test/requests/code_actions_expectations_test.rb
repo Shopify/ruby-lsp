@@ -15,7 +15,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
       uri: URI("file:///fake"),
       global_state: @global_state,
     )
-    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
+    result = nil #: Array[LanguageServer::Protocol::Interface::CodeAction]?
 
     stdout, _ = capture_io do
       result = RubyLsp::Requests::CodeActions.new(
