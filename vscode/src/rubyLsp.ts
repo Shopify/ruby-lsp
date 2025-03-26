@@ -211,6 +211,7 @@ export class RubyLsp {
     // When eagerly activating workspaces, we skip the ones that do not have a lockfile since they may not be a Ruby
     // workspace. Those cases are activated lazily below
     if (eager && !lockfileExists) {
+      this.workspacesBeingLaunched.delete(workspaceFolder.index);
       return;
     }
 
