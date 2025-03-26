@@ -693,7 +693,7 @@ class SetupBundlerTest < Minitest::Test
 
             mock_install = mock("install")
             mock_install.expects(:run)
-            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
+            Bundler::CLI::Install.expects(:new).with({ "no-cache" => true }).returns(mock_install)
             RubyLsp::SetupBundler.new(dir, launcher: true).setup!
           end
         end
@@ -868,7 +868,7 @@ class SetupBundlerTest < Minitest::Test
             mock_install = mock("install")
             mock_install.expects(:run)
             require "bundler/cli/install"
-            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
+            Bundler::CLI::Install.expects(:new).with({ "no-cache" => true }).returns(mock_install)
 
             RubyLsp::SetupBundler.new(dir, launcher: true).setup!
           end
