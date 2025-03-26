@@ -121,6 +121,7 @@ export class TestController {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
       testFileWatcher,
+      nestedTestDirWatcher,
       testFileWatcher.onDidCreate(async (uri) => {
         const workspace = vscode.workspace.getWorkspaceFolder(uri);
 
@@ -149,6 +150,18 @@ export class TestController {
             testFile.children.replace([]);
             await this.resolveHandler(testFile);
           }
+        }
+      }),
+      nestedTestDirWatcher.onDidDelete(async (uri) => {
+        const pathParts = uri.fsPath.split(path.sep);
+        if (pathParts.includes(".git")) {
+          return;
+        }
+
+        const parentItem = await this.getParentTestItem(uri);
+
+        if (parentItem) {
+          parentItem.children.delete(uri.toString());
         }
       }),
       testFileWatcher.onDidDelete(async (uri) => {
