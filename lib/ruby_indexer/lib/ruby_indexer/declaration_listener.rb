@@ -269,11 +269,11 @@ module RubyIndexer
       when :include, :prepend, :extend
         handle_module_operation(node, message)
       when :public
-        @visibility_stack.push(VisibilityScope.public_scope)
+        handle_visibility_change(node, Entry::Visibility::PUBLIC)
       when :protected
-        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PROTECTED))
+        handle_visibility_change(node, Entry::Visibility::PROTECTED)
       when :private
-        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PRIVATE))
+        handle_visibility_change(node, Entry::Visibility::PRIVATE)
       when :module_function
         handle_module_function(node)
       when :private_class_method
@@ -1037,6 +1037,44 @@ module RubyIndexer
       return unless name
 
       name.split("::").last
+    end
+
+    #: (Prism::CallNode, Entry::Visibility) -> void
+    def handle_visibility_change(node, visibility)
+      owner  = @owner_stack.last
+      return unless owner
+
+      owner_name = owner.name
+      method_names = string_or_symbol_argument_values(node)
+
+      if method_names.empty?
+        @visibility_stack.push(VisibilityScope.new(visibility: visibility))
+        return
+      end
+
+      method_names.each do |method_name|
+        entries = @index.resolve_method(method_name, owner_name)
+        next unless entries
+
+        entries.each do |entry|
+          entry.visibility = visibility
+        end
+      end
+    end
+
+    #: (Prism::CallNode) -> Array[String]
+    def string_or_symbol_argument_values(node)
+      arguments = node.arguments&.arguments
+      return [] unless arguments
+
+      arguments.filter_map do |argument|
+        case argument
+        when Prism::StringNode
+          argument.content
+        when Prism::SymbolNode
+          argument.value
+        end
+      end
     end
   end
 end
