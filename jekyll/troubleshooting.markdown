@@ -193,10 +193,14 @@ assist.
 ### Check the VS Code output tab
 
 Many of the activation steps taken are logged in the `Ruby LSP` channel of VS Code's `Output` tab. Check the logs to see
-if any entries hint at what the issue might be. Did the extension select your preferred shell?
+if any entries hint at what the issue might be.
+
+Did the extension select your preferred shell?
 
 Did it select your preferred version manager? You can define which version manager to use with the
 `"rubyLsp.rubyVersionManager"` setting.
+
+No output in the `Ruby LSP` channel? Check the `Extension Host` channel for any errors related to extension startup.
 
 ### Enable logging
 
