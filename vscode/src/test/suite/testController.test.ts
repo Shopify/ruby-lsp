@@ -926,7 +926,7 @@ suite("TestController", () => {
             env: {
               ...workspace.ruby.env,
               DISABLE_SPRING: "1",
-              RUBY_LSP_TEST_RUNNER: "true",
+              RUBY_LSP_TEST_RUNNER: "debug",
             },
           },
           { testRun: runStub },
@@ -936,6 +936,90 @@ suite("TestController", () => {
       createRunStub.restore();
       startDebuggingSpy.restore();
       debug.dispose();
+    });
+  }).timeout(10000);
+
+  test("running a test with the coverage profile", async () => {
+    await withController(async (controller) => {
+      const uri = vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb");
+      const testItem = (await controller.findTestItem(
+        "ServerTest::NestedTest#test_something",
+        uri,
+      ))!;
+
+      const fakeServerPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "src",
+        "test",
+        "suite",
+        "fakeTestServer.js",
+      );
+
+      // eslint-disable-next-line no-process-env
+      workspace.ruby.mergeComposedEnvironment(process.env as any);
+
+      workspace.lspClient = {
+        resolveTestCommands: sinon.stub().resolves({
+          commands: [`node ${fakeServerPath}`],
+          reporterPath: undefined,
+        }),
+      } as any;
+
+      const runStub = {
+        started: sinon.stub(),
+        passed: sinon.stub(),
+        enqueued: sinon.stub(),
+        end: sinon.stub(),
+        addCoverage: sinon.stub(),
+        appendOutput: sinon.stub(),
+      } as any;
+      const createRunStub = sinon
+        .stub(controller.testController, "createTestRun")
+        .returns(runStub);
+
+      const runRequest = new vscode.TestRunRequest(
+        [testItem],
+        [],
+        controller.coverageProfile,
+      );
+      const cancellationSource = new vscode.CancellationTokenSource();
+      const fakeFileContents = Buffer.from(
+        JSON.stringify({
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "file:///test/server_test.rb": [
+            {
+              executed: 1,
+              location: { line: 0, character: 0 },
+              branches: [],
+            },
+          ],
+        }),
+      );
+
+      const fsStub = sinon.stub(vscode.workspace, "fs").get(() => {
+        return {
+          readFile: sinon.stub().resolves(fakeFileContents),
+          stat: sinon.stub().resolves({ type: vscode.FileType.File }),
+        };
+      });
+      await controller.runTest(runRequest, cancellationSource.token);
+      fsStub.restore();
+
+      assert.ok(runStub.enqueued.calledWithExactly(testItem));
+      assert.ok(runStub.started.calledWithExactly(testItem));
+      assert.ok(runStub.passed.calledWithExactly(testItem));
+      assert.ok(runStub.end.calledWithExactly());
+      assert.ok(
+        runStub.appendOutput.calledWithExactly(
+          "Processing test coverage results...\r\n\r\n",
+        ),
+      );
+      assert.ok(runStub.addCoverage.calledOnce);
+
+      createRunStub.restore();
     });
   }).timeout(10000);
 });

@@ -46,11 +46,13 @@ const NOTIFICATION_TYPES = {
 };
 const RUN_PROFILE_LABEL = "Run";
 const DEBUG_PROFILE_LABEL = "Debug";
+const COVERAGE_PROFILE_LABEL = "Coverage";
 
 export class TestController {
   // Only public for testing
   readonly testController: vscode.TestController;
   readonly testRunProfile: vscode.TestRunProfile;
+  readonly coverageProfile: vscode.TestRunProfile;
   readonly testDebugProfile: vscode.TestRunProfile;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
   private terminal: vscode.Terminal | undefined;
@@ -66,6 +68,10 @@ export class TestController {
   ) => Promise<Workspace>;
 
   private readonly fullDiscovery = featureEnabled("fullTestDiscovery");
+  private readonly coverageData = new WeakMap<
+    vscode.FileCoverage,
+    vscode.FileCoverageDetail[]
+  >();
 
   constructor(
     context: vscode.ExtensionContext,
@@ -106,8 +112,35 @@ export class TestController {
       DEBUG_TAG,
     );
 
+    this.coverageProfile = this.testController.createRunProfile(
+      COVERAGE_PROFILE_LABEL,
+      vscode.TestRunProfileKind.Coverage,
+      this.fullDiscovery
+        ? this.runTest.bind(this)
+        : async () => {
+            await vscode.window.showInformationMessage(
+              `Running tests with coverage requires the new explorer implementation,
+               which is currently under development.
+               If you wish to enable it, set the "fullTestDiscovery" feature flag to "true"`,
+            );
+          },
+      false,
+    );
+
+    // This method is invoked when a document is opened in the UI to gather any additional details about coverage for
+    // inline decorations. We save all of the available details in the `coverageData` map ahead of time, so we just need
+    // to return the existing data
+    this.coverageProfile.loadDetailedCoverage = async (
+      _testRun,
+      fileCoverage,
+      _token,
+    ) => {
+      return this.coverageData.get(fileCoverage)!;
+    };
+
     const testFileWatcher =
       vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
+
     const nestedTestDirWatcher = vscode.workspace.createFileSystemWatcher(
       NESTED_TEST_DIR_PATTERN,
       true,
@@ -119,6 +152,7 @@ export class TestController {
       this.testController,
       this.testDebugProfile,
       this.testRunProfile,
+      this.coverageProfile,
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
@@ -397,11 +431,21 @@ export class TestController {
 
       const profile = request.profile;
 
-      if (!profile || profile.label === RUN_PROFILE_LABEL) {
+      if (
+        !profile ||
+        profile.label === RUN_PROFILE_LABEL ||
+        profile.label === COVERAGE_PROFILE_LABEL
+      ) {
         // Enqueue all of the test we're about to run
         testItems.forEach((test) => run.enqueued(test));
 
-        await this.executeTestCommands(response, workspace, run, token);
+        await this.executeTestCommands(
+          response,
+          workspace,
+          run,
+          profile,
+          token,
+        );
       } else if (profile.label === DEBUG_PROFILE_LABEL) {
         await this.debugTestCommands(response, workspace, run, token);
       }
@@ -452,6 +496,7 @@ export class TestController {
     response: ResolvedCommands,
     workspace: Workspace,
     run: vscode.TestRun,
+    profile: vscode.TestRunProfile | undefined,
     token: vscode.CancellationToken,
   ) {
     // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
@@ -460,6 +505,8 @@ export class TestController {
     const rubyOpt = workspace.ruby.env.RUBYOPT
       ? `${workspace.ruby.env.RUBYOPT} ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`
       : response.reporterPaths?.map((path) => `-r${path}`).join(" ");
+
+    const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
 
     for (const command of response.commands) {
       try {
@@ -471,7 +518,7 @@ export class TestController {
           command,
           {
             ...workspace.ruby.env,
-            RUBY_LSP_TEST_RUNNER: "true",
+            RUBY_LSP_TEST_RUNNER: runnerMode,
             RUBYOPT: rubyOpt,
           },
           workspace.workspaceFolder.uri.fsPath,
@@ -482,6 +529,11 @@ export class TestController {
           `Running ${command} failed: ${error.message}`,
         );
       }
+    }
+
+    if (profile === this.coverageProfile) {
+      run.appendOutput("Processing test coverage results...\r\n\r\n");
+      await this.processTestCoverageResults(run, workspace.workspaceFolder);
     }
   }
 
@@ -523,7 +575,7 @@ export class TestController {
               env: {
                 ...workspace.ruby.env,
                 DISABLE_SPRING: "1",
-                RUBY_LSP_TEST_RUNNER: "true",
+                RUBY_LSP_TEST_RUNNER: "debug",
               },
             },
             { testRun: run },
@@ -1346,5 +1398,38 @@ export class TestController {
       // Start listening for events
       connection.listen();
     });
+  }
+
+  private async processTestCoverageResults(
+    run: vscode.TestRun,
+    workspaceFolder: vscode.WorkspaceFolder,
+  ) {
+    try {
+      // Read the coverage data generated by the server during test execution
+      const rawData = await vscode.workspace.fs.readFile(
+        vscode.Uri.joinPath(
+          workspaceFolder.uri,
+          ".ruby-lsp",
+          "coverage_result.json",
+        ),
+      );
+
+      const data: Record<string, vscode.FileCoverageDetail[]> = JSON.parse(
+        rawData.toString(),
+      );
+
+      // Add the coverage data for all files as part of this run
+      Object.entries(data).forEach(([uri, coverageData]) => {
+        const fileCoverage = vscode.FileCoverage.fromDetails(
+          vscode.Uri.parse(uri),
+          coverageData,
+        );
+
+        run.addCoverage(fileCoverage);
+        this.coverageData.set(fileCoverage, coverageData);
+      });
+    } catch (error: any) {
+      run.appendOutput(`Failed to process coverage results: ${error.message}`);
+    }
   }
 }
