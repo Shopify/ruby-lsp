@@ -219,38 +219,52 @@ module RubyLsp
 
         case @global_state.test_library
         when "minitest"
-          last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
-          command += if last_dynamic_reference_index
-            # In cases where the test path looks like `foo::Bar`
-            # the best we can do is match everything to the right of it.
-            # Tests are classes, dynamic references are only a thing for modules,
-            # so there must be something to the left of the available path.
-            group_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
-            if method_name
-              " --name " + "/::#{Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
-            else
-              # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
-              # that are registered on the class itself (matches after `#`) and all tests
-              # that are nested inside of that class in other modules/classes (matches after `::`)
-              " --name " + "\"/::#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
-            end
-          elsif method_name
-            # We know the entire path, do an exact match
-            " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
-          elsif spec_name
-            " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}##{Shellwords.escape(spec_name)}$/\""
-          else
-            # Execute all tests of the selected class and tests in
-            # modules/classes nested inside of that class
-            " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
-          end
+          command += generate_minitest_command(group_stack, method_name, spec_name)
         when "test-unit"
-          group_name = T.must(group_stack.last)
-          command += " --testcase " + "/#{Shellwords.escape(group_name)}/"
+          command += generate_test_unit_command(group_stack, method_name)
+        end
+
+        command
+      end
+
+      #: (Array[String] group_stack, String? method_name, String? spec_name) -> String
+      def generate_minitest_command(group_stack, method_name, spec_name)
+        last_dynamic_reference_index = group_stack.rindex(DYNAMIC_REFERENCE_MARKER)
+
+        if last_dynamic_reference_index
+          # In cases where the test path looks like `foo::Bar`
+          # the best we can do is match everything to the right of it.
+          # Tests are classes, dynamic references are only a thing for modules,
+          # so there must be something to the left of the available path.
+          dynamic_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
 
           if method_name
-            command += " --name " + Shellwords.escape(method_name)
+            " --name " + "/::#{Shellwords.escape(dynamic_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
+          else
+            # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
+            # that are registered on the class itself (matches after `#`) and all tests
+            # that are nested inside of that class in other modules/classes (matches after `::`)
+            " --name " + "\"/::#{Shellwords.escape(dynamic_stack.join("::"))}(#|::)/\""
           end
+        elsif method_name
+          # We know the entire path, do an exact match
+          " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
+        elsif spec_name
+          " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}##{Shellwords.escape(spec_name)}$/\""
+        else
+          # Execute all tests of the selected class and tests in
+          # modules/classes nested inside of that class
+          " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
+        end
+      end
+
+      #: (Array[String] group_stack, String? method_name) -> String
+      def generate_test_unit_command(group_stack, method_name)
+        group_name = T.must(group_stack.last)
+        command = " --testcase " + "/#{Shellwords.escape(group_name)}/"
+
+        if method_name
+          command += " --name " + Shellwords.escape(method_name)
         end
 
         command
