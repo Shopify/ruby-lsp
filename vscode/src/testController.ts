@@ -12,6 +12,9 @@ import { LspTestItem, ResolvedCommands, ServerTestItem } from "./client";
 
 const asyncExec = promisify(exec);
 
+const NESTED_TEST_DIR_PATTERN = "**/{test,spec,features}/**/";
+const TEST_FILE_PATTERN = `${NESTED_TEST_DIR_PATTERN}{*_test.rb,test_*.rb,*_spec.rb,*.feature}`;
+
 interface CodeLensData {
   type: string;
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -103,6 +106,15 @@ export class TestController {
       DEBUG_TAG,
     );
 
+    const testFileWatcher =
+      vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
+    const nestedTestDirWatcher = vscode.workspace.createFileSystemWatcher(
+      NESTED_TEST_DIR_PATTERN,
+      true,
+      true,
+      false,
+    );
+
     context.subscriptions.push(
       this.testController,
       this.testDebugProfile,
@@ -110,8 +122,27 @@ export class TestController {
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
-      vscode.workspace.onDidSaveTextDocument(async (document) => {
-        const uri = document.uri;
+      testFileWatcher,
+      nestedTestDirWatcher,
+      testFileWatcher.onDidCreate(async (uri) => {
+        const workspace = vscode.workspace.getWorkspaceFolder(uri);
+
+        if (!workspace || !vscode.workspace.workspaceFolders) {
+          return;
+        }
+
+        const initialCollection =
+          vscode.workspace.workspaceFolders.length === 1
+            ? this.testController.items
+            : this.testController.items.get(workspace.uri.toString())?.children;
+
+        if (!initialCollection) {
+          return;
+        }
+
+        await this.addTestItemsForFile(uri, workspace, initialCollection);
+      }),
+      testFileWatcher.onDidChange(async (uri) => {
         const item = await this.getParentTestItem(uri);
 
         if (item) {
@@ -121,6 +152,25 @@ export class TestController {
             testFile.children.replace([]);
             await this.resolveHandler(testFile);
           }
+        }
+      }),
+      nestedTestDirWatcher.onDidDelete(async (uri) => {
+        const pathParts = uri.fsPath.split(path.sep);
+        if (pathParts.includes(".git")) {
+          return;
+        }
+
+        const parentItem = await this.getParentTestItem(uri);
+
+        if (parentItem) {
+          parentItem.children.delete(uri.toString());
+        }
+      }),
+      testFileWatcher.onDidDelete(async (uri) => {
+        const item = await this.getParentTestItem(uri);
+
+        if (item) {
+          item.children.delete(uri.toString());
         }
       }),
     );
@@ -770,90 +820,162 @@ export class TestController {
     const pattern = this.testPattern(workspaceFolder);
 
     for (const uri of await vscode.workspace.findFiles(pattern)) {
-      const fileName = path.basename(uri.fsPath);
+      await this.addTestItemsForFile(uri, workspaceFolder, initialCollection);
+    }
+  }
 
-      if (fileName === "test_helper.rb") {
-        continue;
-      }
+  private async addTestItemsForFile(
+    uri: vscode.Uri,
+    workspaceFolder: vscode.WorkspaceFolder,
+    initialCollection: vscode.TestItemCollection,
+  ) {
+    const fileName = path.basename(uri.fsPath);
+    const relativePath = vscode.workspace.asRelativePath(uri, false);
+    const pathParts = relativePath.split(path.sep);
 
-      // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
-      // components, so we want to show each individual test directory as a separate item
-      const relativePath = vscode.workspace.asRelativePath(uri, false);
-      const pathParts = relativePath.split(path.sep);
+    if (this.shouldSkipTestFile(fileName, pathParts)) {
+      return;
+    }
 
-      // Projects may have fixtures that are test files, but not real tests to be executed. We don't want to include
-      // those
-      if (pathParts.some((part) => part === "fixtures")) {
-        continue;
-      }
+    // Get the appropriate collection to add the test file to, creating any necessary hierarchy levels
+    const { firstLevel, secondLevel } = await this.getOrCreateHierarchyLevels(
+      uri,
+      workspaceFolder,
+      initialCollection,
+    );
 
-      const dirPosition = this.testDirectoryPosition(pathParts);
-      const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
-      const firstLevelUri = vscode.Uri.joinPath(
-        workspaceFolder.uri,
-        firstLevelName,
-      );
+    const finalCollection = secondLevel
+      ? secondLevel.children
+      : firstLevel.children;
 
-      let firstLevel = initialCollection.get(firstLevelUri.toString());
-      if (!firstLevel) {
-        firstLevel = this.testController.createTestItem(
-          firstLevelUri.toString(),
-          firstLevelName,
-          firstLevelUri,
-        );
-        firstLevel.tags = [TEST_DIR_TAG, DEBUG_TAG];
-        initialCollection.add(firstLevel);
-      }
+    const testItem = this.testController.createTestItem(
+      uri.toString(),
+      fileName,
+      uri,
+    );
+    testItem.canResolveChildren = true;
+    testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
+    finalCollection.add(testItem);
+  }
 
-      // In Rails apps, it's also very common to divide the test directory into a second hierarchy level, like models or
-      // controllers. Here we try to find out if there is a second level, allowing users to run all tests for models for
-      // example
-      const secondLevelName = pathParts
-        .slice(dirPosition + 1, dirPosition + 2)
-        .join(path.sep);
+  private async detectHierarchyLevels(
+    uri: vscode.Uri,
+    workspaceFolder: vscode.WorkspaceFolder,
+  ): Promise<{
+    firstLevel: { name: string; uri: vscode.Uri };
+    secondLevel?: { name: string; uri: vscode.Uri };
+  }> {
+    // Find the position of the `test/spec/feature` directory. There may be many in applications that are divided by
+    // components, so we want to show each individual test directory as a separate item
+    const relativePath = vscode.workspace.asRelativePath(uri, false);
+    const pathParts = relativePath.split(path.sep);
+    const dirPosition = this.testDirectoryPosition(pathParts);
+
+    // Get the first level test directory item (e.g., test/, spec/, features/)
+    const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
+    const firstLevelUri = vscode.Uri.joinPath(
+      workspaceFolder.uri,
+      firstLevelName,
+    );
+
+    // In Rails apps, it's also very common to divide the test directory into a second hierarchy level, like models or
+    // controllers. Here we try to find out if there is a second level, allowing users to run all tests for models for
+    // example
+    const secondLevelName = pathParts
+      .slice(dirPosition + 1, dirPosition + 2)
+      .join(path.sep);
+
+    if (secondLevelName.length > 0) {
       const secondLevelUri = vscode.Uri.joinPath(
         firstLevelUri,
         secondLevelName,
       );
 
-      const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
-      let finalCollection = firstLevel.children;
-
-      // We only consider something to be another level of hierarchy if it's a directory
-      if (fileStat.type === vscode.FileType.Directory) {
-        let secondLevel = firstLevel.children.get(secondLevelUri.toString());
-
-        if (!secondLevel) {
-          secondLevel = this.testController.createTestItem(
-            secondLevelUri.toString(),
-            secondLevelName,
-            secondLevelUri,
-          );
-          secondLevel.tags = [TEST_DIR_TAG, DEBUG_TAG];
-          firstLevel.children.add(secondLevel);
+      try {
+        const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
+        if (fileStat.type === vscode.FileType.Directory) {
+          return {
+            firstLevel: { name: firstLevelName, uri: firstLevelUri },
+            secondLevel: { name: secondLevelName, uri: secondLevelUri },
+          };
         }
+      } catch (error: any) {
+        // Do nothing
+      }
+    }
 
-        finalCollection = secondLevel.children;
+    return { firstLevel: { name: firstLevelName, uri: firstLevelUri } };
+  }
+
+  private async getOrCreateHierarchyLevels(
+    uri: vscode.Uri,
+    workspaceFolder: vscode.WorkspaceFolder,
+    collection: vscode.TestItemCollection,
+  ): Promise<{
+    firstLevel: vscode.TestItem;
+    secondLevel: vscode.TestItem;
+  }> {
+    const { firstLevel, secondLevel } = await this.detectHierarchyLevels(
+      uri,
+      workspaceFolder,
+    );
+
+    // Get or create the first level test directory item
+    let firstLevelItem = collection.get(firstLevel.uri.toString());
+    if (!firstLevelItem) {
+      firstLevelItem = this.testController.createTestItem(
+        firstLevel.uri.toString(),
+        firstLevel.name,
+        firstLevel.uri,
+      );
+      firstLevelItem.tags = [TEST_DIR_TAG, DEBUG_TAG];
+      collection.add(firstLevelItem);
+    }
+
+    // If we have a second level, get or create it
+    if (secondLevel) {
+      let secondLevelItem = firstLevelItem.children.get(
+        secondLevel.uri.toString(),
+      );
+
+      if (!secondLevelItem) {
+        secondLevelItem = this.testController.createTestItem(
+          secondLevel.uri.toString(),
+          secondLevel.name,
+          secondLevel.uri,
+        );
+        secondLevelItem.tags = [TEST_DIR_TAG, DEBUG_TAG];
+        firstLevelItem.children.add(secondLevelItem);
       }
 
-      // Finally, add the test file to whatever is the final collection, which may be the first level test directory or
-      // a second level like models
-      const testItem = this.testController.createTestItem(
-        uri.toString(),
-        fileName,
-        uri,
-      );
-      testItem.canResolveChildren = true;
-      testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
-      finalCollection.add(testItem);
+      return {
+        firstLevel: firstLevelItem,
+        secondLevel: secondLevelItem,
+      };
     }
+
+    return {
+      firstLevel: firstLevelItem,
+      secondLevel: firstLevelItem,
+    };
+  }
+
+  private shouldSkipTestFile(fileName: string, pathParts: string[]) {
+    if (fileName === "test_helper.rb") {
+      return true;
+    }
+
+    // Projects may have fixtures that are test files, but not real tests to be executed. We don't want to include
+    // those
+    if (pathParts.some((part) => part === "fixtures")) {
+      return true;
+    }
+
+    return false;
   }
 
   private testPattern(workspaceFolder: vscode.WorkspaceFolder) {
-    return new vscode.RelativePattern(
-      workspaceFolder,
-      "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}",
-    );
+    return new vscode.RelativePattern(workspaceFolder, TEST_FILE_PATTERN);
   }
 
   private testDirectoryPosition(pathParts: string[]) {
@@ -888,54 +1010,18 @@ export class TestController {
       )!.children;
     }
 
-    // There's always a first level, but not always a second level
-    const { firstLevelUri, secondLevelUri } = await this.directoryLevelUris(
+    // Get the hierarchy levels and find the appropriate test item
+    const { firstLevel, secondLevel } = await this.detectHierarchyLevels(
       uri,
       workspaceFolder,
     );
 
-    let item = initialCollection.get(firstLevelUri.toString());
-
-    if (secondLevelUri) {
-      item = item?.children.get(secondLevelUri.toString());
+    let item = initialCollection.get(firstLevel.uri.toString());
+    if (secondLevel) {
+      item = item?.children.get(secondLevel.uri.toString());
     }
 
     return item;
-  }
-
-  private async directoryLevelUris(
-    uri: vscode.Uri,
-    workspaceFolder: vscode.WorkspaceFolder,
-  ): Promise<{
-    firstLevelUri: vscode.Uri;
-    secondLevelUri: vscode.Uri | undefined;
-  }> {
-    const relativePath = vscode.workspace.asRelativePath(uri, false);
-    const pathParts = relativePath.split(path.sep);
-    const dirPosition = this.testDirectoryPosition(pathParts);
-    const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
-    const firstLevelUri = vscode.Uri.joinPath(
-      workspaceFolder.uri,
-      firstLevelName,
-    );
-
-    const secondLevelName = pathParts
-      .slice(dirPosition + 1, dirPosition + 2)
-      .join(path.sep);
-
-    if (secondLevelName.length > 0) {
-      const secondLevelUri = vscode.Uri.joinPath(
-        firstLevelUri,
-        secondLevelName,
-      );
-
-      const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
-      if (fileStat.type === vscode.FileType.Directory) {
-        return { firstLevelUri, secondLevelUri };
-      }
-    }
-
-    return { firstLevelUri, secondLevelUri: undefined };
   }
 
   private addDiscoveredItems(
