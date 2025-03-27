@@ -10,8 +10,8 @@ module RubyLsp
       def initialize(response_builder, global_state, dispatcher, uri)
         super
 
-        @describe_block_nesting = T.let([], T::Array[String])
-        @spec_class_stack = T.let([], T::Array[T::Boolean])
+        @describe_block_nesting = [] #: Array[String]
+        @spec_class_stack = [] #: Array[bool]
 
         dispatcher.register(
           self,
@@ -117,7 +117,7 @@ module RubyLsp
         end
         return unless root_group_name
 
-        test_group = T.let(@response_builder[root_group_name], T.nilable(Requests::Support::TestItem))
+        test_group = @response_builder[root_group_name] #: Requests::Support::TestItem?
         return unless test_group
 
         return test_group unless nested_describe_groups

@@ -17,26 +17,23 @@ module RubyLsp
         end
       end
 
-      END_REGEXES = T.let(
-        [
-          /\b(if|unless|for|while|until)\b($|\s|\()/,
-          /\b(class|module|def|case)\b($|\s)/,
-          /.*\s\bdo\b($|\s)/,
-        ],
-        T::Array[Regexp],
-      )
+      END_REGEXES = [
+        /\b(if|unless|for|while|until)\b($|\s|\()/,
+        /\b(class|module|def|case)\b($|\s)/,
+        /.*\s\bdo\b($|\s)/,
+      ] #: Array[Regexp]
 
       #: (RubyDocument document, Hash[Symbol, untyped] position, String trigger_character, String client_name) -> void
       def initialize(document, position, trigger_character, client_name)
         super()
         @document = document
-        @lines = T.let(@document.source.lines, T::Array[String])
+        @lines = @document.source.lines #: Array[String]
         line = @lines[[position[:line] - 1, 0].max]
 
-        @indentation = T.let(line ? find_indentation(line) : 0, Integer)
-        @previous_line = T.let(line ? line.strip.chomp : "", String)
+        @indentation = line ? find_indentation(line) : 0 #: Integer
+        @previous_line = line ? line.strip.chomp : "" #: String
         @position = position
-        @edits = T.let([], T::Array[Interface::TextEdit])
+        @edits = [] #: Array[Interface::TextEdit]
         @trigger_character = trigger_character
         @client_name = client_name
       end

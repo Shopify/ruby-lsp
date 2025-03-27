@@ -25,10 +25,10 @@ module RubyLsp
 
     abstract!
 
-    @addons = T.let([], T::Array[Addon])
-    @addon_classes = T.let([], T::Array[T.class_of(Addon)])
+    @addons = [] #: Array[Addon]
+    @addon_classes = [] #: Array[singleton(Addon)]
     # Add-on instances that have declared a handler to accept file watcher events
-    @file_watcher_addons = T.let([], T::Array[Addon])
+    @file_watcher_addons = [] #: Array[Addon]
 
     AddonNotFoundError = Class.new(StandardError)
 
@@ -149,7 +149,7 @@ module RubyLsp
 
     #: -> void
     def initialize
-      @errors = T.let([], T::Array[StandardError])
+      @errors = [] #: Array[StandardError]
     end
 
     #: (StandardError error) -> self

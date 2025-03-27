@@ -132,7 +132,7 @@ module RubyLsp
         # `Baz`.
         #: (Prism::Node node) { (Prism::Node part) -> void } -> void
         def each_constant_path_part(node, &block)
-          current = T.let(node, T.nilable(Prism::Node))
+          current = node #: Prism::Node?
 
           while current.is_a?(Prism::ConstantPathNode)
             block.call(current)

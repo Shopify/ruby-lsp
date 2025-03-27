@@ -20,8 +20,8 @@ module RubyLsp
       def initialize(global_state, document)
         super()
         @document = document
-        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
-        @uri = T.let(document.uri, URI::Generic)
+        @active_formatter = global_state.active_formatter #: Support::Formatter?
+        @uri = document.uri #: URI::Generic
       end
 
       # @override

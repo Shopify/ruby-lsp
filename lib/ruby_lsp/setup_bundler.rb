@@ -25,45 +25,42 @@ module RubyLsp
     class BundleNotLocked < StandardError; end
     class BundleInstallFailure < StandardError; end
 
-    FOUR_HOURS = T.let(4 * 60 * 60, Integer)
+    FOUR_HOURS = 4 * 60 * 60 #: Integer
 
     #: (String project_path, **untyped options) -> void
     def initialize(project_path, **options)
       @project_path = project_path
-      @branch = T.let(options[:branch], T.nilable(String))
-      @launcher = T.let(options[:launcher], T.nilable(T::Boolean))
+      @branch = options[:branch] #: String?
+      @launcher = options[:launcher] #: bool?
       patch_thor_to_print_progress_to_stderr! if @launcher
 
       # Regular bundle paths
-      @gemfile = T.let(
-        begin
-          Bundler.default_gemfile
-        rescue Bundler::GemfileNotFound
-          nil
-        end,
-        T.nilable(Pathname),
-      )
-      @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
+      @gemfile = begin
+        Bundler.default_gemfile
+      rescue Bundler::GemfileNotFound
+        nil
+      end #: Pathname?
+      @lockfile = @gemfile ? Bundler.default_lockfile : nil #: Pathname?
 
-      @gemfile_hash = T.let(@gemfile ? Digest::SHA256.hexdigest(@gemfile.read) : nil, T.nilable(String))
-      @lockfile_hash = T.let(@lockfile&.exist? ? Digest::SHA256.hexdigest(@lockfile.read) : nil, T.nilable(String))
+      @gemfile_hash = @gemfile ? Digest::SHA256.hexdigest(@gemfile.read) : nil #: String?
+      @lockfile_hash = @lockfile&.exist? ? Digest::SHA256.hexdigest(@lockfile.read) : nil #: String?
 
-      @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
+      @gemfile_name = @gemfile&.basename&.to_s || "Gemfile" #: String
 
       # Custom bundle paths
-      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(@project_path), Pathname)
-      @custom_gemfile = T.let(@custom_dir + @gemfile_name, Pathname)
-      @custom_lockfile = T.let(@custom_dir + (@lockfile&.basename || "Gemfile.lock"), Pathname)
-      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
-      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
-      @error_path = T.let(@custom_dir + "install_error", Pathname)
-      @already_composed_path = T.let(@custom_dir + "bundle_is_composed", Pathname)
+      @custom_dir = Pathname.new(".ruby-lsp").expand_path(@project_path) #: Pathname
+      @custom_gemfile = @custom_dir + @gemfile_name #: Pathname
+      @custom_lockfile = @custom_dir + (@lockfile&.basename || "Gemfile.lock") #: Pathname
+      @lockfile_hash_path = @custom_dir + "main_lockfile_hash" #: Pathname
+      @last_updated_path = @custom_dir + "last_updated" #: Pathname
+      @error_path = @custom_dir + "install_error" #: Pathname
+      @already_composed_path = @custom_dir + "bundle_is_composed" #: Pathname
 
       dependencies, bundler_version = load_dependencies
-      @dependencies = T.let(dependencies, T::Hash[String, T.untyped])
-      @bundler_version = T.let(bundler_version, T.nilable(Gem::Version))
-      @rails_app = T.let(rails_app?, T::Boolean)
-      @retry = T.let(false, T::Boolean)
+      @dependencies = dependencies #: Hash[String, untyped]
+      @bundler_version = bundler_version #: Gem::Version?
+      @rails_app = rails_app? #: bool
+      @retry = false #: bool
     end
 
     # Sets up the composed bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
@@ -130,21 +127,18 @@ module RubyLsp
 
     #: -> Hash[String, untyped]
     def composed_bundle_dependencies
-      @composed_bundle_dependencies ||= T.let(
-        begin
-          original_bundle_gemfile = ENV["BUNDLE_GEMFILE"]
+      @composed_bundle_dependencies ||= begin
+        original_bundle_gemfile = ENV["BUNDLE_GEMFILE"]
 
-          if @custom_lockfile.exist?
-            ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
-            Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
-          else
-            {}
-          end
-        ensure
-          ENV["BUNDLE_GEMFILE"] = original_bundle_gemfile
-        end,
-        T.nilable(T::Hash[String, T.untyped]),
-      )
+        if @custom_lockfile.exist?
+          ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
+          Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
+        else
+          {}
+        end
+      ensure
+        ENV["BUNDLE_GEMFILE"] = original_bundle_gemfile
+      end #: Hash[String, untyped]?
     end
 
     #: -> void

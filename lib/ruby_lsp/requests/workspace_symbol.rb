@@ -14,7 +14,7 @@ module RubyLsp
         super()
         @global_state = global_state
         @query = query
-        @index = T.let(global_state.index, RubyIndexer::Index)
+        @index = global_state.index #: RubyIndexer::Index
       end
 
       # @override

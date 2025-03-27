@@ -12,17 +12,14 @@ module RubyLsp
 
         #: -> void
         def initialize
-          @children = T.let([], T::Array[Interface::DocumentSymbol])
+          @children = [] #: Array[Interface::DocumentSymbol]
         end
       end
 
       #: -> void
       def initialize
         super
-        @stack = T.let(
-          [SymbolHierarchyRoot.new],
-          T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
-        )
+        @stack = [SymbolHierarchyRoot.new] #: Array[(SymbolHierarchyRoot | Interface::DocumentSymbol)]
       end
 
       #: (Interface::DocumentSymbol symbol) -> void

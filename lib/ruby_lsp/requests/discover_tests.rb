@@ -18,8 +18,8 @@ module RubyLsp
         @global_state = global_state
         @document = document
         @dispatcher = dispatcher
-        @response_builder = T.let(ResponseBuilders::TestCollection.new, ResponseBuilders::TestCollection)
-        @index = T.let(global_state.index, RubyIndexer::Index)
+        @response_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
+        @index = global_state.index #: RubyIndexer::Index
       end
 
       # @override

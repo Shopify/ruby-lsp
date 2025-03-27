@@ -11,7 +11,7 @@ module RubyLsp
       #: -> void
       def initialize
         super
-        @items = T.let([], T::Array[ResponseType])
+        @items = [] #: Array[ResponseType]
       end
 
       #: (ResponseType item) -> void

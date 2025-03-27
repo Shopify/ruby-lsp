@@ -6,7 +6,7 @@ module RubyLsp
     class DocumentSymbol
       include Requests::Support::Common
 
-      ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])
+      ATTR_ACCESSORS = [:attr_reader, :attr_writer, :attr_accessor].freeze #: Array[Symbol]
 
       #: (ResponseBuilders::DocumentSymbol response_builder, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, uri, dispatcher)

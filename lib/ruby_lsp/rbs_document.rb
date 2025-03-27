@@ -9,7 +9,7 @@ module RubyLsp
 
     #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
-      @syntax_error = T.let(false, T::Boolean)
+      @syntax_error = false #: bool
       super
     end
 

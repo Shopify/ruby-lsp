@@ -8,33 +8,30 @@ module RubyLsp
     class CodeLens
       include Requests::Support::Common
 
-      BASE_COMMAND = T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_lockfile }
-          "bundle exec ruby"
-        rescue Bundler::GemfileNotFound
-          "ruby"
-        end,
-        String,
-      )
-      ACCESS_MODIFIERS = T.let([:public, :private, :protected], T::Array[Symbol])
-      SUPPORTED_TEST_LIBRARIES = T.let(["minitest", "test-unit"], T::Array[String])
-      DYNAMIC_REFERENCE_MARKER = T.let("<dynamic_reference>", String)
+      BASE_COMMAND = begin
+        Bundler.with_original_env { Bundler.default_lockfile }
+        "bundle exec ruby"
+      rescue Bundler::GemfileNotFound
+        "ruby"
+      end #: String
+      ACCESS_MODIFIERS = [:public, :private, :protected] #: Array[Symbol]
+      SUPPORTED_TEST_LIBRARIES = ["minitest", "test-unit"] #: Array[String]
+      DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>" #: String
 
       #: (ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens] response_builder, GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, global_state, uri, dispatcher)
         @response_builder = response_builder
         @global_state = global_state
-        @uri = T.let(uri, URI::Generic)
-        @path = T.let(uri.to_standardized_path, T.nilable(String))
+        @uri = uri #: URI::Generic
+        @path = uri.to_standardized_path #: String?
         # visibility_stack is a stack of [current_visibility, previous_visibility]
-        @visibility_stack = T.let([[:public, :public]], T::Array[T::Array[T.nilable(Symbol)]])
-        @group_stack = T.let([], T::Array[String])
-        @group_id = T.let(1, Integer)
-        @group_id_stack = T.let([], T::Array[Integer])
+        @visibility_stack = [[:public, :public]] #: Array[Array[Symbol?]]
+        @group_stack = [] #: Array[String]
+        @group_id = 1 #: Integer
+        @group_id_stack = [] #: Array[Integer]
         # We want to avoid adding code lenses for nested definitions
-        @def_depth = T.let(0, Integer)
-        @spec_id = T.let(0, Integer)
+        @def_depth = 0 #: Integer
+        @spec_id = 0 #: Integer
 
         dispatcher.register(
           self,

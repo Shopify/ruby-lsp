@@ -23,7 +23,7 @@ module RubyLsp
       #: (GlobalState global_state, Hash[Symbol, untyped] item) -> void
       def initialize(global_state, item)
         super()
-        @index = T.let(global_state.index, RubyIndexer::Index)
+        @index = global_state.index #: RubyIndexer::Index
         @item = item
       end
 

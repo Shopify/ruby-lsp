@@ -9,22 +9,16 @@ module RubyLsp
   # rubocop:enable RubyLsp/UseLanguageServerAliases
 
   # Used to indicate that a request shouldn't return a response
-  BUNDLE_PATH = T.let(
-    begin
-      Bundler.bundle_path.to_s
-    rescue Bundler::GemfileNotFound
-      nil
-    end,
-    T.nilable(String),
-  )
-  GEMFILE_NAME = T.let(
-    begin
-      Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
-    rescue Bundler::GemfileNotFound
-      "Gemfile"
-    end,
-    String,
-  )
+  BUNDLE_PATH = begin
+    Bundler.bundle_path.to_s
+  rescue Bundler::GemfileNotFound
+    nil
+  end #: String?
+  GEMFILE_NAME = begin
+    Bundler.with_original_env { Bundler.default_gemfile.basename.to_s }
+  rescue Bundler::GemfileNotFound
+    "Gemfile"
+  end #: String
   GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
 
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we

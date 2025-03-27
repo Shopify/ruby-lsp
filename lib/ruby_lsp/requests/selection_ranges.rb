@@ -17,8 +17,8 @@ module RubyLsp
       def initialize(document)
         super()
         @document = document
-        @ranges = T.let([], T::Array[Support::SelectionRange])
-        @stack = T.let([], T::Array[Support::SelectionRange])
+        @ranges = [] #: Array[Support::SelectionRange]
+        @stack = [] #: Array[Support::SelectionRange]
       end
 
       # @override

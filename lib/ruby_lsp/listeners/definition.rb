@@ -12,8 +12,8 @@ module RubyLsp
       def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
+        @index = global_state.index #: RubyIndexer::Index
+        @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @language_id = language_id
         @uri = uri
         @node_context = node_context

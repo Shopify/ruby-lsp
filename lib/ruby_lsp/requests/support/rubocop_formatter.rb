@@ -13,9 +13,9 @@ module RubyLsp
 
         #: -> void
         def initialize
-          @diagnostic_runner = T.let(RuboCopRunner.new, RuboCopRunner)
+          @diagnostic_runner = RuboCopRunner.new #: RuboCopRunner
           # -a is for "--auto-correct" (or "--autocorrect" on newer versions of RuboCop)
-          @format_runner = T.let(RuboCopRunner.new("-a"), RuboCopRunner)
+          @format_runner = RuboCopRunner.new("-a") #: RuboCopRunner
         end
 
         # @override

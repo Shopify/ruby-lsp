@@ -9,7 +9,7 @@ module RubyLsp
       #: -> void
       def initialize
         super
-        @signature_help = T.let(nil, ResponseType)
+        @signature_help = nil #: ResponseType
       end
 
       #: (ResponseType signature_help) -> void

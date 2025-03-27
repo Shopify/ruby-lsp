@@ -16,7 +16,7 @@ module RubyLsp
         @store = store
         @document = document
         @params = params
-        @locations = T.let([], T::Array[Interface::Location])
+        @locations = [] #: Array[Interface::Location]
       end
 
       # @override

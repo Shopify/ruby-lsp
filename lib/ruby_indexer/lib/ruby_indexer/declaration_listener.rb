@@ -3,8 +3,8 @@
 
 module RubyIndexer
   class DeclarationListener
-    OBJECT_NESTING = T.let(["Object"].freeze, T::Array[String])
-    BASIC_OBJECT_NESTING = T.let(["BasicObject"].freeze, T::Array[String])
+    OBJECT_NESTING = ["Object"].freeze #: Array[String]
+    BASIC_OBJECT_NESTING = ["BasicObject"].freeze #: Array[String]
 
     #: Array[String]
     attr_reader :indexing_errors
@@ -13,28 +13,24 @@ module RubyIndexer
     def initialize(index, dispatcher, parse_result, uri, collect_comments: false)
       @index = index
       @uri = uri
-      @enhancements = T.let(Enhancement.all(self), T::Array[Enhancement])
-      @visibility_stack = T.let([VisibilityScope.public_scope], T::Array[VisibilityScope])
-      @comments_by_line = T.let(
-        parse_result.comments.to_h do |c|
-          [c.location.start_line, c]
-        end,
-        T::Hash[Integer, Prism::Comment],
-      )
-      @inside_def = T.let(false, T::Boolean)
-      @code_units_cache = T.let(
-        parse_result.code_units_cache(@index.configuration.encoding),
-        T.any(T.proc.params(arg0: Integer).returns(Integer), Prism::CodeUnitsCache),
-      )
-      @source_lines = T.let(parse_result.source.lines, T::Array[String])
+      @enhancements = Enhancement.all(self) #: Array[Enhancement]
+      @visibility_stack = [VisibilityScope.public_scope] #: Array[VisibilityScope]
+      @comments_by_line = parse_result.comments.to_h do |c|
+        [c.location.start_line, c]
+      end #: Hash[Integer, Prism::Comment]
+      @inside_def = false #: bool
+      @code_units_cache = parse_result
+        .code_units_cache(@index.configuration.encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
+
+      @source_lines = parse_result.source.lines #: Array[String]
 
       # The nesting stack we're currently inside. Used to determine the fully qualified name of constants, but only
       # stored by unresolved aliases which need the original nesting to be lazily resolved
-      @stack = T.let([], T::Array[String])
+      @stack = [] #: Array[String]
 
       # A stack of namespace entries that represent where we currently are. Used to properly assign methods to an owner
-      @owner_stack = T.let([], T::Array[Entry::Namespace])
-      @indexing_errors = T.let([], T::Array[String])
+      @owner_stack = [] #: Array[Entry::Namespace]
+      @indexing_errors = [] #: Array[String]
       @collect_comments = collect_comments
 
       dispatcher.register(

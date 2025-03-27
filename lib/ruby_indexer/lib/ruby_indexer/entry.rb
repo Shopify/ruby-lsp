@@ -30,7 +30,7 @@ module RubyIndexer
       @name = name
       @uri = uri
       @comments = comments
-      @visibility = T.let(Visibility::PUBLIC, Visibility)
+      @visibility = Visibility::PUBLIC #: Visibility
       @location = location
     end
 
@@ -137,7 +137,7 @@ module RubyIndexer
 
       #: (Array[String] nesting, URI::Generic uri, Location location, Location name_location, String? comments) -> void
       def initialize(nesting, uri, location, name_location, comments)
-        @name = T.let(nesting.join("::"), String)
+        @name = nesting.join("::") #: String
         # The original nesting where this namespace was discovered
         @nesting = nesting
 
@@ -156,7 +156,7 @@ module RubyIndexer
       # and prepended
       #: -> Array[ModuleOperation]
       def mixin_operations
-        @mixin_operations ||= T.let([], T.nilable(T::Array[ModuleOperation]))
+        @mixin_operations ||= [] #: Array[ModuleOperation]?
       end
 
       #: -> Integer
@@ -251,7 +251,7 @@ module RubyIndexer
 
     # A rest method parameter, e.g. `def foo(*a)`
     class RestParameter < Parameter
-      DEFAULT_NAME = T.let(:"<anonymous splat>", Symbol)
+      DEFAULT_NAME = :"<anonymous splat>" #: Symbol
 
       # @override
       #: -> Symbol
@@ -262,7 +262,7 @@ module RubyIndexer
 
     # A keyword rest method parameter, e.g. `def foo(**a)`
     class KeywordRestParameter < Parameter
-      DEFAULT_NAME = T.let(:"<anonymous keyword splat>", Symbol)
+      DEFAULT_NAME = :"<anonymous keyword splat>" #: Symbol
 
       # @override
       #: -> Symbol
@@ -273,7 +273,7 @@ module RubyIndexer
 
     # A block method parameter, e.g. `def foo(&block)`
     class BlockParameter < Parameter
-      DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
+      DEFAULT_NAME = :"<anonymous block>" #: Symbol
 
       class << self
         #: -> BlockParameter
@@ -343,14 +343,11 @@ module RubyIndexer
       # @override
       #: -> Array[Signature]
       def signatures
-        @signatures ||= T.let(
-          begin
-            params = []
-            params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-            [Entry::Signature.new(params)]
-          end,
-          T.nilable(T::Array[Signature]),
-        )
+        @signatures ||= begin
+          params = []
+          params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+          [Entry::Signature.new(params)]
+        end #: Array[Signature]?
       end
     end
 
@@ -484,7 +481,7 @@ module RubyIndexer
         )
 
         @target = target
-        @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
+        @owner = unresolved_alias.owner #: Entry::Namespace?
       end
 
       #: -> String
@@ -539,10 +536,10 @@ module RubyIndexer
       #: (Array[Prism::Node] arguments) -> bool
       def matches?(arguments)
         min_pos = 0
-        max_pos = T.let(0, T.any(Integer, Float))
+        max_pos = 0 #: (Integer | Float)
         names = []
-        has_forward = T.let(false, T::Boolean)
-        has_keyword_rest = T.let(false, T::Boolean)
+        has_forward = false #: bool
+        has_keyword_rest = false #: bool
 
         @parameters.each do |param|
           case param

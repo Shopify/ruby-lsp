@@ -3,16 +3,13 @@
 
 module RubyIndexer
   class Configuration
-    CONFIGURATION_SCHEMA = T.let(
-      {
-        "excluded_gems" => Array,
-        "included_gems" => Array,
-        "excluded_patterns" => Array,
-        "included_patterns" => Array,
-        "excluded_magic_comments" => Array,
-      }.freeze,
-      T::Hash[String, T.untyped],
-    )
+    CONFIGURATION_SCHEMA = {
+      "excluded_gems" => Array,
+      "included_gems" => Array,
+      "excluded_patterns" => Array,
+      "included_patterns" => Array,
+      "excluded_magic_comments" => Array,
+    }.freeze #: Hash[String, untyped]
 
     #: String
     attr_writer :workspace_path
@@ -22,18 +19,15 @@ module RubyIndexer
 
     #: -> void
     def initialize
-      @workspace_path = T.let(Dir.pwd, String)
-      @encoding = T.let(Encoding::UTF_8, Encoding)
-      @excluded_gems = T.let(initial_excluded_gems, T::Array[String])
-      @included_gems = T.let([], T::Array[String])
+      @workspace_path = Dir.pwd #: String
+      @encoding = Encoding::UTF_8 #: Encoding
+      @excluded_gems = initial_excluded_gems #: Array[String]
+      @included_gems = [] #: Array[String]
 
-      @excluded_patterns = T.let(
-        [
-          "**/{test,spec}/**/{*_test.rb,test_*.rb,*_spec.rb}",
-          "**/fixtures/**/*",
-        ],
-        T::Array[String],
-      )
+      @excluded_patterns = [
+        "**/{test,spec}/**/{*_test.rb,test_*.rb,*_spec.rb}",
+        "**/fixtures/**/*",
+      ] #: Array[String]
 
       path = Bundler.settings["path"]
       if path
@@ -45,23 +39,20 @@ module RubyIndexer
 
       # We start the included patterns with only the non excluded directories so that we can avoid paying the price of
       # traversing large directories that don't include Ruby files like `node_modules`
-      @included_patterns = T.let(["{#{top_level_directories.join(",")}}/**/*.rb", "*.rb"], T::Array[String])
-      @excluded_magic_comments = T.let(
-        [
-          "frozen_string_literal:",
-          "typed:",
-          "compiled:",
-          "encoding:",
-          "shareable_constant_value:",
-          "warn_indent:",
-          "rubocop:",
-          "nodoc:",
-          "doc:",
-          "coding:",
-          "warn_past_scope:",
-        ],
-        T::Array[String],
-      )
+      @included_patterns = ["{#{top_level_directories.join(",")}}/**/*.rb", "*.rb"] #: Array[String]
+      @excluded_magic_comments = [
+        "frozen_string_literal:",
+        "typed:",
+        "compiled:",
+        "encoding:",
+        "shareable_constant_value:",
+        "warn_indent:",
+        "rubocop:",
+        "nodoc:",
+        "doc:",
+        "coding:",
+        "warn_past_scope:",
+      ] #: Array[String]
     end
 
     #: -> Array[URI::Generic]
@@ -177,7 +168,7 @@ module RubyIndexer
 
     #: -> Regexp
     def magic_comment_regex
-      @magic_comment_regex ||= T.let(/^#\s*#{@excluded_magic_comments.join("|")}/, T.nilable(Regexp))
+      @magic_comment_regex ||= /^#\s*#{@excluded_magic_comments.join("|")}/ #: Regexp?
     end
 
     #: (Hash[String, untyped] config) -> void
