@@ -33,10 +33,34 @@ module RubyLsp
       puts "[MCP] Server started on socket #{@socket_path}"
 
       while @running
-        # Sleep for a short duration to avoid busy-waiting that can EASILY lead to a deadlock
-        sleep(0.5)
-        Thread.start(@socket.accept) do |socket, _|
-          handle_connection(socket)
+        puts "[MCP] Sleeping for 0.1 seconds"
+        sleep(0.1)
+        puts "[MCP] Waking up and checking for connections"
+        begin
+          # Use IO.select with timeout to wait for connections instead of blocking accept
+          ready = IO.select([@socket], nil, nil, 1) # 1 second timeout
+
+          if ready
+            begin
+              client_socket = @socket.accept_nonblock
+              Thread.start(client_socket) do |socket, _|
+                handle_connection(socket)
+              rescue => e
+                puts "[MCP] Error in connection thread: #{e.message}"
+                puts e.backtrace&.join("\n")
+              ensure
+                socket.close
+              end
+            rescue IO::WaitReadable, Errno::EAGAIN
+              # No client trying to connect, just retry
+              sleep(0.1)
+            end
+          end
+        rescue => e
+          puts "[MCP] Error in accept loop: #{e.message}"
+          puts e.backtrace&.join("\n")
+          # Add a small sleep to avoid tight loop in case of persistent errors
+          sleep(1)
         end
       end
     end
@@ -52,6 +76,12 @@ module RubyLsp
 
     sig { params(socket: Socket).void }
     def handle_connection(socket)
+      # Use select with timeout before gets
+      readable, = IO.select([socket], nil, nil, 5)
+      unless readable
+        puts "[MCP] Timeout waiting for request line"
+        return
+      end
       request_line = socket.gets
       return unless request_line
 
@@ -85,7 +115,7 @@ module RubyLsp
       puts "[MCP] Connection error: #{e.message}"
       puts e.backtrace&.join("\n")
     ensure
-      socket.close unless socket.closed?
+      socket.close
     end
 
     sig { params(socket: Socket, body: String).void }
@@ -300,27 +330,86 @@ module RubyLsp
     def respond(socket, status, body)
       socket.write("HTTP/1.1 #{status}\r\n")
       socket.write("Content-Type: application/json\r\n")
+      socket.write("Connection: close\r\n")
       socket.write("Content-Length: #{body.bytesize}\r\n")
       socket.write("\r\n")
-      socket.write(body)
-      socket.flush
+
+      # Write data in chunks to avoid blocking indefinitely on large responses
+      offset = 0
+      chunk_size = 8192 # 8KB chunks
+
+      while offset < body.bytesize
+        # Check if socket is writable before attempting write
+        _, writable, = IO.select(nil, [socket], nil, 1)
+        break unless writable
+
+        current_chunk = body.byteslice(offset, chunk_size)
+        bytes_written = socket.write(current_chunk)
+        offset += bytes_written
+
+        # Break if we couldn't write anything (possible socket issue)
+        break if bytes_written <= 0
+      end
+
+      # Check if socket is writable before flush
+      _, writable, = IO.select(nil, [socket], nil, 1)
+      socket.flush if writable
+    rescue Errno::EPIPE => e
+      puts "[MCP] Broken pipe while sending response: #{e.message}"
+    rescue Errno::ECONNRESET => e
+      puts "[MCP] Connection reset while sending response: #{e.message}"
+    rescue => e
+      puts "[MCP] Error sending response: #{e.class} - #{e.message}"
+      puts e.backtrace&.join("\n")
     end
 
     sig { params(socket: Socket, content_length: Integer).returns(String) }
     def read_request_body(socket, content_length)
       body = +""
       remaining = content_length
+      deadline = Time.now + 5 # 5 second timeout
 
       while remaining > 0
-        chunk = socket.readpartial(remaining)
-        body << chunk
-        remaining -= chunk.bytesize
+        # Check timeout
+        if Time.now > deadline
+          puts "[MCP] Timeout reading request body"
+          break
+        end
+
+        # Use IO.select to check if socket is readable
+        readable, = IO.select([socket], nil, nil, 0.5)
+        unless readable
+          next # Socket not ready, try again
+        end
+
+        begin
+          chunk = socket.read_nonblock([remaining, 8192].min)
+          if chunk.empty?
+            puts "[MCP] Client closed connection during body read"
+            break
+          end
+          body << chunk
+          remaining -= chunk.bytesize
+        rescue EOFError => e
+          puts "[MCP] EOF while reading request body: #{e.message}"
+          break
+        rescue Errno::EPIPE => e
+          puts "[MCP] Broken pipe while reading request body: #{e.message}"
+          break
+        rescue Errno::ECONNRESET => e
+          puts "[MCP] Connection reset while reading request body: #{e.message}"
+          break
+        rescue IO::WaitReadable
+          # Socket not ready, try again after select
+          next
+        rescue => e
+          puts "[MCP] Error reading request body: #{e.class} - #{e.message}"
+          puts e.backtrace&.join("\n")
+          break
+        end
       end
 
       body
-    rescue EOFError => e
-      puts "[MCP] Error reading request body: #{e.message}"
-      ""
     end
 
     #: (RubyIndexer::Entry) -> String

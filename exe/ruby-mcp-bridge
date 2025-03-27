@@ -7,28 +7,29 @@ fi
 
 SOCKET_NAME="$1"
 SOCKET_PATH="/tmp/ruby-mcp-socket/$SOCKET_NAME"
+LOG_PATH="/tmp/ruby-mcp-socket/bridge.log"
 
 # Ensure the directory exists
 mkdir -p /tmp/ruby-mcp-socket
 
-echo "Bridge started for socket: $SOCKET_PATH" >> bridge.log
+echo "Bridge started for socket: $SOCKET_PATH" >> "$LOG_PATH"
 
 while IFS= read -r line; do
-  echo "================================" >> bridge.log
-  echo "Input JSON: $line" >> bridge.log
+  echo "================================" >> "$LOG_PATH"
+  echo "Input JSON: $line" >> "$LOG_PATH"
 
   # Send to Unix domain socket using netcat (nc)
   response=$(echo -e "POST /mcp HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: ${#line}\r\n\r\n$line" | \
-    nc -U "$SOCKET_PATH" 2>/dev/null) || {
-    echo "Socket communication failed" >> bridge.log
+    nc -w 2 -U "$SOCKET_PATH" 2>/dev/null) || {
+    echo "Socket communication failed" >> "$LOG_PATH"
     continue
   }
 
   # Extract the JSON response by removing HTTP headers
   json_response=$(echo "$response" | awk 'BEGIN{RS="\r\n\r\n"} NR==2')
 
-  echo "--------------------------------" >> bridge.log
-  echo "Response JSON: $json_response" >> bridge.log
+  echo "--------------------------------" >> "$LOG_PATH"
+  echo "Response JSON: $json_response" >> "$LOG_PATH"
 
   echo "$json_response"
 done
