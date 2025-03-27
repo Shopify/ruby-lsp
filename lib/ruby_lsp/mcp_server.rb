@@ -4,6 +4,7 @@
 require "socket"
 require "json"
 require "sorbet-runtime"
+require "json_rpc_handler"
 
 module RubyLsp
   class MCPServer
@@ -120,209 +121,128 @@ module RubyLsp
 
     sig { params(socket: Socket, body: String).void }
     def handle_mcp_request(socket, body)
-      if body.strip.empty?
-        puts "[MCP] Received empty MCP request body"
-        error_response = {
-          jsonrpc: "2.0",
-          id: 0, # Use a default ID since we couldn't parse one
-          error: {
-            code: -32700,
-            message: "Parse error",
-            data: "Empty request body",
-          },
-        }
-        respond(socket, 400, error_response.to_json)
-        return
-      end
-
       puts "[MCP] Received request: #{body}"
 
-      begin
-        request = JSON.parse(body, symbolize_names: true)
-        response = process_jsonrpc_request(request)
-        respond(socket, 200, response.to_json)
-        puts "[MCP] Sent response: #{response.inspect}"
-      rescue JSON::ParserError => e
-        puts "[MCP] JSON parsing error: #{e.message}"
-        error_response = {
-          jsonrpc: "2.0",
-          id: 0, # Use a default ID since we couldn't parse one
-          error: {
-            code: -32700,
-            message: "Parse error",
-            data: e.message,
-          },
-        }
-        respond(socket, 400, error_response.to_json)
-      rescue => e
-        puts "[MCP] Internal error: #{e.message}"
-        error_response = {
-          jsonrpc: "2.0",
-          id: request ? request[:id] || 0 : 0,
-          error: {
-            code: -32603,
-            message: "Internal error",
-            data: e.message,
-          },
-        }
-        respond(socket, 500, error_response.to_json)
-      end
+      response = process_jsonrpc_request(body)
+      respond(socket, 200, response)
+      puts "[MCP] Sent response: #{response.inspect}"
     end
 
-    sig { params(request: T::Hash[Symbol, T.untyped]).returns(T::Hash[Symbol, T.untyped]) }
-    def process_jsonrpc_request(request)
-      puts "[MCP] Processing request: #{request.inspect}"
-      request_id = request[:id] || 0
+    sig { params(json: String).returns(String) }
+    def process_jsonrpc_request(json)
+      puts "[MCP] Processing request: #{json.inspect}"
 
-      case request[:method]
-      when "initialize"
-        puts "[MCP] Processing initialize request"
-        {
-          jsonrpc: "2.0",
-          id: request_id,
-          result: {
-            protocolVersion: "2024-11-05",
-            capabilities: {
-              tools: {},
-            },
-            serverInfo: {
-              name: "ruby-lsp-mcp-server",
-              version: "0.1.0",
-            },
-          },
-        }
-      when "initialized", "notifications/initialized"
-        puts "[MCP] Received initialized notification"
-        # Return a proper JSON-RPC response even for notifications
-        {
-          jsonrpc: "2.0",
-          id: request_id,
-          result: {}, # Empty result for notifications
-        }
-      when "tools/list"
-        puts "[MCP] Received tools/list request"
-        {
-          jsonrpc: "2.0",
-          id: request_id,
-          result: {
-            tools: [
-              {
-                name: "all_classes_entries",
-                description: "Show all the indexed classes entries in the current project",
-                inputSchema: {
-                  type: "object",
-                  properties: {},
-                },
-              },
-              {
-                name: "fuzzy_search_entries",
-                description: <<~DESCRIPTION,
-                  Fuzzy search for class/module/method/constant entries in the current project and its dependencies
-                  (gems).
-                DESCRIPTION
-                inputSchema: {
-                  type: "object",
-                  properties: {
-                    query: {
-                      type: "string",
-                    },
-                  },
-                  required: ["query"],
-                },
-              },
-              {
-                name: "list_ancestors",
-                description: "Show the ancestors of the given class",
-                inputSchema: {
-                  type: "object",
-                  properties: {
-                    class_name: {
-                      type: "string",
-                    },
-                  },
-                  required: ["class_name"],
-                },
-              },
-            ],
-          },
-        }
-      when "tools/call"
-        puts "[MCP] Received tools/call request"
-        params = request[:params]
-        case params[:name]
-        when "all_classes_entries"
-          puts "[MCP] Received all_classes tool request"
-          {
-            jsonrpc: "2.0",
-            id: request_id,
-            result: {
-              content: @index.instance_variable_get(:@entries).values.flatten.select do |entry|
-                entry.is_a?(RubyIndexer::Entry::Class)
-              end.map do |entry|
-                {
-                  type: "text",
-                  text: entry.name,
-                }
-              end,
-            },
-          }
-        when "fuzzy_search_entries"
-          puts "[MCP] Received fuzzy_search_entries tool request"
-          query = params.dig(:arguments, :query)
-          entries = @index.prefix_search(query).flatten
-          entries = @index.fuzzy_search(query) if entries.empty?
-          {
-            jsonrpc: "2.0",
-            id: request_id,
-            result: {
-              content: entries.map do |entry|
-                {
-                  type: "text",
-                  text: generate_entry_text(entry),
-                }
-              end,
-            },
-          }
-        when "list_ancestors"
-          puts "[MCP] Received list_ancestors tool request"
-          class_name = params.dig(:arguments, :class_name)
-          ancestors = @index.linearized_ancestors_of(class_name)
-          content = ancestors.map do |ancestor|
+      JsonRpcHandler.handle_json(json) do |method_name|
+        case method_name
+        when "initialize"
+          puts "[MCP] Processing initialize request"
+          ->(_) do
             {
-              type: "text",
-              text: ancestor,
+
+              protocolVersion: "2024-11-05",
+              capabilities: {
+                tools: { list_changed: false },
+              },
+              serverInfo: {
+                name: "ruby-lsp-mcp-server",
+                version: "0.1.0",
+              },
             }
           end
-          {
-            jsonrpc: "2.0",
-            id: request_id,
-            result: {
-              content: content,
-            },
-          }
-        else
-          puts "[MCP] Unknown tool: #{params[:name]}"
-          {
-            jsonrpc: "2.0",
-            id: request_id,
-            error: {
-              code: -32601,
-              message: "Method not found",
-              data: "Tool not supported: #{params[:name]}",
-            },
+        when "initialized", "notifications/initialized"
+          puts "[MCP] Received initialized notification"
+          ->(_) do
+            {}
+          end
+        when "tools/list"
+          puts "[MCP] Received tools/list request"
+          ->(_) do
+            {
+              tools: [
+                {
+                  name: "all_classes_entries",
+                  description: "Show all the indexed classes entries in the current project",
+                  inputSchema: {
+                    type: "object",
+                    properties: {},
+                  },
+                },
+                {
+                  name: "fuzzy_search_entries",
+                  description: <<~DESCRIPTION,
+                    Fuzzy search for class/module/method/constant entries in the current project and its dependencies
+                    (gems).
+                  DESCRIPTION
+                  inputSchema: {
+                    type: "object",
+                    properties: {
+                      query: {
+                        type: "string",
+                      },
+                    },
+                    required: ["query"],
+                  },
+                },
+                {
+                  name: "list_ancestors",
+                  description: "Show the ancestors of the given class",
+                  inputSchema: {
+                    type: "object",
+                    properties: {
+                      class_name: {
+                        type: "string",
+                      },
+                    },
+                    required: ["class_name"],
+                  },
+                },
+              ],
+            }
+          end
+        when "tools/call"
+          puts "[MCP] Received tools/call request"
+          ->(params) {
+            case params[:name]
+            when "all_classes_entries"
+              puts "[MCP] Received all_classes tool request"
+              {
+                content: @index.instance_variable_get(:@entries).values.flatten.select do |entry|
+                  entry.is_a?(RubyIndexer::Entry::Class)
+                end.map do |entry|
+                  {
+                    type: "text",
+                    text: entry.name,
+                  }
+                end,
+              }
+            when "fuzzy_search_entries"
+              puts "[MCP] Received fuzzy_search_entries tool request"
+              query = params.dig(:arguments, :query)
+              entries = @index.prefix_search(query).flatten
+              entries = @index.fuzzy_search(query) if entries.empty?
+              {
+                content: entries.map do |entry|
+                  {
+                    type: "text",
+                    text: generate_entry_text(entry),
+                  }
+                end,
+              }
+            when "list_ancestors"
+              puts "[MCP] Received list_ancestors tool request"
+              class_name = params.dig(:arguments, :class_name)
+              ancestors = @index.linearized_ancestors_of(class_name)
+              {
+                content: ancestors.map do |ancestor|
+                  {
+                    type: "text",
+                    text: ancestor,
+                  }
+                end,
+              }
+            end
           }
         end
-      else
-        puts "[MCP] Unknown method: #{request[:method]}"
-        {
-          jsonrpc: "2.0",
-          id: request_id,
-          error: {
-            code: -32601,
-            message: "Method not found",
-            data: "Method not supported: #{request[:method]}",
-          },
-        }
       end
     end
 
