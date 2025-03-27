@@ -34,7 +34,7 @@ module RubyLsp
 
       while @running
         # Sleep for a short duration to avoid busy-waiting that can EASILY lead to a deadlock
-        sleep(0.1)
+        sleep(0.5)
         Thread.start(@socket.accept) do |socket, _|
           handle_connection(socket)
         end
