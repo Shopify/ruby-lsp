@@ -342,6 +342,11 @@ class ExperimentalCapabilities implements StaticFeature {
   clear(): void {}
 }
 
+export interface ResolvedCommands {
+  commands: string[];
+  reporterPaths: string[] | undefined;
+}
+
 export default class Client extends LanguageClient implements ClientInterface {
   public readonly ruby: Ruby;
   public serverVersion?: string;
@@ -502,9 +507,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     });
   }
 
-  async resolveTestCommands(
-    items: LspTestItem[],
-  ): Promise<{ commands: string[]; reporterPaths: string[] | undefined }> {
+  async resolveTestCommands(items: LspTestItem[]): Promise<ResolvedCommands> {
     return this.sendRequest("rubyLsp/resolveTestCommands", {
       items,
     });

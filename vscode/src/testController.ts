@@ -8,7 +8,7 @@ import { CodeLens } from "vscode-languageclient/node";
 
 import { Workspace } from "./workspace";
 import { featureEnabled } from "./common";
-import { LspTestItem, ServerTestItem } from "./client";
+import { LspTestItem, ResolvedCommands, ServerTestItem } from "./client";
 
 const asyncExec = promisify(exec);
 
@@ -41,13 +41,15 @@ const NOTIFICATION_TYPES = {
   error: new rpc.NotificationType<TestEventWithMessage>("error"),
   appendOutput: new rpc.NotificationType<{ message: string }>("append_output"),
 };
+const RUN_PROFILE_LABEL = "Run";
+const DEBUG_PROFILE_LABEL = "Debug";
 
 export class TestController {
   // Only public for testing
   readonly testController: vscode.TestController;
+  readonly testRunProfile: vscode.TestRunProfile;
+  readonly testDebugProfile: vscode.TestRunProfile;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
-  private readonly testRunProfile: vscode.TestRunProfile;
-  private readonly testDebugProfile: vscode.TestRunProfile;
   private terminal: vscode.Terminal | undefined;
   private readonly telemetry: vscode.TelemetryLogger;
   // We allow the timeout to be configured in seconds, but exec expects it in milliseconds
@@ -85,18 +87,18 @@ export class TestController {
     this.testCommands = new WeakMap<vscode.TestItem, string>();
 
     this.testRunProfile = this.testController.createRunProfile(
-      "Run",
+      RUN_PROFILE_LABEL,
       vscode.TestRunProfileKind.Run,
       this.fullDiscovery ? this.runTest.bind(this) : this.runHandler.bind(this),
       true,
     );
 
     this.testDebugProfile = this.testController.createRunProfile(
-      "Debug",
+      DEBUG_PROFILE_LABEL,
       vscode.TestRunProfileKind.Debug,
-      async (request, token) => {
-        await this.debugHandler(request, token);
-      },
+      this.fullDiscovery
+        ? this.runTest.bind(this)
+        : this.debugHandler.bind(this),
       false,
       DEBUG_TAG,
     );
@@ -334,38 +336,15 @@ export class TestController {
         continue;
       }
 
-      // Enqueue all of the test we're about to run
-      testItems.forEach((test) => run.enqueued(test));
+      const profile = request.profile;
 
-      // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
-      // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
-      // file path for Minitest, it will fail with unrecognized argument errors
-      const rubyOpt = workspace.ruby.env.RUBYOPT
-        ? `${workspace.ruby.env.RUBYOPT} ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`
-        : response.reporterPaths?.map((path) => `-r${path}`).join(" ");
+      if (!profile || profile.label === RUN_PROFILE_LABEL) {
+        // Enqueue all of the test we're about to run
+        testItems.forEach((test) => run.enqueued(test));
 
-      // For each command reported by the server spawn a new process with streaming updates
-      for (const command of response.commands) {
-        try {
-          workspace.outputChannel.debug(
-            `Running tests: "RUBYOPT=${rubyOpt} ${command}"`,
-          );
-          await this.runCommandWithStreamingUpdates(
-            run,
-            command,
-            {
-              ...workspace.ruby.env,
-              RUBY_LSP_TEST_RUNNER: "true",
-              RUBYOPT: rubyOpt,
-            },
-            workspace.workspaceFolder.uri.fsPath,
-            token,
-          );
-        } catch (error: any) {
-          await vscode.window.showErrorMessage(
-            `Running ${command} failed: ${error.message}`,
-          );
-        }
+        await this.executeTestCommands(response, workspace, run, token);
+      } else if (profile.label === DEBUG_PROFILE_LABEL) {
+        await this.debugTestCommands(response, workspace, run, token);
       }
     }
 
@@ -406,6 +385,97 @@ export class TestController {
 
     // If not, the ID might be nested under groups
     return this.findTestInGroup(id, testFileItem);
+  }
+
+  // Execute all of the test commands reported by the server in the background using JSON RPC to receive streaming
+  // updates
+  private async executeTestCommands(
+    response: ResolvedCommands,
+    workspace: Workspace,
+    run: vscode.TestRun,
+    token: vscode.CancellationToken,
+  ) {
+    // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
+    // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
+    // file path for Minitest, it will fail with unrecognized argument errors
+    const rubyOpt = workspace.ruby.env.RUBYOPT
+      ? `${workspace.ruby.env.RUBYOPT} ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`
+      : response.reporterPaths?.map((path) => `-r${path}`).join(" ");
+
+    for (const command of response.commands) {
+      try {
+        workspace.outputChannel.debug(
+          `Running tests: "RUBYOPT=${rubyOpt} ${command}"`,
+        );
+        await this.runCommandWithStreamingUpdates(
+          run,
+          command,
+          {
+            ...workspace.ruby.env,
+            RUBY_LSP_TEST_RUNNER: "true",
+            RUBYOPT: rubyOpt,
+          },
+          workspace.workspaceFolder.uri.fsPath,
+          token,
+        );
+      } catch (error: any) {
+        await vscode.window.showErrorMessage(
+          `Running ${command} failed: ${error.message}`,
+        );
+      }
+    }
+  }
+
+  // Launches the debugger for the test commands reported by the server. This mode of execution does not support the
+  // JSON RPC streaming updates as the debugger uses the stdio pipes to communicate with the editor
+  private async debugTestCommands(
+    response: ResolvedCommands,
+    workspace: Workspace,
+    run: vscode.TestRun,
+    token: vscode.CancellationToken,
+  ) {
+    for (const command of response.commands) {
+      if (token.isCancellationRequested) {
+        break;
+      }
+
+      const disposables: vscode.Disposable[] = [];
+
+      // Here we only resolve the promise once the debugging session has ended. Notice that
+      // `vscode.debug.startDebugging` resolve immediately after successfully starting the debugger, not after it
+      // finishes
+      await new Promise<void>((resolve, reject) => {
+        disposables.push(
+          token.onCancellationRequested(vscode.debug.stopDebugging),
+          vscode.debug.onDidTerminateDebugSession(() => {
+            disposables.forEach((disposable) => disposable.dispose());
+            resolve();
+          }),
+        );
+
+        return vscode.debug
+          .startDebugging(
+            workspace.workspaceFolder,
+            {
+              type: "ruby_lsp",
+              name: "Debug",
+              request: "launch",
+              program: command,
+              env: {
+                ...workspace.ruby.env,
+                DISABLE_SPRING: "1",
+                RUBY_LSP_TEST_RUNNER: "true",
+              },
+            },
+            { testRun: run },
+          )
+          .then((successFullyStarted) => {
+            if (!successFullyStarted) {
+              reject();
+            }
+          });
+      });
+    }
   }
 
   private findTestInGroup(

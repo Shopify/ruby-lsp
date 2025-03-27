@@ -11,8 +11,11 @@ import sinon from "sinon";
 import { TestController } from "../../testController";
 import * as common from "../../common";
 import { Workspace } from "../../workspace";
+import { ManagerIdentifier } from "../../ruby";
+import { Debugger } from "../../debugger";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { createRubySymlinks } from "./helpers";
 
 suite("TestController", () => {
   const workspacePath = path.dirname(
@@ -31,6 +34,7 @@ suite("TestController", () => {
       get: (_name: string) => undefined,
       update: (_name: string, _value: any) => Promise.resolve(),
     },
+    extensionUri: vscode.Uri.joinPath(workspaceUri, "vscode"),
   } as unknown as vscode.ExtensionContext;
   const workspace = new Workspace(
     context,
@@ -1004,6 +1008,79 @@ suite("TestController", () => {
       assert.ok(runStub.end.calledWithExactly());
 
       createRunStub.restore();
+    });
+  }).timeout(10000);
+
+  test("debugging a test", async () => {
+    const manager =
+      os.platform() === "win32"
+        ? { identifier: ManagerIdentifier.None }
+        : { identifier: ManagerIdentifier.Chruby };
+
+    // eslint-disable-next-line no-process-env
+    if (process.env.CI) {
+      createRubySymlinks();
+    }
+
+    await workspace.ruby.activateRuby(manager);
+
+    await withController(async (controller) => {
+      const uri = vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb");
+      const testItem = (await controller.findTestItem(
+        "ServerTest::NestedTest#test_something",
+        uri,
+      ))!;
+
+      workspace.lspClient = {
+        resolveTestCommands: sinon.stub().resolves({
+          commands: [`ruby -e '1'`],
+          reporterPath: undefined,
+        }),
+      } as any;
+
+      const runStub = {
+        started: sinon.stub(),
+        passed: sinon.stub(),
+        enqueued: sinon.stub(),
+        end: sinon.stub(),
+      } as any;
+      const createRunStub = sinon
+        .stub(controller.testController, "createTestRun")
+        .returns(runStub);
+
+      const debug = new Debugger(context, () => workspace);
+      const cancellationSource = new vscode.CancellationTokenSource();
+      const startDebuggingSpy = sinon.spy(vscode.debug, "startDebugging");
+
+      const runRequest = new vscode.TestRunRequest(
+        [testItem],
+        [],
+        controller.testDebugProfile,
+      );
+      await controller.runTest(runRequest, cancellationSource.token);
+
+      assert.ok(runStub.end.calledWithExactly());
+      assert.ok(
+        startDebuggingSpy.calledOnceWith(
+          workspaceFolder,
+          {
+            type: "ruby_lsp",
+            name: "Debug",
+            request: "launch",
+            program: "ruby -e '1'",
+            env: {
+              ...workspace.ruby.env,
+              DISABLE_SPRING: "1",
+              RUBY_LSP_TEST_RUNNER: "true",
+            },
+          },
+          { testRun: runStub },
+        ),
+      );
+
+      createRunStub.restore();
+      startDebuggingSpy.restore();
+      debug.dispose();
     });
   }).timeout(10000);
 });
