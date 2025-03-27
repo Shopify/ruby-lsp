@@ -281,6 +281,15 @@ export class TestController {
     request: vscode.TestRunRequest,
     token: vscode.CancellationToken,
   ) {
+    this.telemetry.logUsage("ruby_lsp.test_explorer", {
+      type: "counter",
+      attributes: {
+        label: request.profile?.label || RUN_PROFILE_LABEL,
+        vscodemachineid: vscode.env.machineId,
+        continuousMode: request.continuous ?? false,
+      },
+    });
+
     const run = this.testController.createTestRun(request, undefined, true);
 
     // Gather all included test items
