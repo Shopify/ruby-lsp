@@ -212,7 +212,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb /test/store_test.rb",
+            "bundle exec ruby -Itest -e \"ARGV.each { |f| require f }\" /test/server_test.rb /test/store_test.rb",
           ],
           result[:commands],
         )
@@ -221,6 +221,7 @@ module RubyLsp
 
     def test_resolve_test_command_entire_directories
       with_server do |server|
+        Dir.stubs(:glob).returns(["/other/test/fake_test.rb", "/other/test/fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -254,7 +255,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /other/test/**/* /test/server_test.rb /test/store_test.rb",
+            "bundle exec ruby -Itest -e \"ARGV.each { |f| require f }\" /other/test/fake_test.rb " \
+              "/other/test/fake_test2.rb /test/server_test.rb /test/store_test.rb",
           ],
           result[:commands],
         )
@@ -535,6 +537,7 @@ module RubyLsp
 
     def test_resolve_test_command_mix_of_directories_and_examples
       with_server do |server|
+        Dir.stubs(:glob).returns(["/test/unit/fake_test.rb", "/test/unit/fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -566,7 +569,8 @@ module RubyLsp
         assert_equal(
           [
             "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#test_server$/\"",
-            "bundle exec ruby -Itest /test/unit/**/*",
+            "bundle exec ruby -Itest -e \"ARGV.each { |f| require f }\" /test/unit/fake_test.rb " \
+              "/test/unit/fake_test2.rb",
           ],
           result[:commands],
         )
@@ -1031,6 +1035,7 @@ module RubyLsp
 
     def test_resolve_test_command_mix_of_directories_and_examples
       with_server do |server|
+        Dir.stubs(:glob).returns(["/test/unit/fake_test.rb", "/test/unit/fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -1062,7 +1067,8 @@ module RubyLsp
         assert_equal(
           [
             "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\" --name \"/test_server$/\"",
-            "bundle exec ruby -Itest /test/unit/**/*",
+            "bundle exec ruby -Itest -e \"ARGV.each { |f| require f }\" /test/unit/fake_test.rb " \
+              "/test/unit/fake_test2.rb",
           ],
           result[:commands],
         )

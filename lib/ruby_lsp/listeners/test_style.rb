@@ -32,7 +32,12 @@ module RubyLsp
             next unless path
 
             if tags.include?("test_dir")
-              full_files << "#{path}/**/*" if children.empty?
+              if children.empty?
+                full_files.concat(Dir.glob(
+                  "#{path}/**/{*_test,test_*}.rb",
+                  File::Constants::FNM_EXTGLOB | File::Constants::FNM_PATHNAME,
+                ))
+              end
             elsif tags.include?("test_file")
               full_files << path if children.empty?
             elsif tags.include?("test_group")
@@ -68,7 +73,10 @@ module RubyLsp
             end
           end
 
-          commands << "#{BASE_COMMAND} -Itest #{full_files.join(" ")}" unless full_files.empty?
+          unless full_files.empty?
+            commands << "#{BASE_COMMAND} -Itest -e \"ARGV.each { |f| require f }\" #{full_files.join(" ")}"
+          end
+
           commands
         end
 
