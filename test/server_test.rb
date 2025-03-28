@@ -1479,6 +1479,37 @@ class ServerTest < Minitest::Test
     assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_unit_test_runner.rb", __dir__))
   end
 
+  def test_ignore_sorbet_option
+    # Test when ignoreSorbet is true
+    capture_subprocess_io do
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: { ignoreSorbet: true },
+          capabilities: { general: { positionEncodings: ["utf-8"] } },
+        },
+      })
+    end
+
+    assert(@server.global_state.ignore_sorbet)
+  end
+
+  def test_ignore_sorbet_option_not_set
+    capture_subprocess_io do
+      @server.process_message({
+        id: 2,
+        method: "initialize",
+        params: {
+          initializationOptions: {},
+          capabilities: { general: { positionEncodings: ["utf-8"] } },
+        },
+      })
+    end
+
+    refute(@server.global_state.ignore_sorbet)
+  end
+
   private
 
   def wait_for_indexing

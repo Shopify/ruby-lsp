@@ -791,6 +791,10 @@ module RubyLsp
 
     #: (Document[untyped] document) -> RubyDocument::SorbetLevel
     def sorbet_level(document)
+      # Return None if explicitly disabled through config
+      return RubyDocument::SorbetLevel::None if @global_state.ignore_sorbet
+
+      # Otherwise use the original behavior
       return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
       return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
 
