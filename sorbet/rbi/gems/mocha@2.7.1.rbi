@@ -39,7 +39,7 @@ module Mocha
   class << self
     # @private
     #
-    # source://mocha//lib/mocha/configuration.rb#24
+    # source://mocha//lib/mocha/configuration.rb#25
     def configuration; end
 
     # Allows setting of configuration options. See {Configuration} for the available options.
@@ -55,7 +55,7 @@ module Mocha
     # @see Configuration
     # @yieldparam configuration [Configuration] the configuration for modification
     #
-    # source://mocha//lib/mocha/configuration.rb#19
+    # source://mocha//lib/mocha/configuration.rb#20
     def configure; end
   end
 end
@@ -319,15 +319,15 @@ class Mocha::Cardinality
   # source://mocha//lib/mocha/cardinality.rb#29
   def <<(invocation); end
 
-  # source://mocha//lib/mocha/cardinality.rb#79
+  # source://mocha//lib/mocha/cardinality.rb#83
   def actual_invocations; end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/cardinality.rb#49
+  # source://mocha//lib/mocha/cardinality.rb#53
   def allowed_any_number_of_times?; end
 
-  # source://mocha//lib/mocha/cardinality.rb#58
+  # source://mocha//lib/mocha/cardinality.rb#62
   def anticipated_times; end
 
   # source://mocha//lib/mocha/cardinality.rb#14
@@ -344,17 +344,22 @@ class Mocha::Cardinality
   # source://mocha//lib/mocha/cardinality.rb#33
   def invocations_allowed?; end
 
-  # source://mocha//lib/mocha/cardinality.rb#75
+  # @return [Boolean]
+  #
+  # source://mocha//lib/mocha/cardinality.rb#37
+  def invocations_never_allowed?; end
+
+  # source://mocha//lib/mocha/cardinality.rb#79
   def invoked_times; end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/cardinality.rb#41
+  # source://mocha//lib/mocha/cardinality.rb#45
   def needs_verifying?; end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/cardinality.rb#37
+  # source://mocha//lib/mocha/cardinality.rb#41
   def satisfied?; end
 
   # source://mocha//lib/mocha/cardinality.rb#22
@@ -362,35 +367,35 @@ class Mocha::Cardinality
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/cardinality.rb#53
+  # source://mocha//lib/mocha/cardinality.rb#57
   def used?; end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/cardinality.rb#45
+  # source://mocha//lib/mocha/cardinality.rb#49
   def verified?; end
 
   protected
 
-  # source://mocha//lib/mocha/cardinality.rb#87
+  # source://mocha//lib/mocha/cardinality.rb#91
   def count(number); end
 
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/cardinality.rb#102
+  # source://mocha//lib/mocha/cardinality.rb#106
   def infinite?(number); end
 
   # Returns the value of attribute maximum.
   #
-  # source://mocha//lib/mocha/cardinality.rb#85
+  # source://mocha//lib/mocha/cardinality.rb#89
   def maximum; end
 
   # Returns the value of attribute required.
   #
-  # source://mocha//lib/mocha/cardinality.rb#85
+  # source://mocha//lib/mocha/cardinality.rb#89
   def required; end
 
-  # source://mocha//lib/mocha/cardinality.rb#96
+  # source://mocha//lib/mocha/cardinality.rb#100
   def update(required, maximum); end
 end
 
@@ -521,12 +526,12 @@ end
 #   c.stubbing_method_on_nil = :allow
 #   end
 #
-# source://mocha//lib/mocha/configuration.rb#39
+# source://mocha//lib/mocha/configuration.rb#40
 class Mocha::Configuration
   # @private
   # @return [Configuration] a new instance of Configuration
   #
-  # source://mocha//lib/mocha/configuration.rb#55
+  # source://mocha//lib/mocha/configuration.rb#56
   def initialize(options = T.unsafe(nil)); end
 
   # Display matching invocations alongside expectations on Mocha-related test failure.
@@ -554,18 +559,18 @@ class Mocha::Configuration
   #   - #<Mock:foo>.baz(5, 6) # => threw (:tag, "value")
   # @param value [Boolean] +true+ to enable display of matching invocations; disabled by default.
   #
-  # source://mocha//lib/mocha/configuration.rb#244
+  # source://mocha//lib/mocha/configuration.rb#251
   def display_matching_invocations_on_failure=(value); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/configuration.rb#249
+  # source://mocha//lib/mocha/configuration.rb#256
   def display_matching_invocations_on_failure?; end
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#65
+  # source://mocha//lib/mocha/configuration.rb#66
   def merge(other); end
 
   # Perform strict keyword argument comparison. Only supported in Ruby >= v2.7.
@@ -604,18 +609,18 @@ class Mocha::Configuration
   #   # This now fails as expected
   # @param value [Boolean] +true+ to enable strict keyword argument matching; +false+ by default.
   #
-  # source://mocha//lib/mocha/configuration.rb#290
+  # source://mocha//lib/mocha/configuration.rb#297
   def strict_keyword_argument_matching=(value); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/configuration.rb#296
+  # source://mocha//lib/mocha/configuration.rb#303
   def strict_keyword_argument_matching?; end
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#215
+  # source://mocha//lib/mocha/configuration.rb#222
   def stubbing_method_on_nil; end
 
   # Configure whether stubbing methods on the +nil+ object is allowed.
@@ -628,14 +633,15 @@ class Mocha::Configuration
   # When +value+ is +:warn+, display a warning.
   # When +value+ is +:prevent+, raise a {StubbingError}. This is the default.
   #
+  # @deprecated This method is deprecated and will be removed in a future release. +nil+ is frozen in Ruby >= v2.2 and Mocha will be dropping support for Ruby v2.1. At that point it won't be possible to stub methods on +nil+ any more.
   # @param value [Symbol] one of +:allow+, +:warn+, +:prevent+.
   #
-  # source://mocha//lib/mocha/configuration.rb#210
+  # source://mocha//lib/mocha/configuration.rb#212
   def stubbing_method_on_nil=(value); end
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#127
+  # source://mocha//lib/mocha/configuration.rb#128
   def stubbing_method_on_non_mock_object; end
 
   # Configure whether stubbing methods on non-mock objects is allowed.
@@ -661,12 +667,12 @@ class Mocha::Configuration
   #   # =>   #<Example:0x593620>.example_method
   # @param value [Symbol] one of +:allow+, +:warn+, +:prevent+.
   #
-  # source://mocha//lib/mocha/configuration.rb#122
+  # source://mocha//lib/mocha/configuration.rb#123
   def stubbing_method_on_non_mock_object=(value); end
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#94
+  # source://mocha//lib/mocha/configuration.rb#95
   def stubbing_method_unnecessarily; end
 
   # Configure whether stubbing methods unnecessarily is allowed.
@@ -688,12 +694,12 @@ class Mocha::Configuration
   #   # =>   #<Mock:example>.unused_stub(any_parameters)
   # @param value [Symbol] one of +:allow+, +:warn+, +:prevent+.
   #
-  # source://mocha//lib/mocha/configuration.rb#89
+  # source://mocha//lib/mocha/configuration.rb#90
   def stubbing_method_unnecessarily=(value); end
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#160
+  # source://mocha//lib/mocha/configuration.rb#161
   def stubbing_non_existent_method; end
 
   # Configure whether stubbing of non-existent methods is allowed.
@@ -719,12 +725,12 @@ class Mocha::Configuration
   #   # =>   #<Example:0x593760>.method_that_doesnt_exist
   # @param value [Symbol] one of +:allow+, +:warn+, +:prevent+.
   #
-  # source://mocha//lib/mocha/configuration.rb#155
+  # source://mocha//lib/mocha/configuration.rb#156
   def stubbing_non_existent_method=(value); end
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#194
+  # source://mocha//lib/mocha/configuration.rb#195
   def stubbing_non_public_method; end
 
   # Configure whether stubbing of non-public methods is allowed.
@@ -751,27 +757,27 @@ class Mocha::Configuration
   #   # =>   #<Example:0x593530>.internal_method
   # @param value [Symbol] one of +:allow+, +:warn+, +:prevent+.
   #
-  # source://mocha//lib/mocha/configuration.rb#189
+  # source://mocha//lib/mocha/configuration.rb#190
   def stubbing_non_public_method=(value); end
 
   protected
 
   # Returns the value of attribute options.
   #
-  # source://mocha//lib/mocha/configuration.rb#51
+  # source://mocha//lib/mocha/configuration.rb#52
   def options; end
 
   private
 
   # @private
   #
-  # source://mocha//lib/mocha/configuration.rb#60
+  # source://mocha//lib/mocha/configuration.rb#61
   def initialize_copy(other); end
 
   class << self
     # @private
     #
-    # source://mocha//lib/mocha/configuration.rb#327
+    # source://mocha//lib/mocha/configuration.rb#334
     def configuration; end
 
     # Temporarily modify {Configuration} options.
@@ -786,31 +792,31 @@ class Mocha::Configuration
     # @param temporary_options [Hash] the configuration options to apply for the duration of the block.
     # @yield block during which the configuration change will be in force.
     #
-    # source://mocha//lib/mocha/configuration.rb#318
+    # source://mocha//lib/mocha/configuration.rb#325
     def override(temporary_options); end
 
     # @private
     #
-    # source://mocha//lib/mocha/configuration.rb#302
+    # source://mocha//lib/mocha/configuration.rb#309
     def reset_configuration; end
 
     private
 
     # @private
     #
-    # source://mocha//lib/mocha/configuration.rb#334
+    # source://mocha//lib/mocha/configuration.rb#341
     def change_config(action, new_value, &block); end
 
     # @private
     #
-    # source://mocha//lib/mocha/configuration.rb#343
+    # source://mocha//lib/mocha/configuration.rb#350
     def temporarily_change_config(action, new_value); end
   end
 end
 
 # @private
 #
-# source://mocha//lib/mocha/configuration.rb#41
+# source://mocha//lib/mocha/configuration.rb#42
 Mocha::Configuration::DEFAULTS = T.let(T.unsafe(nil), Hash)
 
 # source://mocha//lib/mocha/debug.rb#2
@@ -923,22 +929,22 @@ class Mocha::Expectation
   # @private
   # @return [Expectation] a new instance of Expectation
   #
-  # source://mocha//lib/mocha/expectation.rb#597
+  # source://mocha//lib/mocha/expectation.rb#618
   def initialize(mock, expected_method_name, backtrace = T.unsafe(nil)); end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#616
+  # source://mocha//lib/mocha/expectation.rb#637
   def add_in_sequence_ordering_constraint(sequence); end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#611
+  # source://mocha//lib/mocha/expectation.rb#632
   def add_ordering_constraint(ordering_constraint); end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#621
+  # source://mocha//lib/mocha/expectation.rb#642
   def add_side_effect(side_effect); end
 
   # Modifies expectation so that the expected method must be called at least a +minimum_number_of_times+.
@@ -1010,18 +1016,18 @@ class Mocha::Expectation
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#594
+  # source://mocha//lib/mocha/expectation.rb#615
   def backtrace; end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#704
+  # source://mocha//lib/mocha/expectation.rb#730
   def definition_location; end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#631
+  # source://mocha//lib/mocha/expectation.rb#652
   def in_correct_order?; end
 
   # Constrains the expectation so that it must be invoked at the current point in the +sequence+.
@@ -1046,45 +1052,51 @@ class Mocha::Expectation
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   # @see API#sequence
   #
-  # source://mocha//lib/mocha/expectation.rb#588
+  # source://mocha//lib/mocha/expectation.rb#609
   def in_sequence(sequence, *sequences); end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#680
+  # source://mocha//lib/mocha/expectation.rb#706
   def inspect; end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#652
+  # source://mocha//lib/mocha/expectation.rb#673
   def invocations_allowed?; end
 
   # @private
+  # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#662
+  # source://mocha//lib/mocha/expectation.rb#678
+  def invocations_never_allowed?; end
+
+  # @private
+  #
+  # source://mocha//lib/mocha/expectation.rb#688
   def invoke(invocation); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#646
+  # source://mocha//lib/mocha/expectation.rb#667
   def match?(invocation, ignoring_order: T.unsafe(nil)); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#641
+  # source://mocha//lib/mocha/expectation.rb#662
   def matches_method?(method_name); end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#697
+  # source://mocha//lib/mocha/expectation.rb#723
   def method_signature; end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#687
+  # source://mocha//lib/mocha/expectation.rb#713
   def mocha_inspect; end
 
   # Modifies expectation so that when the expected method is called, it yields multiple times per invocation with the specified +parameter_groups+.
@@ -1110,7 +1122,7 @@ class Mocha::Expectation
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   # @see #then
   #
-  # source://mocha//lib/mocha/expectation.rb#375
+  # source://mocha//lib/mocha/expectation.rb#396
   def multiple_yields(*parameter_groups); end
 
   # Modifies expectation so that the expected method must never be called.
@@ -1153,12 +1165,12 @@ class Mocha::Expectation
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#636
+  # source://mocha//lib/mocha/expectation.rb#657
   def ordering_constraints_not_allowing_invocation_now; end
 
   # @private
   #
-  # source://mocha//lib/mocha/expectation.rb#626
+  # source://mocha//lib/mocha/expectation.rb#647
   def perform_side_effects; end
 
   # Modifies expectation so that when the expected method is called, it raises the specified +exception+ with the specified +message+ i.e. calls +Kernel#raise(exception, message)+.
@@ -1191,7 +1203,7 @@ class Mocha::Expectation
   # @see Kernel#raise
   # @see #then
   #
-  # source://mocha//lib/mocha/expectation.rb#462
+  # source://mocha//lib/mocha/expectation.rb#483
   def raises(exception = T.unsafe(nil), message = T.unsafe(nil)); end
 
   # Modifies expectation so that when the expected method is called, it returns the specified +value+.
@@ -1229,13 +1241,13 @@ class Mocha::Expectation
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   # @see #then
   #
-  # source://mocha//lib/mocha/expectation.rb#422
+  # source://mocha//lib/mocha/expectation.rb#443
   def returns(*values); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#657
+  # source://mocha//lib/mocha/expectation.rb#683
   def satisfied?; end
 
   # @example Using {#then} as syntactic sugar when specifying values to be returned and exceptions to be raised on consecutive invocations of the expected method.
@@ -1259,7 +1271,7 @@ class Mocha::Expectation
   # @overload then
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   #
-  # source://mocha//lib/mocha/expectation.rb#536
+  # source://mocha//lib/mocha/expectation.rb#557
   def then(state = T.unsafe(nil)); end
 
   # Modifies expectation so that when the expected method is called, it throws the specified +tag+ with the specific return value +object+ i.e. calls +Kernel#throw(tag, object)+.
@@ -1291,7 +1303,7 @@ class Mocha::Expectation
   # @see Kernel#throw
   # @see #then
   #
-  # source://mocha//lib/mocha/expectation.rb#501
+  # source://mocha//lib/mocha/expectation.rb#522
   def throws(tag, object = T.unsafe(nil)); end
 
   # Modifies expectation so that the number of calls to the expected method must be within a specific +range+.
@@ -1349,13 +1361,13 @@ class Mocha::Expectation
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#675
+  # source://mocha//lib/mocha/expectation.rb#701
   def used?; end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/expectation.rb#669
+  # source://mocha//lib/mocha/expectation.rb#695
   def verified?(assertion_counter = T.unsafe(nil)); end
 
   # Constrains the expectation to occur only when the +state_machine+ is in the state specified by +state_predicate+.
@@ -1376,12 +1388,17 @@ class Mocha::Expectation
   # @see StateMachine
   # @see #then
   #
-  # source://mocha//lib/mocha/expectation.rb#560
+  # source://mocha//lib/mocha/expectation.rb#581
   def when(state_predicate); end
 
   # Modifies expectation so that the expected method must be called with +expected_parameters_or_matchers+.
   #
   # May be used with Ruby literals or variables for exact matching or with parameter matchers for less-specific matching, e.g. {ParameterMatchers#includes}, {ParameterMatchers#has_key}, etc. See {ParameterMatchers} for a list of all available parameter matchers.
+  #
+  # Alternatively a block argument can be passed to {#with} to implement custom parameter matching. The block receives the +*actual_parameters+ as its arguments and should return +true+ if they are acceptable or +false+ otherwise. See the example below where a method is expected to be called with a value divisible by 4.
+  # The block argument takes precedence over +expected_parameters_or_matchers+. The block may be called multiple times per invocation of the expected method and so it should be idempotent.
+  #
+  # Note that if {#with} is called multiple times on the same expectation, the last call takes precedence; other calls are ignored.
   #
   # Positional arguments were separated from keyword arguments in Ruby v3 (see {https://www.ruby-lang.org/en/news/2019/12/12/separation-of-positional-and-keyword-arguments-in-ruby-3-0 this article}). In relation to this a new configuration option ({Configuration#strict_keyword_argument_matching=}) is available in Ruby >= 2.7.
   #
@@ -1433,7 +1450,7 @@ class Mocha::Expectation
   #   example.expects(:foo).with('a', bar: 'b')
   #   example.foo('a', { bar: 'b' })
   #   # This now fails as expected
-  # @example Expected method must be called with a value divisible by 4.
+  # @example Using a block argument to expect the method to be called with a value divisible by 4.
   #   object = mock()
   #   object.expects(:expected_method).with() { |value| value % 4 == 0 }
   #   object.expected_method(16)
@@ -1443,15 +1460,30 @@ class Mocha::Expectation
   #   object.expects(:expected_method).with() { |value| value % 4 == 0 }
   #   object.expected_method(17)
   #   # => verify fails
-  # @param expected_parameters_or_matchers [*Array<Object,ParameterMatchers::Base>] expected parameter values or parameter matchers.
+  # @example Extracting a custom matcher into an instance method on the test class.
+  #   class MyTest < Minitest::Test
+  #   def test_expected_method_is_called_with_a_value_divisible_by_4
+  #   object = mock()
+  #   object.expects(:expected_method).with(&method(:divisible_by_4))
+  #   object.expected_method(16)
+  #   # => verify succeeds
+  #   end
+  #
+  #   private
+  #
+  #   def divisible_by_4(value)
+  #   value % 4 == 0
+  #   end
+  #   end
+  # @param expected_parameters_or_matchers [Array<Object,ParameterMatchers::Base>] expected parameter values or parameter matchers.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   # @see ParameterMatchers
   # @see Configuration#strict_keyword_argument_matching=
   # @yield optional block specifying custom matching.
-  # @yieldparam actual_parameters [*Array<Object>] parameters with which expected method was invoked.
-  # @yieldreturn [Boolean] +true+ if +actual_parameters+ are acceptable.
+  # @yieldparam actual_parameters [Array<Object>] parameters with which expected method was invoked.
+  # @yieldreturn [Boolean] +true+ if +actual_parameters+ are acceptable; +false+ otherwise.
   #
-  # source://mocha//lib/mocha/expectation.rb#269
+  # source://mocha//lib/mocha/expectation.rb#290
   def with(*expected_parameters_or_matchers, **_arg1, &matching_block); end
 
   # Modifies expectation so that the expected method must be called with a block.
@@ -1468,7 +1500,7 @@ class Mocha::Expectation
   #   # => verify fails
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   #
-  # source://mocha//lib/mocha/expectation.rb#289
+  # source://mocha//lib/mocha/expectation.rb#310
   def with_block_given; end
 
   # Modifies expectation so that the expected method must be called without a block.
@@ -1485,7 +1517,7 @@ class Mocha::Expectation
   #   # => verify fails
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   #
-  # source://mocha//lib/mocha/expectation.rb#308
+  # source://mocha//lib/mocha/expectation.rb#329
   def with_no_block_given; end
 
   # Modifies expectation so that when the expected method is called, it yields to the block with the specified +parameters+.
@@ -1520,7 +1552,7 @@ class Mocha::Expectation
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   # @see #then
   #
-  # source://mocha//lib/mocha/expectation.rb#347
+  # source://mocha//lib/mocha/expectation.rb#368
   def yields(*parameters); end
 end
 
@@ -1594,16 +1626,19 @@ class Mocha::ExpectationList
   # source://mocha//lib/mocha/expectation_list.rb#20
   def match(invocation, ignoring_order: T.unsafe(nil)); end
 
-  # source://mocha//lib/mocha/expectation_list.rb#28
+  # source://mocha//lib/mocha/expectation_list.rb#24
   def match_allowing_invocation(invocation); end
 
-  # source://mocha//lib/mocha/expectation_list.rb#24
-  def match_but_out_of_order(invocation); end
+  # source://mocha//lib/mocha/expectation_list.rb#28
+  def match_never_allowing_invocation(invocation); end
 
   # @return [Boolean]
   #
   # source://mocha//lib/mocha/expectation_list.rb#16
   def matches_method?(method_name); end
+
+  # source://mocha//lib/mocha/expectation_list.rb#56
+  def matching_expectations(invocation, ignoring_order: T.unsafe(nil)); end
 
   # source://mocha//lib/mocha/expectation_list.rb#12
   def remove_all_matching_method(method_name); end
@@ -1618,11 +1653,6 @@ class Mocha::ExpectationList
   #
   # source://mocha//lib/mocha/expectation_list.rb#32
   def verified?(assertion_counter = T.unsafe(nil)); end
-
-  private
-
-  # source://mocha//lib/mocha/expectation_list.rb#58
-  def matching_expectations(invocation, ignoring_order: T.unsafe(nil)); end
 end
 
 # Integration hooks for test library authors.
@@ -1935,6 +1965,9 @@ end
 # while an +expects(:foo).at_least_once+ expectation will always be matched
 # against invocations.
 #
+# However, note that if the expectation that matches the invocation has a
+# cardinality of "never", then an unexpected invocation error is reported.
+#
 # This scheme allows you to:
 #
 # - Set up default stubs in your the +setup+ method of your test class and
@@ -1974,17 +2007,17 @@ end
 #   object.expected_method # => 2
 #   object.expected_method # => raises exception of class Exception1
 #
-# source://mocha//lib/mocha/mock.rb#75
+# source://mocha//lib/mocha/mock.rb#79
 class Mocha::Mock
   # @private
   # @return [Mock] a new instance of Mock
   #
-  # source://mocha//lib/mocha/mock.rb#275
+  # source://mocha//lib/mocha/mock.rb#279
   def initialize(mockery, name = T.unsafe(nil), receiver = T.unsafe(nil)); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#299
+  # source://mocha//lib/mocha/mock.rb#303
   def __expectations__; end
 
   # Adds an expectation that the specified method must be called exactly once with any parameters.
@@ -2015,12 +2048,12 @@ class Mocha::Mock
   # @overload expects
   # @return [Expectation] last-built expectation which can be further modified by methods on {Expectation}.
   #
-  # source://mocha//lib/mocha/mock.rb#110
+  # source://mocha//lib/mocha/mock.rb#114
   def __expects__(method_name_or_hash, backtrace = T.unsafe(nil)); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#346
+  # source://mocha//lib/mocha/mock.rb#363
   def __expire__(origin); end
 
   def __singleton_class__; end
@@ -2046,34 +2079,34 @@ class Mocha::Mock
   # @overload stubs
   # @return [Expectation] last-built expectation which can be further modified by methods on {Expectation}.
   #
-  # source://mocha//lib/mocha/mock.rb#149
+  # source://mocha//lib/mocha/mock.rb#153
   def __stubs__(method_name_or_hash, backtrace = T.unsafe(nil)); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/mock.rb#341
+  # source://mocha//lib/mocha/mock.rb#358
   def __verified__?(assertion_counter = T.unsafe(nil)); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#309
+  # source://mocha//lib/mocha/mock.rb#313
   def all_expectations; end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/mock.rb#366
+  # source://mocha//lib/mocha/mock.rb#383
   def any_expectations?; end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#361
+  # source://mocha//lib/mocha/mock.rb#378
   def ensure_method_not_already_defined(method_name); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#287
+  # source://mocha//lib/mocha/mock.rb#291
   def everything_stubbed; end
 
   # Adds an expectation that the specified method must be called exactly once with any parameters.
@@ -2104,27 +2137,27 @@ class Mocha::Mock
   # @overload expects
   # @return [Expectation] last-built expectation which can be further modified by methods on {Expectation}.
   #
-  # source://mocha//lib/mocha/mock.rb#110
+  # source://mocha//lib/mocha/mock.rb#114
   def expects(method_name_or_hash, backtrace = T.unsafe(nil)); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#320
+  # source://mocha//lib/mocha/mock.rb#324
   def handle_method_call(symbol, arguments, block); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#356
+  # source://mocha//lib/mocha/mock.rb#373
   def inspect; end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#314
+  # source://mocha//lib/mocha/mock.rb#318
   def method_missing(symbol, *arguments, **_arg2, &block); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#351
+  # source://mocha//lib/mocha/mock.rb#368
   def mocha_inspect; end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which +responder+ responds publicly. The constraint is only applied at method invocation time.
@@ -2174,7 +2207,7 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like_instance_of
   #
-  # source://mocha//lib/mocha/mock.rb#237
+  # source://mocha//lib/mocha/mock.rb#241
   def quacks_like(responder); end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which an instance of the +responder_class+ responds publicly. The constraint is only applied at method invocation time. Note that the responder instance is instantiated using +Class#allocate+.
@@ -2205,7 +2238,7 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like
   #
-  # source://mocha//lib/mocha/mock.rb#270
+  # source://mocha//lib/mocha/mock.rb#274
   def quacks_like_instance_of(responder_class); end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which +responder+ responds publicly. The constraint is only applied at method invocation time.
@@ -2255,7 +2288,7 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like_instance_of
   #
-  # source://mocha//lib/mocha/mock.rb#237
+  # source://mocha//lib/mocha/mock.rb#241
   def responds_like(responder); end
 
   # Constrains the {Mock} instance so that it can only expect or stub methods to which an instance of the +responder_class+ responds publicly. The constraint is only applied at method invocation time. Note that the responder instance is instantiated using +Class#allocate+.
@@ -2286,12 +2319,12 @@ class Mocha::Mock
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like
   #
-  # source://mocha//lib/mocha/mock.rb#270
+  # source://mocha//lib/mocha/mock.rb#274
   def responds_like_instance_of(responder_class); end
 
   # @private
   #
-  # source://mocha//lib/mocha/mock.rb#304
+  # source://mocha//lib/mocha/mock.rb#308
   def stub_everything; end
 
   # Adds an expectation that the specified method may be called any number of times with any parameters.
@@ -2315,7 +2348,7 @@ class Mocha::Mock
   # @overload stubs
   # @return [Expectation] last-built expectation which can be further modified by methods on {Expectation}.
   #
-  # source://mocha//lib/mocha/mock.rb#149
+  # source://mocha//lib/mocha/mock.rb#153
   def stubs(method_name_or_hash, backtrace = T.unsafe(nil)); end
 
   # Removes the specified stubbed methods (added by calls to {#expects} or {#stubs}) and all expectations associated with them.
@@ -2335,26 +2368,26 @@ class Mocha::Mock
   #   multiplier.unstub(:triple)
   # @param method_names [Array<Symbol>] names of methods to unstub.
   #
-  # source://mocha//lib/mocha/mock.rb#182
+  # source://mocha//lib/mocha/mock.rb#186
   def unstub(*method_names); end
 
   private
 
   # @raise [StubbingError]
   #
-  # source://mocha//lib/mocha/mock.rb#393
+  # source://mocha//lib/mocha/mock.rb#410
   def check_expiry; end
 
-  # source://mocha//lib/mocha/mock.rb#387
+  # source://mocha//lib/mocha/mock.rb#404
   def check_responder_responds_to(symbol); end
 
-  # source://mocha//lib/mocha/mock.rb#372
+  # source://mocha//lib/mocha/mock.rb#389
   def raise_unexpected_invocation_error(invocation, matching_expectation); end
 
   # @private
   # @return [Boolean]
   #
-  # source://mocha//lib/mocha/mock.rb#332
+  # source://mocha//lib/mocha/mock.rb#349
   def respond_to_missing?(symbol, _include_all); end
 end
 
@@ -3616,7 +3649,7 @@ class Mocha::ParametersMatcher
   # source://mocha//lib/mocha/parameters_matcher.rb#12
   def match?(actual_parameters = T.unsafe(nil)); end
 
-  # source://mocha//lib/mocha/parameters_matcher.rb#30
+  # source://mocha//lib/mocha/parameters_matcher.rb#34
   def matchers; end
 
   # source://mocha//lib/mocha/parameters_matcher.rb#24
@@ -3630,6 +3663,9 @@ end
 
 # source://mocha//lib/mocha/ruby_version.rb#2
 Mocha::RUBY_V27_PLUS = T.let(T.unsafe(nil), TrueClass)
+
+# source://mocha//lib/mocha/ruby_version.rb#3
+Mocha::RUBY_V34_PLUS = T.let(T.unsafe(nil), TrueClass)
 
 # source://mocha//lib/mocha/raised_exception.rb#2
 class Mocha::RaisedException

@@ -17,5 +17,11 @@ module URI
 
     sig { returns(String) }
     attr_reader :fragment
+
+    sig { returns(T.nilable(String)) }
+    attr_accessor :line_number
+
+    sig { returns(T.nilable(String)) }
+    attr_accessor :gem_name
   end
 end
