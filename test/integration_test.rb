@@ -254,8 +254,10 @@ class IntegrationTest < Minitest::Test
       RUBY
 
       Bundler.with_unbundled_env do
-        system("bundle", "install")
-        system("bundle", "package")
+        capture_subprocess_io do
+          system("bundle", "install")
+          system("bundle", "package")
+        end
 
         cached_gems = Dir.glob("#{dir}/vendor/cache/*.gem")
         refute_empty(cached_gems)

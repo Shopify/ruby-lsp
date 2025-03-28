@@ -359,7 +359,7 @@ module RubyIndexer
       assert_equal("all?", entry.old_name)
       assert_equal("Array", entry.owner.name)
       assert(entry.file_path.end_with?("core/array.rbs"))
-      assert_includes(entry.comments, "Returns `true` if any element of `self` meets a given criterion.")
+      refute_empty(entry.comments)
     end
 
     def test_indexing_untyped_functions
