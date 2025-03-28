@@ -86,6 +86,14 @@ module RubyLsp
 
       #: (Prism::StringNode node) -> void
       def on_string_node_enter(node)
+        if @path && File.basename(@path) == GEMFILE_NAME
+          parent = @node_context.parent
+          if parent.is_a?(Prism::CallNode) && parent.name == :gem && parent.arguments&.arguments&.first == node
+            generate_gem_hover(parent)
+            return
+          end
+        end
+
         generate_heredoc_hover(node)
       end
 
