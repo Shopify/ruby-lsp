@@ -30,7 +30,7 @@ require "mocha/minitest"
 # `Minitest::Reporters.use!` overrides our reporter customizations and breaks the integrations.
 #
 # We also don't need debug related things
-unless ENV["RUBY_LSP_TEST_RUNNER"] == "true"
+unless ENV["RUBY_LSP_TEST_RUNNER"]
   SORBET_PATHS = Gem.loaded_specs["sorbet-runtime"].full_require_paths.freeze #: Array[String]
 
   # Define breakpoint methods without actually activating the debugger
