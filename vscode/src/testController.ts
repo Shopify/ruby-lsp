@@ -818,9 +818,43 @@ export class TestController {
   ) {
     const initialCollection = item ? item.children : this.testController.items;
     const pattern = this.testPattern(workspaceFolder);
+    let frameworkTag: vscode.TestTag | undefined;
+    let previousFirstLevel: vscode.TestItem | undefined;
 
     for (const uri of await vscode.workspace.findFiles(pattern)) {
-      await this.addTestItemsForFile(uri, workspaceFolder, initialCollection);
+      const itemParts = await this.addTestItemsForFile(
+        uri,
+        workspaceFolder,
+        initialCollection,
+      );
+
+      if (!itemParts) {
+        continue;
+      }
+
+      const { firstLevel, secondLevel, testItem } = itemParts;
+
+      if (!previousFirstLevel || previousFirstLevel.id !== firstLevel.id) {
+        await this.resolveHandler(testItem);
+
+        frameworkTag = testItem.tags.find((tag) =>
+          tag.id.startsWith("framework"),
+        );
+
+        previousFirstLevel = firstLevel;
+      }
+
+      this.addFrameworkTag(firstLevel, frameworkTag!);
+
+      if (secondLevel) {
+        this.addFrameworkTag(secondLevel, frameworkTag!);
+      }
+    }
+  }
+
+  private addFrameworkTag(item: vscode.TestItem, tag: vscode.TestTag) {
+    if (!item.tags.some((tag) => tag.id.startsWith("framework"))) {
+      item.tags = [...item.tags, tag];
     }
   }
 
@@ -856,6 +890,8 @@ export class TestController {
     testItem.canResolveChildren = true;
     testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
     finalCollection.add(testItem);
+
+    return { firstLevel, secondLevel, testItem };
   }
 
   private async detectHierarchyLevels(
@@ -1028,6 +1064,10 @@ export class TestController {
     testItems: ServerTestItem[],
     parent: vscode.TestItem,
   ) {
+    if (testItems.length === 0) {
+      return;
+    }
+
     testItems.forEach((item) => {
       const testItem = this.testController.createTestItem(
         item.id,
@@ -1056,6 +1096,18 @@ export class TestController {
         this.addDiscoveredItems(item.children, testItem);
       }
     });
+
+    const framework = testItems[0].tags.find((tag) =>
+      tag.startsWith("framework"),
+    );
+
+    if (!framework) {
+      return;
+    }
+
+    if (!parent.tags.some((tag) => tag.id.startsWith("framework"))) {
+      parent.tags = [...parent.tags, new vscode.TestTag(framework)];
+    }
   }
 
   private recursivelyFilter(
