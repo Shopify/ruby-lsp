@@ -1271,7 +1271,7 @@ class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::DefNode
   include ::RuboCop::Cop::MinitestExplorationHelpers
 
-  # source://rubocop/1.72.0/lib/rubocop/cop/exclude_limit.rb#11
+  # source://rubocop/1.75.1/lib/rubocop/cop/exclude_limit.rb#11
   def max=(value); end
 
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#37
@@ -1493,7 +1493,7 @@ RuboCop::Cop::Minitest::NonPublicTestMethod::MSG = T.let(T.unsafe(nil), String)
 module RuboCop::Cop::Minitest::PredicateAssertionHandleable
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#22
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#21
   def autocorrect(corrector, node, arguments); end
 
   # @api private
@@ -1505,23 +1505,23 @@ module RuboCop::Cop::Minitest::PredicateAssertionHandleable
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#51
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#50
   def correct_receiver(receiver); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#44
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#43
   def new_arguments(arguments); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#36
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#35
   def offense_message(arguments); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#32
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#31
   def predicate_method?(first_argument); end
 end
 
@@ -2494,7 +2494,7 @@ module RuboCop::Cop::MinitestExplorationHelpers
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#103
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#102
   def assertion_method?(node); end
 
   # @api private
@@ -2515,7 +2515,7 @@ module RuboCop::Cop::MinitestExplorationHelpers
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#116
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#114
   def lifecycle_hook_method?(node); end
 
   # @api private
@@ -2574,7 +2574,7 @@ RuboCop::Cop::MinitestExplorationHelpers::LIFECYCLE_HOOK_METHODS = T.let(T.unsaf
 # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#15
 RuboCop::Cop::MinitestExplorationHelpers::LIFECYCLE_HOOK_METHODS_IN_ORDER = T.let(T.unsafe(nil), Array)
 
-# RuboCop minitest project namespace
+# RuboCop minitest project namespace.
 #
 # source://rubocop-minitest//lib/rubocop/minitest.rb#5
 module RuboCop::Minitest; end
@@ -2664,7 +2664,7 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#108
   def assert_offense(source, file = T.unsafe(nil), **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#214
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#215
   def configuration; end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#78
@@ -2676,47 +2676,43 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#87
   def format_offense(source, **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#182
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#183
   def inspect_source(source, cop, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#189
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#190
   def investigate(cop, processed_source); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#201
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#202
   def parse_source!(source, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#236
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#237
   def parser_engine; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#222
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#223
   def registry; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#231
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#232
   def ruby_version; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#177
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#178
   def setup_assertion; end
 end
 
-# source://rubocop-minitest//lib/rubocop/minitest.rb#8
-RuboCop::Minitest::CONFIG = T.let(T.unsafe(nil), Hash)
-
-# source://rubocop-minitest//lib/rubocop/minitest.rb#7
-RuboCop::Minitest::CONFIG_DEFAULT = T.let(T.unsafe(nil), Pathname)
-
-# Because RuboCop doesn't yet support plugins, we have to monkey patch in a
-# bit of our configuration.
+# A plugin that integrates RuboCop Minitest with RuboCop's plugin system.
 #
-# source://rubocop-minitest//lib/rubocop/minitest/inject.rb#7
-module RuboCop::Minitest::Inject
-  class << self
-    # source://rubocop-minitest//lib/rubocop/minitest/inject.rb#8
-    def defaults!; end
-  end
-end
+# source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#8
+class RuboCop::Minitest::Plugin < ::LintRoller::Plugin
+  # source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#9
+  def about; end
 
-# source://rubocop-minitest//lib/rubocop/minitest.rb#6
-RuboCop::Minitest::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
+  # source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#22
+  def rules(_context); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#18
+  def supported?(context); end
+end
 
 # This module holds the RuboCop Minitest version information.
 #
