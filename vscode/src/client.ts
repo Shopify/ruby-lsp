@@ -264,6 +264,7 @@ function collectClientOptions(
       addonSettings: configuration.get("addonSettings"),
       enabledFeatureFlags: enabledFeatureFlags(),
       telemetryMachineId: vscode.env.machineId,
+      ignoreSorbet: configuration.get("ignoreSorbet"),
     },
   };
 }

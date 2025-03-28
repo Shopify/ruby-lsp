@@ -540,6 +540,11 @@
           "description": "Controls the level of opacity for inline RBS comment signatures",
           "type": "string",
           "default": "1"
+        },
+        "rubyLsp.ignoreSorbet": {
+          "description": "Force Sorbet level to None even if Sorbet is detected in the project",
+          "type": "boolean",
+          "default": false
         }
       }
     },

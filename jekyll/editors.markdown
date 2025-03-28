@@ -88,6 +88,7 @@ configuration languages (JSON, Lua, ELisp, etc.).
     },
     "formatter": "auto",
     "linters": [],
+    "ignoreSorbet": false,
     "experimentalFeaturesEnabled": false
   }
 }

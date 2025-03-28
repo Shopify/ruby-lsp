@@ -12,6 +12,9 @@ module RubyLsp
     #: bool
     attr_reader :has_type_checker
 
+    #: bool
+    attr_reader :ignore_sorbet
+
     #: RubyIndexer::Index
     attr_reader :index
 
@@ -42,6 +45,7 @@ module RubyLsp
       @linters = [] #: Array[String]
       @test_library = "minitest" #: String
       @has_type_checker = true #: bool
+      @ignore_sorbet = false #: bool
       @index = RubyIndexer::Index.new #: RubyIndexer::Index
       @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
       @type_inferrer = TypeInferrer.new(@index) #: TypeInferrer
@@ -173,6 +177,14 @@ module RubyLsp
 
       enabled_flags = options.dig(:initializationOptions, :enabledFeatureFlags)
       @enabled_feature_flags = enabled_flags if enabled_flags
+
+      ignore_sorbet = options.dig(:initializationOptions, :ignoreSorbet)
+      if ignore_sorbet
+        @ignore_sorbet = true
+        notifications << Notification.window_log_message(
+          "Sorbet level will be forced to None even if Sorbet is detected",
+        )
+      end
 
       @telemetry_machine_id = options.dig(:initializationOptions, :telemetryMachineId)
       notifications
