@@ -25,7 +25,7 @@ module RubyLsp
       #: -> (Array[Support::SelectionRange] & Object)
       def perform
         # [node, parent]
-        queue = [[@document.parse_result.value, nil]]
+        queue = [[@document.ast, nil]]
 
         until queue.empty?
           node, parent = queue.shift
