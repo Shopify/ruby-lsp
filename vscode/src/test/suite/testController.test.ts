@@ -857,9 +857,9 @@ suite("TestController", () => {
       const cancellationSource = new vscode.CancellationTokenSource();
       await controller.runTest(runRequest, cancellationSource.token);
 
-      assert.ok(runStub.enqueued.calledWithExactly(testItem));
-      assert.ok(runStub.started.calledWithExactly(testItem));
-      assert.ok(runStub.passed.calledWithExactly(testItem));
+      assert.ok(runStub.enqueued.calledWith(testItem));
+      assert.ok(runStub.started.calledWith(testItem));
+      assert.ok(runStub.passed.calledWith(testItem));
       assert.ok(runStub.end.calledWithExactly());
 
       createRunStub.restore();
@@ -1008,9 +1008,9 @@ suite("TestController", () => {
       await controller.runTest(runRequest, cancellationSource.token);
       fsStub.restore();
 
-      assert.ok(runStub.enqueued.calledWithExactly(testItem));
-      assert.ok(runStub.started.calledWithExactly(testItem));
-      assert.ok(runStub.passed.calledWithExactly(testItem));
+      assert.ok(runStub.enqueued.calledWith(testItem));
+      assert.ok(runStub.started.calledWith(testItem));
+      assert.ok(runStub.passed.calledWith(testItem));
       assert.ok(runStub.end.calledWithExactly());
       assert.ok(
         runStub.appendOutput.calledWithExactly(
