@@ -38,8 +38,12 @@ module RubyLsp
         sleep(0.1)
         puts "[MCP] Waking up and checking for connections"
         begin
-          # Use IO.select with timeout to wait for connections instead of blocking accept
-          ready = IO.select([@socket], nil, nil, 1) # 1 second timeout
+          # Use IO.select to check if the socket is ready
+          ready = begin
+            IO.select([@socket], nil, nil, 0)
+          rescue
+            nil
+          end
 
           if ready
             begin
