@@ -431,7 +431,7 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("formatting", async () => {
-    const text = ["# frozen_string_literal: true", "", "def foo", "end"]
+    const text = ["# frozen_string_literal: true", "", "def foo", "123", "end"]
       .join("\n")
       .trim();
 
@@ -452,10 +452,10 @@ suite("Client", () => {
     );
 
     const expected = [
-      "# typed: strict",
       "# frozen_string_literal: true",
       "",
       "def foo",
+      "  123",
       "end",
     ]
       .join("\n")
