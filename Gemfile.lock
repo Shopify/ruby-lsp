@@ -140,7 +140,6 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.5)
   debug (~> 1.9)
-  json_rpc_handler (~> 0.1.1)
   minitest (~> 5.25)
   minitest-reporters (~> 1.7)
   mocha (~> 2.3)
