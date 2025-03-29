@@ -5,10 +5,12 @@ require "socket"
 require "json"
 require "sorbet-runtime"
 require "json_rpc_handler"
+require "ruby_lsp/requests/support/common"
 
 module RubyLsp
   class MCPServer
     extend T::Sig
+    include Requests::Support::Common
 
     SOCKET_FOLDER = "/tmp/ruby-mcp-socket"
 
@@ -172,24 +174,29 @@ module RubyLsp
                   },
                 },
                 {
-                  name: "fuzzy_search_entries",
+                  name: "constant_details",
                   description: <<~DESCRIPTION,
-                    Fuzzy search for class/module/method/constant entries in the current project and its dependencies
-                    (gems).
+                    Show the details of the given class/module, including:
+                    - Comments
+                    - Definition location
                   DESCRIPTION
                   inputSchema: {
                     type: "object",
                     properties: {
-                      query: {
+                      fully_qualified_name: {
                         type: "string",
                       },
                     },
-                    required: ["query"],
+                    required: ["fully_qualified_name"],
                   },
                 },
                 {
-                  name: "list_ancestors",
-                  description: "Show the ancestors of the given class",
+                  name: "class_details",
+                  description: <<~DESCRIPTION,
+                    Show the details of the given class, including:
+                    - Methods
+                    - Ancestors
+                  DESCRIPTION
                   inputSchema: {
                     type: "object",
                     properties: {
@@ -219,30 +226,52 @@ module RubyLsp
                   }
                 end,
               }
-            when "fuzzy_search_entries"
-              puts "[MCP] Received fuzzy_search_entries tool request"
-              query = params.dig(:arguments, :query)
-              entries = @index.prefix_search(query).flatten
-              entries = @index.fuzzy_search(query) if entries.empty?
+            when "constant_details"
+              puts "[MCP] Received constant_details tool request"
+              fully_qualified_name = params.dig(:arguments, :fully_qualified_name)
+              *nestings, name = fully_qualified_name.delete_prefix("::").split("::")
+              entries = @index.resolve(name, nestings) || []
+              type = case entries.first
+              when RubyIndexer::Entry::Class
+                "class"
+              when RubyIndexer::Entry::Module
+                "module"
+              else
+                "unknown"
+              end
+              content = <<~TEXT
+                name: #{name}
+                nestings: #{nestings.join(", ")}
+                type: #{type}
+                documentation: #{markdown_from_index_entries(name, entries)}
+              TEXT
               {
-                content: entries.map do |entry|
+                content: [
                   {
                     type: "text",
-                    text: generate_entry_text(entry),
-                  }
-                end,
+                    text: content,
+                  },
+                ],
               }
-            when "list_ancestors"
-              puts "[MCP] Received list_ancestors tool request"
+            when "class_details"
+              puts "[MCP] Received class_details tool request"
               class_name = params.dig(:arguments, :class_name)
               ancestors = @index.linearized_ancestors_of(class_name)
+              methods = @index.method_completion_candidates(nil, class_name)
+
+              content = <<~TEXT
+                name: #{class_name}
+                ancestors: #{ancestors.join(", ")}
+                methods: #{methods.map(&:name).join(", ")}
+              TEXT
+
               {
-                content: ancestors.map do |ancestor|
+                content: [
                   {
                     type: "text",
-                    text: ancestor,
-                  }
-                end,
+                    text: content,
+                  },
+                ],
               }
             end
           }
