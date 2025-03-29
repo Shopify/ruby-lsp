@@ -36,9 +36,7 @@ module RubyLsp
       puts "[MCP] Server started on socket #{@socket_path}"
 
       while @running
-        puts "[MCP] Sleeping for 0.1 seconds"
         sleep(0.1)
-        puts "[MCP] Waking up and checking for connections"
         begin
           # Use IO.select to check if the socket is ready
           ready = begin
@@ -141,7 +139,6 @@ module RubyLsp
       JsonRpcHandler.handle_json(json) do |method_name|
         case method_name
         when "initialize"
-          puts "[MCP] Processing initialize request"
           ->(_) do
             {
 
@@ -156,12 +153,10 @@ module RubyLsp
             }
           end
         when "initialized", "notifications/initialized"
-          puts "[MCP] Received initialized notification"
           ->(_) do
             {}
           end
         when "tools/list"
-          puts "[MCP] Received tools/list request"
           ->(_) do
             {
               tools: [
@@ -174,25 +169,10 @@ module RubyLsp
                   },
                 },
                 {
-                  name: "constant_details",
-                  description: <<~DESCRIPTION,
-                    Show the details of the given class/module, including:
-                    - Comments
-                    - Definition location
-                  DESCRIPTION
-                  inputSchema: {
-                    type: "object",
-                    properties: {
-                      fully_qualified_name: {
-                        type: "string",
-                      },
-                    },
-                    required: ["fully_qualified_name"],
-                  },
-                },
-                {
                   name: "read_ruby_files",
-                  description: "Read the contents of the given Ruby files",
+                  description: <<~DESCRIPTION,
+                    Read the contents of the given Ruby files, including files from dependencies.
+                  DESCRIPTION
                   inputSchema: {
                     type: "object",
                     properties: {
@@ -205,31 +185,34 @@ module RubyLsp
                   },
                 },
                 {
-                  name: "class_details",
+                  name: "class_module_details",
                   description: <<~DESCRIPTION,
-                    Show the details of the given class, including:
+                    Show the details of the given classes/modules that are available in the current project and
+                    its dependencies.
+                    - Comments
+                    - Definition location
                     - Methods
                     - Ancestors
                   DESCRIPTION
                   inputSchema: {
                     type: "object",
                     properties: {
-                      class_name: {
-                        type: "string",
+                      fully_qualified_names: {
+                        type: "array",
+                        items: { type: "string" },
                       },
                     },
-                    required: ["class_name"],
+                    required: ["fully_qualified_names"],
                   },
                 },
               ],
             }
           end
         when "tools/call"
-          puts "[MCP] Received tools/call request"
           ->(params) {
+            puts "[MCP] Received tools/call request: #{params.inspect}"
             case params[:name]
             when "all_classes_entries"
-              puts "[MCP] Received all_classes tool request"
               {
                 content: @index.instance_variable_get(:@entries).values.flatten.select do |entry|
                   entry.is_a?(RubyIndexer::Entry::Class)
@@ -240,35 +223,7 @@ module RubyLsp
                   }
                 end,
               }
-            when "constant_details"
-              puts "[MCP] Received constant_details tool request"
-              fully_qualified_name = params.dig(:arguments, :fully_qualified_name)
-              *nestings, name = fully_qualified_name.delete_prefix("::").split("::")
-              entries = @index.resolve(name, nestings) || []
-              type = case entries.first
-              when RubyIndexer::Entry::Class
-                "class"
-              when RubyIndexer::Entry::Module
-                "module"
-              else
-                "unknown"
-              end
-              content = <<~TEXT
-                name: #{name}
-                nestings: #{nestings.join(", ")}
-                type: #{type}
-                documentation: #{markdown_from_index_entries(name, entries)}
-              TEXT
-              {
-                content: [
-                  {
-                    type: "text",
-                    text: content,
-                  },
-                ],
-              }
             when "read_ruby_files"
-              puts "[MCP] Received read_ruby_files tool request"
               file_uris = params.dig(:arguments, :file_uris)
               file_contents = file_uris.map do |file_uri|
                 file_uri = URI(file_uri)
@@ -290,25 +245,41 @@ module RubyLsp
               {
                 content: file_contents,
               }
-            when "class_details"
-              puts "[MCP] Received class_details tool request"
-              class_name = params.dig(:arguments, :class_name)
-              ancestors = @index.linearized_ancestors_of(class_name)
-              methods = @index.method_completion_candidates(nil, class_name)
+            when "class_module_details"
+              fully_qualified_names = params.dig(:arguments, :fully_qualified_names)
 
-              content = <<~TEXT
-                name: #{class_name}
-                ancestors: #{ancestors.join(", ")}
-                methods: #{methods.map(&:name).join(", ")}
-              TEXT
+              contents = fully_qualified_names.map do |fully_qualified_name|
+                *nestings, name = fully_qualified_name.delete_prefix("::").split("::")
+                ancestors = @index.linearized_ancestors_of(fully_qualified_name)
+                methods = @index.method_completion_candidates(nil, fully_qualified_name)
+                entries = @index.resolve(name, nestings) || []
+                type = case entries.first
+                when RubyIndexer::Entry::Class
+                  "class"
+                when RubyIndexer::Entry::Module
+                  "module"
+                else
+                  "unknown"
+                end
+
+                text = <<~TEXT
+                  name: #{fully_qualified_name}
+                  nestings: #{nestings.join(", ")}
+                  type: #{type}
+                  ancestors: #{ancestors.join(", ")}
+                  methods: #{methods.map(&:name).join(", ")}
+                  documentation:
+                    #{markdown_from_index_entries(name, entries)}
+                TEXT
+
+                {
+                  type: "text",
+                  text: text,
+                }
+              end
 
               {
-                content: [
-                  {
-                    type: "text",
-                    text: content,
-                  },
-                ],
+                content: contents,
               }
             end
           }
