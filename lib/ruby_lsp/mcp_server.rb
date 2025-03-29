@@ -191,6 +191,20 @@ module RubyLsp
                   },
                 },
                 {
+                  name: "read_ruby_files",
+                  description: "Read the contents of the given Ruby files",
+                  inputSchema: {
+                    type: "object",
+                    properties: {
+                      file_uris: {
+                        type: "array",
+                        items: { type: "string" },
+                      },
+                    },
+                    required: ["file_uris"],
+                  },
+                },
+                {
                   name: "class_details",
                   description: <<~DESCRIPTION,
                     Show the details of the given class, including:
@@ -252,6 +266,29 @@ module RubyLsp
                     text: content,
                   },
                 ],
+              }
+            when "read_ruby_files"
+              puts "[MCP] Received read_ruby_files tool request"
+              file_uris = params.dig(:arguments, :file_uris)
+              file_contents = file_uris.map do |file_uri|
+                file_uri = URI(file_uri)
+                file_path = file_uri.path
+                next unless file_path
+
+                file_content = File.read(file_path)
+                text = <<~TEXT
+                  file_path: #{file_path}
+                  file_content:
+                  #{file_content}
+                TEXT
+
+                {
+                  type: "text",
+                  text: text,
+                }
+              end
+              {
+                content: file_contents,
               }
             when "class_details"
               puts "[MCP] Received class_details tool request"
