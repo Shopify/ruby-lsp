@@ -81,12 +81,6 @@ module RubyLsp
 
     sig { params(socket: Socket).void }
     def handle_connection(socket)
-      # Use select with timeout before gets
-      readable, = IO.select([socket], nil, nil, 5)
-      unless readable
-        puts "[MCP] Timeout waiting for request line"
-        return
-      end
       request_line = socket.gets
       return unless request_line
 
