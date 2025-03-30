@@ -169,6 +169,8 @@ module RubyLsp
                   },
                 },
                 {
+                  # This may be redundant to some clients if they can access terminal to cat the files
+                  # but it's useful for some clients that don't have that capability
                   name: "read_ruby_files",
                   description: <<~DESCRIPTION,
                     Read the contents of the given Ruby files, including files from dependencies.
@@ -201,6 +203,7 @@ module RubyLsp
                           uri: "uri",
                           visibility: "visibility",
                           comments: "comments",
+                          parameters: "parameters",
                           owner: "owner",
                         }
                       ]
@@ -226,6 +229,8 @@ module RubyLsp
                     - Definition location
                     - Methods
                     - Ancestors
+
+                    Use `methods_details` tool to get the details of specific methods of a class/module.
                   DESCRIPTION
                   inputSchema: {
                     type: "object",
