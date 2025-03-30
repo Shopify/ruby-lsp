@@ -211,21 +211,15 @@ module RubyLsp
                     Use the following format for the signatures:
                     - Class#method
                     - Module#method
+                    - Class.singleton_method
+                    - Module.singleton_method
 
-                    It'll return a list of objects with the following format:
-                    {
-                      receiver: "Class#method",
-                      method: "method",
-                      entry_details: [
-                        {
-                          uri: "uri",
-                          visibility: "visibility",
-                          comments: "comments",
-                          parameters: "parameters",
-                          owner: "owner",
-                        }
-                      ]
-                    }
+                    Details include:
+                    - Comments
+                    - Definition location
+                    - Visibility
+                    - Parameters
+                    - Owner
                   DESCRIPTION
                   inputSchema: {
                     type: "object",
@@ -317,8 +311,15 @@ module RubyLsp
             when "methods_details"
               signatures = params.dig(:arguments, :signatures)
               contents = signatures.map do |signature|
-                receiver, method = signature.split("#")
-                entries = @index.resolve_method(method, receiver)
+                entries = if signature.include?("#")
+                  receiver, method = signature.split("#")
+                  @index.resolve_method(method, receiver)
+                elsif signature.include?(".")
+                  receiver, method = signature.split(".")
+                  singleton_class = @index.existing_or_new_singleton_class(receiver)
+                  @index.resolve_method(method, singleton_class.name)
+                end
+
                 next if entries.nil?
 
                 entry_details = entries.map do |entry|
