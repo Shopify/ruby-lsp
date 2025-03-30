@@ -123,11 +123,24 @@ module RubyLsp
       puts "[MCP] Received request: #{body}"
 
       response = process_jsonrpc_request(body)
-      respond(socket, 200, response)
+
+      if response.nil?
+        respond(socket, 500, {
+          jsonrpc: "2.0",
+          id: nil,
+          error: {
+            code: JsonRpcHandler::ErrorCode::InternalError,
+            message: "Internal error",
+            data: "No response from the server",
+          },
+        }.to_json)
+      else
+        respond(socket, 200, response)
+      end
       puts "[MCP] Sent response: #{response.inspect}"
     end
 
-    sig { params(json: String).returns(String) }
+    sig { params(json: String).returns(T.nilable(String)) }
     def process_jsonrpc_request(json)
       puts "[MCP] Processing request: #{json.inspect}"
 
@@ -397,6 +410,7 @@ module RubyLsp
       socket.flush if writable
     rescue Errno::EPIPE => e
       puts "[MCP] Broken pipe while sending response: #{e.message}"
+      puts "[MCP] Response: #{body}"
     rescue Errno::ECONNRESET => e
       puts "[MCP] Connection reset while sending response: #{e.message}"
     rescue => e
