@@ -13,6 +13,7 @@ module RubyLsp
     include Requests::Support::Common
 
     MCP_FOLDER = "/tmp/ruby-mcp"
+    MAX_CLASSES_TO_RETURN = 5000
 
     sig { params(global_state: GlobalState).void }
     def initialize(global_state)
@@ -155,8 +156,13 @@ module RubyLsp
             {
               tools: [
                 {
-                  name: "all_classes_entries",
-                  description: "Show all the indexed classes entries in the current project",
+                  name: "all_classes",
+                  description: <<~DESCRIPTION,
+                    Show all the indexed classes in the current project and its dependencies.
+                    It'll return a list of class names. But doesn't include their details.
+                    Doesn't support pagination and will return all classes.
+                    Stops after #{MAX_CLASSES_TO_RETURN} classes.
+                  DESCRIPTION
                   inputSchema: {
                     type: "object",
                     properties: {},
@@ -239,17 +245,33 @@ module RubyLsp
           ->(params) {
             puts "[MCP] Received tools/call request: #{params.inspect}"
             case params[:name]
-            when "all_classes_entries"
-              {
-                content: @index.instance_variable_get(:@entries).values.flatten.select do |entry|
-                  entry.is_a?(RubyIndexer::Entry::Class)
-                end.map do |entry|
-                  {
-                    type: "text",
-                    text: entry.name,
-                  }
-                end,
-              }
+            when "all_classes"
+              class_names = @index.instance_variable_get(:@entries).values.flatten.map do |entry|
+                entry.is_a?(RubyIndexer::Entry::Class) ? entry.name : nil
+              end.compact.uniq
+
+              contents =
+                if class_names.size > MAX_CLASSES_TO_RETURN
+                  [
+                    {
+                      type: "text",
+                      text: "Too many classes to return, please use other tool.",
+                    },
+                    {
+                      type: "text",
+                      text: class_names.first(MAX_CLASSES_TO_RETURN).to_json,
+                    },
+                  ]
+                else
+                  [
+                    {
+                      type: "text",
+                      text: class_names.to_json,
+                    },
+                  ]
+                end
+
+              generate_response(contents)
             when "read_ruby_files"
               file_uris = params.dig(:arguments, :file_uris)
               file_contents = file_uris.map do |file_uri|
