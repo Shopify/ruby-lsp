@@ -258,20 +258,16 @@ module RubyLsp
                 next unless file_path
 
                 file_content = File.read(file_path)
-                text = <<~TEXT
-                  file_path: #{file_path}
-                  file_content:
-                  #{file_content}
-                TEXT
-
                 {
                   type: "text",
-                  text: text,
+                  text: {
+                    file_path: file_path,
+                    file_content: file_content,
+                  }.to_json,
                 }
               end
-              {
-                content: file_contents,
-              }
+
+              generate_response(file_contents)
             when "methods_details"
               signatures = params.dig(:arguments, :signatures)
               contents = signatures.map do |signature|
@@ -317,25 +313,20 @@ module RubyLsp
                   "unknown"
                 end
 
-                text = <<~TEXT
-                  name: #{fully_qualified_name}
-                  nestings: #{nestings.join(", ")}
-                  type: #{type}
-                  ancestors: #{ancestors.join(", ")}
-                  methods: #{methods.map(&:name).join(", ")}
-                  documentation:
-                    #{markdown_from_index_entries(name, entries)}
-                TEXT
-
                 {
                   type: "text",
-                  text: text,
+                  text: {
+                    name: fully_qualified_name,
+                    nestings: nestings.join(", "),
+                    type: type,
+                    ancestors: ancestors.join(", "),
+                    methods: methods.map(&:name).join(", "),
+                    documentation: markdown_from_index_entries(name, entries),
+                  }.to_json,
                 }
               end
 
-              {
-                content: contents,
-              }
+              generate_response(contents)
             end
           }
         end
