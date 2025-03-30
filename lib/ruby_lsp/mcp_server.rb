@@ -283,14 +283,14 @@ module RubyLsp
                     },
                     {
                       type: "text",
-                      text: class_names.first(MAX_CLASSES_TO_RETURN).to_json,
+                      text: class_names.first(MAX_CLASSES_TO_RETURN).to_yaml,
                     },
                   ]
                 else
                   [
                     {
                       type: "text",
-                      text: class_names.to_json,
+                      text: class_names.to_yaml,
                     },
                   ]
                 end
@@ -309,7 +309,7 @@ module RubyLsp
                   text: {
                     file_path: file_path,
                     file_content: file_content,
-                  }.to_json,
+                  }.to_yaml,
                 }
               end
 
@@ -337,7 +337,7 @@ module RubyLsp
                     receiver: receiver,
                     method: method,
                     entry_details: entry_details,
-                  }.to_json,
+                  }.to_yaml,
                 }
               end.compact
 
@@ -369,7 +369,7 @@ module RubyLsp
                     methods: methods.map(&:name),
                     uris: entries.map(&:uri),
                     documentation: markdown_from_index_entries(name, entries),
-                  }.to_json,
+                  }.to_yaml,
                 }
               end
 
