@@ -179,6 +179,39 @@ module RubyLsp
                   },
                 },
                 {
+                  name: "methods_details",
+                  description: <<~DESCRIPTION,
+                    Show the details of the given methods.
+                    Use the following format for the signatures:
+                    - Class#method
+                    - Module#method
+
+                    It'll return a list of objects with the following format:
+                    {
+                      receiver: "Class#method",
+                      method: "method",
+                      entry_details: [
+                        {
+                          uri: "uri",
+                          visibility: "visibility",
+                          comments: "comments",
+                          owner: "owner",
+                        }
+                      ]
+                    }
+                  DESCRIPTION
+                  inputSchema: {
+                    type: "object",
+                    properties: {
+                      signatures: {
+                        type: "array",
+                        items: { type: "string" },
+                      },
+                    },
+                    required: ["signatures"],
+                  },
+                },
+                {
                   name: "class_module_details",
                   description: <<~DESCRIPTION,
                     Show the details of the given classes/modules that are available in the current project and
@@ -239,6 +272,34 @@ module RubyLsp
               {
                 content: file_contents,
               }
+            when "methods_details"
+              signatures = params.dig(:arguments, :signatures)
+              contents = signatures.map do |signature|
+                receiver, method = signature.split("#")
+                entries = @index.resolve_method(method, receiver)
+                next if entries.nil?
+
+                entry_details = entries.map do |entry|
+                  {
+                    uri: entry.uri,
+                    visibility: entry.visibility,
+                    comments: entry.comments,
+                    parameters: entry.decorated_parameters,
+                    owner: entry.owner&.name,
+                  }
+                end
+
+                {
+                  type: "text",
+                  text: {
+                    receiver: receiver,
+                    method: method,
+                    entry_details: entry_details,
+                  }.to_json,
+                }
+              end.compact
+
+              generate_response(contents)
             when "class_module_details"
               fully_qualified_names = params.dig(:arguments, :fully_qualified_names)
 
@@ -367,18 +428,21 @@ module RubyLsp
       body
     end
 
-    #: (RubyIndexer::Entry) -> String
-    def generate_entry_text(entry)
-      case entry
-      when RubyIndexer::Entry::Class, RubyIndexer::Entry::Module
-        <<~TEXT
-          type: #{entry.is_a?(RubyIndexer::Entry::Class) ? "class" : "module"}
-          name: #{entry.name}
-          comments: #{entry.comments}
-          uri: #{entry.uri}
-        TEXT
+    sig { params(contents: T::Array[T::Hash[Symbol, T.untyped]]).returns(T::Hash[Symbol, T.untyped]) }
+    def generate_response(contents)
+      if contents.empty?
+        {
+          content: [
+            {
+              type: "text",
+              text: "No results found",
+            },
+          ],
+        }
       else
-        entry.name
+        {
+          content: contents,
+        }
       end
     end
   end
