@@ -12,15 +12,15 @@ module RubyLsp
     extend T::Sig
     include Requests::Support::Common
 
-    SOCKET_FOLDER = "/tmp/ruby-mcp-socket"
+    MCP_FOLDER = "/tmp/ruby-mcp"
 
     sig { params(global_state: GlobalState).void }
     def initialize(global_state)
       @socket_name = T.let(File.basename(global_state.workspace_path), String)
-      unless Dir.exist?(SOCKET_FOLDER)
-        Dir.mkdir(SOCKET_FOLDER)
+      unless Dir.exist?(MCP_FOLDER)
+        Dir.mkdir(MCP_FOLDER)
       end
-      @socket_path = T.let(File.join(SOCKET_FOLDER, @socket_name), String)
+      @socket_path = T.let(File.join(MCP_FOLDER, @socket_name), String)
       if File.exist?(@socket_path)
         File.delete(@socket_path)
       end
