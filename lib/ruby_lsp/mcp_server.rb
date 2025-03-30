@@ -47,19 +47,9 @@ module RubyLsp
           end
 
           if ready
-            begin
-              client_socket = @socket.accept_nonblock
-              Thread.start(client_socket) do |socket, _|
-                handle_connection(socket)
-              rescue => e
-                puts "[MCP] Error in connection thread: #{e.message}"
-                puts e.backtrace&.join("\n")
-              ensure
-                socket.close
-              end
-            rescue IO::WaitReadable, Errno::EAGAIN
-              # No client trying to connect, just retry
-              sleep(0.1)
+            client_socket = @socket.accept_nonblock
+            Thread.start(client_socket) do |socket, _|
+              handle_connection(socket)
             end
           end
         rescue => e
@@ -137,7 +127,7 @@ module RubyLsp
       else
         respond(socket, 200, response)
       end
-      puts "[MCP] Sent response: #{response.inspect}"
+      puts "[MCP] Sent response: #{response}"
     end
 
     sig { params(json: String).returns(T.nilable(String)) }
@@ -409,14 +399,16 @@ module RubyLsp
       # Check if socket is writable before flush
       _, writable, = IO.select(nil, [socket], nil, 1)
       socket.flush if writable
-    rescue Errno::EPIPE => e
-      puts "[MCP] Broken pipe while sending response: #{e.message}"
-      puts "[MCP] Response: #{body}"
-    rescue Errno::ECONNRESET => e
-      puts "[MCP] Connection reset while sending response: #{e.message}"
     rescue => e
-      puts "[MCP] Error sending response: #{e.class} - #{e.message}"
-      puts e.backtrace&.join("\n")
+      case e
+      when Errno::EPIPE
+        puts "[MCP] Broken pipe while sending response: #{e.message}"
+        puts "[MCP] Response: #{body}"
+      when Errno::ECONNRESET
+        puts "[MCP] Connection reset while sending response: #{e.message}"
+      end
+
+      raise
     end
 
     sig { params(socket: Socket, content_length: Integer).returns(String) }
