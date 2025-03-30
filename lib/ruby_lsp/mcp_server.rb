@@ -158,14 +158,19 @@ module RubyLsp
                 {
                   name: "all_classes",
                   description: <<~DESCRIPTION,
-                    Show all the indexed classes in the current project and its dependencies.
-                    It'll return a list of class names. But doesn't include their details.
+                    Show all the indexed classes in the current project and its dependencies when no query is provided.
+                    When a query is provided, it'll return a list of classes that match the query.
                     Doesn't support pagination and will return all classes.
                     Stops after #{MAX_CLASSES_TO_RETURN} classes.
                   DESCRIPTION
                   inputSchema: {
                     type: "object",
-                    properties: {},
+                    properties: {
+                      query: {
+                        type: "string",
+                        description: "A query to filter the classes",
+                      },
+                    },
                   },
                 },
                 {
@@ -251,7 +256,8 @@ module RubyLsp
             puts "[MCP] Received tools/call request: #{params.inspect}"
             case params[:name]
             when "all_classes"
-              class_names = @index.instance_variable_get(:@entries).values.flatten.map do |entry|
+              query = params.dig(:arguments, :query)
+              class_names = @index.fuzzy_search(query).map do |entry|
                 entry.is_a?(RubyIndexer::Entry::Class) ? entry.name : nil
               end.compact.uniq
 
@@ -260,7 +266,7 @@ module RubyLsp
                   [
                     {
                       type: "text",
-                      text: "Too many classes to return, please use other tool.",
+                      text: "Too many classes to return, please narrow down your request with a query.",
                     },
                     {
                       type: "text",
@@ -344,10 +350,11 @@ module RubyLsp
                   type: "text",
                   text: {
                     name: fully_qualified_name,
-                    nestings: nestings.join(", "),
+                    nestings: nestings,
                     type: type,
-                    ancestors: ancestors.join(", "),
-                    methods: methods.map(&:name).join(", "),
+                    ancestors: ancestors,
+                    methods: methods.map(&:name),
+                    uris: entries.map(&:uri),
                     documentation: markdown_from_index_entries(name, entries),
                   }.to_json,
                 }
