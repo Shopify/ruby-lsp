@@ -19,6 +19,22 @@ RuboCop::Markdown::CONFIG_DEFAULT = T.let(T.unsafe(nil), Pathname)
 # source://rubocop-md//lib/rubocop/markdown.rb#9
 RuboCop::Markdown::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
 
+# A plugin that integrates rubocop-md with RuboCop's plugin system.
+#
+# source://rubocop-md//lib/rubocop/markdown/plugin.rb#8
+class RuboCop::Markdown::Plugin < ::LintRoller::Plugin
+  # source://rubocop-md//lib/rubocop/markdown/plugin.rb#9
+  def about; end
+
+  # source://rubocop-md//lib/rubocop/markdown/plugin.rb#23
+  def rules(_context); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-md//lib/rubocop/markdown/plugin.rb#19
+  def supported?(context); end
+end
+
 # Transform source Markdown file into valid Ruby file
 # by commenting out all non-code lines
 #
