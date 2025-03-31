@@ -1275,6 +1275,15 @@ export class TestController {
   ) {
     await new Promise<void>((resolve, reject) => {
       const promises: Promise<void>[] = [];
+      const startTimestamps = new Map<string, number>();
+      const withDuration = (
+        id: string,
+        callback: (duration?: number) => void,
+      ) => {
+        const startTime = startTimestamps.get(id);
+        const duration = startTime ? Date.now() - startTime : undefined;
+        callback(duration);
+      };
 
       const abortController = new AbortController();
       token.onCancellationRequested(() => {
@@ -1326,6 +1335,7 @@ export class TestController {
               (test) => {
                 if (test) {
                   run.started(test);
+                  startTimestamps.set(test.id, Date.now());
                 }
               },
             ),
@@ -1339,7 +1349,9 @@ export class TestController {
             this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
               (test) => {
                 if (test) {
-                  run.passed(test);
+                  withDuration(test.id, (duration) =>
+                    run.passed(test, duration),
+                  );
                 }
               },
             ),
@@ -1353,7 +1365,13 @@ export class TestController {
             this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
               (test) => {
                 if (test) {
-                  run.failed(test, new vscode.TestMessage(params.message));
+                  withDuration(test.id, (duration) =>
+                    run.failed(
+                      test,
+                      new vscode.TestMessage(params.message),
+                      duration,
+                    ),
+                  );
                 }
               },
             ),
@@ -1367,7 +1385,13 @@ export class TestController {
             this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
               (test) => {
                 if (test) {
-                  run.errored(test, new vscode.TestMessage(params.message));
+                  withDuration(test.id, (duration) =>
+                    run.errored(
+                      test,
+                      new vscode.TestMessage(params.message),
+                      duration,
+                    ),
+                  );
                 }
               },
             ),
