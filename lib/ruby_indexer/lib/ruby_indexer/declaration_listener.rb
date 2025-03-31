@@ -9,7 +9,7 @@ module RubyIndexer
     #: Array[String]
     attr_reader :indexing_errors
 
-    #: (Index index, Prism::Dispatcher dispatcher, Prism::ParseResult parse_result, URI::Generic uri, ?collect_comments: bool) -> void
+    #: (Index index, Prism::Dispatcher dispatcher, Prism::ParseLexResult | Prism::ParseResult parse_result, URI::Generic uri, ?collect_comments: bool) -> void
     def initialize(index, dispatcher, parse_result, uri, collect_comments: false)
       @index = index
       @uri = uri
