@@ -293,7 +293,9 @@ module RubyIndexer
 
     #: ((RBS::AST::Declarations::Class | RBS::AST::Declarations::Module | RBS::AST::Declarations::Constant | RBS::AST::Declarations::Global | RBS::AST::Members::MethodDefinition | RBS::AST::Members::Alias) declaration) -> String?
     def comments_to_string(declaration)
-      declaration.comment&.string
+      # HTML comments are not rendered in VS Code, but they are in some other editors, so
+      # we need to strip them out.
+      declaration.comment&.string&.gsub(/<!--.*?-->/m, "")
     end
   end
 end
