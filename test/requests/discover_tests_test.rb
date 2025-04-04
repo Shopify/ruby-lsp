@@ -327,25 +327,29 @@ module RubyLsp
         end
       RUBY
 
-      create_test_discovery_addon
+      begin
+        create_test_discovery_addon
 
-      with_server(source) do |server, uri|
-        server.process_message({
-          id: 1,
-          method: "rubyLsp/discoverTests",
-          params: { textDocument: { uri: uri } },
-        })
+        with_server(source) do |server, uri|
+          server.process_message({
+            id: 1,
+            method: "rubyLsp/discoverTests",
+            params: { textDocument: { uri: uri } },
+          })
 
-        response = pop_result(server)
+          response = pop_result(server)
 
-        assert_instance_of(RubyLsp::Result, response)
-        items = response.response
+          assert_instance_of(RubyLsp::Result, response)
+          items = response.response
 
-        test_classes = items.map { |i| i[:label] }
-        assert_equal(["MyTest"], test_classes)
+          test_classes = items.map { |i| i[:label] }
+          assert_equal(["MyTest"], test_classes)
 
-        test_methods = items[0][:children].map { |i| i[:label] }
-        assert_equal(["should do something", "should do something else"], test_methods)
+          test_methods = items[0][:children].map { |i| i[:label] }
+          assert_equal(["should do something", "should do something else"], test_methods)
+        end
+      ensure
+        RubyLsp::Addon.addon_classes.clear
       end
     end
 

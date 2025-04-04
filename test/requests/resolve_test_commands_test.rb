@@ -1195,6 +1195,8 @@ module RubyLsp
 
         result = server.pop_response.response
         assert_equal(["bin/rails test /test/server_test.rb:2"], result[:commands])
+      ensure
+        RubyLsp::Addon.addon_classes.clear
       end
     end
   end
