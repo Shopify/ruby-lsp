@@ -27,7 +27,7 @@ module RubyLsp
         Listeners::DocumentSymbol.new(@response_builder, uri, dispatcher)
 
         Addon.addons.each do |addon|
-          addon.create_document_symbol_listener(@response_builder, dispatcher)
+          Addon.notify(addon, :create_document_symbol_listener, @response_builder, dispatcher)
         end
       end
 

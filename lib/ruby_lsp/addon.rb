@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 module RubyLsp
-  # To register an add-on, inherit from this class and implement both `name` and `activate`
+  # To register an add-on, inherit from this class and implement `name`, `activate`, and `deactivate`.
   #
   # # Example
   #
@@ -11,6 +11,10 @@ module RubyLsp
   #   class MyAddon < Addon
   #     def activate
   #       # Perform any relevant initialization
+  #     end
+  #
+  #     def deactivate
+  #       # Clean up resources like file watchers or child processes
   #     end
   #
   #     def name
@@ -144,6 +148,23 @@ module RubyLsp
           raise IncompatibleApiError,
             "Add-on is not compatible with this version of the Ruby LSP. Skipping its activation"
         end
+      end
+
+      # Notifies the given add-on of a specific event by invoking the corresponding method on the add-on.
+      #
+      # Prevents the add-on from crashing the process if it raises a StandardError or SystemExit.
+      #
+      # Example:
+      # ```ruby
+      # Addon.notify(addon, :create_code_lens_listener, response_builder, uri, dispatcher)
+      # ```
+      #: (Addon addon, Symbol event, *Object) -> untyped
+      def notify(addon, event, *args)
+        T.unsafe(addon).send(event, *args) if addon.respond_to?(event)
+      rescue SystemExit
+        puts "Add-on #{addon.name} attempted to exit the process while calling #{event} with args (#{args}). Ignoring..."
+      rescue StandardError => e
+        puts "Add-on #{addon.name} raised an error while calling #{event} with args (#{args}): #{e.full_message}"
       end
     end
 

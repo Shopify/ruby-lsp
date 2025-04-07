@@ -40,7 +40,7 @@ module RubyLsp
           Listeners::SpecStyle.new(@response_builder, @global_state, @dispatcher, @document.uri)
 
           Addon.addons.each do |addon|
-            addon.create_discover_tests_listener(@response_builder, @dispatcher, @document.uri)
+            Addon.notify(addon, :create_discover_tests_listener, @response_builder, @dispatcher, @document.uri)
           end
 
           @dispatcher.visit(@document.parse_result.value)
@@ -58,7 +58,7 @@ module RubyLsp
             Listeners::SpecStyle.new(@response_builder, @global_state, @dispatcher, @document.uri)
 
             Addon.addons.each do |addon|
-              addon.create_discover_tests_listener(@response_builder, @dispatcher, @document.uri)
+              Addon.notify(addon, :create_discover_tests_listener, @response_builder, @dispatcher, @document.uri)
             end
 
             # Dispatch the events both for indexing the test file and discovering the tests. The order here is

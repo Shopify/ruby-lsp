@@ -188,5 +188,53 @@ module RubyLsp
         assert_predicate(T.unsafe(addon), :hello)
       end
     end
+
+    def test_an_addon_calling_exit_or_raising_does_not_quit_lsp
+      Addon.load_addons(@global_state, @outgoing_queue)
+
+      addon = Addon.get("My Add-on", "0.1.0")
+
+      listeners = addon.public_methods.grep(/_listener$/)
+      other_commands = [
+        :handle_window_show_message_response,
+        :resolve_test_commands,
+        :workspace_did_change_watched_files,
+      ]
+
+      commands_that_should_not_quit_lsp = [*listeners, *other_commands]
+
+      failures = []
+
+      commands_that_should_not_quit_lsp.each do |command|
+        # Check how `exit` is handled
+        addon.define_singleton_method(command) { Kernel.exit }
+
+        begin
+          capture_io { Addon.notify(addon, command, nil) }
+        rescue SystemExit
+          failures << "Addon.notify(addon, #{command.inspect}, args) should not be able to exit the LSP process"
+        end
+
+        # Check how `abort` is handled
+        addon.define_singleton_method(command) { Kernel.abort }
+
+        begin
+          capture_io { Addon.notify(addon, command, nil) }
+        rescue SystemExit
+          failures << "Addon.notify(addon, #{command.inspect}, args) should not be able to abort the LSP process"
+        end
+
+        # Check how `raise` is handled
+        addon.define_singleton_method(command) { raise StandardError }
+
+        begin
+          capture_io { Addon.notify(addon, command, nil) }
+        rescue StandardError
+          failures << "Addon.notify(addon, #{command.inspect}, args) should not raise an error"
+        end
+      end
+
+      assert_empty(failures, failures.join("\n"))
+    end
   end
 end

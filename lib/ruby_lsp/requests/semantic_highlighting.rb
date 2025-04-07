@@ -87,7 +87,7 @@ module RubyLsp
         Listeners::SemanticHighlighting.new(dispatcher, @response_builder)
 
         Addon.addons.each do |addon|
-          addon.create_semantic_highlighting_listener(@response_builder, dispatcher)
+          Addon.notify(addon, :create_semantic_highlighting_listener, @response_builder, dispatcher)
         end
       end
 
