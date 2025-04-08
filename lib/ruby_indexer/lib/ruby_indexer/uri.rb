@@ -15,14 +15,19 @@ module URI
     class << self
       #: (path: String, ?fragment: String?, ?scheme: String, ?load_path_entry: String?) -> URI::Generic
       def from_path(path:, fragment: nil, scheme: "file", load_path_entry: nil)
+        # This unsafe regex is the same one used in the URI::RFC2396_REGEXP class with the exception of the fact that we
+        # do not include colon as a safe character. VS Code URIs always escape colons and we need to ensure we do the
+        # same to avoid inconsistencies in our URIs, which are used to identify resources
+        unsafe_regex = %r{[^\-_.!~*'()a-zA-Z\d;/?@&=+$,\[\]]}
+
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
-          PARSER.escape("/#{path}")
+          PARSER.escape("/#{path}", unsafe_regex)
         elsif path.start_with?("//?/")
           # Some paths on Windows start with "//?/". This is a special prefix that allows for long file paths
-          PARSER.escape(path.delete_prefix("//?"))
+          PARSER.escape(path.delete_prefix("//?"), unsafe_regex)
         else
-          PARSER.escape(path)
+          PARSER.escape(path, unsafe_regex)
         end
 
         uri = build(scheme: scheme, path: escaped_path, fragment: fragment)
