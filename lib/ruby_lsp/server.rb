@@ -241,7 +241,9 @@ module RubyLsp
 
       bundle_env_path = File.join(".ruby-lsp", "bundle_env")
       bundle_env = if File.exist?(bundle_env_path)
-        env = File.readlines(bundle_env_path).to_h { |line| T.cast(line.chomp.split("=", 2), [String, String]) }
+        env = File.readlines(bundle_env_path).to_h do |line|
+          line.chomp.split("=", 2) #: as [String, String]
+        end
         FileUtils.rm(bundle_env_path)
         env
       end

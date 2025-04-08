@@ -379,8 +379,10 @@ module RubyIndexer
       indexer = RubyIndexer::RBSIndexer.new(index)
       pathname = Pathname.new("/file.rbs")
       indexer.process_signature(pathname, declarations)
-      entry = T.must(index[method_name]).first
-      T.cast(entry, Entry::Method).signatures
+
+      index[method_name] #: as !nil
+        .first #: as Entry::Method
+        .signatures
     end
   end
 end

@@ -446,23 +446,43 @@ class RubyDocumentTest < Minitest::Test
     # Locate the `ActiveRecord` module
     node_context = document.locate_node({ line: 0, character: 19 })
     assert_instance_of(Prism::ConstantReadNode, node_context.node)
-    assert_equal("ActiveRecord", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
+    assert_equal(
+      "ActiveRecord",
+      node_context
+        .node #: as Prism::ConstantReadNode
+        .location.slice,
+    )
 
     assert_instance_of(Prism::ConstantPathNode, node_context.parent)
     assert_equal(
       "ActiveRecord",
-      T.must(T.cast(node_context.parent, Prism::ConstantPathNode).child_nodes.first).location.slice,
+      node_context
+        .parent #: as Prism::ConstantPathNode
+        .child_nodes
+        .first #: as !nil
+        .location
+        .slice,
     )
 
     # Locate the `Base` class
     node_context = document.locate_node({ line: 0, character: 27 })
     found = node_context.node #: as Prism::ConstantPathNode
-    assert_equal(:ActiveRecord, T.cast(found.parent, Prism::ConstantReadNode).name)
+    assert_equal(
+      :ActiveRecord,
+      found
+        .parent #: as Prism::ConstantReadNode
+        .name,
+    )
     assert_equal(:Base, found.name)
 
     # Locate the `where` invocation
     node_context = document.locate_node({ line: 3, character: 4 })
-    assert_equal("where", T.cast(node_context.node, Prism::CallNode).message)
+    assert_equal(
+      "where",
+      node_context
+        .node #: as Prism::CallNode
+        .message,
+    )
   end
 
   def test_locate_returns_nesting
@@ -483,11 +503,21 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     node_context = document.locate_node({ line: 9, character: 6 })
-    assert_equal("Qux", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
+    assert_equal(
+      "Qux",
+      node_context
+        .node #: as Prism::ConstantReadNode
+        .location.slice,
+    )
     assert_equal(["Foo", "Bar"], node_context.nesting)
 
     node_context = document.locate_node({ line: 3, character: 6 })
-    assert_equal("Hello", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
+    assert_equal(
+      "Hello",
+      node_context
+        .node #: as Prism::ConstantReadNode
+        .location.slice,
+    )
     assert_equal(["Foo", "Other"], node_context.nesting)
   end
 
@@ -565,7 +595,12 @@ class RubyDocumentTest < Minitest::Test
 
     node_context = document.locate_node({ line: 3, character: 6 }, node_types: [Prism::ConstantReadNode])
     found = node_context.node
-    assert_equal("Qux", T.cast(found, Prism::ConstantReadNode).location.slice)
+    assert_equal(
+      "Qux",
+      found #: as Prism::ConstantReadNode
+        .location
+        .slice,
+    )
     assert_equal(["Foo", "Bar"], node_context.nesting)
   end
 
@@ -585,7 +620,11 @@ class RubyDocumentTest < Minitest::Test
       node_types: [Prism::DefNode],
     )
     found = node_context.node
-    assert_equal(:C鳴く, T.cast(found, Prism::DefNode).name)
+    assert_equal(
+      :C鳴く,
+      found #: as Prism::DefNode
+        .name,
+    )
     assert_equal(["A動物", "Bねこ"], node_context.nesting)
   end
 
@@ -761,14 +800,22 @@ class RubyDocumentTest < Minitest::Test
       node_types: [Prism::CallNode],
     )
 
-    assert_equal("each", T.cast(target, Prism::CallNode).message)
+    assert_equal(
+      "each",
+      target #: as Prism::CallNode
+        .message,
+    )
 
     target = document.locate_first_within_range(
       { start: { line: 1, character: 2 }, end: { line: 2, character: 5 } },
       node_types: [Prism::CallNode],
     )
 
-    assert_equal("each", T.cast(target, Prism::CallNode).message)
+    assert_equal(
+      "each",
+      target #: as Prism::CallNode
+        .message,
+    )
   end
 
   def test_uncached_requests_return_empty_cache_object

@@ -561,7 +561,9 @@ module RubyIndexer
         end
 
         keyword_hash_nodes, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
-        keyword_args = T.cast(keyword_hash_nodes.first, T.nilable(Prism::KeywordHashNode))&.elements
+        keyword_args =
+          keyword_hash_nodes.first #: as Prism::KeywordHashNode?
+            &.elements
         forwarding_arguments, positionals = positional_args.partition do |arg|
           arg.is_a?(Prism::ForwardingArgumentsNode)
         end

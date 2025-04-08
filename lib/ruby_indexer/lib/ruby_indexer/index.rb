@@ -261,15 +261,7 @@ module RubyIndexer
     def constant_completion_candidates(name, nesting)
       # If we have a top level reference, then we don't need to include completions inside the current nesting
       if name.start_with?("::")
-        return T.cast(
-          @entries_tree.search(name.delete_prefix("::")),
-          T::Array[T::Array[T.any(
-            Entry::Constant,
-            Entry::ConstantAlias,
-            Entry::Namespace,
-            Entry::UnresolvedConstantAlias,
-          )]],
-        )
+        return @entries_tree.search(name.delete_prefix("::")) #: as Array[Array[(Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias)]]
       end
 
       # Otherwise, we have to include every possible constant the user might be referring to. This is essentially the
@@ -645,15 +637,15 @@ module RubyIndexer
       # indirect means like including a module that than includes the ancestor. Trying to figure out exactly which
       # ancestors need to be deleted is too expensive. Therefore, if any of the namespace entries has a change to their
       # ancestor hash, we clear all ancestors and start linearizing lazily again from scratch
-      original_map = T.cast(
-        original_entries.select { |e| e.is_a?(Entry::Namespace) },
-        T::Array[Entry::Namespace],
-      ).to_h { |e| [e.name, e.ancestor_hash] }
+      original_map =
+        original_entries
+          .select { |e| e.is_a?(Entry::Namespace) } #: as Array[Entry::Namespace]
+          .to_h { |e| [e.name, e.ancestor_hash] }
 
-      updated_map = T.cast(
-        updated_entries.select { |e| e.is_a?(Entry::Namespace) },
-        T::Array[Entry::Namespace],
-      ).to_h { |e| [e.name, e.ancestor_hash] }
+      updated_map =
+        updated_entries
+          .select { |e| e.is_a?(Entry::Namespace) } #: as Array[Entry::Namespace]
+          .to_h { |e| [e.name, e.ancestor_hash] }
 
       @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end

@@ -23,7 +23,13 @@ class RBSDocumentTest < Minitest::Test
     )
 
     refute_predicate(document, :syntax_error?)
-    assert_equal(:Foo, T.cast(document.parse_result[0], RBS::AST::Declarations::Class).name.name)
+    assert_equal(
+      :Foo,
+      document
+        .parse_result[0] #: as RBS::AST::Declarations::Class
+        .name
+        .name,
+    )
   end
 
   def test_parsing_remembers_syntax_errors
