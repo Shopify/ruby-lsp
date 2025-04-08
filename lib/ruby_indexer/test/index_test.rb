@@ -250,7 +250,13 @@ module RubyIndexer
 
       entries = @index.resolve_method("Array", "Foo") #: as !nil
       assert_equal("Array", entries.first.name)
-      assert_equal("Foo", T.must(entries.first.owner).name)
+      assert_equal(
+        "Foo",
+        entries
+          .first
+          .owner #: as !nil
+          .name,
+      )
     end
 
     def test_resolve_method_attribute
@@ -1591,7 +1597,13 @@ module RubyIndexer
 
       entries = @index.method_completion_candidates("bar", "Baz")
       assert_equal(["bar"], entries.map(&:name))
-      assert_equal("Baz", T.must(entries.first.owner).name)
+      assert_equal(
+        "Baz",
+        entries
+          .first
+          .owner #: as !nil
+          .name,
+      )
     end
 
     def test_completion_does_not_duplicate_methods_overridden_by_aliases

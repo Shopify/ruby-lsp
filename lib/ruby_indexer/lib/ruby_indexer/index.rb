@@ -126,7 +126,10 @@ module RubyIndexer
 
       (@entries[name] ||= []) << entry
       (@uris_to_entries[entry.uri.to_s] ||= []) << entry
-      @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
+      @entries_tree.insert(
+        name,
+        @entries[name], #: as !nil
+      ) unless skip_prefix_tree
     end
 
     #: (String fully_qualified_name) -> Array[Entry]?
@@ -180,7 +183,9 @@ module RubyIndexer
       end
 
       results = nesting.length.downto(0).flat_map do |i|
-        prefix = T.must(nesting[0...i]).join("::")
+        prefix =
+          nesting[0...i] #: as !nil
+            .join("::")
         namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
         @entries_tree.search(namespaced_query)
       end
@@ -382,7 +387,13 @@ module RubyIndexer
     # Indexes a File URI by reading the contents from disk
     #: (URI::Generic uri, ?collect_comments: bool) -> void
     def index_file(uri, collect_comments: true)
-      index_single(uri, File.read(T.must(uri.full_path)), collect_comments: collect_comments)
+      index_single(
+        uri,
+        File.read(
+          uri.full_path, #: as !nil
+        ),
+        collect_comments: collect_comments,
+      )
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it

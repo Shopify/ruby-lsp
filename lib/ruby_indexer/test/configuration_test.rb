@@ -100,7 +100,9 @@ module RubyIndexer
       uris = @config.indexable_uris
       assert(uris.none? { |uri| uri.full_path == path })
     ensure
-      FileUtils.rm(T.must(path))
+      FileUtils.rm(
+        path, #: as !nil
+      )
     end
 
     def test_paths_are_unique

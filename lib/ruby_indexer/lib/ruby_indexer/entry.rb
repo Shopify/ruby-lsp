@@ -54,7 +54,9 @@ module RubyIndexer
       if @uri.scheme == "untitled"
         @uri.opaque #: as !nil
       else
-        File.basename(T.must(file_path))
+        File.basename(
+          file_path, #: as !nil
+        )
       end
     end
 

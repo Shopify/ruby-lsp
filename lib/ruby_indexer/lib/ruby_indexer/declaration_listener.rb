@@ -509,7 +509,10 @@ module RubyIndexer
         parent_class_name,
       )
 
-      advance_namespace_stack(T.must(nesting.last), entry)
+      advance_namespace_stack(
+        nesting.last, #: as !nil
+        entry,
+      )
     end
 
     #: { (Index index, Entry::Namespace base) -> void } -> void
@@ -900,7 +903,9 @@ module RubyIndexer
 
       # private_class_method accepts strings, symbols or arrays of strings and symbols as arguments. Here we build a
       # single list of all of the method names that have to be made private
-      arrays, others = arguments.partition { |argument| argument.is_a?(Prism::ArrayNode) } #: as [Array[Prism::ArrayNode], Array[Prism::Node]]
+      arrays, others = arguments.partition do |argument|
+        argument.is_a?(Prism::ArrayNode)
+      end #: as [Array[Prism::ArrayNode], Array[Prism::Node]]
       arrays.each { |array| others.concat(array.elements) }
 
       names = others.filter_map do |argument|

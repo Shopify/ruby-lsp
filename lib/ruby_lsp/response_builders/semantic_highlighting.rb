@@ -64,7 +64,7 @@ module RubyLsp
             start_line: location.start_line,
             start_code_unit_column: location.cached_start_code_units_column(@code_units_cache),
             length: length,
-            type: T.must(TOKEN_TYPES[type]),
+            type: TOKEN_TYPES[type], #: as !nil
             modifier: modifiers_indices,
           ),
         )
