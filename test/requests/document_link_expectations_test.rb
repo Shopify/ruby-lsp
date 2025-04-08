@@ -9,7 +9,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
 
   def assert_expectations(source, expected)
     source = substitute_syntax_tree_version(source)
-    actual = T.cast(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::DocumentLink])
+    actual = run_expectations(source) #: as Array[LanguageServer::Protocol::Interface::DocumentLink]
     assert_equal(map_expectations(json_expectations(expected)), JSON.parse(actual.to_json))
   end
 

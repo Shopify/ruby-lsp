@@ -815,7 +815,7 @@ module RubyLsp
         return
       end
 
-      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
+      hints_configurations = @store.features_configuration.dig(:inlayHint) #: as !nil
       dispatcher = Prism::Dispatcher.new
 
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)

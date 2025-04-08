@@ -132,10 +132,10 @@ module RubyIndexer
         name = (expression.is_a?(Prism::SelfNode) ? "<Class:#{last_name_in_stack}>" : "<Class:#{expression.slice}>")
         real_nesting = Index.actual_nesting(@stack, name)
 
-        existing_entries = T.cast(@index[real_nesting.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
+        existing_entries = @index[real_nesting.join("::")] #: as Array[Entry::SingletonClass]?
 
         if existing_entries
-          entry = T.must(existing_entries.first)
+          entry = existing_entries.first #: as !nil
           entry.update_singleton_information(
             Location.from_prism_location(node.location, @code_units_cache),
             Location.from_prism_location(expression.location, @code_units_cache),
@@ -900,10 +900,7 @@ module RubyIndexer
 
       # private_class_method accepts strings, symbols or arrays of strings and symbols as arguments. Here we build a
       # single list of all of the method names that have to be made private
-      arrays, others = T.cast(
-        arguments.partition { |argument| argument.is_a?(Prism::ArrayNode) },
-        [T::Array[Prism::ArrayNode], T::Array[Prism::Node]],
-      )
+      arrays, others = arguments.partition { |argument| argument.is_a?(Prism::ArrayNode) } #: as [Array[Prism::ArrayNode], Array[Prism::Node]]
       arrays.each { |array| others.concat(array.elements) }
 
       names = others.filter_map do |argument|
@@ -927,7 +924,7 @@ module RubyIndexer
 
     #: -> VisibilityScope
     def current_visibility_scope
-      T.must(@visibility_stack.last)
+      @visibility_stack.last #: as !nil
     end
 
     #: (Prism::ParametersNode? parameters_node) -> Array[Entry::Parameter]

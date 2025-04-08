@@ -456,7 +456,7 @@ class RubyDocumentTest < Minitest::Test
 
     # Locate the `Base` class
     node_context = document.locate_node({ line: 0, character: 27 })
-    found = T.cast(node_context.node, Prism::ConstantPathNode)
+    found = node_context.node #: as Prism::ConstantPathNode
     assert_equal(:ActiveRecord, T.cast(found.parent, Prism::ConstantReadNode).name)
     assert_equal(:Base, found.name)
 
@@ -816,7 +816,7 @@ class RubyDocumentTest < Minitest::Test
     range = { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }
     document.push_edits([{ range: range, text: "d" }], version: 2)
 
-    last_edit = T.must(document.last_edit)
+    last_edit = document.last_edit #: as !nil
     assert_instance_of(RubyLsp::Document::Insert, last_edit)
     assert_equal(range, last_edit.range)
 
@@ -824,7 +824,7 @@ class RubyDocumentTest < Minitest::Test
     range = { start: { line: 1, character: 0 }, end: { line: 1, character: 1 } }
     document.push_edits([{ range: range, text: "def" }], version: 3)
 
-    last_edit = T.must(document.last_edit)
+    last_edit = document.last_edit #: as !nil
     assert_instance_of(RubyLsp::Document::Replace, last_edit)
     assert_equal(range, last_edit.range)
 
@@ -832,7 +832,7 @@ class RubyDocumentTest < Minitest::Test
     range = { start: { line: 1, character: 0 }, end: { line: 1, character: 3 } }
     document.push_edits([{ range: range, text: "" }], version: 4)
 
-    last_edit = T.must(document.last_edit)
+    last_edit = document.last_edit #: as !nil
     assert_instance_of(RubyLsp::Document::Delete, last_edit)
     assert_equal(range, last_edit.range)
 

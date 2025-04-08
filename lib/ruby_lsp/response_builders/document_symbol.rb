@@ -32,13 +32,13 @@ module RubyLsp
       #: -> Interface::DocumentSymbol?
       def pop
         if @stack.size > 1
-          T.cast(@stack.pop, Interface::DocumentSymbol)
+          @stack.pop #: as Interface::DocumentSymbol
         end
       end
 
       #: -> (SymbolHierarchyRoot | Interface::DocumentSymbol)
       def last
-        T.must(@stack.last)
+        @stack.last #: as !nil
       end
 
       # @override

@@ -34,7 +34,7 @@ class DiagnosticsTest < Minitest::Test
       def foo
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
 
     assert_equal(2, diagnostics.length)
     assert_equal("expected an `end` to close the `def` statement", T.must(diagnostics.last).message)
@@ -54,7 +54,7 @@ class DiagnosticsTest < Minitest::Test
 
     @global_state.instance_variable_get(:@supported_formatters).delete("rubocop_internal")
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
 
     assert_empty(diagnostics)
   ensure
@@ -69,7 +69,7 @@ class DiagnosticsTest < Minitest::Test
       end
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
 
     refute_empty(diagnostics)
   end
@@ -104,7 +104,7 @@ class DiagnosticsTest < Minitest::Test
       initializationOptions: { linters: ["my-custom-formatter"] },
     })
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
     assert(diagnostics.find { |d| d.message == "Hello from custom formatter" })
   end
 
@@ -116,7 +116,7 @@ class DiagnosticsTest < Minitest::Test
       b /a/
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
     assert_match("ambiguous first argument", T.must(diagnostics[0]).message)
     assert_match("ambiguous first argument", T.must(diagnostics[1]).message)
     assert_match("ambiguous `*`", T.must(diagnostics[2]).message)
@@ -128,7 +128,7 @@ class DiagnosticsTest < Minitest::Test
       def m; END{}; end
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
     assert_equal("END in method; use at_exit", T.must(diagnostics[0]).message)
   end
 
@@ -137,7 +137,7 @@ class DiagnosticsTest < Minitest::Test
       def foo
     RUBY
 
-    diagnostics = T.must(RubyLsp::Requests::Diagnostics.new(@global_state, document).perform)
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
     assert_equal("expected a delimiter to close the parameters", T.must(diagnostics[0]).message)
     assert_equal(
       "unexpected end-of-input, assuming it is closing the parent top level context",

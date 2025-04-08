@@ -80,7 +80,7 @@ class CodeActionsFormattingTest < Minitest::Test
     diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform
     # The source of the returned attributes may be RuboCop or Prism. Prism diagnostics don't have a code.
     rubocop_diagnostics = T.must(diagnostics).select { _1.attributes[:source] == "RuboCop" }
-    diagnostic = T.must(T.must(rubocop_diagnostics).find { |d| d.attributes[:code] && (d.code == diagnostic_code) })
+    diagnostic = T.must(rubocop_diagnostics).find { |d| d.attributes[:code] && (d.code == diagnostic_code) } #: as !nil
     range = diagnostic.range.to_hash.transform_values(&:to_hash)
     result = RubyLsp::Requests::CodeActions.new(document, range, {
       diagnostics: [JSON.parse(T.must(diagnostic).to_json, symbolize_names: true)],
@@ -90,7 +90,7 @@ class CodeActionsFormattingTest < Minitest::Test
     # hashes here, so cast to untyped and only look at those.
     untyped_result = result #: untyped
     selected_action = untyped_result.find do |ca|
-      code_action = T.let(ca, T.untyped)
+      code_action = ca #: untyped
       code_action.respond_to?(:[]) && code_action[:title] == code_action_title
     end
 

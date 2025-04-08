@@ -98,7 +98,7 @@ module RubyLsp
 
       #: (Prism::DefNode node) -> void
       def on_def_node_leave(node)
-        @current_scope = T.must(@current_scope.parent)
+        @current_scope = @current_scope.parent #: as !nil
       end
 
       #: (Prism::BlockNode node) -> void
@@ -108,7 +108,7 @@ module RubyLsp
 
       #: (Prism::BlockNode node) -> void
       def on_block_node_leave(node)
-        @current_scope = T.must(@current_scope.parent)
+        @current_scope = @current_scope.parent #: as !nil
       end
 
       #: (Prism::BlockLocalVariableNode node) -> void

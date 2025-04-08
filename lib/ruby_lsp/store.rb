@@ -46,7 +46,7 @@ module RubyLsp
       end
 
       set(uri: uri, source: File.binread(path), version: 0, language_id: language_id)
-      T.must(@state[uri.to_s])
+      @state[uri.to_s] #: as !nil
     rescue Errno::ENOENT
       raise NonExistingDocumentError, uri.to_s
     end

@@ -284,7 +284,7 @@ class ServerTest < Minitest::Test
       },
     })
 
-    notification = T.must(@server.pop_response)
+    notification = @server.pop_response #: as !nil
     assert_equal("textDocument/publishDiagnostics", notification.method)
     assert_empty(T.cast(notification.params, RubyLsp::Interface::PublishDiagnosticsParams).diagnostics)
   end

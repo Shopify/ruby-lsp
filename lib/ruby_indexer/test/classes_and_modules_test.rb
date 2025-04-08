@@ -331,16 +331,16 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"].first)
+      foo = @index["Foo"].first #: as !nil
       assert_equal("Bar", foo.parent_class)
 
-      baz = T.must(@index["Baz"].first)
+      baz = @index["Baz"].first #: as !nil
       assert_equal("::Object", baz.parent_class)
 
-      qux = T.must(@index["Something::Qux"].first)
+      qux = @index["Something::Qux"].first #: as !nil
       assert_equal("::Baz", qux.parent_class)
 
-      final_thing = T.must(@index["FinalThing"].first)
+      final_thing = @index["FinalThing"].first #: as !nil
       assert_equal("Something::Baz", final_thing.parent_class)
     end
 
@@ -380,13 +380,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"][0])
+      foo = @index["Foo"][0] #: as !nil
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux"][0])
+      qux = @index["Foo::Qux"][0] #: as !nil
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      constant_path_references = @index["ConstantPathReferences"][0] #: as !nil
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -426,13 +426,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"][0])
+      foo = @index["Foo"][0] #: as !nil
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux"][0])
+      qux = @index["Foo::Qux"][0] #: as !nil
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      constant_path_references = @index["ConstantPathReferences"][0] #: as !nil
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -472,13 +472,13 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo::<Class:Foo>"][0])
+      foo = @index["Foo::<Class:Foo>"][0] #: as !nil
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux::<Class:Qux>"][0])
+      qux = @index["Foo::Qux::<Class:Qux>"][0] #: as !nil
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences::<Class:ConstantPathReferences>"][0])
+      constant_path_references = @index["ConstantPathReferences::<Class:ConstantPathReferences>"][0] #: as !nil
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -492,7 +492,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo::<Class:Foo>"].first)
+      foo = @index["Foo::<Class:Foo>"].first #: as !nil
       assert_equal(4, foo.location.start_line)
       assert_equal("Some extra comments", foo.comments)
     end
@@ -506,7 +506,7 @@ module RubyIndexer
         end
       RUBY
 
-      singleton = T.must(@index["Foo::<Class:bar>"].first)
+      singleton = @index["Foo::<Class:bar>"].first #: as !nil
 
       # Even though this is not correct, we consider any dynamic singleton class block as a regular singleton class.
       # That pattern cannot be properly analyzed statically and assuming that it's always a regular singleton simplifies
@@ -539,7 +539,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"].first)
+      foo = @index["Foo"].first #: as !nil
       refute_equal(foo.location, foo.name_location)
 
       name_location = foo.name_location
@@ -548,7 +548,7 @@ module RubyIndexer
       assert_equal(6, name_location.start_column)
       assert_equal(9, name_location.end_column)
 
-      bar = T.must(@index["Bar"].first)
+      bar = @index["Bar"].first #: as !nil
       refute_equal(bar.location, bar.name_location)
 
       name_location = bar.name_location

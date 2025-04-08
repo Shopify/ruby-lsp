@@ -51,10 +51,7 @@ module RubyLsp
           )
         end
 
-        target = T.cast(
-          target,
-          T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode),
-        )
+        target = target #: as (Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode)
 
         name = RubyIndexer::Index.constant_name(target)
         return unless name
@@ -97,7 +94,7 @@ module RubyLsp
         # rename the files for the user.
         #
         # We also look for an associated test file and rename it too
-        short_name = T.must(fully_qualified_name.split("::").last)
+        short_name = fully_qualified_name.split("::").last #: as !nil
 
         T.must(@global_state.index[fully_qualified_name]).each do |entry|
           # Do not rename files that are not part of the workspace

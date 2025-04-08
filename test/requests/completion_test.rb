@@ -30,7 +30,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -61,7 +61,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require("#{prefix}")
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -92,7 +92,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -123,7 +123,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -793,7 +793,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require_relative "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -834,7 +834,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require_relative("#{prefix}")
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -878,7 +878,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require_relative "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -918,7 +918,7 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require_relative "b"
     RUBY
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 
@@ -961,7 +961,7 @@ class CompletionTest < Minitest::Test
       require_relative "#{prefix}"
     RUBY
 
-    end_char = T.must(source.rindex('"'))
+    end_char = source.rindex('"') #: as !nil
     start_position = { line: 0, character: T.must(source.index('"')) + 1 }
     end_position = { line: 0, character: end_char }
 

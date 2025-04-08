@@ -155,15 +155,7 @@ module RubyIndexer
         end
       end
 
-      T.cast(
-        entries,
-        T.nilable(T::Array[T.any(
-          Entry::Namespace,
-          Entry::ConstantAlias,
-          Entry::UnresolvedConstantAlias,
-          Entry::Constant,
-        )]),
-      )
+      entries #: as Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant)]?
     end
 
     # Searches entries in the index based on an exact prefix, intended for providing autocomplete. All possible matches
@@ -302,15 +294,7 @@ module RubyIndexer
       # Top level constants
       entries.concat(@entries_tree.search(name))
       entries.uniq!
-      T.cast(
-        entries,
-        T::Array[T::Array[T.any(
-          Entry::Constant,
-          Entry::ConstantAlias,
-          Entry::Namespace,
-          Entry::UnresolvedConstantAlias,
-        )]],
-      )
+      entries #: as Array[Array[(Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias)]]
     end
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
@@ -546,7 +530,9 @@ module RubyIndexer
 
       if nesting.any?
         singleton_levels.times do
-          nesting << "<Class:#{T.must(nesting.last)}>"
+          nesting << "<Class:#{
+            nesting.last #: as !nil
+          }>"
         end
       end
 
@@ -573,7 +559,7 @@ module RubyIndexer
     # and find inherited instance variables as well
     #: (String variable_name, String owner_name) -> Array[Entry::InstanceVariable]?
     def resolve_instance_variable(variable_name, owner_name)
-      entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
+      entries = self[variable_name] #: as Array[Entry::InstanceVariable]?
       return unless entries
 
       ancestors = linearized_ancestors_of(owner_name)
@@ -597,7 +583,7 @@ module RubyIndexer
     # include the `@` prefix
     #: (String name, String owner_name) -> Array[(Entry::InstanceVariable | Entry::ClassVariable)]
     def instance_variable_completion_candidates(name, owner_name)
-      entries = T.cast(prefix_search(name).flatten, T::Array[T.any(Entry::InstanceVariable, Entry::ClassVariable)])
+      entries = prefix_search(name).flatten #: as Array[(Entry::InstanceVariable | Entry::ClassVariable)]
       # Avoid wasting time linearizing ancestors if we didn't find anything
       return entries if entries.empty?
 
@@ -626,7 +612,7 @@ module RubyIndexer
 
     #: (String name, String owner_name) -> Array[Entry::ClassVariable]
     def class_variable_completion_candidates(name, owner_name)
-      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::ClassVariable])
+      entries = prefix_search(name).flatten #: as Array[Entry::ClassVariable]
       # Avoid wasting time linearizing ancestors if we didn't find anything
       return entries if entries.empty?
 
@@ -696,10 +682,10 @@ module RubyIndexer
     def existing_or_new_singleton_class(name)
       *_namespace, unqualified_name = name.split("::")
       full_singleton_name = "#{name}::<Class:#{unqualified_name}>"
-      singleton = T.cast(self[full_singleton_name]&.first, T.nilable(Entry::SingletonClass))
+      singleton = self[full_singleton_name]&.first #: as Entry::SingletonClass?
 
       unless singleton
-        attached_ancestor = T.must(self[name]&.first)
+        attached_ancestor = self[name]&.first #: as !nil
 
         singleton = Entry::SingletonClass.new(
           [full_singleton_name],
@@ -821,19 +807,16 @@ module RubyIndexer
     )
       # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
       # from two different classes in different files, we simply ignore it
-      superclass = T.cast(
-        if singleton_levels > 0
-          self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-        else
-          namespace_entries.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-        end,
-        T.nilable(Entry::Class),
-      )
+      superclass = if singleton_levels > 0
+        self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+      else
+        namespace_entries.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+      end #: as Entry::Class?
 
       if superclass
         # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
         # error. We need to ensure that this isn't the case
-        parent_class = T.must(superclass.parent_class)
+        parent_class = superclass.parent_class #: as !nil
 
         resolved_parent_class = resolve(parent_class, nesting)
         parent_class_name = resolved_parent_class&.first&.name
@@ -862,7 +845,7 @@ module RubyIndexer
       elsif singleton_levels > 0
         # When computing the linearization for a module's singleton class, it inherits from the linearized ancestors of
         # the `Module` class
-        mod = T.cast(self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) }, T.nilable(Entry::Module))
+        mod = self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) } #: as Entry::Module?
 
         if mod
           module_class_name_parts = ["Module"]
@@ -892,7 +875,7 @@ module RubyIndexer
       resolved_alias = Entry::ConstantAlias.new(target_name, entry)
 
       # Replace the UnresolvedAlias by a resolved one so that we don't have to do this again later
-      original_entries = T.must(@entries[alias_name])
+      original_entries = @entries[alias_name] #: as !nil
       original_entries.delete(entry)
       original_entries << resolved_alias
 
@@ -1004,14 +987,9 @@ module RubyIndexer
     def direct_or_aliased_constant(full_name, seen_names)
       entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
 
-      T.cast(
-        entries&.map { |e| e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e },
-        T.nilable(T::Array[T.any(
-          Entry::Namespace,
-          Entry::ConstantAlias,
-          Entry::UnresolvedConstantAlias,
-        )]),
-      )
+      entries&.map do |e|
+        e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
+      end #: as Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
     end
 
     # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
@@ -1028,7 +1006,7 @@ module RubyIndexer
       return entry unless target_method_entries
 
       resolved_alias = Entry::MethodAlias.new(T.must(target_method_entries.first), entry)
-      original_entries = T.must(@entries[new_name])
+      original_entries = @entries[new_name] #: as !nil
       original_entries.delete(entry)
       original_entries << resolved_alias
       resolved_alias

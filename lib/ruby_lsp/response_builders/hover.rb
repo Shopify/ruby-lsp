@@ -35,7 +35,7 @@ module RubyLsp
       # @override
       #: -> ResponseType
       def response
-        result = T.must(@response[:title])
+        result = @response[:title] #: as !nil
         result << "\n" << @response[:links] if @response[:links]
         result << "\n" << @response[:documentation] if @response[:documentation]
 

@@ -46,7 +46,7 @@ class RangeFormattingTest < Minitest::Test
   private
 
   def expect_formatted_range(range, expected)
-    edits = T.must(RubyLsp::Requests::RangeFormatting.new(@global_state, @document, { range: range }).perform)
+    edits = RubyLsp::Requests::RangeFormatting.new(@global_state, @document, { range: range }).perform #: as !nil
 
     @document.push_edits(
       edits.map do |edit|

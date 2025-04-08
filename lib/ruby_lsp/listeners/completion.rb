@@ -155,7 +155,7 @@ module RubyLsp
 
             if name
               start_loc = node.location
-              end_loc = T.must(node.call_operator_loc)
+              end_loc = node.call_operator_loc #: as !nil
 
               constant_path_completion(
                 "#{name}::",
@@ -305,7 +305,7 @@ module RubyLsp
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
-          first_entry = T.must(entries.first)
+          first_entry = entries.first #: as !nil
           next if first_entry.private? && !first_entry.name.start_with?("#{nesting}::")
 
           entry_name = first_entry.name
@@ -584,7 +584,7 @@ module RubyLsp
 
       #: (String real_name, String incomplete_name, Interface::Range range, Array[RubyIndexer::Entry] entries, bool top_level) -> Interface::CompletionItem
       def build_entry_completion(real_name, incomplete_name, range, entries, top_level)
-        first_entry = T.must(entries.first)
+        first_entry = entries.first #: as !nil
         kind = case first_entry
         when RubyIndexer::Entry::Class
           Constant::CompletionItemKind::CLASS

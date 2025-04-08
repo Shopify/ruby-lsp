@@ -97,7 +97,7 @@ module RubyLsp
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
         start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        extracted_source = @document.source[start_index...end_index] #: as !nil
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = RubyDocument
@@ -115,10 +115,10 @@ module RubyLsp
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
         # immediately after that closest node
-        closest_node = T.must(closest_statements.child_nodes.compact.min_by do |node|
+        closest_node = closest_statements.child_nodes.compact.min_by do |node|
           distance = source_range.dig(:start, :line) - (node.location.end_line - 1)
           distance <= 0 ? Float::INFINITY : distance
-        end)
+        end #: as !nil
 
         return Error::InvalidTargetRange if closest_node.is_a?(Prism::MissingNode)
 
@@ -195,7 +195,7 @@ module RubyLsp
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
         start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        extracted_source = @document.source[start_index...end_index] #: as !nil
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
         node_context = RubyDocument.locate(
@@ -351,17 +351,7 @@ module RubyLsp
           return Error::EmptySelection unless CodeActions::INSTANCE_VARIABLE_NODES.include?(node.class)
         end
 
-        node = T.cast(
-          node,
-          T.any(
-            Prism::InstanceVariableAndWriteNode,
-            Prism::InstanceVariableOperatorWriteNode,
-            Prism::InstanceVariableOrWriteNode,
-            Prism::InstanceVariableReadNode,
-            Prism::InstanceVariableTargetNode,
-            Prism::InstanceVariableWriteNode,
-          ),
-        )
+        node = node #: as (Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode)
 
         node_context = @document.locate_node(
           {
@@ -379,16 +369,14 @@ module RubyLsp
 
         attribute_name = node.name[1..]
         indentation = " " * (closest_node.location.start_column + 2)
-        attribute_accessor_source = T.must(
-          case @code_action[:title]
-          when CodeActions::CREATE_ATTRIBUTE_READER
-            "#{indentation}attr_reader :#{attribute_name}\n\n"
-          when CodeActions::CREATE_ATTRIBUTE_WRITER
-            "#{indentation}attr_writer :#{attribute_name}\n\n"
-          when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
-            "#{indentation}attr_accessor :#{attribute_name}\n\n"
-          end,
-        )
+        attribute_accessor_source = case @code_action[:title]
+        when CodeActions::CREATE_ATTRIBUTE_READER
+          "#{indentation}attr_reader :#{attribute_name}\n\n"
+        when CodeActions::CREATE_ATTRIBUTE_WRITER
+          "#{indentation}attr_writer :#{attribute_name}\n\n"
+        when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+          "#{indentation}attr_accessor :#{attribute_name}\n\n"
+        end #: as !nil
 
         target_start_line = closest_node.location.start_line
         target_range = {

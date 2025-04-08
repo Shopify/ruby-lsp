@@ -76,7 +76,7 @@ module RubyLsp
         current_line = @lines[@position[:line]]
         return unless /((?<=do)|(?<={))\s+\|/.match?(current_line)
 
-        line = T.must(current_line)
+        line = current_line #: as !nil
 
         # If the user inserts the closing pipe manually to the end of the block argument, we need to avoid adding
         # an additional one and remove the previous one.  This also helps to remove the user who accidentally
