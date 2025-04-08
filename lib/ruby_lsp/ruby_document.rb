@@ -53,7 +53,8 @@ module RubyLsp
           # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
           # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
           # sibling
-          T.unsafe(queue).unshift(*candidate.child_nodes)
+          queue #: as untyped
+            .unshift(*candidate.child_nodes)
 
           # Skip if the current node doesn't cover the desired position
           loc = candidate.location
@@ -195,7 +196,8 @@ module RubyLsp
         # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
         # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
         # sibling
-        T.unsafe(queue).unshift(*candidate.child_nodes)
+        queue #: as untyped
+          .unshift(*candidate.child_nodes)
 
         # Skip if the current node doesn't cover the desired position
         loc = candidate.location

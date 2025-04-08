@@ -281,12 +281,14 @@ class IntegrationTest < Minitest::Test
       ["-I", File.expand_path(path)]
     end.uniq.flatten
 
-    stdin, stdout, stderr, wait_thr = T.unsafe(Open3).popen3(
-      extra_env,
-      Gem.ruby,
-      *load_path,
-      File.join(@root, "exe", exec),
-    )
+    stdin, stdout, stderr, wait_thr =
+      Open3 #: as untyped
+        .popen3(
+          extra_env,
+          Gem.ruby,
+          *load_path,
+          File.join(@root, "exe", exec),
+        )
     stdin.sync = true
     stdin.binmode
     stdout.sync = true
@@ -318,7 +320,7 @@ class IntegrationTest < Minitest::Test
 
     # If the child process failed, it is really difficult to diagnose what's happening unless we read what was printed
     # to stderr
-    unless T.unsafe(wait_thr.value).success?
+    unless wait_thr.value.success?
       require "timeout"
 
       Timeout.timeout(5) do

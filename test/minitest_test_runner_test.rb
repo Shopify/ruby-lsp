@@ -9,14 +9,16 @@ module RubyLsp
       plugin_path = "lib/ruby_lsp/ruby_lsp_reporter_plugin.rb"
       # In Ruby 3.1, the require fails unless Bundler is set up.
       env = { "RUBYOPT" => "-rbundler/setup -r./#{plugin_path}", "RUBY_LSP_TEST_RUNNER" => "run" }
-      _stdin, stdout, _stderr, _wait_thr = T.unsafe(Open3).popen3(
-        env,
-        "bundle",
-        "exec",
-        "ruby",
-        "-Itest",
-        "test/fixtures/minitest_example.rb",
-      )
+      _stdin, stdout, _stderr, _wait_thr =
+        Open3 #: as untyped
+          .popen3(
+            env,
+            "bundle",
+            "exec",
+            "ruby",
+            "-Itest",
+            "test/fixtures/minitest_example.rb",
+          )
 
       stdout.binmode
       stdout.sync = true

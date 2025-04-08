@@ -771,17 +771,22 @@ module RubyIndexer
           uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
           insert_position = linearized_prepends.length - uniq_prepends.length
 
-          T.unsafe(ancestors).insert(
-            insert_position,
-            *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
-          )
+          ancestors #: as untyped
+            .insert(
+              insert_position,
+              *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
+            )
 
           main_namespace_index += linearized_prepends.length
         when Entry::Include
           # When including a module, Ruby will always prevent duplicate entries in case the module has already been
           # prepended or included
           linearized_includes = linearized_ancestors_of(module_fully_qualified_name)
-          T.unsafe(ancestors).insert(main_namespace_index + 1, *(linearized_includes - ancestors))
+          ancestors #: as untyped
+            .insert(
+              main_namespace_index + 1,
+              *(linearized_includes - ancestors),
+            )
         end
       end
     end
@@ -971,8 +976,9 @@ module RubyIndexer
       # Otherwise, push all of the leading parts of the nesting that aren't redundant into the name. For example, if we
       # have a reference to `Foo::Bar` inside the `[Namespace, Foo]` nesting, then only the `Foo` part is redundant, but
       # we still need to include the `Namespace` part
-      T.unsafe(name_parts).unshift(*nesting[0...first_redundant_part])
-      name_parts.join("::")
+      name_parts #: as untyped
+        .unshift(*nesting[0...first_redundant_part])
+        .join("::")
     end
 
     #: (String full_name, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?

@@ -266,7 +266,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       def create_code_lens_listener(response_builder, uri, dispatcher)
         raise "uri can't be nil" unless uri
 
-        klass = Class.new do
+        Class.new do
           include RubyLsp::Requests::Support::Common
 
           def initialize(response_builder, uri, dispatcher)
@@ -285,9 +285,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
               ),
             )
           end
-        end
-
-        T.unsafe(klass).new(response_builder, uri, dispatcher)
+        end.new(response_builder, uri, dispatcher)
       end
 
       def activate(global_state, outgoing_queue)

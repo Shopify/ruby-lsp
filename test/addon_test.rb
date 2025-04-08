@@ -56,7 +56,11 @@ module RubyLsp
       Addon.load_addons(@global_state, @outgoing_queue)
 
       addon = Addon.addons.find { |addon| addon.is_a?(@addon) }
-      assert_equal(123, T.unsafe(addon).field)
+      assert_equal(
+        123,
+        addon #: as untyped
+          .field,
+      )
     end
 
     def test_loading_addons_initializes_them
@@ -144,7 +148,11 @@ module RubyLsp
       Addon.load_addons(@global_state, @outgoing_queue)
 
       addon = Addon.get("My Add-on", "0.1.0")
-      assert_equal({ something: false }, T.unsafe(addon).settings)
+      assert_equal(
+        { something: false },
+        addon #: as untyped
+          .settings,
+      )
     end
 
     def test_depend_on_constraints
@@ -185,7 +193,7 @@ module RubyLsp
 
         addon = Addon.get("Project Addon", "0.1.0")
         assert_equal("Project Addon", addon.name)
-        assert_predicate(T.unsafe(addon), :hello)
+        assert_predicate(addon, :hello)
       end
     end
   end

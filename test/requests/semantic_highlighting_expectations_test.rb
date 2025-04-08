@@ -83,7 +83,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
   def create_semantic_highlighting_addon
     Class.new(RubyLsp::Addon) do
       def create_semantic_highlighting_listener(response_builder, dispatcher)
-        klass = Class.new do
+        Class.new do
           include RubyLsp::Requests::Support::Common
 
           def initialize(response_builder, dispatcher)
@@ -98,9 +98,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
               current_token.replace_modifier([:declaration])
             end
           end
-        end
-
-        T.unsafe(klass).new(response_builder, dispatcher)
+        end.new(response_builder, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

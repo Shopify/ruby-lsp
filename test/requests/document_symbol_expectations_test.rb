@@ -133,7 +133,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
       end
 
       def create_document_symbol_listener(response_builder, dispatcher)
-        klass = Class.new do
+        Class.new do
           include RubyLsp::Requests::Support::Common
 
           def initialize(response_builder, dispatcher)
@@ -155,9 +155,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
               range: range_from_node(node),
             )
           end
-        end
-
-        T.unsafe(klass).new(response_builder, dispatcher)
+        end.new(response_builder, dispatcher)
       end
     end
   end

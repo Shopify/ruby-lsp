@@ -1273,7 +1273,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   def create_definition_addon
     Class.new(RubyLsp::Addon) do
       def create_definition_listener(response_builder, uri, nesting, dispatcher)
-        klass = Class.new do
+        Class.new do
           def initialize(response_builder, uri, _, dispatcher)
             @uri = uri
             @response_builder = response_builder
@@ -1293,9 +1293,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
               ),
             )
           end
-        end
-
-        T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
+        end.new(response_builder, uri, nesting, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

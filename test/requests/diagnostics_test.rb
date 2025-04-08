@@ -99,7 +99,7 @@ class DiagnosticsTest < Minitest::Test
       end
     end
 
-    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).new)
+    @global_state.register_formatter("my-custom-formatter", formatter_class.new)
     @global_state.apply_options({
       initializationOptions: { linters: ["my-custom-formatter"] },
     })

@@ -46,7 +46,8 @@ module RubyLsp
           if (start_char..end_char).cover?(loc.start_offset..loc.end_offset)
             found_nodes << node
           else
-            T.unsafe(queue).unshift(*node.child_nodes)
+            queue #: as untyped
+              .unshift(*node.child_nodes)
           end
         end
 

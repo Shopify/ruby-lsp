@@ -1776,7 +1776,7 @@ class CompletionTest < Minitest::Test
   def create_completion_addon
     Class.new(RubyLsp::Addon) do
       def create_completion_listener(response_builder, nesting, dispatcher, uri)
-        klass = Class.new do
+        Class.new do
           include RubyLsp::Requests::Support::Common
 
           def initialize(response_builder, _, dispatcher, uri)
@@ -1795,9 +1795,7 @@ class CompletionTest < Minitest::Test
               kind: RubyLsp::Constant::CompletionItemKind::CONSTANT,
             )
           end
-        end
-
-        T.unsafe(klass).new(response_builder, nesting, dispatcher, uri)
+        end.new(response_builder, nesting, dispatcher, uri)
       end
 
       def activate(global_state, outgoing_queue); end
