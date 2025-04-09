@@ -49,7 +49,7 @@ module RubyLsp
               },
             ],
         },
-        TestReporter.gather_coverage_results,
+        TestReporter.instance.gather_coverage_results,
       )
     end
   end

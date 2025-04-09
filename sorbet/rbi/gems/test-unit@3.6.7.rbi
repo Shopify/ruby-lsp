@@ -1717,6 +1717,28 @@ module Test::Unit::AutoRunnerLoader
   end
 end
 
+# source://test-unit//lib/test/unit/code-snippet-fetcher.rb#3
+class Test::Unit::CodeSnippetFetcher
+  # @return [CodeSnippetFetcher] a new instance of CodeSnippetFetcher
+  #
+  # source://test-unit//lib/test/unit/code-snippet-fetcher.rb#4
+  def initialize; end
+
+  # source://test-unit//lib/test/unit/code-snippet-fetcher.rb#8
+  def fetch(path, line, options = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/code-snippet-fetcher.rb#21
+  def source(path); end
+
+  private
+
+  # source://test-unit//lib/test/unit/code-snippet-fetcher.rb#43
+  def detect_encoding(first_line); end
+
+  # source://test-unit//lib/test/unit/code-snippet-fetcher.rb#26
+  def read_source(path); end
+end
+
 # source://test-unit//lib/test/unit/color.rb#3
 class Test::Unit::Color
   # @return [Color] a new instance of Color
@@ -2555,6 +2577,40 @@ module Test::Unit::FailureHandler
     # source://test-unit//lib/test/unit/failure.rb#81
     def included(base); end
   end
+end
+
+# source://test-unit//lib/test/unit/fault-location-detector.rb#9
+class Test::Unit::FaultLocationDetector
+  # @return [FaultLocationDetector] a new instance of FaultLocationDetector
+  #
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#10
+  def initialize(fault, code_snippet_fetcher); end
+
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#16
+  def split_backtrace_entry(entry); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#32
+  def target?(backtrace_entry); end
+
+  private
+
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#89
+  def extract_fault_information; end
+
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#81
+  def guess_indent_level(line); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#73
+  def target_method?(method_name); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/fault-location-detector.rb#48
+  def target_source_location?(file, line_number, method_name); end
 end
 
 # source://test-unit//lib/test/unit/fixture.rb#3
@@ -4579,6 +4635,275 @@ end
 
 # source://test-unit//lib/test/unit/ui/testrunnerutilities.rb#9
 module Test::Unit::UI; end
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#4
+module Test::Unit::UI::Console; end
+
+# source://test-unit//lib/test/unit/ui/console/testrunner.rb#721
+class Test::Unit::UI::Console::ColorizedReadableDiffer < ::Test::Unit::Diff::ReadableDiffer
+  # @return [ColorizedReadableDiffer] a new instance of ColorizedReadableDiffer
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#722
+  def initialize(from, to, runner); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#727
+  def need_diff?(options = T.unsafe(nil)); end
+
+  private
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#756
+  def color(name); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#760
+  def cut_off_ratio; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#764
+  def default_ratio; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#793
+  def diff_line(from_line, to_line); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#736
+  def one_line_all_change?; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#752
+  def output(something, color = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#748
+  def output_single(something, color = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#768
+  def tag(mark, color_name, contents); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#777
+  def tag_deleted(contents); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#789
+  def tag_difference(contents); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#785
+  def tag_equal(contents); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#781
+  def tag_inserted(contents); end
+end
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#5
+module Test::Unit::UI::Console::OutputLevel; end
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#8
+Test::Unit::UI::Console::OutputLevel::IMPORTANT_FAULTS_ONLY = T.let(T.unsafe(nil), Integer)
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#9
+Test::Unit::UI::Console::OutputLevel::NORMAL = T.let(T.unsafe(nil), Integer)
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#7
+Test::Unit::UI::Console::OutputLevel::PROGRESS_ONLY = T.let(T.unsafe(nil), Integer)
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#6
+Test::Unit::UI::Console::OutputLevel::SILENT = T.let(T.unsafe(nil), Integer)
+
+# source://test-unit//lib/test/unit/ui/console/outputlevel.rb#10
+Test::Unit::UI::Console::OutputLevel::VERBOSE = T.let(T.unsafe(nil), Integer)
+
+# Runs a Test::Unit::TestSuite on the console.
+#
+# source://test-unit//lib/test/unit/ui/console/testrunner.rb#29
+class Test::Unit::UI::Console::TestRunner < ::Test::Unit::UI::TestRunner
+  include ::Test::Unit::UI::Console::OutputLevel
+
+  # Creates a new TestRunner for running the passed
+  # suite. If quiet_mode is true, the output while
+  # running is limited to progress dots, errors and
+  # failures, and the final result. io specifies
+  # where runner output should go to; defaults to
+  # STDOUT.
+  #
+  # @return [TestRunner] a new instance of TestRunner
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#40
+  def initialize(suite, options = T.unsafe(nil)); end
+
+  private
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#103
+  def add_fault(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#86
+  def attach_to_mediator; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#181
+  def categorize_fault(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#171
+  def categorize_faults; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#68
+  def change_output_level(level); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#597
+  def color(name); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#224
+  def detect_target_location_on_github_actions(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#608
+  def fault_class_color(fault_class); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#604
+  def fault_class_color_name(fault_class); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#612
+  def fault_color(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#616
+  def fault_marker_color(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#309
+  def fetch_code_snippet(file, line_number); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#120
+  def finished(elapsed_time); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#390
+  def format_fault(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#647
+  def guess_color_availability; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#624
+  def guess_output_level; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#680
+  def guess_progress_row_max; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#662
+  def guess_progress_style; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#693
+  def guess_term_width; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#709
+  def guess_term_width_from_env; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#697
+  def guess_term_width_from_io; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#520
+  def indent; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#145
+  def max_digit(max_number); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#528
+  def nl(level = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#532
+  def output(something, color = T.unsafe(nil), level = T.unsafe(nil)); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#593
+  def output?(level); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#313
+  def output_code_snippet(lines, target_line_color = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#329
+  def output_failure_message(failure); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#281
+  def output_fault_backtrace(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#192
+  def output_fault_in_detail(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#383
+  def output_fault_in_short(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#267
+  def output_fault_message(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#248
+  def output_fault_on_github_actions(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#134
+  def output_faults; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#149
+  def output_faults_in_detail(faults); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#159
+  def output_faults_in_short(label, fault_class, faults); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#552
+  def output_progress(mark, color = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#572
+  def output_progress_in_detail(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#567
+  def output_progress_in_detail_marker(fault); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#80
+  def output_setup_end; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#538
+  def output_single(something, color = T.unsafe(nil), level = T.unsafe(nil)); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#116
+  def output_started; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#394
+  def output_statistics(elapsed_time); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#431
+  def output_summary_marker; end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#676
+  def ruby_2_0_or_later?; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#75
+  def setup_mediator; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#111
+  def started(result); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#486
+  def suite_name(prefix, suite); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#620
+  def summary_marker_color; end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#459
+  def test_finished(test); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#436
+  def test_started(test); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#515
+  def test_suite_finished(suite); end
+
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#495
+  def test_suite_started(suite); end
+
+  # @return [Boolean]
+  #
+  # source://test-unit//lib/test/unit/ui/console/testrunner.rb#672
+  def windows?; end
+end
+
+# source://test-unit//lib/test/unit/ui/console/testrunner.rb#32
+Test::Unit::UI::Console::TestRunner::N_REPORT_SLOW_TESTS = T.let(T.unsafe(nil), Integer)
+
+# source://test-unit//lib/test/unit/ui/console/testrunner.rb#632
+Test::Unit::UI::Console::TestRunner::TERM_COLOR_SUPPORT = T.let(T.unsafe(nil), Regexp)
 
 # source://test-unit//lib/test/unit/ui/testrunner.rb#6
 class Test::Unit::UI::TestRunner
