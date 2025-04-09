@@ -6,11 +6,38 @@ require "test_helper"
 module RubyLsp
   class MinitestTestRunnerTest < Minitest::Test
     def test_minitest_output
-      plugin_path = "lib/ruby_lsp/ruby_lsp_reporter_plugin.rb"
-      # In Ruby 3.1, the require fails unless Bundler is set up.
-      env = { "RUBYOPT" => "-rbundler/setup -r./#{plugin_path}", "RUBY_LSP_TEST_RUNNER" => "run" }
-      _stdin, stdout, _stderr, _wait_thr = T.unsafe(Open3).popen3(
-        env,
+      plugin_path = File.expand_path("lib/ruby_lsp/ruby_lsp_reporter_plugin.rb")
+      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_example.rb").to_s
+
+      server = TCPServer.new("localhost", 0)
+      port = server.addr[1].to_s
+      events = []
+      socket = T.let(nil, T.nilable(Socket))
+
+      receiver = Thread.new do
+        socket = server.accept
+        socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+
+        loop do
+          headers = socket.gets("\r\n\r\n")
+          break unless headers
+
+          content_length = headers[/Content-Length: (\d+)/i, 1].to_i
+          raw_message = socket.read(content_length)
+
+          event = JSON.parse(raw_message)
+          events << event
+
+          break if event["method"] == "finish"
+        end
+      end
+
+      _stdin, stdout, _stderr, wait_thr = T.unsafe(Open3).popen3(
+        {
+          "RUBYOPT" => "-rbundler/setup -r#{plugin_path}",
+          "RUBY_LSP_TEST_RUNNER" => "run",
+          "RUBY_LSP_REPORTER_PORT" => port,
+        },
         "bundle",
         "exec",
         "ruby",
@@ -18,12 +45,10 @@ module RubyLsp
         "test/fixtures/minitest_example.rb",
       )
 
-      stdout.binmode
-      stdout.sync = true
+      receiver.join
+      wait_thr.join
+      socket&.close
 
-      actual = parse_json_api_stream(stdout)
-
-      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_example.rb").to_s
       expected = [
         {
           "method" => "start",
@@ -91,35 +116,20 @@ module RubyLsp
           },
         },
         {
-          "method" => "append_output",
-          "params" => {
-            "message" => "hello from $stdout.puts\r\nanother line\r\n",
-          },
-        },
-        {
-          "method" => "append_output",
-          "params" => {
-            "message" => "hello from puts\r\nanother line\r\n",
-          },
-        },
-        {
-          "method" => "append_output",
-          "params" => {
-            "message" => "hello from write\r\nanother line",
-          },
-        },
-        {
           "method" => "pass",
           "params" => {
             "id" => "SampleTest#test_with_output",
             "uri" => uri,
           },
         },
+        {
+          "method" => "finish",
+          "params" => {},
+        },
       ]
 
-      expected.each do |message|
-        assert_includes(actual, message)
-      end
+      assert_equal(expected, events)
+      refute_empty(stdout.read)
     end
 
     private
