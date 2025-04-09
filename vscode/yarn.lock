@@ -608,10 +608,10 @@
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
   integrity sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==
 
-"@shopify/eslint-plugin@^47.0.1":
-  version "47.0.1"
-  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-47.0.1.tgz#77e1d3cbf70c5b89a63ef60c26517574214b43a9"
-  integrity sha512-1LA1wUCt7w0UNtEueD94rMA+6ORhWGm0FcLWM939iByWPEU0piEQ7aFbbKHq5vo65UR7HECfxZVPBFrKStd0mQ==
+"@shopify/eslint-plugin@^48.0.2":
+  version "48.0.2"
+  resolved "https://registry.yarnpkg.com/@shopify/eslint-plugin/-/eslint-plugin-48.0.2.tgz#4f47d571f4f560c1edd6022de070220aa184e996"
+  integrity sha512-kf8bOpSDpa/S6manD6EtQiMD1+kS8MG/ZT+sOgbO0hriPiMd37p6BwC8aY3enW5qTxWuVmVNY/tzIhrXV0naIg==
   dependencies:
     change-case "^4.1.2"
     common-tags "^1.8.2"
