@@ -850,6 +850,7 @@ suite("TestController", () => {
         enqueued: sinon.stub(),
         end: sinon.stub(),
         token: cancellationSource.token,
+        appendOutput: sinon.stub(),
       } as any;
       const createRunStub = sinon
         .stub(controller.testController, "createTestRun")
@@ -887,10 +888,18 @@ suite("TestController", () => {
         uri,
       ))!;
 
+      const program = `bundle exec ruby -Itest ${path.join("test", "fixtures", "minitest_example.rb")}`;
       workspace.lspClient = {
         resolveTestCommands: sinon.stub().resolves({
-          commands: [`ruby -e '1'`],
-          reporterPath: undefined,
+          commands: [program],
+          reporterPaths: [
+            path.join(
+              workspacePath,
+              "lib",
+              "ruby_lsp",
+              "ruby_lsp_reporter_plugin.rb",
+            ),
+          ],
         }),
       } as any;
 
@@ -901,6 +910,7 @@ suite("TestController", () => {
         enqueued: sinon.stub(),
         end: sinon.stub(),
         token: cancellationSource.token,
+        appendOutput: sinon.stub(),
       } as any;
       const createRunStub = sinon
         .stub(controller.testController, "createTestRun")
@@ -924,7 +934,7 @@ suite("TestController", () => {
             type: "ruby_lsp",
             name: "Debug",
             request: "launch",
-            program: "ruby -e '1'",
+            program,
             env: {
               ...workspace.ruby.env,
               DISABLE_SPRING: "1",
@@ -1017,7 +1027,7 @@ suite("TestController", () => {
       assert.ok(runStub.end.calledWithExactly());
       assert.ok(
         runStub.appendOutput.calledWithExactly(
-          "Processing test coverage results...\r\n\r\n",
+          "\r\n\r\nProcessing test coverage results...\r\n\r\n",
         ),
       );
       assert.ok(runStub.addCoverage.calledOnce);
