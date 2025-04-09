@@ -86,7 +86,7 @@ module RubyLsp
           )
 
           Addon.addons.each do |addon|
-            addon.create_definition_listener(@response_builder, document.uri, node_context, dispatcher)
+            Addon.notify(addon, :create_definition_listener, @response_builder, document.uri, node_context, dispatcher)
           end
         end
 

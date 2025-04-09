@@ -26,7 +26,7 @@ module RubyLsp
         Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
 
         Addon.addons.each do |addon|
-          addon.create_code_lens_listener(@response_builder, uri, dispatcher)
+          Addon.notify(addon, :create_code_lens_listener, @response_builder, uri, dispatcher)
         end
       end
 

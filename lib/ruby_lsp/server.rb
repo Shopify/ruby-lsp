@@ -1056,12 +1056,7 @@ module RubyLsp
       end
 
       Addon.file_watcher_addons.each do |addon|
-        T.unsafe(addon).workspace_did_change_watched_files(changes)
-      rescue => e
-        send_log_message(
-          "Error in #{addon.name} add-on while processing watched file notifications: #{e.full_message}",
-          type: Constant::MessageType::ERROR,
-        )
+        Addon.notify(addon, :workspace_did_change_watched_files, changes)
       end
     end
 
@@ -1362,7 +1357,7 @@ module RubyLsp
       addon = Addon.addons.find { |addon| addon.name == addon_name }
       return unless addon
 
-      addon.handle_window_show_message_response(result[:title])
+      Addon.notify(addon, :handle_window_show_message_response, result[:title])
     end
 
     # NOTE: all servers methods are void because they can produce several messages for the client. The only reason this
@@ -1462,7 +1457,7 @@ module RubyLsp
       commands = Listeners::TestStyle.resolve_test_commands(items)
 
       Addon.addons.each do |addon|
-        commands.concat(addon.resolve_test_commands(items))
+        commands.concat(Addon.notify(addon, :resolve_test_commands, items))
       end
 
       send_message(Result.new(
