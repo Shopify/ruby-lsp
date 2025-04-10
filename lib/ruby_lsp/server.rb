@@ -376,6 +376,13 @@ module RubyLsp
       perform_initial_indexing
       check_formatter_is_available
 
+      start_mcp_server
+    end
+
+    #: -> void
+    def start_mcp_server
+      return unless @global_state.uses_ruby_mcp
+
       @mcp_server_thread = T.let(
         Thread.new do
           @mcp_server = T.let(MCPServer.new(@global_state), T.nilable(MCPServer))

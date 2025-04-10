@@ -310,6 +310,75 @@ module RubyLsp
       assert_equal("test_machine_id", state.telemetry_machine_id)
     end
 
+    def test_detects_vscode_ruby_mcp
+      state = GlobalState.new
+
+      # Stub the bin_rails_present method
+      state.stubs(:bin_rails_present).returns(false)
+
+      stub_workspace_file_does_not_exist(".cursor/mcp.json")
+      stub_workspace_file_exists(".vscode/mcp.json")
+      File.stubs(:read).with("#{Dir.pwd}/.vscode/mcp.json").returns('{"servers":{"rubyMcp":{"command":"path"}}}')
+
+      state.apply_options({})
+      assert(state.uses_ruby_mcp)
+    end
+
+    def test_detects_cursor_ruby_mcp
+      state = GlobalState.new
+
+      # Stub the bin_rails_present method
+      state.stubs(:bin_rails_present).returns(false)
+
+      stub_workspace_file_does_not_exist(".vscode/mcp.json")
+      stub_workspace_file_exists(".cursor/mcp.json")
+      File.stubs(:read).with("#{Dir.pwd}/.cursor/mcp.json").returns('{"mcpServers":{"rubyMcp":{"command":"path"}}}')
+
+      state.apply_options({})
+      assert(state.uses_ruby_mcp)
+    end
+
+    def test_does_not_detect_ruby_mcp_when_no_files_exist
+      state = GlobalState.new
+
+      # Stub the bin_rails_present method
+      state.stubs(:bin_rails_present).returns(false)
+
+      stub_workspace_file_does_not_exist(".vscode/mcp.json")
+      stub_workspace_file_does_not_exist(".cursor/mcp.json")
+
+      state.apply_options({})
+      refute(state.uses_ruby_mcp)
+    end
+
+    def test_does_not_detect_ruby_mcp_when_vscode_has_no_config
+      state = GlobalState.new
+
+      # Stub the bin_rails_present method
+      state.stubs(:bin_rails_present).returns(false)
+
+      stub_workspace_file_exists(".vscode/mcp.json")
+      stub_workspace_file_does_not_exist(".cursor/mcp.json")
+      File.stubs(:read).with("#{Dir.pwd}/.vscode/mcp.json").returns('{"servers":{"otherServer":{"command":"path"}}}')
+
+      state.apply_options({})
+      refute(state.uses_ruby_mcp)
+    end
+
+    def test_does_not_detect_ruby_mcp_when_cursor_has_no_config
+      state = GlobalState.new
+
+      # Stub the bin_rails_present method
+      state.stubs(:bin_rails_present).returns(false)
+
+      stub_workspace_file_does_not_exist(".vscode/mcp.json")
+      stub_workspace_file_exists(".cursor/mcp.json")
+      File.stubs(:read).with("#{Dir.pwd}/.cursor/mcp.json").returns('{"mcpServers":{"otherServer":{"command":"path"}}}')
+
+      state.apply_options({})
+      refute(state.uses_ruby_mcp)
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)
@@ -322,7 +391,11 @@ module RubyLsp
     end
 
     def stub_workspace_file_exists(path)
-      File.expects(:exist?).with("#{Dir.pwd}/#{path}").returns(true)
+      File.stubs(:exist?).with("#{Dir.pwd}/#{path}").returns(true)
+    end
+
+    def stub_workspace_file_does_not_exist(path)
+      File.stubs(:exist?).with("#{Dir.pwd}/#{path}").returns(false)
     end
   end
 end
