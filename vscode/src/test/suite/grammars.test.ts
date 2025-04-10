@@ -456,6 +456,35 @@ suite("Grammars", () => {
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
 
+      test("multi-line method signature with continuation (#|)", () => {
+        const ruby = "#: ()\n#| -> void";
+        const expectedTokens = [
+          ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          [
+            "(",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
+          [
+            ")",
+            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
+          ],
+          ["#|", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
+          [" ", ["meta.type.signature.rbs"]],
+          [
+            "->",
+            [
+              "meta.type.signature.rbs",
+              "punctuation.section.signature.return.rbs",
+            ],
+          ],
+          [" ", ["meta.type.signature.rbs"]],
+          ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
+        ];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
       test("inline method signature with &", () => {
         const ruby = "#: [X] (X & Object) -> Class[X]";
         const expectedTokens = [
