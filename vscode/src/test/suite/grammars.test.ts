@@ -208,8 +208,7 @@ suite("Grammars", () => {
                 [
                   "source.ruby",
                   languageConfig.name,
-                  "string.unquoted.heredoc.ruby",
-                  "punctuation.definition.string.begin.ruby",
+                  "string.definition.begin.ruby",
                 ],
               ],
               [
@@ -217,8 +216,7 @@ suite("Grammars", () => {
                 [
                   "source.ruby",
                   languageConfig.name,
-                  "string.unquoted.heredoc.ruby",
-                  "punctuation.definition.string.end.ruby",
+                  "string.definition.end.ruby",
                 ],
               ],
             ];
@@ -282,6 +280,71 @@ suite("Grammars", () => {
           [...labelsOnly, ...objects],
           "EMBEDDED_HEREDOC_LANGUAGES label entries are not sorted",
         );
+      });
+
+      test("HEREDOC only matches the content and not the delimiters", () => {
+        const ruby = "foo(<<~FOO, bar)\nfoo\nFOO";
+        const expectedTokens = [
+          [
+            "foo",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "entity.name.function.ruby",
+            ],
+          ],
+          [
+            "(",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "punctuation.section.function.ruby",
+            ],
+          ],
+          [
+            "<<~FOO",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "string.definition.begin.ruby",
+            ],
+          ],
+          [
+            ",",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "punctuation.separator.object.ruby",
+            ],
+          ],
+          [" bar", ["source.ruby", "meta.function-call.ruby"]],
+          [
+            ")",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "punctuation.section.function.ruby",
+            ],
+          ],
+          [
+            "foo",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "string.unquoted.heredoc.ruby",
+            ],
+          ],
+          [
+            "FOO",
+            [
+              "source.ruby",
+              "meta.function-call.ruby",
+              "string.definition.end.ruby",
+            ],
+          ],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
       });
     });
 
@@ -827,15 +890,14 @@ suite("Grammars", () => {
             begin: `(?><<[-~](["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1)`,
             beginCaptures: {
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              "0": { name: "punctuation.definition.string.begin.ruby" },
+              "0": { name: "string.definition.begin.ruby" },
             },
             contentName,
             end: "^\\s*\\2$\\n?",
             endCaptures: {
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              "0": { name: "punctuation.definition.string.end.ruby" },
+              "0": { name: "string.definition.end.ruby" },
             },
-            name: "string.unquoted.heredoc.ruby",
             patterns: [
               { include: "#heredoc" },
               { include: "#interpolated_ruby" },
