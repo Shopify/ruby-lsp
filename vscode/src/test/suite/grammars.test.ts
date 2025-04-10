@@ -635,6 +635,13 @@ suite("Grammars", () => {
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
 
+      test("grammar is not applied to `#:` in regexes", () => {
+        const ruby = "/#: foo/";
+        const expectedTokens = [["/#: foo/", []]];
+        const actualTokens = tokenizeRBS(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
       test("grammar is applied to `#:` in trailing comments", () => {
         const ruby = "attr_reader :name #: String";
         const expectedTokens = [
