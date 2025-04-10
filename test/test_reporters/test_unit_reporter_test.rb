@@ -2,12 +2,14 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "socket"
 
 module RubyLsp
-  class MinitestTestRunnerTest < Minitest::Test
-    def test_minitest_output
-      plugin_path = File.expand_path("lib/ruby_lsp/ruby_lsp_reporter_plugin.rb")
-      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_example.rb").to_s
+  class TestUnitReporterTest < Minitest::Test
+    def test_test_runner_output
+      reporter_path = File.expand_path(File.join("lib", "ruby_lsp", "test_reporters", "test_unit_reporter.rb"))
+      test_path = File.join(Dir.pwd, "test", "fixtures", "test_unit_example.rb")
+      uri = URI::Generic.from_path(path: test_path).to_s
 
       server = TCPServer.new("localhost", 0)
       port = server.addr[1].to_s
@@ -34,7 +36,7 @@ module RubyLsp
 
       _stdin, stdout, _stderr, wait_thr = T.unsafe(Open3).popen3(
         {
-          "RUBYOPT" => "-rbundler/setup -r#{plugin_path}",
+          "RUBYOPT" => "-rbundler/setup -r#{reporter_path}",
           "RUBY_LSP_TEST_RUNNER" => "run",
           "RUBY_LSP_REPORTER_PORT" => port,
         },
@@ -42,11 +44,12 @@ module RubyLsp
         "exec",
         "ruby",
         "-Itest",
-        "test/fixtures/minitest_example.rb",
+        test_path,
+        chdir: Bundler.root.to_s,
       )
 
-      receiver.join
       wait_thr.join
+      receiver.join
       socket&.close
 
       expected = [
@@ -61,7 +64,7 @@ module RubyLsp
           "method" => "fail",
           "params" => {
             "id" => "SampleTest#test_that_fails",
-            "message" => "Expected: 1\n  Actual: 2",
+            "message" => "<1> expected but was\n<2>.",
             "uri" => uri,
           },
         },
@@ -104,21 +107,7 @@ module RubyLsp
           "method" => "error",
           "params" => {
             "id" => "SampleTest#test_that_raises",
-            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:24:in #{error_location}",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "start",
-          "params" => {
-            "id" => "SampleTest#test_with_output",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "pass",
-          "params" => {
-            "id" => "SampleTest#test_with_output",
+            "message" => "RuntimeError: oops",
             "uri" => uri,
           },
         },
@@ -127,21 +116,8 @@ module RubyLsp
           "params" => {},
         },
       ]
-
       assert_equal(expected, events)
       refute_empty(stdout.read)
-    end
-
-    private
-
-    def error_location
-      ruby_version = Gem::Version.new(RUBY_VERSION)
-
-      if ruby_version >= Gem::Version.new("3.4")
-        "'SampleTest#test_that_raises'"
-      else
-        "`test_that_raises'"
-      end
     end
   end
 end

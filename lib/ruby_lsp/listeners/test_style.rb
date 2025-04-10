@@ -133,8 +133,8 @@ module RubyLsp
 
       include Requests::Support::Common
 
-      MINITEST_REPORTER_PATH = File.expand_path("../ruby_lsp_reporter_plugin.rb", __dir__) #: String
-      TEST_UNIT_REPORTER_PATH = File.expand_path("../test_unit_test_runner.rb", __dir__) #: String
+      MINITEST_REPORTER_PATH = File.expand_path("../test_reporters/minitest_reporter.rb", __dir__) #: String
+      TEST_UNIT_REPORTER_PATH = File.expand_path("../test_reporters/test_unit_reporter.rb", __dir__) #: String
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
       BASE_COMMAND = begin
         Bundler.with_original_env { Bundler.default_lockfile }

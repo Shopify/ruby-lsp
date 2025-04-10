@@ -6,7 +6,7 @@ require "socket"
 require "singleton"
 
 module RubyLsp
-  class TestReporter
+  class LspReporter
     include Singleton
 
     #: -> void
@@ -146,7 +146,7 @@ if ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
   Coverage.start(:all)
 
   at_exit do
-    coverage_results = RubyLsp::TestReporter.instance.gather_coverage_results
+    coverage_results = RubyLsp::LspReporter.instance.gather_coverage_results
     File.write(File.join(".ruby-lsp", "coverage_result.json"), coverage_results.to_json)
   end
 end
