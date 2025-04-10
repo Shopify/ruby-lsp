@@ -59,6 +59,8 @@ export class TestController {
     vscode.FileCoverageDetail[]
   >();
 
+  private readonly runner = new StreamingRunner(this.findTestItem.bind(this));
+
   constructor(
     context: vscode.ExtensionContext,
     telemetry: vscode.TelemetryLogger,
@@ -139,6 +141,7 @@ export class TestController {
       this.testDebugProfile,
       this.testRunProfile,
       this.coverageProfile,
+      this.runner,
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
@@ -507,9 +510,8 @@ export class TestController {
 
     for await (const command of response.commands) {
       try {
-        const runner = new StreamingRunner(run, this.findTestItem.bind(this));
-
-        await runner.execute(
+        await this.runner.execute(
+          run,
           command,
           {
             ...workspace.ruby.env,
@@ -552,9 +554,8 @@ export class TestController {
         ? `${workspace.ruby.env.RUBYOPT} -rbundler/setup ${reporterPaths}`
         : `-rbundler/setup ${reporterPaths}`;
 
-      const runner = new StreamingRunner(run, this.findTestItem.bind(this));
-
-      await runner.execute(
+      await this.runner.execute(
+        run,
         command,
         {
           ...workspace.ruby.env,
