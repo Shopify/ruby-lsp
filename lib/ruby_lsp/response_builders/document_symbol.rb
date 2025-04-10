@@ -44,7 +44,8 @@ module RubyLsp
       # @override
       #: -> Array[Interface::DocumentSymbol]
       def response
-        T.must(@stack.first).children
+        @stack.first #: as !nil
+          .children
       end
     end
   end

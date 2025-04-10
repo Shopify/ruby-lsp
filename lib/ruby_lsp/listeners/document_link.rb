@@ -106,7 +106,8 @@ module RubyLsp
         return unless match
 
         uri = begin
-          URI(T.must(match[0]))
+          # match[0] can't be nil here because we already checked that match exists
+          URI(match[0])
         rescue URI::Error
           nil
         end #: as URI::Source?

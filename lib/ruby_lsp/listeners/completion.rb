@@ -108,7 +108,8 @@ module RubyLsp
         range = range_from_location(node.location)
         candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         candidates.each do |entries|
-          complete_name = T.must(entries.first).name
+          complete_name = entries.first #: as !nil
+            .name
           @response_builder << build_entry_completion(
             complete_name,
             name,
@@ -296,7 +297,10 @@ module RubyLsp
         namespace_entries = @index.resolve(aliased_namespace, nesting)
         return unless namespace_entries
 
-        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
+        real_namespace = @index.follow_aliased_namespace(
+          namespace_entries.first #: as !nil
+            .name,
+        )
 
         candidates = @index.constant_completion_candidates(
           "#{real_namespace}::#{incomplete_name}",
@@ -324,7 +328,10 @@ module RubyLsp
             name,
             range,
             entries,
-            top_level_reference || top_level?(T.must(entries.first).name),
+            top_level_reference || top_level?(
+              entries.first #: as !nil
+                .name,
+            ),
           )
         end
       end
@@ -429,7 +436,10 @@ module RubyLsp
         matched_uris = @index.search_require_paths(path_node_to_complete.content)
 
         matched_uris.map!(&:require_path).sort!.each do |path|
-          @response_builder << build_completion(T.must(path), path_node_to_complete)
+          @response_builder << build_completion(
+            path, #: as !nil
+            path_node_to_complete,
+          )
         end
       end
 
@@ -486,7 +496,8 @@ module RubyLsp
         method_name = @trigger_character == "." ? nil : name
 
         range = if method_name
-          range_from_location(T.must(node.message_loc))
+          # @type var node.message_loc: !nil
+          range_from_location(node.message_loc)
         else
           loc = node.call_operator_loc
 
@@ -531,7 +542,9 @@ module RubyLsp
 
       #: (Prism::CallNode node, String name) -> void
       def add_local_completions(node, name)
-        range = range_from_location(T.must(node.message_loc))
+        range = range_from_location(
+          node.message_loc, #: as !nil
+        )
 
         @node_context.locals_for_scope.each do |local|
           local_name = local.to_s
@@ -551,7 +564,9 @@ module RubyLsp
 
       #: (Prism::CallNode node, String name) -> void
       def add_keyword_completions(node, name)
-        range = range_from_location(T.must(node.message_loc))
+        range = range_from_location(
+          node.message_loc, #: as !nil
+        )
 
         KEYWORDS.each do |keyword|
           next unless keyword.start_with?(name)
@@ -675,7 +690,9 @@ module RubyLsp
       def top_level?(entry_name)
         nesting = @node_context.nesting
         nesting.length.downto(0) do |i|
-          prefix = T.must(nesting[0...i]).join("::")
+          prefix =
+            nesting[0...i] #: as !nil
+              .join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 

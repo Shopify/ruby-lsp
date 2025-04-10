@@ -223,7 +223,8 @@ module RubyLsp
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
 
       configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
-      T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints
+      @store.features_configuration.dig(:inlayHint) #: as !nil
+        .configuration.merge!(configured_hints) if configured_hints
 
       enabled_features = case configured_features
       when Array
@@ -490,7 +491,11 @@ module RubyLsp
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
-      inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
+      inlay_hint = Requests::InlayHints.new(
+        document,
+        @store.features_configuration.dig(:inlayHint), #: as !nil
+        dispatcher,
+      )
 
       if document.is_a?(RubyDocument) && document.should_index?
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
@@ -1396,7 +1401,9 @@ module RubyLsp
           Open3.capture3(
             Gem.ruby,
             "-I",
-            File.dirname(T.must(__dir__)),
+            File.dirname(
+              __dir__, #: as !nil
+            ),
             File.expand_path("../../exe/ruby-lsp-launcher", __dir__),
             @global_state.workspace_uri.to_s,
             chdir: @global_state.workspace_path,

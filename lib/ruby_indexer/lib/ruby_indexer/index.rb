@@ -277,7 +277,9 @@ module RubyIndexer
 
       # Constants defined in enclosing scopes
       nesting.length.downto(1) do |i|
-        namespace = T.must(nesting[0...i]).join("::")
+        namespace =
+          nesting[0...i] #: as !nil
+            .join("::")
         entries.concat(@entries_tree.search("#{namespace}::#{name}"))
       end
 
@@ -415,25 +417,10 @@ module RubyIndexer
       real_parts = []
 
       (parts.length - 1).downto(0) do |i|
-        current_name = T.must(parts[0..i]).join("::")
-        entry = @entries[current_name]&.first
-
-        case entry
-        when Entry::ConstantAlias
-          target = entry.target
-          return follow_aliased_namespace("#{target}::#{real_parts.join("::")}", seen_names)
-        when Entry::UnresolvedConstantAlias
-          resolved = resolve_alias(entry, seen_names)
-
-          if resolved.is_a?(Entry::UnresolvedConstantAlias)
-            raise UnresolvableAliasError, "The constant #{resolved.name} is an alias to a non existing constant"
-          end
-
-          target = resolved.target
-          return follow_aliased_namespace("#{target}::#{real_parts.join("::")}", seen_names)
-        else
-          real_parts.unshift(T.must(parts[i]))
-        end
+        current_name =
+          parts[0..i] #: as !nil
+            .join("::")
+        real_parts << current_name if indexed?(current_name)
       end
 
       real_parts.join("::")
@@ -529,7 +516,9 @@ module RubyIndexer
 
       # The original nesting where we discovered this namespace, so that we resolve the correct names of the
       # included/prepended/extended modules and parent classes
-      nesting = T.must(namespaces.first).nesting.flat_map { |n| n.split("::") }
+      nesting =
+        namespaces.first #: as !nil
+          .nesting.flat_map { |n| n.split("::") }
 
       if nesting.any?
         singleton_levels.times do
@@ -601,7 +590,9 @@ module RubyIndexer
         name_parts = owner_name.split("::")
 
         if name_parts.last&.start_with?("<Class:")
-          attached_name = T.must(name_parts[0..-2]).join("::")
+          attached_name =
+            name_parts[0..-2] #: as !nil
+              .join("::")
           attached_ancestors = linearized_ancestors_of(attached_name)
           variables.concat(class_variables.select { |e| attached_ancestors.any?(e.owner&.name) })
         else
@@ -638,7 +629,10 @@ module RubyIndexer
         block.call(self)
       else
         delete(uri)
-        index_single(uri, T.must(source))
+        index_single(
+          uri,
+          source, #: as !nil
+        )
       end
 
       updated_entries = @uris_to_entries[key]
@@ -721,7 +715,9 @@ module RubyIndexer
       name_parts = name.split("::")
 
       if name_parts.last&.start_with?("<Class:")
-        attached_name = T.must(name_parts[0..-2]).join("::")
+        attached_name =
+          name_parts[0..-2] #: as !nil
+            .join("::")
         linearized_ancestors_of(attached_name)
       else
         linearized_ancestors_of(name)
@@ -744,7 +740,9 @@ module RubyIndexer
           resolved_modules = resolve(operation.module_name, nesting)
           next unless resolved_modules
 
-          module_name = T.must(resolved_modules.first).name
+          module_name =
+            resolved_modules.first #: as !nil
+              .name
 
           # Then we grab any hooks registered for that module
           hooks = @included_hooks[module_name]
@@ -767,7 +765,9 @@ module RubyIndexer
         resolved_module = resolve(operation.module_name, nesting)
         next unless resolved_module
 
-        module_fully_qualified_name = T.must(resolved_module.first).name
+        module_fully_qualified_name =
+          resolved_module.first #: as !nil
+            .name
 
         case operation
         when Entry::Prepend
@@ -780,6 +780,7 @@ module RubyIndexer
           # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
           # be inserted after `"A`
           uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
+
           insert_position = linearized_prepends.length - uniq_prepends.length
 
           ancestors #: as untyped

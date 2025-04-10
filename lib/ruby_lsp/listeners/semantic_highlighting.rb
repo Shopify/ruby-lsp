@@ -67,12 +67,18 @@ module RubyLsp
         return if special_method?(message)
 
         if Requests::Support::Sorbet.annotation?(node)
-          @response_builder.add_token(T.must(node.message_loc), :type)
+          @response_builder.add_token(
+            node.message_loc, #: as !nil
+            :type,
+          )
         elsif !node.receiver && !node.opening_loc
           # If the node has a receiver, then the syntax is not ambiguous and semantic highlighting is not necessary to
           # determine that the token is a method call. The only ambiguous case is method calls with implicit self
           # receiver and no parenthesis, which may be confused with local variables
-          @response_builder.add_token(T.must(node.message_loc), :method)
+          @response_builder.add_token(
+            node.message_loc, #: as !nil
+            :method,
+          )
         end
       end
 
@@ -301,7 +307,9 @@ module RubyLsp
         # For each capture name we find in the regexp, look for a local in the current_scope
         Regexp.new(content, Regexp::FIXEDENCODING).names.each do |name|
           # The +3 is to compensate for the "(?<" part of the capture name
-          capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
+          capture_name_offset =
+            content.index("(?<#{name}>") #: as !nil
+          + 3
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
           local = @current_scope.lookup(name)
