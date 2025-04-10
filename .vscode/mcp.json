@@ -1,0 +1,12 @@
+{
+  "inputs": [],
+  "servers": {
+    "rubyMcp": {
+      "type": "stdio",
+      "command": "${workspaceFolder}/.ruby-lsp/ruby-mcp-bridge",
+      "args": [
+        "${workspaceFolderBasename}"
+      ]
+    }
+  }
+}
