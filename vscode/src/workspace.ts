@@ -178,6 +178,8 @@ export class Workspace implements WorkspaceInterface {
       );
       STATUS_EMITTER.fire(this);
 
+      await this.copyRubyMcpBridge();
+
       // If something triggered a restart while we were still booting, then now we need to perform the restart since the
       // server can now handle shutdown requests
       if (this.needsRestart) {
@@ -439,6 +441,19 @@ export class Workspace implements WorkspaceInterface {
       workspaceWatcher.onDidCreate(start),
       // Once they are deleted and the action is complete, then we restart
       workspaceWatcher.onDidDelete(stop),
+    );
+  }
+
+  private async copyRubyMcpBridge() {
+    const targetURI = vscode.Uri.joinPath(
+      this.workspaceFolder.uri,
+      ".ruby-lsp",
+      "ruby-mcp-bridge",
+    );
+    await vscode.workspace.fs.copy(
+      vscode.Uri.joinPath(this.context.extensionUri, "ruby-mcp-bridge"),
+      targetURI,
+      { overwrite: true },
     );
   }
 
