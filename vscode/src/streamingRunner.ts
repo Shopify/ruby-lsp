@@ -30,103 +30,70 @@ export enum Mode {
 
 // The StreamingRunner class is responsible for executing the test process or launching the debugger while handling the
 // streaming events to update the test explorer status
-export class StreamingRunner {
-  private readonly promises: Promise<void>[] = [];
-  private readonly disposables: vscode.Disposable[] = [];
-  private readonly run: vscode.TestRun;
+export class StreamingRunner implements vscode.Disposable {
+  private promises: Promise<void>[] = [];
+  private disposables: vscode.Disposable[] = [];
   private readonly findTestItem: (
     id: string,
     uri: vscode.Uri,
   ) => Promise<vscode.TestItem | undefined>;
 
+  private readonly tcpServer: net.Server;
+  private tcpPort: string | undefined;
+  private connection: rpc.MessageConnection | undefined;
+  private executionPromise:
+    | { resolve: () => void; reject: (error: Error) => void }
+    | undefined;
+
+  private run: vscode.TestRun | undefined;
+
   constructor(
-    run: vscode.TestRun,
     findTestItem: (
       id: string,
       uri: vscode.Uri,
     ) => Promise<vscode.TestItem | undefined>,
   ) {
-    this.run = run;
     this.findTestItem = findTestItem;
+    this.tcpServer = this.startServer();
   }
 
   async execute(
+    currentRun: vscode.TestRun,
     command: string,
     env: NodeJS.ProcessEnv,
     workspace: Workspace,
     mode: Mode,
     linkedCancellationSource: LinkedCancellationSource,
   ) {
+    this.run = currentRun;
+
     await new Promise<void>((resolve, reject) => {
-      const server = net.createServer();
-      server.on("error", reject);
-      server.unref();
+      this.executionPromise = { resolve, reject };
+      const abortController = new AbortController();
 
-      server.listen(0, "localhost", async () => {
-        const address = server.address();
-        const serverPort =
-          typeof address === "string" ? address : address?.port.toString();
-
-        if (!serverPort) {
-          reject(
-            new Error(
-              "Failed to set up TCP server to communicate with test process",
-            ),
-          );
-          return;
-        }
-
-        const abortController = new AbortController();
-
-        server.on("connection", (socket) => {
-          const connection = rpc.createMessageConnection(
-            new rpc.StreamMessageReader(socket),
-            new rpc.StreamMessageWriter(socket),
-          );
-          const finalize = () => {
-            Promise.all(this.promises)
-              .then(() => {
-                this.disposables.forEach((disposable) => disposable.dispose());
-                connection.end();
-                connection.dispose();
-                server.close();
-                resolve();
-              })
-              .catch(reject);
-          };
-
-          // We resolve the promise and perform cleanup on two occasions: if the test run finished normally, then we
-          // should receive the finish event. The other case is when the run is cancelled and the abort controller gets
-          // triggered, in which case we will not receive the finish event
-          linkedCancellationSource.onCancellationRequested(() => {
-            this.run.appendOutput("\r\nTest run cancelled.");
-            abortController.abort();
-            finalize();
-          });
-
-          this.disposables.push(
-            connection.onNotification(NOTIFICATION_TYPES.finish, finalize),
-          );
-
-          this.registerStreamingEvents(connection);
-
-          // Start listening for events
-          connection.listen();
-        });
-
-        if (mode === Mode.Run) {
-          this.spawnTestProcess(
-            command,
-            env,
-            workspace.workspaceFolder.uri.fsPath,
-            serverPort,
-            abortController,
-          );
-        } else {
-          await this.launchDebugger(command, env, workspace, serverPort);
-        }
+      linkedCancellationSource.onCancellationRequested(async () => {
+        this.run!.appendOutput("\r\nTest run cancelled.");
+        abortController.abort();
+        await this.finalize();
       });
+
+      if (mode === Mode.Run) {
+        this.spawnTestProcess(
+          command,
+          env,
+          workspace.workspaceFolder.uri.fsPath,
+          abortController,
+        );
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.launchDebugger(command, env, workspace);
+      }
     });
+  }
+
+  dispose() {
+    this.tcpServer.close();
+    this.connection?.dispose();
   }
 
   // Launches the debugger with streaming updates
@@ -134,29 +101,28 @@ export class StreamingRunner {
     command: string,
     env: NodeJS.ProcessEnv,
     workspace: Workspace,
-    serverPort: string,
   ) {
-    await vscode.debug
-      .startDebugging(
-        workspace.workspaceFolder,
-        {
-          type: "ruby_lsp",
-          name: "Debug",
-          request: "launch",
-          program: command,
-          env: {
-            ...env,
-            DISABLE_SPRING: "1",
-            RUBY_LSP_REPORTER_PORT: serverPort,
-          },
+    const successFullyStarted = await vscode.debug.startDebugging(
+      workspace.workspaceFolder,
+      {
+        type: "ruby_lsp",
+        name: "Debug",
+        request: "launch",
+        program: command,
+        env: {
+          ...env,
+          DISABLE_SPRING: "1",
+          RUBY_LSP_REPORTER_PORT: this.tcpPort,
         },
-        { testRun: this.run },
-      )
-      .then((successFullyStarted) => {
-        if (!successFullyStarted) {
-          throw new Error("Failed to start debugging session");
-        }
-      });
+      },
+      { testRun: this.run },
+    );
+
+    if (!successFullyStarted) {
+      this.executionPromise!.reject(
+        new Error("Failed to start debugging session"),
+      );
+    }
   }
 
   // Spawns the test process and redirects any stdout or stderr output to the test run output
@@ -164,11 +130,10 @@ export class StreamingRunner {
     command: string,
     env: NodeJS.ProcessEnv,
     cwd: string,
-    serverPort: string,
     abortController: AbortController,
   ) {
     const testProcess = spawn(command, {
-      env: { ...env, RUBY_LSP_REPORTER_PORT: serverPort },
+      env: { ...env, RUBY_LSP_REPORTER_PORT: this.tcpPort },
       stdio: ["pipe", "pipe", "pipe"],
       shell: true,
       signal: abortController.signal,
@@ -176,17 +141,69 @@ export class StreamingRunner {
     });
 
     testProcess.stdout.on("data", (data) => {
-      this.run.appendOutput(data.toString().replace(/\n/g, "\r\n"));
+      this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
     });
 
     testProcess.stderr.on("data", (data) => {
-      this.run.appendOutput(data.toString().replace(/\n/g, "\r\n"));
+      this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
     });
+  }
+
+  private startServer() {
+    const server = net.createServer();
+    server.on("error", (error) => {
+      throw error;
+    });
+    server.unref();
+
+    server.listen(0, "localhost", () => {
+      const address = server.address();
+
+      if (!address) {
+        throw new Error("Failed setup TCP server for streaming updates");
+      }
+      this.tcpPort =
+        typeof address === "string" ? address : address.port.toString();
+
+      // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
+      server.on("connection", (socket) => {
+        this.connection = rpc.createMessageConnection(
+          new rpc.StreamMessageReader(socket),
+          new rpc.StreamMessageWriter(socket),
+        );
+
+        // Register and start listening for events
+        this.registerStreamingEvents();
+        this.connection.listen();
+      });
+    });
+
+    return server;
+  }
+
+  private async finalize() {
+    await Promise.all(this.promises);
+
+    this.disposables.forEach((disposable) => disposable.dispose());
+
+    this.promises = [];
+    this.disposables = [];
+
+    if (this.connection) {
+      this.connection.end();
+      this.connection.dispose();
+    }
+
+    this.executionPromise!.resolve();
   }
 
   // Registers all streaming events that we will receive from the server except for the finish event, which is
   // registered to resolve the execute promise
-  private registerStreamingEvents(connection: rpc.MessageConnection) {
+  private registerStreamingEvents() {
+    if (!this.connection) {
+      return;
+    }
+
     const startTimestamps = new Map<string, number>();
     const withDuration = (
       id: string,
@@ -199,12 +216,19 @@ export class StreamingRunner {
 
     // Handle the JSON events being emitted by the tests
     this.disposables.push(
-      connection.onNotification(NOTIFICATION_TYPES.start, (params) => {
+      this.connection.onNotification(
+        NOTIFICATION_TYPES.finish,
+        this.finalize.bind(this),
+      ),
+    );
+
+    this.disposables.push(
+      this.connection.onNotification(NOTIFICATION_TYPES.start, (params) => {
         this.promises.push(
           this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
             (test) => {
               if (test) {
-                this.run.started(test);
+                this.run!.started(test);
                 startTimestamps.set(test.id, Date.now());
               }
             },
@@ -214,13 +238,13 @@ export class StreamingRunner {
     );
 
     this.disposables.push(
-      connection.onNotification(NOTIFICATION_TYPES.pass, (params) => {
+      this.connection.onNotification(NOTIFICATION_TYPES.pass, (params) => {
         this.promises.push(
           this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
             (test) => {
               if (test) {
                 withDuration(test.id, (duration) =>
-                  this.run.passed(test, duration),
+                  this.run!.passed(test, duration),
                 );
               }
             },
@@ -230,13 +254,13 @@ export class StreamingRunner {
     );
 
     this.disposables.push(
-      connection.onNotification(NOTIFICATION_TYPES.fail, (params) => {
+      this.connection.onNotification(NOTIFICATION_TYPES.fail, (params) => {
         this.promises.push(
           this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
             (test) => {
               if (test) {
                 withDuration(test.id, (duration) =>
-                  this.run.failed(
+                  this.run!.failed(
                     test,
                     new vscode.TestMessage(params.message),
                     duration,
@@ -250,13 +274,13 @@ export class StreamingRunner {
     );
 
     this.disposables.push(
-      connection.onNotification(NOTIFICATION_TYPES.error, (params) => {
+      this.connection.onNotification(NOTIFICATION_TYPES.error, (params) => {
         this.promises.push(
           this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
             (test) => {
               if (test) {
                 withDuration(test.id, (duration) =>
-                  this.run.errored(
+                  this.run!.errored(
                     test,
                     new vscode.TestMessage(params.message),
                     duration,
@@ -270,12 +294,12 @@ export class StreamingRunner {
     );
 
     this.disposables.push(
-      connection.onNotification(NOTIFICATION_TYPES.skip, (params) => {
+      this.connection.onNotification(NOTIFICATION_TYPES.skip, (params) => {
         this.promises.push(
           this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
             (test) => {
               if (test) {
-                this.run.skipped(test);
+                this.run!.skipped(test);
               }
             },
           ),
