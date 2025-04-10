@@ -25,65 +25,33 @@ module Minitest
         uri = uri_from_test_class(test_class, method_name)
         return unless uri
 
-        RubyLsp::TestReporter.start_test(
-          id: "#{test_class.name}##{method_name}",
-          uri: uri,
-        )
+        RubyLsp::TestReporter.instance.start_test(id: "#{test_class.name}##{method_name}", uri: uri)
       end
 
       #: (Minitest::Result result) -> void
       def record(result)
+        id = "#{result.klass}##{result.name}"
+        uri = uri_from_result(result)
+
         if result.error?
-          record_error(result)
+          message = result.failures.first.message
+          RubyLsp::TestReporter.instance.record_error(id: id, uri: uri, message: message)
         elsif result.passed?
-          record_pass(result)
+          RubyLsp::TestReporter.instance.record_pass(id: id, uri: uri)
         elsif result.skipped?
-          record_skip(result)
+          RubyLsp::TestReporter.instance.record_skip(id: id, uri: uri)
         elsif result.failure
-          record_fail(result)
+          message = result.failure.message
+          RubyLsp::TestReporter.instance.record_fail(id: id, uri: uri, message: message)
         end
       end
 
+      #: -> void
+      def report
+        RubyLsp::TestReporter.instance.shutdown
+      end
+
       private
-
-      #: (Minitest::Result result) -> void
-      def record_pass(result)
-        RubyLsp::TestReporter.record_pass(
-          id: id_from_result(result),
-          uri: uri_from_result(result),
-        )
-      end
-
-      #: (Minitest::Result result) -> void
-      def record_skip(result)
-        RubyLsp::TestReporter.record_skip(
-          id: id_from_result(result),
-          uri: uri_from_result(result),
-        )
-      end
-
-      #: (Minitest::Result result) -> void
-      def record_fail(result)
-        RubyLsp::TestReporter.record_fail(
-          id: id_from_result(result),
-          message: result.failure.message,
-          uri: uri_from_result(result),
-        )
-      end
-
-      #: (Minitest::Result result) -> void
-      def record_error(result)
-        RubyLsp::TestReporter.record_error(
-          id: id_from_result(result),
-          uri: uri_from_result(result),
-          message: result.failures.first.message,
-        )
-      end
-
-      #: (Minitest::Result result) -> String
-      def id_from_result(result)
-        "#{result.klass}##{result.name}"
-      end
 
       #: (Minitest::Result result) -> URI::Generic
       def uri_from_result(result)

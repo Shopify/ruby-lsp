@@ -48,6 +48,7 @@ jaccard
 Jaccard
 Jaro
 Kaigi
+KEEPALIVE
 klass
 kwargs
 libexec
@@ -88,6 +89,7 @@ rubyfmt
 rubylibdir
 rubylibprefix
 setqflist
+setsockopt
 shadowenv
 Shadowenv
 shellwords

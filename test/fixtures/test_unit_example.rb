@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "test-unit"
-require "ruby_lsp/test_unit_test_runner"
 
 class SampleTest < Test::Unit::TestCase
   def test_that_passes
