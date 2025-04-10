@@ -1475,8 +1475,8 @@ class ServerTest < Minitest::Test
     result = find_message(RubyLsp::Result, id: 1)
     reporters = result.response[:reporterPaths]
 
-    assert_includes(reporters, File.expand_path("../lib/ruby_lsp/ruby_lsp_reporter_plugin.rb", __dir__))
-    assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_unit_test_runner.rb", __dir__))
+    assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_reporters/minitest_reporter.rb", __dir__))
+    assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_reporters/test_unit_reporter.rb", __dir__))
   end
 
   private

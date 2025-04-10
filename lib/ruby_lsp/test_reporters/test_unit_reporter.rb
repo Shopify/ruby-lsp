@@ -9,11 +9,17 @@ rescue LoadError
   return
 end
 
-require_relative "test_reporter"
+require_relative "lsp_reporter"
 require "ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
-  class TestRunner < ::Test::Unit::UI::Console::TestRunner
+  class TestUnitReporter < Test::Unit::UI::Console::TestRunner
+    def initialize(suite, options = {})
+      super
+      @current_uri = nil #: URI::Generic?
+      @current_test_id = nil #: String?
+    end
+
     private
 
     #: (::Test::Unit::TestCase test) -> void
@@ -25,32 +31,35 @@ module RubyLsp
       return unless @current_uri
 
       @current_test_id = "#{current_test.class.name}##{current_test.method_name}"
-      TestReporter.instance.start_test(id: @current_test_id, uri: @current_uri)
+      LspReporter.instance.start_test(id: @current_test_id, uri: @current_uri)
     end
 
     #: (::Test::Unit::TestCase test) -> void
     def test_finished(test)
       super
-      TestReporter.instance.record_pass(id: @current_test_id, uri: @current_uri) if test.passed?
+      return unless test.passed? && @current_uri && @current_test_id
+
+      LspReporter.instance.record_pass(id: @current_test_id, uri: @current_uri)
     end
 
     #: (::Test::Unit::Failure | ::Test::Unit::Error | ::Test::Unit::Pending result) -> void
     def add_fault(result)
       super
+      return unless @current_uri && @current_test_id
 
       case result
       when ::Test::Unit::Failure
-        TestReporter.instance.record_fail(id: @current_test_id, message: result.message, uri: @current_uri)
+        LspReporter.instance.record_fail(id: @current_test_id, message: result.message, uri: @current_uri)
       when ::Test::Unit::Error
-        TestReporter.instance.record_error(id: @current_test_id, message: result.message, uri: @current_uri)
+        LspReporter.instance.record_error(id: @current_test_id, message: result.message, uri: @current_uri)
       when ::Test::Unit::Pending
-        TestReporter.instance.record_skip(id: @current_test_id, uri: @current_uri)
+        LspReporter.instance.record_skip(id: @current_test_id, uri: @current_uri)
       end
     end
 
     #: (Float) -> void
     def finished(elapsed_time)
-      TestReporter.instance.shutdown
+      LspReporter.instance.shutdown
     end
 
     #: (::Test::Unit::TestCase test) -> URI::Generic?
@@ -81,5 +90,5 @@ module RubyLsp
   end
 end
 
-Test::Unit::AutoRunner.register_runner(:ruby_lsp) { |_auto_runner| RubyLsp::TestRunner }
+Test::Unit::AutoRunner.register_runner(:ruby_lsp) { |_auto_runner| RubyLsp::TestUnitReporter }
 Test::Unit::AutoRunner.default_runner = :ruby_lsp
