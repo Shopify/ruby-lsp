@@ -805,4 +805,65 @@ suite("TestController", () => {
     );
     assert.ok(runStub.addCoverage.calledOnce);
   }).timeout(10000);
+
+  test("running a test with the run in terminal profile", async () => {
+    await controller.testController.resolveHandler!(undefined);
+
+    const testItem = (await controller.findTestItem(
+      "ServerTest::NestedTest#test_something",
+      serverTestUri,
+    ))!;
+
+    const fakeServerPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "src",
+      "test",
+      "suite",
+      "fakeTestServer.js",
+    );
+
+    // eslint-disable-next-line no-process-env
+    workspace.ruby.mergeComposedEnvironment(process.env as any);
+    sandbox.stub(workspace, "lspClient").value({
+      resolveTestCommands: sinon.stub().resolves({
+        commands: [`node ${fakeServerPath}`],
+        reporterPath: undefined,
+      }),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
+    });
+
+    const cancellationSource = new vscode.CancellationTokenSource();
+    const runStub = {
+      started: sinon.stub(),
+      passed: sinon.stub(),
+      enqueued: sinon.stub(),
+      end: sinon.stub(),
+      addCoverage: sinon.stub(),
+      appendOutput: sinon.stub(),
+      token: cancellationSource.token,
+    } as any;
+    sandbox.stub(controller.testController, "createTestRun").returns(runStub);
+
+    const runRequest = new vscode.TestRunRequest(
+      [testItem],
+      [],
+      controller.runInTerminalProfile,
+    );
+    await controller.runTest(runRequest, cancellationSource.token);
+
+    assert.ok(runStub.enqueued.calledWith(testItem));
+    assert.ok(runStub.started.calledWith(testItem));
+    assert.ok(runStub.passed.calledWith(testItem));
+    assert.ok(runStub.end.calledWithExactly());
+  }).timeout(10000);
 });

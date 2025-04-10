@@ -25,6 +25,7 @@ const NOTIFICATION_TYPES = {
 
 export enum Mode {
   Run = "run",
+  RunInTerminal = "runInTerminal",
   Debug = "debug",
 }
 
@@ -46,8 +47,11 @@ export class StreamingRunner implements vscode.Disposable {
     | undefined;
 
   private run: vscode.TestRun | undefined;
+  private terminals = new Map<string, vscode.Terminal>();
+  private currentWorkspace: Workspace | undefined;
 
   constructor(
+    context: vscode.ExtensionContext,
     findTestItem: (
       id: string,
       uri: vscode.Uri,
@@ -55,6 +59,12 @@ export class StreamingRunner implements vscode.Disposable {
   ) {
     this.findTestItem = findTestItem;
     this.tcpServer = this.startServer();
+
+    context.subscriptions.push(
+      vscode.window.onDidCloseTerminal((terminal) => {
+        this.terminals.delete(terminal.name);
+      }),
+    );
   }
 
   async execute(
@@ -65,6 +75,7 @@ export class StreamingRunner implements vscode.Disposable {
     mode: Mode,
     linkedCancellationSource: LinkedCancellationSource,
   ) {
+    this.currentWorkspace = workspace;
     this.run = currentRun;
 
     await new Promise<void>((resolve, reject) => {
@@ -84,6 +95,8 @@ export class StreamingRunner implements vscode.Disposable {
           workspace.workspaceFolder.uri.fsPath,
           abortController,
         );
+      } else if (mode === Mode.RunInTerminal) {
+        this.runInTerminal(command, env, workspace.workspaceFolder);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.launchDebugger(command, env, workspace);
@@ -123,6 +136,41 @@ export class StreamingRunner implements vscode.Disposable {
         new Error("Failed to start debugging session"),
       );
     }
+  }
+
+  // Run the given test in the terminal
+  private runInTerminal(
+    command: string,
+    env: NodeJS.ProcessEnv,
+    workspaceFolder: vscode.WorkspaceFolder,
+  ) {
+    const cwd = workspaceFolder.uri.fsPath;
+    const name = `${workspaceFolder.name}: test`;
+    let terminal = vscode.window.terminals.find((t) => t.name === name);
+    if (!terminal) {
+      terminal = vscode.window.createTerminal({
+        name,
+        cwd,
+        env,
+      });
+    }
+
+    // Set the TCP port information every time even if there's an existing terminal. The user can close the editor
+    // window or reload extensions, which will assign a new port but maintain the same terminal
+    if (process.platform === "win32") {
+      terminal.sendText(
+        `$env:RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; Clear-Host`,
+      );
+    } else {
+      terminal.sendText(
+        `export RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; clear`,
+      );
+    }
+
+    this.terminals.set(name, terminal);
+
+    terminal.show();
+    terminal.sendText(command);
   }
 
   // Spawns the test process and redirects any stdout or stderr output to the test run output
@@ -182,6 +230,17 @@ export class StreamingRunner implements vscode.Disposable {
   }
 
   private async finalize() {
+    if (this.currentWorkspace) {
+      // If the tests are being executed in a terminal, send a CTRL+C signal to stop them
+      const terminal = this.terminals.get(
+        `${this.currentWorkspace.workspaceFolder.name}: test`,
+      );
+
+      if (terminal) {
+        terminal.sendText("\u0003");
+      }
+    }
+
     await Promise.all(this.promises);
 
     this.disposables.forEach((disposable) => disposable.dispose());
