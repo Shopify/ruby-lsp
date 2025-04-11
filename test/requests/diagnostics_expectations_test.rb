@@ -35,6 +35,8 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
     # On Windows, RuboCop will complain that the file is missing a carriage return at the end. We need to ignore these
     T.must(result).reject { |diagnostic| diagnostic.source == "RuboCop" && diagnostic.code == "Layout/EndOfLine" }
+  rescue RubyLsp::Requests::Support::InternalRuboCopError
+    skip("Fixture requires a fix from Rubocop")
   end
 
   def assert_expectations(source, expected)

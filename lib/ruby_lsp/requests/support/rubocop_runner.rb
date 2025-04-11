@@ -111,7 +111,11 @@ module RubyLsp
         rescue ::RuboCop::ValidationError => error
           raise ConfigurationError, error.message
         rescue StandardError => error
-          raise InternalRuboCopError, error
+          # Maintain the original backtrace so that debugging cops that are breaking is easier, but re-raise as a
+          # different error class
+          internal_error = InternalRuboCopError.new(error)
+          internal_error.set_backtrace(error.backtrace)
+          raise internal_error
         end
 
         #: -> String
