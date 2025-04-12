@@ -1,27 +1,33 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <socket-name>"
+# Determine script location and workspace path
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE_RUBY_LSP_DIR="$(dirname "$SCRIPT_DIR")/.ruby-lsp"
+PORT_FILE="$WORKSPACE_RUBY_LSP_DIR/mcp-port"
+LOG_PATH="$WORKSPACE_RUBY_LSP_DIR/mcp-bridge.log"
+
+# Ensure log directory exists
+mkdir -p "$WORKSPACE_RUBY_LSP_DIR"
+
+# Check if port file exists
+if [ ! -f "$PORT_FILE" ]; then
+  echo "Error: MCP port file not found at $PORT_FILE" >&2
+  echo "MCP server may not be running." >&2
   exit 1
 fi
 
-WORKSPACE_NAME="$1"
-SOCKET_NAME="$WORKSPACE_NAME"
-SOCKET_PATH="/tmp/ruby-mcp/$SOCKET_NAME"
-LOG_PATH="/tmp/ruby-mcp/$SOCKET_NAME.log"
+# Read port from file
+PORT=$(cat "$PORT_FILE")
 
-# Ensure the directory exists
-mkdir -p /tmp/ruby-mcp
-
-echo "Bridge started for workspace: $WORKSPACE_NAME" >> "$LOG_PATH"
+echo "Bridge started using port $PORT" >> "$LOG_PATH"
 
 while IFS= read -r line; do
   echo "================================" >> "$LOG_PATH"
   echo "Input JSON: $line" >> "$LOG_PATH"
 
-  # Send to Unix domain socket using netcat (nc)
+  # Send to TCP socket using netcat (nc)
   response=$(echo -e "POST /mcp HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: ${#line}\r\n\r\n$line" | \
-    nc -w 2 -U "$SOCKET_PATH" 2>/dev/null) || {
+    nc -w 2 127.0.0.1 "$PORT" 2>/dev/null) || {
     echo "Socket communication failed" >> "$LOG_PATH"
     continue
   }

@@ -12,20 +12,30 @@ module RubyLsp
     extend T::Sig
     include Requests::Support::Common
 
-    MCP_FOLDER = "/tmp/ruby-mcp"
     MAX_CLASSES_TO_RETURN = 5000
+
+    class << self
+      # Find an available TCP port
+      #: -> Integer
+      def find_available_port
+        server = TCPServer.new("127.0.0.1", 0)
+        port = server.addr[1]
+        server.close
+        port
+      end
+    end
 
     sig { params(global_state: GlobalState).void }
     def initialize(global_state)
-      @socket_name = T.let(File.basename(global_state.workspace_path), String)
-      unless Dir.exist?(MCP_FOLDER)
-        Dir.mkdir(MCP_FOLDER)
-      end
-      @socket_path = T.let(File.join(MCP_FOLDER, @socket_name), String)
-      if File.exist?(@socket_path)
-        File.delete(@socket_path)
-      end
-      @socket = T.let(Socket.unix_server_socket(@socket_path), Socket)
+      @workspace_path = T.let(global_state.workspace_path, String)
+      @port = T.let(self.class.find_available_port, Integer)
+
+      # Write port to file
+      port_file = File.join(@workspace_path, ".ruby-lsp", "mcp-port")
+      File.write(port_file, @port.to_s)
+
+      # Create TCP server
+      @server = T.let(TCPServer.new("127.0.0.1", @port), TCPServer)
       @running = T.let(false, T::Boolean)
       @global_state = T.let(global_state, GlobalState)
       @index = T.let(global_state.index, RubyIndexer::Index)
@@ -34,20 +44,20 @@ module RubyLsp
     sig { void }
     def start
       @running = true
-      puts "[MCP] Server started on socket #{@socket_path}"
+      puts "[MCP] Server started on TCP port #{@port}"
 
       while @running
         sleep(0.1)
         begin
           # Use IO.select to check if the socket is ready
           ready = begin
-            IO.select([@socket], nil, nil, 0)
+            IO.select([@server], nil, nil, 0)
           rescue
             nil
           end
 
           if ready
-            client_socket = @socket.accept_nonblock
+            client_socket = @server.accept_nonblock
             Thread.start(client_socket) do |socket, _|
               handle_connection(socket)
             end
@@ -65,7 +75,7 @@ module RubyLsp
     def stop
       puts "[MCP] Stopping server"
       @running = false
-      @socket.close
+      @server.close
     end
 
     private
