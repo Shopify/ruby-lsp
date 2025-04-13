@@ -13,6 +13,9 @@ module RubyLsp
     include Requests::Support::Common
 
     MAX_CLASSES_TO_RETURN = 5000
+    RESPONSE_TIMEOUT = 3
+    CHUNK_SIZE = 8192
+    WAIT_SOCKET_TIMEOUT = 0.1
 
     class << self
       # Find an available TCP port
@@ -135,7 +138,9 @@ module RubyLsp
           },
         }.to_json)
       else
-        respond(socket, 200, response)
+        Timeout.timeout(RESPONSE_TIMEOUT) do
+          respond(socket, 200, response)
+        end
       end
       puts "[MCP] Sent response: #{response}"
     end
@@ -280,20 +285,30 @@ module RubyLsp
 
     sig { params(socket: Socket, status: Integer, body: String).void }
     def respond(socket, status, body)
-      socket.write("HTTP/1.1 #{status}\r\n")
-      socket.write("Content-Type: application/json\r\n")
-      socket.write("Connection: close\r\n")
-      socket.write("Content-Length: #{body.bytesize}\r\n")
-      socket.write("\r\n")
+      writable = T.let(nil, T.nilable(T::Array[IO])) # Initialize writable outside the loop
+
+      loop do
+        _readable, writable, = IO.select(nil, [socket], nil, WAIT_SOCKET_TIMEOUT)
+        break if writable
+
+        sleep(0.1)
+      end
+
+      socket.write(<<~HTTP_RESPONSE)
+        HTTP/1.1 #{status}\r
+        Content-Type: application/json\r
+        Connection: close\r
+        Content-Length: #{body.bytesize}\r
+        \r
+      HTTP_RESPONSE
 
       # Write data in chunks to avoid blocking indefinitely on large responses
       offset = 0
-      chunk_size = 8192 # 8KB chunks
-      writable = T.let(nil, T.nilable(T::Array[IO])) # Initialize writable outside the loop
+      chunk_size = CHUNK_SIZE
 
       while offset < body.bytesize
         # Check if socket is writable before attempting write
-        _readable, writable, = IO.select(nil, [socket], nil, 1)
+        _readable, writable, = IO.select(nil, [socket], nil, WAIT_SOCKET_TIMEOUT)
         break unless writable
 
         current_chunk = body.byteslice(offset, chunk_size)
@@ -305,7 +320,7 @@ module RubyLsp
       end
 
       # Check if socket is writable before flush
-      _, writable, = IO.select(nil, [socket], nil, 1)
+      _, writable, = IO.select(nil, [socket], nil, WAIT_SOCKET_TIMEOUT)
       socket.flush if writable
     rescue => e
       case e
@@ -323,7 +338,7 @@ module RubyLsp
     def read_request_body(socket, content_length)
       body = +""
       remaining = content_length
-      deadline = Time.now + 5 # 5 second timeout
+      deadline = Time.now + RESPONSE_TIMEOUT # 5 second timeout
 
       while remaining > 0
         # Check timeout
@@ -333,13 +348,13 @@ module RubyLsp
         end
 
         # Use IO.select to check if socket is readable
-        readable, = IO.select([socket], nil, nil, 0.5)
+        readable, = IO.select([socket], nil, nil, WAIT_SOCKET_TIMEOUT)
         unless readable
           next # Socket not ready, try again
         end
 
         begin
-          chunk = socket.read_nonblock([remaining, 8192].min)
+          chunk = socket.read_nonblock([remaining, CHUNK_SIZE].min)
           if chunk.empty?
             puts "[MCP] Client closed connection during body read"
             break
