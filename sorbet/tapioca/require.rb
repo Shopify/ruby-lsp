@@ -11,6 +11,7 @@ $LOAD_PATH.delete_if { |path| yarp_require_paths.include?(path) } if yarp_requir
 require "language_server-protocol"
 require "json_rpc_handler"
 require "prism"
+require "webrick"
 require "prism/visitor"
 require "mocha/minitest"
 require "rubocop/minitest/assert_offense"

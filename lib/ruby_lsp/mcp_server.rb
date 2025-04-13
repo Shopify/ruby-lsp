@@ -1,8 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "socket"
 require "json"
+require "webrick"
 require "sorbet-runtime"
 require "json_rpc_handler"
 require "ruby_lsp/requests/support/common"
@@ -13,9 +13,6 @@ module RubyLsp
     include Requests::Support::Common
 
     MAX_CLASSES_TO_RETURN = 5000
-    RESPONSE_TIMEOUT = 3
-    CHUNK_SIZE = 8192
-    WAIT_SOCKET_TIMEOUT = 0.1
 
     class << self
       # Find an available TCP port
@@ -37,8 +34,22 @@ module RubyLsp
       port_file = File.join(@workspace_path, ".ruby-lsp", "mcp-port")
       File.write(port_file, @port.to_s)
 
-      # Create TCP server
-      @server = T.let(TCPServer.new("127.0.0.1", @port), TCPServer)
+      # Create WEBrick server
+      @server = T.let(
+        WEBrick::HTTPServer.new(
+          Port: @port,
+          BindAddress: "127.0.0.1",
+          Logger: WEBrick::Log.new(File.join(@workspace_path, ".ruby-lsp", "mcp-webrick.log")),
+          AccessLog: [],
+        ),
+        WEBrick::HTTPServer,
+      )
+
+      # Mount the MCP handler
+      @server.mount_proc("/mcp") do |req, res|
+        handle_mcp_request(req, res)
+      end
+
       @running = T.let(false, T::Boolean)
       @global_state = T.let(global_state, GlobalState)
       @index = T.let(global_state.index, RubyIndexer::Index)
@@ -46,89 +57,29 @@ module RubyLsp
 
     sig { void }
     def start
-      @running = true
       puts "[MCP] Server started on TCP port #{@port}"
-
-      while @running
-        sleep(0.1)
-        begin
-          # Use IO.select to check if the socket is ready
-          ready = begin
-            IO.select([@server], nil, nil, 0)
-          rescue
-            nil
-          end
-
-          if ready
-            client_socket = @server.accept_nonblock
-            Thread.start(client_socket) do |socket, _|
-              handle_connection(socket)
-            end
-          end
-        rescue => e
-          puts "[MCP] Error in accept loop: #{e.message}"
-          puts e.backtrace&.join("\n")
-          # Add a small sleep to avoid tight loop in case of persistent errors
-          sleep(1)
-        end
-      end
+      @server.start
     end
 
     sig { void }
     def stop
       puts "[MCP] Stopping server"
-      @running = false
-      @server.close
+      @server.shutdown
     end
 
     private
 
-    sig { params(socket: Socket).void }
-    def handle_connection(socket)
-      request_line = socket.gets
-      return unless request_line
+    sig { params(request: WEBrick::HTTPRequest, response: WEBrick::HTTPResponse).void }
+    def handle_mcp_request(request, response)
+      body = request.body || ""
 
-      method, path, _ = request_line.split(" ")
-      headers = {}
-      while (line = socket.gets) && (line != "\r\n")
-        key, value = line.split(": ", 2)
-        headers[key.downcase] = value.strip if key && value
-      end
-
-      puts "[MCP] Received: #{method} #{path}"
-
-      if method == "POST" && path == "/mcp"
-        content_length = headers["content-length"].to_i
-        body = read_request_body(socket, content_length)
-        handle_mcp_request(socket, body)
-      else
-        # Proper JSON-RPC error for unknown endpoint
-        error_response = {
-          jsonrpc: "2.0",
-          id: 0, # Use a default ID for requests without an ID
-          error: {
-            code: -32601,
-            message: "Method not found",
-            data: "Endpoint not found: #{path}",
-          },
-        }
-        respond(socket, 404, error_response.to_json)
-      end
-    rescue => e
-      puts "[MCP] Connection error: #{e.message}"
-      puts e.backtrace&.join("\n")
-    ensure
-      socket.close
-    end
-
-    sig { params(socket: Socket, body: String).void }
-    def handle_mcp_request(socket, body)
       puts "[MCP] Received request: #{body}"
 
-      response = process_jsonrpc_request(body)
+      result = process_jsonrpc_request(body)
 
-      if response.nil?
-        respond(socket, 500, {
+      if result.nil?
+        response.status = 500
+        response.body = {
           jsonrpc: "2.0",
           id: nil,
           error: {
@@ -136,13 +87,28 @@ module RubyLsp
             message: "Internal error",
             data: "No response from the server",
           },
-        }.to_json)
+        }.to_json
       else
-        Timeout.timeout(RESPONSE_TIMEOUT) do
-          respond(socket, 200, response)
-        end
+        response.status = 200
+        response.content_type = "application/json"
+        response.body = result
       end
-      puts "[MCP] Sent response: #{response}"
+
+      puts "[MCP] Sent response: #{response.body}"
+    rescue => e
+      puts "[MCP] Error processing request: #{e.message}"
+      puts e.backtrace&.join("\n")
+
+      response.status = 500
+      response.body = {
+        jsonrpc: "2.0",
+        id: nil,
+        error: {
+          code: JsonRpcHandler::ErrorCode::InternalError,
+          message: "Internal error",
+          data: e.message,
+        },
+      }.to_json
     end
 
     sig { params(json: String).returns(T.nilable(String)) }
@@ -154,7 +120,6 @@ module RubyLsp
         when "initialize"
           ->(_) do
             {
-
               protocolVersion: "2024-11-05",
               capabilities: {
                 tools: { list_changed: false },
@@ -281,106 +246,6 @@ module RubyLsp
           }
         end
       end
-    end
-
-    sig { params(socket: Socket, status: Integer, body: String).void }
-    def respond(socket, status, body)
-      writable = T.let(nil, T.nilable(T::Array[IO])) # Initialize writable outside the loop
-
-      loop do
-        _readable, writable, = IO.select(nil, [socket], nil, WAIT_SOCKET_TIMEOUT)
-        break if writable
-
-        sleep(0.1)
-      end
-
-      socket.write(<<~HTTP_RESPONSE)
-        HTTP/1.1 #{status}\r
-        Content-Type: application/json\r
-        Connection: close\r
-        Content-Length: #{body.bytesize}\r
-        \r
-      HTTP_RESPONSE
-
-      # Write data in chunks to avoid blocking indefinitely on large responses
-      offset = 0
-      chunk_size = CHUNK_SIZE
-
-      while offset < body.bytesize
-        # Check if socket is writable before attempting write
-        _readable, writable, = IO.select(nil, [socket], nil, WAIT_SOCKET_TIMEOUT)
-        break unless writable
-
-        current_chunk = body.byteslice(offset, chunk_size)
-        bytes_written = socket.write(current_chunk)
-        offset += bytes_written
-
-        # Break if we couldn't write anything (possible socket issue)
-        break if bytes_written <= 0
-      end
-
-      # Check if socket is writable before flush
-      _, writable, = IO.select(nil, [socket], nil, WAIT_SOCKET_TIMEOUT)
-      socket.flush if writable
-    rescue => e
-      case e
-      when Errno::EPIPE
-        puts "[MCP] Broken pipe while sending response: #{e.message}"
-        puts "[MCP] Response: #{body}"
-      when Errno::ECONNRESET
-        puts "[MCP] Connection reset while sending response: #{e.message}"
-      end
-
-      raise
-    end
-
-    sig { params(socket: Socket, content_length: Integer).returns(String) }
-    def read_request_body(socket, content_length)
-      body = +""
-      remaining = content_length
-      deadline = Time.now + RESPONSE_TIMEOUT # 5 second timeout
-
-      while remaining > 0
-        # Check timeout
-        if Time.now > deadline
-          puts "[MCP] Timeout reading request body"
-          break
-        end
-
-        # Use IO.select to check if socket is readable
-        readable, = IO.select([socket], nil, nil, WAIT_SOCKET_TIMEOUT)
-        unless readable
-          next # Socket not ready, try again
-        end
-
-        begin
-          chunk = socket.read_nonblock([remaining, CHUNK_SIZE].min)
-          if chunk.empty?
-            puts "[MCP] Client closed connection during body read"
-            break
-          end
-          body << chunk
-          remaining -= chunk.bytesize
-        rescue EOFError => e
-          puts "[MCP] EOF while reading request body: #{e.message}"
-          break
-        rescue Errno::EPIPE => e
-          puts "[MCP] Broken pipe while reading request body: #{e.message}"
-          break
-        rescue Errno::ECONNRESET => e
-          puts "[MCP] Connection reset while reading request body: #{e.message}"
-          break
-        rescue IO::WaitReadable
-          # Socket not ready, try again after select
-          next
-        rescue => e
-          puts "[MCP] Error reading request body: #{e.class} - #{e.message}"
-          puts e.backtrace&.join("\n")
-          break
-        end
-      end
-
-      body
     end
 
     sig { params(contents: T::Array[T::Hash[Symbol, T.untyped]]).returns(T::Hash[Symbol, T.untyped]) }

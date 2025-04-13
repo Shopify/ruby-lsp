@@ -25,18 +25,17 @@ while IFS= read -r line; do
   echo "================================" >> "$LOG_PATH"
   echo "Input JSON: $line" >> "$LOG_PATH"
 
-  # Send to TCP socket using netcat (nc)
-  response=$(echo -e "POST /mcp HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: ${#line}\r\n\r\n$line" | \
-    nc -w 2 127.0.0.1 "$PORT" 2>/dev/null) || {
-    echo "Socket communication failed" >> "$LOG_PATH"
+  # Send HTTP request to the WEBrick server
+  response=$(curl -s -X POST -H "Content-Type: application/json" \
+    -H "Content-Length: ${#line}" \
+    --data "$line" \
+    "http://127.0.0.1:$PORT/mcp" 2>$LOG_PATH) || {
+    echo "HTTP request failed" >> "$LOG_PATH"
     continue
   }
 
-  # Extract the JSON response by removing HTTP headers
-  json_response=$(echo "$response" | awk 'BEGIN{RS="\r\n\r\n"} NR==2')
-
   echo "--------------------------------" >> "$LOG_PATH"
-  echo "Response JSON: $json_response" >> "$LOG_PATH"
+  echo "Response JSON: $response" >> "$LOG_PATH"
 
-  echo "$json_response"
+  echo "$response"
 done
