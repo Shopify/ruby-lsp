@@ -50,7 +50,7 @@ module RubyLsp
         "__LINE__",
       ].freeze
 
-      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, RubyDocument::SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, String? trigger_character) -> void
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, RubyDocument::SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, String? trigger_character, Integer char_position) -> void
       def initialize( # rubocop:disable Metrics/ParameterLists
         response_builder,
         global_state,
@@ -58,7 +58,8 @@ module RubyLsp
         sorbet_level,
         dispatcher,
         uri,
-        trigger_character
+        trigger_character,
+        char_position
       )
         @response_builder = response_builder
         @global_state = global_state
@@ -68,6 +69,7 @@ module RubyLsp
         @sorbet_level = sorbet_level
         @uri = uri
         @trigger_character = trigger_character
+        @char_position = char_position
 
         dispatcher.register(
           self,
@@ -167,6 +169,11 @@ module RubyLsp
               return
             end
           end
+        end
+
+        if ["(", ","].include?(@trigger_character)
+          complete_keyword_arguments(node)
+          return
         end
 
         name = node.message
@@ -525,8 +532,138 @@ module RubyLsp
             },
           )
         end
+
+        # In a situation like this:
+        #     foo(aaa: 1, b)
+        #                 ^
+        # when we type `b`, it triggers completion for b,
+        # so we provide keyword arguments completion for `foo` using `b` as a filter prefix
+        if @node_context.parent.is_a?(Prism::CallNode) && method_name
+          call_node = T.cast(@node_context.parent, Prism::CallNode)
+          candidates = keyword_argument_completion_candidates(call_node, method_name)
+          candidates.each do |param|
+            build_keyword_argument_completion_item(param, range)
+          end
+        end
       rescue RubyIndexer::Index::NonExistingNamespaceError
         # We have not indexed this namespace, so we can't provide any completions
+      end
+
+      #: (Prism::CallNode call_node, String? filter) -> void
+      def complete_keyword_arguments(call_node, filter = nil)
+        candidates = keyword_argument_completion_candidates(call_node, filter)
+
+        range =
+          case @trigger_character
+          when "("
+            opening_loc = call_node.opening_loc
+            if opening_loc
+              Interface::Range.new(
+                start: Interface::Position.new(
+                  line: opening_loc.start_line - 1,
+                  character: opening_loc.start_column + 1,
+                ),
+                end: Interface::Position.new(line: opening_loc.start_line - 1, character: opening_loc.start_column + 1),
+              )
+            end
+          when ","
+            arguments = call_node.arguments
+            if arguments
+              # TODO: most possible position
+              nearest_argument = arguments.arguments.flat_map do
+                _1.is_a?(Prism::KeywordHashNode) ? _1.elements : _1
+              end.find do |argument|
+                (argument.location.start_offset..argument.location.end_offset).cover?(@char_position)
+              end
+              location = nearest_argument&.location || arguments.location
+              # offset = @char_position - location.start_offset
+              Interface::Range.new(
+                start: Interface::Position.new(
+                  line: location.end_line - 1,
+                  character: location.end_column + 1,
+                ),
+                end: Interface::Position.new(
+                  line: location.end_line - 1,
+                  character: location.end_column + 1,
+                ),
+              )
+            end
+          end
+        return unless range
+
+        candidates.each do |param|
+          build_keyword_argument_completion_item(param, range)
+        end
+      end
+
+      #: (RubyIndexer::Entry::KeywordParameter | RubyIndexer::Entry::OptionalKeywordParameter param, Interface::Range range) -> void
+      def build_keyword_argument_completion_item(param, range)
+        decorated_name = param.decorated_name
+        new_text = @trigger_character == "," ? " #{decorated_name} " : "#{decorated_name} "
+        @response_builder << Interface::CompletionItem.new(
+          label: decorated_name,
+          text_edit: Interface::TextEdit.new(range: range, new_text: new_text),
+          kind: Constant::CompletionItemKind::PROPERTY,
+        )
+      end
+
+      #: (Prism::CallNode call_node, String? filter) -> Array[RubyIndexer::Entry::KeywordParameter | RubyIndexer::Entry::OptionalKeywordParameter]
+      def keyword_argument_completion_candidates(call_node, filter = nil)
+        method = resolve_method(call_node, call_node.message) if call_node
+        return [] unless method
+
+        signature = method.signatures.first
+        return [] unless signature
+
+        arguments = call_node.arguments&.arguments || []
+        keyword_arguments = arguments.find { _1.is_a?(Prism::KeywordHashNode) }
+
+        arg_names =
+          if keyword_arguments
+            keyword_arguments = T.cast(keyword_arguments, Prism::KeywordHashNode)
+            T.cast(
+              keyword_arguments.elements.select { _1.is_a?(Prism::AssocNode) },
+              T::Array[Prism::AssocNode],
+            ).map do |arg|
+              key = arg.key
+              arg_name =
+                case key
+                when Prism::StringNode then key.content
+                when Prism::SymbolNode then key.value
+                when Prism::CallNode then key.name
+                end
+
+              arg_name&.to_sym
+            end.compact
+          else
+            []
+          end
+
+        candidates = []
+        signature.parameters.each do |param|
+          unless param.is_a?(RubyIndexer::Entry::KeywordParameter) ||
+              param.is_a?(RubyIndexer::Entry::OptionalKeywordParameter)
+            next
+          end
+          # the argument is already provided
+          next if arg_names.include?(param.name)
+          # the argument is being typed halfway
+          next if filter && !param.name.start_with?(filter)
+
+          candidates << param
+        end
+
+        candidates
+      end
+
+      #: (Prism::CallNode node, String? name) -> (RubyIndexer::Entry::Member | RubyIndexer::Entry::MethodAlias)?
+      def resolve_method(node, name)
+        return unless name
+
+        type = @type_inferrer.send(:infer_receiver_for_call_node, node, @node_context)
+        return unless type
+
+        @index.resolve_method(name, type.name)&.first
       end
 
       #: (Prism::CallNode node, String name) -> void

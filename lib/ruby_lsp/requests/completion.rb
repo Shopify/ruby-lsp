@@ -13,7 +13,7 @@ module RubyLsp
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
-            trigger_characters: ["/", "\"", "'", ":", "@", ".", "=", "<", "$"],
+            trigger_characters: ["/", "\"", "'", ":", "@", ".", "=", "<", "$", "(", ","],
             completion_item: {
               labelDetailsSupport: true,
             },
@@ -71,6 +71,7 @@ module RubyLsp
           dispatcher,
           document.uri,
           params.dig(:context, :triggerCharacter),
+          char_position,
         )
 
         Addon.addons.each do |addon|
