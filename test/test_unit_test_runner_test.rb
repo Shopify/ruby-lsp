@@ -80,7 +80,40 @@ module RubyLsp
             "uri" => uri,
           },
         },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_with_output",
+            "uri" => uri,
+          },
+        },
+        {
+          "method" => "append_output",
+          "params" => {
+            "message" => "hello from $stdout.puts\r\nanother line\r\n",
+          },
+        },
+        {
+          "method" => "append_output",
+          "params" => {
+            "message" => "hello from puts\r\nanother line\r\n",
+          },
+        },
+        {
+          "method" => "append_output",
+          "params" => {
+            "message" => "hello from write\r\nanother line",
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "SampleTest#test_with_output",
+            "uri" => uri,
+          },
+        },
       ]
+      assert_equal(2 + 2 + 2 + 2 + 5, actual.size)
       assert_equal(expected, actual)
     end
   end
