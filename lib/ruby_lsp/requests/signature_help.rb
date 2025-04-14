@@ -24,6 +24,7 @@ module RubyLsp
         super()
 
         char_position, _ = document.find_index_by_position(position)
+        char_position -= 1
         delegate_request_if_needed!(global_state, document, char_position)
 
         node_context = RubyDocument.locate(
@@ -38,7 +39,14 @@ module RubyLsp
         @target = target #: Prism::Node?
         @dispatcher = dispatcher
         @response_builder = ResponseBuilders::SignatureHelp.new #: ResponseBuilders::SignatureHelp
-        Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, sorbet_level)
+        Listeners::SignatureHelp.new(
+          @response_builder,
+          global_state,
+          node_context,
+          dispatcher,
+          sorbet_level,
+          char_position,
+        )
       end
 
       # @override

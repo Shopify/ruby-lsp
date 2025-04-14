@@ -86,7 +86,7 @@ class SignatureHelpTest < Minitest::Test
     with_server(source) do |server, uri|
       server.process_message(id: 1, method: "textDocument/signatureHelp", params:  {
         textDocument: { uri: uri },
-        position: { line: 5, character: 9 },
+        position: { line: 5, character: 10 },
         context: {
           triggerCharacter: ",",
         },
@@ -114,7 +114,7 @@ class SignatureHelpTest < Minitest::Test
     with_server(source) do |server, uri|
       server.process_message(id: 1, method: "textDocument/signatureHelp", params:  {
         textDocument: { uri: uri },
-        position: { line: 5, character: 12 },
+        position: { line: 5, character: 13 },
         context: {
           triggerCharacter: ",",
           activeSignatureHelp: nil,
@@ -124,7 +124,7 @@ class SignatureHelpTest < Minitest::Test
       signature = result.signatures.first
 
       assert_equal("bar(a:, b:)", signature.label)
-      assert_equal(1, result.active_parameter)
+      assert_equal(0, result.active_parameter)
     end
   end
 
@@ -143,7 +143,7 @@ class SignatureHelpTest < Minitest::Test
     with_server(source) do |server, uri|
       server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
-        position: { line: 5, character: 15 },
+        position: { line: 5, character: 16 },
         context: {
           triggerCharacter: ",",
           activeSignatureHelp: nil,
@@ -152,7 +152,7 @@ class SignatureHelpTest < Minitest::Test
       result = server.pop_response.response
       signature = result.signatures.first
       assert_equal("bar(a, b = <default>, c:, d:)", signature.label)
-      assert_equal(2, result.active_parameter)
+      assert_equal(3, result.active_parameter)
     end
   end
 
@@ -171,13 +171,13 @@ class SignatureHelpTest < Minitest::Test
     with_server(source) do |server, uri|
       server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
-        position: { line: 5, character: 20 },
+        position: { line: 5, character: 21 },
         context: {},
       })
       result = server.pop_response.response
       signature = result.signatures.first
       assert_equal("bar(*a)", signature.label)
-      assert_equal(0, result.active_parameter)
+      assert_equal(signature.parameters.length, result.active_parameter)
     end
   end
 
@@ -196,7 +196,7 @@ class SignatureHelpTest < Minitest::Test
     with_server(source) do |server, uri|
       server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
-        position: { line: 5, character: 9 },
+        position: { line: 5, character: 10 },
         context: {},
       })
       result = server.pop_response.response
