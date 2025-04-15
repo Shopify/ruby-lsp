@@ -1,6 +1,6 @@
 # typed: true
 
-module RubyLsp::TestReporter
+class RubyLsp::TestReporter
   # https://code.visualstudio.com/api/references/vscode-api#Position
   Position = T.type_alias { { line: Integer, character: Integer } }
 

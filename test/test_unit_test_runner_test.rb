@@ -2,25 +2,56 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "stringio"
+require "socket"
 
 module RubyLsp
   class TestUnitTestRunnerTest < Minitest::Test
     def test_test_runner_output
-      _stdin, stdout, _stderr, _wait_thr = Open3.popen3(
+      reporter_path = File.expand_path(File.join("lib", "ruby_lsp", "test_unit_test_runner.rb"))
+      test_path = File.join(Dir.pwd, "test", "fixtures", "test_unit_example.rb")
+      uri = URI::Generic.from_path(path: test_path).to_s
+
+      server = TCPServer.new("localhost", 0)
+      port = server.addr[1].to_s
+      events = []
+      socket = T.let(nil, T.nilable(Socket))
+
+      receiver = Thread.new do
+        socket = server.accept
+        socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+
+        loop do
+          headers = socket.gets("\r\n\r\n")
+          break unless headers
+
+          content_length = headers[/Content-Length: (\d+)/i, 1].to_i
+          raw_message = socket.read(content_length)
+
+          event = JSON.parse(raw_message)
+          events << event
+
+          break if event["method"] == "finish"
+        end
+      end
+
+      _stdin, stdout, _stderr, wait_thr = T.unsafe(Open3).popen3(
+        {
+          "RUBYOPT" => "-rbundler/setup -r#{reporter_path}",
+          "RUBY_LSP_TEST_RUNNER" => "run",
+          "RUBY_LSP_REPORTER_PORT" => port,
+        },
         "bundle",
         "exec",
         "ruby",
-        "test/fixtures/test_unit_example.rb",
-        "--runner",
-        "ruby_lsp",
+        "-Itest",
+        test_path,
+        chdir: Bundler.root.to_s,
       )
-      stdout.binmode
-      stdout.sync = true
 
-      actual = parse_json_api_stream(stdout)
+      wait_thr.join
+      receiver.join
+      socket&.close
 
-      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/test_unit_example.rb").to_s
       expected = [
         {
           "method" => "start",
@@ -80,8 +111,13 @@ module RubyLsp
             "uri" => uri,
           },
         },
+        {
+          "method" => "finish",
+          "params" => {},
+        },
       ]
-      assert_equal(expected, actual)
+      assert_equal(expected, events)
+      refute_empty(stdout.read)
     end
   end
 end
