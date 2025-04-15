@@ -144,9 +144,9 @@ module RubyLsp
     end
 
     # @override
-    #: -> LanguageId
+    #: -> Symbol
     def language_id
-      LanguageId::Ruby
+      :ruby
     end
 
     #: (Hash[Symbol, untyped] range, ?node_types: Array[singleton(Prism::Node)]) -> Prism::Node?

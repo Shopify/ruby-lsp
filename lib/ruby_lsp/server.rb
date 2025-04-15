@@ -387,11 +387,11 @@ module RubyLsp
         text_document = message.dig(:params, :textDocument)
         language_id = case text_document[:languageId]
         when "erb", "eruby"
-          Document::LanguageId::ERB
+          :erb
         when "rbs"
-          Document::LanguageId::RBS
+          :rbs
         else
-          Document::LanguageId::Ruby
+          :ruby
         end
 
         document = @store.set(

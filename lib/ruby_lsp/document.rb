@@ -3,14 +3,6 @@
 
 module RubyLsp
   class Document
-    class LanguageId < T::Enum
-      enums do
-        Ruby = new("ruby")
-        ERB = new("erb")
-        RBS = new("rbs")
-      end
-    end
-
     extend T::Sig
     extend T::Helpers
     extend T::Generic
@@ -71,7 +63,7 @@ module RubyLsp
       self.class == other.class && uri == other.uri && @source == other.source
     end
 
-    sig { abstract.returns(LanguageId) }
+    sig { abstract.returns(Symbol) }
     def language_id; end
 
     #: [T] (String request_name) { (Document[ParseResultType] document) -> T } -> T

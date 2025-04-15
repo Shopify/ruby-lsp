@@ -8,7 +8,7 @@ module RubyLsp
 
       MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER = 10
 
-      #: (ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)] response_builder, GlobalState global_state, Document::LanguageId language_id, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
+      #: (ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)] response_builder, GlobalState global_state, Symbol language_id, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
@@ -62,7 +62,7 @@ module RubyLsp
 
         # Until we can properly infer the receiver type in erb files (maybe with ruby-lsp-rails),
         # treating method calls' type as `nil` will allow users to get some completion support first
-        if @language_id == Document::LanguageId::ERB && inferrer_receiver_type&.name == "Object"
+        if @language_id == :erb && inferrer_receiver_type&.name == "Object"
           inferrer_receiver_type = nil
         end
 
