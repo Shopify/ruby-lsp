@@ -871,17 +871,9 @@ module RubyLsp
       end
 
       result = Requests::CodeActionResolve.new(document, @global_state, params).perform
-
-      case result
-      when Requests::CodeActionResolve::Error::EmptySelection
-        fail_request_and_notify(message[:id], "Invalid selection for extract variable refactor")
-      when Requests::CodeActionResolve::Error::InvalidTargetRange
-        fail_request_and_notify(message[:id], "Couldn't find an appropriate location to place extracted refactor")
-      when Requests::CodeActionResolve::Error::UnknownCodeAction
-        fail_request_and_notify(message[:id], "Unknown code action")
-      else
-        send_message(Result.new(id: message[:id], response: result))
-      end
+      send_message(Result.new(id: message[:id], response: result))
+    rescue Requests::CodeActionResolve::CodeActionError => e
+      fail_request_and_notify(message[:id], e.message)
     end
 
     #: (Hash[Symbol, untyped] message) -> void
