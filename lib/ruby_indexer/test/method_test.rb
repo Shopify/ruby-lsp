@@ -100,9 +100,9 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:1-10:2-5", visibility: Entry::Visibility::PRIVATE)
-      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:4-2:4-14", visibility: Entry::Visibility::PUBLIC)
-      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:8-2:8-14", visibility: Entry::Visibility::PROTECTED)
+      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:1-10:2-5", visibility: :private)
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:4-2:4-14", visibility: :public)
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:8-2:8-14", visibility: :protected)
     end
 
     def test_visibility_tracking_with_nested_class_or_modules
@@ -120,9 +120,9 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:3-2:3-14", visibility: Entry::Visibility::PRIVATE)
-      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:6-4:6-16", visibility: Entry::Visibility::PUBLIC)
-      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:9-2:9-14", visibility: Entry::Visibility::PRIVATE)
+      assert_entry("foo", Entry::Method, "/fake/path/foo.rb:3-2:3-14", visibility: :private)
+      assert_entry("bar", Entry::Method, "/fake/path/foo.rb:6-4:6-16", visibility: :public)
+      assert_entry("baz", Entry::Method, "/fake/path/foo.rb:9-2:9-14", visibility: :private)
     end
 
     def test_visibility_tracking_with_module_function
@@ -147,7 +147,7 @@ module RubyIndexer
         # The second entry points to the public singleton method
         assert_equal("Test::<Class:Test>", second_entry&.owner&.name)
         assert_instance_of(Entry::SingletonClass, second_entry&.owner)
-        assert_equal(Entry::Visibility::PUBLIC, second_entry&.visibility)
+        assert_equal(:public, second_entry&.visibility)
       end
     end
 

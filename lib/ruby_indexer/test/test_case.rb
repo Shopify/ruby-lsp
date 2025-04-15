@@ -11,6 +11,13 @@ module RubyIndexer
       @default_indexed_entries = @index.instance_variable_get(:@entries).dup
     end
 
+    def teardown
+      entries = @index.instance_variable_get(:@entries).values.flatten
+      entries.each do |entry|
+        assert_includes([:public, :private, :protected], entry.visibility)
+      end
+    end
+
     private
 
     def index(source, uri: URI::Generic.from_path(path: "/fake/path/foo.rb"))
@@ -31,7 +38,6 @@ module RubyIndexer
           ":#{location.end_line - 1}-#{location.end_column}"
 
       assert_equal(expected_location, location_string)
-
       assert_equal(visibility, entry.visibility) if visibility
     end
 

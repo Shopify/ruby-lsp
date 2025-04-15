@@ -107,15 +107,6 @@ module RubyIndexer
       location = to_ruby_indexer_location(member.location)
       comments = comments_to_string(member)
 
-      visibility = case member.visibility
-      when :private
-        Entry::Visibility::PRIVATE
-      when :protected
-        Entry::Visibility::PROTECTED
-      else
-        Entry::Visibility::PUBLIC
-      end
-
       real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
       signatures = signatures(member)
       @index.add(Entry::Method.new(
@@ -125,7 +116,7 @@ module RubyIndexer
         location,
         comments,
         signatures,
-        visibility,
+        member.visibility || :public,
         real_owner,
       ))
     end

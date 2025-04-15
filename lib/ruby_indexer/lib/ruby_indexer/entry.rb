@@ -3,14 +3,6 @@
 
 module RubyIndexer
   class Entry
-    class Visibility < T::Enum
-      enums do
-        PUBLIC = new(:public)
-        PROTECTED = new(:protected)
-        PRIVATE = new(:private)
-      end
-    end
-
     #: String
     attr_reader :name
 
@@ -22,7 +14,7 @@ module RubyIndexer
 
     alias_method :name_location, :location
 
-    #: Visibility
+    #: Symbol
     attr_accessor :visibility
 
     #: (String name, URI::Generic uri, Location location, String? comments) -> void
@@ -30,23 +22,23 @@ module RubyIndexer
       @name = name
       @uri = uri
       @comments = comments
-      @visibility = Visibility::PUBLIC #: Visibility
+      @visibility = :public #: Symbol
       @location = location
     end
 
     #: -> bool
     def public?
-      visibility == Visibility::PUBLIC
+      @visibility == :public
     end
 
     #: -> bool
     def protected?
-      visibility == Visibility::PROTECTED
+      @visibility == :protected
     end
 
     #: -> bool
     def private?
-      visibility == Visibility::PRIVATE
+      @visibility == :private
     end
 
     #: -> String
@@ -306,7 +298,7 @@ module RubyIndexer
       #: Entry::Namespace?
       attr_reader :owner
 
-      #: (String name, URI::Generic uri, Location location, String? comments, Visibility visibility, Entry::Namespace? owner) -> void
+      #: (String name, URI::Generic uri, Location location, String? comments, Symbol visibility, Entry::Namespace? owner) -> void
       def initialize(name, uri, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, uri, location, comments)
         @visibility = visibility
@@ -358,7 +350,7 @@ module RubyIndexer
       #: Location
       attr_reader :name_location
 
-      #: (String name, URI::Generic uri, Location location, Location name_location, String? comments, Array[Signature] signatures, Visibility visibility, Entry::Namespace? owner) -> void
+      #: (String name, URI::Generic uri, Location location, Location name_location, String? comments, Array[Signature] signatures, Symbol visibility, Entry::Namespace? owner) -> void
       def initialize(name, uri, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(name, uri, location, comments, visibility, owner)
         @signatures = signatures
