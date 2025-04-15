@@ -259,4 +259,47 @@ module RubyLsp
       @configuration[:enableAll] || @configuration[feature]
     end
   end
+
+  class SorbetLevel
+    class << self
+      #: -> SorbetLevel
+      def ignore
+        new("ignore")
+      end
+    end
+
+    #: (String?) -> void
+    def initialize(sigil)
+      @level = case sigil
+      when "ignore"
+        :ignore
+      when "false"
+        :false
+      when "true"
+        :true
+      when "strict", "strong"
+        :strict
+      else
+        :none
+      end #: Symbol
+    end
+
+    #: -> bool
+    def ignore? = @level == :ignore
+
+    #: -> bool
+    def false? = @level == :false
+
+    #: -> bool
+    def true? = @level == :true
+
+    #: -> bool
+    def strict? = @level == :strict
+
+    #: -> bool
+    def none? = @level == :none
+
+    #: -> bool
+    def true_or_higher? = @level == :true || @level == :strict
+  end
 end

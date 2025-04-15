@@ -23,16 +23,6 @@ module RubyLsp
       :private_class_method,
     ].freeze
 
-    class SorbetLevel < T::Enum
-      enums do
-        None = new("none")
-        Ignore = new("ignore")
-        False = new("false")
-        True = new("true")
-        Strict = new("strict")
-      end
-    end
-
     class << self
       #: (Prism::Node node, Integer char_position, code_units_cache: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache), ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
       def locate(node, char_position, code_units_cache:, node_types: [])
@@ -157,26 +147,6 @@ module RubyLsp
     #: -> LanguageId
     def language_id
       LanguageId::Ruby
-    end
-
-    #: -> SorbetLevel
-    def sorbet_level
-      sigil = parse_result.magic_comments.find do |comment|
-        comment.key == "typed"
-      end&.value
-
-      case sigil
-      when "ignore"
-        SorbetLevel::Ignore
-      when "false"
-        SorbetLevel::False
-      when "true"
-        SorbetLevel::True
-      when "strict", "strong"
-        SorbetLevel::Strict
-      else
-        SorbetLevel::None
-      end
     end
 
     #: (Hash[Symbol, untyped] range, ?node_types: Array[singleton(Prism::Node)]) -> Prism::Node?

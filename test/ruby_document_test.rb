@@ -656,66 +656,6 @@ class RubyDocumentTest < Minitest::Test
     assert_equal(value, document.cache_get("textDocument/semanticHighlighting"))
   end
 
-  def test_no_sigil
-    document = RubyLsp::RubyDocument.new(
-      source: +"# frozen_string_literal: true",
-      version: 1,
-      uri: @uri,
-      global_state: @global_state,
-    )
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::None, document.sorbet_level)
-  end
-
-  def test_sigil_ignore
-    document = RubyLsp::RubyDocument.new(source: +"# typed: ignore", version: 1, uri: @uri, global_state: @global_state)
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Ignore, document.sorbet_level)
-  end
-
-  def test_sigil_false
-    document = RubyLsp::RubyDocument.new(source: +"# typed: false", version: 1, uri: @uri, global_state: @global_state)
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
-  end
-
-  def test_sigil_true
-    document = RubyLsp::RubyDocument.new(source: +"# typed: true", version: 1, uri: @uri, global_state: @global_state)
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::True, document.sorbet_level)
-  end
-
-  def test_sigil_strict
-    document = RubyLsp::RubyDocument.new(source: +"# typed: strict", version: 1, uri: @uri, global_state: @global_state)
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
-  end
-
-  def test_sigil_strong
-    document = RubyLsp::RubyDocument.new(source: +"# typed: strong", version: 1, uri: @uri, global_state: @global_state)
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::Strict, document.sorbet_level)
-  end
-
-  def test_sorbet_sigil_only_in_magic_comment
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
-      # typed: false
-
-      def foo
-        some_string = "# typed: true"
-      end
-
-      # Shouldn't be tricked by the following comment:
-      # ```
-      # # typed: strict
-      #
-      # def main; end
-      # ```
-      def bar; end
-
-      def baz
-        <<-CODE
-          # typed: strong
-        CODE
-      end
-    RUBY
-    assert_equal(RubyLsp::RubyDocument::SorbetLevel::False, document.sorbet_level)
-  end
-
   def test_locating_compact_namespace_declaration
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       class Foo::Bar
