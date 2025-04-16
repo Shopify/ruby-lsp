@@ -598,10 +598,11 @@ module RubyLsp
 
       #: (RubyIndexer::Entry::KeywordParameter | RubyIndexer::Entry::OptionalKeywordParameter param, Interface::Range range) -> void
       def build_keyword_argument_completion_item(param, range)
-        decorated_name = param.decorated_name
-        new_text = @trigger_character == "," ? " #{decorated_name} " : "#{decorated_name} "
+        new_text =
+          param.is_a?(RubyIndexer::Entry::KeywordParameter) ? param.decorated_name : "#{param.name}:".to_sym
+        new_text = @trigger_character == "," ? " #{new_text} " : "#{new_text} "
         @response_builder << Interface::CompletionItem.new(
-          label: decorated_name,
+          label: param.decorated_name,
           text_edit: Interface::TextEdit.new(range: range, new_text: new_text),
           kind: Constant::CompletionItemKind::PROPERTY,
         )
