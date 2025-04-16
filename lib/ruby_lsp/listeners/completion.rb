@@ -569,14 +569,12 @@ module RubyLsp
           when ","
             arguments = call_node.arguments
             if arguments
-              # TODO: most possible position
               nearest_argument = arguments.arguments.flat_map do
                 _1.is_a?(Prism::KeywordHashNode) ? _1.elements : _1
               end.find do |argument|
                 (argument.location.start_offset..argument.location.end_offset).cover?(@char_position)
               end
               location = nearest_argument&.location || arguments.location
-              # offset = @char_position - location.start_offset
               Interface::Range.new(
                 start: Interface::Position.new(
                   line: location.end_line - 1,
