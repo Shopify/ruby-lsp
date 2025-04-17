@@ -148,7 +148,7 @@ module RubyLsp
       def in_spec_context?
         return true if @nesting.empty?
 
-        T.must(@spec_class_stack.last)
+        @spec_class_stack.last #: as !nil
       end
     end
   end

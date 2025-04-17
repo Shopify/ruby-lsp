@@ -51,7 +51,9 @@ module RubyLsp
           # But if it's a RBS signature starting with `#:`, we'll ignore it
           # so users can immediately continue typing the method definition
           if (comment_match = @previous_line.match(/^#(?!:)(\s*)/))
-            handle_comment_line(T.must(comment_match[1]))
+            handle_comment_line(
+              comment_match[1], #: as !nil
+            )
           elsif @document.syntax_error?
             match = /(<<((-|~)?))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
             heredoc_delimiter = match && match.named_captures["delimiter"]
@@ -76,7 +78,7 @@ module RubyLsp
         current_line = @lines[@position[:line]]
         return unless /((?<=do)|(?<={))\s+\|/.match?(current_line)
 
-        line = T.must(current_line)
+        line = current_line #: as !nil
 
         # If the user inserts the closing pipe manually to the end of the block argument, we need to avoid adding
         # an additional one and remove the previous one.  This also helps to remove the user who accidentally

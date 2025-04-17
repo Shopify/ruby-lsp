@@ -69,7 +69,11 @@ module RubyLsp
           signature.matches?(arguments)
         end || 0
 
-        parameter_length = [T.must(signatures[active_sig_index]).parameters.length - 1, 0].max
+        parameter_length = [
+          signatures[active_sig_index] #: as !nil
+            .parameters.length - 1,
+          0,
+        ].max
         active_parameter = (arguments.length - 1).clamp(0, parameter_length)
 
         # If there are arguments, then we need to check if there's a trailing comma after the end of the last argument

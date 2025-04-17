@@ -929,7 +929,10 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
       contents = server.pop_response.response.contents.value
       assert_match("```ruby\nyield\n```", contents)
-      assert_match(T.must(RubyLsp::KEYWORD_DOCS["yield"]), contents)
+      assert_match(
+        RubyLsp::KEYWORD_DOCS["yield"], #: as !nil
+        contents,
+      )
       assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
     end
   end

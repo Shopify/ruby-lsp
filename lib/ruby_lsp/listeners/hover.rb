@@ -299,7 +299,7 @@ module RubyLsp
         methods = @index.resolve_method(message, type.name, inherited_only: inherited_only)
         return unless methods
 
-        first_method = T.must(methods.first)
+        first_method = methods.first #: as !nil
 
         title = "#{message}#{first_method.decorated_parameters}"
         title << first_method.formatted_signatures
@@ -365,7 +365,7 @@ module RubyLsp
 
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
-        first_entry = T.must(entries.first)
+        first_entry = entries.first #: as !nil
         return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{name}"
 
         categorized_markdown_from_index_entries(name, entries).each do |category, content|

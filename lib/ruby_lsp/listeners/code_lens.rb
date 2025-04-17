@@ -208,7 +208,7 @@ module RubyLsp
 
       #: (?group_stack: Array[String], ?spec_name: String?, ?method_name: String?) -> String
       def generate_test_command(group_stack: [], spec_name: nil, method_name: nil)
-        path = T.must(@path)
+        path = @path #: as !nil
         command = BASE_COMMAND
         command += " -Itest" if File.fnmatch?("**/test/**/*", path, File::FNM_PATHNAME)
         command += " -Ispec" if File.fnmatch?("**/spec/**/*", path, File::FNM_PATHNAME)
@@ -233,7 +233,7 @@ module RubyLsp
           # the best we can do is match everything to the right of it.
           # Tests are classes, dynamic references are only a thing for modules,
           # so there must be something to the left of the available path.
-          dynamic_stack = T.must(group_stack[last_dynamic_reference_index + 1..])
+          dynamic_stack = group_stack[last_dynamic_reference_index + 1..] #: as !nil
 
           if method_name
             " --name " + "/::#{Shellwords.escape(dynamic_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
@@ -257,7 +257,7 @@ module RubyLsp
 
       #: (Array[String] group_stack, String? method_name) -> String
       def generate_test_unit_command(group_stack, method_name)
-        group_name = T.must(group_stack.last)
+        group_name = group_stack.last #: as !nil
         command = " --testcase " + "/#{Shellwords.escape(group_name)}/"
 
         if method_name

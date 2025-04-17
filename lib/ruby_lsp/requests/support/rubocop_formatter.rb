@@ -21,7 +21,7 @@ module RubyLsp
         # @override
         #: (URI::Generic uri, RubyDocument document) -> String?
         def run_formatting(uri, document)
-          filename = T.must(uri.to_standardized_path || uri.opaque)
+          filename = uri.to_standardized_path || uri.opaque #: as !nil
 
           # Invoke RuboCop with just this file in `paths`
           @format_runner.run(filename, document.source)
@@ -38,7 +38,7 @@ module RubyLsp
         # @override
         #: (URI::Generic uri, RubyDocument document) -> Array[Interface::Diagnostic]?
         def run_diagnostic(uri, document)
-          filename = T.must(uri.to_standardized_path || uri.opaque)
+          filename = uri.to_standardized_path || uri.opaque #: as !nil
           # Invoke RuboCop with just this file in `paths`
           @diagnostic_runner.run(filename, document.source)
 

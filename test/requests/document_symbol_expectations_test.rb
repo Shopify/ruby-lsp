@@ -26,11 +26,11 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     assert_equal(5, response.size)
 
-    assert_equal("@foo", T.must(response[0]).name)
-    assert_equal("@bar", T.must(response[1]).name)
-    assert_equal("@baz", T.must(response[2]).name)
-    assert_equal("@qux", T.must(response[3]).name)
-    assert_equal("@quux", T.must(response[4]).name)
+    assert_equal("@foo", response[0]&.name)
+    assert_equal("@bar", response[1]&.name)
+    assert_equal("@baz", response[2]&.name)
+    assert_equal("@qux", response[3]&.name)
+    assert_equal("@quux", response[4]&.name)
   end
 
   def test_instance_variable_with_destructuring_assignment
@@ -49,11 +49,11 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     assert_equal(5, response.size)
 
-    assert_equal("@a", T.must(response[0]).name)
-    assert_equal("@b", T.must(response[1]).name)
-    assert_equal("@c", T.must(response[2]).name)
-    assert_equal("@d", T.must(response[3]).name)
-    assert_equal("@e", T.must(response[4]).name)
+    assert_equal("@a", response[0]&.name)
+    assert_equal("@b", response[1]&.name)
+    assert_equal("@c", response[2]&.name)
+    assert_equal("@d", response[3]&.name)
+    assert_equal("@e", response[4]&.name)
   end
 
   def test_labels_blank_names
@@ -70,7 +70,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     response = listener.perform
 
     assert_equal(1, response.size)
-    assert_equal("<blank>", T.must(response.first).name)
+    assert_equal("<blank>", response.first&.name)
   end
 
   def test_document_symbol_addons

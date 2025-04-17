@@ -108,7 +108,7 @@ module RubyIndexer
           return unless association_name.is_a?(Prism::SymbolNode)
 
           @listener.add_method(
-            T.must(association_name.value),
+            association_name.value, #: as !nil
             association_name.location,
             [],
           )

@@ -37,8 +37,8 @@ module RubyLsp
 
         if should_refine_target?(parent, target)
           target = determine_target(
-            T.must(target),
-            T.must(parent),
+            target, #: as !nil
+            parent, #: as !nil
             position,
           )
         elsif position_outside_target?(position, target)
