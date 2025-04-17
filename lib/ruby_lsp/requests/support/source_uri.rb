@@ -71,7 +71,7 @@ module URI
     if URI.respond_to?(:register_scheme)
       URI.register_scheme("SOURCE", self)
     else
-      @@schemes = @@schemes # rubocop:disable Style/ClassVars #: Hash[String, untyped]
+      @@schemes = @@schemes #: Hash[String, untyped] # rubocop:disable Style/ClassVars
       @@schemes["SOURCE"] = self
     end
   end
