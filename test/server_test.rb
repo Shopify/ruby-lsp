@@ -284,7 +284,7 @@ class ServerTest < Minitest::Test
       },
     })
 
-    notification = T.must(@server.pop_response)
+    notification = @server.pop_response #: as !nil
     assert_equal("textDocument/publishDiagnostics", notification.method)
     assert_empty(T.cast(notification.params, RubyLsp::Interface::PublishDiagnosticsParams).diagnostics)
   end
@@ -474,31 +474,32 @@ class ServerTest < Minitest::Test
   def test_changed_file_only_indexes_ruby
     path = File.join(Dir.pwd, "lib", "foo.rb")
     File.write(path, "class Foo\nend")
-
-    @server.global_state.index.index_all(uris: [])
-    @server.global_state.index.expects(:index_single).once.with do |uri|
-      uri.full_path == path
-    end
-
     uri = URI::Generic.from_path(path: path)
 
-    @server.process_message({
-      method: "workspace/didChangeWatchedFiles",
-      params: {
-        changes: [
-          {
-            uri: uri,
-            type: RubyLsp::Constant::FileChangeType::CREATED,
-          },
-          {
-            uri: URI("file:///.rubocop.yml"),
-            type: RubyLsp::Constant::FileChangeType::CREATED,
-          },
-        ],
-      },
-    })
-  ensure
-    FileUtils.rm(T.must(path))
+    begin
+      @server.global_state.index.index_all(uris: [])
+      @server.global_state.index.expects(:index_single).once.with do |uri|
+        uri.full_path == path
+      end
+
+      @server.process_message({
+        method: "workspace/didChangeWatchedFiles",
+        params: {
+          changes: [
+            {
+              uri: uri,
+              type: RubyLsp::Constant::FileChangeType::CREATED,
+            },
+            {
+              uri: URI("file:///.rubocop.yml"),
+              type: RubyLsp::Constant::FileChangeType::CREATED,
+            },
+          ],
+        },
+      })
+    ensure
+      FileUtils.rm(path)
+    end
   end
 
   def test_did_change_watched_files_does_not_fail_for_non_existing_files
@@ -1346,7 +1347,7 @@ class ServerTest < Minitest::Test
         },
       })
     ensure
-      FileUtils.rm(T.must(path)) if File.exist?(path)
+      FileUtils.rm(path) if File.exist?(path)
     end
   end
 
@@ -1397,7 +1398,7 @@ class ServerTest < Minitest::Test
       uris = @server.global_state.index.search_require_paths("foo")
       assert_equal(["foo"], uris.map(&:require_path))
     ensure
-      FileUtils.rm(T.must(path)) if File.exist?(path)
+      FileUtils.rm(path) if File.exist?(path)
     end
   end
 

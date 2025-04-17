@@ -36,15 +36,17 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     assert_equal(6, response.size)
 
-    assert_equal("▶ Run In Terminal", T.must(response[1]).command.title)
+    assert_equal("▶ Run In Terminal", response[1]&.command&.title)
     assert_equal(
       "bundle exec ruby -Itest /test/fake.rb --name \"/^FooTest(#|::)/\"",
-      T.must(response[1]).command.arguments[2],
+      response[1] #: as !nil
+        .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", T.must(response[4]).command.title)
+    assert_equal("▶ Run In Terminal", response[4]&.command&.title)
     assert_equal(
       "bundle exec ruby -Itest /test/fake.rb --name FooTest#test_bar",
-      T.must(response[4]).command.arguments[2],
+      response[4] #: as !nil
+        .command.arguments[2],
     )
   end
 
@@ -68,20 +70,23 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     assert_equal(9, response.size)
 
-    assert_equal("▶ Run In Terminal", T.must(response[1]).command.title)
+    assert_equal("▶ Run In Terminal", response[1]&.command&.title)
     assert_equal(
       "bundle exec ruby -Ispec /spec/fake.rb --name \"/^FooTest(#|::)/\"",
-      T.must(response[1]).command.arguments[2],
+      response[1] #: as !nil
+        .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", T.must(response[4]).command.title)
+    assert_equal("▶ Run In Terminal", response[4]&.command&.title)
     assert_equal(
       "bundle exec ruby -Ispec /spec/fake.rb --name \"/^FooTest::a(#|::)/\"",
-      T.must(response[4]).command.arguments[2],
+      response[4] #: as !nil
+        .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", T.must(response[7]).command.title)
+    assert_equal("▶ Run In Terminal", response[7]&.command&.title)
     assert_equal(
       "bundle exec ruby -Ispec /spec/fake.rb --name \"/^FooTest::a#test_0001_b$/\"",
-      T.must(response[7]).command.arguments[2],
+      response[7] #: as !nil
+        .command.arguments[2],
     )
   end
 
@@ -123,12 +128,17 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     assert_equal(6, response.size)
 
-    assert_equal("▶ Run In Terminal", T.must(response[1]).command.title)
-    assert_equal("bundle exec ruby -Itest /test/fake.rb --testcase /FooTest/", T.must(response[1]).command.arguments[2])
-    assert_equal("▶ Run In Terminal", T.must(response[4]).command.title)
+    assert_equal("▶ Run In Terminal", response[1]&.command&.title)
+    assert_equal(
+      "bundle exec ruby -Itest /test/fake.rb --testcase /FooTest/",
+      response[1] #: as !nil
+        .command.arguments[2],
+    )
+    assert_equal("▶ Run In Terminal", response[4]&.command&.title)
     assert_equal(
       "bundle exec ruby -Itest /test/fake.rb --testcase /FooTest/ --name test_bar",
-      T.must(response[4]).command.arguments[2],
+      response[4] #: as !nil
+        .command.arguments[2],
     )
   end
 

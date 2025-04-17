@@ -172,31 +172,33 @@ module RubyLsp
         end
       RUBY
 
-      with_server do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Test
-            module Unit
-              class TestCase; end
+      begin
+        with_server do |server, uri|
+          server.global_state.index.index_single(uri, <<~RUBY)
+            module Test
+              module Unit
+                class TestCase; end
+              end
             end
-          end
-        RUBY
+          RUBY
 
-        server.process_message(
-          id: 1,
-          method: "rubyLsp/discoverTests",
-          params: { textDocument: { uri: URI::Generic.from_path(path: path) } },
-        )
+          server.process_message(
+            id: 1,
+            method: "rubyLsp/discoverTests",
+            params: { textDocument: { uri: URI::Generic.from_path(path: path) } },
+          )
 
-        items = get_response(server)
-        assert_equal(
-          ["FooTest"],
-          items.map { |i| i[:label] },
-        )
-        assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
-        assert_all_items_tagged_with(items, :test_unit)
+          items = get_response(server)
+          assert_equal(
+            ["FooTest"],
+            items.map { |i| i[:label] },
+          )
+          assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
+          assert_all_items_tagged_with(items, :test_unit)
+        end
+      ensure
+        FileUtils.rm(path)
       end
-    ensure
-      FileUtils.rm(T.must(path))
     end
 
     def test_does_not_raise_on_duplicate_test_ids

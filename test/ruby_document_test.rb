@@ -451,7 +451,8 @@ class RubyDocumentTest < Minitest::Test
     assert_instance_of(Prism::ConstantPathNode, node_context.parent)
     assert_equal(
       "ActiveRecord",
-      T.must(T.cast(node_context.parent, Prism::ConstantPathNode).child_nodes.first).location.slice,
+      T.cast(node_context.parent, Prism::ConstantPathNode).child_nodes.first #: as !nil
+        .location.slice,
     )
 
     # Locate the `Base` class
@@ -504,11 +505,11 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     node_context = document.locate_node({ line: 3, character: 14 })
-    assert_equal(":foo", T.must(node_context.node).slice)
-    assert_equal(:hello, T.must(node_context.call_node).name)
+    assert_equal(":foo", node_context.node&.slice)
+    assert_equal(:hello, node_context.call_node&.name)
 
     node_context = document.locate_node({ line: 4, character: 8 })
-    assert_equal(":bar", T.must(node_context.node).slice)
+    assert_equal(":bar", node_context.node&.slice)
     assert_nil(node_context.call_node)
   end
 
@@ -524,8 +525,8 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     node_context = document.locate_node({ line: 3, character: 22 })
-    assert_equal(":foo", T.must(node_context.node).slice)
-    assert_equal(:hello, T.must(node_context.call_node).name)
+    assert_equal(":foo", node_context.node&.slice)
+    assert_equal(:hello, node_context.call_node&.name)
   end
 
   def test_locate_returns_call_node_for_blocks
@@ -536,7 +537,7 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     node_context = document.locate_node({ line: 1, character: 4 })
-    assert_equal(:foo, T.must(node_context.call_node).name)
+    assert_equal(:foo, node_context.call_node&.name)
   end
 
   def test_locate_returns_call_node_ZZZ
@@ -549,7 +550,7 @@ class RubyDocumentTest < Minitest::Test
     RUBY
 
     node_context = document.locate_node({ line: 2, character: 6 })
-    assert_equal(:foo, T.must(node_context.call_node).name)
+    assert_equal(:foo, node_context.call_node&.name)
   end
 
   def test_locate_returns_correct_nesting_when_specifying_target_classes
@@ -697,11 +698,11 @@ class RubyDocumentTest < Minitest::Test
 
     node_context = document.locate_node({ line: 0, character: 11 })
     assert_empty(node_context.nesting)
-    assert_equal("Foo::Bar", T.must(node_context.node).slice)
+    assert_equal("Foo::Bar", node_context.node&.slice)
 
     node_context = document.locate_node({ line: 3, character: 6 })
     assert_empty(node_context.nesting)
-    assert_equal("Baz", T.must(node_context.node).slice)
+    assert_equal("Baz", node_context.node&.slice)
   end
 
   def test_locating_singleton_contexts
@@ -816,7 +817,7 @@ class RubyDocumentTest < Minitest::Test
     range = { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }
     document.push_edits([{ range: range, text: "d" }], version: 2)
 
-    last_edit = T.must(document.last_edit)
+    last_edit = document.last_edit #: as !nil
     assert_instance_of(RubyLsp::Document::Insert, last_edit)
     assert_equal(range, last_edit.range)
 
@@ -824,7 +825,7 @@ class RubyDocumentTest < Minitest::Test
     range = { start: { line: 1, character: 0 }, end: { line: 1, character: 1 } }
     document.push_edits([{ range: range, text: "def" }], version: 3)
 
-    last_edit = T.must(document.last_edit)
+    last_edit = document.last_edit #: as !nil
     assert_instance_of(RubyLsp::Document::Replace, last_edit)
     assert_equal(range, last_edit.range)
 
@@ -832,7 +833,7 @@ class RubyDocumentTest < Minitest::Test
     range = { start: { line: 1, character: 0 }, end: { line: 1, character: 3 } }
     document.push_edits([{ range: range, text: "" }], version: 4)
 
-    last_edit = T.must(document.last_edit)
+    last_edit = document.last_edit #: as !nil
     assert_instance_of(RubyLsp::Document::Delete, last_edit)
     assert_equal(range, last_edit.range)
 

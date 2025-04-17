@@ -382,7 +382,7 @@ module RubyLsp
 
         # We should only allow jumping to the definition of private constants if the constant is defined in the same
         # namespace as the reference
-        first_entry = T.must(entries.first)
+        first_entry = entries.first #: as !nil
         return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{value}"
 
         entries.each do |entry|

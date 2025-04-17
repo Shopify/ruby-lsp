@@ -21,9 +21,9 @@ module RubyLsp
       builder.add(test_item)
       test_item.add(nested_item)
 
-      item = builder["my-id"]
+      item = builder["my-id"] #: as !nil
       assert(item)
-      assert(T.must(item)["nested-id"])
+      assert(item["nested-id"])
 
       builder.response.map(&:to_hash).each { |item| assert_expected_fields(item) }
     end
@@ -43,7 +43,11 @@ module RubyLsp
         @range,
         framework: :minitest,
       ))
-      assert_equal("Other title, but same ID", T.must(builder["my-id"]).label)
+      assert_equal(
+        "Other title, but same ID",
+        builder["my-id"] #: as !nil
+          .label,
+      )
 
       test_item.add(Requests::Support::TestItem.new(
         "nested-id",
@@ -52,7 +56,11 @@ module RubyLsp
         @range,
         framework: :minitest,
       ))
-      assert_equal("Other title, but same ID", T.must(test_item["nested-id"]).label)
+      assert_equal(
+        "Other title, but same ID",
+        test_item["nested-id"] #: as !nil
+          .label,
+      )
     end
 
     private

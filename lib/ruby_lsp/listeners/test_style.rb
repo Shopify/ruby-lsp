@@ -22,7 +22,7 @@ module RubyLsp
           queue = items.dup
 
           until queue.empty?
-            item = T.must(queue.shift)
+            item = queue.shift #: as !nil
             tags = Set.new(item[:tags])
             next unless tags.include?("framework:minitest") || tags.include?("framework:test_unit")
 

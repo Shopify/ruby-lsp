@@ -405,12 +405,15 @@ module RubyLsp
     def correct_relative_remote_paths
       content = @custom_lockfile.read
       content.gsub!(/remote: (.*)/) do |match|
-        path = T.must(Regexp.last_match)[1]
+        last_match = Regexp.last_match #: as !nil
+        path = last_match[1]
 
         # We should only apply the correction if the remote is a relative path. It might also be a URI, like
         # `https://rubygems.org` or an absolute path, in which case we shouldn't do anything
         if path && !URI(path).scheme
-          "remote: #{File.expand_path(path, T.must(@gemfile).dirname)}"
+          bundle_dir = @gemfile #: as !nil
+            .dirname
+          "remote: #{File.expand_path(path, bundle_dir)}"
         else
           match
         end

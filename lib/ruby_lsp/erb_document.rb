@@ -111,7 +111,9 @@ module RubyLsp
               push_char(" ")
             end
           else
-            push_char(T.must(char))
+            push_char(
+              char, #: as !nil
+            )
           end
         when "-"
           if @inside_ruby && next_char == "%" &&
@@ -120,7 +122,9 @@ module RubyLsp
             push_char("   ")
             @inside_ruby = false
           else
-            push_char(T.must(char))
+            push_char(
+              char, #: as !nil
+            )
           end
         when "%"
           if @inside_ruby && next_char == ">"
@@ -128,7 +132,9 @@ module RubyLsp
             @current_pos += 1
             push_char("  ")
           else
-            push_char(T.must(char))
+            push_char(
+              char, #: as !nil
+            )
           end
         when "\r"
           @ruby << char
@@ -143,7 +149,9 @@ module RubyLsp
           @ruby << char
           @host_language << char
         else
-          push_char(T.must(char))
+          push_char(
+            char, #: as !nil
+          )
         end
       end
 

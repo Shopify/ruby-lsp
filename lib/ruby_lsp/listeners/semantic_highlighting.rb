@@ -67,12 +67,18 @@ module RubyLsp
         return if special_method?(message)
 
         if Requests::Support::Sorbet.annotation?(node)
-          @response_builder.add_token(T.must(node.message_loc), :type)
+          @response_builder.add_token(
+            node.message_loc, #: as !nil
+            :type,
+          )
         elsif !node.receiver && !node.opening_loc
           # If the node has a receiver, then the syntax is not ambiguous and semantic highlighting is not necessary to
           # determine that the token is a method call. The only ambiguous case is method calls with implicit self
           # receiver and no parenthesis, which may be confused with local variables
-          @response_builder.add_token(T.must(node.message_loc), :method)
+          @response_builder.add_token(
+            node.message_loc, #: as !nil
+            :method,
+          )
         end
       end
 
@@ -98,7 +104,7 @@ module RubyLsp
 
       #: (Prism::DefNode node) -> void
       def on_def_node_leave(node)
-        @current_scope = T.must(@current_scope.parent)
+        @current_scope = @current_scope.parent #: as !nil
       end
 
       #: (Prism::BlockNode node) -> void
@@ -108,7 +114,7 @@ module RubyLsp
 
       #: (Prism::BlockNode node) -> void
       def on_block_node_leave(node)
-        @current_scope = T.must(@current_scope.parent)
+        @current_scope = @current_scope.parent #: as !nil
       end
 
       #: (Prism::BlockLocalVariableNode node) -> void
@@ -301,7 +307,8 @@ module RubyLsp
         # For each capture name we find in the regexp, look for a local in the current_scope
         Regexp.new(content, Regexp::FIXEDENCODING).names.each do |name|
           # The +3 is to compensate for the "(?<" part of the capture name
-          capture_name_offset = T.must(content.index("(?<#{name}>")) + 3
+          capture_name_index = content.index("(?<#{name}>") #: as !nil
+          capture_name_offset = capture_name_index + 3
           local_var_loc = loc.copy(start_offset: loc.start_offset + capture_name_offset, length: name.length)
 
           local = @current_scope.lookup(name)

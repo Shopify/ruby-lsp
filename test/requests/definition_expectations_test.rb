@@ -312,7 +312,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         },
       })
       index = server.global_state.index
-      index.index_single(URI::Generic.from_path(path: T.must(second_uri.to_standardized_path)), second_source)
+      path = second_uri.to_standardized_path #: as !nil
+      index.index_single(URI::Generic.from_path(path: path), second_source)
 
       server.process_message(
         id: 1,
