@@ -3,10 +3,10 @@
 
 require "test_helper"
 require "coverage"
-require "ruby_lsp/test_reporter"
+require "ruby_lsp/test_reporters/lsp_reporter"
 
 module RubyLsp
-  class TestReporterTest < Minitest::Test
+  class LspReporterTest < Minitest::Test
     def test_coverage_results_are_formatted_as_vscode_expects
       path = "/path/to/file.rb"
       Coverage.expects(:result).returns({
@@ -49,7 +49,7 @@ module RubyLsp
               },
             ],
         },
-        TestReporter.instance.gather_coverage_results,
+        LspReporter.instance.gather_coverage_results,
       )
     end
   end
