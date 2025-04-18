@@ -8,7 +8,7 @@
   ],
   "repository": {
     "rbs-signature": {
-      "begin": "(?<![\"'][^\"']*)(#:)",
+      "begin": "(?<![\"'/][^\"'/]*)(#(?::|\\|))",
       "beginCaptures": {
         "1": {
           "name": "comment.line.signature.rbs"
