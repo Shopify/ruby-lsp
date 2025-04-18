@@ -140,7 +140,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path").map(&:require_path))
+      assert_equal(["path/other_foo", "path/foo"], @index.search_require_paths("path").map(&:require_path))
     end
 
     def test_searching_for_entries_based_on_prefix
@@ -157,10 +157,10 @@ module RubyIndexer
       RUBY
 
       results = @index.prefix_search("Foo", []).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
+      assert_equal([["Foo::Bizt"], ["Foo::Bizw", "Foo::Bizw"]], results)
 
       results = @index.prefix_search("Biz", ["Foo"]).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
+      assert_equal([["Foo::Bizt"], ["Foo::Bizw", "Foo::Bizw"]], results)
     end
 
     def test_resolve_normalizes_top_level_names
@@ -2128,7 +2128,7 @@ module RubyIndexer
         end
       RUBY
 
-      abc, adf = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+      adf, abc = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
 
       refute_nil(abc)
       refute_nil(adf)
