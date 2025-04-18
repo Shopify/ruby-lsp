@@ -100,6 +100,8 @@ module RubyLsp
           active_parameter_index += 1
         end
 
+        # if the incoming position is a keyword parameter,
+        # find the first keyword that is not in the current argument list
         if signature && keyword_parameter?(signature.parameters[active_parameter_index])
           active_parameter_index = determine_active_keyword_argument(signature, flat_arguments)
         end
