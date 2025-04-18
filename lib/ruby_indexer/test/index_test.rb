@@ -1893,7 +1893,7 @@ module RubyIndexer
       assert_equal("==", method.name)
 
       candidates = @index.method_completion_candidates("=", "Foo")
-      assert_equal(["==", "==="], candidates.map(&:name))
+      assert_equal(["===", "=="], candidates.map(&:name))
     end
 
     def test_entries_for
