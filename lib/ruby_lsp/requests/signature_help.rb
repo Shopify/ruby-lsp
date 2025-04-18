@@ -14,7 +14,7 @@ module RubyLsp
         def provider
           # Identifier characters are automatically included, such as A-Z, a-z, 0-9, _, * or :
           Interface::SignatureHelpOptions.new(
-            trigger_characters: ["(", ","],
+            trigger_characters: ["(", " ", ","],
           )
         end
       end

@@ -92,7 +92,7 @@ module RubyLsp
 
         active_parameter_index = flat_arguments.find_index do |argument|
           (argument.location.start_offset..argument.location.end_offset).cover?(@char_position)
-        end || [flat_arguments.length - 1, 0].max
+        end || parameter_length
 
         # If there's a trailing comma after the end of the current argument,
         # advance the active parameter to the next one
