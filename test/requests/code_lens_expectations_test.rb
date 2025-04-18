@@ -14,7 +14,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
@@ -31,7 +31,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(6, response.size)
@@ -63,7 +63,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(9, response.size)
@@ -98,7 +98,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     # 3 for the describe, 3 for the specify
@@ -118,7 +118,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(6, response.size)
@@ -145,7 +145,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_empty(response)
@@ -164,7 +164,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_empty(response)
@@ -183,7 +183,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_empty(response)
@@ -202,7 +202,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_empty(response)
@@ -257,7 +257,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(6, response.size)
