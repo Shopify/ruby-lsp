@@ -1725,6 +1725,65 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_keyword_arguments
+    source = +<<~RUBY
+      class Foo
+        def foo(arg1, aaa:, bbb:, abc: 1)
+        end
+      end
+
+      class Bar
+        def bar(xxx:, yyy:, xyz: 1)
+        end
+      end
+
+      baz = 2
+      Foo.new.foo(
+      Foo.new.foo(baz, bbb: 1,
+      Foo.new.foo(
+        baz,
+        aaa: Bar.new.bar(
+          baz,
+        ),
+        bbb: 3
+      )
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 11, character: 12 },
+        context: { triggerCharacter: "(" },
+      })
+      result = server.pop_response.response
+      assert_equal([:"aaa:", :"bbb:", :"abc: <default>"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 24 },
+        context: { triggerCharacter: "," },
+      })
+      result = server.pop_response.response
+      assert_equal([:"aaa:", :"abc: <default>"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 16, character: 8 },
+        context: { triggerCharacter: "," },
+      })
+      result = server.pop_response.response
+      assert_equal([:"xxx:", :"yyy:", :"xyz: <default>"], result.map(&:label))
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 17, character: 4 },
+        context: { triggerCharacter: "," },
+      })
+      result = server.pop_response.response
+      assert_equal([:"abc: <default>"], result.map(&:label))
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
