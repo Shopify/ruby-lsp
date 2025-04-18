@@ -42,14 +42,16 @@ module RubyLsp
       Addon.load_addons(@global_state, @outgoing_queue)
       server = RubyLsp::Server.new
 
-      capture_subprocess_io do
-        server.process_message({ method: "initialized" })
-      end
+      begin
+        capture_subprocess_io do
+          server.process_message({ method: "initialized" })
+        end
 
-      addon_instance = T.must(Addon.addons.find { |addon| addon.is_a?(@addon) })
-      assert_predicate(addon_instance, :activated)
-    ensure
-      T.must(server).run_shutdown
+        addon_instance = Addon.addons.find { |addon| addon.is_a?(@addon) } #: as !nil
+        assert_predicate(addon_instance, :activated)
+      ensure
+        server.run_shutdown
+      end
     end
 
     def test_addons_are_automatically_tracked
@@ -83,7 +85,7 @@ module RubyLsp
       end
 
       Addon.load_addons(@global_state, @outgoing_queue)
-      error_addon = T.must(Addon.addons.find(&:error?))
+      error_addon = Addon.addons.find(&:error?) #: as !nil
 
       assert_predicate(error_addon, :error?)
       assert_equal(<<~MESSAGE, error_addon.formatted_errors)

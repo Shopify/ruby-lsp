@@ -14,8 +14,8 @@ module RubyIndexer
 
       assert_entry("@@bar", Entry::ClassVariable, "/fake/path/foo.rb:1-2:1-7")
 
-      entry = T.must(@index["@@bar"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@@bar"]&.first #: as !nil
+      owner = entry.owner #: as !nil
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
     end
@@ -50,13 +50,13 @@ module RubyIndexer
       assert_entry("@@foo", Entry::ClassVariable, "/fake/path/foo.rb:1-2:1-7")
       assert_entry("@@bar", Entry::ClassVariable, "/fake/path/foo.rb:1-9:1-14")
 
-      entry = T.must(@index["@@foo"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@@foo"]&.first #: as !nil
+      owner = entry.owner #: as !nil
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
 
-      entry = T.must(@index["@@bar"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@@bar"]&.first #: as !nil
+      owner = entry.owner #: as !nil
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
     end
@@ -86,7 +86,7 @@ module RubyIndexer
         @foo = 123
       RUBY
 
-      entry = T.must(@index["@foo"]&.first)
+      entry = @index["@foo"]&.first #: as !nil
       assert_nil(entry.owner)
     end
 
@@ -99,8 +99,8 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["@@bar"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@@bar"]&.first #: as !nil
+      owner = entry.owner #: as !nil
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
     end
@@ -114,8 +114,8 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["@@bar"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@@bar"]&.first #: as !nil
+      owner = entry.owner #: as !nil
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
     end
@@ -131,8 +131,8 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["@@bar"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@@bar"]&.first #: as !nil
+      owner = entry.owner #: as !nil
       assert_instance_of(Entry::Class, owner)
       assert_equal("Foo", owner.name)
     end

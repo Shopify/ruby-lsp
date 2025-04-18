@@ -47,8 +47,8 @@ module RubyIndexer
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
 
-      entry = T.must(@index["bar"].first)
-      owner = T.must(entry.owner)
+      entry = @index["bar"].first
+      owner = entry.owner
       assert_equal("Foo::<Class:Foo>", owner.name)
       assert_instance_of(Entry::SingletonClass, owner)
     end
@@ -80,9 +80,9 @@ module RubyIndexer
       RUBY
 
       assert_equal(2, @index["bar"].length)
-      first_entry = T.must(@index["bar"].first)
+      first_entry = @index["bar"].first
       assert_equal("Foo::self::Bar", first_entry.owner.name)
-      second_entry = T.must(@index["bar"].last)
+      second_entry = @index["bar"].last
       assert_equal("Bar", second_entry.owner.name)
     end
 
@@ -135,7 +135,7 @@ module RubyIndexer
       RUBY
 
       ["foo", "bar"].each do |keyword|
-        entries = T.must(@index[keyword])
+        entries = @index[keyword]
         # should receive two entries because module_function creates a singleton method
         # for the Test module and a private method for classes include the Test module
         assert_equal(entries.size, 2)
@@ -168,13 +168,13 @@ module RubyIndexer
       RUBY
 
       ["foo", "bar"].each do |keyword|
-        entries = T.must(@index[keyword])
+        entries = @index[keyword]
         assert_equal(1, entries.size)
         entry = entries.first
         assert_predicate(entry, :private?)
       end
 
-      entries = T.must(@index["baz"])
+      entries = @index["baz"]
       assert_equal(1, entries.size)
       entry = entries.first
       assert_predicate(entry, :public?)
@@ -197,13 +197,13 @@ module RubyIndexer
       RUBY
 
       ["foo", "bar"].each do |keyword|
-        entries = T.must(@index[keyword])
+        entries = @index[keyword]
         assert_equal(1, entries.size)
         entry = entries.first
         assert_predicate(entry, :private?)
       end
 
-      entries = T.must(@index["baz"])
+      entries = @index["baz"]
       assert_equal(1, entries.size)
       entry = entries.first
       assert_predicate(entry, :public?)
@@ -220,12 +220,12 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index["foo"])
+      entries = @index["foo"]
       assert_equal(1, entries.size)
       entry = entries.first
       assert_predicate(entry, :private?)
 
-      entries = T.must(@index["bar"])
+      entries = @index["bar"]
       assert_equal(1, entries.size)
       entry = entries.first
       assert_predicate(entry, :public?)
@@ -273,7 +273,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(1, parameters.length)
       parameter = parameters.first
@@ -290,7 +290,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(1, parameters.length)
       parameter = parameters.first
@@ -307,7 +307,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(1, parameters.length)
       parameter = parameters.first
@@ -324,7 +324,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(2, parameters.length)
       a, b = parameters
@@ -345,7 +345,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(2, parameters.length)
       a, b = parameters
@@ -371,7 +371,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(2, parameters.length)
       a, b = parameters
@@ -382,7 +382,7 @@ module RubyIndexer
       assert_equal(:b, b.name)
       assert_instance_of(Entry::RequiredParameter, b)
 
-      entry = T.must(@index["baz"].first)
+      entry = @index["baz"].first
       parameters = entry.signatures.first.parameters
       assert_equal(2, parameters.length)
       a, b = parameters
@@ -393,7 +393,7 @@ module RubyIndexer
       assert_equal(:b, b.name)
       assert_instance_of(Entry::RequiredParameter, b)
 
-      entry = T.must(@index["qux"].first)
+      entry = @index["qux"].first
       parameters = entry.signatures.first.parameters
       assert_equal(2, parameters.length)
       _a, second = parameters
@@ -411,7 +411,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(1, parameters.length)
       param = parameters.first
@@ -431,13 +431,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       param = parameters.first
       assert_equal(:block, param.name)
       assert_instance_of(Entry::BlockParameter, param)
 
-      entry = T.must(@index["baz"].first)
+      entry = @index["baz"].first
       parameters = entry.signatures.first.parameters
       assert_equal(1, parameters.length)
 
@@ -455,7 +455,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_equal(2, parameters.length)
       first, second = parameters
@@ -476,7 +476,7 @@ module RubyIndexer
       RUBY
 
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:2-5")
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       parameters = entry.signatures.first.parameters
       assert_empty(parameters)
     end
@@ -492,14 +492,14 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       assert_instance_of(Entry::Method, entry, "Expected `bar` to be indexed")
 
       parameters = entry.signatures.first.parameters
       assert_equal(1, parameters.length)
       assert_instance_of(Entry::ForwardingParameter, parameters.first)
 
-      entry = T.must(@index["baz"].first)
+      entry = @index["baz"].first
       assert_instance_of(Entry::Method, entry, "Expected `baz` to be indexed")
 
       parameters = entry.signatures.first.parameters
@@ -516,8 +516,8 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
-      owner_name = T.must(entry.owner).name
+      entry = @index["bar"].first
+      owner_name = entry.owner.name
 
       assert_equal("Foo", owner_name)
     end
@@ -565,14 +565,14 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.cast(@index["first_method"]&.first, Entry::Method)
-      assert_equal("Foo", T.must(entry.owner).name)
+      entry = @index["first_method"].first
+      assert_equal("Foo", entry.owner.name)
 
-      entry = T.cast(@index["second_method"]&.first, Entry::Method)
-      assert_equal("Foo::Bar", T.must(entry.owner).name)
+      entry = @index["second_method"].first
+      assert_equal("Foo::Bar", entry.owner.name)
 
-      entry = T.cast(@index["third_method"]&.first, Entry::Method)
-      assert_equal("Foo", T.must(entry.owner).name)
+      entry = @index["third_method"].first
+      assert_equal("Foo", entry.owner.name)
     end
 
     def test_keeps_track_of_aliases
@@ -609,8 +609,8 @@ module RubyIndexer
       assert_entry("bar", Entry::Method, "/fake/path/foo.rb:1-2:1-19")
       assert_entry("baz", Entry::Method, "/fake/path/foo.rb:4-4:4-16")
 
-      bar_owner = T.must(T.must(@index["bar"].first).owner)
-      baz_owner = T.must(T.must(@index["baz"].first).owner)
+      bar_owner = @index["bar"].first.owner
+      baz_owner = @index["baz"].first.owner
 
       assert_instance_of(Entry::SingletonClass, bar_owner)
       assert_instance_of(Entry::SingletonClass, baz_owner)
@@ -630,7 +630,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       refute_equal(entry.location, entry.name_location)
 
       name_location = entry.name_location
@@ -648,7 +648,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       # Matching calls
       assert_signature_matches(entry, "bar()")
@@ -682,7 +682,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       # All calls match a forwarding parameter
       assert_signature_matches(entry, "bar(1)")
@@ -708,7 +708,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       # All calls with at least one positional argument match
       assert_signature_matches(entry, "bar(1)")
@@ -734,7 +734,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       # All calls with at least one positional argument match
       assert_signature_matches(entry, "bar()")
@@ -762,7 +762,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       # All calls with at least one positional argument match
       assert_signature_matches(entry, "bar(1)")
@@ -789,7 +789,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       assert_signature_matches(entry, "bar(...)")
       assert_signature_matches(entry, "bar()")
@@ -817,7 +817,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
 
       assert_signature_matches(entry, "bar(...)")
       assert_signature_matches(entry, "bar()")
@@ -841,10 +841,10 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       assert_signature_matches(entry, "bar(a: 1)")
 
-      entry = T.must(@index["baz"].first)
+      entry = @index["baz"].first
       assert_signature_matches(entry, "baz(1)")
     end
 
@@ -864,27 +864,27 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       assert_predicate(entry, :public?)
-      assert_equal("Foo", T.must(entry.owner).name)
+      assert_equal("Foo", entry.owner.name)
 
-      instance_baz, singleton_baz = T.must(@index["baz"])
+      instance_baz, singleton_baz = @index["baz"]
       assert_predicate(instance_baz, :private?)
-      assert_equal("Foo", T.must(instance_baz.owner).name)
+      assert_equal("Foo", instance_baz.owner.name)
 
       assert_predicate(singleton_baz, :public?)
-      assert_equal("Foo::<Class:Foo>", T.must(singleton_baz.owner).name)
+      assert_equal("Foo::<Class:Foo>", singleton_baz.owner.name)
 
       # After invoking `public`, the state of `module_function` is reset
-      instance_qux, singleton_qux = T.must(@index["qux"])
+      instance_qux, singleton_qux = @index["qux"]
       assert_nil(singleton_qux)
       assert_predicate(instance_qux, :public?)
-      assert_equal("Foo", T.must(instance_baz.owner).name)
+      assert_equal("Foo", instance_baz.owner.name)
 
       # Attributes are not turned into class methods, they do become private
       instance_attribute, singleton_attribute = @index["attribute"]
       assert_nil(singleton_attribute)
-      assert_equal("Foo", T.must(instance_attribute.owner).name)
+      assert_equal("Foo", instance_attribute.owner.name)
       assert_predicate(instance_attribute, :private?)
     end
 
@@ -900,13 +900,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       assert_predicate(entry, :public?)
-      assert_equal("Foo", T.must(entry.owner).name)
+      assert_equal("Foo", entry.owner.name)
 
-      entry = T.must(@index["baz"].first)
+      entry = @index["baz"].first
       assert_predicate(entry, :public?)
-      assert_equal("Foo", T.must(entry.owner).name)
+      assert_equal("Foo", entry.owner.name)
     end
 
     def test_making_several_class_methods_private
@@ -940,13 +940,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"].first
       assert_predicate(entry, :private?)
 
-      entry = T.must(@index["baz"].first)
+      entry = @index["baz"].first
       assert_predicate(entry, :protected?)
 
-      entry = T.must(@index["qux"].first)
+      entry = @index["qux"].first
       assert_predicate(entry, :public?)
     end
 
@@ -954,14 +954,14 @@ module RubyIndexer
 
     #: (Entry::Method entry, String call_string) -> void
     def assert_signature_matches(entry, call_string)
-      sig = T.must(entry.signatures.first)
+      sig = entry.signatures.first #: as !nil
       arguments = parse_prism_args(call_string)
       assert(sig.matches?(arguments), "Expected #{call_string} to match #{entry.name}#{entry.decorated_parameters}")
     end
 
     #: (Entry::Method entry, String call_string) -> void
     def refute_signature_matches(entry, call_string)
-      sig = T.must(entry.signatures.first)
+      sig = entry.signatures.first #: as !nil
       arguments = parse_prism_args(call_string)
       refute(sig.matches?(arguments), "Expected #{call_string} to not match #{entry.name}#{entry.decorated_parameters}")
     end

@@ -54,7 +54,7 @@ module RubyLsp
           end
         end
 
-        first_entry = T.must(entries.first)
+        first_entry = entries.first #: as !nil
 
         if first_entry.is_a?(RubyIndexer::Entry::Member)
           label = +"#{label}#{first_entry.decorated_parameters}"

@@ -108,7 +108,8 @@ module RubyLsp
         range = range_from_location(node.location)
         candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         candidates.each do |entries|
-          complete_name = T.must(entries.first).name
+          complete_name = entries.first #: as !nil
+            .name
           @response_builder << build_entry_completion(
             complete_name,
             name,
@@ -155,7 +156,7 @@ module RubyLsp
 
             if name
               start_loc = node.location
-              end_loc = T.must(node.call_operator_loc)
+              end_loc = node.call_operator_loc #: as !nil
 
               constant_path_completion(
                 "#{name}::",
@@ -296,7 +297,9 @@ module RubyLsp
         namespace_entries = @index.resolve(aliased_namespace, nesting)
         return unless namespace_entries
 
-        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
+        namespace_name = namespace_entries.first #: as !nil
+          .name
+        real_namespace = @index.follow_aliased_namespace(namespace_name)
 
         candidates = @index.constant_completion_candidates(
           "#{real_namespace}::#{incomplete_name}",
@@ -305,7 +308,7 @@ module RubyLsp
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
-          first_entry = T.must(entries.first)
+          first_entry = entries.first #: as !nil
           next if first_entry.private? && !first_entry.name.start_with?("#{nesting}::")
 
           entry_name = first_entry.name
@@ -324,7 +327,7 @@ module RubyLsp
             name,
             range,
             entries,
-            top_level_reference || top_level?(T.must(entries.first).name),
+            top_level_reference || top_level?(first_entry.name),
           )
         end
       end
@@ -429,7 +432,10 @@ module RubyLsp
         matched_uris = @index.search_require_paths(path_node_to_complete.content)
 
         matched_uris.map!(&:require_path).sort!.each do |path|
-          @response_builder << build_completion(T.must(path), path_node_to_complete)
+          @response_builder << build_completion(
+            path, #: as !nil
+            path_node_to_complete,
+          )
         end
       end
 
@@ -486,7 +492,9 @@ module RubyLsp
         method_name = @trigger_character == "." ? nil : name
 
         range = if method_name
-          range_from_location(T.must(node.message_loc))
+          range_from_location(
+            node.message_loc, #: as !nil
+          )
         else
           loc = node.call_operator_loc
 
@@ -531,7 +539,9 @@ module RubyLsp
 
       #: (Prism::CallNode node, String name) -> void
       def add_local_completions(node, name)
-        range = range_from_location(T.must(node.message_loc))
+        range = range_from_location(
+          node.message_loc, #: as !nil
+        )
 
         @node_context.locals_for_scope.each do |local|
           local_name = local.to_s
@@ -551,7 +561,9 @@ module RubyLsp
 
       #: (Prism::CallNode node, String name) -> void
       def add_keyword_completions(node, name)
-        range = range_from_location(T.must(node.message_loc))
+        range = range_from_location(
+          node.message_loc, #: as !nil
+        )
 
         KEYWORDS.each do |keyword|
           next unless keyword.start_with?(name)
@@ -584,7 +596,7 @@ module RubyLsp
 
       #: (String real_name, String incomplete_name, Interface::Range range, Array[RubyIndexer::Entry] entries, bool top_level) -> Interface::CompletionItem
       def build_entry_completion(real_name, incomplete_name, range, entries, top_level)
-        first_entry = T.must(entries.first)
+        first_entry = entries.first #: as !nil
         kind = case first_entry
         when RubyIndexer::Entry::Class
           Constant::CompletionItemKind::CLASS
@@ -675,7 +687,8 @@ module RubyLsp
       def top_level?(entry_name)
         nesting = @node_context.nesting
         nesting.length.downto(0) do |i|
-          prefix = T.must(nesting[0...i]).join("::")
+          prefix = nesting[0...i] #: as !nil
+            .join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 

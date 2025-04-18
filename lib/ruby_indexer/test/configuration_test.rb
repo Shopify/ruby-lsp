@@ -97,10 +97,12 @@ module RubyIndexer
       path = Pathname.new(RbConfig::CONFIG["rubylibdir"]).join("extra_file.txt").to_s
       FileUtils.touch(path)
 
-      uris = @config.indexable_uris
-      assert(uris.none? { |uri| uri.full_path == path })
-    ensure
-      FileUtils.rm(T.must(path))
+      begin
+        uris = @config.indexable_uris
+        assert(uris.none? { |uri| uri.full_path == path })
+      ensure
+        FileUtils.rm(path)
+      end
     end
 
     def test_paths_are_unique

@@ -78,7 +78,7 @@ module RubyIndexer
       return unless node
 
       # Remove the node from the tree and then go up the parents to remove any of them with empty children
-      parent = T.must(node.parent) #: Node[Value]?
+      parent = node.parent #: Node[Value]?
 
       while parent
         parent.children.delete(node.key)

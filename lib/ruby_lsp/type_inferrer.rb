@@ -177,7 +177,10 @@ module RubyLsp
       # Returns the attached version of this type by removing the `<Class:...>` part from its name
       #: -> Type
       def attached
-        Type.new(T.must(@name.split("::")[..-2]).join("::"))
+        Type.new(
+          @name.split("::")[..-2] #: as !nil
+          .join("::"),
+        )
       end
     end
 

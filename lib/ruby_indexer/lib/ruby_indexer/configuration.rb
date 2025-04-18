@@ -94,7 +94,7 @@ module RubyIndexer
       # Remove user specified patterns
       bundle_path = Bundler.settings["path"]&.gsub(/[\\]+/, "/")
       uris.reject! do |indexable|
-        path = T.must(indexable.full_path)
+        path = indexable.full_path #: as !nil
         next false if test_files_ignored_from_exclusion?(path, bundle_path)
 
         excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }

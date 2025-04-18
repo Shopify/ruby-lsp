@@ -29,7 +29,7 @@ module RubyLsp
 
       #: -> String
       def ast_for_range
-        range = T.must(@range)
+        range = @range #: as !nil
         start_char, end_char = @document.find_index_by_position(range[:start], range[:end])
 
         queue = @tree.statements.body.dup

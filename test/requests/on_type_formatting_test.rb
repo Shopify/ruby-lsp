@@ -45,7 +45,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_adding_missing_curly_brace_in_string_interpolation
@@ -81,7 +81,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_adding_missing_pipe
@@ -117,7 +117,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_pipe_is_not_added_in_regular_or_pipe
@@ -143,7 +143,7 @@ class OnTypeFormattingTest < Minitest::Test
       "|",
       "Visual Studio Code",
     ).perform
-    assert_empty(T.must(edits))
+    assert_empty(edits)
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_completion
@@ -186,7 +186,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
     assert_equal("[].each do ||", document.source)
 
     # Push the third pipe manually after the completion happened
@@ -214,7 +214,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_pipe_is_removed_if_user_adds_manually_after_block_argument
@@ -257,7 +257,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_comment_continuation
@@ -289,7 +289,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "#    ",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_comment_continuation_does_not_apply_to_rbs_signatures
@@ -401,7 +401,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "#    ",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_comment_continuation_when_inserting_new_line_in_the_middle
@@ -436,7 +436,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "# ",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_breaking_line_between_keyword_and_more_content
@@ -477,7 +477,7 @@ class OnTypeFormattingTest < Minitest::Test
       },
     ]
 
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_breaking_line_between_keyword_when_there_is_content_on_the_next_line
@@ -540,7 +540,7 @@ class OnTypeFormattingTest < Minitest::Test
       },
     ]
 
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_auto_indent_after_end_keyword
@@ -568,7 +568,7 @@ class OnTypeFormattingTest < Minitest::Test
       },
     ]
 
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_auto_indent_after_end_keyword_with_complex_body
@@ -604,7 +604,7 @@ class OnTypeFormattingTest < Minitest::Test
       },
     ]
 
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_auto_indent_after_end_keyword_does_not_add_extra_indentation
@@ -628,7 +628,7 @@ class OnTypeFormattingTest < Minitest::Test
       },
     ]
 
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_breaking_line_if_a_keyword_is_part_of_method_call
@@ -674,7 +674,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_adding_heredoc_delimiter
@@ -714,7 +714,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_plain_heredoc_completion
@@ -754,7 +754,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_quoted_heredoc_completion
@@ -794,7 +794,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_completing_end_token_inside_parameters
@@ -825,7 +825,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_completing_end_token_inside_brackets
@@ -856,7 +856,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_no_snippet_if_not_vs_code
@@ -892,7 +892,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "end",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_includes_snippets_on_vscode_insiders
@@ -932,7 +932,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_includes_snippets_on_cursor
@@ -972,7 +972,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_includes_snippets_on_vscodium
@@ -1012,7 +1012,7 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 
   def test_does_not_confuse_class_parameter_with_keyword
@@ -1080,6 +1080,6 @@ class OnTypeFormattingTest < Minitest::Test
         newText: "$0",
       },
     ]
-    assert_equal(expected_edits.to_json, T.must(edits).to_json)
+    assert_equal(expected_edits.to_json, edits.to_json)
   end
 end

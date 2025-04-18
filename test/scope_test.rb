@@ -8,7 +8,7 @@ class ScopeTest < Minitest::Test
     scope = RubyLsp::Scope.new
     scope.add("foo", :parameter)
 
-    assert_equal(:parameter, T.must(scope.lookup("foo")).type)
+    assert_equal(:parameter, scope.lookup("foo")&.type)
   end
 
   def test_finding_parameter_in_parent_scope
@@ -16,7 +16,7 @@ class ScopeTest < Minitest::Test
     parent.add("foo", :parameter)
 
     scope = RubyLsp::Scope.new(parent)
-    assert_equal(:parameter, T.must(scope.lookup("foo")).type)
+    assert_equal(:parameter, scope.lookup("foo")&.type)
   end
 
   def test_not_finding_parameter

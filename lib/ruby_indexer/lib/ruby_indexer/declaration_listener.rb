@@ -135,7 +135,7 @@ module RubyIndexer
         existing_entries = T.cast(@index[real_nesting.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
 
         if existing_entries
-          entry = T.must(existing_entries.first)
+          entry = existing_entries.first #: as !nil
           entry.update_singleton_information(
             Location.from_prism_location(node.location, @code_units_cache),
             Location.from_prism_location(expression.location, @code_units_cache),
@@ -509,7 +509,10 @@ module RubyIndexer
         parent_class_name,
       )
 
-      advance_namespace_stack(T.must(nesting.last), entry)
+      advance_namespace_stack(
+        nesting.last, #: as !nil
+        entry,
+      )
     end
 
     #: { (Index index, Entry::Namespace base) -> void } -> void
@@ -927,7 +930,7 @@ module RubyIndexer
 
     #: -> VisibilityScope
     def current_visibility_scope
-      T.must(@visibility_stack.last)
+      @visibility_stack.last #: as !nil
     end
 
     #: (Prism::ParametersNode? parameters_node) -> Array[Entry::Parameter]

@@ -107,7 +107,9 @@ module RubyLsp
 
         uri = T.cast(
           begin
-            URI(T.must(match[0]))
+            URI(
+              match[0], #: as !nil
+            )
           rescue URI::Error
             nil
           end,

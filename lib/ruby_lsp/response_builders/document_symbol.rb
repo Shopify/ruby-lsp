@@ -38,13 +38,14 @@ module RubyLsp
 
       #: -> (SymbolHierarchyRoot | Interface::DocumentSymbol)
       def last
-        T.must(@stack.last)
+        @stack.last #: as !nil
       end
 
       # @override
       #: -> Array[Interface::DocumentSymbol]
       def response
-        T.must(@stack.first).children
+        @stack.first #: as !nil
+          .children
       end
     end
   end

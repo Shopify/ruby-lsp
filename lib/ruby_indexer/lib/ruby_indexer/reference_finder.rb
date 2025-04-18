@@ -282,7 +282,11 @@ module RubyIndexer
     #: (Prism::CallNode node) -> void
     def on_call_node_enter(node)
       if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
-        @references << Reference.new(name, T.must(node.message_loc), declaration: false)
+        @references << Reference.new(
+          name,
+          node.message_loc, #: as !nil
+          declaration: false,
+        )
       end
     end
 

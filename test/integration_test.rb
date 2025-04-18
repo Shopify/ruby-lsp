@@ -39,8 +39,9 @@ class IntegrationTest < Minitest::Test
 
     assert_equal(0, status.exitstatus, stderr)
 
-    activation_string = T.must(/RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr))[1]
-    version, gem_path, yjit, *fields = T.must(activation_string).split("RUBY_LSP_FS")
+    match = /RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr) #: as !nil
+    activation_string = match[1] #: as !nil
+    version, gem_path, yjit, *fields = activation_string.split("RUBY_LSP_FS")
 
     assert_equal(RUBY_VERSION, version)
     refute_nil(gem_path)
@@ -68,8 +69,9 @@ class IntegrationTest < Minitest::Test
 
     assert_equal(0, status.exitstatus, stderr)
 
-    activation_string = T.must(/RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr))[1]
-    version, gem_path, yjit, *fields = T.must(activation_string).split("RUBY_LSP_FS")
+    match = /RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr) #: as !nil
+    activation_string = match[1] #: as !nil
+    version, gem_path, yjit, *fields = activation_string.split("RUBY_LSP_FS")
 
     assert_equal(RUBY_VERSION, version)
     refute_nil(gem_path)
