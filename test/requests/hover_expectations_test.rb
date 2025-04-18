@@ -273,13 +273,12 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_hovering_over_gemfile_dependency
+  def test_hovering_over_gemfile_dependency_using_gem_call
     source = <<~RUBY
       gem 'rake'
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -295,13 +294,48 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_over_gemfile_dependency_using_gem_name
+    source = <<~RUBY
+      gem 'rake'
+    RUBY
+
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 0 } },
+      )
+
+      response = server.pop_response.response
+
+      assert_includes(response.contents.value, "rake")
+    end
+  end
+
+  def test_hovering_over_gemfile_dependency_triggers_only_for_first_arg
+    source = <<~RUBY
+      gem 'rake', '~> 1.0'
+    RUBY
+
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 13, line: 0 } },
+      )
+
+      response = server.pop_response.response
+
+      assert_nil(response)
+    end
+  end
+
   def test_hovering_over_gemfile_dependency_with_missing_argument
     source = <<~RUBY
       gem()
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -317,8 +351,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       gem(method_call)
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
