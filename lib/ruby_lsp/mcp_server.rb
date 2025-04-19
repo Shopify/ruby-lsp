@@ -168,24 +168,6 @@ module RubyLsp
                   },
                 },
                 {
-                  # This may be redundant to some clients if they can access terminal to cat the files
-                  # but it's useful for some clients that don't have that capability
-                  name: "read_ruby_files",
-                  description: <<~DESCRIPTION,
-                    Read the contents of the given Ruby files, including files from dependencies.
-                  DESCRIPTION
-                  inputSchema: {
-                    type: "object",
-                    properties: {
-                      file_uris: {
-                        type: "array",
-                        items: { type: "string" },
-                      },
-                    },
-                    required: ["file_uris"],
-                  },
-                },
-                {
                   name: "get_methods_details",
                   description: <<~DESCRIPTION,
                     Show the details of the given methods.
@@ -245,8 +227,6 @@ module RubyLsp
             contents = case params[:name]
             when "get_classes_and_modules"
               handle_get_classes_and_modules(params.dig(:arguments, :query))
-            when "read_ruby_files"
-              handle_read_ruby_files(params.dig(:arguments, :file_uris))
             when "get_methods_details"
               handle_get_methods_details(params.dig(:arguments, :signatures))
             when "get_class_module_details"
@@ -314,42 +294,6 @@ module RubyLsp
           },
         ]
       end
-    end
-
-    #: (Array[String]) -> Array[Hash[Symbol, untyped]]
-    def handle_read_ruby_files(file_uris)
-      file_uris.map do |file_uri|
-        file_uri_obj = URI(file_uri)
-        file_path = file_uri_obj.path
-        next unless file_path
-
-        begin
-          file_content = File.read(file_path)
-          {
-            type: "text",
-            text: {
-              file_path: file_path,
-              file_content: file_content,
-            }.to_yaml,
-          }
-        rescue Errno::ENOENT
-          {
-            type: "text",
-            text: {
-              file_path: file_path,
-              error: "File not found",
-            }.to_yaml,
-          }
-        rescue => e
-          {
-            type: "text",
-            text: {
-              file_path: file_path,
-              error: "Error reading file: #{e.message}",
-            }.to_yaml,
-          }
-        end
-      end.compact
     end
 
     #: (Array[String]) -> Array[Hash[Symbol, untyped]]
