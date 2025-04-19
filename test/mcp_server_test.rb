@@ -73,58 +73,6 @@ module RubyLsp
       MCPServer.const_set(:MAX_CLASSES_TO_RETURN, original_max_classes)
     end
 
-    def test_handle_read_ruby_files_single_file
-      file_path = File.join(Dir.pwd, "test_read.rb")
-      file_content = "# Test content"
-      File.write(file_path, file_content)
-
-      begin
-        result = @server.send(:handle_read_ruby_files, ["file://#{file_path}"])
-        expected_yaml = { file_path: file_path, file_content: file_content }.to_yaml
-        expected_result = [{ type: "text", text: expected_yaml }]
-
-        assert_equal(expected_result, result)
-      ensure
-        File.delete(file_path) if File.exist?(file_path)
-      end
-    end
-
-    def test_handle_read_ruby_files_multiple_files
-      file_path1 = File.join(Dir.pwd, "test_read1.rb")
-      file_content1 = "# Test content 1"
-      File.write(file_path1, file_content1)
-
-      file_path2 = File.join(Dir.pwd, "test_read2.rb")
-      file_content2 = "# Test content 2"
-      File.write(file_path2, file_content2)
-
-      begin
-        result = @server.send(:handle_read_ruby_files, ["file://#{file_path1}", "file://#{file_path2}"])
-
-        expected_yaml1 = { file_path: file_path1, file_content: file_content1 }.to_yaml
-        expected_yaml2 = { file_path: file_path2, file_content: file_content2 }.to_yaml
-        expected_result = [
-          { type: "text", text: expected_yaml1 },
-          { type: "text", text: expected_yaml2 },
-        ]
-
-        assert_equal(expected_result, result)
-      ensure
-        File.delete(file_path1) if File.exist?(file_path1)
-        File.delete(file_path2) if File.exist?(file_path2)
-      end
-    end
-
-    def test_handle_read_ruby_files_non_existent_file
-      non_existent_path = File.join(Dir.pwd, "non_existent.rb")
-      result = @server.send(:handle_read_ruby_files, ["file://#{non_existent_path}"])
-
-      expected_yaml = { file_path: non_existent_path, error: "File not found" }.to_yaml
-      expected_result = [{ type: "text", text: expected_yaml }]
-
-      assert_equal(expected_result, result)
-    end
-
     def test_handle_get_methods_details_instance_method
       uri = URI("file:///fake_instance.rb")
       @index.index_single(uri, <<~RUBY)
