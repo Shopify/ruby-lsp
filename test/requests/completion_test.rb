@@ -203,7 +203,7 @@ class CompletionTest < Minitest::Test
           position: { line: 5, character: 9 },
         })
         result = server.pop_response.response
-        assert_equal(["Foo::Bar", "Foo::Bar::Baz"], result.map(&:label))
+        assert_equal(["Foo::Bar::Baz", "Foo::Bar"], result.map(&:label))
       end
     end
   end
@@ -695,9 +695,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["qux", "qux="], result.map(&:label))
-        assert_equal(["qux", "qux="], result.map(&:filter_text))
-        assert_equal(["qux", "qux="], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux=", "qux"], result.map(&:label))
+        assert_equal(["qux=", "qux"], result.map(&:filter_text))
+        assert_equal(["qux=", "qux"], result.map { |completion| completion.text_edit.new_text })
       end
     end
   end
@@ -1112,7 +1112,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@@foo", "@@foobar"], result.map(&:label))
+      assert_equal(["@@foobar", "@@foo"], result.map(&:label))
       assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
     end
   end
@@ -1138,7 +1138,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@@foo", "@@foobar"], result.map(&:label))
+      assert_equal(["@@foobar", "@@foo"], result.map(&:label))
     end
   end
 
@@ -1267,14 +1267,14 @@ class CompletionTest < Minitest::Test
         position: { line: 7, character: 5 },
       })
       result = server.pop_response.response
-      assert_equal(["@foo", "@foobar"], result.map(&:label))
+      assert_equal(["@foobar", "@foo"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
         position: { line: 11, character: 5 },
       })
       result = server.pop_response.response
-      assert_equal(["@foo", "@foobar"], result.map(&:label))
+      assert_equal(["@foobar", "@foo"], result.map(&:label))
       assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
     end
   end

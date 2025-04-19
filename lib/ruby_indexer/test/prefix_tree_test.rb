@@ -37,9 +37,9 @@ module RubyIndexer
       tree = PrefixTree[String].new
       ["fo", "foo"].each { |item| tree.insert(item, item) }
 
-      assert_equal(["fo", "foo"], tree.search(""))
-      assert_equal(["fo", "foo"], tree.search("f"))
-      assert_equal(["fo", "foo"], tree.search("fo"))
+      assert_equal(["foo", "fo"], tree.search(""))
+      assert_equal(["foo", "fo"], tree.search("f"))
+      assert_equal(["foo", "fo"], tree.search("fo"))
       assert_equal(["foo"], tree.search("foo"))
       assert_empty(tree.search("fooo"))
     end
@@ -84,8 +84,8 @@ module RubyIndexer
           "foo/bar/support/semantic",
           "foo/bar/support/syntax",
           "foo/bar/support/source",
-          "foo/bar/support/runner",
           "foo/bar/support/runner2",
+          "foo/bar/support/runner",
           "foo/bar/support/rails",
           "foo/bar/support/diagnostic",
           "foo/bar/support/highlight",
