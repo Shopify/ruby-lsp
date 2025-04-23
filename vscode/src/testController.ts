@@ -420,6 +420,19 @@ export class TestController {
         request.exclude,
       );
       const workspace = await this.getOrActivateWorkspace(workspaceFolder);
+
+      if (
+        !workspace.lspClient?.initializeResult?.capabilities.experimental
+          ?.full_test_discovery
+      ) {
+        run.appendOutput(
+          `The version of the Ruby LSP server being used by ${workspaceFolder.name} does not support the new
+           test explorer functionality. Please make sure you are using the latest version of the server.
+           See https://shopify.github.io/ruby-lsp/troubleshooting.html#outdated-version for more information.`,
+        );
+        break;
+      }
+
       const response =
         await workspace.lspClient?.resolveTestCommands(requestTestItems);
 
@@ -849,6 +862,19 @@ export class TestController {
         await this.gatherWorkspaceTests(workspaceFolder, item);
       } else if (!item.tags.some((tag) => tag === TEST_GROUP_TAG)) {
         const workspace = await this.getOrActivateWorkspace(workspaceFolder);
+
+        if (
+          !workspace.lspClient?.initializeResult?.capabilities.experimental
+            ?.full_test_discovery
+        ) {
+          await vscode.window.showWarningMessage(
+            `The version of the Ruby LSP server being used by ${workspaceFolder.name} does not support the new
+             test explorer functionality. Please make sure you are using the latest version of the server.
+             See https://shopify.github.io/ruby-lsp/troubleshooting.html#outdated-version for more information.`,
+          );
+          return;
+        }
+
         const lspClient = workspace.lspClient;
 
         if (lspClient) {

@@ -294,6 +294,7 @@ module RubyLsp
             addon_detection: true,
             compose_bundle: true,
             go_to_relevant_file: true,
+            full_test_discovery: true,
           },
         ),
         serverInfo: {
