@@ -19,10 +19,10 @@ module RubyIndexer
 
       assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:4-6:4-8")
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo::Bar", owner.name)
+      assert_equal("Foo::Bar", owner&.name)
     end
 
     def test_instance_variable_with_multibyte_characters
@@ -51,10 +51,10 @@ module RubyIndexer
 
       assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:4-6:4-8")
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo::Bar", owner.name)
+      assert_equal("Foo::Bar", owner&.name)
     end
 
     def test_instance_variable_operator_write
@@ -71,10 +71,10 @@ module RubyIndexer
 
       assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:4-6:4-8")
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo::Bar", owner.name)
+      assert_equal("Foo::Bar", owner&.name)
     end
 
     def test_instance_variable_or_write
@@ -91,10 +91,10 @@ module RubyIndexer
 
       assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:4-6:4-8")
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo::Bar", owner.name)
+      assert_equal("Foo::Bar", owner&.name)
     end
 
     def test_instance_variable_target
@@ -112,15 +112,15 @@ module RubyIndexer
       assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:4-6:4-8")
       assert_entry("@b", Entry::InstanceVariable, "/fake/path/foo.rb:4-10:4-12")
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo::Bar", owner.name)
+      assert_equal("Foo::Bar", owner&.name)
 
-      entry = T.must(@index["@b"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@b"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo::Bar", owner.name)
+      assert_equal("Foo::Bar", owner&.name)
     end
 
     def test_empty_name_instance_variables
@@ -156,24 +156,24 @@ module RubyIndexer
 
       assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:2-4:2-6")
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::Bar::<Class:Bar>", owner.name)
+      assert_equal("Foo::Bar::<Class:Bar>", owner&.name)
 
       assert_entry("@b", Entry::InstanceVariable, "/fake/path/foo.rb:6-8:6-10")
 
-      entry = T.must(@index["@b"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@b"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::Bar::<Class:Bar>", owner.name)
+      assert_equal("Foo::Bar::<Class:Bar>", owner&.name)
 
       assert_entry("@c", Entry::InstanceVariable, "/fake/path/foo.rb:9-6:9-8")
 
-      entry = T.must(@index["@c"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@c"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>", owner.name)
+      assert_equal("Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>", owner&.name)
     end
 
     def test_top_level_instance_variables
@@ -181,7 +181,7 @@ module RubyIndexer
         @a = 123
       RUBY
 
-      entry = T.must(@index["@a"]&.first)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
       assert_nil(entry.owner)
     end
 
@@ -194,10 +194,10 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::<Class:Foo>", owner.name)
+      assert_equal("Foo::<Class:Foo>", owner&.name)
     end
 
     def test_instance_variable_inside_dynamic_method_declaration
@@ -211,10 +211,10 @@ module RubyIndexer
 
       # If the surrounding method is being defined on any dynamic value that isn't `self`, then we attribute the
       # instance variable to the wrong owner since there's no way to understand that statically
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::Class, owner)
-      assert_equal("Foo", owner.name)
+      assert_equal("Foo", owner&.name)
     end
 
     def test_module_function_does_not_impact_instance_variables
@@ -231,10 +231,10 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index["@a"]&.first)
-      owner = T.must(entry.owner)
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::<Class:Foo>", owner.name)
+      assert_equal("Foo::<Class:Foo>", owner&.name)
     end
   end
 end

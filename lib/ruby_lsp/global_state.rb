@@ -185,7 +185,7 @@ module RubyLsp
 
     #: -> String
     def workspace_path
-      T.must(@workspace_uri.to_standardized_path)
+      @workspace_uri.to_standardized_path #: as !nil
     end
 
     #: -> String

@@ -49,8 +49,7 @@ module RubyLsp
 
         # While the spec allows for multiple entries, VSCode seems to only support one
         # We'll just return the first one for now
-        first_entry = T.must(entries.first)
-
+        first_entry = entries.first #: as !nil
         range = range_from_location(first_entry.location)
 
         [

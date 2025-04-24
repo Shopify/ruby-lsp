@@ -106,7 +106,8 @@ module RubyLsp
           entries = @global_state.index.resolve(name, node_context.nesting)
           return unless entries
 
-          fully_qualified_name = T.must(entries.first).name
+          fully_qualified_name = entries.first #: as !nil
+            .name
           RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
         when
           Prism::InstanceVariableAndWriteNode,

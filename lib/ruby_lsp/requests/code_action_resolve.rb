@@ -97,7 +97,7 @@ module RubyLsp
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
         start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        extracted_source = @document.source[start_index...end_index] #: as !nil
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = RubyDocument
@@ -153,7 +153,8 @@ module RubyLsp
           indentation_line = lines[indentation_line_number]
           return Error::InvalidTargetRange unless indentation_line
 
-          indentation = T.must(indentation_line[/\A */]).size
+          indentation = indentation_line[/\A */] #: as !nil
+            .size
 
           target_range = {
             start: { line: target_line, character: indentation },
@@ -195,7 +196,7 @@ module RubyLsp
         return Error::EmptySelection if source_range[:start] == source_range[:end]
 
         start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        extracted_source = @document.source[start_index...end_index] #: as !nil
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
         node_context = RubyDocument.locate(

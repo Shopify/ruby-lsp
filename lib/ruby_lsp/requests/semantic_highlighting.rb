@@ -43,8 +43,8 @@ module RubyLsp
           # Filter the tokens based on the first different position. This must happen at this stage, before we try to
           # find the next position from the end or else we risk confusing sets of token that may have different lengths,
           # but end with the exact same token
-          old_tokens = T.must(previous_tokens[first_different_position...])
-          new_tokens = T.must(current_tokens[first_different_position...])
+          old_tokens = previous_tokens[first_different_position...] #: as !nil
+          new_tokens = current_tokens[first_different_position...] #: as !nil
 
           # Then search from the end to find the first token that doesn't match. Since the user is normally editing the
           # middle of the file, this will minimize the number of edits since the end of the token array has not changed
@@ -53,8 +53,8 @@ module RubyLsp
           end || 0
 
           # Filter the old and new tokens to only the section that will be replaced/inserted/deleted
-          old_tokens = T.must(old_tokens[...old_tokens.length - first_different_token_from_end])
-          new_tokens = T.must(new_tokens[...new_tokens.length - first_different_token_from_end])
+          old_tokens = old_tokens[...old_tokens.length - first_different_token_from_end] #: as !nil
+          new_tokens = new_tokens[...new_tokens.length - first_different_token_from_end] #: as !nil
 
           # And we send back a single edit, replacing an entire section for the new tokens
           Interface::SemanticTokensDelta.new(

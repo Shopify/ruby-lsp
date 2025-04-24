@@ -63,10 +63,11 @@ module RubyLsp
         return unless entries
 
         if (conflict_entries = @global_state.index.resolve(@new_name, node_context.nesting))
-          raise InvalidNameError, "The new name is already in use by #{T.must(conflict_entries.first).name}"
+          raise InvalidNameError, "The new name is already in use by #{conflict_entries.first&.name}"
         end
 
-        fully_qualified_name = T.must(entries.first).name
+        fully_qualified_name = entries.first #: as !nil
+          .name
         reference_target = RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
         changes = collect_text_edits(reference_target, name)
 
@@ -97,9 +98,9 @@ module RubyLsp
         # rename the files for the user.
         #
         # We also look for an associated test file and rename it too
-        short_name = T.must(fully_qualified_name.split("::").last)
+        short_name = fully_qualified_name.split("::").last #: as !nil
 
-        T.must(@global_state.index[fully_qualified_name]).each do |entry|
+        @global_state.index[fully_qualified_name]&.each do |entry|
           # Do not rename files that are not part of the workspace
           uri = entry.uri
           file_path = uri.full_path
@@ -112,7 +113,9 @@ module RubyLsp
             file_name = file_from_constant_name(short_name)
 
             if "#{file_name}.rb" == entry.file_name
-              new_file_name = file_from_constant_name(T.must(@new_name.split("::").last))
+              new_file_name = file_from_constant_name(
+                @new_name.split("::").last, #: as !nil
+              )
 
               new_uri = URI::Generic.from_path(path: File.join(
                 File.dirname(file_path),

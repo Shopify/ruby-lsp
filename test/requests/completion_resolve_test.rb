@@ -31,7 +31,10 @@ class CompletionResolveTest < Minitest::Test
       expected = existing_item.merge(
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries("Foo::Bar", T.must(server.global_state.index["Foo::Bar"])),
+          value: markdown_from_index_entries(
+            "Foo::Bar",
+            server.global_state.index["Foo::Bar"], #: as !nil
+          ),
         ),
       )
       assert_match(/This is a class that does things/, result[:documentation].value)
@@ -197,7 +200,10 @@ class CompletionResolveTest < Minitest::Test
       contents = result[:documentation].value
 
       assert_match("```ruby\nyield\n```", contents)
-      assert_match(T.must(RubyLsp::KEYWORD_DOCS["yield"]), contents)
+      assert_match(
+        RubyLsp::KEYWORD_DOCS["yield"], #: as !nil
+        contents,
+      )
       assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
     end
   end

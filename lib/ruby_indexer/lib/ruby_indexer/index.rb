@@ -126,7 +126,13 @@ module RubyIndexer
 
       (@entries[name] ||= []) << entry
       (@uris_to_entries[entry.uri.to_s] ||= []) << entry
-      @entries_tree.insert(name, T.must(@entries[name])) unless skip_prefix_tree
+
+      unless skip_prefix_tree
+        @entries_tree.insert(
+          name,
+          @entries[name], #: as !nil
+        )
+      end
     end
 
     #: (String fully_qualified_name) -> Array[Entry]?
@@ -188,7 +194,8 @@ module RubyIndexer
       end
 
       results = nesting.length.downto(0).flat_map do |i|
-        prefix = T.must(nesting[0...i]).join("::")
+        prefix = nesting[0...i] #: as !nil
+          .join("::")
         namespaced_query = prefix.empty? ? query : "#{prefix}::#{query}"
         @entries_tree.search(namespaced_query)
       end
@@ -288,7 +295,8 @@ module RubyIndexer
 
       # Constants defined in enclosing scopes
       nesting.length.downto(1) do |i|
-        namespace = T.must(nesting[0...i]).join("::")
+        namespace = nesting[0...i] #: as !nil
+          .join("::")
         entries.concat(@entries_tree.search("#{namespace}::#{name}"))
       end
 
@@ -406,7 +414,8 @@ module RubyIndexer
     # Indexes a File URI by reading the contents from disk
     #: (URI::Generic uri, ?collect_comments: bool) -> void
     def index_file(uri, collect_comments: true)
-      index_single(uri, File.read(T.must(uri.full_path)), collect_comments: collect_comments)
+      path = uri.full_path #: as !nil
+      index_single(uri, File.read(path), collect_comments: collect_comments)
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it
@@ -428,7 +437,8 @@ module RubyIndexer
       real_parts = []
 
       (parts.length - 1).downto(0) do |i|
-        current_name = T.must(parts[0..i]).join("::")
+        current_name = parts[0..i] #: as !nil
+          .join("::")
         entry = @entries[current_name]&.first
 
         case entry
@@ -445,7 +455,9 @@ module RubyIndexer
           target = resolved.target
           return follow_aliased_namespace("#{target}::#{real_parts.join("::")}", seen_names)
         else
-          real_parts.unshift(T.must(parts[i]))
+          real_parts.unshift(
+            parts[i], #: as !nil
+          )
         end
       end
 
@@ -542,11 +554,12 @@ module RubyIndexer
 
       # The original nesting where we discovered this namespace, so that we resolve the correct names of the
       # included/prepended/extended modules and parent classes
-      nesting = T.must(namespaces.first).nesting.flat_map { |n| n.split("::") }
+      nesting = namespaces.first #: as !nil
+        .nesting.flat_map { |n| n.split("::") }
 
       if nesting.any?
         singleton_levels.times do
-          nesting << "<Class:#{T.must(nesting.last)}>"
+          nesting << "<Class:#{nesting.last}>"
         end
       end
 
@@ -612,7 +625,8 @@ module RubyIndexer
         name_parts = owner_name.split("::")
 
         if name_parts.last&.start_with?("<Class:")
-          attached_name = T.must(name_parts[0..-2]).join("::")
+          attached_name = name_parts[0..-2] #: as !nil
+            .join("::")
           attached_ancestors = linearized_ancestors_of(attached_name)
           variables.concat(class_variables.select { |e| attached_ancestors.any?(e.owner&.name) })
         else
@@ -649,7 +663,10 @@ module RubyIndexer
         block.call(self)
       else
         delete(uri)
-        index_single(uri, T.must(source))
+        index_single(
+          uri,
+          source, #: as !nil
+        )
       end
 
       updated_entries = @uris_to_entries[key]
@@ -699,7 +716,7 @@ module RubyIndexer
       singleton = T.cast(self[full_singleton_name]&.first, T.nilable(Entry::SingletonClass))
 
       unless singleton
-        attached_ancestor = T.must(self[name]&.first)
+        attached_ancestor = self[name]&.first #: as !nil
 
         singleton = Entry::SingletonClass.new(
           [full_singleton_name],
@@ -732,7 +749,8 @@ module RubyIndexer
       name_parts = name.split("::")
 
       if name_parts.last&.start_with?("<Class:")
-        attached_name = T.must(name_parts[0..-2]).join("::")
+        attached_name = name_parts[0..-2] #: as !nil
+          .join("::")
         linearized_ancestors_of(attached_name)
       else
         linearized_ancestors_of(name)
@@ -755,7 +773,8 @@ module RubyIndexer
           resolved_modules = resolve(operation.module_name, nesting)
           next unless resolved_modules
 
-          module_name = T.must(resolved_modules.first).name
+          module_name = resolved_modules.first #: as !nil
+            .name
 
           # Then we grab any hooks registered for that module
           hooks = @included_hooks[module_name]
@@ -778,7 +797,8 @@ module RubyIndexer
         resolved_module = resolve(operation.module_name, nesting)
         next unless resolved_module
 
-        module_fully_qualified_name = T.must(resolved_module.first).name
+        module_fully_qualified_name = resolved_module.first #: as !nil
+          .name
 
         case operation
         when Entry::Prepend
@@ -790,20 +810,20 @@ module RubyIndexer
           # When there are duplicate prepended modules, we have to insert the new prepends after the existing ones. For
           # example, if the current ancestors are `["A", "Foo"]` and we try to prepend `["A", "B"]`, then `"B"` has to
           # be inserted after `"A`
-          uniq_prepends = linearized_prepends - T.must(ancestors[0...main_namespace_index])
+          prepended_ancestors = ancestors[0...main_namespace_index] #: as !nil
+          uniq_prepends = linearized_prepends - prepended_ancestors
           insert_position = linearized_prepends.length - uniq_prepends.length
 
-          T.unsafe(ancestors).insert(
-            insert_position,
-            *(linearized_prepends - T.must(ancestors[0...main_namespace_index])),
-          )
+          ancestors #: as untyped
+            .insert(insert_position, *uniq_prepends)
 
           main_namespace_index += linearized_prepends.length
         when Entry::Include
           # When including a module, Ruby will always prevent duplicate entries in case the module has already been
           # prepended or included
           linearized_includes = linearized_ancestors_of(module_fully_qualified_name)
-          T.unsafe(ancestors).insert(main_namespace_index + 1, *(linearized_includes - ancestors))
+          ancestors #: as untyped
+            .insert(main_namespace_index + 1, *(linearized_includes - ancestors))
         end
       end
     end
@@ -833,7 +853,7 @@ module RubyIndexer
       if superclass
         # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
         # error. We need to ensure that this isn't the case
-        parent_class = T.must(superclass.parent_class)
+        parent_class = superclass.parent_class #: as !nil
 
         resolved_parent_class = resolve(parent_class, nesting)
         parent_class_name = resolved_parent_class&.first&.name
@@ -888,11 +908,12 @@ module RubyIndexer
       target = resolve(entry.target, entry.nesting, seen_names)
       return entry unless target
 
-      target_name = T.must(target.first).name
+      target_name = target.first #: as !nil
+        .name
       resolved_alias = Entry::ConstantAlias.new(target_name, entry)
 
       # Replace the UnresolvedAlias by a resolved one so that we don't have to do this again later
-      original_entries = T.must(@entries[alias_name])
+      original_entries = @entries[alias_name] #: as !nil
       original_entries.delete(entry)
       original_entries << resolved_alias
 
@@ -904,7 +925,8 @@ module RubyIndexer
     #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
     def lookup_enclosing_scopes(name, nesting, seen_names)
       nesting.length.downto(1) do |i|
-        namespace = T.must(nesting[0...i]).join("::")
+        namespace = nesting[0...i] #: as !nil
+          .join("::")
 
         # If we find an entry with `full_name` directly, then we can already return it, even if it contains aliases -
         # because the user might be trying to jump to the alias definition.
@@ -928,7 +950,9 @@ module RubyIndexer
       namespace_entries = resolve(nesting_parts.join("::"), [], seen_names)
       return unless namespace_entries
 
-      ancestors = nesting_parts.empty? ? [] : linearized_ancestors_of(T.must(namespace_entries.first).name)
+      namespace_name = namespace_entries.first #: as !nil
+        .name
+      ancestors = nesting_parts.empty? ? [] : linearized_ancestors_of(namespace_name)
 
       ancestors.each do |ancestor_name|
         entries = direct_or_aliased_constant("#{ancestor_name}::#{constant_name}", seen_names)
@@ -952,7 +976,9 @@ module RubyIndexer
       end
       return [] unless namespace_entries
 
-      ancestors = linearized_ancestors_of(T.must(namespace_entries.first).name)
+      namespace_name = namespace_entries.first #: as !nil
+        .name
+      ancestors = linearized_ancestors_of(namespace_name)
       candidates = ancestors.flat_map do |ancestor_name|
         @entries_tree.search("#{ancestor_name}::#{constant_name}")
       end
@@ -960,7 +986,8 @@ module RubyIndexer
       # For candidates with the same name, we must only show the first entry in the inheritance chain, since that's the
       # one the user will be referring to in completion
       completion_items = candidates.each_with_object({}) do |entries, hash|
-        *parts, short_name = T.must(entries.first).name.split("::")
+        *parts, short_name = entries.first #: as !nil
+          .name.split("::")
         namespace_name = parts.join("::")
         ancestor_index = ancestors.index(namespace_name)
         existing_entry, existing_entry_index = hash[short_name]
@@ -1027,8 +1054,11 @@ module RubyIndexer
       target_method_entries = resolve_method(entry.old_name, receiver_name, seen_names)
       return entry unless target_method_entries
 
-      resolved_alias = Entry::MethodAlias.new(T.must(target_method_entries.first), entry)
-      original_entries = T.must(@entries[new_name])
+      resolved_alias = Entry::MethodAlias.new(
+        target_method_entries.first, #: as !nil
+        entry,
+      )
+      original_entries = @entries[new_name] #: as !nil
       original_entries.delete(entry)
       original_entries << resolved_alias
       resolved_alias

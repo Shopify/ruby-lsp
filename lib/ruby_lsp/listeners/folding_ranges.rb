@@ -193,8 +193,10 @@ module RubyLsp
           next if chunk.length == 1
 
           @response_builder << Interface::FoldingRange.new(
-            start_line: T.must(chunk.first).location.start_line - 1,
-            end_line: T.must(chunk.last).location.end_line - 1,
+            start_line: chunk.first #: as !nil
+              .location.start_line - 1,
+            end_line: chunk.last #: as !nil
+              .location.end_line - 1,
             kind: "comment",
           )
         end
@@ -204,8 +206,10 @@ module RubyLsp
       def emit_requires_range
         if @requires.length > 1
           @response_builder << Interface::FoldingRange.new(
-            start_line: T.must(@requires.first).location.start_line - 1,
-            end_line: T.must(@requires.last).location.end_line - 1,
+            start_line: @requires.first #: as !nil
+              .location.start_line - 1,
+            end_line: @requires.last #: as !nil
+              .location.end_line - 1,
             kind: "imports",
           )
         end
