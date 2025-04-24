@@ -50,7 +50,7 @@ Sorbet/TrueSigil:
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
     - "lib/ruby_lsp/load_sorbet.rb"
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
-    - "lib/ruby_lsp/test_unit_test_runner.rb"
+    - "lib/ruby_lsp/test_reporters/test_unit_reporter.rb"
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
@@ -68,9 +68,7 @@ Sorbet/StrictSigil:
     - "lib/ruby_lsp/load_sorbet.rb"
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
     - "lib/ruby_lsp/test_helper.rb"
-    # runs as part of host app where sorbet-runtime may not be available. Using RBS signatures we can get to
-    # `typed: true` but not yet `typed: strict`
-    - "lib/ruby_lsp/test_unit_test_runner.rb"
+    - "lib/ruby_lsp/test_reporters/test_unit_reporter.rb"
 
 Layout/ClassStructure:
   Enabled: true
