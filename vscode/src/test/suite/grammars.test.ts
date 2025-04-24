@@ -853,6 +853,17 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
+      test("assignment with an underscore prefix", () => {
+        const ruby = "_local=1";
+        const expectedTokens = [
+          ["_local", ["source.ruby", "variable.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
     });
 
     function tokenizeRBS(rbs: string): [string, string[]][] {
