@@ -11,11 +11,41 @@ require_relative "lsp_reporter"
 require "ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
+  # An override of the default progress reporter in Minitest to add color to the output
+  class ProgressReporterWithColor < Minitest::ProgressReporter
+    #: (Minitest::Result) -> void
+    def record(result)
+      color = if result.error?
+        "\e[31m" # red
+      elsif result.passed?
+        "\e[32m" # green
+      elsif result.skipped?
+        "\e[33m" # yellow
+      elsif result.failure
+        "\e[31m" # red
+      else
+        "\e[0m" # no color
+      end
+
+      io.print("#{color}#{result.result_code}\e[0m") # Reset color after printing
+    end
+  end
+
   class MinitestReporter < Minitest::AbstractReporter
     class << self
       #: (Hash[untyped, untyped]) -> void
       def minitest_plugin_init(_options)
-        Minitest.reporter.reporters << MinitestReporter.new
+        # Remove the original progress reporter, so that we replace it with our own. We only do this if no other
+        # reporters were included by the application itself to avoid double reporting
+        reporters = Minitest.reporter.reporters
+
+        if reporters.all? { |r| r.is_a?(Minitest::ProgressReporter) || r.is_a?(Minitest::SummaryReporter) }
+          reporters.delete_if { |r| r.is_a?(Minitest::ProgressReporter) }
+          reporters << ProgressReporterWithColor.new
+        end
+
+        # Add the JSON RPC reporter
+        reporters << MinitestReporter.new
       end
     end
 
