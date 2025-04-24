@@ -120,6 +120,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
     workspace.lspClient = fakeClient as any;
     await controller.testController.resolveHandler!(undefined);
@@ -323,6 +331,14 @@ suite("TestController", () => {
         ];
       },
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
     workspace.lspClient = fakeClient as any;
 
@@ -427,6 +443,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
 
     workspace.lspClient = fakeClient as any;
@@ -470,6 +494,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
 
     workspace.lspClient = fakeClient as any;
@@ -522,6 +554,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
 
     workspace.lspClient = fakeClient as any;
@@ -624,6 +664,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
 
     workspace.lspClient = fakeClient as any;
@@ -699,6 +747,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
     workspace.lspClient = fakeClient as any;
     await controller.testController.resolveHandler!(serverTest);
@@ -791,6 +847,14 @@ suite("TestController", () => {
         },
       ]),
       waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
     };
     workspace.lspClient = fakeClient as any;
 
@@ -841,6 +905,14 @@ suite("TestController", () => {
           commands: [`node ${fakeServerPath}`],
           reporterPath: undefined,
         }),
+        initializeResult: {
+          capabilities: {
+            experimental: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              full_test_discovery: true,
+            },
+          },
+        },
       } as any;
 
       const cancellationSource = new vscode.CancellationTokenSource();
@@ -892,6 +964,14 @@ suite("TestController", () => {
           commands: [`ruby -e '1'`],
           reporterPath: undefined,
         }),
+        initializeResult: {
+          capabilities: {
+            experimental: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              full_test_discovery: true,
+            },
+          },
+        },
       } as any;
 
       const cancellationSource = new vscode.CancellationTokenSource();
@@ -968,6 +1048,14 @@ suite("TestController", () => {
           commands: [`node ${fakeServerPath}`],
           reporterPath: undefined,
         }),
+        initializeResult: {
+          capabilities: {
+            experimental: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              full_test_discovery: true,
+            },
+          },
+        },
       } as any;
 
       const cancellationSource = new vscode.CancellationTokenSource();
