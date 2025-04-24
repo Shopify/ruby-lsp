@@ -1810,7 +1810,7 @@ class CompletionTest < Minitest::Test
           end
         end
 
-        T.unsafe(klass).new(response_builder, nesting, dispatcher, uri)
+        klass.new(response_builder, nesting, dispatcher, uri)
       end
 
       def activate(global_state, outgoing_queue); end

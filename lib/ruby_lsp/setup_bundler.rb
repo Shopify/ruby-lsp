@@ -260,7 +260,8 @@ module RubyLsp
       # The ENV can only be merged after checking if an update is required because we depend on the original value of
       # ENV["BUNDLE_GEMFILE"], which gets overridden after the merge
       should_update = should_bundle_update?
-      T.unsafe(ENV).merge!(env)
+      ENV #: as untyped
+        .merge!(env)
 
       unless should_update && !force_install
         Bundler::CLI::Install.new({ "no-cache" => true }).run

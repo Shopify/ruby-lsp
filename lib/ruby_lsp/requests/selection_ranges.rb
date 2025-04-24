@@ -32,7 +32,7 @@ module RubyLsp
           next unless node
 
           range = Support::SelectionRange.new(range: range_from_location(node.location), parent: parent)
-          T.unsafe(queue).unshift(*node.child_nodes.map { |child| [child, range] })
+          queue.unshift(*node.child_nodes.map { |child| [child, range] })
           @ranges.unshift(range)
         end
 

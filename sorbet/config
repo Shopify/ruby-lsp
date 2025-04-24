@@ -8,3 +8,4 @@
 --enable-experimental-requires-ancestor
 --enable-experimental-rbs-signatures
 --enable-experimental-rbs-assertions
+--suppress-error-code=7019

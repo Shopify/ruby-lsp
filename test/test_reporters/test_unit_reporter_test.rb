@@ -14,7 +14,7 @@ module RubyLsp
       server = TCPServer.new("localhost", 0)
       port = server.addr[1].to_s
       events = []
-      socket = T.let(nil, T.nilable(Socket))
+      socket = nil #: Socket?
 
       receiver = Thread.new do
         socket = server.accept
@@ -34,19 +34,20 @@ module RubyLsp
         end
       end
 
-      _stdin, stdout, _stderr, wait_thr = T.unsafe(Open3).popen3(
-        {
-          "RUBYOPT" => "-rbundler/setup -r#{reporter_path}",
-          "RUBY_LSP_TEST_RUNNER" => "run",
-          "RUBY_LSP_REPORTER_PORT" => port,
-        },
-        "bundle",
-        "exec",
-        "ruby",
-        "-Itest",
-        test_path,
-        chdir: Bundler.root.to_s,
-      )
+      _stdin, stdout, _stderr, wait_thr = Open3 #: as untyped
+        .popen3(
+          {
+            "RUBYOPT" => "-rbundler/setup -r#{reporter_path}",
+            "RUBY_LSP_TEST_RUNNER" => "run",
+            "RUBY_LSP_REPORTER_PORT" => port,
+          },
+          "bundle",
+          "exec",
+          "ruby",
+          "-Itest",
+          test_path,
+          chdir: Bundler.root.to_s,
+        )
 
       wait_thr.join
       receiver.join

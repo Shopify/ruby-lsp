@@ -160,7 +160,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, dispatcher)
+        klass.new(response_builder, dispatcher)
       end
     end
   end

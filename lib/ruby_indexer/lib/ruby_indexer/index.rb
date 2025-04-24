@@ -1023,7 +1023,7 @@ module RubyIndexer
       # Otherwise, push all of the leading parts of the nesting that aren't redundant into the name. For example, if we
       # have a reference to `Foo::Bar` inside the `[Namespace, Foo]` nesting, then only the `Foo` part is redundant, but
       # we still need to include the `Namespace` part
-      T.unsafe(name_parts).unshift(*nesting[0...first_redundant_part])
+      name_parts.unshift(*nesting[0...first_redundant_part])
       name_parts.join("::")
     end
 
