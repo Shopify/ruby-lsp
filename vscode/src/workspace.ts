@@ -172,6 +172,7 @@ export class Workspace implements WorkspaceInterface {
           title: "Initializing Ruby LSP",
         },
         async () => {
+          await this.copyRubyMcpBridge();
           await this.lspClient!.start();
           await this.lspClient!.afterStart();
         },
@@ -439,6 +440,19 @@ export class Workspace implements WorkspaceInterface {
       workspaceWatcher.onDidCreate(start),
       // Once they are deleted and the action is complete, then we restart
       workspaceWatcher.onDidDelete(stop),
+    );
+  }
+
+  private async copyRubyMcpBridge() {
+    const targetURI = vscode.Uri.joinPath(
+      this.workspaceFolder.uri,
+      ".ruby-lsp",
+      "ruby-mcp-bridge",
+    );
+    await vscode.workspace.fs.copy(
+      vscode.Uri.joinPath(this.context.extensionUri, "ruby-mcp-bridge"),
+      targetURI,
+      { overwrite: true },
     );
   }
 
