@@ -618,9 +618,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["qux1", "qux2"], result.map(&:label))
-        assert_equal(["qux1", "qux2"], result.map(&:filter_text))
-        assert_equal(["qux1", "qux2"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux2", "qux1"], result.map(&:label))
+        assert_equal(["qux2", "qux1"], result.map(&:filter_text))
+        assert_equal(["qux2", "qux1"], result.map { |completion| completion.text_edit.new_text })
         assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
       end
     end
@@ -646,9 +646,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["bar", "baz"], result.map(&:label))
-        assert_equal(["bar", "baz"], result.map(&:filter_text))
-        assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["baz", "bar"], result.map(&:label))
+        assert_equal(["baz", "bar"], result.map(&:filter_text))
+        assert_equal(["baz", "bar"], result.map { |completion| completion.text_edit.new_text })
         assert_equal([9, 9], result.map { |completion| completion.text_edit.range.start.character })
       end
     end
@@ -787,7 +787,7 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["module", "method1", "method2"], result.map(&:label))
+        assert_equal(["module", "method2", "method1"], result.map(&:label))
       end
     end
   end
@@ -1053,7 +1053,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["$qar", "$qaz", "$qux", "$quux", "$qorge", "$qoo"], result.map(&:label))
+      assert_equal(["$qoo", "$qorge", "$quux", "$qux", "$qaz", "$qar"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1061,7 +1061,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["$LOADED_FEATURES", "$LOAD_PATH"], result.map(&:label))
+      assert_equal(["$LOAD_PATH", "$LOADED_FEATURES"], result.map(&:label))
       assert_equal(["global_variables.rbs", "global_variables.rbs"], result.map { _1.label_details.description })
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
@@ -1181,7 +1181,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@@bar", "@@baz"], result.map(&:label))
+      assert_equal(["@@baz", "@@bar"], result.map(&:label))
     end
   end
 
@@ -1248,7 +1248,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@@a", "@@b", "@@c", "@@d"], result.map(&:label))
+      assert_equal(["@@d", "@@c", "@@b", "@@a"], result.map(&:label))
     end
   end
 
@@ -1319,7 +1319,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@a", "@b"], result.map(&:label))
+      assert_equal(["@b", "@a"], result.map(&:label))
     end
   end
 
@@ -1372,7 +1372,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["baz", "bar"], result.map(&:label))
+      assert_equal(["bar", "baz"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1380,7 +1380,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["begin", "break", "baz", "bar"], result.map(&:label))
+      assert_equal(["begin", "break", "bar", "baz"], result.map(&:label))
     end
   end
 
@@ -1416,7 +1416,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@a", "@b", "@c"], result.map(&:label))
+      assert_equal(["@c", "@b", "@a"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1424,7 +1424,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@a", "@b", "@c"], result.map(&:label))
+      assert_equal(["@c", "@b", "@a"], result.map(&:label))
     end
   end
 
@@ -1449,7 +1449,7 @@ class CompletionTest < Minitest::Test
         position: { line: 8, character: 5 },
       })
       result = server.pop_response.response
-      assert_equal(["begin", "break", "bar", "baz"], result.map(&:label))
+      assert_equal(["begin", "break", "baz", "bar"], result.map(&:label))
     end
   end
 

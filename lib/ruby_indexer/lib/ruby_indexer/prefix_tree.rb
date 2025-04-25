@@ -138,10 +138,11 @@ module RubyIndexer
       #: -> Array[Value]
       def collect
         result = []
-        result << @value if @leaf
+        stack = [self]
 
-        @children.each_value do |node|
-          result.concat(node.collect)
+        while (node = stack.pop)
+          result << node.value if node.leaf
+          stack.concat(node.children.values)
         end
 
         result
