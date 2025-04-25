@@ -16,7 +16,6 @@ GEM
     debug (1.10.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
-    docile (1.4.1)
     erubi (1.13.1)
     io-console (0.8.0)
     irb (1.15.1)
@@ -84,12 +83,6 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    simplecov (0.22.0)
-      docile (~> 1.1)
-      simplecov-html (~> 0.11)
-      simplecov_json_formatter (~> 0.1)
-    simplecov-html (0.13.1)
-    simplecov_json_formatter (0.1.4)
     sorbet (0.5.12017)
       sorbet-static (= 0.5.12017)
     sorbet-runtime (0.5.12017)
@@ -149,7 +142,6 @@ DEPENDENCIES
   rubocop-shopify (~> 2.15)
   rubocop-sorbet (~> 0.8)
   ruby-lsp!
-  simplecov
   sorbet-static-and-runtime
   syntax_tree (>= 6.1.1, < 7)
   tapioca (~> 0.16)
