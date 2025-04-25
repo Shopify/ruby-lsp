@@ -270,6 +270,50 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_launch_mode_retries_if_setup_failed_after_successful_install
+    # RubyGems asks for confirmation when uninstalling a gem, so we need to be able to write the `y` to stdin
+    uninstall_rails = ->() {
+      stdin, _stdout, _stderr, wait_thread = Open3.popen3("gem", "uninstall", "rails")
+      stdin.write("y\n")
+      wait_thread.join
+    }
+
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "rails"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        # Generate a lockfile first
+        capture_subprocess_io { system("bundle", "install") }
+        # Uninstall the gem so that composing the bundle has to install it
+        uninstall_rails.call
+
+        # Preemptively create the bundle_env file and acquire an exclusive lock on it, so that composing the bundle will
+        # have to pause immediately after bundle installing, but before invoking Bundler.setup
+        bundle_env_path = File.join(dir, ".ruby-lsp", "bundle_env")
+        FileUtils.mkdir_p(File.dirname(bundle_env_path))
+        FileUtils.touch(bundle_env_path)
+
+        thread = Thread.new do
+          File.open(bundle_env_path) do |f|
+            f.flock(File::LOCK_EX)
+
+            # Give the bundle compose enough time to finish and get stuck on the lock
+            sleep(2)
+            # Uninstall Rails after successfully bundle installing and before invoking Bundler.setup, which will cause
+            # it to fail with `Bundler::GemNotFound`. This triggers our retry mechanism
+            uninstall_rails.call
+          end
+        end
+
+        launch(dir)
+        thread.join
+      end
+    end
+  end
+
   private
 
   def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})

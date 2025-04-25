@@ -11,12 +11,19 @@ install_error = nil
 reboot = false
 
 workspace_uri = ARGV.first
+raw_initialize_path = File.join(".ruby-lsp", "raw_initialize")
 
 raw_initialize = if workspace_uri && !workspace_uri.start_with?("--")
   # If there's an argument without `--`, then it's the server asking to compose the bundle and passing to this
   # executable the workspace URI. We can't require gems at this point, so we built a fake initialize request manually
   reboot = true
   "{\"params\":{\"workspaceFolders\":[{\"uri\":\"#{workspace_uri}\"}]}}"
+elsif ARGV.include?("--retry")
+  # If we're trying to re-boot automatically, we can't try to read the same initialize request again from the pipe. We
+  # need to ensure that the retry mechanism always writes the request to a file, so that we can reuse it
+  content = File.read(raw_initialize_path)
+  File.delete(raw_initialize_path)
+  content
 else
   # Read the initialize request before even starting the server. We need to do this to figure out the workspace URI.
   # Editors are not required to spawn the language server process on the same directory as the workspace URI, so we need
@@ -89,7 +96,8 @@ rescue Bundler::GemNotFound, Bundler::GitError
   # scratch
   unless install_error || ARGV.include?("--retry")
     $stderr.puts("Initial bundle compose succeeded, but Bundler.setup failed. Trying to restart from scratch...")
-    exec(Gem.ruby, File.expand_path("ruby-lsp-launcher", __dir__), *ARGV, "--retry")
+    File.write(raw_initialize_path, raw_initialize)
+    exec(Gem.ruby, __FILE__, *ARGV, "--retry")
   end
 
   $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
