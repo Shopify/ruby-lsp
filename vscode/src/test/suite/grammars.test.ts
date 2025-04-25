@@ -864,6 +864,28 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
+      test("using just underscore as the name", () => {
+        const ruby = "_=1";
+        const expectedTokens = [
+          ["_", ["source.ruby", "variable.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("all upper case name prefixed by underscore is always a local variable", () => {
+        const ruby = "_ABC=1";
+        const expectedTokens = [
+          ["_ABC", ["source.ruby", "variable.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
     });
 
     function tokenizeRBS(rbs: string): [string, string[]][] {
