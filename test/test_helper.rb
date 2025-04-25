@@ -5,15 +5,6 @@ require "sorbet-runtime"
 
 ENV["RUBY_LSP_ENV"] = "test"
 
-if ENV["COVERAGE"]
-  require "simplecov"
-
-  SimpleCov.start do
-    T.bind(self, SimpleCov::Configuration)
-    enable_coverage :branch
-  end
-end
-
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 $VERBOSE = nil unless ENV["VERBOSE"] || ENV["CI"]
 
