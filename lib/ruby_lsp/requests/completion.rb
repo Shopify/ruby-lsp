@@ -74,7 +74,7 @@ module RubyLsp
         )
 
         Addon.addons.each do |addon|
-          addon.create_completion_listener(@response_builder, node_context, dispatcher, document.uri)
+          Addon.notify(addon, :create_completion_listener, @response_builder, node_context, dispatcher, document.uri)
         end
 
         matched = node_context.node

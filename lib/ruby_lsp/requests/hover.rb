@@ -53,7 +53,7 @@ module RubyLsp
         @response_builder = ResponseBuilders::Hover.new #: ResponseBuilders::Hover
         Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, sorbet_level)
         Addon.addons.each do |addon|
-          addon.create_hover_listener(@response_builder, node_context, dispatcher)
+          Addon.notify(addon, :create_hover_listener, @response_builder, node_context, dispatcher)
         end
 
         @dispatcher = dispatcher
