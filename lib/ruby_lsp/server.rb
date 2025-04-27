@@ -1320,24 +1320,24 @@ module RubyLsp
 
     #: (Hash[Symbol, untyped]? indexing_options) -> void
     def process_indexing_configuration(indexing_options)
-      # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
-      index_path = File.join(@global_state.workspace_path, ".index.yml")
+      config_path = File.join(@global_state.workspace_path, ".ruby-lsp.json")
 
-      if File.exist?(index_path)
+      configuration = @global_state.index.configuration
+      configuration.workspace_path = @global_state.workspace_path
+
+      if File.exist?(config_path)
         begin
-          @global_state.index.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
-          send_message(
-            Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: "The .index.yml configuration file is deprecated. " \
-                  "Please use editor settings to configure the index",
-              ),
-            ),
-          )
-        rescue Psych::SyntaxError => e
-          message = "Syntax error while loading configuration: #{e.message}"
+          file_config = JSON.parse(File.read(config_path))
+          # Extract indexing configuration if present
+          indexing_config = file_config["indexing"]
+
+          if indexing_config
+            # The index expects snake case configurations, but JSON standardizes on camel case
+            snake_case_config = indexing_config.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase }
+            configuration.apply_config(snake_case_config)
+          end
+        rescue JSON::ParserError => e
+          message = "Syntax error while loading ruby-lsp.json configuration: #{e.message}"
           send_message(
             Notification.new(
               method: "window/showMessage",
@@ -1348,11 +1348,9 @@ module RubyLsp
             ),
           )
         end
-        return
       end
 
-      configuration = @global_state.index.configuration
-      configuration.workspace_path = @global_state.workspace_path
+      # Apply editor settings last if provided (they take lower precedence than ruby-lsp.json)
       return unless indexing_options
 
       # The index expects snake case configurations, but VS Code standardizes on camel case settings
