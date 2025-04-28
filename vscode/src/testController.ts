@@ -1,8 +1,7 @@
-import { exec, spawn } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 
-import * as rpc from "vscode-jsonrpc/node";
 import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
 
@@ -10,6 +9,7 @@ import { Workspace } from "./workspace";
 import { featureEnabled } from "./common";
 import { LspTestItem, ResolvedCommands, ServerTestItem } from "./client";
 import { LinkedCancellationSource } from "./linkedCancellationSource";
+import { Mode, StreamingRunner } from "./streamingRunner";
 
 const asyncExec = promisify(exec);
 
@@ -30,21 +30,6 @@ const TEST_GROUP_TAG = new vscode.TestTag("test_group");
 const DEBUG_TAG = new vscode.TestTag("debug");
 const TEST_FILE_TAG = new vscode.TestTag("test_file");
 
-interface TestEventId {
-  uri: string;
-  id: string;
-}
-type TestEventWithMessage = TestEventId & { message: string };
-
-// All notification types that may be produce by our custom JSON test reporter
-const NOTIFICATION_TYPES = {
-  start: new rpc.NotificationType<TestEventId>("start"),
-  pass: new rpc.NotificationType<TestEventId>("pass"),
-  skip: new rpc.NotificationType<TestEventId>("skip"),
-  fail: new rpc.NotificationType<TestEventWithMessage>("fail"),
-  error: new rpc.NotificationType<TestEventWithMessage>("error"),
-  appendOutput: new rpc.NotificationType<{ message: string }>("append_output"),
-};
 const RUN_PROFILE_LABEL = "Run";
 const DEBUG_PROFILE_LABEL = "Debug";
 const COVERAGE_PROFILE_LABEL = "Coverage";
@@ -73,6 +58,8 @@ export class TestController {
     vscode.FileCoverage,
     vscode.FileCoverageDetail[]
   >();
+
+  private readonly runner = new StreamingRunner(this.findTestItem.bind(this));
 
   constructor(
     context: vscode.ExtensionContext,
@@ -154,6 +141,7 @@ export class TestController {
       this.testDebugProfile,
       this.testRunProfile,
       this.coverageProfile,
+      this.runner,
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
@@ -448,6 +436,9 @@ export class TestController {
         continue;
       }
 
+      // Enqueue all of the test we're about to run
+      testItems.forEach((test) => run.enqueued(test));
+
       const profile = request.profile;
 
       if (
@@ -455,9 +446,6 @@ export class TestController {
         profile.label === RUN_PROFILE_LABEL ||
         profile.label === COVERAGE_PROFILE_LABEL
       ) {
-        // Enqueue all of the test we're about to run
-        testItems.forEach((test) => run.enqueued(test));
-
         await this.executeTestCommands(
           response,
           workspace,
@@ -533,12 +521,9 @@ export class TestController {
 
     const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
 
-    for (const command of response.commands) {
+    for await (const command of response.commands) {
       try {
-        workspace.outputChannel.debug(
-          `Running tests: "RUBYOPT=${rubyOpt} ${command}"`,
-        );
-        await this.runCommandWithStreamingUpdates(
+        await this.runner.execute(
           run,
           command,
           {
@@ -546,7 +531,8 @@ export class TestController {
             RUBY_LSP_TEST_RUNNER: runnerMode,
             RUBYOPT: rubyOpt,
           },
-          workspace.workspaceFolder.uri.fsPath,
+          workspace,
+          Mode.Run,
           linkedCancellationSource,
         );
       } catch (error: any) {
@@ -557,7 +543,7 @@ export class TestController {
     }
 
     if (profile === this.coverageProfile) {
-      run.appendOutput("Processing test coverage results...\r\n\r\n");
+      run.appendOutput("\r\n\r\nProcessing test coverage results...\r\n\r\n");
       await this.processTestCoverageResults(run, workspace.workspaceFolder);
     }
   }
@@ -574,46 +560,25 @@ export class TestController {
       if (linkedCancellationSource.isCancellationRequested()) {
         break;
       }
+      const reporterPaths = response.reporterPaths
+        ?.map((path) => `-r${path}`)
+        .join(" ");
+      const rubyOpt = workspace.ruby.env.RUBYOPT
+        ? `${workspace.ruby.env.RUBYOPT} -rbundler/setup ${reporterPaths}`
+        : `-rbundler/setup ${reporterPaths}`;
 
-      const disposables: vscode.Disposable[] = [];
-
-      // Here we only resolve the promise once the debugging session has ended. Notice that
-      // `vscode.debug.startDebugging` resolve immediately after successfully starting the debugger, not after it
-      // finishes
-      await new Promise<void>((resolve, reject) => {
-        linkedCancellationSource.onCancellationRequested(
-          vscode.debug.stopDebugging,
-        );
-
-        disposables.push(
-          vscode.debug.onDidTerminateDebugSession(() => {
-            disposables.forEach((disposable) => disposable.dispose());
-            resolve();
-          }),
-        );
-
-        return vscode.debug
-          .startDebugging(
-            workspace.workspaceFolder,
-            {
-              type: "ruby_lsp",
-              name: "Debug",
-              request: "launch",
-              program: command,
-              env: {
-                ...workspace.ruby.env,
-                DISABLE_SPRING: "1",
-                RUBY_LSP_TEST_RUNNER: "debug",
-              },
-            },
-            { testRun: run },
-          )
-          .then((successFullyStarted) => {
-            if (!successFullyStarted) {
-              reject();
-            }
-          });
-      });
+      await this.runner.execute(
+        run,
+        command,
+        {
+          ...workspace.ruby.env,
+          RUBY_LSP_TEST_RUNNER: "debug",
+          RUBYOPT: rubyOpt,
+        },
+        workspace,
+        Mode.Debug,
+        linkedCancellationSource,
+      );
     }
   }
 
@@ -1303,167 +1268,6 @@ export class TestController {
       children,
       tags: item.tags.map((tag) => tag.id),
     };
-  }
-
-  // This method spawns the process that will run tests and registers a JSON RPC connection to listen for events about
-  // what's happening during the execution, updating the state of test items in the run
-  private async runCommandWithStreamingUpdates(
-    run: vscode.TestRun,
-    command: string,
-    env: NodeJS.ProcessEnv,
-    cwd: string,
-    linkedCancellationSource: LinkedCancellationSource,
-  ) {
-    await new Promise<void>((resolve, reject) => {
-      const promises: Promise<void>[] = [];
-      const startTimestamps = new Map<string, number>();
-      const withDuration = (
-        id: string,
-        callback: (duration?: number) => void,
-      ) => {
-        const startTime = startTimestamps.get(id);
-        const duration = startTime ? Date.now() - startTime : undefined;
-        callback(duration);
-      };
-
-      const abortController = new AbortController();
-
-      linkedCancellationSource.onCancellationRequested(() => {
-        run.appendOutput("\r\nTest run cancelled.");
-        abortController.abort();
-      });
-
-      // Use JSON RPC to communicate with the process executing the tests
-      const testProcess = spawn(command, {
-        env,
-        stdio: ["pipe", "pipe", "pipe"],
-        shell: true,
-        signal: abortController.signal,
-        cwd,
-      });
-      const connection = rpc.createMessageConnection(
-        new rpc.StreamMessageReader(testProcess.stdout),
-        new rpc.StreamMessageWriter(testProcess.stdin),
-      );
-
-      const disposables: vscode.Disposable[] = [];
-      let errorMessage = "";
-
-      testProcess.stderr.on("data", (data) => {
-        const stringData = data.toString();
-        errorMessage += stringData;
-        run.appendOutput(stringData);
-      });
-
-      // Handle the execution end
-      testProcess.on("exit", () => {
-        Promise.all(promises)
-          .then(() => {
-            disposables.forEach((disposable) => disposable.dispose());
-            connection.end();
-            connection.dispose();
-            resolve();
-          })
-          .catch((err) => {
-            reject(err);
-          });
-      });
-
-      // Handle the JSON events being emitted by the tests
-      disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.start, (params) => {
-          promises.push(
-            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-              (test) => {
-                if (test) {
-                  run.started(test);
-                  startTimestamps.set(test.id, Date.now());
-                }
-              },
-            ),
-          );
-        }),
-      );
-
-      disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.pass, (params) => {
-          promises.push(
-            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-              (test) => {
-                if (test) {
-                  withDuration(test.id, (duration) =>
-                    run.passed(test, duration),
-                  );
-                }
-              },
-            ),
-          );
-        }),
-      );
-
-      disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.fail, (params) => {
-          promises.push(
-            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-              (test) => {
-                if (test) {
-                  withDuration(test.id, (duration) =>
-                    run.failed(
-                      test,
-                      new vscode.TestMessage(params.message),
-                      duration,
-                    ),
-                  );
-                }
-              },
-            ),
-          );
-        }),
-      );
-
-      disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.error, (params) => {
-          promises.push(
-            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-              (test) => {
-                if (test) {
-                  withDuration(test.id, (duration) =>
-                    run.errored(
-                      test,
-                      new vscode.TestMessage(params.message),
-                      duration,
-                    ),
-                  );
-                }
-              },
-            ),
-          );
-        }),
-      );
-
-      disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.skip, (params) => {
-          promises.push(
-            this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-              (test) => {
-                if (test) {
-                  run.skipped(test);
-                }
-              },
-            ),
-          );
-        }),
-      );
-
-      disposables.push(
-        connection.onNotification(NOTIFICATION_TYPES.appendOutput, (params) => {
-          run.appendOutput(params.message);
-        }),
-      );
-
-      // Start listening for events
-      connection.listen();
-    });
   }
 
   private async processTestCoverageResults(

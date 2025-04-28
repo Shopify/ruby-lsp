@@ -1,29 +1,37 @@
 const path = require("path");
 const os = require("os");
+const net = require("net");
 
-function sendMessage(message) {
-  const jsonMessage = JSON.stringify(message);
-  // eslint-disable-next-line no-console
-  process.stdout.write(`Content-Length: ${jsonMessage.length}\r\n\r\n${jsonMessage}`);
-}
+const port = process.env.RUBY_LSP_REPORTER_PORT;
 
-const serverFilePath = path.join(__dirname, "..", "..", "..", "..", "test", "server_test.rb");
-const uri = os.platform() === "win32" ? `file:///${serverFilePath.replace(/\\/g, '/')}` : `file://${serverFilePath}`;
+const socket = new net.Socket();
+socket.connect(parseInt(port, 10), "localhost", () => {
 
-setTimeout(() => {
-  sendMessage({
-    method: "start",
-    params: { id: "ServerTest::NestedTest#test_something", uri: uri },
-  });
-}, 1000);
+  const sendMessage = (message) => {
+    const jsonMessage = JSON.stringify(message);
+    socket.write(`Content-Length: ${jsonMessage.length}\r\n\r\n${jsonMessage}`);
+  };
 
-setTimeout(() => {
+  const serverFilePath = path.join(__dirname, "..", "..", "..", "..", "test", "server_test.rb");
+  const uri = os.platform() === "win32" ? `file:///${serverFilePath.replace(/\\/g, '/')}` : `file://${serverFilePath}`;
+
   setTimeout(() => {
     sendMessage({
-      method: "pass",
+      method: "start",
       params: { id: "ServerTest::NestedTest#test_something", uri: uri },
     });
-
-    setTimeout(() => {}, 1000);
   }, 1000);
-}, 1000);
+
+  setTimeout(() => {
+    setTimeout(() => {
+      sendMessage({
+        method: "pass",
+        params: { id: "ServerTest::NestedTest#test_something", uri: uri },
+      });
+
+      sendMessage({ method: "finish", params: {} });
+
+      setTimeout(() => { socket.end(); }, 1000);
+    }, 1000);
+  }, 1000);
+});
