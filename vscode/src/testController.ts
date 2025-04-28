@@ -210,6 +210,9 @@ export class TestController {
     );
   }
 
+  /**
+   * @deprecated To be removed once the new test explorer is fully rolled out
+   */
   createTestItems(response: CodeLens[]) {
     // In the new experience, we will no longer overload code lens
     if (this.fullDiscovery) {
@@ -277,6 +280,9 @@ export class TestController {
     });
   }
 
+  /**
+   * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
+   */
   runTestInTerminal(_path: string, _name: string, command?: string) {
     // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
@@ -297,6 +303,9 @@ export class TestController {
     });
   }
 
+  /**
+   * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
+   */
   async runOnClick(testId: string) {
     const test = this.findTestById(testId);
 
@@ -317,6 +326,9 @@ export class TestController {
     return this.testRunProfile.runHandler(testRun, tokenSource.token);
   }
 
+  /**
+   * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
+   */
   debugTest(_path: string, _name: string, command?: string) {
     // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
@@ -359,6 +371,41 @@ export class TestController {
     });
 
     return filtered;
+  }
+
+  // Method to run tests in any profile through code lens buttons
+  async runViaCommand(path: string, name: string, mode: Mode) {
+    const uri = vscode.Uri.file(path);
+    const testItem = await this.findTestItem(name, uri);
+    if (!testItem) return;
+
+    await vscode.commands.executeCommand(
+      "vscode.revealTestInExplorer",
+      testItem,
+    );
+    const tokenSource = new vscode.CancellationTokenSource();
+
+    tokenSource.token.onCancellationRequested(async () => {
+      tokenSource.dispose();
+      await vscode.window.showInformationMessage("Cancelled the progress");
+    });
+
+    let profile;
+
+    switch (mode) {
+      case Mode.Debug:
+        profile = this.testDebugProfile;
+        break;
+      case Mode.RunInTerminal:
+        profile = this.runInTerminalProfile;
+        break;
+      default:
+        profile = this.testRunProfile;
+        break;
+    }
+
+    const request = new vscode.TestRunRequest([testItem], [], profile);
+    return this.runTest(request, tokenSource.token);
   }
 
   async runTest(
@@ -481,6 +528,10 @@ export class TestController {
 
   // Public for testing purposes. Finds a test item based on its ID and URI
   async findTestItem(id: string, uri: vscode.Uri) {
+    if (this.testController.items.size === 0) {
+      await this.resolveHandler(undefined);
+    }
+
     const parentItem = await this.getParentTestItem(uri);
     if (!parentItem) {
       return;
