@@ -916,4 +916,53 @@ suite("TestController", () => {
 
     source.dispose();
   });
+
+  test("findTestItem creates items automatically when line is passed", async () => {
+    assert.strictEqual(
+      "ServerTest",
+      (await controller.findTestItem("ServerTest", serverTestUri))!.id,
+    );
+    assert.strictEqual(
+      "ServerTest::NestedTest",
+      (await controller.findTestItem("ServerTest::NestedTest", serverTestUri))!
+        .id,
+    );
+
+    const dynamicallyDefinedTest = await controller.findTestItem(
+      "ServerTest#test_dynamically_defined",
+      serverTestUri,
+      32,
+    );
+
+    assert.ok(dynamicallyDefinedTest);
+    assert.strictEqual(
+      "ServerTest#test_dynamically_defined",
+      dynamicallyDefinedTest.id,
+    );
+    assert.strictEqual("dynamic test", dynamicallyDefinedTest.description);
+    assert.strictEqual(
+      "★ test_dynamically_defined",
+      dynamicallyDefinedTest.label,
+    );
+
+    const dynamicallyDefinedNestedTest = await controller.findTestItem(
+      "ServerTest::NestedTest#test_nested_dynamically_defined",
+      serverTestUri,
+      32,
+    );
+
+    assert.ok(dynamicallyDefinedNestedTest);
+    assert.strictEqual(
+      "ServerTest::NestedTest#test_nested_dynamically_defined",
+      dynamicallyDefinedNestedTest.id,
+    );
+    assert.strictEqual(
+      "dynamic test",
+      dynamicallyDefinedNestedTest.description,
+    );
+    assert.strictEqual(
+      "★ test_nested_dynamically_defined",
+      dynamicallyDefinedNestedTest.label,
+    );
+  });
 });
