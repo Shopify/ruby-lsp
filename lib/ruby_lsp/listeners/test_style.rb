@@ -93,9 +93,9 @@ module RubyLsp
             if examples.empty?
               "^#{group_regex}(#|::)"
             elsif examples.length == 1
-              "^#{group_regex}##{examples[0]}$"
+              "^#{group_regex}##{examples[0]}\\$"
             else
-              "^#{group_regex}#(#{examples.join("|")})$"
+              "^#{group_regex}#(#{examples.join("|")})\\$"
             end
           end
 
@@ -116,13 +116,13 @@ module RubyLsp
               Shellwords.escape(TestDiscovery::DYNAMIC_REFERENCE_MARKER),
               ".*",
             )
-            command = +"#{BASE_COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}$/\""
+            command = +"#{BASE_COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}\\$/\""
 
             unless examples.empty?
               command << if examples.length == 1
-                " --name \"/#{examples[0]}$/\""
+                " --name \"/#{examples[0]}\\$/\""
               else
-                " --name \"/(#{examples.join("|")})$/\""
+                " --name \"/(#{examples.join("|")})\\$/\""
               end
             end
 
