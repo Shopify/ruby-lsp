@@ -31,6 +31,7 @@ const DEBUG_TAG = new vscode.TestTag("debug");
 const TEST_FILE_TAG = new vscode.TestTag("test_file");
 
 const RUN_PROFILE_LABEL = "Run";
+const RUN_IN_TERMINAL_PROFILE_LABEL = "Run in terminal";
 const DEBUG_PROFILE_LABEL = "Debug";
 const COVERAGE_PROFILE_LABEL = "Coverage";
 
@@ -38,6 +39,7 @@ export class TestController {
   // Only public for testing
   readonly testController: vscode.TestController;
   readonly testRunProfile: vscode.TestRunProfile;
+  readonly runInTerminalProfile: vscode.TestRunProfile;
   readonly coverageProfile: vscode.TestRunProfile;
   readonly testDebugProfile: vscode.TestRunProfile;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
@@ -59,7 +61,7 @@ export class TestController {
     vscode.FileCoverageDetail[]
   >();
 
-  private readonly runner = new StreamingRunner(this.findTestItem.bind(this));
+  private readonly runner: StreamingRunner;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -70,6 +72,7 @@ export class TestController {
     ) => Promise<Workspace>,
   ) {
     this.telemetry = telemetry;
+    this.runner = new StreamingRunner(context, this.findTestItem.bind(this));
     this.currentWorkspace = currentWorkspace;
     this.getOrActivateWorkspace = getOrActivateWorkspace;
     this.testController = vscode.tests.createTestController(
@@ -126,6 +129,13 @@ export class TestController {
       return this.coverageData.get(fileCoverage)!;
     };
 
+    this.runInTerminalProfile = this.testController.createRunProfile(
+      RUN_IN_TERMINAL_PROFILE_LABEL,
+      vscode.TestRunProfileKind.Run,
+      this.runTest.bind(this),
+      false,
+    );
+
     const testFileWatcher =
       vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
 
@@ -142,6 +152,7 @@ export class TestController {
       this.testRunProfile,
       this.coverageProfile,
       this.runner,
+      this.runInTerminalProfile,
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
@@ -444,6 +455,7 @@ export class TestController {
       if (
         !profile ||
         profile.label === RUN_PROFILE_LABEL ||
+        profile.label === RUN_IN_TERMINAL_PROFILE_LABEL ||
         profile.label === COVERAGE_PROFILE_LABEL
       ) {
         await this.executeTestCommands(
@@ -520,6 +532,8 @@ export class TestController {
       : response.reporterPaths?.map((path) => `-r${path}`).join(" ");
 
     const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
+    const mode =
+      profile === this.runInTerminalProfile ? Mode.RunInTerminal : Mode.Run;
 
     for await (const command of response.commands) {
       try {
@@ -532,7 +546,7 @@ export class TestController {
             RUBYOPT: rubyOpt,
           },
           workspace,
-          Mode.Run,
+          mode,
           linkedCancellationSource,
         );
       } catch (error: any) {
