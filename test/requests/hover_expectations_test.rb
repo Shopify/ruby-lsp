@@ -273,28 +273,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_hovering_over_gemfile_dependency_using_gem_call
-    source = <<~RUBY
-      gem 'rake'
-    RUBY
-
-    with_server(source, URI("file:///Gemfile")) do |server, uri|
-      server.process_message(
-        id: 1,
-        method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
-      )
-
-      response = server.pop_response.response
-      spec = Gem.loaded_specs["rake"]
-
-      assert_includes(response.contents.value, spec.name)
-      assert_includes(response.contents.value, spec.version.to_s)
-      assert_includes(response.contents.value, spec.homepage)
-    end
-  end
-
-  def test_hovering_over_gemfile_dependency_using_gem_name
+  def test_hovering_over_gemfile_dependency_name
     source = <<~RUBY
       gem 'rake'
     RUBY
@@ -307,8 +286,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
       )
 
       response = server.pop_response.response
+      spec = Gem.loaded_specs["rake"]
 
-      assert_includes(response.contents.value, "rake")
+      assert_includes(response.contents.value, spec.name)
+      assert_includes(response.contents.value, spec.version.to_s)
+      assert_includes(response.contents.value, spec.homepage)
     end
   end
 
