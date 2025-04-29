@@ -728,8 +728,12 @@ export class RubyLsp {
             uri,
           );
 
-        if (response) {
+        if (response && response.locations.length > 0) {
           return openUris(response.locations);
+        } else {
+          await vscode.window.showInformationMessage(
+            "Couldn't find relevant files",
+          );
         }
       }),
     ];
