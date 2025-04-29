@@ -529,6 +529,7 @@ export class TestController {
   // Public for testing purposes. Finds a test item based on its ID and URI
   async findTestItem(id: string, uri: vscode.Uri) {
     if (this.testController.items.size === 0) {
+      // Discover and test items immediately if the test explorer hasn't been expanded
       await this.resolveHandler(undefined);
     }
 
