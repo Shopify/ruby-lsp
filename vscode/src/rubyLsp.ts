@@ -5,6 +5,7 @@ import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
 import {
   Command,
+  featureEnabled,
   LOG_CHANNEL,
   STATUS_EMITTER,
   SUPPORTED_LANGUAGE_IDS,
@@ -18,6 +19,7 @@ import { DependenciesTree } from "./dependenciesTree";
 import { Rails } from "./rails";
 import { ChatAgent } from "./chatAgent";
 import { collectRubyLspInfo } from "./infoCollector";
+import { Mode } from "./streamingRunner";
 
 // The RubyLsp class represents an instance of the entire extension. This should only be instantiated once at the
 // activation event. One instance of this class controls all of the existing workspaces, telemetry and handles all
@@ -452,17 +454,27 @@ export class RubyLsp {
       ),
       vscode.commands.registerCommand(
         Command.RunTest,
-        (_path, name, _command) => {
-          return this.testController.runOnClick(name);
+        (path, name, _command) => {
+          return featureEnabled("fullTestDiscovery")
+            ? this.testController.runViaCommand(path, name, Mode.Run)
+            : this.testController.runOnClick(name);
         },
       ),
       vscode.commands.registerCommand(
         Command.RunTestInTerminal,
-        this.testController.runTestInTerminal.bind(this.testController),
+        (path, name, command) => {
+          return featureEnabled("fullTestDiscovery")
+            ? this.testController.runViaCommand(path, name, Mode.RunInTerminal)
+            : this.testController.runTestInTerminal(path, name, command);
+        },
       ),
       vscode.commands.registerCommand(
         Command.DebugTest,
-        this.testController.debugTest.bind(this.testController),
+        (path, name, command) => {
+          return featureEnabled("fullTestDiscovery")
+            ? this.testController.runViaCommand(path, name, Mode.Debug)
+            : this.testController.debugTest(path, name, command);
+        },
       ),
       vscode.commands.registerCommand(
         Command.RunTask,
