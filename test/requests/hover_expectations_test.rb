@@ -847,7 +847,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       class Child
         def initialize
           # Hello
-          @something = T.let(123, Integer)
+          @something = 123 #: Integer
         end
 
         def bar

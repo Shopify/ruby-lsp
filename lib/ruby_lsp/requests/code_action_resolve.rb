@@ -115,10 +115,10 @@ module RubyLsp
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
         # immediately after that closest node
-        closest_node = T.must(closest_statements.child_nodes.compact.min_by do |node|
+        closest_node = closest_statements.child_nodes.compact.min_by do |node|
           distance = source_range.dig(:start, :line) - (node.location.end_line - 1)
           distance <= 0 ? Float::INFINITY : distance
-        end)
+        end #: as !nil
 
         return Error::InvalidTargetRange if closest_node.is_a?(Prism::MissingNode)
 
@@ -380,16 +380,14 @@ module RubyLsp
 
         attribute_name = node.name[1..]
         indentation = " " * (closest_node.location.start_column + 2)
-        attribute_accessor_source = T.must(
-          case @code_action[:title]
-          when CodeActions::CREATE_ATTRIBUTE_READER
-            "#{indentation}attr_reader :#{attribute_name}\n\n"
-          when CodeActions::CREATE_ATTRIBUTE_WRITER
-            "#{indentation}attr_writer :#{attribute_name}\n\n"
-          when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
-            "#{indentation}attr_accessor :#{attribute_name}\n\n"
-          end,
-        )
+        attribute_accessor_source = case @code_action[:title]
+        when CodeActions::CREATE_ATTRIBUTE_READER
+          "#{indentation}attr_reader :#{attribute_name}\n\n"
+        when CodeActions::CREATE_ATTRIBUTE_WRITER
+          "#{indentation}attr_writer :#{attribute_name}\n\n"
+        when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+          "#{indentation}attr_accessor :#{attribute_name}\n\n"
+        end #: as !nil
 
         target_start_line = closest_node.location.start_line
         target_range = {

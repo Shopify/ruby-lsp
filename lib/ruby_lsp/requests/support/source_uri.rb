@@ -21,8 +21,10 @@ module URI
     # have the uri gem in their own bundle and thus not use a compatible version.
     PARSER = const_defined?(:RFC2396_PARSER) ? RFC2396_PARSER : DEFAULT_PARSER #: RFC2396_Parser
 
-    T.unsafe(self).alias_method(:gem_name, :host)
-    T.unsafe(self).alias_method(:line_number, :fragment)
+    self #: as untyped # rubocop:disable Style/RedundantSelf
+      .alias_method(:gem_name, :host)
+    self #: as untyped # rubocop:disable Style/RedundantSelf
+      .alias_method(:line_number, :fragment)
 
     #: String?
     attr_reader :gem_version

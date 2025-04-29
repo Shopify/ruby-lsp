@@ -56,8 +56,13 @@ module RubyLsp
       @encoding = global_state.encoding #: Encoding
       @uri = uri #: URI::Generic
       @needs_parsing = true #: bool
-      @parse_result = T.unsafe(nil) #: ParseResultType
       @last_edit = nil #: Edit?
+
+      # Workaround to be able to type parse_result properly. It is immediately set when invoking parse!
+      @parse_result = ( # rubocop:disable Style/RedundantParentheses
+        nil #: as untyped
+      ) #: ParseResultType
+
       parse!
     end
 

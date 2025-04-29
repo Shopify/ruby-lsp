@@ -1485,8 +1485,8 @@ class ServerTest < Minitest::Test
   def wait_for_indexing
     message = @server.pop_response
     until message.is_a?(RubyLsp::Notification) && message.method == "$/progress" &&
-        T.unsafe(message).params.value.kind == "end"
-
+        message.params #: as untyped
+            .value.kind == "end"
       message = @server.pop_response
     end
   end
@@ -1547,10 +1547,10 @@ class ServerTest < Minitest::Test
 
   #: (Class desired_class, ?String? desired_method, ?id: Integer?) -> untyped
   def find_message(desired_class, desired_method = nil, id: nil)
-    message = @server.pop_response #: (RubyLsp::Result | RubyLsp::Message | RubyLsp::Error)
+    message = @server.pop_response
 
-    until message.is_a?(desired_class) && (!desired_method || T.unsafe(message).method == desired_method) &&
-        (!id || T.unsafe(message).id == id)
+    until message.is_a?(desired_class) && (!desired_method || message.method == desired_method) &&
+        (!id || message.id == id)
       message = @server.pop_response
 
       if message.is_a?(RubyLsp::Error) && desired_class != RubyLsp::Error

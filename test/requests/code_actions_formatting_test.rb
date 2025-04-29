@@ -90,8 +90,7 @@ class CodeActionsFormattingTest < Minitest::Test
     # hashes here, so cast to untyped and only look at those.
     untyped_result = result #: untyped
     selected_action = untyped_result.find do |ca|
-      code_action = T.let(ca, T.untyped)
-      code_action.respond_to?(:[]) && code_action[:title] == code_action_title
+      ca.respond_to?(:[]) && ca[:title] == code_action_title
     end
 
     # transform edits from lsp to the format RubyLsp::Document wants them

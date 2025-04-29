@@ -1176,7 +1176,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       # typed: strict
       class Foo
         def initialize
-          @something = T.let(123, Integer)
+          @something = 123 #: Integer
         end
 
         def baz
@@ -1300,7 +1300,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
+        klass.new(response_builder, uri, nesting, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

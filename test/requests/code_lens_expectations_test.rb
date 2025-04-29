@@ -301,7 +301,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, dispatcher)
+        klass.new(response_builder, uri, dispatcher)
       end
 
       def activate(global_state, outgoing_queue)

@@ -151,7 +151,7 @@ class FormattingTest < Minitest::Test
       end
     end
 
-    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).new)
+    @global_state.register_formatter("my-custom-formatter", formatter_class.new)
     assert_includes(formatted_document("my-custom-formatter"), "# formatter by my-custom-formatter")
   end
 

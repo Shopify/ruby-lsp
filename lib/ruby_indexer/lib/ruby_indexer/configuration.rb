@@ -66,7 +66,7 @@ module RubyIndexer
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
 
       uris = @included_patterns.flat_map do |pattern|
-        load_path_entry = T.let(nil, T.nilable(String))
+        load_path_entry = nil #: String?
 
         Dir.glob(File.join(@workspace_path, pattern), flags).map! do |path|
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every

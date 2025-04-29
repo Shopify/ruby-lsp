@@ -257,7 +257,8 @@ module RubyLsp
       notifications = state.apply_options({ initializationOptions: { linters: ["rubocop"] } })
 
       log = notifications.find do |n|
-        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
       end
       refute_nil(log)
       assert_equal(["rubocop"], state.instance_variable_get(:@linters))
@@ -270,7 +271,8 @@ module RubyLsp
       notifications = state.apply_options({ initializationOptions: { formatter: "rubocop" } })
 
       log = notifications.find do |n|
-        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
       end
       refute_nil(log)
       assert_equal("rubocop", state.formatter)
@@ -283,7 +285,8 @@ module RubyLsp
       notifications = state.apply_options({ initializationOptions: { linters: ["rubocop"] } })
 
       log = notifications.find do |n|
-        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
       end
       refute_nil(log)
       assert_equal(["rubocop_internal"], state.instance_variable_get(:@linters))
@@ -296,7 +299,8 @@ module RubyLsp
       notifications = state.apply_options({ initializationOptions: { formatter: "rubocop" } })
 
       log = notifications.find do |n|
-        n.method == "window/logMessage" && T.unsafe(n.params).message.include?("RuboCop v1.70.0")
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
       end
       refute_nil(log)
       assert_equal("rubocop_internal", state.formatter)

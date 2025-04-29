@@ -1062,7 +1062,8 @@ module RubyLsp
       end
 
       Addon.file_watcher_addons.each do |addon|
-        T.unsafe(addon).workspace_did_change_watched_files(changes)
+        addon #: as untyped
+          .workspace_did_change_watched_files(changes)
       rescue => e
         send_log_message(
           "Error in #{addon.name} add-on while processing watched file notifications: #{e.full_message}",
