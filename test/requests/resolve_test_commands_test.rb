@@ -65,8 +65,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#test_server$/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --name \"/^StoreTest#test_store$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#test_server\\$/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --name \"/^StoreTest#test_store\\$/\"",
           ],
           result[:commands],
         )
@@ -122,7 +122,7 @@ module RubyLsp
         assert_equal(
           [
             "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest(#|::)/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --name \"/^StoreTest#test_store$/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --name \"/^StoreTest#test_store\\$/\"",
           ],
           result[:commands],
         )
@@ -177,7 +177,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#(test_server|test_server_again)$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#(test_server|test_server_again)\\$/\"",
           ],
           result[:commands],
         )
@@ -389,8 +389,8 @@ module RubyLsp
         assert_equal(
           [
             "bundle exec ruby -Itest /test/server_test.rb --name " \
-              "\"/(^ServerTest#(test_server|test_server_again)$|^OtherServerTest(#|::))/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --name \"/^StoreTest#test_store$/\"",
+              "\"/(^ServerTest#(test_server|test_server_again)\\$|^OtherServerTest(#|::))/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --name \"/^StoreTest#test_store\\$/\"",
           ],
           result[:commands],
         )
@@ -445,7 +445,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --name \"/^.*::ServerTest#test_server$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --name \"/^.*::ServerTest#test_server\\$/\"",
             "bundle exec ruby -Itest /test/store_test.rb --name \"/^.*::StoreTest(#|::)/\"",
           ],
           result[:commands],
@@ -484,7 +484,7 @@ module RubyLsp
         assert_equal(
           [
             "bundle exec ruby -Itest /test/requests/completion_test.rb " \
-              "--name \"/^CompletionTest#(test_with_typed_false|test_with_typed_true)$/\"",
+              "--name \"/^CompletionTest#(test_with_typed_false|test_with_typed_true)\\$/\"",
           ],
           result[:commands],
         )
@@ -568,7 +568,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#test_server$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --name \"/^ServerTest#test_server\\$/\"",
             "bundle exec ruby -Itest -e \"ARGV.each { |f| require f }\" /test/unit/fake_test.rb " \
               "/test/unit/fake_test2.rb",
           ],
@@ -639,8 +639,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\" --name \"/test_server$/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^StoreTest$/\" --name \"/test_store$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\" --name \"/test_server\\$/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^StoreTest\\$/\" --name \"/test_store\\$/\"",
           ],
           result[:commands],
         )
@@ -695,8 +695,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^StoreTest$/\" --name \"/test_store$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^StoreTest\\$/\" --name \"/test_store\\$/\"",
           ],
           result[:commands],
         )
@@ -751,8 +751,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\" " \
-              "--name \"/(test_server|test_server_again)$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\" " \
+              "--name \"/(test_server|test_server_again)\\$/\"",
           ],
           result[:commands],
         )
@@ -795,8 +795,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\"",
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^OtherServerTest$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^OtherServerTest\\$/\"",
           ],
           result[:commands],
         )
@@ -885,10 +885,10 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\" " \
-              "--name \"/(test_server|test_server_again)$/\"",
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^OtherServerTest$/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^StoreTest$/\" --name \"/test_store$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\" " \
+              "--name \"/(test_server|test_server_again)\\$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^OtherServerTest\\$/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^StoreTest\\$/\" --name \"/test_store\\$/\"",
           ],
           result[:commands],
         )
@@ -943,8 +943,9 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^.*::ServerTest$/\" --name \"/test_server$/\"",
-            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^.*::StoreTest$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^.*::ServerTest\\$/\" " \
+              "--name \"/test_server\\$/\"",
+            "bundle exec ruby -Itest /test/store_test.rb --testcase \"/^.*::StoreTest\\$/\"",
           ],
           result[:commands],
         )
@@ -981,8 +982,8 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/requests/completion_test.rb --testcase \"/^CompletionTest$/\" " \
-              "--name \"/(test_with_typed_false|test_with_typed_true)$/\"",
+            "bundle exec ruby -Itest /test/requests/completion_test.rb --testcase \"/^CompletionTest\\$/\" " \
+              "--name \"/(test_with_typed_false|test_with_typed_true)\\$/\"",
           ],
           result[:commands],
         )
@@ -1026,7 +1027,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest::MainTest::NestedTest$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest::MainTest::NestedTest\\$/\"",
           ],
           result[:commands],
         )
@@ -1066,7 +1067,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest$/\" --name \"/test_server$/\"",
+            "bundle exec ruby -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\" --name \"/test_server\\$/\"",
             "bundle exec ruby -Itest -e \"ARGV.each { |f| require f }\" /test/unit/fake_test.rb " \
               "/test/unit/fake_test2.rb",
           ],
