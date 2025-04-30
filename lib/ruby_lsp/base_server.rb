@@ -130,11 +130,9 @@ module RubyLsp
       @incoming_queue << message
     end
 
-    sig { abstract.params(message: T::Hash[Symbol, T.untyped]).void }
-    def process_message(message); end
+    # @abstract: def process_message:(Hash[Symbol, untyped] message) -> void
 
-    sig { abstract.void }
-    def shutdown; end
+    # @abstract: def shutdown: -> void
 
     #: (Integer id, String message, ?type: Integer) -> void
     def fail_request_and_notify(id, message, type: Constant::MessageType::INFO)

@@ -9,8 +9,7 @@ module RubyLsp
 
       abstract!
 
-      sig { abstract.returns(T.anything) }
-      def response; end
+      # @abstract: def response: -> top
     end
   end
 end

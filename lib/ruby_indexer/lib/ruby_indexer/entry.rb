@@ -316,8 +316,7 @@ module RubyIndexer
         @owner = owner
       end
 
-      sig { abstract.returns(T::Array[Entry::Signature]) }
-      def signatures; end
+      # @abstract: def signatures: -> T::Array[Entry::Signature]
 
       #: -> String
       def decorated_parameters

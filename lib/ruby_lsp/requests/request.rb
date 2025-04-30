@@ -11,8 +11,7 @@ module RubyLsp
 
       abstract!
 
-      sig { abstract.returns(T.anything) }
-      def perform; end
+      # @abstract: def perform: -> top
 
       private
 

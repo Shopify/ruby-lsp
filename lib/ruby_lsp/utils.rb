@@ -52,8 +52,7 @@ module RubyLsp
       @params = params
     end
 
-    sig { abstract.returns(T::Hash[Symbol, T.untyped]) }
-    def to_hash; end
+    # @abstract: def to_hash: -> Hash[Symbol, untyped]
   end
 
   class Notification < Message

@@ -178,22 +178,18 @@ module RubyLsp
 
     # Each add-on should implement `MyAddon#activate` and use to perform any sort of initialization, such as
     # reading information into memory or even spawning a separate process
-    sig { abstract.params(global_state: GlobalState, outgoing_queue: Thread::Queue).void }
-    def activate(global_state, outgoing_queue); end
+    # @abstract: def activate: (GlobalState global_state, Thread::Queue outgoing_queue) -> void
 
     # Each add-on should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process
-    sig { abstract.void }
-    def deactivate; end
+    # @abstract: def deactivate: -> void
 
     # Add-ons should override the `name` method to return the add-on name
-    sig { abstract.returns(String) }
-    def name; end
+    # @abstract: def name: -> String
 
     # Add-ons should override the `version` method to return a semantic version string representing the add-on's
     # version. This is used for compatibility checks
-    sig { abstract.returns(String) }
-    def version; end
+    # @abstract: def version: -> String
 
     # Handle a response from a window/showMessageRequest request. Add-ons must include the addon_name as part of the
     # original request so that the response is delegated to the correct add-on and must override this method to handle

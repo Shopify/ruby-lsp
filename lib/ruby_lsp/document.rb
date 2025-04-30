@@ -71,8 +71,7 @@ module RubyLsp
       self.class == other.class && uri == other.uri && @source == other.source
     end
 
-    sig { abstract.returns(LanguageId) }
-    def language_id; end
+    # @abstract: def language_id: -> LanguageId
 
     #: [T] (String request_name) { (Document[ParseResultType] document) -> T } -> T
     def cache_fetch(request_name, &block)
@@ -125,11 +124,9 @@ module RubyLsp
     end
 
     # Returns `true` if the document was parsed and `false` if nothing needed parsing
-    sig { abstract.returns(T::Boolean) }
-    def parse!; end
+    # @abstract: def parse!: -> bool
 
-    sig { abstract.returns(T::Boolean) }
-    def syntax_error?; end
+    # @abstract: def syntax_error?: -> bool
 
     #: -> bool
     def past_expensive_limit?

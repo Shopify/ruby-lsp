@@ -10,19 +10,11 @@ module RubyLsp
 
         interface!
 
-        sig { abstract.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
-        def run_formatting(uri, document); end
+        # @abstract: def run_formatting:(URI::Generic uri, RubyDocument document) -> String?
 
-        sig { abstract.params(uri: URI::Generic, source: String, base_indentation: Integer).returns(T.nilable(String)) }
-        def run_range_formatting(uri, source, base_indentation); end
+        # @abstract: def run_range_formatting:(URI::Generic uri, String source, Integer base_indentation) -> String?
 
-        sig do
-          abstract.params(
-            uri: URI::Generic,
-            document: RubyDocument,
-          ).returns(T.nilable(T::Array[Interface::Diagnostic]))
-        end
-        def run_diagnostic(uri, document); end
+        # @abstract: def run_diagnostic:(URI::Generic uri, RubyDocument document) -> Array[Interface::Diagnostic]?
       end
     end
   end
