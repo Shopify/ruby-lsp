@@ -1799,10 +1799,13 @@ class CompletionTest < Minitest::Test
           end
 
           def on_constant_read_node_enter(node)
+            range = self #: as untyped # rubocop:disable Style/RedundantSelf
+              .range_from_node(node)
+
             @response_builder << RubyLsp::Interface::CompletionItem.new(
               label: "MyCompletion",
               text_edit: RubyLsp::Interface::TextEdit.new(
-                range: T.bind(self, RubyLsp::Requests::Support::Common).range_from_node(node),
+                range: range,
                 new_text: "MyCompletion",
               ),
               kind: RubyLsp::Constant::CompletionItemKind::CONSTANT,

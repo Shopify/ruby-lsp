@@ -145,8 +145,9 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
 
           def on_call_node_enter(node)
+            range = self #: as untyped # rubocop:disable Style/RedundantSelf
+              .range_from_node(node)
             parent = @response_builder.last
-            T.bind(self, RubyLsp::Requests::Support::Common)
             message_value = node.message
             arguments = node.arguments&.arguments
             return unless message_value == "test" && arguments&.any?
@@ -154,8 +155,8 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
             parent.children << RubyLsp::Interface::DocumentSymbol.new(
               name: arguments.first.content,
               kind: LanguageServer::Protocol::Constant::SymbolKind::METHOD,
-              selection_range: range_from_node(node),
-              range: range_from_node(node),
+              selection_range: range,
+              range: range,
             )
           end
         end

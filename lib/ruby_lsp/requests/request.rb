@@ -60,7 +60,8 @@ module RubyLsp
         return target unless parent.is_a?(Prism::ConstantPathNode)
 
         target = parent #: Prism::Node
-        parent = T.cast(target, Prism::ConstantPathNode).parent #: Prism::Node?
+        parent = target #: as Prism::ConstantPathNode
+          .parent #: Prism::Node?
 
         while parent && cover?(parent.location, position)
           target = parent

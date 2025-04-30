@@ -20,7 +20,7 @@ module RubyLsp
 
       #: (GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(global_state, uri, dispatcher)
-        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
+        @response_builder = ResponseBuilders::CollectionResponseBuilder
           .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
         super()
         Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)

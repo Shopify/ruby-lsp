@@ -55,22 +55,7 @@ module RubyLsp
           )
         end
 
-        target = T.cast(
-          target,
-          T.any(
-            Prism::ConstantReadNode,
-            Prism::ConstantPathNode,
-            Prism::ConstantPathTargetNode,
-            Prism::InstanceVariableAndWriteNode,
-            Prism::InstanceVariableOperatorWriteNode,
-            Prism::InstanceVariableOrWriteNode,
-            Prism::InstanceVariableReadNode,
-            Prism::InstanceVariableTargetNode,
-            Prism::InstanceVariableWriteNode,
-            Prism::CallNode,
-            Prism::DefNode,
-          ),
-        )
+        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode, # rubocop:disable Layout/LineLength
 
         reference_target = create_reference_target(target, node_context)
         return @locations unless reference_target

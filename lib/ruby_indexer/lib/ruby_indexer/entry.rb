@@ -107,7 +107,6 @@ module RubyIndexer
     end
 
     class ModuleOperation
-      extend T::Sig
       extend T::Helpers
 
       abstract!
@@ -125,7 +124,6 @@ module RubyIndexer
     class Prepend < ModuleOperation; end
 
     class Namespace < Entry
-      extend T::Sig
       extend T::Helpers
 
       abstract!
@@ -203,7 +201,6 @@ module RubyIndexer
 
     class Parameter
       extend T::Helpers
-      extend T::Sig
 
       abstract!
 
@@ -563,7 +560,8 @@ module RubyIndexer
         end
 
         keyword_hash_nodes, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
-        keyword_args = T.cast(keyword_hash_nodes.first, T.nilable(Prism::KeywordHashNode))&.elements
+        keyword_args = keyword_hash_nodes.first #: as Prism::KeywordHashNode?
+          &.elements
         forwarding_arguments, positionals = positional_args.partition do |arg|
           arg.is_a?(Prism::ForwardingArgumentsNode)
         end

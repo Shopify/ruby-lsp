@@ -25,10 +25,8 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     )
 
     stdout, _ = capture_io do
-      result = T.cast(
-        RubyLsp::Requests::Diagnostics.new(@global_state, document).perform,
-        T::Array[RubyLsp::Interface::Diagnostic],
-      )
+      result = RubyLsp::Requests::Diagnostics.new(@global_state, document)
+        .perform #: as Array[RubyLsp::Interface::Diagnostic]
     end
 
     assert_empty(stdout)

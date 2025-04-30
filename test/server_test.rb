@@ -200,7 +200,8 @@ class ServerTest < Minitest::Test
       "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): boom!"
     assert_equal(
       expected_message,
-      T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      notification.params #: as RubyLsp::Interface::ShowMessageParams
+        .message,
     )
   end
 
@@ -221,7 +222,8 @@ class ServerTest < Minitest::Test
     assert_equal("window/showMessage", notification.method)
     assert_equal(
       "Formatting error: boom",
-      T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      notification.params #: as RubyLsp::Interface::ShowMessageParams
+        .message,
     )
   end
 
@@ -286,7 +288,10 @@ class ServerTest < Minitest::Test
 
     notification = @server.pop_response #: as !nil
     assert_equal("textDocument/publishDiagnostics", notification.method)
-    assert_empty(T.cast(notification.params, RubyLsp::Interface::PublishDiagnosticsParams).diagnostics)
+    assert_empty(
+      notification.params #: as RubyLsp::Interface::PublishDiagnosticsParams
+        .diagnostics,
+    )
   end
 
   def test_initialize_features_with_default_configuration
@@ -366,7 +371,8 @@ class ServerTest < Minitest::Test
     notification = find_message(RubyLsp::Notification, "window/showMessage")
     assert_match(
       /Syntax error while loading configuration/,
-      T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+      notification.params #: as RubyLsp::Interface::ShowMessageParams
+        .message,
     )
   ensure
     FileUtils.rm(".index.yml")
@@ -393,7 +399,8 @@ class ServerTest < Minitest::Test
 
       assert_equal(
         "Ruby LSP formatter is set to `rubocop_internal` but RuboCop was not found in the Gemfile or gemspec.",
-        T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+        notification.params #: as RubyLsp::Interface::ShowMessageParams
+          .message,
       )
     end
   end
@@ -406,7 +413,8 @@ class ServerTest < Minitest::Test
       notification = find_message(RubyLsp::Notification, "window/showMessage")
       assert_match(
         "RuboCop configuration error: Configuration file not found: #{Dir.pwd}/.i_dont_exist.yml",
-        T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
+        notification.params #: as RubyLsp::Interface::ShowMessageParams
+          .message,
       )
     end
   ensure
