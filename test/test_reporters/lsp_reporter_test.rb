@@ -52,5 +52,14 @@ module RubyLsp
         LspReporter.instance.gather_coverage_results,
       )
     end
+
+    def test_shutdown_does_nothing_in_coverage_mode
+      ENV["RUBY_LSP_TEST_RUNNER"] = "coverage"
+      io = LspReporter.instance.instance_variable_get(:@io)
+      io.expects(:close).never
+      LspReporter.instance.shutdown
+    ensure
+      ENV.delete("RUBY_LSP_TEST_RUNNER")
+    end
   end
 end

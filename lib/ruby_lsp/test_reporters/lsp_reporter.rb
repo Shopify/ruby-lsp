@@ -23,6 +23,17 @@ module RubyLsp
 
     #: -> void
     def shutdown
+      # When running in coverage mode, we don't want to inform the extension that we finished immediately after running
+      # tests. We only do it after we finish processing coverage results, by invoking `internal_shutdown`
+      return if ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
+
+      internal_shutdown
+    end
+
+    # This method is intended to be used by the RubyLsp::LspReporter class itself only. If you're writing a custom test
+    # reporter, use `shutdown` instead
+    #: -> void
+    def internal_shutdown
       send_message("finish")
       @io.close
     end
@@ -148,5 +159,6 @@ if ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
   at_exit do
     coverage_results = RubyLsp::LspReporter.instance.gather_coverage_results
     File.write(File.join(".ruby-lsp", "coverage_result.json"), coverage_results.to_json)
+    RubyLsp::LspReporter.instance.internal_shutdown
   end
 end
