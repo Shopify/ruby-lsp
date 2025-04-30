@@ -156,14 +156,16 @@ export class StreamingRunner implements vscode.Disposable {
     }
 
     // Set the TCP port information every time even if there's an existing terminal. The user can close the editor
-    // window or reload extensions, which will assign a new port but maintain the same terminal
+    // window or reload extensions, which will assign a new port but maintain the same terminal.
+    //
+    // We also send RUBYOPT since that hooks up the custom LSP test reporters and the user's shell may override it
     if (process.platform === "win32") {
       terminal.sendText(
-        `$env:RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; Clear-Host`,
+        `$env:RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; $env:RUBYOPT="${env.RUBYOPT}"; Clear-Host`,
       );
     } else {
       terminal.sendText(
-        `export RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; clear`,
+        `export RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; export RUBYOPT="${env.RUBYOPT}"; clear`,
       );
     }
 
