@@ -17,6 +17,13 @@ class CodeActionResolveExpectationsTest < ExpectationsTestRunner
     )
 
     RubyLsp::Requests::CodeActionResolve.new(document, @global_state, params).perform
+  rescue RubyLsp::Requests::CodeActionResolve::CodeActionError
+    # By default, we don't specify a code action for fixtures without an expectation file since the actions are very
+    # specific and won't work for every case. If a fixture errors with one of our defined error classes without any
+    # specified refactor, that's fine. Otherwise, we re-raise
+    raise if params[:title]
+
+    pass
   end
 
   def assert_expectations(source, expected)
