@@ -579,9 +579,10 @@ export class TestController {
     // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
     // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
     // file path for Minitest, it will fail with unrecognized argument errors
+    const commonOpts = `-rbundler/setup ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`;
     const rubyOpt = workspace.ruby.env.RUBYOPT
-      ? `${workspace.ruby.env.RUBYOPT} ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`
-      : response.reporterPaths?.map((path) => `-r${path}`).join(" ");
+      ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}`
+      : commonOpts;
 
     const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
     const mode =
@@ -626,12 +627,10 @@ export class TestController {
       if (linkedCancellationSource.isCancellationRequested()) {
         break;
       }
-      const reporterPaths = response.reporterPaths
-        ?.map((path) => `-r${path}`)
-        .join(" ");
+      const commonOpts = `-rbundler/setup ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`;
       const rubyOpt = workspace.ruby.env.RUBYOPT
-        ? `${workspace.ruby.env.RUBYOPT} -rbundler/setup ${reporterPaths}`
-        : `-rbundler/setup ${reporterPaths}`;
+        ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}`
+        : commonOpts;
 
       await this.runner.execute(
         run,
