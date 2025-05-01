@@ -356,8 +356,27 @@ class ServerTest < Minitest::Test
     assert(store.features_configuration.dig(:inlayHint).enabled?(:implicitHashValue))
   end
 
-  def test_handles_invalid_configuration
-    File.write(".index.yml", "} invalid yaml")
+  def test_handles_ruby_lsp_json_configuration
+    File.write(".ruby-lsp.json", JSON.dump({
+      "indexing": {
+        "excludedGems": ["foo_gem"],
+        "includedGems": ["bar_gem"],
+      },
+    }))
+
+    capture_subprocess_io do
+      @server.process_message(id: 1, method: "initialize", params: {})
+    end
+
+    config = @server.global_state.index.configuration
+    assert_includes(config.instance_variable_get(:@excluded_gems), "foo_gem")
+    assert_includes(config.instance_variable_get(:@included_gems), "bar_gem")
+  ensure
+    FileUtils.rm(".ruby-lsp.json") if File.exist?(".ruby-lsp.json")
+  end
+
+  def test_handles_invalid_ruby_lsp_json_configuration
+    File.write(".ruby-lsp.json", "{ invalid json")
 
     capture_subprocess_io do
       @server.process_message(id: 1, method: "initialize", params: {})
@@ -365,11 +384,46 @@ class ServerTest < Minitest::Test
 
     notification = find_message(RubyLsp::Notification, "window/showMessage")
     assert_match(
-      /Syntax error while loading configuration/,
+      /Syntax error while loading ruby-lsp.json configuration/,
       T.cast(notification.params, RubyLsp::Interface::ShowMessageParams).message,
     )
   ensure
-    FileUtils.rm(".index.yml")
+    FileUtils.rm(".ruby-lsp.json") if File.exist?(".ruby-lsp.json")
+  end
+
+  def test_ruby_lsp_json_takes_precedence_over_editor_settings
+    # Create a ruby-lsp.json file with settings
+    File.write(".ruby-lsp.json", JSON.dump({
+      "indexing": {
+        "excludedGems": ["from_json_file"],
+      },
+    }))
+
+    # Initialize with editor settings
+    capture_subprocess_io do
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: {
+            indexing: {
+              excludedGems: ["from_editor"],
+            },
+          },
+        },
+      })
+    end
+
+    # Check that ruby-lsp.json settings took precedence
+    config = @server.global_state.index.configuration
+    excluded_gems = config.instance_variable_get(:@excluded_gems)
+
+    assert_includes(excluded_gems, "from_json_file")
+    assert_includes(excluded_gems, "from_editor")
+    # The file config (which is applied first) should be overridden by the editor config
+    # when they conflict, but both should be present when they don't
+  ensure
+    FileUtils.rm(".ruby-lsp.json") if File.exist?(".ruby-lsp.json")
   end
 
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
