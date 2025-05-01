@@ -9,6 +9,9 @@ module RubyLsp
   class LspReporter
     include Singleton
 
+    #: bool
+    attr_reader :invoked_shutdown
+
     #: -> void
     def initialize
       port = ENV["RUBY_LSP_REPORTER_PORT"]
@@ -19,6 +22,8 @@ module RubyLsp
         require "stringio"
         StringIO.new
       end #: IO | StringIO
+
+      @invoked_shutdown = false #: bool
     end
 
     #: -> void
@@ -34,6 +39,8 @@ module RubyLsp
     # reporter, use `shutdown` instead
     #: -> void
     def internal_shutdown
+      @invoked_shutdown = true
+
       send_message("finish")
       @io.close
     end
@@ -160,5 +167,11 @@ if ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
     coverage_results = RubyLsp::LspReporter.instance.gather_coverage_results
     File.write(File.join(".ruby-lsp", "coverage_result.json"), coverage_results.to_json)
     RubyLsp::LspReporter.instance.internal_shutdown
+  end
+elsif ENV["RUBY_LSP_TEST_RUNNER"] && !ENV["RUBY_LSP_ENV"] == "test"
+  at_exit do
+    # If the test process crashed immediately without finishing the tests, we still need to tell the extension that the
+    # execution ended so that it can clean up
+    RubyLsp::LspReporter.instance.internal_shutdown unless RubyLsp::LspReporter.instance.invoked_shutdown
   end
 end
