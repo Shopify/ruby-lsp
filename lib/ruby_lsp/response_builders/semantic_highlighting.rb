@@ -3,6 +3,7 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = Interface::SemanticTokens]
     class SemanticHighlighting < ResponseBuilder
       class UndefinedTokenType < StandardError; end
 
@@ -44,8 +45,6 @@ module RubyLsp
         documentation: 8,
         default_library: 9,
       }.freeze #: Hash[Symbol, Integer]
-
-      ResponseType = type_member { { fixed: Interface::SemanticTokens } }
 
       #: ((^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache) -> void
       def initialize(code_units_cache)

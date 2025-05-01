@@ -3,9 +3,8 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = Array[Interface::DocumentSymbol]]
     class DocumentSymbol < ResponseBuilder
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
-
       class SymbolHierarchyRoot
         #: Array[Interface::DocumentSymbol]
         attr_reader :children

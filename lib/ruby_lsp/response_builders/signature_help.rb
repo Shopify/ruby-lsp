@@ -3,9 +3,8 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = Interface::SignatureHelp?]
     class SignatureHelp < ResponseBuilder
-      ResponseType = type_member { { fixed: T.nilable(Interface::SignatureHelp) } }
-
       #: -> void
       def initialize
         super

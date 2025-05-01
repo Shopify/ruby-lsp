@@ -3,11 +3,8 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType < Object]
     class CollectionResponseBuilder < ResponseBuilder
-      extend T::Generic
-
-      ResponseType = type_member { { upper: Object } }
-
       #: -> void
       def initialize
         super

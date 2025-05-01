@@ -2,13 +2,12 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  #: [ParseResultType]
   class Document
     extend T::Sig
     extend T::Helpers
-    extend T::Generic
 
     class LocationNotFoundError < StandardError; end
-    ParseResultType = type_member
 
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code

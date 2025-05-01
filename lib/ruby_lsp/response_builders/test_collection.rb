@@ -3,11 +3,8 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = Requests::Support::TestItem]
     class TestCollection < ResponseBuilder
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: Requests::Support::TestItem } }
-
       #: Array[Interface::CodeLens]
       attr_reader :code_lens
 

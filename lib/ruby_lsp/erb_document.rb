@@ -2,11 +2,8 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  #: [ParseResultType = Prism::ParseResult]
   class ERBDocument < Document
-    extend T::Generic
-
-    ParseResultType = type_member { { fixed: Prism::ParseResult } }
-
     #: String
     attr_reader :host_language_source
 

@@ -7,17 +7,14 @@ module RubyLsp
   module Requests
     # The [hover request](https://microsoft.github.io/language-server-protocol/specification#textDocument_hover)
     # displays the documentation for the symbol currently under the cursor.
+    #: [ResponseType = Interface::Hover?]
     class Hover < Request
-      extend T::Generic
-
       class << self
         #: -> Interface::HoverOptions
         def provider
           Interface::HoverOptions.new
         end
       end
-
-      ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
       #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, dispatcher, sorbet_level)

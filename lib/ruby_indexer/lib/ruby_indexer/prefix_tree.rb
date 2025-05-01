@@ -32,11 +32,8 @@ module RubyIndexer
   # `Value` type.
   #
   # See https://en.wikipedia.org/wiki/Trie for more information
+  #: [Value]
   class PrefixTree
-    extend T::Generic
-
-    Value = type_member
-
     #: -> void
     def initialize
       @root = Node.new("", "") #: Node[Value]
@@ -106,11 +103,8 @@ module RubyIndexer
       node
     end
 
+    #: [Value]
     class Node
-      extend T::Generic
-
-      Value = type_member
-
       #: Hash[String, Node[Value]]
       attr_reader :children
 
