@@ -85,7 +85,7 @@ export class StreamingRunner implements vscode.Disposable {
       linkedCancellationSource.onCancellationRequested(async () => {
         this.run!.appendOutput("\r\nTest run cancelled.");
         abortController.abort();
-        await this.finalize();
+        await this.finalize(true);
       });
 
       if (mode === Mode.Run) {
@@ -248,8 +248,8 @@ export class StreamingRunner implements vscode.Disposable {
     return server;
   }
 
-  private async finalize() {
-    if (this.currentWorkspace) {
+  private async finalize(cancellation: boolean) {
+    if (cancellation && this.currentWorkspace) {
       // If the tests are being executed in a terminal, send a CTRL+C signal to stop them
       const terminal = this.terminals.get(
         `${this.currentWorkspace.workspaceFolder.name}: test`,
@@ -294,9 +294,8 @@ export class StreamingRunner implements vscode.Disposable {
 
     // Handle the JSON events being emitted by the tests
     this.disposables.push(
-      this.connection.onNotification(
-        NOTIFICATION_TYPES.finish,
-        this.finalize.bind(this),
+      this.connection.onNotification(NOTIFICATION_TYPES.finish, () =>
+        this.finalize(false),
       ),
     );
 
