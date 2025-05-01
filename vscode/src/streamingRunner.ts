@@ -136,6 +136,15 @@ export class StreamingRunner implements vscode.Disposable {
         new Error("Failed to start debugging session"),
       );
     }
+
+    const promise = new Promise<void>((resolve) => {
+      const disposable = vscode.debug.onDidTerminateDebugSession((_session) => {
+        disposable.dispose();
+        resolve();
+      });
+    });
+
+    this.promises.push(promise);
   }
 
   // Run the given test in the terminal
@@ -182,21 +191,29 @@ export class StreamingRunner implements vscode.Disposable {
     cwd: string,
     abortController: AbortController,
   ) {
-    const testProcess = spawn(command, {
-      env: { ...env, RUBY_LSP_REPORTER_PORT: this.tcpPort },
-      stdio: ["pipe", "pipe", "pipe"],
-      shell: true,
-      signal: abortController.signal,
-      cwd,
+    const promise = new Promise<void>((resolve, _reject) => {
+      const testProcess = spawn(command, {
+        env: { ...env, RUBY_LSP_REPORTER_PORT: this.tcpPort },
+        stdio: ["pipe", "pipe", "pipe"],
+        shell: true,
+        signal: abortController.signal,
+        cwd,
+      });
+
+      testProcess.stdout.on("data", (data) => {
+        this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
+      });
+
+      testProcess.stderr.on("data", (data) => {
+        this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
+      });
+
+      testProcess.on("exit", (_code) => {
+        resolve();
+      });
     });
 
-    testProcess.stdout.on("data", (data) => {
-      this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
-    });
-
-    testProcess.stderr.on("data", (data) => {
-      this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
-    });
+    this.promises.push(promise);
   }
 
   private startServer() {
