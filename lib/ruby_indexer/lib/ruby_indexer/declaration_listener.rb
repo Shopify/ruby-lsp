@@ -132,7 +132,7 @@ module RubyIndexer
         name = (expression.is_a?(Prism::SelfNode) ? "<Class:#{last_name_in_stack}>" : "<Class:#{expression.slice}>")
         real_nesting = Index.actual_nesting(@stack, name)
 
-        existing_entries = T.cast(@index[real_nesting.join("::")], T.nilable(T::Array[Entry::SingletonClass]))
+        existing_entries = @index[real_nesting.join("::")] #: as Array[Entry::SingletonClass]?
 
         if existing_entries
           entry = existing_entries.first #: as !nil
@@ -903,10 +903,9 @@ module RubyIndexer
 
       # private_class_method accepts strings, symbols or arrays of strings and symbols as arguments. Here we build a
       # single list of all of the method names that have to be made private
-      arrays, others = T.cast(
-        arguments.partition { |argument| argument.is_a?(Prism::ArrayNode) },
-        [T::Array[Prism::ArrayNode], T::Array[Prism::Node]],
-      )
+      arrays, others = arguments.partition do |argument|
+        argument.is_a?(Prism::ArrayNode)
+      end #: as [Array[Prism::ArrayNode], Array[Prism::Node]]
       arrays.each { |array| others.concat(array.elements) }
 
       names = others.filter_map do |argument|

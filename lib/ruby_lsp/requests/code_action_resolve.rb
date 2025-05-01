@@ -365,17 +365,7 @@ module RubyLsp
           end
         end
 
-        node = T.cast(
-          node,
-          T.any(
-            Prism::InstanceVariableAndWriteNode,
-            Prism::InstanceVariableOperatorWriteNode,
-            Prism::InstanceVariableOrWriteNode,
-            Prism::InstanceVariableReadNode,
-            Prism::InstanceVariableTargetNode,
-            Prism::InstanceVariableWriteNode,
-          ),
-        )
+        node = node #: as Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode # rubocop:disable Layout/LineLength
 
         node_context = @document.locate_node(
           {

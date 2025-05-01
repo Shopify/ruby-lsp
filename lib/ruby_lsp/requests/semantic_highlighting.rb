@@ -74,7 +74,7 @@ module RubyLsp
       @result_id = 0 #: Integer
       @mutex = Mutex.new #: Mutex
 
-      #: (GlobalState global_state, Prism::Dispatcher dispatcher, (RubyDocument | ERBDocument) document, String? previous_result_id, ?range: T::Range[Integer]?) -> void
+      #: (GlobalState global_state, Prism::Dispatcher dispatcher, (RubyDocument | ERBDocument) document, String? previous_result_id, ?range: Range[Integer]?) -> void
       def initialize(global_state, dispatcher, document, previous_result_id, range: nil)
         super()
 

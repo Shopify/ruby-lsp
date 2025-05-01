@@ -3,7 +3,6 @@
 
 module RubyIndexer
   class Enhancement
-    extend T::Sig
     extend T::Helpers
 
     abstract!
@@ -11,8 +10,6 @@ module RubyIndexer
     @enhancements = [] #: Array[Class[Enhancement]]
 
     class << self
-      extend T::Sig
-
       #: (Class[Enhancement] child) -> void
       def inherited(child)
         @enhancements << child

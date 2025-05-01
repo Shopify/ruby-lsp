@@ -8,8 +8,6 @@ module RubyLsp
     # that navigates to the relevant file for the current document.
     # Currently, it supports source code file <> test file navigation.
     class GoToRelevantFile < Request
-      extend T::Sig
-
       TEST_KEYWORDS = ["test", "spec", "integration_test"]
 
       TEST_PREFIX_PATTERN = /^(#{TEST_KEYWORDS.join("_|")}_)/

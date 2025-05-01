@@ -60,7 +60,7 @@ module RubyLsp
           ],
           code_units_cache: document.code_units_cache,
         )
-        @response_builder = ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
+        @response_builder = ResponseBuilders::CollectionResponseBuilder
           .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
 
         Listeners::Completion.new(

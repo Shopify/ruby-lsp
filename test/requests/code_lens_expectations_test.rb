@@ -289,10 +289,11 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
           end
 
           def on_class_node_enter(node)
-            T.bind(self, RubyLsp::Requests::Support::Common)
+            range = self #: as untyped # rubocop:disable Style/RedundantSelf
+              .range_from_node(node)
 
             @response_builder << RubyLsp::Interface::CodeLens.new(
-              range: range_from_node(node),
+              range: range,
               command: RubyLsp::Interface::Command.new(
                 title: "Run #{node.constant_path.slice}",
                 command: "rubyLsp.runTest",

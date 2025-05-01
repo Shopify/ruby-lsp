@@ -51,10 +51,7 @@ module RubyLsp
           )
         end
 
-        target = T.cast(
-          target,
-          T.any(Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode),
-        )
+        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode
 
         name = RubyIndexer::Index.constant_name(target)
         return unless name

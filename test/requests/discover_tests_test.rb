@@ -371,8 +371,8 @@ module RubyLsp
             end
 
             def on_class_node_enter(node)
-              T.bind(self, RubyLsp::Requests::Support::Common)
-
+              range = self #: as untyped # rubocop:disable Style/RedundantSelf
+                .range_from_node(node)
               class_name = node.constant_path.slice
 
               if class_name == "MyTest"
@@ -380,7 +380,7 @@ module RubyLsp
                   class_name,
                   class_name,
                   @uri,
-                  range_from_node(node),
+                  range,
                   framework: :custom_addon,
                 )
 
@@ -389,8 +389,8 @@ module RubyLsp
             end
 
             def on_call_node_enter(node)
-              T.bind(self, RubyLsp::Requests::Support::Common)
-
+              range = self #: as untyped # rubocop:disable Style/RedundantSelf
+                .range_from_node(node)
               arguments = node.arguments&.arguments
               first_arg = arguments&.first
               return unless first_arg.is_a?(Prism::StringNode)
@@ -401,7 +401,7 @@ module RubyLsp
                 "#{@current_class.id}##{test_name}",
                 test_name,
                 @uri,
-                range_from_node(node),
+                range,
                 framework: :custom_addon,
               ))
             end

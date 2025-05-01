@@ -5,7 +5,7 @@ module RubyLsp
   module Requests
     module Support
       class Annotation
-        #: (arity: (Integer | T::Range[Integer]), ?receiver: bool) -> void
+        #: (arity: (Integer | Range[Integer]), ?receiver: bool) -> void
         def initialize(arity:, receiver: false)
           @arity = arity
           @receiver = receiver

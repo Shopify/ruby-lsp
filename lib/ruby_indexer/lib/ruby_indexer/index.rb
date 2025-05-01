@@ -60,7 +60,7 @@ module RubyIndexer
       @entries = {} #: Hash[String, Array[Entry]]
 
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
-      @entries_tree = PrefixTree[T::Array[Entry]].new #: PrefixTree[Array[Entry]]
+      @entries_tree = PrefixTree.new #: PrefixTree[Array[Entry]]
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
@@ -71,7 +71,7 @@ module RubyIndexer
       @uris_to_entries = {} #: Hash[String, Array[Entry]]
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
-      @require_paths_tree = PrefixTree[URI::Generic].new #: PrefixTree[URI::Generic]
+      @require_paths_tree = PrefixTree.new #: PrefixTree[URI::Generic]
 
       # Holds the linearized ancestors list for every namespace
       @ancestors = {} #: Hash[String, Array[String]]
@@ -147,7 +147,7 @@ module RubyIndexer
 
     # Searches for a constant based on an unqualified name and returns the first possible match regardless of whether
     # there are more possible matching entries
-    #: (String name) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant)]?
+    #: (String name) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def first_unqualified_const(name)
       # Look for an exact match first
       _name, entries = @entries.find do |const_name, _entries|
@@ -161,15 +161,7 @@ module RubyIndexer
         end
       end
 
-      T.cast(
-        entries,
-        T.nilable(T::Array[T.any(
-          Entry::Namespace,
-          Entry::ConstantAlias,
-          Entry::UnresolvedConstantAlias,
-          Entry::Constant,
-        )]),
-      )
+      entries #: as Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     end
 
     # Searches entries in the index based on an exact prefix, intended for providing autocomplete. All possible matches
@@ -272,19 +264,11 @@ module RubyIndexer
       completion_items.values.map!(&:first)
     end
 
-    #: (String name, Array[String] nesting) -> Array[Array[(Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias)]]
+    #: (String name, Array[String] nesting) -> Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]]
     def constant_completion_candidates(name, nesting)
       # If we have a top level reference, then we don't need to include completions inside the current nesting
       if name.start_with?("::")
-        return T.cast(
-          @entries_tree.search(name.delete_prefix("::")),
-          T::Array[T::Array[T.any(
-            Entry::Constant,
-            Entry::ConstantAlias,
-            Entry::Namespace,
-            Entry::UnresolvedConstantAlias,
-          )]],
-        )
+        return @entries_tree.search(name.delete_prefix("::")) #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]] # rubocop:disable Layout/LineLength
       end
 
       # Otherwise, we have to include every possible constant the user might be referring to. This is essentially the
@@ -310,15 +294,7 @@ module RubyIndexer
       # Top level constants
       entries.concat(@entries_tree.search(name))
       entries.uniq!
-      T.cast(
-        entries,
-        T::Array[T::Array[T.any(
-          Entry::Constant,
-          Entry::ConstantAlias,
-          Entry::Namespace,
-          Entry::UnresolvedConstantAlias,
-        )]],
-      )
+      entries #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]] # rubocop:disable Layout/LineLength
     end
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
@@ -328,7 +304,7 @@ module RubyIndexer
     # nesting: the nesting structure where the reference was found (e.g.: ["Foo", "Bar"])
     # seen_names: this parameter should not be used by consumers of the api. It is used to avoid infinite recursion when
     # resolving circular references
-    #: (String name, Array[String] nesting, ?Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    #: (String name, Array[String] nesting, ?Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def resolve(name, nesting, seen_names = [])
       # If we have a top level reference, then we just search for it straight away ignoring the nesting
       if name.start_with?("::")
@@ -586,7 +562,7 @@ module RubyIndexer
     # and find inherited instance variables as well
     #: (String variable_name, String owner_name) -> Array[Entry::InstanceVariable]?
     def resolve_instance_variable(variable_name, owner_name)
-      entries = T.cast(self[variable_name], T.nilable(T::Array[Entry::InstanceVariable]))
+      entries = self[variable_name] #: as Array[Entry::InstanceVariable]?
       return unless entries
 
       ancestors = linearized_ancestors_of(owner_name)
@@ -610,7 +586,7 @@ module RubyIndexer
     # include the `@` prefix
     #: (String name, String owner_name) -> Array[(Entry::InstanceVariable | Entry::ClassVariable)]
     def instance_variable_completion_candidates(name, owner_name)
-      entries = T.cast(prefix_search(name).flatten, T::Array[T.any(Entry::InstanceVariable, Entry::ClassVariable)])
+      entries = prefix_search(name).flatten #: as Array[Entry::InstanceVariable | Entry::ClassVariable]
       # Avoid wasting time linearizing ancestors if we didn't find anything
       return entries if entries.empty?
 
@@ -640,7 +616,7 @@ module RubyIndexer
 
     #: (String name, String owner_name) -> Array[Entry::ClassVariable]
     def class_variable_completion_candidates(name, owner_name)
-      entries = T.cast(prefix_search(name).flatten, T::Array[Entry::ClassVariable])
+      entries = prefix_search(name).flatten #: as Array[Entry::ClassVariable]
       # Avoid wasting time linearizing ancestors if we didn't find anything
       return entries if entries.empty?
 
@@ -676,15 +652,13 @@ module RubyIndexer
       # indirect means like including a module that than includes the ancestor. Trying to figure out exactly which
       # ancestors need to be deleted is too expensive. Therefore, if any of the namespace entries has a change to their
       # ancestor hash, we clear all ancestors and start linearizing lazily again from scratch
-      original_map = T.cast(
-        original_entries.select { |e| e.is_a?(Entry::Namespace) },
-        T::Array[Entry::Namespace],
-      ).to_h { |e| [e.name, e.ancestor_hash] }
+      original_map = original_entries
+        .select { |e| e.is_a?(Entry::Namespace) } #: as Array[Entry::Namespace]
+        .to_h { |e| [e.name, e.ancestor_hash] }
 
-      updated_map = T.cast(
-        updated_entries.select { |e| e.is_a?(Entry::Namespace) },
-        T::Array[Entry::Namespace],
-      ).to_h { |e| [e.name, e.ancestor_hash] }
+      updated_map = updated_entries
+        .select { |e| e.is_a?(Entry::Namespace) } #: as Array[Entry::Namespace]
+        .to_h { |e| [e.name, e.ancestor_hash] }
 
       @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end
@@ -713,7 +687,7 @@ module RubyIndexer
     def existing_or_new_singleton_class(name)
       *_namespace, unqualified_name = name.split("::")
       full_singleton_name = "#{name}::<Class:#{unqualified_name}>"
-      singleton = T.cast(self[full_singleton_name]&.first, T.nilable(Entry::SingletonClass))
+      singleton = self[full_singleton_name]&.first #: as Entry::SingletonClass?
 
       unless singleton
         attached_ancestor = self[name]&.first #: as !nil
@@ -841,14 +815,11 @@ module RubyIndexer
     )
       # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
       # from two different classes in different files, we simply ignore it
-      superclass = T.cast(
-        if singleton_levels > 0
-          self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-        else
-          namespace_entries.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-        end,
-        T.nilable(Entry::Class),
-      )
+      superclass = if singleton_levels > 0
+        self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+      else
+        namespace_entries.find { |n| n.is_a?(Entry::Class) && n.parent_class }
+      end #: as Entry::Class?
 
       if superclass
         # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
@@ -882,7 +853,7 @@ module RubyIndexer
       elsif singleton_levels > 0
         # When computing the linearization for a module's singleton class, it inherits from the linearized ancestors of
         # the `Module` class
-        mod = T.cast(self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) }, T.nilable(Entry::Module))
+        mod = self[attached_class_name]&.find { |n| n.is_a?(Entry::Module) } #: as Entry::Module?
 
         if mod
           module_class_name_parts = ["Module"]
@@ -922,7 +893,7 @@ module RubyIndexer
       resolved_alias
     end
 
-    #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def lookup_enclosing_scopes(name, nesting, seen_names)
       nesting.length.downto(1) do |i|
         namespace = nesting[0...i] #: as !nil
@@ -942,7 +913,7 @@ module RubyIndexer
       nil
     end
 
-    #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    #: (String name, Array[String] nesting, Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def lookup_ancestor_chain(name, nesting, seen_names)
       *nesting_parts, constant_name = build_non_redundant_full_name(name, nesting).split("::")
       return if nesting_parts.empty?
@@ -1027,18 +998,13 @@ module RubyIndexer
       name_parts.join("::")
     end
 
-    #: (String full_name, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    #: (String full_name, Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def direct_or_aliased_constant(full_name, seen_names)
       entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
 
-      T.cast(
-        entries&.map { |e| e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e },
-        T.nilable(T::Array[T.any(
-          Entry::Namespace,
-          Entry::ConstantAlias,
-          Entry::UnresolvedConstantAlias,
-        )]),
-      )
+      entries&.map do |e|
+        e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
+      end #: as Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias])?
     end
 
     # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
