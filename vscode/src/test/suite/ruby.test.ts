@@ -1,7 +1,6 @@
 /* eslint-disable no-process-env */
 import * as assert from "assert";
 import * as path from "path";
-import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
@@ -174,47 +173,6 @@ suite("Ruby environment activation", () => {
 
     assert.deepStrictEqual(ruby.env, { BUNDLE_GEMFILE: ".ruby-lsp/Gemfile" });
   });
-
-  test("Adds local exe directory to PATH when working on the Ruby LSP itself", async () => {
-    if (os.platform() === "win32") {
-      // We don't mutate the path on Windows
-      return;
-    }
-
-    const manager = process.env.CI
-      ? ManagerIdentifier.None
-      : ManagerIdentifier.Chruby;
-
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) => {
-          if (name === "rubyVersionManager") {
-            return { identifier: manager };
-          } else if (name === "bundleGemfile") {
-            return "";
-          }
-
-          return undefined;
-        },
-      } as unknown as vscode.WorkspaceConfiguration);
-
-    const workspacePath = path.dirname(
-      path.dirname(path.dirname(path.dirname(__dirname))),
-    );
-    const lspFolder: vscode.WorkspaceFolder = {
-      uri: vscode.Uri.file(workspacePath),
-      name: path.basename(workspacePath),
-      index: 0,
-    };
-    const ruby = new Ruby(context, lspFolder, outputChannel, FAKE_TELEMETRY);
-    await ruby.activateRuby();
-
-    const firstEntry = ruby.env.PATH!.split(path.delimiter)[0];
-    assert.match(firstEntry, /ruby-lsp\/exe$/);
-
-    configStub.restore();
-  }).timeout(10000);
 
   test("Ignores untrusted workspace for telemetry", async () => {
     const telemetry = { ...FAKE_TELEMETRY, logError: sinon.stub() };

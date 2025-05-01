@@ -137,6 +137,12 @@ function getLspExecutables(
       options: executableOptions,
     };
   } else {
+    const workspacePath = workspaceFolder.uri.fsPath;
+    const command =
+      path.basename(workspacePath) === "ruby-lsp" && os.platform() !== "win32"
+        ? path.join(workspacePath, "exe", "ruby-lsp")
+        : "ruby-lsp";
+
     const args = [];
 
     if (branch.length > 0) {
@@ -147,14 +153,9 @@ function getLspExecutables(
       args.push("--use-launcher");
     }
 
-    run = {
-      command: "ruby-lsp",
-      args,
-      options: executableOptions,
-    };
-
+    run = { command, args, options: executableOptions };
     debug = {
-      command: "ruby-lsp",
+      command,
       args: args.concat(["--debug"]),
       options: executableOptions,
     };
