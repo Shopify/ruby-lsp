@@ -265,11 +265,11 @@ module RubyIndexer
       when :include, :prepend, :extend
         handle_module_operation(node, message)
       when :public
-        handle_visibility_change(node, Entry::Visibility::PUBLIC)
+        handle_visibility_change(node, :public)
       when :protected
-        handle_visibility_change(node, Entry::Visibility::PROTECTED)
+        handle_visibility_change(node, :protected)
       when :private
-        handle_visibility_change(node, Entry::Visibility::PRIVATE)
+        handle_visibility_change(node, :private)
       when :module_function
         handle_module_function(node)
       when :private_class_method
@@ -343,7 +343,7 @@ module RubyIndexer
             name_location,
             comments,
             signatures,
-            Entry::Visibility::PUBLIC,
+            :public,
             singleton,
           ))
         end
@@ -465,8 +465,8 @@ module RubyIndexer
       handle_class_variable(node, node.name_loc)
     end
 
-    #: (String name, Prism::Location node_location, Array[Entry::Signature] signatures, ?visibility: Entry::Visibility, ?comments: String?) -> void
-    def add_method(name, node_location, signatures, visibility: Entry::Visibility::PUBLIC, comments: nil)
+    #: (String name, Prism::Location node_location, Array[Entry::Signature] signatures, ?visibility: Symbol, ?comments: String?) -> void
+    def add_method(name, node_location, signatures, visibility: :public, comments: nil)
       location = Location.from_prism_location(node_location, @code_units_cache)
 
       @index.add(Entry::Method.new(
@@ -621,7 +621,7 @@ module RubyIndexer
       # The private_constant method does not resolve the constant name. It always points to a constant that needs to
       # exist in the current namespace
       entries = @index[fully_qualify_name(name)]
-      entries&.each { |entry| entry.visibility = Entry::Visibility::PRIVATE }
+      entries&.each { |entry| entry.visibility = :private }
     end
 
     #: (Prism::CallNode node) -> void
@@ -868,7 +868,7 @@ module RubyIndexer
           entry_owner_name = entry.owner&.name
           next unless entry_owner_name
 
-          entry.visibility = Entry::Visibility::PRIVATE
+          entry.visibility = :private
 
           singleton = @index.existing_or_new_singleton_class(entry_owner_name)
           location = Location.from_prism_location(argument.location, @code_units_cache)
@@ -879,7 +879,7 @@ module RubyIndexer
             location,
             collect_comments(node)&.concat(entry.comments),
             entry.signatures,
-            Entry::Visibility::PUBLIC,
+            :public,
             singleton,
           ))
         end
@@ -894,7 +894,7 @@ module RubyIndexer
       # If we're passing a method definition directly to `private_class_method`, push a new private scope. That will be
       # applied when the indexer finds the method definition and then popped on `call_node_leave`
       if arguments.first.is_a?(Prism::DefNode)
-        @visibility_stack.push(VisibilityScope.new(visibility: Entry::Visibility::PRIVATE))
+        @visibility_stack.push(VisibilityScope.new(visibility: :private))
         return
       end
 
@@ -921,9 +921,7 @@ module RubyIndexer
         entries = @index.resolve_method(name, @index.existing_or_new_singleton_class(owner_name).name)
         next unless entries
 
-        entries.each do |entry|
-          entry.visibility = Entry::Visibility::PRIVATE
-        end
+        entries.each { |entry| entry.visibility = :private }
       end
     end
 
@@ -1037,7 +1035,7 @@ module RubyIndexer
       name.split("::").last
     end
 
-    #: (Prism::CallNode, Entry::Visibility) -> void
+    #: (Prism::CallNode, Symbol) -> void
     def handle_visibility_change(node, visibility)
       owner  = @owner_stack.last
       return unless owner

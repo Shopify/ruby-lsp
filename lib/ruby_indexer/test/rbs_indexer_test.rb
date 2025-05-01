@@ -60,7 +60,7 @@ module RubyIndexer
       entry = entries.find { |entry| entry.owner&.name == "Array" } #: as Entry::Method
       assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.file_path)
       assert_equal("array.rbs", entry.file_name)
-      assert_equal(Entry::Visibility::PUBLIC, entry.visibility)
+      assert_equal(:public, entry.visibility)
 
       # Using fixed positions would be fragile, so let's just check some basics.
       assert_operator(entry.location.start_line, :>, 0)

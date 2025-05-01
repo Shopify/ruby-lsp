@@ -8,7 +8,7 @@ module RubyIndexer
     class << self
       #: -> instance
       def module_function_scope
-        new(module_func: true, visibility: Entry::Visibility::PRIVATE)
+        new(module_func: true, visibility: :private)
       end
 
       #: -> instance
@@ -17,14 +17,14 @@ module RubyIndexer
       end
     end
 
-    #: Entry::Visibility
+    #: Symbol
     attr_reader :visibility
 
     #: bool
     attr_reader :module_func
 
-    #: (?visibility: Entry::Visibility, ?module_func: bool) -> void
-    def initialize(visibility: Entry::Visibility::PUBLIC, module_func: false)
+    #: (?visibility: Symbol, ?module_func: bool) -> void
+    def initialize(visibility: :public, module_func: false)
       @visibility = visibility
       @module_func = module_func
     end
