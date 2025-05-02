@@ -10,11 +10,11 @@ module RubyLsp
 
     #: (**untyped options) -> void
     def initialize(**options)
+      @reader = MessageReader.new(options[:reader] || $stdin) #: MessageReader
+      @writer = MessageWriter.new(options[:writer] || $stdout) #: MessageWriter
       @test_mode = options[:test_mode] #: bool?
       @setup_error = options[:setup_error] #: StandardError?
       @install_error = options[:install_error] #: StandardError?
-      @writer = Transport::Stdio::Writer.new #: Transport::Stdio::Writer
-      @reader = Transport::Stdio::Reader.new #: Transport::Stdio::Reader
       @incoming_queue = Thread::Queue.new #: Thread::Queue
       @outgoing_queue = Thread::Queue.new #: Thread::Queue
       @cancelled_requests = [] #: Array[Integer]
@@ -40,7 +40,7 @@ module RubyLsp
 
     #: -> void
     def start
-      @reader.read do |message|
+      @reader.each_message do |message|
         method = message[:method]
 
         # We must parse the document under a mutex lock or else we might switch threads and accept text edits in the
