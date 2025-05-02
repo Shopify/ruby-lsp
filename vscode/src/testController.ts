@@ -91,6 +91,8 @@ export class TestController {
       vscode.TestRunProfileKind.Run,
       this.fullDiscovery ? this.runTest.bind(this) : this.runHandler.bind(this),
       true,
+      undefined,
+      true,
     );
 
     this.testDebugProfile = this.testController.createRunProfile(
@@ -420,8 +422,87 @@ export class TestController {
         continuousMode: request.continuous ?? false,
       },
     });
+    if (request.continuous) {
+      const disposables: vscode.Disposable[] = [];
 
-    const run = this.testController.createTestRun(request, undefined, true);
+      const testFileWatcher = vscode.workspace.createFileSystemWatcher(
+        TEST_FILE_PATTERN,
+        true,
+        false,
+        true,
+      );
+
+      disposables.push(
+        testFileWatcher,
+        testFileWatcher.onDidChange(async () => {
+          const continuousRequest = new vscode.TestRunRequest(
+            request.include,
+            request.exclude,
+            request.profile,
+            false,
+            request.preserveFocus,
+          );
+
+          await this.handleTests(continuousRequest, token);
+        }),
+      );
+
+      disposables.push(
+        token.onCancellationRequested(() => {
+          disposables.forEach((disposable) => disposable.dispose());
+        }),
+      );
+    } else {
+      await this.handleTests(request, token);
+    }
+  }
+
+  // Public for testing purposes. Finds a test item based on its ID and URI
+  async findTestItem(id: string, uri: vscode.Uri) {
+    if (this.testController.items.size === 0) {
+      // Discover and test items immediately if the test explorer hasn't been expanded
+      await this.resolveHandler(undefined);
+    }
+
+    const parentItem = await this.getParentTestItem(uri);
+    if (!parentItem) {
+      return;
+    }
+
+    if (parentItem.id === id) {
+      return parentItem;
+    }
+
+    const testFileItem = parentItem.children.get(uri.toString());
+    if (!testFileItem) {
+      return;
+    }
+
+    if (testFileItem.id === id) {
+      return testFileItem;
+    }
+
+    // If we're trying to find a test item inside a file that has never been expanded, then we never discovered its
+    // children and need to do so before trying to access them
+    if (testFileItem.children.size === 0) {
+      await this.resolveHandler(testFileItem);
+    }
+
+    // If we find an exact match for this ID, then return it right away
+    const groupOrItem = testFileItem.children.get(id);
+    if (groupOrItem) {
+      return groupOrItem;
+    }
+
+    // If not, the ID might be nested under groups
+    return this.findTestInGroup(id, testFileItem);
+  }
+
+  private async handleTests(
+    request: vscode.TestRunRequest,
+    token: vscode.CancellationToken,
+  ) {
+    const run = this.testController.createTestRun(request);
 
     // Gather all included test items
     const items: vscode.TestItem[] = [];
@@ -524,47 +605,6 @@ export class TestController {
 
     run.end();
     linkedCancellationSource.dispose();
-  }
-
-  // Public for testing purposes. Finds a test item based on its ID and URI
-  async findTestItem(id: string, uri: vscode.Uri) {
-    if (this.testController.items.size === 0) {
-      // Discover and test items immediately if the test explorer hasn't been expanded
-      await this.resolveHandler(undefined);
-    }
-
-    const parentItem = await this.getParentTestItem(uri);
-    if (!parentItem) {
-      return;
-    }
-
-    if (parentItem.id === id) {
-      return parentItem;
-    }
-
-    const testFileItem = parentItem.children.get(uri.toString());
-    if (!testFileItem) {
-      return;
-    }
-
-    if (testFileItem.id === id) {
-      return testFileItem;
-    }
-
-    // If we're trying to find a test item inside a file that has never been expanded, then we never discovered its
-    // children and need to do so before trying to access them
-    if (testFileItem.children.size === 0) {
-      await this.resolveHandler(testFileItem);
-    }
-
-    // If we find an exact match for this ID, then return it right away
-    const groupOrItem = testFileItem.children.get(id);
-    if (groupOrItem) {
-      return groupOrItem;
-    }
-
-    // If not, the ID might be nested under groups
-    return this.findTestInGroup(id, testFileItem);
   }
 
   // Execute all of the test commands reported by the server in the background using JSON RPC to receive streaming
