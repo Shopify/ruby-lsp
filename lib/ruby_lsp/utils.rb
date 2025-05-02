@@ -5,7 +5,6 @@ module RubyLsp
   # rubocop:disable RubyLsp/UseLanguageServerAliases
   Interface = LanguageServer::Protocol::Interface
   Constant = LanguageServer::Protocol::Constant
-  Transport = LanguageServer::Protocol::Transport
   # rubocop:enable RubyLsp/UseLanguageServerAliases
 
   # Used to indicate that a request shouldn't return a response
@@ -304,5 +303,38 @@ module RubyLsp
 
     #: -> bool
     def true_or_higher? = @level == :true || @level == :strict
+  end
+
+  # Reads JSON RPC messages from the given IO in a loop
+  class MessageReader
+    #: (IO) -> void
+    def initialize(io)
+      @io = io
+    end
+
+    #: () { (Hash[Symbol, untyped]) -> void } -> void
+    def each_message(&block)
+      while (headers = @io.gets("\r\n\r\n"))
+        raw_message = @io.read(headers[/Content-Length: (\d+)/i, 1].to_i) #: as !nil
+        block.call(JSON.parse(raw_message, symbolize_names: true))
+      end
+    end
+  end
+
+  # Writes JSON RPC messages to the given IO
+  class MessageWriter
+    #: (IO) -> void
+    def initialize(io)
+      @io = io
+    end
+
+    #: (Hash[Symbol, untyped]) -> void
+    def write(message)
+      message[:jsonrpc] = "2.0"
+      json_message = message.to_json
+
+      @io.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
+      @io.flush
+    end
   end
 end

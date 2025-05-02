@@ -333,6 +333,23 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_launching_an_older_server_version
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "ruby-lsp", "0.23.0"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        capture_subprocess_io do
+          system("bundle", "install")
+        end
+
+        launch(dir)
+      end
+    end
+  end
+
   private
 
   def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})
