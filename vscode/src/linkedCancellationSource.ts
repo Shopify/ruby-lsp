@@ -2,23 +2,20 @@ import * as vscode from "vscode";
 
 export class LinkedCancellationSource implements vscode.Disposable {
   private readonly tokenSource = new vscode.CancellationTokenSource();
-  private readonly disposables: vscode.Disposable[] = [this.tokenSource];
 
   constructor(
     token: vscode.CancellationToken,
     ...additionalTokens: vscode.CancellationToken[]
   ) {
     [token, ...additionalTokens].forEach((token) => {
-      const disposable = token.onCancellationRequested(() => {
+      token.onCancellationRequested(() => {
         this.tokenSource.cancel();
       });
-
-      this.disposables.push(disposable);
     });
   }
 
   dispose() {
-    this.disposables.forEach((disposable) => disposable.dispose());
+    this.tokenSource.dispose();
   }
 
   isCancellationRequested() {
@@ -26,8 +23,6 @@ export class LinkedCancellationSource implements vscode.Disposable {
   }
 
   onCancellationRequested(callback: () => void) {
-    this.disposables.push(
-      this.tokenSource.token.onCancellationRequested(callback),
-    );
+    this.tokenSource.token.onCancellationRequested(callback);
   }
 }
