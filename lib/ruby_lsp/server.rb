@@ -491,12 +491,15 @@ module RubyLsp
       folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
-      code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
       inlay_hint = Requests::InlayHints.new(
         document,
         @store.features_configuration.dig(:inlayHint), #: as !nil
         dispatcher,
       )
+
+      # The code lens listener requires the index to be populated, so the DeclarationListener must be inserted first in
+      # the dispatcher's state
+      code_lens = nil #: Requests::CodeLens?
 
       if document.is_a?(RubyDocument) && document.should_index?
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
@@ -507,10 +510,12 @@ module RubyLsp
           @global_state.index.handle_change(uri) do |index|
             index.delete(uri, skip_require_paths_tree: true)
             RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
+            code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
             dispatcher.dispatch(parse_result.value)
           end
         end
       else
+        code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
         dispatcher.dispatch(parse_result.value)
       end
 
@@ -519,7 +524,11 @@ module RubyLsp
       document.cache_set("textDocument/foldingRange", folding_range.perform)
       document.cache_set("textDocument/documentSymbol", document_symbol.perform)
       document.cache_set("textDocument/documentLink", document_link.perform)
-      document.cache_set("textDocument/codeLens", code_lens.perform)
+      document.cache_set(
+        "textDocument/codeLens",
+        code_lens #: as !nil
+          .perform,
+      )
       document.cache_set("textDocument/inlayHint", inlay_hint.perform)
 
       send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
