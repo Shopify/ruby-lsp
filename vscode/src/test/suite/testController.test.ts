@@ -198,7 +198,9 @@ suite("TestController", () => {
 
     workspaceStubs.push(
       sandbox.stub(vscode.workspace, "getWorkspaceFolder").callsFake((uri) => {
-        return workspaces.find((workspace) => workspace.uri === uri);
+        return workspaces.find((workspace) =>
+          uri.fsPath.startsWith(workspace.uri.fsPath),
+        );
       }),
     );
   }
@@ -573,6 +575,22 @@ suite("TestController", () => {
 
     await controller.findTestItem("ServerTest", serverTestUri);
     assert.ok(serverTest.children.size > 0);
+  });
+
+  test("finding an item inside a workspace test item automatically discovers children", async () => {
+    const firstWorkspace = createWorkspaceWithTestFile();
+    const secondWorkspace = createWorkspaceWithTestFile();
+
+    stubWorkspaceOperations(
+      firstWorkspace.workspaceFolder,
+      secondWorkspace.workspaceFolder,
+    );
+
+    const serverTest = await controller.findTestItem(
+      "ServerTest::NestedTest#test_something",
+      firstWorkspace.testFileUri,
+    );
+    assert.ok(serverTest);
   });
 
   test("running a test", async () => {
