@@ -1,5 +1,7 @@
 import { spawn } from "child_process";
 import net from "net";
+import os from "os";
+import path from "path";
 
 import * as rpc from "vscode-jsonrpc/node";
 import * as vscode from "vscode";
@@ -32,6 +34,7 @@ export enum Mode {
 // The StreamingRunner class is responsible for executing the test process or launching the debugger while handling the
 // streaming events to update the test explorer status
 export class StreamingRunner implements vscode.Disposable {
+  tcpPort: string | undefined;
   private promises: Promise<void>[] = [];
   private disposables: vscode.Disposable[] = [];
   private readonly findTestItem: (
@@ -39,8 +42,13 @@ export class StreamingRunner implements vscode.Disposable {
     uri: vscode.Uri,
   ) => Promise<vscode.TestItem | undefined>;
 
-  private readonly tcpServer: net.Server;
-  private tcpPort: string | undefined;
+  private readonly createTestRun: (
+    request: vscode.TestRunRequest,
+    name?: string,
+    persist?: boolean,
+  ) => vscode.TestRun;
+
+  private tcpServer: net.Server | undefined;
   private connection: rpc.MessageConnection | undefined;
   private executionPromise:
     | { resolve: () => void; reject: (error: Error) => void }
@@ -56,15 +64,24 @@ export class StreamingRunner implements vscode.Disposable {
       id: string,
       uri: vscode.Uri,
     ) => Promise<vscode.TestItem | undefined>,
+    createTestRun: (
+      request: vscode.TestRunRequest,
+      name?: string,
+      persist?: boolean,
+    ) => vscode.TestRun,
   ) {
     this.findTestItem = findTestItem;
-    this.tcpServer = this.startServer();
+    this.createTestRun = createTestRun;
 
     context.subscriptions.push(
       vscode.window.onDidCloseTerminal((terminal) => {
         this.terminals.delete(terminal.name);
       }),
     );
+  }
+
+  async activate() {
+    this.tcpServer = await this.startServer();
   }
 
   async execute(
@@ -105,7 +122,7 @@ export class StreamingRunner implements vscode.Disposable {
   }
 
   dispose() {
-    this.tcpServer.close();
+    this.tcpServer?.close();
     this.connection?.dispose();
   }
 
@@ -122,11 +139,7 @@ export class StreamingRunner implements vscode.Disposable {
         name: "Debug",
         request: "launch",
         program: command,
-        env: {
-          ...env,
-          DISABLE_SPRING: "1",
-          RUBY_LSP_REPORTER_PORT: this.tcpPort,
-        },
+        env: { ...env, DISABLE_SPRING: "1" },
       },
       { testRun: this.run },
     );
@@ -164,18 +177,11 @@ export class StreamingRunner implements vscode.Disposable {
       });
     }
 
-    // Set the TCP port information every time even if there's an existing terminal. The user can close the editor
-    // window or reload extensions, which will assign a new port but maintain the same terminal.
-    //
-    // We also send RUBYOPT since that hooks up the custom LSP test reporters and the user's shell may override it
+    // We need to send RUBYOPT since that hooks up the custom LSP test reporters and the user's shell may override it
     if (process.platform === "win32") {
-      terminal.sendText(
-        `$env:RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; $env:RUBYOPT="${env.RUBYOPT}"; Clear-Host`,
-      );
+      terminal.sendText(`$env:RUBYOPT="${env.RUBYOPT}"; Clear-Host`);
     } else {
-      terminal.sendText(
-        `export RUBY_LSP_REPORTER_PORT="${this.tcpPort}"; export RUBYOPT="${env.RUBYOPT}"; clear`,
-      );
+      terminal.sendText(`export RUBYOPT="${env.RUBYOPT}"; clear`);
     }
 
     this.terminals.set(name, terminal);
@@ -193,7 +199,7 @@ export class StreamingRunner implements vscode.Disposable {
   ) {
     const promise = new Promise<void>((resolve, _reject) => {
       const testProcess = spawn(command, {
-        env: { ...env, RUBY_LSP_REPORTER_PORT: this.tcpPort },
+        env,
         stdio: ["pipe", "pipe", "pipe"],
         shell: true,
         signal: abortController.signal,
@@ -216,36 +222,54 @@ export class StreamingRunner implements vscode.Disposable {
     this.promises.push(promise);
   }
 
-  private startServer() {
-    const server = net.createServer();
-    server.on("error", (error) => {
-      throw error;
-    });
-    server.unref();
+  private async startServer(): Promise<net.Server> {
+    // Listening on the TCP connection is asynchronous. We can only resolve the promise once we know what port has been
+    // assigned, otherwise we risk trying to start tests without a port
+    return new Promise((resolve, reject) => {
+      const server = net.createServer();
+      server.on("error", reject);
+      server.unref();
 
-    server.listen(0, "localhost", () => {
-      const address = server.address();
+      server.listen(0, "localhost", async () => {
+        const address = server.address();
 
-      if (!address) {
-        throw new Error("Failed setup TCP server for streaming updates");
-      }
-      this.tcpPort =
-        typeof address === "string" ? address : address.port.toString();
+        if (!address) {
+          throw new Error("Failed setup TCP server for streaming updates");
+        }
+        this.tcpPort =
+          typeof address === "string" ? address : address.port.toString();
 
-      // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
-      server.on("connection", (socket) => {
-        this.connection = rpc.createMessageConnection(
-          new rpc.StreamMessageReader(socket),
-          new rpc.StreamMessageWriter(socket),
+        const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
+
+        await vscode.workspace.fs.createDirectory(tempDirUri);
+        await vscode.workspace.fs.writeFile(
+          vscode.Uri.joinPath(tempDirUri, "test_reporter_port"),
+          Buffer.from(this.tcpPort!.toString()),
         );
 
-        // Register and start listening for events
-        this.registerStreamingEvents();
-        this.connection.listen();
+        // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
+        server.on("connection", (socket) => {
+          this.connection = rpc.createMessageConnection(
+            new rpc.StreamMessageReader(socket),
+            new rpc.StreamMessageWriter(socket),
+          );
+
+          // Register and start listening for events
+          this.registerStreamingEvents();
+
+          if (!this.run) {
+            this.run = this.createTestRun(
+              new vscode.TestRunRequest(),
+              "on_demand_run_in_terminal",
+            );
+          }
+
+          this.connection.listen();
+        });
+
+        resolve(server);
       });
     });
-
-    return server;
   }
 
   private async finalize(cancellation: boolean) {
@@ -271,6 +295,11 @@ export class StreamingRunner implements vscode.Disposable {
       this.connection.end();
       this.connection.dispose();
     }
+
+    if (this.run!.name === "on_demand_run_in_terminal") {
+      this.run!.end();
+    }
+    this.run = undefined;
 
     this.executionPromise!.resolve();
   }
