@@ -21,7 +21,7 @@ module RubyLsp
         end
       end
 
-      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] params, RubyDocument::SorbetLevel sorbet_level, Prism::Dispatcher dispatcher) -> void
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] params, SorbetLevel sorbet_level, Prism::Dispatcher dispatcher) -> void
       def initialize(document, global_state, params, sorbet_level, dispatcher)
         super()
         @target = nil #: Prism::Node?

@@ -159,11 +159,6 @@ module RubyLsp
             Constant::SymbolKind::FIELD
           end
         end
-
-        #: (RubyDocument::SorbetLevel sorbet_level) -> bool
-        def sorbet_level_true_or_higher?(sorbet_level)
-          sorbet_level == RubyDocument::SorbetLevel::True || sorbet_level == RubyDocument::SorbetLevel::Strict
-        end
       end
     end
   end

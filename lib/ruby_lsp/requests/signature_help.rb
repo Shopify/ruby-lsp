@@ -19,7 +19,7 @@ module RubyLsp
         end
       end
 
-      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Hash[Symbol, untyped]? context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Hash[Symbol, untyped]? context, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         super()
 

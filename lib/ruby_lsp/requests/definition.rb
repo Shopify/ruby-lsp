@@ -11,7 +11,7 @@ module RubyLsp
     class Definition < Request
       extend T::Generic
 
-      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
         @response_builder = ResponseBuilders::CollectionResponseBuilder

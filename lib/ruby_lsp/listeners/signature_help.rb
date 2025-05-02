@@ -6,7 +6,7 @@ module RubyLsp
     class SignatureHelp
       include Requests::Support::Common
 
-      #: (ResponseBuilders::SignatureHelp response_builder, GlobalState global_state, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
+      #: (ResponseBuilders::SignatureHelp response_builder, GlobalState global_state, NodeContext node_context, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, node_context, dispatcher, sorbet_level)
         @sorbet_level = sorbet_level
         @response_builder = response_builder
@@ -19,7 +19,7 @@ module RubyLsp
 
       #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
-        return if sorbet_level_true_or_higher?(@sorbet_level)
+        return if @sorbet_level.true_or_higher?
 
         message = node.message
         return unless message

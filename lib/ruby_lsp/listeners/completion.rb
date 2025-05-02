@@ -50,7 +50,7 @@ module RubyLsp
         "__LINE__",
       ].freeze
 
-      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, RubyDocument::SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, String? trigger_character) -> void
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, String? trigger_character) -> void
       def initialize( # rubocop:disable Metrics/ParameterLists
         response_builder,
         global_state,
@@ -100,7 +100,7 @@ module RubyLsp
       def on_constant_read_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
+        return unless @sorbet_level.ignore?
 
         name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
@@ -125,7 +125,7 @@ module RubyLsp
       def on_constant_path_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
+        return unless @sorbet_level.ignore?
 
         name = begin
           node.full_name
@@ -143,7 +143,7 @@ module RubyLsp
       def on_call_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        if @sorbet_level == RubyDocument::SorbetLevel::Ignore
+        if @sorbet_level.ignore?
           receiver = node.receiver
 
           # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke
@@ -390,7 +390,7 @@ module RubyLsp
       def handle_instance_variable_completion(name, location)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
+        return if @sorbet_level.strict?
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -475,13 +475,13 @@ module RubyLsp
       def complete_methods(node, name)
         # If the node has a receiver, then we don't need to provide local nor keyword completions. Sorbet can provide
         # local and keyword completion for any file with a Sorbet level of true or higher
-        if !sorbet_level_true_or_higher?(@sorbet_level) && !node.receiver
+        if !@sorbet_level.true_or_higher? && !node.receiver
           add_local_completions(node, name)
           add_keyword_completions(node, name)
         end
 
         # Sorbet can provide completion for methods invoked on self on typed true or higher files
-        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
+        return if @sorbet_level.true_or_higher? && self_receiver?(node)
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type

@@ -797,12 +797,16 @@ module RubyLsp
       )
     end
 
-    #: (Document[untyped] document) -> RubyDocument::SorbetLevel
+    #: (Document[untyped] document) -> SorbetLevel
     def sorbet_level(document)
-      return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
-      return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
+      return SorbetLevel.ignore unless document.is_a?(RubyDocument)
+      return SorbetLevel.ignore unless @global_state.has_type_checker
 
-      document.sorbet_level
+      sigil = document.parse_result.magic_comments.find do |comment|
+        comment.key == "typed"
+      end&.value
+
+      SorbetLevel.new(sigil)
     end
 
     #: (Hash[Symbol, untyped] message) -> void

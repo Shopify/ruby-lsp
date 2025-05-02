@@ -8,7 +8,7 @@ module RubyLsp
 
       MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER = 10
 
-      #: (ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)] response_builder, GlobalState global_state, Document::LanguageId language_id, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
+      #: (ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)] response_builder, GlobalState global_state, Document::LanguageId language_id, URI::Generic uri, NodeContext node_context, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, language_id, uri, node_context, dispatcher, sorbet_level) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
@@ -53,7 +53,7 @@ module RubyLsp
       #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         # Sorbet can handle go to definition for methods invoked on self on typed true or higher
-        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
+        return if @sorbet_level.true_or_higher? && self_receiver?(node)
 
         message = node.message
         return unless message
@@ -223,7 +223,7 @@ module RubyLsp
       #: -> void
       def handle_super_node_definition
         # Sorbet can handle super hover on typed true or higher
-        return if sorbet_level_true_or_higher?(@sorbet_level)
+        return if @sorbet_level.true_or_higher?
 
         surrounding_method = @node_context.surrounding_method
         return unless surrounding_method
@@ -276,7 +276,7 @@ module RubyLsp
       def handle_instance_variable_definition(name)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
+        return if @sorbet_level.strict?
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -317,7 +317,7 @@ module RubyLsp
         methods.each do |target_method|
           uri = target_method.uri
           full_path = uri.full_path
-          next if sorbet_level_true_or_higher?(@sorbet_level) && (!full_path || not_in_dependencies?(full_path))
+          next if @sorbet_level.true_or_higher? && (!full_path || not_in_dependencies?(full_path))
 
           @response_builder << Interface::LocationLink.new(
             target_uri: uri.to_s,
@@ -392,7 +392,7 @@ module RubyLsp
           uri = entry.uri
           full_path = uri.full_path
 
-          if @sorbet_level != RubyDocument::SorbetLevel::Ignore && (!full_path || not_in_dependencies?(full_path))
+          if !@sorbet_level.ignore? && (!full_path || not_in_dependencies?(full_path))
             next
           end
 

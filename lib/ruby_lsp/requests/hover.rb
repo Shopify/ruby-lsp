@@ -19,7 +19,7 @@ module RubyLsp
 
       ResponseType = type_member { { fixed: T.nilable(Interface::Hover) } }
 
-      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, RubyDocument::SorbetLevel sorbet_level) -> void
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] position, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
 
