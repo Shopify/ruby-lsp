@@ -36,12 +36,10 @@ module RubyIndexer
 
       # Returns the unresolved name for a constant reference including all parts of a constant path, or `nil` if the
       # constant contains dynamic or incomplete parts
-      #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String?
+      #: (Prism::Node) -> String?
       def constant_name(node)
         case node
-        when Prism::CallNode, Prism::MissingNode
-          nil
-        else
+        when Prism::ConstantPathNode, Prism::ConstantReadNode, Prism::ConstantPathTargetNode
           node.full_name
         end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
