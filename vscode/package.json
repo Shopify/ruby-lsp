@@ -788,9 +788,9 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.10",
+    "@babel/core": "^7.27.1",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.25.1",
+    "@eslint/js": "^9.26.0",
     "@shopify/eslint-plugin": "^47.0.1",
     "@shopify/prettier-config": "^1.1.4",
     "@types/glob": "^8.1.0",
@@ -805,9 +805,9 @@
     "esbuild": "^0.25.3",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^4.3.4",
-    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-prettier": "^5.3.1",
     "glob": "^11.0.2",
-    "mocha": "^11.1.0",
+    "mocha": "^11.2.2",
     "ovsx": "^0.10.2",
     "prettier": "^3.5.3",
     "sinon": "^20.0.0",
