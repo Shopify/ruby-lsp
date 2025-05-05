@@ -23,11 +23,10 @@ users to execute the tests defined in their codebase in 4 modes directly from in
 
 ## Design
 
-Our design was based on 2 main problems that had to be addressed:
+Our design is based on addressing 2 main goals:
 
-1. Ruby has many different test frameworks and we wanted to be able to support all of them without requiring extra
-editor extensions
-2. Whatever solution had to be performant enough to work on large scale applications
+1. Supporting Ruby's diverse test frameworks without the need for extra editor extensions
+2. Ensuring the solution is performant enough for large scale applications
 
 With these in mind, the Ruby LSP populates the test explorer panel through static analysis. Loading every single test
 into memory to perform runtime introspection as a discovery mechanism would not satisfy our performance goal. Tests
