@@ -24,8 +24,11 @@ suite("Workspace", () => {
   let workspacePath: string;
   let workspaceUri: vscode.Uri;
   let workspaceFolder: vscode.WorkspaceFolder;
+  let sandbox: sinon.SinonSandbox;
+  let workspace: Workspace;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-workspace-"),
     );
@@ -36,9 +39,18 @@ suite("Workspace", () => {
       name: path.basename(workspacePath),
       index: 0,
     };
+
+    workspace = new Workspace(
+      context,
+      workspaceFolder,
+      FAKE_TELEMETRY,
+      () => {},
+      new Map(),
+    );
   });
 
   afterEach(() => {
+    sandbox.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
   });
 
@@ -46,17 +58,8 @@ suite("Workspace", () => {
     const gitDir = path.join(workspacePath, ".git");
     fs.mkdirSync(gitDir);
 
-    const workspace = new Workspace(
-      context,
-      workspaceFolder,
-      FAKE_TELEMETRY,
-      () => {},
-      new Map(),
-    );
-
-    const startStub = sinon.stub(workspace, "start");
-    const restartSpy = sinon.spy(workspace, "restart");
-
+    const startStub = sandbox.stub(workspace, "start");
+    const restartSpy = sandbox.spy(workspace, "restart");
     await workspace.activate();
 
     for (let i = 0; i < 4; i++) {
@@ -68,9 +71,6 @@ suite("Workspace", () => {
 
     // Give enough time for all watchers to fire and all debounces to run off
     await new Promise((resolve) => setTimeout(resolve, 10000));
-
-    startStub.restore();
-    restartSpy.restore();
 
     // The start call only happens once because of the inhibitRestart flag
     assert.strictEqual(startStub.callCount, 1);
@@ -85,18 +85,10 @@ suite("Workspace", () => {
     const contents = Buffer.from("hello");
     await vscode.workspace.fs.writeFile(lockfileUri, contents);
 
-    const workspace = new Workspace(
-      context,
-      workspaceFolder,
-      FAKE_TELEMETRY,
-      () => {},
-      new Map(),
-    );
-
     await workspace.activate();
 
-    const startStub = sinon.stub(workspace, "start");
-    const restartSpy = sinon.spy(workspace, "restart");
+    const startStub = sandbox.stub(workspace, "start");
+    const restartSpy = sandbox.spy(workspace, "restart");
 
     for (let i = 0; i < 4; i++) {
       const updateDate = new Date();
@@ -106,9 +98,6 @@ suite("Workspace", () => {
 
     // Give enough time for all watchers to fire and all debounces to run off
     await new Promise((resolve) => setTimeout(resolve, 6000));
-
-    startStub.restore();
-    restartSpy.restore();
 
     assert.strictEqual(startStub.callCount, 0);
     assert.strictEqual(restartSpy.callCount, 0);
