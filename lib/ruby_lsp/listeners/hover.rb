@@ -366,9 +366,10 @@ module RubyLsp
         # We should only show hover for private constants if the constant is defined in the same namespace as the
         # reference
         first_entry = entries.first #: as !nil
-        return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{name}"
+        full_name = first_entry.name
+        return if first_entry.private? && full_name != "#{@node_context.fully_qualified_name}::#{name}"
 
-        categorized_markdown_from_index_entries(name, entries).each do |category, content|
+        categorized_markdown_from_index_entries(full_name, entries).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end
