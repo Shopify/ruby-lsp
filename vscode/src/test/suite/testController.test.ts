@@ -32,7 +32,7 @@ suite("TestController", () => {
   const serverTestUri = vscode.Uri.joinPath(testDirUri, "server_test.rb");
   const storeTestUri = vscode.Uri.joinPath(testDirUri, "store_test.rb");
 
-  beforeEach(() => {
+  beforeEach(async () => {
     sandbox = sinon.createSandbox();
     workspaceStubs = [];
 
@@ -56,6 +56,8 @@ suite("TestController", () => {
 
     setupLspClientStub(workspace);
     stubWorkspaceOperations(LSP_WORKSPACE_FOLDER);
+
+    await controller.activate();
   });
 
   afterEach(() => {
@@ -594,8 +596,11 @@ suite("TestController", () => {
       "fakeTestServer.js",
     );
 
-    // eslint-disable-next-line no-process-env
-    workspace.ruby.mergeComposedEnvironment(process.env as any);
+    workspace.ruby.mergeComposedEnvironment({
+      // eslint-disable-next-line no-process-env
+      ...process.env,
+      RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
+    });
 
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
@@ -646,6 +651,9 @@ suite("TestController", () => {
     }
 
     await workspace.ruby.activateRuby(manager);
+    workspace.ruby.mergeComposedEnvironment({
+      RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
+    });
 
     const testItem = (await controller.findTestItem(
       "ServerTest::NestedTest#test_something",
@@ -739,8 +747,11 @@ suite("TestController", () => {
       "fakeTestServer.js",
     );
 
-    // eslint-disable-next-line no-process-env
-    workspace.ruby.mergeComposedEnvironment(process.env as any);
+    workspace.ruby.mergeComposedEnvironment({
+      // eslint-disable-next-line no-process-env
+      ...process.env,
+      RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
+    });
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
         commands: [`node ${fakeServerPath}`],
@@ -825,8 +836,11 @@ suite("TestController", () => {
       "fakeTestServer.js",
     );
 
-    // eslint-disable-next-line no-process-env
-    workspace.ruby.mergeComposedEnvironment(process.env as any);
+    workspace.ruby.mergeComposedEnvironment({
+      // eslint-disable-next-line no-process-env
+      ...process.env,
+      RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
+    });
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
         commands: [`node ${fakeServerPath}`],

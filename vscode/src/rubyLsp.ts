@@ -161,6 +161,7 @@ export class RubyLsp {
     }
 
     STATUS_EMITTER.fire(this.currentActiveWorkspace());
+    await this.testController.activate();
   }
 
   // Deactivate the extension, which should stop all language servers. Notice that this just stops anything that is

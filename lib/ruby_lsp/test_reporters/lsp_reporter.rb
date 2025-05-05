@@ -4,6 +4,7 @@
 require "json"
 require "socket"
 require "singleton"
+require "tmpdir"
 
 module RubyLsp
   class LspReporter
@@ -14,11 +15,24 @@ module RubyLsp
 
     #: -> void
     def initialize
+      dir_path = File.join(Dir.tmpdir, "ruby-lsp")
+      FileUtils.mkdir_p(dir_path)
+
+      port_path = File.join(dir_path, "test_reporter_port")
       port = ENV["RUBY_LSP_REPORTER_PORT"]
-      @io = if port
-        TCPSocket.new("localhost", port)
-      else
-        # For tests that don't spawn the TCP server
+
+      @io = begin
+        # The environment variable is only used for tests. The extension always writes to the temporary file
+        if port
+          TCPSocket.new("localhost", port)
+        elsif File.exist?(port_path)
+          TCPSocket.new("localhost", File.read(port_path))
+        else
+          # For tests that don't spawn the TCP server
+          require "stringio"
+          StringIO.new
+        end
+      rescue
         require "stringio"
         StringIO.new
       end #: IO | StringIO
@@ -168,7 +182,7 @@ if ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
     File.write(File.join(".ruby-lsp", "coverage_result.json"), coverage_results.to_json)
     RubyLsp::LspReporter.instance.internal_shutdown
   end
-elsif ENV["RUBY_LSP_TEST_RUNNER"] && !ENV["RUBY_LSP_ENV"] == "test"
+elsif ENV["RUBY_LSP_TEST_RUNNER"] && ENV["RUBY_LSP_ENV"] != "test"
   at_exit do
     # If the test process crashed immediately without finishing the tests, we still need to tell the extension that the
     # execution ended so that it can clean up

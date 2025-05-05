@@ -72,12 +72,16 @@ export class TestController {
     ) => Promise<Workspace>,
   ) {
     this.telemetry = telemetry;
-    this.runner = new StreamingRunner(context, this.findTestItem.bind(this));
     this.currentWorkspace = currentWorkspace;
     this.getOrActivateWorkspace = getOrActivateWorkspace;
     this.testController = vscode.tests.createTestController(
       "rubyTests",
       "Ruby Tests",
+    );
+    this.runner = new StreamingRunner(
+      context,
+      this.findTestItem.bind(this),
+      this.testController.createTestRun.bind(this.testController),
     );
 
     if (this.fullDiscovery) {
@@ -496,6 +500,14 @@ export class TestController {
 
     // If not, the ID might be nested under groups
     return this.findTestInGroup(id, testFileItem);
+  }
+
+  async activate() {
+    await this.runner.activate();
+  }
+
+  get streamingPort() {
+    return this.runner.tcpPort;
   }
 
   private async handleTests(
