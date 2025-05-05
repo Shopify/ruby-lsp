@@ -16,7 +16,7 @@ module RubyLsp
     #: -> void
     def initialize
       dir_path = File.join(Dir.tmpdir, "ruby-lsp")
-      FileUtils.mkdir_p(dir_path) unless File.exist?(dir_path)
+      FileUtils.mkdir_p(dir_path)
 
       port_path = File.join(dir_path, "test_reporter_port")
       port = ENV["RUBY_LSP_REPORTER_PORT"]
