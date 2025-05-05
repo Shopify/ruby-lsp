@@ -53,7 +53,7 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [Rails generator integrations](#rails-generator-integrations)
     - [Debug client](#debug-client)
     - [Version manager integrations](#version-manager-integrations)
-    - [Test explorer](#test-explorer)
+    - [Test explorer](test_explorer)
 - [Experimental Features](#experimental-features)
     - [Ancestors Hierarchy Request](#ancestors-hierarchy-request)
     - [Copilot chat participant](#copilot-chat-participant)
@@ -515,19 +515,6 @@ systems, shells, plugins and version managers. On top of those, people configure
 For example, some users may source their version managers in `~/.zshrc` while others will do it in `~/.zshenv`  or `~/.zprofile`.<br><br>
 If experiencing issues, keep in mind that shell configurations could be interfering, check
 [troubleshooting](troubleshooting) and, if none of the listed solutions work, please [report an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
-
-### Test explorer
-
-The Ruby LSP populates VS Code's test explorer view with the test for the current file. See [code lens](#code-lens) for
-another demo.
-
-{: .note }
-The Ruby LSP intentionally does not index every single test in codebases to display in the test explorer. In large
-codebases, trying to do so leads to performance issues, excessive memory usage and difficulties in navigation (due to
-the amount of tests). We may reconsider this in the future, but it will require ensuring that it meets our performance
-requirements
-
-![Test explorer demo](images/test_explorer.png)
 
 ## Experimental Features
 
