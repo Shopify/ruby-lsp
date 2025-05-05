@@ -971,6 +971,46 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_constants_shows_complete_name
+    source = <<~RUBY
+      # typed: ignore
+      module Foo
+        CONST = 123
+
+        module Bar
+          class Baz; end
+
+          Baz
+        end
+      end
+
+      QUX = 42
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+      assert_match("```ruby\nFoo::Bar::Baz\n```", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 2 } },
+      )
+      assert_match("```ruby\nFoo::CONST\n```", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 11 } },
+      )
+      assert_match("```ruby\nQUX\n```", server.pop_response.response.contents.value)
+    end
+  end
+
   private
 
   def create_hover_addon
