@@ -36,9 +36,9 @@ module RubyLsp
     end
 
     # @override
-    #: -> LanguageId
+    #: -> Symbol
     def language_id
-      LanguageId::RBS
+      :rbs
     end
   end
 end

@@ -84,7 +84,7 @@ class RenameTest < Minitest::Test
       end
     RUBY
     global_state.index.index_single(untitled_uri, untitled_source)
-    store.set(uri: untitled_uri, source: untitled_source, version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    store.set(uri: untitled_uri, source: untitled_source, version: 1, language_id: :ruby)
 
     document = RubyLsp::RubyDocument.new(
       source: source,

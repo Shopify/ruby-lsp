@@ -38,11 +38,11 @@ module RubyLsp
       ext = File.extname(path)
       language_id = case ext
       when ".erb", ".rhtml"
-        Document::LanguageId::ERB
+        :erb
       when ".rbs"
-        Document::LanguageId::RBS
+        :rbs
       else
-        Document::LanguageId::Ruby
+        :ruby
       end
 
       set(uri: uri, source: File.binread(path), version: 0, language_id: language_id)
@@ -51,12 +51,12 @@ module RubyLsp
       raise NonExistingDocumentError, uri.to_s
     end
 
-    #: (uri: URI::Generic, source: String, version: Integer, language_id: Document::LanguageId) -> Document[untyped]
+    #: (uri: URI::Generic, source: String, version: Integer, language_id: Symbol) -> Document[untyped]
     def set(uri:, source:, version:, language_id:)
       @state[uri.to_s] = case language_id
-      when Document::LanguageId::ERB
+      when :erb
         ERBDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
-      when Document::LanguageId::RBS
+      when :rbs
         RBSDocument.new(source: source, version: version, uri: uri, global_state: @global_state)
       else
         RubyDocument.new(source: source, version: version, uri: uri, global_state: @global_state)

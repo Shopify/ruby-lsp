@@ -46,9 +46,9 @@ module RubyLsp
     end
 
     # @override
-    #: -> LanguageId
+    #: -> Symbol
     def language_id
-      LanguageId::ERB
+      :erb
     end
 
     #: (Hash[Symbol, untyped] position, ?node_types: Array[singleton(Prism::Node)]) -> NodeContext

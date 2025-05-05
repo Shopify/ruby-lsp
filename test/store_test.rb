@@ -11,7 +11,7 @@ class StoreTest < Minitest::Test
       uri: URI::Generic.from_path(path: "/foo/bar.rb"),
       source: "def foo; end",
       version: 1,
-      language_id: RubyLsp::Document::LanguageId::Ruby,
+      language_id: :ruby,
     )
   end
 
@@ -56,7 +56,7 @@ class StoreTest < Minitest::Test
 
   def test_handling_uris_with_spaces
     uri = URI("file:///foo%20bar/baz.rb")
-    @store.set(uri: uri, source: "def foo; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    @store.set(uri: uri, source: "def foo; end", version: 1, language_id: :ruby)
 
     assert_equal(
       RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri, global_state: @global_state),
@@ -66,7 +66,7 @@ class StoreTest < Minitest::Test
 
   def test_handling_uris_for_unsaved_files
     uri = URI("untitled:Untitled-1")
-    @store.set(uri: uri, source: "def foo; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    @store.set(uri: uri, source: "def foo; end", version: 1, language_id: :ruby)
 
     assert_equal(
       RubyLsp::RubyDocument.new(source: "def foo; end", version: 1, uri: uri, global_state: @global_state),
@@ -81,8 +81,8 @@ class StoreTest < Minitest::Test
     path = "/foo/bar.rb"
     file_uri = URI("file://#{path}")
     git_uri = URI("git://#{path}")
-    @store.set(uri: file_uri, source: "def foo; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
-    @store.set(uri: git_uri, source: "def foo; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    @store.set(uri: file_uri, source: "def foo; end", version: 1, language_id: :ruby)
+    @store.set(uri: git_uri, source: "def foo; end", version: 1, language_id: :ruby)
 
     refute_same(@store.get(file_uri), @store.get(git_uri))
 
@@ -158,7 +158,7 @@ class StoreTest < Minitest::Test
     assert_equal(1, counter)
 
     # After the entry in the storage is updated, the cache is invalidated
-    @store.set(uri: uri, source: "def bar; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    @store.set(uri: uri, source: "def bar; end", version: 1, language_id: :ruby)
     5.times do
       @store.cache_fetch(uri, "textDocument/foldingRange") do
         counter += 1
@@ -170,7 +170,7 @@ class StoreTest < Minitest::Test
 
   def test_push_edits
     uri = URI("file:///foo/bar.rb")
-    @store.set(uri: uri, source: +"def bar; end", version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    @store.set(uri: uri, source: +"def bar; end", version: 1, language_id: :ruby)
 
     # Write puts 'a' in incremental edits
     @store.push_edits(
