@@ -1225,9 +1225,14 @@ export class TestController {
     if (workspaceFolders.length > 1) {
       workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)!;
 
-      initialCollection = initialCollection.get(
+      const workspaceTestItem = initialCollection.get(
         workspaceFolder.uri.toString(),
-      )!.children;
+      );
+      initialCollection = workspaceTestItem!.children;
+
+      if (initialCollection.size === 0) {
+        await this.resolveHandler(workspaceTestItem);
+      }
     }
 
     // Get the hierarchy levels and find the appropriate test item
