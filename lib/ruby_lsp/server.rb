@@ -674,6 +674,10 @@ module RubyLsp
         "Formatting error: #{error.message}",
         type: Constant::MessageType::ERROR,
       ))
+      send_message(Notification.window_log_message(
+        "Formatting failed with\r\n: #{error.full_message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     end
 
@@ -917,6 +921,10 @@ module RubyLsp
     rescue StandardError, LoadError => error
       send_message(Notification.window_show_message(
         "Error running diagnostics: #{error.message}",
+        type: Constant::MessageType::ERROR,
+      ))
+      send_message(Notification.window_log_message(
+        "Diagnostics failed with\r\n: #{error.full_message}",
         type: Constant::MessageType::ERROR,
       ))
       send_empty_response(message[:id])
