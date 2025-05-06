@@ -13,6 +13,12 @@ module RubyLsp
         #: String
         attr_reader :id, :label
 
+        #: URI::Generic
+        attr_reader :uri
+
+        #: Interface::Range
+        attr_reader :range
+
         #: (String id, String label, URI::Generic uri, Interface::Range range, Symbol framework) -> void
         def initialize(id, label, uri, range, framework:)
           @id = id

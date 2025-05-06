@@ -701,7 +701,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
         if (response) {
           const testLenses = response.filter(
-            (codeLens) => (codeLens as CodeLens).data.type === "test",
+            (codeLens) => (codeLens as CodeLens).data?.type === "test",
           ) as CodeLens[];
 
           if (testLenses.length) {

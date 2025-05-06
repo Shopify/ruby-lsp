@@ -23,17 +23,29 @@ module RubyLsp
         @response_builder = ResponseBuilders::CollectionResponseBuilder
           .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
         super()
-        Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
+
+        @test_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
+
+        if global_state.enabled_feature?(:fullTestDiscovery)
+          Listeners::TestStyle.new(@test_builder, global_state, dispatcher, uri)
+          Listeners::SpecStyle.new(@test_builder, global_state, dispatcher, uri)
+        else
+          Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
+        end
 
         Addon.addons.each do |addon|
           addon.create_code_lens_listener(@response_builder, uri, dispatcher)
+
+          if global_state.enabled_feature?(:fullTestDiscovery)
+            addon.create_discover_tests_listener(@test_builder, dispatcher, uri)
+          end
         end
       end
 
       # @override
       #: -> Array[Interface::CodeLens]
       def perform
-        @response_builder.response
+        @response_builder.response + @test_builder.code_lens
       end
     end
   end

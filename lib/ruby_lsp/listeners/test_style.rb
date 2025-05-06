@@ -143,7 +143,7 @@ module RubyLsp
         "ruby"
       end #: String
 
-      #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
+      #: (ResponseBuilders::TestCollection, GlobalState, Prism::Dispatcher, URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         super
 
@@ -165,13 +165,16 @@ module RubyLsp
           @framework = :test_unit if ancestors.include?("Test::Unit::TestCase")
 
           if @framework == :test_unit || non_declarative_minitest?(ancestors, name)
-            @response_builder.add(Requests::Support::TestItem.new(
+            test_item = Requests::Support::TestItem.new(
               name,
               name,
               @uri,
               range_from_node(node),
               framework: @framework,
-            ))
+            )
+
+            @response_builder.add(test_item)
+            @response_builder.add_code_lens(test_item)
           end
         end
       end
@@ -191,13 +194,15 @@ module RubyLsp
         test_item = @response_builder[current_group_name]
         return unless test_item
 
-        test_item.add(Requests::Support::TestItem.new(
+        example_item = Requests::Support::TestItem.new(
           "#{current_group_name}##{name}",
           name,
           @uri,
           range_from_node(node),
           framework: @framework,
-        ))
+        )
+        test_item.add(example_item)
+        @response_builder.add_code_lens(test_item)
       end
 
       #: (Prism::CallNode node) -> void

@@ -4,7 +4,7 @@
 module RubyLsp
   module Listeners
     class SpecStyle < TestDiscovery
-      #: (response_builder: ResponseBuilders::TestCollection, global_state: GlobalState, dispatcher: Prism::Dispatcher, uri: URI::Generic) -> void
+      #: (ResponseBuilders::TestCollection, GlobalState, Prism::Dispatcher, URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
         super
 
@@ -20,7 +20,7 @@ module RubyLsp
         )
       end
 
-      #: (node: Prism::ClassNode) -> void
+      #: (Prism::ClassNode) -> void
       def on_class_node_enter(node)
         with_test_ancestor_tracking(node) do |_, ancestors|
           is_spec = ancestors.include?("Minitest::Spec")
@@ -28,14 +28,14 @@ module RubyLsp
         end
       end
 
-      #: (node: Prism::ClassNode) -> void
+      #: (Prism::ClassNode) -> void
       def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         super
 
         @spec_class_stack.pop
       end
 
-      #: (node: Prism::CallNode) -> void
+      #: (Prism::CallNode) -> void
       def on_call_node_enter(node)
         case node.name
         when :describe
@@ -45,7 +45,7 @@ module RubyLsp
         end
       end
 
-      #: (node: Prism::CallNode) -> void
+      #: (Prism::CallNode) -> void
       def on_call_node_leave(node)
         return unless node.name == :describe && !node.receiver
 
@@ -54,7 +54,7 @@ module RubyLsp
 
       private
 
-      #: (node: Prism::CallNode) -> void
+      #: (Prism::CallNode) -> void
       def handle_describe(node)
         return if node.block.nil?
 
@@ -72,6 +72,7 @@ module RubyLsp
             framework: :minitest,
           )
           @response_builder.add(test_item)
+          @response_builder.add_code_lens(test_item)
         else
           add_to_parent_test_group(description, node)
         end
@@ -79,7 +80,7 @@ module RubyLsp
         @describe_block_nesting << description
       end
 
-      #: (node: Prism::CallNode) -> void
+      #: (Prism::CallNode) -> void
       def handle_example(node)
         return unless in_spec_context?
 
@@ -91,7 +92,7 @@ module RubyLsp
         add_to_parent_test_group(description, node)
       end
 
-      #: (description: String, node: Prism::CallNode) -> void
+      #: (String, Prism::CallNode) -> void
       def add_to_parent_test_group(description, node)
         parent_test_group = find_parent_test_group
         return unless parent_test_group
@@ -104,6 +105,7 @@ module RubyLsp
           framework: :minitest,
         )
         parent_test_group.add(test_item)
+        @response_builder.add_code_lens(test_item)
       end
 
       #: -> Requests::Support::TestItem?
@@ -127,7 +129,7 @@ module RubyLsp
         test_group
       end
 
-      #: (node: Prism::CallNode) -> String?
+      #: (Prism::CallNode) -> String?
       def extract_description(node)
         first_argument = node.arguments&.arguments&.first
         return unless first_argument
