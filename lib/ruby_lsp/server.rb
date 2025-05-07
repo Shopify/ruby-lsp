@@ -1124,7 +1124,7 @@ module RubyLsp
       # Clear all document caches for pull diagnostics
       @global_state.synchronize do
         @store.each do |_uri, document|
-          document.cache_set("textDocument/diagnostic", Document::EMPTY_CACHE)
+          document.clear_cache("textDocument/diagnostic")
         end
       end
 
@@ -1280,9 +1280,25 @@ module RubyLsp
         # allocations and garbage collections are faster
         GC.compact unless @test_mode
 
+        @global_state.synchronize do
+          # If we linearize ancestors while the index is not fully populated, we may end up caching incorrect results
+          # that were missing namespaces. After indexing is complete, we need to clear the ancestors cache and start
+          # again
+          @global_state.index.clear_ancestors
+
+          # The results for code lens depend on ancestor linearization, so we need to clear any previously computed
+          # responses
+          @store.each { |_uri, document| document.clear_cache("textDocument/codeLens") }
+        end
+
         # Always end the progress notification even if indexing failed or else it never goes away and the user has no
         # way of dismissing it
         end_progress("indexing-progress")
+
+        # Request a code lens refresh if we populated them before all test parent classes were indexed
+        if @global_state.client_capabilities.supports_code_lens_refresh
+          send_message(Request.new(id: @current_request_id, method: "workspace/codeLens/refresh", params: nil))
+        end
       end
     end
 
