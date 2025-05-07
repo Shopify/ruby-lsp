@@ -1488,6 +1488,45 @@ class ServerTest < Minitest::Test
     assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_reporters/test_unit_reporter.rb", __dir__))
   end
 
+  def test_requests_code_lens_refresh_after_indexing
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {
+          general: { positionEncodings: ["utf-8"] },
+          window: { workDoneProgress: true },
+          workspace: { codeLens: { refreshSupport: true } },
+        },
+      },
+    })
+
+    @server.process_message({ method: "initialized", params: {} })
+
+    wait_for_indexing
+
+    request = find_message(RubyLsp::Request, "workspace/codeLens/refresh")
+    refute_nil(request)
+  end
+
+  def test_busts_ancestor_cache_after_indexing
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: { general: { positionEncodings: ["utf-8"] }, window: { workDoneProgress: true } },
+      },
+    })
+
+    @server.process_message({ method: "initialized", params: {} })
+
+    wait_for_indexing
+
+    assert_empty(@server.global_state.index.instance_variable_get(:@ancestors))
+  end
+
   private
 
   def wait_for_indexing
