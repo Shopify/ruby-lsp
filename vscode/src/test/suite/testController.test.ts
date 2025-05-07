@@ -898,4 +898,22 @@ suite("TestController", () => {
     assert.ok(runStub.passed.calledWith(testItem));
     assert.ok(runStub.end.calledWithExactly());
   }).timeout(10000);
+
+  test("refresh handler clears all items and starts from scratch", async () => {
+    await controller.testController.resolveHandler!(undefined);
+    assert.ok(controller.testController.items.size > 0);
+
+    const replaceSpy = sandbox.spy(controller.testController.items, "replace");
+    const resolveHandlerStub = sandbox.stub().resolves(true);
+    controller.testController.resolveHandler = resolveHandlerStub;
+
+    const source = new vscode.CancellationTokenSource();
+    await controller.testController.refreshHandler!(source.token);
+
+    assert.ok(replaceSpy.calledOnce);
+    assert.ok(replaceSpy.calledWith([]));
+    assert.ok(resolveHandlerStub.calledOnce);
+
+    source.dispose();
+  });
 });
