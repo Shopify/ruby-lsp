@@ -25,8 +25,12 @@ module RubyLsp
 
       #: (ResponseType item) -> void
       def add_code_lens(item)
-        range = item.range
         arguments = [item.uri.to_standardized_path, item.id]
+        start = item.range.start
+        range = Interface::Range.new(
+          start: start,
+          end: Interface::Position.new(line: start.line, character: start.character + 1),
+        )
 
         @code_lens << Interface::CodeLens.new(
           range: range,
@@ -40,7 +44,7 @@ module RubyLsp
         @code_lens << Interface::CodeLens.new(
           range: range,
           command: Interface::Command.new(
-            title: "▶ Run In Terminal",
+            title: "▶ Run in terminal",
             command: "rubyLsp.runTestInTerminal",
             arguments: arguments,
           ),
