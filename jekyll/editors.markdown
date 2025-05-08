@@ -78,7 +78,8 @@ configuration languages (JSON, Lua, ELisp, etc.).
       "inlayHint": {
         "implicitHashValue": true,
         "implicitRescue": true
-      }
+      },
+      "typeCheckerIntegration": "defer"
     },
     "indexing": {
       "excludedPatterns": ["path/to/excluded/file.rb"],
