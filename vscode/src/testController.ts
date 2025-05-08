@@ -86,6 +86,7 @@ export class TestController {
 
     if (this.fullDiscovery) {
       this.testController.resolveHandler = this.resolveHandler.bind(this);
+      this.testController.refreshHandler = this.refreshHandler.bind(this);
     }
 
     this.testCommands = new WeakMap<vscode.TestItem, string>();
@@ -508,6 +509,12 @@ export class TestController {
 
   get streamingPort() {
     return this.runner.tcpPort;
+  }
+
+  private async refreshHandler(_token: vscode.CancellationToken) {
+    this.testController.items.replace([]);
+    this.testController.invalidateTestResults();
+    await this.testController.resolveHandler!(undefined);
   }
 
   private async handleTests(
