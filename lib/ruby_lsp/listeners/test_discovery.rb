@@ -71,7 +71,7 @@ module RubyLsp
         slice.gsub(/((?<=::)|^)[a-z]\w*/, DYNAMIC_REFERENCE_MARKER)
       end
 
-      #: (Prism::ClassNode node, ^(String name, Array[String] ancestors) -> void block) -> void
+      #: (Prism::ClassNode node) { (String name, Array[String] ancestors) -> void } -> void
       def with_test_ancestor_tracking(node, &block)
         @visibility_stack << :public
         name = constant_name(node.constant_path)
