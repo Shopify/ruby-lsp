@@ -17,7 +17,7 @@ type TestEventWithMessage = TestEventId & { message: string };
 
 // All notification types that may be produce by our custom JSON test reporter
 const NOTIFICATION_TYPES = {
-  start: new rpc.NotificationType<TestEventId>("start"),
+  start: new rpc.NotificationType<TestEventId & { line: number }>("start"),
   pass: new rpc.NotificationType<TestEventId>("pass"),
   skip: new rpc.NotificationType<TestEventId>("skip"),
   fail: new rpc.NotificationType<TestEventWithMessage>("fail"),
@@ -40,6 +40,7 @@ export class StreamingRunner implements vscode.Disposable {
   private readonly findTestItem: (
     id: string,
     uri: vscode.Uri,
+    line?: number,
   ) => Promise<vscode.TestItem | undefined>;
 
   private readonly createTestRun: (
@@ -331,14 +332,16 @@ export class StreamingRunner implements vscode.Disposable {
     this.disposables.push(
       this.connection.onNotification(NOTIFICATION_TYPES.start, (params) => {
         this.promises.push(
-          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-            (test) => {
-              if (test) {
-                this.run!.started(test);
-                startTimestamps.set(test.id, Date.now());
-              }
-            },
-          ),
+          this.findTestItem(
+            params.id,
+            vscode.Uri.parse(params.uri),
+            params.line,
+          ).then((test) => {
+            if (test) {
+              this.run!.started(test);
+              startTimestamps.set(test.id, Date.now());
+            }
+          }),
         );
       }),
     );

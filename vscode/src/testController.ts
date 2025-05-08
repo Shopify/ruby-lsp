@@ -463,7 +463,7 @@ export class TestController {
   }
 
   // Public for testing purposes. Finds a test item based on its ID and URI
-  async findTestItem(id: string, uri: vscode.Uri) {
+  async findTestItem(id: string, uri: vscode.Uri, line?: number) {
     if (this.testController.items.size === 0) {
       // Discover and test items immediately if the test explorer hasn't been expanded
       await this.resolveHandler(undefined);
@@ -500,7 +500,7 @@ export class TestController {
     }
 
     // If not, the ID might be nested under groups
-    return this.findTestInGroup(id, testFileItem);
+    return this.findTestInGroup(id, testFileItem, line);
   }
 
   async activate() {
@@ -709,6 +709,7 @@ export class TestController {
   private findTestInGroup(
     id: string,
     group: vscode.TestItem,
+    line: number | undefined,
   ): vscode.TestItem | undefined {
     let found: vscode.TestItem | undefined;
 
@@ -722,7 +723,45 @@ export class TestController {
       return;
     }
 
-    return found.children.get(id) ?? this.findTestInGroup(id, found);
+    // If we found the exact item, return it
+    const target = found.children.get(id);
+    if (target) {
+      return target;
+    }
+
+    // If the ID we're looking for starts with the found item's ID suffixed by a `::`, it means that there are more
+    // groups nested inside and we can continue searching
+    if (id.startsWith(`${found.id}::`)) {
+      return this.findTestInGroup(id, found, line);
+    }
+
+    if (!line) {
+      return;
+    }
+
+    // If neither of the previous are true, then this test is dynamically defined and we need to create the items for it
+    // automatically
+    const label = id.split("#")[1]!;
+    const testItem = this.testController.createTestItem(
+      id,
+      `★ ${label}`,
+      found.uri,
+    );
+
+    testItem.description = "dynamic test";
+
+    testItem.range = new vscode.Range(
+      new vscode.Position(line, 0),
+      new vscode.Position(line, 1),
+    );
+
+    const frameworkTag = found.tags.find((tag) =>
+      tag.id.startsWith("framework"),
+    );
+
+    testItem.tags = frameworkTag ? [DEBUG_TAG, frameworkTag] : [DEBUG_TAG];
+    found.children.add(testItem);
+    return testItem;
   }
 
   // Get an existing terminal or create a new one. For multiple workspaces, it's important to create a new terminal for
