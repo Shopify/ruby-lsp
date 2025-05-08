@@ -965,4 +965,56 @@ suite("TestController", () => {
       dynamicallyDefinedNestedTest.label,
     );
   });
+
+  test("finding a file with no tests inside doesn't reset framework tag", async () => {
+    const discoverTestsStub = sandbox
+      .stub()
+      .onFirstCall()
+      .resolves([
+        {
+          id: "StoreTest",
+          uri: storeTestUri.toString(),
+          label: "StoreTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 30, character: 3 },
+          },
+          tags: ["framework:minitest"],
+          children: [
+            {
+              id: "StoreTest#test_store",
+              uri: storeTestUri.toString(),
+              label: "test_store",
+              range: {
+                start: { line: 1, character: 2 },
+                end: { line: 10, character: 3 },
+              },
+              tags: ["framework:minitest"],
+              children: [],
+            },
+          ],
+        },
+      ])
+      .onSecondCall()
+      .resolves([]);
+
+    const fakeClient = {
+      discoverTests: discoverTestsStub,
+      waitForIndexing: sinon.stub().resolves(),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
+    };
+
+    sandbox.stub(workspace, "lspClient").value(fakeClient);
+
+    await assert.doesNotReject(async () => {
+      await controller.testController.resolveHandler!(undefined);
+    });
+  });
 });
