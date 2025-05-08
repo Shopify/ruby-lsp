@@ -19,7 +19,7 @@ module RubyLsp
         #: Interface::Range
         attr_reader :range
 
-        #: (String id, String label, URI::Generic uri, Interface::Range range, Symbol framework) -> void
+        #: (String id, String label, URI::Generic uri, Interface::Range range, framework: Symbol) -> void
         def initialize(id, label, uri, range, framework:)
           @id = id
           @label = label

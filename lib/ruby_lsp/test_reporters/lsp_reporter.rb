@@ -163,7 +163,7 @@ module RubyLsp
 
     private
 
-    #: (method_name: String?, params: untyped) -> void
+    #: (String?, **untyped) -> void
     def send_message(method_name, **params)
       json_message = { method: method_name, params: params }.to_json
       @io.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
