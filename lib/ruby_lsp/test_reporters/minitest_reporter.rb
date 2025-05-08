@@ -51,16 +51,19 @@ module RubyLsp
 
     #: (singleton(Minitest::Test) test_class, String method_name) -> void
     def prerecord(test_class, method_name)
-      uri = uri_from_test_class(test_class, method_name)
+      uri, line = LspReporter.instance.uri_and_line_for(test_class.instance_method(method_name))
       return unless uri
 
-      LspReporter.instance.start_test(id: "#{test_class.name}##{method_name}", uri: uri)
+      LspReporter.instance.start_test(id: "#{test_class.name}##{method_name}", uri: uri, line: line)
     end
 
     #: (Minitest::Result result) -> void
     def record(result)
       id = "#{result.klass}##{result.name}"
-      uri = uri_from_result(result)
+      file_path, _line = result.source_location
+      return unless file_path
+
+      uri = URI::Generic.from_path(path: File.expand_path(file_path))
 
       if result.error?
         message = result.failures.first.message
@@ -78,26 +81,6 @@ module RubyLsp
     #: -> void
     def report
       LspReporter.instance.shutdown
-    end
-
-    private
-
-    #: (Minitest::Result result) -> URI::Generic
-    def uri_from_result(result)
-      file = result.source_location[0]
-      absolute_path = File.expand_path(file, Dir.pwd)
-      URI::Generic.from_path(path: absolute_path)
-    end
-
-    #: (singleton(Minitest::Test) test_class, String method_name) -> URI::Generic?
-    def uri_from_test_class(test_class, method_name)
-      file, _line = test_class.instance_method(method_name).source_location
-      return unless file
-
-      return if file.start_with?("(eval at ") # test is dynamically defined
-
-      absolute_path = File.expand_path(file, Dir.pwd)
-      URI::Generic.from_path(path: absolute_path)
     end
   end
 end

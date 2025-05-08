@@ -59,6 +59,7 @@ module RubyLsp
           "params" => {
             "id" => "SampleTest#test_that_fails",
             "uri" => uri,
+            "line" => 11,
           },
         },
         {
@@ -74,6 +75,7 @@ module RubyLsp
           "params" => {
             "id" => "SampleTest#test_that_is_pending",
             "uri" => uri,
+            "line" => 15,
           },
         },
         {
@@ -88,6 +90,7 @@ module RubyLsp
           "params" => {
             "id" => "SampleTest#test_that_passes",
             "uri" => uri,
+            "line" => 6,
           },
         },
         {
@@ -102,6 +105,7 @@ module RubyLsp
           "params" => {
             "id" => "SampleTest#test_that_raises",
             "uri" => uri,
+            "line" => 19,
           },
         },
         {

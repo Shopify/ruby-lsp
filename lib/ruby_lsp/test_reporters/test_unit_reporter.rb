@@ -26,12 +26,12 @@ module RubyLsp
     def test_started(test)
       super
 
-      current_test = test
-      @current_uri = uri_for_test(current_test)
-      return unless @current_uri
+      uri, line = LspReporter.instance.uri_and_line_for(test.method(test.method_name))
+      return unless uri
 
-      @current_test_id = "#{current_test.class.name}##{current_test.method_name}"
-      LspReporter.instance.start_test(id: @current_test_id, uri: @current_uri)
+      @current_uri = uri
+      @current_test_id = "#{test.class.name}##{test.method_name}"
+      LspReporter.instance.start_test(id: @current_test_id, uri: @current_uri, line: line)
     end
 
     #: (::Test::Unit::TestCase test) -> void
@@ -60,18 +60,6 @@ module RubyLsp
     #: (Float) -> void
     def finished(elapsed_time)
       LspReporter.instance.shutdown
-    end
-
-    #: (::Test::Unit::TestCase test) -> URI::Generic?
-    def uri_for_test(test)
-      location = test.method(test.method_name).source_location
-      return unless location
-
-      file, _line = location
-      return if file.start_with?("(eval at ")
-
-      absolute_path = File.expand_path(file, Dir.pwd)
-      URI::Generic.from_path(path: absolute_path)
     end
 
     #: -> void

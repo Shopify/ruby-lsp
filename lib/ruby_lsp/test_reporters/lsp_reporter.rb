@@ -59,9 +59,9 @@ module RubyLsp
       @io.close
     end
 
-    #: (id: String, uri: URI::Generic) -> void
-    def start_test(id:, uri:)
-      send_message("start", id: id, uri: uri.to_s)
+    #: (id: String, uri: URI::Generic, ?line: Integer?) -> void
+    def start_test(id:, uri:, line: nil)
+      send_message("start", id: id, uri: uri.to_s, line: line)
     end
 
     #: (id: String, uri: URI::Generic) -> void
@@ -82,6 +82,17 @@ module RubyLsp
     #: (id: String, message: String?, uri: URI::Generic) -> void
     def record_error(id:, message:, uri:)
       send_message("error", id: id, message: message, uri: uri.to_s)
+    end
+
+    #: (Method | UnboundMethod) -> [URI::Generic, Integer?]?
+    def uri_and_line_for(method_object)
+      file_path, line = method_object.source_location
+      return unless file_path
+      return if file_path.start_with?("(eval at ")
+
+      uri = URI::Generic.from_path(path: File.expand_path(file_path))
+      zero_based_line = line ? line - 1 : nil
+      [uri, zero_based_line]
     end
 
     # Gather the results returned by Coverage.result and format like the VS Code test explorer expects
