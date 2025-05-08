@@ -1067,11 +1067,26 @@ export class TestController {
       if (!previousFirstLevel || previousFirstLevel.id !== firstLevel.id) {
         await this.resolveHandler(testItem);
 
-        frameworkTag = testItem.tags.find((tag) =>
-          tag.id.startsWith("framework"),
-        );
+        // Sometimes, we find a file that looks like a test, but isn't. For example, `test_config.rb`. In these cases,
+        // we won't find any tests inside and the associated framework tag won't exist. If we had already found a
+        // framework tag for other files within the same directory, we should continue using that same tag.
+        //
+        // And for the item that has no tests inside, we should delete it since we probably can't run it anyway
+        frameworkTag =
+          testItem.tags.find((tag) => tag.id.startsWith("framework")) ??
+          frameworkTag;
 
-        previousFirstLevel = firstLevel;
+        if (frameworkTag) {
+          previousFirstLevel = firstLevel;
+        } else {
+          if (secondLevel) {
+            secondLevel.children.delete(testItem.id);
+          } else {
+            firstLevel.children.delete(testItem.id);
+          }
+
+          continue;
+        }
       }
 
       this.addFrameworkTag(firstLevel, frameworkTag!);
@@ -1179,7 +1194,7 @@ export class TestController {
     collection: vscode.TestItemCollection,
   ): Promise<{
     firstLevel: vscode.TestItem;
-    secondLevel: vscode.TestItem;
+    secondLevel: vscode.TestItem | undefined;
   }> {
     const { firstLevel, secondLevel } = await this.detectHierarchyLevels(
       uri,
@@ -1222,7 +1237,7 @@ export class TestController {
 
     return {
       firstLevel: firstLevelItem,
-      secondLevel: firstLevelItem,
+      secondLevel: undefined,
     };
   }
 

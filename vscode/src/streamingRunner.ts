@@ -297,10 +297,10 @@ export class StreamingRunner implements vscode.Disposable {
       this.connection.dispose();
     }
 
-    if (this.run!.name === "on_demand_run_in_terminal") {
-      this.run!.end();
+    if (this.run && this.run.name === "on_demand_run_in_terminal") {
+      this.run.end();
+      this.run = undefined;
     }
-    this.run = undefined;
 
     this.executionPromise!.resolve();
   }
