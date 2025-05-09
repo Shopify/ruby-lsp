@@ -14,7 +14,7 @@ Bundler.ui.level = :silent
 
 require "json"
 require "uri"
-require "cgi"
+require "cgi/escape"
 require "set"
 require "strscan"
 require "prism"
