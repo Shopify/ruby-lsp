@@ -429,6 +429,7 @@ suite("TestController", () => {
     };
 
     sandbox.stub(workspace, "lspClient").value(fakeClient);
+    storeTest.children.replace([]);
     await controller.testController.resolveHandler!(storeTest);
 
     const excludedExample = await controller.findTestItem(
