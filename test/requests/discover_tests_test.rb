@@ -129,51 +129,51 @@ module RubyLsp
         assert_equal(9, items.length)
 
         # MyTest
-        assert_equal("▶ Run", items[0].command.title)
+        assert_equal("run_test", items[0].data[:kind])
         assert_equal(
           { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
           JSON.parse(items[0].range.to_json, symbolize_names: true),
         )
-        assert_equal("▶ Run in terminal", items[1].command.title)
+        assert_equal("run_test_in_terminal", items[1].data[:kind])
         assert_equal(
           { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
           JSON.parse(items[1].range.to_json, symbolize_names: true),
         )
-        assert_equal("⚙ Debug", items[2].command.title)
+        assert_equal("debug_test", items[2].data[:kind])
         assert_equal(
           { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
           JSON.parse(items[2].range.to_json, symbolize_names: true),
         )
 
         # test_something
-        assert_equal("▶ Run", items[3].command.title)
+        assert_equal("run_test", items[3].data[:kind])
         assert_equal(
           { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[3].range.to_json, symbolize_names: true),
         )
-        assert_equal("▶ Run in terminal", items[4].command.title)
+        assert_equal("run_test_in_terminal", items[4].data[:kind])
         assert_equal(
           { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[4].range.to_json, symbolize_names: true),
         )
-        assert_equal("⚙ Debug", items[5].command.title)
+        assert_equal("debug_test", items[5].data[:kind])
         assert_equal(
           { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[5].range.to_json, symbolize_names: true),
         )
 
         # test_something_else
-        assert_equal("▶ Run", items[6].command.title)
+        assert_equal("run_test", items[6].data[:kind])
         assert_equal(
           { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
           JSON.parse(items[6].range.to_json, symbolize_names: true),
         )
-        assert_equal("▶ Run in terminal", items[7].command.title)
+        assert_equal("run_test_in_terminal", items[7].data[:kind])
         assert_equal(
           { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
           JSON.parse(items[7].range.to_json, symbolize_names: true),
         )
-        assert_equal("⚙ Debug", items[8].command.title)
+        assert_equal("debug_test", items[8].data[:kind])
         assert_equal(
           { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
           JSON.parse(items[8].range.to_json, symbolize_names: true),
