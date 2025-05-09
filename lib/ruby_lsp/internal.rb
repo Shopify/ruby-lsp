@@ -15,6 +15,11 @@ Bundler.ui.level = :silent
 require "json"
 require "uri"
 require "cgi/escape"
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.5")
+  # Just requiring `cgi/escape` leaves CGI.unescape broken on older rubies
+  # Some background on why this is necessary: https://bugs.ruby-lang.org/issues/21258
+  require "cgi/util"
+end
 require "set"
 require "strscan"
 require "prism"
