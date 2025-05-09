@@ -661,6 +661,11 @@ module RubyIndexer
       @ancestors.clear if original_map.any? { |name, hash| updated_map[name] != hash }
     end
 
+    #: -> void
+    def clear_ancestors
+      @ancestors.clear
+    end
+
     #: -> bool
     def empty?
       @entries.empty?
