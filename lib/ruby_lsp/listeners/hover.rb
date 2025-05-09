@@ -86,6 +86,14 @@ module RubyLsp
 
       #: (Prism::StringNode node) -> void
       def on_string_node_enter(node)
+        if @path && File.basename(@path) == GEMFILE_NAME
+          call_node = @node_context.call_node
+          if call_node && call_node.name == :gem && call_node.arguments&.arguments&.first == node
+            generate_gem_hover(call_node)
+            return
+          end
+        end
+
         generate_heredoc_hover(node)
       end
 
@@ -123,11 +131,6 @@ module RubyLsp
 
       #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
-        if @path && File.basename(@path) == GEMFILE_NAME && node.name == :gem
-          generate_gem_hover(node)
-          return
-        end
-
         return if @sorbet_level.true_or_higher? && self_receiver?(node)
 
         message = node.message
