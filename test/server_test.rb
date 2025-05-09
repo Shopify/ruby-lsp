@@ -1527,6 +1527,72 @@ class ServerTest < Minitest::Test
     assert_empty(@server.global_state.index.instance_variable_get(:@ancestors))
   end
 
+  def test_code_lens_resolve_populates_run_test_command
+    arguments = ["/workspace/test/foo_test.rb", "FooTest#test_something"]
+    @server.process_message({
+      id: 1,
+      method: "codeLens/resolve",
+      params: {
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+        data: {
+          kind: "run_test",
+          arguments: arguments,
+        },
+      },
+    })
+
+    result = find_message(RubyLsp::Result, id: 1)
+    command = result.response[:command]
+
+    assert_equal("▶ Run", command.title)
+    assert_equal("rubyLsp.runTest", command.command)
+    assert_equal(arguments, command.arguments)
+  end
+
+  def test_code_lens_resolve_populates_run_test_in_terminal_command
+    arguments = ["/workspace/test/foo_test.rb", "FooTest#test_something"]
+    @server.process_message({
+      id: 1,
+      method: "codeLens/resolve",
+      params: {
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+        data: {
+          kind: "run_test_in_terminal",
+          arguments: arguments,
+        },
+      },
+    })
+
+    result = find_message(RubyLsp::Result, id: 1)
+    command = result.response[:command]
+
+    assert_equal("▶ Run in terminal", command.title)
+    assert_equal("rubyLsp.runTestInTerminal", command.command)
+    assert_equal(arguments, command.arguments)
+  end
+
+  def test_code_lens_resolve_populates_debug_test_command
+    arguments = ["/workspace/test/foo_test.rb", "FooTest#test_something"]
+    @server.process_message({
+      id: 1,
+      method: "codeLens/resolve",
+      params: {
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+        data: {
+          kind: "debug_test",
+          arguments: arguments,
+        },
+      },
+    })
+
+    result = find_message(RubyLsp::Result, id: 1)
+    command = result.response[:command]
+
+    assert_equal("⚙ Debug", command.title)
+    assert_equal("rubyLsp.debugTest", command.command)
+    assert_equal(arguments, command.arguments)
+  end
+
   private
 
   def wait_for_indexing

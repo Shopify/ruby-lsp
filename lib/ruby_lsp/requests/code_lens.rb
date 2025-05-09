@@ -14,7 +14,7 @@ module RubyLsp
       class << self
         #: -> Interface::CodeLensOptions
         def provider
-          Interface::CodeLensOptions.new(resolve_provider: false)
+          Interface::CodeLensOptions.new(resolve_provider: true)
         end
       end
 
