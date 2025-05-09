@@ -4,8 +4,8 @@
 module RubyLsp
   module ResponseBuilders
     class ResponseBuilder
-      extend T::Generic
       extend T::Sig
+      extend T::Helpers
 
       abstract!
 

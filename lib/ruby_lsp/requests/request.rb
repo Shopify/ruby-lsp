@@ -4,7 +4,7 @@
 module RubyLsp
   module Requests
     class Request
-      extend T::Generic
+      extend T::Helpers
       extend T::Sig
 
       class InvalidFormatter < StandardError; end
