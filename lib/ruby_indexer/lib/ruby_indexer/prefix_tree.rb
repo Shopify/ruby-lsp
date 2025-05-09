@@ -36,7 +36,10 @@ module RubyIndexer
   class PrefixTree
     #: -> void
     def initialize
-      @root = Node.new("", "") #: Node[Value]
+      @root = Node.new(
+        "",
+        "", #: as untyped
+      ) #: Node[Value]
     end
 
     # Search the PrefixTree based on a given `prefix`. If `foo` is an entry in the tree, then searching for `fo` will
