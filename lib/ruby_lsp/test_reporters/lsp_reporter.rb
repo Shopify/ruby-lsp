@@ -126,10 +126,9 @@ module RubyLsp
     def gather_coverage_results
       # Ignore coverage results inside dependencies
       bundle_path = Bundler.bundle_path.to_s
-      default_gems_path = File.dirname(RbConfig::CONFIG["rubylibdir"])
 
       result = Coverage.result.reject do |file_path, _coverage_info|
-        file_path.start_with?(bundle_path, default_gems_path, "eval")
+        file_path.start_with?(bundle_path) || !file_path.start_with?(Dir.pwd)
       end
 
       result.to_h do |file_path, coverage_info|

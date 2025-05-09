@@ -9,8 +9,15 @@ module RubyLsp
   class LspReporterTest < Minitest::Test
     def test_coverage_results_are_formatted_as_vscode_expects
       path = "/path/to/file.rb"
+      Dir.expects(:pwd).returns("/path/to").at_least_once
       Coverage.expects(:result).returns({
         path => {
+          lines: [1, 2, 3, nil],
+          branches: {
+            ["&.", 0, 2, 2, 3, 6] => { [:then, 1, 2, 2, 2, 6] => 0, [:else, 3, 3, 2, 3, 6] => 1 },
+          },
+        },
+        "/unrelated/file.rb" => {
           lines: [1, 2, 3, nil],
           branches: {
             ["&.", 0, 2, 2, 3, 6] => { [:then, 1, 2, 2, 2, 6] => 0, [:else, 3, 3, 2, 3, 6] => 1 },
