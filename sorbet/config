@@ -9,3 +9,4 @@
 --enable-experimental-rbs-signatures
 --enable-experimental-rbs-assertions
 --suppress-error-code=7019
+--cache-dir=sorbet/cache

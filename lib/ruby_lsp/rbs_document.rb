@@ -2,11 +2,8 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  #: [ParseResultType = Array[RBS::AST::Declarations::Base]]
   class RBSDocument < Document
-    extend T::Generic
-
-    ParseResultType = type_member { { fixed: T::Array[RBS::AST::Declarations::Base] } }
-
     #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
       @syntax_error = false #: bool

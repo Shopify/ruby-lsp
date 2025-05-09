@@ -32,14 +32,14 @@ module RubyIndexer
   # `Value` type.
   #
   # See https://en.wikipedia.org/wiki/Trie for more information
+  #: [Value]
   class PrefixTree
-    extend T::Generic
-
-    Value = type_member
-
     #: -> void
     def initialize
-      @root = Node.new("", "") #: Node[Value]
+      @root = Node.new(
+        "",
+        "", #: as untyped
+      ) #: Node[Value]
     end
 
     # Search the PrefixTree based on a given `prefix`. If `foo` is an entry in the tree, then searching for `fo` will
@@ -106,11 +106,8 @@ module RubyIndexer
       node
     end
 
+    #: [Value]
     class Node
-      extend T::Generic
-
-      Value = type_member
-
       #: Hash[String, Node[Value]]
       attr_reader :children
 

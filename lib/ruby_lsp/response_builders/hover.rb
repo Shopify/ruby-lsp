@@ -3,11 +3,8 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = String]
     class Hover < ResponseBuilder
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: String } }
-
       #: -> void
       def initialize
         super
