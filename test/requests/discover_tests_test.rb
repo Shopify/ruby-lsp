@@ -97,6 +97,90 @@ module RubyLsp
       end
     end
 
+    def test_collects_code_lenses
+      source = <<~RUBY
+        module Foo
+          class MyTest < Test::Unit::TestCase
+            def test_something; end
+
+            def test_something_else; end
+          end
+        end
+      RUBY
+
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+          module Test
+            module Unit
+              class TestCase; end
+            end
+          end
+        RUBY
+
+        server.global_state.stubs(:enabled_feature?).returns(true)
+
+        server.process_message(id: 1, method: "textDocument/codeLens", params: {
+          textDocument: { uri: uri },
+        })
+
+        # Discard the indexing log message
+        server.pop_response
+        items = get_response(server)
+        assert_equal(9, items.length)
+
+        # MyTest
+        assert_equal("▶ Run", items[0].command.title)
+        assert_equal(
+          { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
+          JSON.parse(items[0].range.to_json, symbolize_names: true),
+        )
+        assert_equal("▶ Run in terminal", items[1].command.title)
+        assert_equal(
+          { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
+          JSON.parse(items[1].range.to_json, symbolize_names: true),
+        )
+        assert_equal("⚙ Debug", items[2].command.title)
+        assert_equal(
+          { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
+          JSON.parse(items[2].range.to_json, symbolize_names: true),
+        )
+
+        # test_something
+        assert_equal("▶ Run", items[3].command.title)
+        assert_equal(
+          { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
+          JSON.parse(items[3].range.to_json, symbolize_names: true),
+        )
+        assert_equal("▶ Run in terminal", items[4].command.title)
+        assert_equal(
+          { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
+          JSON.parse(items[4].range.to_json, symbolize_names: true),
+        )
+        assert_equal("⚙ Debug", items[5].command.title)
+        assert_equal(
+          { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
+          JSON.parse(items[5].range.to_json, symbolize_names: true),
+        )
+
+        # test_something_else
+        assert_equal("▶ Run", items[6].command.title)
+        assert_equal(
+          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          JSON.parse(items[6].range.to_json, symbolize_names: true),
+        )
+        assert_equal("▶ Run in terminal", items[7].command.title)
+        assert_equal(
+          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          JSON.parse(items[7].range.to_json, symbolize_names: true),
+        )
+        assert_equal("⚙ Debug", items[8].command.title)
+        assert_equal(
+          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          JSON.parse(items[8].range.to_json, symbolize_names: true),
+        )
+      end
+    end
+
     def test_ignores_minitest_tests_that_extend_active_support_declarative
       source = <<~RUBY
         class MyTest < ActiveSupport::TestCase
