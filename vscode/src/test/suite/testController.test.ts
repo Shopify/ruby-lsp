@@ -336,7 +336,7 @@ suite("TestController", () => {
     assert.ok(testDir);
     assert.deepStrictEqual(
       testDir!.tags.map((tag) => tag.id),
-      ["test_dir", "debug", "framework:minitest"],
+      ["test_dir", "debug"],
     );
 
     const firstWorkspaceTest = testDir!.children.get(
@@ -345,7 +345,7 @@ suite("TestController", () => {
     assert.ok(firstWorkspaceTest);
     assert.deepStrictEqual(
       firstWorkspaceTest!.tags.map((tag) => tag.id),
-      ["test_file", "debug", "framework:minitest"],
+      ["test_file", "debug"],
     );
 
     // Second workspace
@@ -369,7 +369,7 @@ suite("TestController", () => {
     assert.ok(secondTestDir);
     assert.deepStrictEqual(
       secondTestDir!.tags.map((tag) => tag.id),
-      ["test_dir", "debug", "framework:minitest"],
+      ["test_dir", "debug"],
     );
 
     const otherTest = secondTestDir!.children.get(
@@ -378,7 +378,7 @@ suite("TestController", () => {
     assert.ok(otherTest);
     assert.deepStrictEqual(
       otherTest!.tags.map((tag) => tag.id),
-      ["test_file", "debug", "framework:minitest"],
+      ["test_file", "debug"],
     );
   });
 
@@ -460,7 +460,6 @@ suite("TestController", () => {
     await assertTags(testDir.uri!.toString(), testDir.uri!, controller, [
       "test_dir",
       "debug",
-      "framework:minitest",
     ]);
     await assertTags(serverTest.uri!.toString(), serverTest.uri!, controller, [
       "test_file",
@@ -1018,4 +1017,90 @@ suite("TestController", () => {
       await controller.testController.resolveHandler!(undefined);
     });
   });
+
+  test("running tests lazily discovers framework", async () => {
+    await controller.testController.resolveHandler!(undefined);
+    const testItem = (await controller.findTestItem(
+      testDirUri.toString(),
+      testDirUri,
+    ))!;
+
+    assert.ok(!testItem.tags.some((tag) => tag.id.startsWith("framework:")));
+
+    const fakeServerPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "src",
+      "test",
+      "suite",
+      "fakeTestServer.js",
+    );
+
+    workspace.ruby.mergeComposedEnvironment({
+      // eslint-disable-next-line no-process-env
+      ...process.env,
+      RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
+    });
+
+    sandbox.stub(workspace, "lspClient").value({
+      resolveTestCommands: sinon.stub().resolves({
+        commands: [`node ${fakeServerPath}`],
+        reporterPath: undefined,
+      }),
+      initializeResult: {
+        capabilities: {
+          experimental: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            full_test_discovery: true,
+          },
+        },
+      },
+      waitForIndexing: sandbox.stub().resolves(),
+      discoverTests: sandbox.stub().resolves([
+        {
+          id: "ServerTest",
+          uri: serverTestUri.toString(),
+          label: "ServerTest",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 12, character: 10 },
+          },
+          tags: ["framework:minitest"],
+          children: [
+            {
+              id: "ServerTest#test_something",
+              uri: serverTestUri.toString(),
+              label: "test_something",
+              range: {
+                start: { line: 2, character: 0 },
+                end: { line: 10, character: 10 },
+              },
+              tags: ["framework:minitest"],
+              children: [],
+            },
+          ],
+        },
+      ]),
+    });
+
+    const cancellationSource = new vscode.CancellationTokenSource();
+    const runStub = {
+      started: sinon.stub(),
+      passed: sinon.stub(),
+      enqueued: sinon.stub(),
+      end: sinon.stub(),
+      token: cancellationSource.token,
+      appendOutput: sinon.stub(),
+    } as any;
+    sandbox.stub(controller.testController, "createTestRun").returns(runStub);
+
+    const runRequest = new vscode.TestRunRequest([testItem]);
+    await controller.runTest(runRequest, cancellationSource.token);
+
+    assert.ok(
+      testItem.tags.find((tag) => tag.id.startsWith("framework:minitest")),
+    );
+  }).timeout(10000);
 });
