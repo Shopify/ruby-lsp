@@ -5,8 +5,6 @@ module RubyLsp
   # @abstract
   #: [ParseResultType]
   class Document
-    extend T::Generic
-
     class LocationNotFoundError < StandardError; end
 
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
@@ -166,8 +164,6 @@ module RubyLsp
     class Delete < Edit; end
 
     class Scanner
-      extend T::Sig
-
       LINE_BREAK = 0x0A #: Integer
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = 0xFFFF #: Integer

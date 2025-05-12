@@ -1,7 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "sorbet-runtime"
 require "bundler"
 require "bundler/cli"
 require "bundler/cli/install"
@@ -20,10 +19,15 @@ Bundler.ui.level = :silent
 
 module RubyLsp
   class SetupBundler
-    extend T::Sig
-
     class BundleNotLocked < StandardError; end
     class BundleInstallFailure < StandardError; end
+
+    module ThorPatch
+      #: -> IO
+      def stdout
+        $stderr
+      end
+    end
 
     FOUR_HOURS = 4 * 60 * 60 #: Integer
 
@@ -440,15 +444,7 @@ module RubyLsp
     def patch_thor_to_print_progress_to_stderr!
       return unless defined?(Bundler::Thor::Shell::Basic)
 
-      Bundler::Thor::Shell::Basic.prepend(Module.new do
-        extend T::Sig
-
-        sig { returns(IO) }
-        def stdout
-          $stderr
-        end
-      end)
-
+      Bundler::Thor::Shell::Basic.prepend(ThorPatch)
       Bundler.ui.level = :info
     end
   end
