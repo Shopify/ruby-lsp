@@ -31,29 +31,17 @@ module RubyLsp
 
         @code_lens << Interface::CodeLens.new(
           range: range,
-          command: Interface::Command.new(
-            title: "▶ Run",
-            command: "rubyLsp.runTest",
-            arguments: arguments,
-          ),
+          data: { arguments: arguments, kind: "run_test" },
         )
 
         @code_lens << Interface::CodeLens.new(
           range: range,
-          command: Interface::Command.new(
-            title: "▶ Run in terminal",
-            command: "rubyLsp.runTestInTerminal",
-            arguments: arguments,
-          ),
+          data: { arguments: arguments, kind: "run_test_in_terminal" },
         )
 
         @code_lens << Interface::CodeLens.new(
           range: range,
-          command: Interface::Command.new(
-            title: "⚙ Debug",
-            command: "rubyLsp.debugTest",
-            arguments: arguments,
-          ),
+          data: { arguments: arguments, kind: "debug_test" },
         )
       end
 

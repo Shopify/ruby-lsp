@@ -32,6 +32,8 @@ module RubyLsp
         text_document_document_link(message)
       when "textDocument/codeLens"
         text_document_code_lens(message)
+      when "codeLens/resolve"
+        code_lens_resolve(message)
       when "textDocument/semanticTokens/full"
         text_document_semantic_tokens_full(message)
       when "textDocument/semanticTokens/full/delta"
@@ -1511,6 +1513,27 @@ module RubyLsp
           commands: commands,
           reporterPaths: [Listeners::TestStyle::MINITEST_REPORTER_PATH, Listeners::TestStyle::TEST_UNIT_REPORTER_PATH],
         },
+      ))
+    end
+
+    #: (Hash[Symbol, untyped] message) -> void
+    def code_lens_resolve(message)
+      code_lens = message[:params]
+      args = code_lens.dig(:data, :arguments)
+
+      case code_lens.dig(:data, :kind)
+      when "run_test"
+        code_lens[:command] = Interface::Command.new(title: "▶ Run", command: "rubyLsp.runTest", arguments: args)
+      when "run_test_in_terminal"
+        code_lens[:command] =
+          Interface::Command.new(title: "▶ Run in terminal", command: "rubyLsp.runTestInTerminal", arguments: args)
+      when "debug_test"
+        code_lens[:command] = Interface::Command.new(title: "⚙ Debug", command: "rubyLsp.debugTest", arguments: args)
+      end
+
+      send_message(Result.new(
+        id: message[:id],
+        response: code_lens,
       ))
     end
   end
