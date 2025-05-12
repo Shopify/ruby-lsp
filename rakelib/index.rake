@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "sorbet-runtime"
 require "ruby_lsp/internal"
 
 # Based on https://github.com/ruby/prism/blob/main/rakelib/lex.rake

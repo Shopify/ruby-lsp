@@ -5,9 +5,8 @@ module RubyLsp
   # @abstract
   #: [ParseResultType]
   class Document
-    extend T::Generic
-
     class InvalidLocationError < StandardError; end
+
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code
     MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
@@ -177,8 +176,6 @@ module RubyLsp
     # See https://microsoft.github.io/language-server-protocol/specification/#positionEncodingKind for more information
     # @abstract
     class Scanner
-      extend T::Sig
-
       LINE_BREAK = 0x0A #: Integer
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = 0xFFFF #: Integer
