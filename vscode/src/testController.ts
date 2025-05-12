@@ -1123,18 +1123,16 @@ export class TestController {
       initialCollection,
     );
 
-    const finalCollection = secondLevel
-      ? secondLevel.children
-      : firstLevel.children;
-
+    const finalItem = secondLevel ?? firstLevel;
     const testItem = this.testController.createTestItem(
       uri.toString(),
-      fileName,
+      path.relative(finalItem.uri!.fsPath, uri.fsPath),
       uri,
     );
+
     testItem.canResolveChildren = true;
     testItem.tags = [TEST_FILE_TAG, DEBUG_TAG];
-    finalCollection.add(testItem);
+    finalItem.children.add(testItem);
 
     return { firstLevel, secondLevel, testItem };
   }
