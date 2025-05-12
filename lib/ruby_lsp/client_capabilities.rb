@@ -10,7 +10,8 @@ module RubyLsp
       :supports_request_delegation,
       :window_show_message_supports_extra_properties,
       :supports_progress,
-      :supports_diagnostic_refresh
+      :supports_diagnostic_refresh,
+      :supports_code_lens_refresh
 
     #: -> void
     def initialize
@@ -34,6 +35,9 @@ module RubyLsp
 
       # The editor supports server initiated refresh for diagnostics
       @supports_diagnostic_refresh = false #: bool
+
+      # The editor supports server initiated refresh for code lenses
+      @supports_code_lens_refresh = false #: bool
     end
 
     #: (Hash[Symbol, untyped] capabilities) -> void
@@ -61,6 +65,7 @@ module RubyLsp
       @supports_progress = progress if progress
 
       @supports_diagnostic_refresh = workspace_capabilities.dig(:diagnostics, :refreshSupport) || false
+      @supports_code_lens_refresh = workspace_capabilities.dig(:codeLens, :refreshSupport) || false
     end
 
     #: -> bool

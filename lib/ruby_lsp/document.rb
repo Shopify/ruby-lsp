@@ -85,6 +85,11 @@ module RubyLsp
       @cache[request_name]
     end
 
+    #: (String request_name) -> void
+    def clear_cache(request_name)
+      @cache[request_name] = EMPTY_CACHE
+    end
+
     #: (Array[Hash[Symbol, untyped]] edits, version: Integer) -> void
     def push_edits(edits, version:)
       edits.each do |edit|
