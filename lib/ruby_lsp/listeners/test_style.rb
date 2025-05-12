@@ -202,7 +202,7 @@ module RubyLsp
           framework: @framework,
         )
         test_item.add(example_item)
-        @response_builder.add_code_lens(test_item)
+        @response_builder.add_code_lens(example_item)
       end
 
       #: (Prism::CallNode node) -> void
