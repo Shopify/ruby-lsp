@@ -531,6 +531,8 @@ export class TestController {
       this.testController.items.forEach((test) => items.push(test));
     }
 
+    await this.discoverFrameworkTag(items);
+
     const workspaceToTestItems = new Map<
       vscode.WorkspaceFolder,
       vscode.TestItem[]
@@ -624,6 +626,50 @@ export class TestController {
 
     run.end();
     linkedCancellationSource.dispose();
+  }
+
+  // When trying to a test file or directory, we need to know which framework is used by tests inside of it to resolve
+  // the command correctly. This method will resolve the first test file with children inside to determine the framework
+  // and then set that to all parents
+  private async discoverFrameworkTag(items: vscode.TestItem[]) {
+    const missingFramework = items.filter((item) => {
+      return !item.tags.some((tag) => tag.id.startsWith("framework"));
+    });
+
+    if (missingFramework.length === 0) {
+      return;
+    }
+
+    for (const item of missingFramework) {
+      let testFileItem = item;
+
+      while (!testFileItem.tags.some((tag) => tag === TEST_FILE_TAG)) {
+        let firstChild: vscode.TestItem | undefined;
+
+        testFileItem.children.forEach((child) => {
+          if (firstChild === undefined) firstChild = child;
+        });
+
+        testFileItem = firstChild!;
+      }
+
+      // Handle the case where the test file is empty and has no children
+      await this.resolveHandler(testFileItem);
+      this.setFrameworkTagInAllParents(testFileItem);
+    }
+  }
+
+  private setFrameworkTagInAllParents(item: vscode.TestItem) {
+    const tag = item.tags.find((tag) => tag.id.startsWith("framework"))!;
+    let parent = item.parent;
+
+    while (parent) {
+      if (!parent.tags.some((tag) => tag.id.startsWith("framework"))) {
+        parent.tags = [...parent.tags, tag];
+      }
+
+      parent = parent.parent;
+    }
   }
 
   // Execute all of the test commands reported by the server in the background using JSON RPC to receive streaming
@@ -1048,58 +1094,9 @@ export class TestController {
   ) {
     const initialCollection = item ? item.children : this.testController.items;
     const pattern = this.testPattern(workspaceFolder);
-    let frameworkTag: vscode.TestTag | undefined;
-    let previousFirstLevel: vscode.TestItem | undefined;
 
     for (const uri of await vscode.workspace.findFiles(pattern)) {
-      const itemParts = await this.addTestItemsForFile(
-        uri,
-        workspaceFolder,
-        initialCollection,
-      );
-
-      if (!itemParts) {
-        continue;
-      }
-
-      const { firstLevel, secondLevel, testItem } = itemParts;
-
-      if (!previousFirstLevel || previousFirstLevel.id !== firstLevel.id) {
-        await this.resolveHandler(testItem);
-
-        // Sometimes, we find a file that looks like a test, but isn't. For example, `test_config.rb`. In these cases,
-        // we won't find any tests inside and the associated framework tag won't exist. If we had already found a
-        // framework tag for other files within the same directory, we should continue using that same tag.
-        //
-        // And for the item that has no tests inside, we should delete it since we probably can't run it anyway
-        frameworkTag =
-          testItem.tags.find((tag) => tag.id.startsWith("framework")) ??
-          frameworkTag;
-
-        if (frameworkTag) {
-          previousFirstLevel = firstLevel;
-        } else {
-          if (secondLevel) {
-            secondLevel.children.delete(testItem.id);
-          } else {
-            firstLevel.children.delete(testItem.id);
-          }
-
-          continue;
-        }
-      }
-
-      this.addFrameworkTag(firstLevel, frameworkTag!);
-
-      if (secondLevel) {
-        this.addFrameworkTag(secondLevel, frameworkTag!);
-      }
-    }
-  }
-
-  private addFrameworkTag(item: vscode.TestItem, tag: vscode.TestTag) {
-    if (!item.tags.some((tag) => tag.id.startsWith("framework"))) {
-      item.tags = [...item.tags, tag];
+      await this.addTestItemsForFile(uri, workspaceFolder, initialCollection);
     }
   }
 
