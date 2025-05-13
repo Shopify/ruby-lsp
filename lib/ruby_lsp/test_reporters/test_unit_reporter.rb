@@ -80,3 +80,13 @@ end
 
 Test::Unit::AutoRunner.register_runner(:ruby_lsp) { |_auto_runner| RubyLsp::TestUnitReporter }
 Test::Unit::AutoRunner.default_runner = :ruby_lsp
+
+if RubyLsp::LspReporter.start_coverage?
+  Test::Unit.at_exit do
+    RubyLsp::LspReporter.instance.at_coverage_exit
+  end
+elsif RubyLsp::LspReporter.executed_under_test_runner?
+  Test::Unit.at_exit do
+    RubyLsp::LspReporter.instance.at_exit
+  end
+end

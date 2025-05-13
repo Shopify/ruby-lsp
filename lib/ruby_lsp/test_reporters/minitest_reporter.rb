@@ -86,3 +86,13 @@ module RubyLsp
 end
 
 Minitest.extensions << RubyLsp::MinitestReporter
+
+if RubyLsp::LspReporter.start_coverage?
+  Minitest.after_run do
+    RubyLsp::LspReporter.instance.at_coverage_exit
+  end
+elsif RubyLsp::LspReporter.executed_under_test_runner?
+  Minitest.after_run do
+    RubyLsp::LspReporter.instance.at_exit
+  end
+end
