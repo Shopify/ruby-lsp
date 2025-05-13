@@ -28,7 +28,6 @@ import {
   FeatureState,
   ServerCapabilities,
   ErrorCodes,
-  WorkDoneProgress,
 } from "vscode-languageclient/node";
 
 import {
@@ -436,16 +435,17 @@ export default class Client extends LanguageClient implements ClientInterface {
     );
 
     this.indexingPromise = new Promise<void>((resolve) => {
-      const disposable = this.onProgress(
-        WorkDoneProgress.type,
-        "indexing-progress",
-        (value: any) => {
-          if (value.kind === "end") {
-            disposable.dispose();
-            resolve();
-          }
-        },
-      );
+      this.clientOptions.middleware!.handleWorkDoneProgress = (
+        token,
+        params,
+        next,
+      ) => {
+        if (token.toString() === "indexing-progress" && params.kind === "end") {
+          resolve();
+        }
+
+        next(token, params);
+      };
     });
   }
 
