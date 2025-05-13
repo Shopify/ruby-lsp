@@ -6,6 +6,7 @@ module RubyLsp
   class Document
     extend T::Sig
     extend T::Helpers
+    extend T::Generic
 
     class LocationNotFoundError < StandardError; end
 
