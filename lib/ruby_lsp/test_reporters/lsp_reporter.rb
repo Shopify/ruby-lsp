@@ -171,6 +171,30 @@ module RubyLsp
       end
     end
 
+    #: -> void
+    def at_coverage_exit
+      coverage_results = gather_coverage_results
+      File.write(File.join(".ruby-lsp", "coverage_result.json"), coverage_results.to_json)
+      internal_shutdown
+    end
+
+    #: -> void
+    def at_exit
+      internal_shutdown unless invoked_shutdown
+    end
+
+    class << self
+      #: -> bool
+      def start_coverage?
+        ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
+      end
+
+      #: -> bool
+      def executed_under_test_runner?
+        !!(ENV["RUBY_LSP_TEST_RUNNER"] && ENV["RUBY_LSP_ENV"] != "test")
+      end
+    end
+
     private
 
     #: (String?, **untyped) -> void
@@ -181,21 +205,9 @@ module RubyLsp
   end
 end
 
-if ENV["RUBY_LSP_TEST_RUNNER"] == "coverage"
+if RubyLsp::LspReporter.start_coverage?
   # Auto start coverage when running tests under that profile. This avoids the user from having to configure coverage
   # manually for their project or adding extra dependencies
   require "coverage"
   Coverage.start(:all)
-
-  at_exit do
-    coverage_results = RubyLsp::LspReporter.instance.gather_coverage_results
-    File.write(File.join(".ruby-lsp", "coverage_result.json"), coverage_results.to_json)
-    RubyLsp::LspReporter.instance.internal_shutdown
-  end
-elsif ENV["RUBY_LSP_TEST_RUNNER"] && ENV["RUBY_LSP_ENV"] != "test"
-  at_exit do
-    # If the test process crashed immediately without finishing the tests, we still need to tell the extension that the
-    # execution ended so that it can clean up
-    RubyLsp::LspReporter.instance.internal_shutdown unless RubyLsp::LspReporter.instance.invoked_shutdown
-  end
 end
