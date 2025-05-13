@@ -141,6 +141,7 @@ module RubyLsp
 
       io = output == :stdout ? stdout : stderr
       refute_empty(io.read)
+
       events
     end
   end

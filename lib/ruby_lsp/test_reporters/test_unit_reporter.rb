@@ -59,6 +59,7 @@ module RubyLsp
 
     #: (Float) -> void
     def finished(elapsed_time)
+      super
       LspReporter.instance.shutdown
     end
 
