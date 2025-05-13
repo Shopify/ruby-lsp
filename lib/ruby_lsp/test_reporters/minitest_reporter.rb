@@ -54,14 +54,18 @@ module RubyLsp
       uri, line = LspReporter.instance.uri_and_line_for(test_class.instance_method(method_name))
       return unless uri
 
-      LspReporter.instance.start_test(id: "#{test_class.name}##{method_name}", uri: uri, line: line)
+      id = "#{test_class.name}##{handle_spec_test_id(method_name, line)}"
+      LspReporter.instance.start_test(id: id, uri: uri, line: line)
     end
 
     #: (Minitest::Result result) -> void
     def record(result)
-      id = "#{result.klass}##{result.name}"
-      file_path, _line = result.source_location
+      file_path, line = result.source_location
       return unless file_path
+
+      zero_based_line = line ? line - 1 : nil
+      name = handle_spec_test_id(result.name, zero_based_line)
+      id = "#{result.klass}##{name}"
 
       uri = URI::Generic.from_path(path: File.expand_path(file_path))
 
@@ -81,6 +85,11 @@ module RubyLsp
     #: -> void
     def report
       LspReporter.instance.shutdown
+    end
+
+    #: (String, Integer?) -> String
+    def handle_spec_test_id(method_name, line)
+      method_name.gsub(/(?<=test_)\d{4}(?=_)/, format("%04d", line.to_s))
     end
   end
 end

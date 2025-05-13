@@ -318,6 +318,24 @@ module RubyLsp
       end
     end
 
+    def test_anonymous_examples
+      source = <<~RUBY
+        class BogusSpec < Minitest::Spec
+          it do
+            assert true
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        examples = items[0][:children]
+        assert_equal(
+          ["test_0002_anonymous"],
+          examples.map { |i| i[:label] },
+        )
+      end
+    end
+
     def test_discovers_nested_specs
       source = File.read("test/fixtures/minitest_spec_nested.rb")
 
@@ -330,7 +348,7 @@ module RubyLsp
 
         nested_specs = top_level_specs[0][:children]
         assert_equal(
-          ["test one", "test two", "test three"],
+          ["test_0005_test one", "test_0009_test two", "test_0013_test three"],
           nested_specs.map { |i| i[:label] },
         )
         assert_all_items_tagged_with(items, :minitest)
@@ -349,7 +367,7 @@ module RubyLsp
 
         nested_specs = top_level_specs[0][:children]
         assert_equal(
-          ["it_level_one", "nested", "it_level_one_again"],
+          ["test_0002_it_level_one", "nested", "test_0014_it_level_one_again"],
           nested_specs.map { |i| i[:label] },
         )
         assert_all_items_tagged_with(items, :minitest)
@@ -362,7 +380,7 @@ module RubyLsp
       with_minitest_spec_configured(source) do |items|
         nested_specs = items[0][:children][0][:children]
         assert_equal(
-          ["dynamic_name"],
+          ["test_0005_dynamic_name"],
           nested_specs.map { |i| i[:label] },
         )
         assert_all_items_tagged_with(items, :minitest)
@@ -393,7 +411,7 @@ module RubyLsp
         assert_equal(["FooSpec"], items.map { |i| i[:label] })
         assert_equal(
           [
-            "does something",
+            "test_0002_does something",
             "test_also_valid",
           ],
           items[0][:children].map { |i| i[:label] },
