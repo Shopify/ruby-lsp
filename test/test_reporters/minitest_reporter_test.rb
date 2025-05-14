@@ -6,8 +6,110 @@ require "test_helper"
 module RubyLsp
   class MinitestReporterTest < Minitest::Test
     def test_minitest_output
+      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_example.rb")
+      string_uri = uri.to_s
+      events = gather_events(uri)
+
+      expected = [
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_that_fails",
+            "uri" => string_uri,
+            "line" => 14,
+          },
+        },
+        {
+          "method" => "fail",
+          "params" => {
+            "id" => "SampleTest#test_that_fails",
+            "message" => "Expected: 1\n  Actual: 2",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_that_is_pending",
+            "uri" => string_uri,
+            "line" => 18,
+          },
+        },
+        {
+          "method" => "skip",
+          "params" => {
+            "id" => "SampleTest#test_that_is_pending",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_that_passes",
+            "uri" => string_uri,
+            "line" => 9,
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "SampleTest#test_that_passes",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_that_raises",
+            "uri" => string_uri,
+            "line" => 22,
+          },
+        },
+        {
+          "method" => "error",
+          "params" => {
+            "id" => "SampleTest#test_that_raises",
+            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:24:in #{error_location}",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "SampleTest#test_with_output",
+            "uri" => string_uri,
+            "line" => 26,
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "SampleTest#test_with_output",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "finish",
+          "params" => {},
+        },
+      ]
+
+      assert_equal(expected, events)
+    end
+
+    def test_crashing_example
+      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_crash_example.rb")
+      events = gather_events(uri, output: :stderr)
+
+      expected = [{ "method" => "finish", "params" => {} }]
+      assert_equal(expected, events)
+    end
+
+    private
+
+    #: (URI::Generic, ?output: Symbol) -> Array[Hash[untyped, untyped]]
+    def gather_events(uri, output: :stdout)
       plugin_path = File.expand_path("lib/ruby_lsp/test_reporters/minitest_reporter.rb")
-      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_example.rb").to_s
 
       server = TCPServer.new("localhost", 0)
       port = server.addr[1].to_s
@@ -32,113 +134,27 @@ module RubyLsp
         end
       end
 
-      _stdin, stdout, _stderr, wait_thr = Open3 #: as untyped
-        .popen3(
-          {
-            "RUBYOPT" => "-rbundler/setup -r#{plugin_path}",
-            "RUBY_LSP_TEST_RUNNER" => "run",
-            "RUBY_LSP_REPORTER_PORT" => port,
-          },
-          "bundle",
-          "exec",
-          "ruby",
-          "-Itest",
-          "test/fixtures/minitest_example.rb",
-        )
+      _stdin, stdout, stderr, wait_thr = Open3.popen3(
+        {
+          "RUBYOPT" => "-rbundler/setup -r#{plugin_path}",
+          "RUBY_LSP_TEST_RUNNER" => "run",
+          "RUBY_LSP_REPORTER_PORT" => port,
+          "RUBY_LSP_ENV" => "production",
+        },
+        "bundle",
+        "exec",
+        "ruby",
+        "-Itest",
+        uri.to_standardized_path, #: as !nil
+      )
 
       receiver.join
       wait_thr.join
       socket&.close
-
-      expected = [
-        {
-          "method" => "start",
-          "params" => {
-            "id" => "SampleTest#test_that_fails",
-            "uri" => uri,
-            "line" => 14,
-          },
-        },
-        {
-          "method" => "fail",
-          "params" => {
-            "id" => "SampleTest#test_that_fails",
-            "message" => "Expected: 1\n  Actual: 2",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "start",
-          "params" => {
-            "id" => "SampleTest#test_that_is_pending",
-            "uri" => uri,
-            "line" => 18,
-          },
-        },
-        {
-          "method" => "skip",
-          "params" => {
-            "id" => "SampleTest#test_that_is_pending",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "start",
-          "params" => {
-            "id" => "SampleTest#test_that_passes",
-            "uri" => uri,
-            "line" => 9,
-          },
-        },
-        {
-          "method" => "pass",
-          "params" => {
-            "id" => "SampleTest#test_that_passes",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "start",
-          "params" => {
-            "id" => "SampleTest#test_that_raises",
-            "uri" => uri,
-            "line" => 22,
-          },
-        },
-        {
-          "method" => "error",
-          "params" => {
-            "id" => "SampleTest#test_that_raises",
-            "message" => "RuntimeError: oops\n    test/fixtures/minitest_example.rb:24:in #{error_location}",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "start",
-          "params" => {
-            "id" => "SampleTest#test_with_output",
-            "uri" => uri,
-            "line" => 26,
-          },
-        },
-        {
-          "method" => "pass",
-          "params" => {
-            "id" => "SampleTest#test_with_output",
-            "uri" => uri,
-          },
-        },
-        {
-          "method" => "finish",
-          "params" => {},
-        },
-      ]
-
-      assert_equal(expected, events)
-      refute_empty(stdout.read)
+      io = output == :stdout ? stdout : stderr
+      refute_empty(io.read)
+      events
     end
-
-    private
 
     def error_location
       ruby_version = Gem::Version.new(RUBY_VERSION)

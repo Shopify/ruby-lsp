@@ -1,6 +1,7 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "English"
 require "json"
 require "socket"
 require "singleton"
@@ -210,4 +211,12 @@ if RubyLsp::LspReporter.start_coverage?
   # manually for their project or adding extra dependencies
   require "coverage"
   Coverage.start(:all)
+end
+
+if RubyLsp::LspReporter.executed_under_test_runner?
+  at_exit do
+    # Regular finish events are registered per test reporter. However, if the test crashes during loading the files
+    # (e.g.: a bad require), we need to ensure that the execution is finalized so that the extension is not left hanging
+    RubyLsp::LspReporter.instance.at_exit if $ERROR_INFO
+  end
 end
