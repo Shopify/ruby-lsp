@@ -67,6 +67,19 @@ class MyTest < Minitest::Spec
 end
 ```
 
+Dynamically defined anonymous tests are not supported properly because there's no way to accurately reconcile their
+discovery with execution.
+
+```ruby
+class MyTest < Minitest::Spec
+  # Anonymous examples (no description) defined dynamically are not supported
+  5.times do
+    it do
+    end
+  end
+end
+```
+
 ### Tests that accept external parameters
 
 In Ruby, you can write tests that accept external parameters, like environment variables.

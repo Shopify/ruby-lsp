@@ -57,11 +57,10 @@ module RubyLsp
       #: (Prism::CallNode) -> void
       def handle_describe(node)
         return if node.block.nil?
+        return unless in_spec_context?
 
         description = extract_description(node)
         return unless description
-
-        return unless in_spec_context?
 
         if @nesting.empty? && @describe_block_nesting.empty?
           test_item = Requests::Support::TestItem.new(
@@ -83,13 +82,15 @@ module RubyLsp
       #: (Prism::CallNode) -> void
       def handle_example(node)
         return unless in_spec_context?
-
         return if @describe_block_nesting.empty? && @nesting.empty?
 
-        description = extract_description(node)
-        return unless description
+        # Minitest formats the descriptions into test method names by using the count of examples with the description
+        # We are not guaranteed to discover examples in the exact order using static analysis, so we use the line number
+        # instead. Note that anonymous examples mixed with meta-programming will not be handled correctly
+        description = extract_description(node) || "anonymous"
+        line = node.location.start_line
 
-        add_to_parent_test_group(description, node)
+        add_to_parent_test_group(format("test_%04d_%s", line, description), node)
       end
 
       #: (String, Prism::CallNode) -> void

@@ -105,6 +105,48 @@ module RubyLsp
       assert_equal(expected, events)
     end
 
+    def test_minitest_spec_output
+      uri = URI::Generic.from_path(path: "#{Dir.pwd}/test/fixtures/minitest_spec_example.rb")
+      string_uri = uri.to_s
+      events = gather_events(uri)
+
+      expected = [
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "MySpec::some scenario#test_0009_works as expected!",
+            "uri" => string_uri,
+            "line" => 9,
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "MySpec::some scenario#test_0009_works as expected!",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "MySpec::some scenario#test_0014_anonymous",
+            "uri" => string_uri,
+            "line" => 14,
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "MySpec::some scenario#test_0014_anonymous",
+            "uri" => string_uri,
+          },
+        },
+        { "method" => "finish", "params" => {} },
+      ]
+
+      assert_equal(expected, events)
+    end
+
     private
 
     #: (URI::Generic, ?output: Symbol) -> Array[Hash[untyped, untyped]]
