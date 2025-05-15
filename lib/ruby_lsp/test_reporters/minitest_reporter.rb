@@ -8,7 +8,6 @@ rescue LoadError
 end
 
 require_relative "lsp_reporter"
-require "ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
   # An override of the default progress reporter in Minitest to add color to the output

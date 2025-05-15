@@ -10,7 +10,6 @@ rescue LoadError
 end
 
 require_relative "lsp_reporter"
-require "ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
   class TestUnitReporter < Test::Unit::UI::Console::TestRunner

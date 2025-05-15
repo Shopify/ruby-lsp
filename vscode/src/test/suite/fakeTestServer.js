@@ -2,7 +2,7 @@ const path = require("path");
 const os = require("os");
 const net = require("net");
 
-const port = process.env.RUBY_LSP_REPORTER_PORT;
+const port = process.env.RUBY_LSP_REPORTER_PORT ? process.env.RUBY_LSP_REPORTER_PORT : process.argv[2].trim();
 
 const socket = new net.Socket();
 socket.connect(parseInt(port, 10), "localhost", () => {
