@@ -174,7 +174,6 @@ export class StreamingRunner implements vscode.Disposable {
       terminal = vscode.window.createTerminal({
         name,
         cwd,
-        env,
       });
     }
 

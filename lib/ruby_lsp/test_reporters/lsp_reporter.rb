@@ -6,6 +6,7 @@ require "json"
 require "socket"
 require "singleton"
 require "tmpdir"
+require_relative "../../ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
   class LspReporter

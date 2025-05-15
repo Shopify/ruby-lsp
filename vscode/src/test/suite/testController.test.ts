@@ -854,14 +854,13 @@ suite("TestController", () => {
       "fakeTestServer.js",
     );
 
-    workspace.ruby.mergeComposedEnvironment({
+    workspace.ruby.mergeComposedEnvironment(
       // eslint-disable-next-line no-process-env
-      ...process.env,
-      RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
-    });
+      process.env as any,
+    );
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
-        commands: [`node ${fakeServerPath}`],
+        commands: [`node ${fakeServerPath} ${controller.streamingPort!}`],
         reporterPath: undefined,
       }),
       initializeResult: {
