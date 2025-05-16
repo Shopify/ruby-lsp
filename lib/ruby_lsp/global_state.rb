@@ -42,6 +42,7 @@ module RubyLsp
       @linters = [] #: Array[String]
       @test_library = "minitest" #: String
       @has_type_checker = true #: bool
+      @type_checker_integration = ENV["RUBY_LSP_BYPASS_TYPECHECKER"] ? :bypass : :defer #: Symbol
       @index = RubyIndexer::Index.new #: RubyIndexer::Index
       @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
       @type_inferrer = TypeInferrer.new(@index) #: TypeInferrer
@@ -143,6 +144,21 @@ module RubyLsp
 
       @test_library = detect_test_library(direct_dependencies)
       notifications << Notification.window_log_message("Detected test library: #{@test_library}")
+
+      case (integration_setting = options.dig(:initializationOptions, :featuresConfiguration, :typeCheckerIntegration))
+      when "defer"
+        @type_checker_integration = :defer
+      when "bypass"
+        @type_checker_integration = :bypass
+      when nil
+        # no op
+      else
+        notifications << Notification.window_log_message(
+          "Invalid typeCheckerIntegration value '#{integration_setting}', must be " \
+            "'defer' or 'bypass'. Using default: #{integration_setting}",
+          type: Constant::MessageType::WARNING,
+        )
+      end
 
       @has_type_checker = detect_typechecker(all_dependencies)
       if @has_type_checker
@@ -256,9 +272,7 @@ module RubyLsp
 
     #: (Array[String] dependencies) -> bool
     def detect_typechecker(dependencies)
-      return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
-
-      dependencies.any?(/^sorbet-static/)
+      @type_checker_integration == :defer && dependencies.any?(/^sorbet-static/)
     rescue Bundler::GemfileNotFound
       false
     end
