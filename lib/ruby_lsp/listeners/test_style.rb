@@ -34,7 +34,7 @@ module RubyLsp
             if tags.include?("test_dir")
               if children.empty?
                 full_files.concat(Dir.glob(
-                  "#{path}/**/{*_test,test_*}.rb",
+                  "#{path}/**/{*_test,test_*,*_spec}.rb",
                   File::Constants::FNM_EXTGLOB | File::Constants::FNM_PATHNAME,
                 ))
               end
@@ -74,13 +74,20 @@ module RubyLsp
           end
 
           unless full_files.empty?
-            commands << "#{BASE_COMMAND} -Itest -e \"ARGV.each { |f| require f }\" #{full_files.join(" ")}"
+            specs, tests = full_files.partition { |path| spec?(path) }
+            commands << "#{BASE_COMMAND} -Itest -e \"ARGV.each { |f| require f }\" #{tests.join(" ")}" if tests.any?
+            commands << "#{BASE_COMMAND} -Ispec -e \"ARGV.each { |f| require f }\" #{specs.join(" ")}" if specs.any?
           end
 
           commands
         end
 
         private
+
+        #: (String) -> bool
+        def spec?(path)
+          File.fnmatch?("**/spec/**/*_spec.rb", path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+        end
 
         #: (String, Hash[String, Hash[Symbol, untyped]]) -> String
         def handle_minitest_groups(file_path, groups_and_examples)
@@ -105,7 +112,8 @@ module RubyLsp
             "(#{regexes.join("|")})"
           end
 
-          "#{BASE_COMMAND} -Itest #{file_path} --name \"/#{regex}/\""
+          load_path = spec?(file_path) ? "-Ispec" : "-Itest"
+          "#{BASE_COMMAND} #{load_path} #{file_path} --name \"/#{regex}/\""
         end
 
         #: (String, Hash[String, Hash[Symbol, untyped]]) -> Array[String]
