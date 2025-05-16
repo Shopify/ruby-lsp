@@ -114,7 +114,7 @@ export class StreamingRunner implements vscode.Disposable {
           abortController,
         );
       } else if (mode === Mode.RunInTerminal) {
-        this.runInTerminal(command, env, workspace.workspaceFolder);
+        this.runInTerminal(command, workspace.workspaceFolder);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.launchDebugger(command, env, workspace);
@@ -164,7 +164,6 @@ export class StreamingRunner implements vscode.Disposable {
   // Run the given test in the terminal
   private runInTerminal(
     command: string,
-    env: NodeJS.ProcessEnv,
     workspaceFolder: vscode.WorkspaceFolder,
   ) {
     const cwd = workspaceFolder.uri.fsPath;
@@ -177,17 +176,14 @@ export class StreamingRunner implements vscode.Disposable {
       });
     }
 
-    // We need to send RUBYOPT since that hooks up the custom LSP test reporters and the user's shell may override it
-    if (process.platform === "win32") {
-      terminal.sendText(`$env:RUBYOPT="${env.RUBYOPT}"; Clear-Host`);
-    } else {
-      terminal.sendText(`export RUBYOPT="${env.RUBYOPT}"; clear`);
-    }
-
     this.terminals.set(name, terminal);
 
     terminal.show();
-    terminal.sendText(command);
+    const exec =
+      path.basename(cwd) === "ruby-lsp" && os.platform() !== "win32"
+        ? "exe/ruby-lsp-test-exec"
+        : "ruby-lsp-test-exec";
+    terminal.sendText(`${exec} ${command}`);
   }
 
   // Spawns the test process and redirects any stdout or stderr output to the test run output

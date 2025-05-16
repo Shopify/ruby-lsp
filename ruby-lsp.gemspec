@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.files = Dir.glob("lib/**/*.rb") + ["README.md", "VERSION", "LICENSE.txt"] + Dir.glob("static_docs/**/*.md")
   s.bindir = "exe"
-  s.executables = ["ruby-lsp", "ruby-lsp-check", "ruby-lsp-launcher"]
+  s.executables = ["ruby-lsp", "ruby-lsp-check", "ruby-lsp-launcher", "ruby-lsp-test-exec"]
   s.require_paths = ["lib"]
 
   # Dependencies must be kept in sync with the checks in the extension side on workspace.ts
