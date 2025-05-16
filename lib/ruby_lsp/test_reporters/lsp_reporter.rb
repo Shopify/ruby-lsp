@@ -20,15 +20,20 @@ module RubyLsp
       dir_path = File.join(Dir.tmpdir, "ruby-lsp")
       FileUtils.mkdir_p(dir_path)
 
-      port_path = File.join(dir_path, "test_reporter_port")
+      # Remove in 1 month once updates have rolled out
+      legacy_port_path = File.join(dir_path, "test_reporter_port")
+      port_db_path = File.join(dir_path, "test_reporter_port_db.json")
       port = ENV["RUBY_LSP_REPORTER_PORT"]
 
       @io = begin
         # The environment variable is only used for tests. The extension always writes to the temporary file
         if port
           TCPSocket.new("localhost", port)
-        elsif File.exist?(port_path)
-          TCPSocket.new("localhost", File.read(port_path))
+        elsif File.exist?(port_db_path)
+          db = JSON.load_file(port_db_path)
+          TCPSocket.new("localhost", db[Dir.pwd])
+        elsif File.exist?(legacy_port_path)
+          TCPSocket.new("localhost", File.read(legacy_port_path))
         else
           # For tests that don't spawn the TCP server
           require "stringio"
