@@ -365,8 +365,8 @@ module RubyLsp
       with_minitest_spec_configured(source) do |items|
         examples = items[0][:children]
         assert_equal(
-          ["test_0002_anonymous"],
-          examples.map { |i| i[:label] },
+          ["BogusSpec#test_0001_anonymous"],
+          examples.map { |i| i[:id] },
         )
       end
     end
@@ -377,14 +377,18 @@ module RubyLsp
       with_minitest_spec_configured(source) do |items|
         top_level_specs = items[0][:children]
         assert_equal(
-          ["First Spec"],
-          top_level_specs.map { |i| i[:label] },
+          ["BogusSpec::First Spec"],
+          top_level_specs.map { |i| i[:id] },
         )
 
         nested_specs = top_level_specs[0][:children]
         assert_equal(
-          ["test_0005_test one", "test_0009_test two", "test_0013_test three"],
-          nested_specs.map { |i| i[:label] },
+          [
+            "BogusSpec::First Spec#test_0004_test one",
+            "BogusSpec::First Spec#test_0008_test two",
+            "BogusSpec::First Spec#test_0012_test three",
+          ],
+          nested_specs.map { |i| i[:id] },
         )
         assert_all_items_tagged_with(items, :minitest)
       end
@@ -397,13 +401,13 @@ module RubyLsp
         top_level_specs = items
         assert_equal(
           ["Foo", "Foo::Bar", "Baz"],
-          top_level_specs.map { |i| i[:label] },
+          top_level_specs.map { |i| i[:id] },
         )
 
         nested_specs = top_level_specs[0][:children]
         assert_equal(
-          ["test_0002_it_level_one", "nested", "test_0014_it_level_one_again"],
-          nested_specs.map { |i| i[:label] },
+          ["Foo#test_0001_it_level_one", "Foo::nested", "Foo#test_0013_it_level_one_again"],
+          nested_specs.map { |i| i[:id] },
         )
         assert_all_items_tagged_with(items, :minitest)
       end
@@ -415,8 +419,8 @@ module RubyLsp
       with_minitest_spec_configured(source) do |items|
         nested_specs = items[0][:children][0][:children]
         assert_equal(
-          ["test_0005_dynamic_name"],
-          nested_specs.map { |i| i[:label] },
+          ["BogusSpec::First Spec#test_0004_dynamic_name"],
+          nested_specs.map { |i| i[:id] },
         )
         assert_all_items_tagged_with(items, :minitest)
       end
@@ -443,14 +447,101 @@ module RubyLsp
       RUBY
 
       with_minitest_spec_configured(source) do |items|
-        assert_equal(["FooSpec"], items.map { |i| i[:label] })
+        assert_equal(["FooSpec"], items.map { |i| i[:id] })
         assert_equal(
           [
-            "test_0002_does something",
-            "test_also_valid",
+            "FooSpec#test_0001_does something",
+            "FooSpec#test_also_valid",
           ],
-          items[0][:children].map { |i| i[:label] },
+          items[0][:children].map { |i| i[:id] },
         )
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
+    def test_handles_specs_with_classes_inside
+      source = <<~RUBY
+        class FooSpec < Minitest::Spec
+          class Bar; end
+
+          it "does something" do
+          end
+        end
+
+        describe "BazSpec" do
+          it "does something" do
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["FooSpec", "BazSpec"], items.map { |i| i[:id] })
+        assert_equal(
+          ["FooSpec#test_0003_does something"],
+          items[0][:children].map { |i| i[:id] },
+        )
+        assert_equal(
+          ["BazSpec#test_0008_does something"],
+          items[1][:children].map { |i| i[:id] },
+        )
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
+    def test_complex_spec_case
+      source = <<~RUBY
+        module First
+          module Second
+            module Third
+              class MySpec < Minitest::Spec
+                describe "when something is true" do
+                  describe "and other thing is false" do
+                    it "does what's expected" do
+                      assert(true)
+                    end
+                  end
+
+                  class NestedSpec < Minitest::Spec
+                    it "does something else" do
+                      assert(true)
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        top_class = "First::Second::Third::MySpec"
+        assert_equal([top_class], items.map { |i| i[:id] })
+        assert_equal(
+          [
+            "#{top_class}::when something is true",
+            "#{top_class}::NestedSpec",
+          ],
+          items[0][:children].map { |i| i[:id] },
+        )
+        assert_equal(
+          [
+            "#{top_class}::when something is true::and other thing is false",
+          ],
+          items[0][:children][0][:children].map { |i| i[:id] },
+        )
+        assert_equal(
+          [
+            "#{top_class}::NestedSpec#test_0012_does something else",
+          ],
+          items[0][:children][1][:children].map { |i| i[:id] },
+        )
+        assert_equal(
+          [
+            "#{top_class}::when something is true::and other thing is false#test_0006_does what's expected",
+          ],
+          items[0][:children][0][:children][0][:children].map { |i| i[:id] },
+        )
+
         assert_all_items_tagged_with(items, :minitest)
       end
     end

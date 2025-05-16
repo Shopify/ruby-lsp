@@ -3,17 +3,31 @@
 require "minitest/spec"
 require "minitest/autorun"
 
-Minitest::Test.i_suck_and_my_tests_are_order_dependent!
+Minitest::Spec.i_suck_and_my_tests_are_order_dependent!
 
-class MySpec < Minitest::Spec
-  describe "some scenario" do
-    it "works as expected!" do
-      assert_equal(1, 1)
-    end
+module First
+  module Second
+    module Third
+      class MySpec < Minitest::Spec
+        # Anonymous example
+        it do
+          assert_equal(1, 1)
+        end
 
-    # Anonymous example
-    it do
-      assert_equal(2, 2)
+        describe "when something is true" do
+          describe "and other thing is false" do
+            it "does what's expected" do
+              assert(true)
+            end
+          end
+
+          class NestedSpec < Minitest::Spec
+            it "does something else" do
+              assert(true)
+            end
+          end
+        end
+      end
     end
   end
 end
