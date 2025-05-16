@@ -33,7 +33,6 @@ module RubyLsp
           [
             "Foo::FooTest",
             "Foo::Bar::BarTest",
-            "Foo::Bar::BarTest::Baz::BazTest",
             "Foo::Baz::BazTest",
             "Foo::Bar::FooBarTest",
             "Foo::Bar::FooBar::Test",
@@ -42,11 +41,43 @@ module RubyLsp
         )
 
         assert_equal(["test_foo", "test_foo_2"], items[0][:children].map { |i| i[:label] })
-        assert_equal(["test_bar"], items[1][:children].map { |i| i[:label] })
-        assert_equal(["test_baz", "test_baz_2"], items[2][:children].map { |i| i[:label] })
-        assert_equal(["test_baz"], items[3][:children].map { |i| i[:label] })
-        assert_equal(["test_foo_bar", "test_foo_bar_2"], items[4][:children].map { |i| i[:label] })
-        assert_equal(["test_foo_bar_baz"], items[5][:children].map { |i| i[:label] })
+        assert_equal(["test_bar", "Foo::Bar::BarTest::Baz::BazTest"], items[1][:children].map { |i| i[:label] })
+        assert_equal(["test_baz", "test_baz_2"], items[1][:children][1][:children].map { |i| i[:label] })
+        assert_equal(["test_baz"], items[2][:children].map { |i| i[:label] })
+        assert_equal(["test_foo_bar", "test_foo_bar_2"], items[3][:children].map { |i| i[:label] })
+        assert_equal(["test_foo_bar_baz"], items[4][:children].map { |i| i[:label] })
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
+    def test_complex_nested_example
+      source = <<~RUBY
+        module First
+          class MyTest < Minitest::Test
+            def test_something; end
+
+            class Random
+              class NestedTest < Minitest::Test
+                def test_something_else; end
+              end
+            end
+          end
+        end
+      RUBY
+
+      with_minitest_test(source) do |items|
+        assert_equal(["First::MyTest"], items.map { |i| i[:id] })
+        assert_equal(
+          [
+            "First::MyTest#test_something",
+            "First::MyTest::Random::NestedTest",
+          ],
+          items[0][:children].map { |i| i[:id] },
+        )
+        assert_equal(
+          ["First::MyTest::Random::NestedTest#test_something_else"],
+          items[0][:children][1][:children].map { |i| i[:id] },
+        )
         assert_all_items_tagged_with(items, :minitest)
       end
     end
@@ -58,15 +89,20 @@ module RubyLsp
         assert_equal(
           [
             "<dynamic_reference>::Baz::Test",
-            "<dynamic_reference>::Baz::Test::NestedTest",
             "<dynamic_reference>::Baz::SomeOtherTest",
           ],
           items.map { |i| i[:label] },
         )
 
-        assert_equal(["test_something", "test_something_else"], items[0][:children].map { |i| i[:label] })
-        assert_equal(["test_nested"], items[1][:children].map { |i| i[:label] })
-        assert_equal(["test_stuff", "test_other_stuff"], items[2][:children].map { |i| i[:label] })
+        assert_equal(
+          ["test_something", "test_something_else", "<dynamic_reference>::Baz::Test::NestedTest"],
+          items[0][:children].map { |i| i[:label] },
+        )
+        assert_equal(
+          ["test_nested"],
+          items[0][:children][2][:children].map { |i| i[:label] },
+        )
+        assert_equal(["test_stuff", "test_other_stuff"], items[1][:children].map { |i| i[:label] })
         assert_all_items_tagged_with(items, :minitest)
       end
     end
@@ -89,10 +125,9 @@ module RubyLsp
       RUBY
 
       with_test_unit(source) do |items|
-        assert_equal(["Foo::MyTest", "Foo::MyTest::NestedTest"], items.map { |i| i[:label] })
-
-        assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
-        assert_equal(["test_hello"], items[1][:children].map { |i| i[:label] })
+        assert_equal(["Foo::MyTest"], items.map { |i| i[:label] })
+        assert_equal(["test_something", "Foo::MyTest::NestedTest"], items[0][:children].map { |i| i[:label] })
+        assert_equal(["test_hello"], items[0][:children][1][:children].map { |i| i[:label] })
         assert_all_items_tagged_with(items, :test_unit)
       end
     end

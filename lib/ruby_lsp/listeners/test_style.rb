@@ -148,6 +148,7 @@ module RubyLsp
         super
 
         @framework = :minitest #: Symbol
+        @parent_stack = [@response_builder] #: Array[(Requests::Support::TestItem | ResponseBuilders::TestCollection)?]
 
         dispatcher.register(
           self,
@@ -173,10 +174,19 @@ module RubyLsp
               framework: @framework,
             )
 
-            @response_builder.add(test_item)
+            last_test_group.add(test_item)
             @response_builder.add_code_lens(test_item)
+            @parent_stack << test_item
+          else
+            @parent_stack << nil
           end
         end
+      end
+
+      #: (Prism::ClassNode node) -> void
+      def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        @parent_stack.pop
+        super
       end
 
       #: (Prism::DefNode node) -> void
@@ -187,12 +197,8 @@ module RubyLsp
         return unless name.start_with?("test_")
 
         current_group_name = RubyIndexer::Index.actual_nesting(@nesting, nil).join("::")
-
-        # If we're finding a test method, but for the wrong framework, then the group test item will not have been
-        # previously pushed and thus we return early and avoid adding items for a framework this listener is not
-        # interested in
-        test_item = @response_builder[current_group_name]
-        return unless test_item
+        parent = @parent_stack.last
+        return unless parent.is_a?(Requests::Support::TestItem)
 
         example_item = Requests::Support::TestItem.new(
           "#{current_group_name}##{name}",
@@ -201,7 +207,7 @@ module RubyLsp
           range_from_node(node),
           framework: @framework,
         )
-        test_item.add(example_item)
+        parent.add(example_item)
         @response_builder.add_code_lens(example_item)
       end
 
@@ -223,6 +229,12 @@ module RubyLsp
       end
 
       private
+
+      #: -> (Requests::Support::TestItem | ResponseBuilders::TestCollection)
+      def last_test_group
+        index = @parent_stack.rindex { |i| i } #: as !nil
+        @parent_stack[index] #: as Requests::Support::TestItem | ResponseBuilders::TestCollection
+      end
 
       #: (Array[String] attached_ancestors, String fully_qualified_name) -> bool
       def non_declarative_minitest?(attached_ancestors, fully_qualified_name)
