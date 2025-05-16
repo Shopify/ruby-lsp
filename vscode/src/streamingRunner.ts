@@ -242,9 +242,18 @@ export class StreamingRunner implements vscode.Disposable {
         const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
 
         await vscode.workspace.fs.createDirectory(tempDirUri);
+
+        const portString = this.tcpPort!.toString();
+        const workspacePathToPortMap = Object.fromEntries(
+          vscode.workspace.workspaceFolders!.map((folder) => [
+            folder.uri.fsPath,
+            portString,
+          ]),
+        );
+
         await vscode.workspace.fs.writeFile(
-          vscode.Uri.joinPath(tempDirUri, "test_reporter_port"),
-          Buffer.from(this.tcpPort!.toString()),
+          vscode.Uri.joinPath(tempDirUri, "test_reporter_port_db.json"),
+          Buffer.from(JSON.stringify(workspacePathToPortMap)),
         );
 
         // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
