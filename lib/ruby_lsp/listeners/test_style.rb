@@ -44,7 +44,7 @@ module RubyLsp
               # If all of the children of the current test group are other groups, then there's no need to add it to the
               # aggregated examples
               unless children.any? && children.all? { |child| child[:tags].include?("test_group") }
-                aggregated_tests[path][item[:label]] = { tags: tags, examples: [] }
+                aggregated_tests[path][item[:id]] = { tags: tags, examples: [] }
               end
             else
               class_name, method_name = item[:id].split("#")

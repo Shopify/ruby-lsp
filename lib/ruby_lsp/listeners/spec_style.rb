@@ -10,6 +10,7 @@ module RubyLsp
 
         @describe_block_nesting = [] #: Array[String]
         @spec_class_stack = [] #: Array[bool]
+        @spec_id = 0 #: Integer
 
         dispatcher.register(
           self,
@@ -63,6 +64,9 @@ module RubyLsp
 
         return unless in_spec_context?
 
+        # Reset spec_id when entering a new group
+        @spec_id = 0
+
         if @nesting.empty? && @describe_block_nesting.empty?
           test_item = Requests::Support::TestItem.new(
             description,
@@ -89,6 +93,9 @@ module RubyLsp
         description = extract_description(node)
         return unless description
 
+        # Increment spec_id for each example
+        @spec_id += 1
+
         add_to_parent_test_group(description, node)
       end
 
@@ -97,8 +104,15 @@ module RubyLsp
         parent_test_group = find_parent_test_group
         return unless parent_test_group
 
+        id = if node.name == :describe
+          "#{@nesting.dup.concat(@describe_block_nesting).join("::")}::#{description}"
+        else
+          method_name = format("test_%04d_%s", @spec_id, description)
+          "#{@nesting.dup.concat(@describe_block_nesting).join("::")}##{method_name}"
+        end
+
         test_item = Requests::Support::TestItem.new(
-          description,
+          id,
           description,
           @uri,
           range_from_node(node),
@@ -123,7 +137,8 @@ module RubyLsp
         return test_group unless nested_describe_groups
 
         nested_describe_groups.each do |description|
-          test_group = test_group[description]
+          id = "#{test_group.id}::#{description}"
+          test_group = test_group[id]
         end
 
         test_group

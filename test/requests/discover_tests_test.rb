@@ -239,16 +239,43 @@ module RubyLsp
 
       with_minitest_spec_configured(source) do |items|
         top_level_specs = items[0][:children]
+
         assert_equal(
           ["First Spec"],
           top_level_specs.map { |i| i[:label] },
         )
+        assert_equal(
+          ["BogusSpec::First Spec"],
+          top_level_specs.map { |i| i[:id] },
+        )
 
         nested_specs = top_level_specs[0][:children]
         assert_equal(
-          ["test one", "test two", "test three"],
+          ["test one", "test two", "test three", "lorem ipsum"],
           nested_specs.map { |i| i[:label] },
         )
+        assert_equal(
+          [
+            "BogusSpec::First Spec#test_0001_test one",
+            "BogusSpec::First Spec#test_0002_test two",
+            "BogusSpec::First Spec#test_0003_test three",
+            "BogusSpec::First Spec::lorem ipsum",
+          ],
+          nested_specs.map { |i| i[:id] },
+        )
+
+        second_level_nest_specs = nested_specs.last[:children]
+        assert_equal(
+          ["dolor sit"],
+          second_level_nest_specs.map { |i| i[:label] },
+        )
+        assert_equal(
+          [
+            "BogusSpec::First Spec::lorem ipsum#test_0001_dolor sit",
+          ],
+          second_level_nest_specs.map { |i| i[:id] },
+        )
+
         assert_all_items_tagged_with(items, :minitest)
       end
     end

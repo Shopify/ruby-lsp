@@ -13,5 +13,11 @@ class BogusSpec < Minitest::Spec
     specify "test three" do
       assert true
     end
+
+    describe "lorem ipsum" do
+      it "dolor sit" do
+        assert false
+      end
+    end
   end
 end
