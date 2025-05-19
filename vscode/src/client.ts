@@ -426,7 +426,10 @@ export default class Client extends LanguageClient implements ClientInterface {
               name: event.errorClass,
               stack: event.stack,
             },
-            { serverVersion: this.serverVersion },
+            {
+              appType: "server",
+              appVersion: this.serverVersion,
+            },
           );
         } else if (event.type === "data" && this.validServerTelemetry(event)) {
           this.telemetry.logUsage(event.eventName, event.data);
@@ -598,7 +601,8 @@ export default class Client extends LanguageClient implements ClientInterface {
               },
               {
                 ...error.data,
-                serverVersion: this.serverVersion,
+                appType: "server",
+                appVersion: this.serverVersion,
                 workspace: new vscode.TelemetryTrustedValue(
                   path.basename(this.workingDirectory),
                 ),
