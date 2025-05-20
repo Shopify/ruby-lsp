@@ -583,6 +583,30 @@ module RubyLsp
       end
     end
 
+    def test_ignores_methods_that_look_like_tests_in_other_namespaces
+      source = <<~RUBY
+        class MyTest < Minitest::Test
+          def test_something; end
+
+          module Foo
+            def test_something_else; end
+          end
+
+          class Bar
+            def test_other_thing; end
+          end
+        end
+      RUBY
+
+      with_minitest_test(source) do |items|
+        assert_equal(["MyTest"], items.map { |i| i[:id] })
+        assert_equal(
+          ["MyTest#test_something"],
+          items.dig(0, :children).map { |i| i[:id] },
+        )
+      end
+    end
+
     private
 
     def create_test_discovery_addon
