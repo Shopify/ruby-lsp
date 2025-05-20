@@ -235,13 +235,8 @@ export class StreamingRunner implements vscode.Disposable {
         this.tcpPort =
           typeof address === "string" ? address : address.port.toString();
 
-        const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
-
-        await vscode.workspace.fs.createDirectory(tempDirUri);
-        await vscode.workspace.fs.writeFile(
-          vscode.Uri.joinPath(tempDirUri, "test_reporter_port"),
-          Buffer.from(this.tcpPort!.toString()),
-        );
+        const portString = this.tcpPort!.toString();
+        await this.updatePortMap(portString);
 
         // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
         server.on("connection", (socket) => {
@@ -266,6 +261,40 @@ export class StreamingRunner implements vscode.Disposable {
         resolve(server);
       });
     });
+  }
+
+  private async updatePortMap(portString: string) {
+    const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
+    await vscode.workspace.fs.createDirectory(tempDirUri);
+
+    const workspacePathToPortMap = Object.fromEntries(
+      vscode.workspace.workspaceFolders!.map((folder) => [
+        folder.uri.fsPath,
+        portString,
+      ]),
+    );
+    const mapUri = vscode.Uri.joinPath(
+      tempDirUri,
+      "test_reporter_port_db.json",
+    );
+    let currentMap: Record<string, string>;
+
+    try {
+      const contents = await vscode.workspace.fs.readFile(mapUri);
+      currentMap = JSON.parse(contents.toString());
+    } catch (error: any) {
+      currentMap = {};
+    }
+
+    const updatedMap = {
+      ...currentMap,
+      ...workspacePathToPortMap,
+    };
+
+    await vscode.workspace.fs.writeFile(
+      mapUri,
+      Buffer.from(JSON.stringify(updatedMap)),
+    );
   }
 
   private async finalize(cancellation: boolean) {
