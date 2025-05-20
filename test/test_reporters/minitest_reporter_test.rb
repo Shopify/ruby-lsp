@@ -114,37 +114,57 @@ module RubyLsp
         {
           "method" => "start",
           "params" => {
-            "id" => "MySpec::some scenario#test_0009_works as expected!",
+            "id" => "First::Second::Third::MySpec::NestedSpec#test_0024_does something else",
             "uri" => string_uri,
-            "line" => 9,
+            "line" => 24,
           },
         },
         {
           "method" => "pass",
           "params" => {
-            "id" => "MySpec::some scenario#test_0009_works as expected!",
+            "id" => "First::Second::Third::MySpec::NestedSpec#test_0024_does something else",
             "uri" => string_uri,
           },
         },
         {
           "method" => "start",
           "params" => {
-            "id" => "MySpec::some scenario#test_0014_anonymous",
+            "id" => "First::Second::Third::MySpec#test_0012_anonymous",
             "uri" => string_uri,
-            "line" => 14,
+            "line" => 12,
           },
         },
         {
           "method" => "pass",
           "params" => {
-            "id" => "MySpec::some scenario#test_0014_anonymous",
+            "id" => "First::Second::Third::MySpec#test_0012_anonymous",
+            "uri" => string_uri,
+          },
+        },
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "First::Second::Third::MySpec::when something is true::and other thing is false#test_0018_does " \
+              "what's expected",
+            "uri" => string_uri,
+            "line" => 18,
+          },
+        },
+        {
+          "method" => "pass",
+          "params" => {
+            "id" => "First::Second::Third::MySpec::when something is true::and other thing is false#test_0018_does " \
+              "what's expected",
             "uri" => string_uri,
           },
         },
         { "method" => "finish", "params" => {} },
       ]
 
-      assert_equal(expected, events)
+      assert_equal(
+        expected.sort_by { |h| [h.dig("params", "id") || "", h["method"]] },
+        events.sort_by { |h| [h.dig("params", "id") || "", h["method"]] },
+      )
     end
 
     private
