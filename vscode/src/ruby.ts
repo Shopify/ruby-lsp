@@ -154,6 +154,8 @@ export class Ruby implements RubyInterface {
       } catch (error: any) {
         if (!(error instanceof UntrustedWorkspaceError)) {
           this.telemetry.logError(error, {
+            appType: "extension",
+            appVersion: this.context.extension.packageJSON.version,
             versionManager: this.versionManager.identifier,
             workspace: new vscode.TelemetryTrustedValue(
               this.workspaceFolder.name,
