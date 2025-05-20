@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Append to RUBYOPT the necessary requires to hook our custom test reporters so that results are automatically
+# reflected in the test explorer
+rubyopt = [
+  *ENV["RUBYOPT"],
+  "-rbundler/setup",
+  "-r#{File.expand_path("../lib/ruby_lsp/test_reporters/minitest_reporter", __dir__)}",
+  "-r#{File.expand_path("../lib/ruby_lsp/test_reporters/test_unit_reporter", __dir__)}",
+].join(" ")
+
+# Replace this process with whatever command was passed. We only want to set RUBYOPT.
+# The way you use this executable is by prefixing your test command with `ruby-lsp-test-exec`, like so:
+#  ruby-lsp-test-exec bundle exec ruby -Itest test/example_test.rb
+#  ruby-lsp-test-exec bundle exec ruby -Ispec spec/example_spec.rb
+#  ruby-lsp-test-exec bundle exec rspec spec/example_spec.rb
+exec({ "RUBYOPT" => rubyopt }, *ARGV)

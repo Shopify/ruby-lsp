@@ -107,6 +107,20 @@ Automatically detecting what type of external argument is required for each test
 Code's test explorer doesn't have support for arguments when running tests out of the box and neither do its test
 items accept metadata. This scenario will not be supported by the Ruby LSP.
 
+## Connecting terminal tests to the explorer
+
+When running tests in the terminal through a code lens or test explorer, the Ruby LSP uses the `ruby-lsp-test-exec`
+executable, which hooks the test run to the extension so that we can show test results in the explorer.
+
+By running tests with this executable, even manually written test commands will also have their results reported
+to the test explorer. For example, all of the following will report test statuses to the extension:
+
+```shell
+ruby-lsp-test-exec bundle exec ruby -Itest test/example_test.rb
+ruby-lsp-test-exec bundle exec ruby -Ispec spec/example_spec.rb
+ruby-lsp-test-exec bundle exec rspec spec/example_spec.rb
+```
+
 ## Customization
 
 When tests are running through any execution mode, we set the `RUBY_LSP_TEST_RUNNER` environment variable to allow
