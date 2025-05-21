@@ -607,6 +607,68 @@ module RubyLsp
       end
     end
 
+    def test_spec_ignores_methods_that_look_like_tests_in_other_namespaces
+      source = <<~RUBY
+        class MySpec < Minitest::Spec
+          it "should do something" do
+          end
+
+          module Foo
+            def test_something_else; end
+
+            it "should do something else" do
+            end
+          end
+
+          class Bar
+            def test_other_thing; end
+
+            it "another ignored call" do
+            end
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["MySpec"], items.map { |i| i[:id] })
+        assert_equal(
+          ["MySpec#test_0001_should do something"],
+          items.dig(0, :children).map { |i| i[:id] },
+        )
+      end
+    end
+
+    def test_spec_using_describe_ignores_methods_that_look_like_tests_in_other_namespaces
+      source = <<~RUBY
+        describe "MySpec" do
+          it "should do something" do
+          end
+
+          module Foo
+            def test_something_else; end
+
+            it "should do something else" do
+            end
+          end
+
+          class Bar
+            def test_other_thing; end
+
+            it "another ignored call" do
+            end
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["MySpec"], items.map { |i| i[:id] })
+        assert_equal(
+          ["MySpec#test_0001_should do something"],
+          items.dig(0, :children).map { |i| i[:id] },
+        )
+      end
+    end
+
     private
 
     def create_test_discovery_addon
