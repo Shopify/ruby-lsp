@@ -1102,4 +1102,12 @@ suite("TestController", () => {
       testItem.tags.find((tag) => tag.id.startsWith("framework:minitest")),
     );
   }).timeout(10000);
+
+  test("trying to populate test files twice doesn't do duplicate work", async () => {
+    const spy = sandbox.spy(vscode.workspace, "findFiles");
+    await controller.testController.resolveHandler!(undefined);
+    await controller.testController.resolveHandler!(undefined);
+
+    assert.ok(spy.calledOnce);
+  });
 });

@@ -466,7 +466,15 @@ export class TestController {
   async findTestItem(id: string, uri: vscode.Uri, line?: number) {
     if (this.testController.items.size === 0) {
       // Discover and test items immediately if the test explorer hasn't been expanded
-      await this.resolveHandler(undefined);
+      await vscode.window.withProgress(
+        {
+          title: "Discovering tests",
+          location: vscode.ProgressLocation.Notification,
+        },
+        async (progress) => {
+          await this.resolveHandler(undefined, progress);
+        },
+      );
     }
 
     const parentItem = await this.getParentTestItem(uri);
@@ -1022,9 +1030,15 @@ export class TestController {
 
   private async resolveHandler(
     item: vscode.TestItem | undefined,
+    progress?: vscode.Progress<{ message?: string; increment?: number }>,
   ): Promise<void> {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
+      return;
+    }
+
+    // If we receive another initial resolve request, but the explorer is already populated, skip
+    if (item === undefined && this.testController.items.size > 0) {
       return;
     }
 
@@ -1063,7 +1077,7 @@ export class TestController {
     } else if (workspaceFolders.length === 1) {
       // If there's only one workspace, there's no point in nesting the tests under the workspace name
       await vscode.commands.executeCommand("testing.clearTestResults");
-      await this.gatherWorkspaceTests(workspaceFolders[0], undefined);
+      await this.gatherWorkspaceTests(workspaceFolders[0], undefined, progress);
     } else {
       // If there's more than one workspace, we use them as the top level items
       await vscode.commands.executeCommand("testing.clearTestResults");
@@ -1091,11 +1105,21 @@ export class TestController {
   private async gatherWorkspaceTests(
     workspaceFolder: vscode.WorkspaceFolder,
     item: vscode.TestItem | undefined,
+    progress?: vscode.Progress<{ message?: string; increment?: number }>,
   ) {
     const initialCollection = item ? item.children : this.testController.items;
     const pattern = this.testPattern(workspaceFolder);
+    const filePaths = await vscode.workspace.findFiles(pattern);
+    const increment = Math.floor(filePaths.length / 100);
 
-    for (const uri of await vscode.workspace.findFiles(pattern)) {
+    for (const uri of filePaths) {
+      if (progress) {
+        progress.report({
+          message: `Processing ${path.basename(uri.fsPath)}`,
+          increment,
+        });
+      }
+
       await this.addTestItemsForFile(uri, workspaceFolder, initialCollection);
     }
   }
