@@ -625,7 +625,7 @@ module RubyLsp
         result = server.pop_response.response
         assert_equal(
           [
-            "bundle exec ruby -Ispec /spec/server_spec.rb --name \"/^ServerSpec#test_0003_something\\$/\"",
+            "bundle exec ruby -Ispec /spec/server_spec.rb --name \"/^ServerSpec#test_\\d{4}_something\\$/\"",
             "bundle exec ruby -Ispec -e \"ARGV.each { |f| require f }\" /spec/other_spec.rb",
           ],
           result[:commands],
