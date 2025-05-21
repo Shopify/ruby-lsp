@@ -30,6 +30,30 @@ module RubyLsp
     end
   end
 
+  # This patch is here to prevent other gems from overriding or adding more Minitest reporters. Otherwise, they may
+  # break the integration between the server and extension
+  module PreventReporterOverridePatch
+    @lsp_reporters = [] #: Array[Minitest::AbstractReporter]
+
+    class << self
+      #: Array[Minitest::AbstractReporter]
+      attr_accessor :lsp_reporters
+    end
+
+    # Patch the writer to prevent replacing the entire array
+    #: (untyped) -> void
+    def reporters=(reporters)
+      # Do nothing. We don't want other gems to override our reporter
+    end
+
+    # Patch the reader to prevent appending more reporters. This method always returns a temporary copy of the real
+    # reporters so that if any gem mutates it, it continues to return the original reporters
+    #: -> Array[untyped]
+    def reporters
+      PreventReporterOverridePatch.lsp_reporters.dup
+    end
+  end
+
   class MinitestReporter < Minitest::AbstractReporter
     class << self
       #: (Hash[untyped, untyped]) -> void
@@ -45,6 +69,8 @@ module RubyLsp
 
         # Add the JSON RPC reporter
         reporters << MinitestReporter.new
+        PreventReporterOverridePatch.lsp_reporters = reporters
+        Minitest.reporter.class.prepend(PreventReporterOverridePatch)
       end
     end
 
