@@ -103,7 +103,7 @@ module RubyIndexer
     #: (RBS::AST::Members::MethodDefinition member, Entry::Namespace owner) -> void
     def handle_method(member, owner)
       name = member.name.name
-      uri = URI::Generic.from_path(path: member.location.buffer.name)
+      uri = URI::Generic.from_path(path: member.location.buffer.name.to_s)
       location = to_ruby_indexer_location(member.location)
       comments = comments_to_string(member)
 
@@ -267,7 +267,7 @@ module RubyIndexer
 
     #: (RBS::AST::Members::Alias member, Entry::Namespace owner_entry) -> void
     def handle_signature_alias(member, owner_entry)
-      uri = URI::Generic.from_path(path: member.location.buffer.name)
+      uri = URI::Generic.from_path(path: member.location.buffer.name.to_s)
       comments = comments_to_string(member)
 
       entry = Entry::UnresolvedMethodAlias.new(

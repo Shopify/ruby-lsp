@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   # Dependencies must be kept in sync with the checks in the extension side on workspace.ts
   s.add_dependency("language_server-protocol", "~> 3.17.0")
   s.add_dependency("prism", ">= 1.2", "< 2.0")
-  s.add_dependency("rbs", ">= 3", "< 4")
+  s.add_dependency("rbs", ">= 3", "< 5")
   s.add_dependency("sorbet-runtime", ">= 0.5.10782")
 
   s.required_ruby_version = ">= 3.0"
