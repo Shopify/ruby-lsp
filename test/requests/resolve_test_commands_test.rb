@@ -706,6 +706,51 @@ module RubyLsp
         )
       end
     end
+
+    def test_resolve_test_command_for_minitest_spec_with_backticks
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "ServerSpec",
+                uri: "file:///spec/server_spec.rb",
+                label: "ServerSpec",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:minitest", "test_group"],
+                children: [
+                  {
+                    id: "ServerSpec#test_0001_uses `SomeClass` to do something",
+                    uri: "file:///spec/server_spec.rb",
+                    label: "test_server",
+                    range: {
+                      start: { line: 1, character: 2 },
+                      end: { line: 10, character: 3 },
+                    },
+                    tags: ["framework:minitest"],
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          [
+            "bundle exec ruby -Ispec /spec/server_spec.rb --name " \
+              "\"/^ServerSpec#test_\\d{4}_uses\\ \\`SomeClass\\`\\ to\\ do\\ something\\$/\"",
+          ],
+          result[:commands],
+        )
+      end
+    end
   end
 
   class ResolveTestCommandsTestUnitTest < Minitest::Test
