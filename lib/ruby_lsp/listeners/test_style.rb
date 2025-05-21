@@ -197,6 +197,18 @@ module RubyLsp
         super
       end
 
+      #: (Prism::ModuleNode node) -> void
+      def on_module_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        @parent_stack << nil
+        super
+      end
+
+      #: (Prism::ModuleNode node) -> void
+      def on_module_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        @parent_stack.pop
+        super
+      end
+
       #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         return if @visibility_stack.last != :public
