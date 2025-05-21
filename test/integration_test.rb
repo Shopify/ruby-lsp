@@ -95,7 +95,7 @@ class IntegrationTest < Minitest::Test
         GEM
           remote: https://rubygems.org/
           specs:
-            stringio (3.1.0)
+            stringio (3.1.7)
 
         PLATFORMS
           arm64-darwin-23
@@ -134,7 +134,7 @@ class IntegrationTest < Minitest::Test
         GEM
           remote: https://rubygems.org/
           specs:
-            stringio (3.1.0)
+            stringio (3.1.7)
 
         PLATFORMS
           arm64-darwin-23
@@ -319,7 +319,7 @@ class IntegrationTest < Minitest::Test
   def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})
     specification = Gem::Specification.find_by_name("ruby-lsp")
     paths = [specification.full_gem_path]
-    paths.concat(specification.dependencies.map { |dep| dep.to_spec.full_gem_path })
+    paths.concat(specification.dependencies.filter_map { |dep| dep.to_spec&.full_gem_path })
 
     load_path = $LOAD_PATH.filter_map do |path|
       next unless paths.any? { |gem_path| path.start_with?(gem_path) } || !path.start_with?(Bundler.bundle_path.to_s)
