@@ -92,7 +92,7 @@ module RubyLsp
         #: (String, Hash[String, Hash[Symbol, untyped]]) -> String
         def handle_minitest_groups(file_path, groups_and_examples)
           regexes = groups_and_examples.flat_map do |group, info|
-            examples = info[:examples]
+            examples = info[:examples].map { |e| e.gsub(/test_\d{4}/, "test_\\d{4}") }
             group_regex = Shellwords.escape(group).gsub(
               Shellwords.escape(TestDiscovery::DYNAMIC_REFERENCE_MARKER),
               ".*",
