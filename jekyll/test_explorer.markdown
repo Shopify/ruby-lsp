@@ -127,25 +127,7 @@ When tests are running through any execution mode, we set the `RUBY_LSP_TEST_RUN
 users to customize behavior of their test suite if needed.
 
 {: .important }
-The Ruby LSP uses a custom test reporter to be able to communicate between extension and server. Some gems that modify
-reporters may break this integration. The `RUBY_LSP_TEST_RUNNER` variable can be used to turn off these gems only when
-running under the Ruby LSP's integrations.
-
-{: .important }
 Using coverage mode **does not require any extra dependencies or configuration** for collecting the coverage data. This is done automatically by the Ruby LSP through Ruby's built-in coverage API.
-
-For example
-
-```ruby
-# test/test_helper.rb
-
-unless ENV["RUBY_LSP_TEST_RUNNER"]
-  # Minitest reporters cannot be used when running through the Ruby LSP integrations as it breaks our custom reporter
-
-  require "minitest/reporters"
-  Minitest::Reporters.use!(...)
-end
-```
 
 Users can also differentiate between the mode of execution, which is the value of the `RUBY_LSP_TEST_RUNNER` variable:
 
