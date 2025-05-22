@@ -250,7 +250,13 @@ export class StreamingRunner implements vscode.Disposable {
 
           if (!this.run) {
             this.run = this.createTestRun(
-              new vscode.TestRunRequest(),
+              new vscode.TestRunRequest(
+                undefined,
+                undefined,
+                undefined,
+                undefined,
+                true,
+              ),
               "on_demand_run_in_terminal",
             );
           }
