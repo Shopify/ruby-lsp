@@ -1,0 +1,14 @@
+Benchmarked in Buk main repository having ~25K ruby files.
+
+                      user     system      total        real
+old-glob          1.019865   0.292442   1.312307 (  1.312549)
+new-index         0.000049   0.000007   0.000056 (  0.000056)
+
+Beign N = number of files
+Beign K = number of files matching the subject/test
+And should be very low (Almost constant)
+
+Space Complexity O(N)
+Time complexity is O(K)
+
+The feature become almost instant 

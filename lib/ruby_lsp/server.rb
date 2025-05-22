@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "benchmark"
+
 module RubyLsp
   class Server < BaseServer
     # Only for testing
@@ -1181,8 +1183,28 @@ module RubyLsp
         return
       end
 
+      $stdout = File.new("benchmark.log", "w")
+      $stdout.sync = true
+
+      Benchmark.bm(15) do |x|
+        x.report("old-glob") do
+          Requests::GoToRelevantFile.new(path, @global_state.workspace_path).perform
+        end
+        x.report("new-index") do
+          Requests::GoToRelevantFileV2.new(
+            path,
+            @global_state.workspace_path,
+            @global_state.index.file_index,
+          ).perform
+        end
+      end
+
       response = {
-        locations: Requests::GoToRelevantFile.new(path, @global_state.workspace_path).perform,
+        locations: Requests::GoToRelevantFileV2.new(
+          path,
+          @global_state.workspace_path,
+          @global_state.index.file_index,
+        ).perform,
       }
       send_message(Result.new(id: message[:id], response: response))
     end
