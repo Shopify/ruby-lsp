@@ -53,6 +53,12 @@ jobs:
         with:
           submodules: "recursive"
 
+      # Spoom (and Tapioca) don't support Ruby 3.1 and won't be installed on it
+      # so we need to remove the Gemfile.lock to avoid errors
+      - name: Remove Gemfile.lock
+        if: matrix.ruby == '3.1'
+        run: rm Gemfile.lock
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@cb0fda56a307b8c78d38320cd40d9eb22a3bf04e # v1.242.0
         with:
