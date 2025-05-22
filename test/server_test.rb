@@ -1593,6 +1593,48 @@ class ServerTest < Minitest::Test
     assert_equal(arguments, command.arguments)
   end
 
+  def test_code_lens_caches_discovered_tests
+    uri = URI::Generic.from_path(path: "/foo.rb")
+    text = <<~RUBY
+      class MyTest < Minitest::Test
+        def test_something
+        end
+      end
+    RUBY
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: text,
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    @server.process_message({
+      id: 1,
+      method: "textDocument/codeLens",
+      params: {
+        textDocument: { uri: uri },
+      },
+    })
+
+    result = find_message(RubyLsp::Result, id: 1)
+    assert_equal(6, result.response.length)
+
+    RubyLsp::Requests::DiscoverTests.any_instance.expects(:perform).never
+    @server.process_message({
+      id: 2,
+      method: "rubyLsp/discoverTests",
+      params: {
+        textDocument: { uri: uri },
+      },
+    })
+  end
+
   private
 
   def wait_for_indexing

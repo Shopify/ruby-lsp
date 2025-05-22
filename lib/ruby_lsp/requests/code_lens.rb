@@ -18,13 +18,15 @@ module RubyLsp
         end
       end
 
-      #: (GlobalState global_state, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
-      def initialize(global_state, uri, dispatcher)
+      #: (GlobalState, RubyDocument | ERBDocument, Prism::Dispatcher) -> void
+      def initialize(global_state, document, dispatcher)
         @response_builder = ResponseBuilders::CollectionResponseBuilder
           .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
         super()
 
+        @document = document
         @test_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
+        uri = document.uri
 
         if global_state.enabled_feature?(:fullTestDiscovery)
           Listeners::TestStyle.new(@test_builder, global_state, dispatcher, uri)
@@ -45,6 +47,7 @@ module RubyLsp
       # @override
       #: -> Array[Interface::CodeLens]
       def perform
+        @document.cache_set("rubyLsp/discoverTests", @test_builder.response)
         @response_builder.response + @test_builder.code_lens
       end
     end
