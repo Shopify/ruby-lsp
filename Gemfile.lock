@@ -30,7 +30,7 @@ GEM
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
-    parallel (1.26.3)
+    parallel (1.27.0)
     parser (3.3.7.1)
       ast (~> 2.4.1)
       racc
@@ -46,7 +46,7 @@ GEM
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
-    rbi (0.3.1)
+    rbi (0.3.3)
       prism (~> 1.0)
       rbs (>= 3.4.4)
       sorbet-runtime (>= 0.5.9204)
@@ -58,6 +58,8 @@ GEM
     regexp_parser (2.10.0)
     reline (0.6.0)
       io-console (~> 0.5)
+    require-hooks (0.2.2)
+    rexml (3.4.1)
     rubocop (1.72.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -84,31 +86,35 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    sorbet (0.5.12119)
-      sorbet-static (= 0.5.12119)
-    sorbet-runtime (0.5.12119)
-    sorbet-static (0.5.12119-universal-darwin)
-    sorbet-static (0.5.12119-x86_64-linux)
-    sorbet-static-and-runtime (0.5.12119)
-      sorbet (= 0.5.12119)
-      sorbet-runtime (= 0.5.12119)
-    spoom (1.6.1)
+    sorbet (0.5.12123)
+      sorbet-static (= 0.5.12123)
+    sorbet-runtime (0.5.12123)
+    sorbet-static (0.5.12123-aarch64-linux)
+    sorbet-static (0.5.12123-universal-darwin)
+    sorbet-static (0.5.12123-x86_64-linux)
+    sorbet-static-and-runtime (0.5.12123)
+      sorbet (= 0.5.12123)
+      sorbet-runtime (= 0.5.12123)
+    spoom (1.7.0)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
-      rbi (>= 0.2.3)
+      rbi (>= 0.3.3)
+      rbs (>= 4.0.0.dev.4)
+      rexml (>= 3.2.6)
       sorbet-static-and-runtime (>= 0.5.10187)
       thor (>= 0.19.2)
     stringio (3.1.6)
     syntax_tree (6.2.0)
       prettier_print (>= 1.2.0)
-    tapioca (0.16.11)
+    tapioca (0.17.0)
       benchmark
       bundler (>= 2.2.25)
       netrc (>= 0.11.0)
       parallel (>= 1.21.0)
-      rbi (~> 0.2)
+      rbi (>= 0.3.1)
+      require-hooks (>= 0.2.2)
       sorbet-static-and-runtime (>= 0.5.11087)
-      spoom (>= 1.2.0)
+      spoom (>= 1.7.0)
       thor (>= 1.2.0)
       yard-sorbet
     test-unit (3.6.7)
@@ -123,7 +129,9 @@ GEM
       yard
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin
+  universal-darwin
   x64-mingw-ucrt
   x64-mingw32
   x86_64-darwin
