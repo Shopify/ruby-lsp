@@ -78,6 +78,12 @@ module RubyLsp
         self.addons = addon_classes.map(&:new)
         self.file_watcher_addons = addons.select { |addon| addon.respond_to?(:workspace_did_change_watched_files) }
 
+        # Disable addons with { "rubyLsp.addonSettings": {"Addon Name": { enabled: false }}}
+        self.addons = addons.filter do |addon|
+          addon_settings = global_state.settings_for_addon(addon.name) || {}
+          addon_settings.fetch(:enabled, true)
+        end
+
         # Activate each one of the discovered add-ons. If any problems occur in the add-ons, we don't want to
         # fail to boot the server
         addons.each do |addon|
