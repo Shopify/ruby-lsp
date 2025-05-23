@@ -386,12 +386,14 @@ export class TestController {
     const testItem = await this.findTestItem(name, uri);
     if (!testItem) return;
 
-    await vscode.commands.executeCommand(
-      "vscode.revealTestInExplorer",
-      testItem,
-    );
-    const tokenSource = new vscode.CancellationTokenSource();
+    if (mode === Mode.Run) {
+      await vscode.commands.executeCommand(
+        "vscode.revealTestInExplorer",
+        testItem,
+      );
+    }
 
+    const tokenSource = new vscode.CancellationTokenSource();
     tokenSource.token.onCancellationRequested(async () => {
       tokenSource.dispose();
       await vscode.window.showInformationMessage("Cancelled the progress");
