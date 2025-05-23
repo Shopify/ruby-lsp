@@ -21,6 +21,7 @@ async function detectMise() {
   const possiblePaths = [
     vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
     vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
+    vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
   ];
 
   for (const possiblePath of possiblePaths) {

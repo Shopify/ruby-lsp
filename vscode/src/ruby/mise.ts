@@ -48,6 +48,7 @@ export class Mise extends VersionManager {
     //
     // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
     // 2. Homebrew M series
+    // 3. Installation from `apt install mise`
     const possiblePaths = [
       vscode.Uri.joinPath(
         vscode.Uri.file(os.homedir()),
@@ -59,6 +60,12 @@ export class Mise extends VersionManager {
         vscode.Uri.file("/"),
         "opt",
         "homebrew",
+        "bin",
+        "mise",
+      ),
+      vscode.Uri.joinPath(
+        vscode.Uri.file("/"),
+        "usr",
         "bin",
         "mise",
       ),
