@@ -2,10 +2,9 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # @abstract
   #: [ParseResultType]
   class Document
-    extend T::Sig
-    extend T::Helpers
     extend T::Generic
 
     class LocationNotFoundError < StandardError; end
@@ -14,8 +13,6 @@ module RubyLsp
     # This is the same number used by the TypeScript extension in VS Code
     MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
     EMPTY_CACHE = Object.new.freeze #: Object
-
-    abstract!
 
     #: ParseResultType
     attr_reader :parse_result
@@ -63,7 +60,8 @@ module RubyLsp
       self.class == other.class && uri == other.uri && @source == other.source
     end
 
-    sig { abstract.returns(Symbol) }
+    # @abstract
+    #: -> Symbol
     def language_id; end
 
     #: [T] (String request_name) { (Document[ParseResultType] document) -> T } -> T
@@ -122,10 +120,12 @@ module RubyLsp
     end
 
     # Returns `true` if the document was parsed and `false` if nothing needed parsing
-    sig { abstract.returns(T::Boolean) }
+    # @abstract
+    #: -> bool
     def parse!; end
 
-    sig { abstract.returns(T::Boolean) }
+    # @abstract
+    #: -> bool
     def syntax_error?; end
 
     #: -> bool
@@ -150,12 +150,8 @@ module RubyLsp
       Scanner.new(@source, @encoding)
     end
 
+    # @abstract
     class Edit
-      extend T::Sig
-      extend T::Helpers
-
-      abstract!
-
       #: Hash[Symbol, untyped]
       attr_reader :range
 

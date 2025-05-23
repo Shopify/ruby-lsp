@@ -3,15 +3,12 @@
 
 module RubyLsp
   module Requests
+    # @abstract
     class Request
-      extend T::Helpers
-      extend T::Sig
-
       class InvalidFormatter < StandardError; end
 
-      abstract!
-
-      sig { abstract.returns(T.anything) }
+      # @abstract
+      #: -> untyped
       def perform; end
 
       private

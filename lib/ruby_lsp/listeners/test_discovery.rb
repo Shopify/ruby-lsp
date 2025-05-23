@@ -3,10 +3,8 @@
 
 module RubyLsp
   module Listeners
+    # @abstract
     class TestDiscovery
-      extend T::Helpers
-      abstract!
-
       include Requests::Support::Common
 
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"

@@ -2,12 +2,8 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # @abstract
   class BaseServer
-    extend T::Sig
-    extend T::Helpers
-
-    abstract!
-
     #: (**untyped options) -> void
     def initialize(**options)
       @test_mode = options[:test_mode] #: bool?
@@ -130,10 +126,12 @@ module RubyLsp
       @incoming_queue << message
     end
 
-    sig { abstract.params(message: T::Hash[Symbol, T.untyped]).void }
+    # @abstract
+    #: (Hash[Symbol, untyped] message) -> void
     def process_message(message); end
 
-    sig { abstract.void }
+    # @abstract
+    #: -> void
     def shutdown; end
 
     #: (Integer id, String message, ?type: Integer) -> void
