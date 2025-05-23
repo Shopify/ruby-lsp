@@ -7,9 +7,14 @@ parent: VS Code extension
 # Test explorer
 
 {: .important }
-The new test explorer implementation is currently being rolled out to users! You can adopt it early by toggling this
-feature flag in your user or workspace settings<br>
-"rubyLsp.featureFlags": { "fullTestDiscovery": true }
+> The new test explorer implementation is currently being rolled out to users! You can adopt it early by toggling this
+> feature flag in your user or workspace settings
+>
+> ```js
+> "rubyLsp.featureFlags": {
+>   "fullTestDiscovery": true
+> }
+> ```
 
 The Ruby LSP implements VS Code's [test explorer](https://code.visualstudio.com/docs/debugtest/testing), which allows
 users to execute the tests defined in their codebase in 4 modes directly from inside the editor:
