@@ -14,7 +14,7 @@ module RuboCop::Cop; end
 # source://rubocop-rake//lib/rubocop/cop/rake/helper/class_definition.rb#5
 module RuboCop::Cop::Rake; end
 
-# This cop detects class or module definition in a task or namespace,
+# Detects class or module definition in a task or namespace,
 # because it is defined to the top level.
 # It is confusing because the scope looks in the task or namespace,
 # but actually it is defined to the top level.
@@ -231,12 +231,15 @@ end
 module RuboCop::Cop::Rake::Helper::OnTask
   extend ::RuboCop::AST::NodePattern::Macros
 
-  # source://rubocop-rake//lib/rubocop/cop/rake/helper/on_task.rb#14
+  # source://rubocop-rake//lib/rubocop/cop/rake/helper/on_task.rb#16
   def on_send(node); end
 
-  # source://rubocop-rake//lib/rubocop/cop/rake/helper/on_task.rb#10
+  # source://rubocop-rake//lib/rubocop/cop/rake/helper/on_task.rb#12
   def task?(param0 = T.unsafe(nil)); end
 end
+
+# source://rubocop-rake//lib/rubocop/cop/rake/helper/on_task.rb#10
+RuboCop::Cop::Rake::Helper::OnTask::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
 # source://rubocop-rake//lib/rubocop/cop/rake/helper/task_definition.rb#7
 module RuboCop::Cop::Rake::Helper::TaskDefinition
@@ -260,7 +263,7 @@ module RuboCop::Cop::Rake::Helper::TaskName
   def task_name(node); end
 end
 
-# This cop detects method definition in a task or namespace,
+# Detects method definition in a task or namespace,
 # because it is defined to the top level.
 # It is confusing because the scope looks in the task or namespace,
 # but actually it is defined to the top level.
@@ -302,28 +305,24 @@ RuboCop::Cop::Rake::MethodDefinitionInTask::MSG = T.let(T.unsafe(nil), String)
 # source://rubocop-rake//lib/rubocop/rake/version.rb#4
 module RuboCop::Rake; end
 
-# source://rubocop-rake//lib/rubocop/rake.rb#12
-RuboCop::Rake::CONFIG = T.let(T.unsafe(nil), Hash)
-
-# source://rubocop-rake//lib/rubocop/rake.rb#11
-RuboCop::Rake::CONFIG_DEFAULT = T.let(T.unsafe(nil), Pathname)
-
 # source://rubocop-rake//lib/rubocop/rake.rb#8
 class RuboCop::Rake::Error < ::StandardError; end
 
-# Because RuboCop doesn't yet support plugins, we have to monkey patch in a
-# bit of our configuration.
+# A plugin that integrates RuboCop Rake with RuboCop's plugin system.
 #
-# source://rubocop-rake//lib/rubocop/rake/inject.rb#9
-module RuboCop::Rake::Inject
-  class << self
-    # source://rubocop-rake//lib/rubocop/rake/inject.rb#10
-    def defaults!; end
-  end
-end
+# source://rubocop-rake//lib/rubocop/rake/plugin.rb#8
+class RuboCop::Rake::Plugin < ::LintRoller::Plugin
+  # source://rubocop-rake//lib/rubocop/rake/plugin.rb#9
+  def about; end
 
-# source://rubocop-rake//lib/rubocop/rake.rb#10
-RuboCop::Rake::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
+  # source://rubocop-rake//lib/rubocop/rake/plugin.rb#22
+  def rules(_context); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-rake//lib/rubocop/rake/plugin.rb#18
+  def supported?(context); end
+end
 
 # source://rubocop-rake//lib/rubocop/rake/version.rb#5
 RuboCop::Rake::VERSION = T.let(T.unsafe(nil), String)
