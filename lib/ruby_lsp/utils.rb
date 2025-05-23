@@ -4,7 +4,6 @@
 module RubyLsp
   # rubocop:disable RubyLsp/UseLanguageServerAliases
   Interface = LanguageServer::Protocol::Interface
-  Constant = LanguageServer::Protocol::Constant
   # rubocop:enable RubyLsp/UseLanguageServerAliases
 
   # Used to indicate that a request shouldn't return a response
