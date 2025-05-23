@@ -41,8 +41,20 @@ module RubyLsp
 
       #: (Prism::ClassNode) -> void
       def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-        super
         @spec_group_id_stack.pop
+        super
+      end
+
+      #: (Prism::ModuleNode) -> void
+      def on_module_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        @spec_group_id_stack << nil
+        super
+      end
+
+      #: (Prism::ModuleNode) -> void
+      def on_module_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        @spec_group_id_stack.pop
+        super
       end
 
       #: (Prism::CallNode) -> void
@@ -61,6 +73,12 @@ module RubyLsp
       def on_call_node_leave(node)
         return unless node.name == :describe && !node.receiver
 
+        current_group = @spec_group_id_stack.last
+        return unless current_group.is_a?(DescribeGroup)
+
+        description = extract_description(node)
+        return unless description && current_group.id.end_with?(description)
+
         @spec_group_id_stack.pop
       end
 
@@ -76,6 +94,8 @@ module RubyLsp
         return unless description
 
         parent = latest_group
+        return unless parent
+
         id = case parent
         when Requests::Support::TestItem
           "#{parent.id}::#{description}"
@@ -135,26 +155,50 @@ module RubyLsp
         end
       end
 
-      #: -> (Requests::Support::TestItem | ResponseBuilders::TestCollection)
+      #: -> (Requests::Support::TestItem | ResponseBuilders::TestCollection)?
       def latest_group
+        # If we haven't found anything yet, then return the response builder
         return @response_builder if @spec_group_id_stack.compact.empty?
+        # If we found something that isn't a group last, then we're inside a random module or class, but not a spec
+        # group
+        return unless @spec_group_id_stack.last
 
-        first_class_index = @spec_group_id_stack.rindex { |i| i.is_a?(ClassGroup) } || 0
-        first_class = @spec_group_id_stack[0] #: as !nil
-        item = @response_builder[first_class.id] #: as !nil
+        # Specs using at least one class as a group require special handling
+        closest_class_index = @spec_group_id_stack.rindex { |i| i.is_a?(ClassGroup) }
 
-        # Descend into child items from the beginning all the way to the latest class group, ignoring describes
-        @spec_group_id_stack[1..first_class_index] #: as !nil
-          .each do |group|
-          next unless group.is_a?(ClassGroup)
+        if closest_class_index
+          first_class_index = @spec_group_id_stack.index { |i| i.is_a?(ClassGroup) } #: as !nil
+          first_class = @spec_group_id_stack[first_class_index] #: as !nil
+          item = @response_builder[first_class.id] #: as !nil
 
-          item = item[group.id] #: as !nil
+          # Descend into child items from the beginning all the way to the latest class group, ignoring describes
+          @spec_group_id_stack[first_class_index + 1..closest_class_index] #: as !nil
+            .each do |group|
+            next unless group.is_a?(ClassGroup)
+
+            item = item[group.id] #: as !nil
+          end
+
+          # From the class forward, we must take describes into account
+          @spec_group_id_stack[closest_class_index + 1..] #: as !nil
+            .each do |group|
+            next unless group
+
+            item = item[group.id] #: as !nil
+          end
+
+          return item
         end
 
-        # From the class forward, we must take describes into account
-        @spec_group_id_stack[first_class_index + 1..] #: as !nil
+        # Specs only using describes
+        first_group = @spec_group_id_stack.find { |i| i.is_a?(DescribeGroup) }
+        return unless first_group
+
+        item = @response_builder[first_group.id] #: as !nil
+
+        @spec_group_id_stack[1..] #: as !nil
           .each do |group|
-          next unless group
+          next unless group.is_a?(DescribeGroup)
 
           item = item[group.id] #: as !nil
         end
