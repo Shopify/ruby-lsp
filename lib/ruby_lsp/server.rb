@@ -512,12 +512,12 @@ module RubyLsp
           @global_state.index.handle_change(uri) do |index|
             index.delete(uri, skip_require_paths_tree: true)
             RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
-            code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
+            code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
             dispatcher.dispatch(parse_result.value)
           end
         end
       else
-        code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
+        code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
         dispatcher.dispatch(parse_result.value)
       end
 

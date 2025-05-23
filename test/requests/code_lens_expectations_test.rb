@@ -13,7 +13,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     listener.perform
   end
@@ -30,7 +30,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -64,7 +64,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -102,7 +102,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -122,7 +122,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -154,7 +154,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("unknown")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -173,7 +173,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("rspec")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -192,7 +192,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -211,7 +211,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     stub_test_library("minitest")
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
@@ -266,7 +266,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::CodeLens.new(@global_state, uri, dispatcher)
+    listener = RubyLsp::Requests::CodeLens.new(@global_state, document, dispatcher)
     dispatcher.dispatch(document.parse_result.value)
     response = listener.perform
 
