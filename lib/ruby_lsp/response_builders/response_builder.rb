@@ -3,14 +3,12 @@
 
 module RubyLsp
   module ResponseBuilders
+    # @abstract
     class ResponseBuilder
-      extend T::Sig
-      extend T::Helpers
       extend T::Generic
 
-      abstract!
-
-      sig { abstract.returns(T.anything) }
+      # @abstract
+      #: -> top
       def response; end
     end
   end

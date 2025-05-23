@@ -34,17 +34,13 @@ module RubyLsp
   BUNDLE_COMPOSE_FAILED_CODE = -33000
 
   # A notification to be sent to the client
+  # @abstract
   class Message
-    extend T::Sig
-    extend T::Helpers
-
     #: String
     attr_reader :method
 
     #: Object
     attr_reader :params
-
-    abstract!
 
     #: (method: String, params: Object) -> void
     def initialize(method:, params:)
@@ -52,7 +48,8 @@ module RubyLsp
       @params = params
     end
 
-    sig { abstract.returns(T::Hash[Symbol, T.untyped]) }
+    # @abstract
+    #: -> Hash[Symbol, untyped]
     def to_hash; end
   end
 

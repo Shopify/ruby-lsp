@@ -98,11 +98,8 @@ module RubyIndexer
       end
     end
 
+    # @abstract
     class ModuleOperation
-      extend T::Helpers
-
-      abstract!
-
       #: String
       attr_reader :module_name
 
@@ -115,11 +112,8 @@ module RubyIndexer
     class Include < ModuleOperation; end
     class Prepend < ModuleOperation; end
 
+    # @abstract
     class Namespace < Entry
-      extend T::Helpers
-
-      abstract!
-
       #: Array[String]
       attr_reader :nesting
 
@@ -191,11 +185,8 @@ module RubyIndexer
     class Constant < Entry
     end
 
+    # @abstract
     class Parameter
-      extend T::Helpers
-
-      abstract!
-
       # Name includes just the name of the parameter, excluding symbols like splats
       #: Symbol
       attr_reader :name
@@ -289,12 +280,8 @@ module RubyIndexer
       end
     end
 
+    # @abstract
     class Member < Entry
-      extend T::Sig
-      extend T::Helpers
-
-      abstract!
-
       #: Entry::Namespace?
       attr_reader :owner
 
@@ -305,7 +292,8 @@ module RubyIndexer
         @owner = owner
       end
 
-      sig { abstract.returns(T::Array[Entry::Signature]) }
+      # @abstract
+      #: -> Array[Signature]
       def signatures; end
 
       #: -> String

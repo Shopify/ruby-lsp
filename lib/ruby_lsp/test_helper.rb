@@ -4,12 +4,9 @@
 # NOTE: This module is intended to be used by addons for writing their own tests, so keep that in mind if changing.
 
 module RubyLsp
+  # @requires_ancestor: Kernel
   module TestHelper
     class TestError < StandardError; end
-
-    extend T::Helpers
-
-    requires_ancestor { Kernel }
 
     #: [T] (?String? source, ?URI::Generic uri, ?stub_no_typechecker: bool, ?load_addons: bool) { (RubyLsp::Server server, URI::Generic uri) -> T } -> T
     def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: true,

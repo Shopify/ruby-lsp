@@ -4,24 +4,19 @@
 module RubyLsp
   module Requests
     module Support
+      # Empty module to avoid the runtime component. This is an interface defined in sorbet/rbi/shims/ruby_lsp.rbi
+      # @interface
       module Formatter
-        extend T::Sig
-        extend T::Helpers
-
-        interface!
-
-        sig { abstract.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
+        # @abstract
+        #: (URI::Generic, RubyLsp::RubyDocument) -> String?
         def run_formatting(uri, document); end
 
-        sig { abstract.params(uri: URI::Generic, source: String, base_indentation: Integer).returns(T.nilable(String)) }
+        # @abstract
+        #: (URI::Generic, String, Integer) -> String?
         def run_range_formatting(uri, source, base_indentation); end
 
-        sig do
-          abstract.params(
-            uri: URI::Generic,
-            document: RubyDocument,
-          ).returns(T.nilable(T::Array[Interface::Diagnostic]))
-        end
+        # @abstract
+        #: (URI::Generic, RubyLsp::RubyDocument) -> Array[Interface::Diagnostic]?
         def run_diagnostic(uri, document); end
       end
     end

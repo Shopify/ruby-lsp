@@ -3,11 +3,8 @@
 
 module RubyIndexer
   class ReferenceFinder
-    class Target
-      extend T::Helpers
-
-      abstract!
-    end
+    # @abstract
+    class Target; end
 
     class ConstTarget < Target
       #: String

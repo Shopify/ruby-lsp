@@ -2,11 +2,8 @@
 # frozen_string_literal: true
 
 module RubyIndexer
+  # @abstract
   class Enhancement
-    extend T::Helpers
-
-    abstract!
-
     @enhancements = [] #: Array[Class[Enhancement]]
 
     class << self
