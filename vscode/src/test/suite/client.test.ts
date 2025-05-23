@@ -155,12 +155,23 @@ suite("Client", () => {
 
     // eslint-disable-next-line no-invalid-this
     this.timeout(90000);
+
+    await vscode.workspace.fs.rename(
+      vscode.Uri.joinPath(workspaceUri, ".rubocop.yml"),
+      vscode.Uri.joinPath(workspaceUri, ".rubocop.bak.yml"),
+    );
+
     client = await launchClient(workspaceUri);
   });
 
   after(async function () {
     // eslint-disable-next-line no-invalid-this
     this.timeout(20000);
+
+    await vscode.workspace.fs.rename(
+      vscode.Uri.joinPath(workspaceUri, ".rubocop.bak.yml"),
+      vscode.Uri.joinPath(workspaceUri, ".rubocop.yml"),
+    );
 
     try {
       await client.stop();
@@ -431,10 +442,7 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("formatting", async () => {
-    const text = ["# frozen_string_literal: true", "", "def foo", "end"]
-      .join("\n")
-      .trim();
-
+    const text = "       foo()";
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
         uri: documentUri.toString(),
@@ -451,17 +459,7 @@ suite("Client", () => {
       },
     );
 
-    const expected = [
-      "# typed: strict",
-      "# frozen_string_literal: true",
-      "",
-      "def foo",
-      "end",
-    ]
-      .join("\n")
-      .trim();
-
-    assert.strictEqual(response[0].newText.trim(), expected);
+    assert.strictEqual(response[0].newText.trim(), "foo");
   }).timeout(20000);
 
   test("selection range", async () => {
