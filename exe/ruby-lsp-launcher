@@ -6,6 +6,13 @@
 # composed bundle
 # !!!!!!!
 
+$stdin.sync = true
+$stdout.sync = true
+$stderr.sync = true
+$stdin.binmode
+$stdout.binmode
+$stderr.binmode
+
 setup_error = nil
 install_error = nil
 reboot = false
@@ -28,7 +35,6 @@ else
   # Read the initialize request before even starting the server. We need to do this to figure out the workspace URI.
   # Editors are not required to spawn the language server process on the same directory as the workspace URI, so we need
   # to ensure that we're setting up the bundle in the right place
-  $stdin.binmode
   headers = $stdin.gets("\r\n\r\n")
   content_length = headers[/Content-Length: (\d+)/i, 1].to_i
   $stdin.read(content_length)
@@ -138,22 +144,28 @@ if ARGV.include?("--debug")
   end
 end
 
-# Ensure all output goes out stderr by default to allow puts/p/pp to work without specifying output device.
-$> = $stderr
-
 initialize_request = JSON.parse(raw_initialize, symbolize_names: true) if raw_initialize
 
 begin
-  RubyLsp::Server.new(
+  server = RubyLsp::Server.new(
     install_error: install_error,
     setup_error: setup_error,
     initialize_request: initialize_request,
-  ).start
+  )
+
+  # Ensure all output goes out stderr by default to allow puts/p/pp to work without specifying output device.
+  $> = $stderr
+
+  server.start
 rescue ArgumentError
   # If the launcher is booting an outdated version of the server, then the initializer doesn't accept a keyword splat
   # and we already read the initialize request from the stdin pipe. In this case, we need to process the initialize
   # request manually and then start the main loop
   server = RubyLsp::Server.new
+
+  # Ensure all output goes out stderr by default to allow puts/p/pp to work without specifying output device.
+  $> = $stderr
+
   server.process_message(initialize_request)
   server.start
 end
