@@ -20,7 +20,7 @@ module RubyLsp
         delegate_request_if_needed!(global_state, document, char_position)
 
         node_context = RubyDocument.locate(
-          document.parse_result.value,
+          document.ast,
           char_position,
           code_units_cache: document.code_units_cache,
         )
