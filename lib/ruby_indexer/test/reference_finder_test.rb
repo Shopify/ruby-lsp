@@ -273,14 +273,20 @@ module RubyIndexer
       assert_equal(7, refs[4].location.start_line)
     end
 
-    def test_finds_instance_variable_references_in_receiver_ancestors
-      refs = find_instance_variable_references("@name", ["Foo", "Base", "Parent"], <<~RUBY)
+    def test_finds_instance_variable_references_in_owner_ancestors
+      refs = find_instance_variable_references("@name", ["Foo", "Base", "Top", "Parent"], <<~RUBY)
         module Base
           def change_name(name)
             @name = name
           end
           def name
             @name
+          end
+
+          module ::Top
+            def name
+              @name
+            end
           end
         end
 
@@ -309,7 +315,7 @@ module RubyIndexer
           end
         end
       RUBY
-      assert_equal(6, refs.size)
+      assert_equal(7, refs.size)
 
       assert_equal("@name", refs[0].name)
       assert_equal(3, refs[0].location.start_line)
@@ -318,16 +324,19 @@ module RubyIndexer
       assert_equal(6, refs[1].location.start_line)
 
       assert_equal("@name", refs[2].name)
-      assert_equal(12, refs[2].location.start_line)
+      assert_equal(11, refs[2].location.start_line)
 
       assert_equal("@name", refs[3].name)
-      assert_equal(15, refs[3].location.start_line)
+      assert_equal(18, refs[3].location.start_line)
 
       assert_equal("@name", refs[4].name)
-      assert_equal(22, refs[4].location.start_line)
+      assert_equal(21, refs[4].location.start_line)
 
       assert_equal("@name", refs[5].name)
-      assert_equal(25, refs[5].location.start_line)
+      assert_equal(28, refs[5].location.start_line)
+
+      assert_equal("@name", refs[6].name)
+      assert_equal(31, refs[6].location.start_line)
     end
 
     def test_accounts_for_reopened_classes
@@ -366,8 +375,8 @@ module RubyIndexer
       find_references(target, source)
     end
 
-    def find_instance_variable_references(instance_variable_name, receiver_ancestors, source)
-      target = ReferenceFinder::InstanceVariableTarget.new(instance_variable_name, receiver_ancestors)
+    def find_instance_variable_references(instance_variable_name, owner_ancestors, source)
+      target = ReferenceFinder::InstanceVariableTarget.new(instance_variable_name, owner_ancestors)
       find_references(target, source)
     end
 

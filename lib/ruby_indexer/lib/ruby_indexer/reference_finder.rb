@@ -36,13 +36,13 @@ module RubyIndexer
       attr_reader :name
 
       #: Array[String]
-      attr_reader :receiver_ancestors
+      attr_reader :owner_ancestors
 
-      #: (String name, Array[String] receiver_ancestors) -> void
-      def initialize(name, receiver_ancestors)
+      #: (String name, Array[String] owner_ancestors) -> void
+      def initialize(name, owner_ancestors)
         super()
         @name = name
-        @receiver_ancestors = receiver_ancestors
+        @owner_ancestors = owner_ancestors
       end
     end
 
@@ -325,8 +325,8 @@ module RubyIndexer
     def collect_instance_variable_references(name, location, declaration)
       return unless @target.is_a?(InstanceVariableTarget) && name == @target.name
 
-      receiver_type = @stack.join("::")
-      if @target.receiver_ancestors.include?(receiver_type)
+      receiver_type = Index.actual_nesting(@stack, nil).join("::")
+      if @target.owner_ancestors.include?(receiver_type)
         @references << Reference.new(name, location, declaration: declaration)
       end
     end
