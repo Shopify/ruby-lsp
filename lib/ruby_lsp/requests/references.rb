@@ -101,7 +101,11 @@ module RubyLsp
           Prism::InstanceVariableReadNode,
           Prism::InstanceVariableTargetNode,
           Prism::InstanceVariableWriteNode
-          RubyIndexer::ReferenceFinder::InstanceVariableTarget.new(target_node.name.to_s)
+          receiver_type = @global_state.type_inferrer.infer_receiver_type(node_context)
+          return unless receiver_type
+
+          ancestors = @global_state.index.linearized_ancestors_of(receiver_type.name)
+          RubyIndexer::ReferenceFinder::InstanceVariableTarget.new(target_node.name.to_s, ancestors)
         when Prism::CallNode, Prism::DefNode
           RubyIndexer::ReferenceFinder::MethodTarget.new(target_node.name.to_s)
         end

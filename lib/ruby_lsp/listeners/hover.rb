@@ -7,6 +7,7 @@ module RubyLsp
       include Requests::Support::Common
 
       ALLOWED_TARGETS = [
+        Prism::BreakNode,
         Prism::CallNode,
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
@@ -54,6 +55,7 @@ module RubyLsp
 
         dispatcher.register(
           self,
+          :on_break_node_enter,
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
@@ -242,6 +244,11 @@ module RubyLsp
       #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         handle_class_variable_hover(node.name.to_s)
+      end
+
+      #: (Prism::BreakNode node) -> void
+      def on_break_node_enter(node)
+        handle_keyword_documentation(node.keyword)
       end
 
       private

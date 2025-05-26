@@ -15,5 +15,7 @@ module RubyLsp
   # A map of keyword => short documentation to be displayed on hover or completion
   KEYWORD_DOCS = {
     "yield" => "Invokes the passed block with the given arguments",
+    "case" => "Starts a case expression for pattern matching or multiple condition checking",
+    "break" => "Terminates the execution of a block, loop, or method",
   }.freeze #: Hash[String, String]
 end
