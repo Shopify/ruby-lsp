@@ -4,7 +4,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
-import { afterEach, beforeEach } from "mocha";
+import { after, afterEach, before, beforeEach } from "mocha";
 
 import { StreamingRunner } from "../../streamingRunner";
 
@@ -13,6 +13,26 @@ import { CONTEXT } from "./helpers";
 suite("StreamingRunner", () => {
   let sandbox: sinon.SinonSandbox;
   const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
+  const dbUri = vscode.Uri.joinPath(tempDirUri, "test_reporter_port_db.json");
+  let currentDbContents: string | undefined;
+
+  before(async () => {
+    try {
+      const buffer = await vscode.workspace.fs.readFile(dbUri);
+      currentDbContents = buffer.toString();
+    } catch {
+      // Do nothing
+    }
+  });
+
+  after(async () => {
+    if (currentDbContents) {
+      await vscode.workspace.fs.writeFile(
+        dbUri,
+        Buffer.from(currentDbContents),
+      );
+    }
+  });
 
   beforeEach(async () => {
     await vscode.workspace.fs.createDirectory(tempDirUri);
@@ -25,7 +45,6 @@ suite("StreamingRunner", () => {
   });
 
   test("updates port DB with new values", async () => {
-    const dbUri = vscode.Uri.joinPath(tempDirUri, "test_reporter_port_db.json");
     const initialDb = {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       "/some/path/to/project": "1234",
