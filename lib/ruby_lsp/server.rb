@@ -378,7 +378,7 @@ module RubyLsp
 
     #: -> void
     def start_mcp_server
-      return unless @global_state.uses_ruby_mcp
+      return if ENV["CI"] || !@global_state.uses_ruby_mcp
 
       @mcp_server = T.let(MCPServer.new(@global_state), T.nilable(MCPServer))
       T.must(@mcp_server).start
