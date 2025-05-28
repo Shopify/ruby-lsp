@@ -522,7 +522,7 @@ module RubyLsp
             method_name = entry_name.delete_suffix("=")
 
             # For writer methods, format as assignment and prefix "self." when no receiver is specified
-            new_text = node.receiver.nil? ? "self.#{method_name}=" : method_name
+            new_text = node.receiver.nil? ? "self.#{method_name} = " : "#{method_name} = "
           end
 
           label_details = Interface::CompletionItemLabelDetails.new(

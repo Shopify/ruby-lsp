@@ -706,7 +706,7 @@ class CompletionTest < Minitest::Test
         result = server.pop_response.response
         assert_equal(["qux", "qux="], result.map(&:label))
         assert_equal(["qux", "qux="], result.map(&:filter_text))
-        assert_equal(["qux", "self.qux="], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux", "self.qux = "], result.map { |completion| completion.text_edit.new_text })
 
         # Test explicit self receiver: "self.q"
         server.process_message(id: 1, method: "textDocument/completion", params: {
@@ -717,7 +717,7 @@ class CompletionTest < Minitest::Test
         result = server.pop_response.response
         assert_equal(["qux", "qux="], result.map(&:label))
         assert_equal(["qux", "qux="], result.map(&:filter_text))
-        assert_equal(["qux", "qux="], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux", "qux = "], result.map { |completion| completion.text_edit.new_text })
 
         # Test external receiver; "foo.q"
         server.process_message(id: 1, method: "textDocument/completion", params: {
@@ -728,7 +728,7 @@ class CompletionTest < Minitest::Test
         result = server.pop_response.response
         assert_equal(["qux", "qux="], result.map(&:label))
         assert_equal(["qux", "qux="], result.map(&:filter_text))
-        assert_equal(["qux", "qux="], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux", "qux = "], result.map { |completion| completion.text_edit.new_text })
       end
     end
   end
