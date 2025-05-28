@@ -410,11 +410,14 @@ module RubyIndexer
     class InstanceVariable < Entry
       #: Entry::Namespace?
       attr_reader :owner
+      #: String
+      attr_reader :method
 
-      #: (String name, URI::Generic uri, Location location, String? comments, Entry::Namespace? owner) -> void
-      def initialize(name, uri, location, comments, owner)
+      #: (String name, URI::Generic uri, Location location, String? comments, Entry::Namespace? owner, String method) -> void
+      def initialize(name, uri, location, comments, owner, method)
         super(name, uri, location, comments)
         @owner = owner
+        @method = method
       end
     end
 

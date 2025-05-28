@@ -33,6 +33,8 @@ module RubyIndexer
       @indexing_errors = [] #: Array[String]
       @collect_comments = collect_comments
 
+      @method_name = "" #: String
+
       dispatcher.register(
         self,
         :on_class_node_enter,
@@ -316,6 +318,8 @@ module RubyIndexer
       comments = collect_comments(node)
       scope = current_visibility_scope
 
+      @method_name = method_name
+
       case node.receiver
       when nil
         location = Location.from_prism_location(node.location, @code_units_cache)
@@ -467,7 +471,10 @@ module RubyIndexer
 
     #: (String name, Prism::Location node_location, Array[Entry::Signature] signatures, ?visibility: Symbol, ?comments: String?) -> void
     def add_method(name, node_location, signatures, visibility: :public, comments: nil)
+      puts "Adding method: #{name} at #{node_location}"
       location = Location.from_prism_location(node_location, @code_units_cache)
+
+      @method_name = name
 
       @index.add(Entry::Method.new(
         name,
@@ -590,12 +597,19 @@ module RubyIndexer
         owner = @index.existing_or_new_singleton_class(owner.name)
       end
 
+      # debugger
+
+      # existing = @index[name]&.find { |entry| entry.is_a?(Entry::InstanceVariable) && entry.owner == owner }
+
+      # if ex
+
       @index.add(Entry::InstanceVariable.new(
         name,
         @uri,
         Location.from_prism_location(loc, @code_units_cache),
         collect_comments(node),
         owner,
+        @method_name,
       ))
     end
 

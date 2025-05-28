@@ -77,6 +77,79 @@ module RubyIndexer
       assert_equal("Foo::Bar", owner&.name)
     end
 
+    def test_instance_variable_memoize
+      index(<<~RUBY)
+        module Foo
+          class Bar
+            def initialize
+              # Hello
+              @a = 1
+            end
+
+            def mutate
+              # Memoize
+              @a ||= 1
+          end
+        end
+      RUBY
+
+      assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:4-6:4-8")
+      assert_equal(2, @index["@a"]&.size)
+
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo::Bar", owner&.name)
+      assert_equal("initialize", entry.method)
+
+      entry = @index["@a"]&.last #: as Entry::InstanceVariable
+      owner = entry.owner
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo::Bar", owner&.name)
+      assert_equal("mutate", entry.method)
+
+      resolved = @index.resolve_instance_variable("@a", owner&.name || "")
+      assert_equal(2, resolved&.size || 0)
+    end
+
+    def test_instance_variable_in_different_class
+      index(<<~RUBY)
+          module Foo
+            class Bar
+              def initialize
+                @a = 1
+              end
+            end
+
+            class Baz
+              def initialize
+                @a = 2
+              end
+            end
+          end
+        end
+      RUBY
+
+      assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:3-8:3-10")
+      assert_equal(2, @index["@a"]&.size)
+
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      owner = entry.owner
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo::Bar", owner&.name)
+
+      entry = @index["@a"]&.last #: as Entry::InstanceVariable
+      owner = entry.owner
+      assert_instance_of(Entry::Class, owner)
+      assert_equal("Foo::Baz", owner&.name)
+
+      resolved = @index.resolve_instance_variable("@a", "Foo::Bar")
+      assert_equal(1, resolved&.size || 0)
+
+      resolved = @index.resolve_instance_variable("@a", "Foo::Baz")
+      assert_equal(1, resolved&.size || 0)
+    end
+
     def test_instance_variable_or_write
       index(<<~RUBY)
         module Foo
