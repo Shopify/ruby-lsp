@@ -18,8 +18,8 @@ module RubyLsp
 
     #: (GlobalState) -> void
     def initialize(global_state)
-      @workspace_path = T.let(global_state.workspace_path, String)
-      @port = T.let(self.class.find_available_port, Integer)
+      @workspace_path = global_state.workspace_path #: String
+      @port = self.class.find_available_port #: Integer
 
       # Create .ruby-lsp directory if it doesn't exist
       lsp_dir = File.join(@workspace_path, ".ruby-lsp")
@@ -30,24 +30,21 @@ module RubyLsp
       File.write(port_file, @port.to_s)
 
       # Create WEBrick server
-      @server = T.let(
-        WEBrick::HTTPServer.new(
-          Port: @port,
-          BindAddress: "127.0.0.1",
-          Logger: WEBrick::Log.new(File.join(lsp_dir, "mcp-webrick.log")),
-          AccessLog: [],
-        ),
-        WEBrick::HTTPServer,
-      )
+      @server = WEBrick::HTTPServer.new(
+        Port: @port,
+        BindAddress: "127.0.0.1",
+        Logger: WEBrick::Log.new(File.join(lsp_dir, "mcp-webrick.log")),
+        AccessLog: [],
+      ) #: WEBrick::HTTPServer
 
       # Mount the MCP handler
       @server.mount_proc("/mcp") do |req, res|
         handle_mcp_request(req, res)
       end
 
-      @running = T.let(false, T::Boolean)
-      @global_state = T.let(global_state, GlobalState)
-      @index = T.let(global_state.index, RubyIndexer::Index)
+      @running = false #: T::Boolean
+      @global_state = global_state #: GlobalState
+      @index = global_state.index #: RubyIndexer::Index
     end
 
     #: -> void
