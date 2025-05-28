@@ -8,6 +8,7 @@ module RubyLsp
 
       ALLOWED_TARGETS = [
         Prism::CallNode,
+        Prism::CaseNode,
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
         Prism::ConstantPathNode,
@@ -54,6 +55,7 @@ module RubyLsp
 
         dispatcher.register(
           self,
+          :on_case_node_enter,
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
@@ -95,6 +97,11 @@ module RubyLsp
         end
 
         generate_heredoc_hover(node)
+      end
+
+      #: (Prism::CaseNode node) -> void
+      def on_case_node_enter(node)
+        handle_keyword_documentation(node.case_keyword)
       end
 
       #: (Prism::InterpolatedStringNode node) -> void
