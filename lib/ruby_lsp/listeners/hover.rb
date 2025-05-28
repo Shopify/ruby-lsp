@@ -7,7 +7,9 @@ module RubyLsp
       include Requests::Support::Common
 
       ALLOWED_TARGETS = [
+        Prism::BeginNode,
         Prism::BreakNode,
+        Prism::CaseNode,
         Prism::CallNode,
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
