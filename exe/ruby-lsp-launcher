@@ -83,8 +83,13 @@ begin
     # This Marshal load can only happen after requiring Bundler because it will load a custom error class from Bundler
     # itself. If we try to load before requiring, the class will not be defined and loading will fail
     error_path = File.join(".ruby-lsp", "install_error")
-    install_error = if File.exist?(error_path)
-      Marshal.load(File.read(error_path))
+    install_error = begin
+      Marshal.load(File.read(error_path)) if File.exist?(error_path)
+    rescue ArgumentError
+      # The class we tried to load is not defined. This might happen when the user upgrades Bundler and new error
+      # classes are introduced or removed
+      File.delete(error_path)
+      nil
     end
 
     Bundler.setup
