@@ -12,6 +12,7 @@ module RubyLsp
       def initialize(response_builder, uri, dispatcher)
         @response_builder = response_builder
         @uri = uri
+        @current_visibility = T.let(:public, Symbol)
 
         dispatcher.register(
           self,
@@ -79,19 +80,14 @@ module RubyLsp
 
       #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
-        # Working in here as it seems like the correct place to work "upstream" of the `on_def_node_enter` method.
         node_name = node.name
 
         # TODO: Pull into a constant and look more closely at the CodeLens implementation
-        if [:private, :protected].include?(node_name) && node.arguments.nil?
-          # TODO: Is this disgusting? It creates an "empty" container but that means I'm changing the hierarchy in the outline.
-          @response_builder << create_document_symbol(
-            name: node_name.to_s,
-            kind: Constant::SymbolKind::NAMESPACE,
-            range_location: node.location,
-            selection_range_location: node.message_loc || node.location,
-          )
-          return # TODO: Is this a hack? I want to return and not interrupt the rest of the response builder doing its thing.
+        # TODO: Is this disgusting? It creates an "empty" container but that means I'm changing the hierarchy in the outline.
+        # TODO: Is this a hack? I want to return and not interrupt the rest of the response builder doing its thing.
+        if [:private, :protected, :public].include?(node_name) && node.arguments.nil?
+          @current_visibility = node_name
+          return
         end
 
         if ATTR_ACCESSORS.include?(node_name)
@@ -107,15 +103,15 @@ module RubyLsp
 
       #: (Prism::CallNode node) -> void
       def on_call_node_leave(node)
+        # TODO: Currently exiting the container here using the same `pop` as above but is this correct in this context?
+        # TODO: Investigate how CodeLens is handling this. I can see it doing `#pop` off the modifier constant.
+        if node.name == :public && node.arguments.nil?
+          @current_visibility = :public
+        end
+        # No pop for private/protected anymore
         return unless rake?
 
         if node.name == :namespace && !node.receiver
-          @response_builder.pop
-        end
-
-        # TODO: Currently exiting the container here using the same `pop` as above but is this correct in this context?
-        # TODO: Investigate how CodeLens is handling this. I can see it doing `#pop` off the modifier constant.
-        if [:private, :protected].include?(node.name) && node.arguments.nil?
           @response_builder.pop
         end
       end
@@ -254,12 +250,11 @@ module RubyLsp
         # TODO: Use the stuff we set up in the `on_call_node_enter` method to prefix the modifier.
         # This can definitely be tidied up, if only because it's a nested `if` statement and I'm reassigning `name`. Grim.
         # Not really sure I really understand the current/previous visibility stuff, just copying the bit above.
-        if previous_symbol.is_a?(Interface::DocumentSymbol) && previous_symbol.respond_to?(:name)
-          if previous_symbol.name == "private"
-            name = "(private) #{name}"
-          elsif previous_symbol.name == "protected"
-            name = "(protected) #{name}"
-          end
+        case @current_visibility
+        when :private
+          name = "(private) #{name}"
+        when :protected
+          name = "(protected) #{name}"
         end
 
         symbol = create_document_symbol(
