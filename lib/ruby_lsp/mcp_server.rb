@@ -67,7 +67,7 @@ module RubyLsp
     def stop
       puts "[MCP] Stopping server"
       @server.shutdown
-
+    ensure
       # Clean up port file
       lsp_dir = File.join(@workspace_path, ".ruby-lsp")
       port_file = File.join(lsp_dir, "mcp-port")
