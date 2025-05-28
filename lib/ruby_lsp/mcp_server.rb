@@ -1,15 +1,10 @@
 # typed: strict
 # frozen_string_literal: true
 
-# TODO: Extract MCP requests and load them separately
-require "ruby_lsp/requests/support/common"
+require "ruby_lsp/mcp/tool"
 
 module RubyLsp
   class MCPServer
-    include RubyLsp::Requests::Support::Common
-
-    MAX_CLASSES_TO_RETURN = 5000
-
     class << self
       # Find an available TCP port
       #: -> Integer
@@ -148,92 +143,25 @@ module RubyLsp
         when "tools/list"
           ->(_) do
             {
-              tools: [
+              tools: RubyLsp::MCP::Tool.tools.map do |tool_name, tool_class|
                 {
-                  name: "get_classes_and_modules",
-                  description: <<~DESCRIPTION,
-                    Show all the indexed classes and modules in the current project and its dependencies when no query is provided.
-                    When a query is provided, it'll return a list of classes and modules that match the query.
-                    Doesn't support pagination and will return all classes and modules.
-                    Stops after #{MAX_CLASSES_TO_RETURN} classes and modules.
-                  DESCRIPTION
-                  inputSchema: {
-                    type: "object",
-                    properties: {
-                      query: {
-                        type: "string",
-                        description: "A query to filter the classes and modules",
-                      },
-                    },
-                  },
-                },
-                {
-                  name: "get_methods_details",
-                  description: <<~DESCRIPTION,
-                    Show the details of the given methods.
-                    Use the following format for the signatures:
-                    - Class#method
-                    - Module#method
-                    - Class.singleton_method
-                    - Module.singleton_method
-
-                    Details include:
-                    - Comments
-                    - Definition location
-                    - Visibility
-                    - Parameters
-                    - Owner
-                  DESCRIPTION
-                  inputSchema: {
-                    type: "object",
-                    properties: {
-                      signatures: {
-                        type: "array",
-                        items: { type: "string" },
-                      },
-                    },
-                    required: ["signatures"],
-                  },
-                },
-                {
-                  name: "get_class_module_details",
-                  description: <<~DESCRIPTION,
-                    Show the details of the given classes/modules that are available in the current project and
-                    its dependencies.
-                    - Comments
-                    - Definition location
-                    - Methods
-                    - Ancestors
-
-                    Use `get_methods_details` tool to get the details of specific methods of a class/module.
-                  DESCRIPTION
-                  inputSchema: {
-                    type: "object",
-                    properties: {
-                      fully_qualified_names: {
-                        type: "array",
-                        items: { type: "string" },
-                      },
-                    },
-                    required: ["fully_qualified_names"],
-                  },
-                },
-              ],
+                  name: tool_name,
+                  description: tool_class.description.dump, # avoid newlines in the description
+                  inputSchema: tool_class.input_schema,
+                }
+              end,
             }
           end
         when "tools/call"
           ->(params) {
             puts "[MCP] Received tools/call request: #{params.inspect}"
-            contents = case params[:name]
-            when "get_classes_and_modules"
-              handle_get_classes_and_modules(params.dig(:arguments, :query))
-            when "get_methods_details"
-              handle_get_methods_details(params.dig(:arguments, :signatures))
-            when "get_class_module_details"
-              handle_get_class_module_details(params.dig(:arguments, :fully_qualified_names))
-            end
+            tool_name = params[:name]
+            tool_class = RubyLsp::MCP::Tool.get(tool_name)
 
-            generate_response(contents) if contents
+            if tool_class
+              contents = tool_class.new(@index).call(params[:arguments] || {})
+              generate_response(contents)
+            end
           }
         end
       end
@@ -253,123 +181,6 @@ module RubyLsp
       else
         {
           content: contents,
-        }
-      end
-    end
-
-    # Tool implementations
-    #: (String?) -> Array[Hash[Symbol, untyped]]
-    def handle_get_classes_and_modules(query)
-      class_names = @index.fuzzy_search(query).map do |entry|
-        case entry
-        when RubyIndexer::Entry::Class
-          {
-            name: entry.name,
-            type: "class",
-          }
-        when RubyIndexer::Entry::Module
-          {
-            name: entry.name,
-            type: "module",
-          }
-        end
-      end.compact.uniq
-
-      if class_names.size > MAX_CLASSES_TO_RETURN
-        [
-          {
-            type: "text",
-            text: "Too many classes and modules to return, please narrow down your request with a query.",
-          },
-          {
-            type: "text",
-            text: class_names.first(MAX_CLASSES_TO_RETURN).to_yaml,
-          },
-        ]
-      else
-        [
-          {
-            type: "text",
-            text: class_names.to_yaml,
-          },
-        ]
-      end
-    end
-
-    #: (Array[String]) -> Array[Hash[Symbol, untyped]]
-    def handle_get_methods_details(signatures)
-      signatures.map do |signature|
-        entries = nil
-        receiver = nil
-        method = nil
-
-        if signature.include?("#")
-          receiver, method = signature.split("#")
-          entries = @index.resolve_method(T.must(method), T.must(receiver))
-        elsif signature.include?(".")
-          receiver, method = signature.split(".")
-          singleton_class = @index.existing_or_new_singleton_class(T.must(receiver))
-          entries = @index.resolve_method(T.must(method), singleton_class.name)
-        end
-
-        next if entries.nil?
-
-        entry_details = entries.map do |entry|
-          {
-            uri: entry.uri,
-            visibility: entry.visibility,
-            comments: entry.comments,
-            parameters: entry.decorated_parameters,
-            owner: entry.owner&.name,
-          }
-        end
-
-        {
-          type: "text",
-          text: {
-            receiver: receiver,
-            method: method,
-            entry_details: entry_details,
-          }.to_yaml,
-        }
-      end.compact
-    end
-
-    #: (Array[String]) -> Array[Hash[Symbol, untyped]]
-    def handle_get_class_module_details(fully_qualified_names)
-      fully_qualified_names.map do |fully_qualified_name|
-        *nestings, name = fully_qualified_name.delete_prefix("::").split("::")
-        entries = @index.resolve(T.must(name), nestings) || []
-
-        begin
-          ancestors = @index.linearized_ancestors_of(fully_qualified_name)
-          methods = @index.method_completion_candidates(nil, fully_qualified_name)
-        rescue RubyIndexer::Index::NonExistingNamespaceError
-          # If the namespace doesn't exist, we can't find ancestors or methods
-          ancestors = []
-          methods = []
-        end
-
-        type = case entries.first
-        when RubyIndexer::Entry::Class
-          "class"
-        when RubyIndexer::Entry::Module
-          "module"
-        else
-          "unknown"
-        end
-
-        {
-          type: "text",
-          text: {
-            name: fully_qualified_name,
-            nestings: nestings,
-            type: type,
-            ancestors: ancestors,
-            methods: methods.map(&:name),
-            uris: entries.map(&:uri),
-            documentation: markdown_from_index_entries(T.must(name), entries),
-          }.to_yaml,
         }
       end
     end

@@ -25,7 +25,8 @@ module RubyLsp
         module Bar; end
       RUBY
 
-      result = @server.send(:handle_get_classes_and_modules, nil)
+      tool = RubyLsp::MCP::GetClassesAndModules.new(@index)
+      result = tool.call({})
       expected_yaml = [{ name: "Foo", type: "class" }, { name: "Bar", type: "module" }].to_yaml
       expected_result = [{ type: "text", text: expected_yaml }]
 
@@ -40,7 +41,8 @@ module RubyLsp
         class AnotherClass; end
       RUBY
 
-      result = @server.send(:handle_get_classes_and_modules, "Foo")
+      tool = RubyLsp::MCP::GetClassesAndModules.new(@index)
+      result = tool.call({ "query" => "Foo" })
       expected_yaml = [{ name: "FooClass", type: "class" }, { name: "FooModule", type: "module" }].to_yaml
       expected_result = [{ type: "text", text: expected_yaml }]
 
@@ -48,8 +50,8 @@ module RubyLsp
     end
 
     def test_handle_get_classes_and_modules_too_many_results
-      original_max_classes = MCPServer::MAX_CLASSES_TO_RETURN
-      MCPServer.const_set(:MAX_CLASSES_TO_RETURN, 1)
+      original_max_classes = RubyLsp::MCP::Tool::MAX_CLASSES_TO_RETURN
+      RubyLsp::MCP::Tool.const_set(:MAX_CLASSES_TO_RETURN, 1)
 
       # Index more classes than the limit
       @index.index_single(URI("file:///fake.rb"), <<~RUBY)
@@ -57,20 +59,21 @@ module RubyLsp
         class Class2; end
       RUBY
 
-      result = @server.send(:handle_get_classes_and_modules, nil)
+      tool = RubyLsp::MCP::GetClassesAndModules.new(@index)
+      result = tool.call({})
 
       assert_equal(2, result.size)
-      assert_equal("text", result[0][:type])
+      assert_equal("text", result.dig(0, :type))
       assert_equal(
         "Too many classes and modules to return, please narrow down your request with a query.",
-        result[0][:text],
+        result.dig(0, :text),
       )
-      assert_equal("text", result[1][:type])
+      assert_equal("text", result.dig(1, :type))
       # Check that only the first MAX_CLASSES_TO_RETURN are included
       expected_yaml = [{ name: "Class1", type: "class" }].to_yaml
-      assert_equal(expected_yaml, result[1][:text])
+      assert_equal(expected_yaml, result.dig(1, :text))
     ensure
-      MCPServer.const_set(:MAX_CLASSES_TO_RETURN, original_max_classes)
+      RubyLsp::MCP::Tool.const_set(:MAX_CLASSES_TO_RETURN, original_max_classes)
     end
 
     def test_handle_get_methods_details_instance_method
@@ -83,11 +86,12 @@ module RubyLsp
         end
       RUBY
 
-      result = @server.send(:handle_get_methods_details, ["MyClass#my_method"])
+      tool = RubyLsp::MCP::GetMethodsDetails.new(@index)
+      result = tool.call({ "signatures" => ["MyClass#my_method"] })
       entry = @index.resolve_method("my_method", "MyClass").first
 
       # Parse actual result
-      result_yaml = Psych.unsafe_load(result[0][:text])
+      result_yaml = Psych.unsafe_load(result.dig(0, :text))
 
       # Define expected simple values
       expected_receiver = "MyClass"
@@ -121,11 +125,12 @@ module RubyLsp
       RUBY
 
       singleton_class_name = "MyClass::<Class:MyClass>"
-      result = @server.send(:handle_get_methods_details, ["MyClass.my_singleton_method"])
+      tool = RubyLsp::MCP::GetMethodsDetails.new(@index)
+      result = tool.call({ "signatures" => ["MyClass.my_singleton_method"] })
       entry = @index.resolve_method("my_singleton_method", singleton_class_name).first
 
       # Parse actual result
-      result_yaml = Psych.unsafe_load(result[0][:text])
+      result_yaml = Psych.unsafe_load(result.dig(0, :text))
 
       # Define expected simple values
       expected_receiver = "MyClass"
@@ -150,12 +155,14 @@ module RubyLsp
 
     def test_handle_get_methods_details_method_not_found
       @index.index_single(URI("file:///fake_not_found.rb"), "class MyClass; end")
-      result = @server.send(:handle_get_methods_details, ["MyClass#non_existent_method"])
+      tool = RubyLsp::MCP::GetMethodsDetails.new(@index)
+      result = tool.call({ "signatures" => ["MyClass#non_existent_method"] })
       assert_empty(result)
     end
 
     def test_handle_get_methods_details_receiver_not_found
-      result = @server.send(:handle_get_methods_details, ["NonExistentClass#method"])
+      tool = RubyLsp::MCP::GetMethodsDetails.new(@index)
+      result = tool.call({ "signatures" => ["NonExistentClass#method"] })
       assert_empty(result)
     end
 
@@ -169,7 +176,8 @@ module RubyLsp
         end
       RUBY
 
-      result = @server.send(:handle_get_class_module_details, ["MyDetailedClass"])
+      tool = RubyLsp::MCP::GetClassModuleDetails.new(@index)
+      result = tool.call({ "fully_qualified_names" => ["MyDetailedClass"] })
       entry = @index.resolve("MyDetailedClass", []).first
 
       expected_text = {
@@ -182,12 +190,12 @@ module RubyLsp
         documentation: "__PLACEHOLDER__",
       }
 
-      result_yaml = Psych.unsafe_load(result[0][:text])
+      result_yaml = Psych.unsafe_load(result.dig(0, :text))
       actual_documentation = result_yaml.delete(:documentation)
       expected_text.delete(:documentation)
 
       assert_equal(1, result.size)
-      assert_equal("text", result[0][:type])
+      assert_equal("text", result.dig(0, :type))
       # Compare the hash without documentation
       assert_equal(expected_text, result_yaml)
       # Assert documentation content separately
@@ -204,7 +212,8 @@ module RubyLsp
         end
       RUBY
 
-      result = @server.send(:handle_get_class_module_details, ["MyDetailedModule"])
+      tool = RubyLsp::MCP::GetClassModuleDetails.new(@index)
+      result = tool.call({ "fully_qualified_names" => ["MyDetailedModule"] })
       entry = @index.resolve("MyDetailedModule", []).first
 
       expected_text = {
@@ -217,12 +226,12 @@ module RubyLsp
         documentation: "__PLACEHOLDER__",
       }
 
-      result_yaml = Psych.unsafe_load(result[0][:text])
+      result_yaml = Psych.unsafe_load(result.dig(0, :text))
       actual_documentation = result_yaml.delete(:documentation)
       expected_text.delete(:documentation)
 
       assert_equal(1, result.size)
-      assert_equal("text", result[0][:type])
+      assert_equal("text", result.dig(0, :type))
       # Compare the hash without documentation
       assert_equal(expected_text, result_yaml)
       # Assert documentation content separately
@@ -241,7 +250,8 @@ module RubyLsp
         end
       RUBY
 
-      result = @server.send(:handle_get_class_module_details, ["Outer::InnerClass"])
+      tool = RubyLsp::MCP::GetClassModuleDetails.new(@index)
+      result = tool.call({ "fully_qualified_names" => ["Outer::InnerClass"] })
       entry = @index.resolve("InnerClass", ["Outer"]).first
 
       expected_text = {
@@ -254,12 +264,12 @@ module RubyLsp
         documentation: "__PLACEHOLDER__",
       }
 
-      result_yaml = Psych.unsafe_load(result[0][:text])
+      result_yaml = Psych.unsafe_load(result.dig(0, :text))
       actual_documentation = result_yaml.delete(:documentation)
       expected_text.delete(:documentation)
 
       assert_equal(1, result.size)
-      assert_equal("text", result[0][:type])
+      assert_equal("text", result.dig(0, :type))
       # Compare the hash without documentation
       assert_equal(expected_text, result_yaml)
       # Assert documentation content separately
@@ -268,7 +278,8 @@ module RubyLsp
     end
 
     def test_handle_get_class_module_details_not_found
-      result = @server.send(:handle_get_class_module_details, ["NonExistentThing"])
+      tool = RubyLsp::MCP::GetClassModuleDetails.new(@index)
+      result = tool.call({ "fully_qualified_names" => ["NonExistentThing"] })
 
       expected_text = {
         name: "NonExistentThing",
@@ -280,12 +291,12 @@ module RubyLsp
         documentation: "__PLACEHOLDER__",
       }
 
-      result_yaml = Psych.unsafe_load(result[0][:text])
+      result_yaml = Psych.unsafe_load(result.dig(0, :text))
       actual_documentation = result_yaml.delete(:documentation)
       expected_text.delete(:documentation)
 
       assert_equal(1, result.size)
-      assert_equal("text", result[0][:type])
+      assert_equal("text", result.dig(0, :type))
       # Compare the hash without documentation
       assert_equal(expected_text, result_yaml)
       # Assert documentation content separately (structure but no specific comment)
