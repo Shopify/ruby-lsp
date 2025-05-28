@@ -687,15 +687,42 @@ class CompletionTest < Minitest::Test
 
         def bar
           q
+          self.q
         end
       end
+
+      foo = Foo.new
+      foo.q
     RUBY
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
+        # Test implicit self receiver: "q"
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 4, character: 5 },
+        })
+
+        result = server.pop_response.response
+        assert_equal(["qux", "qux="], result.map(&:label))
+        assert_equal(["qux", "qux="], result.map(&:filter_text))
+        assert_equal(["qux", "self.qux="], result.map { |completion| completion.text_edit.new_text })
+
+        # Test explicit self receiver: "self.q"
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 5, character: 10 },
+        })
+
+        result = server.pop_response.response
+        assert_equal(["qux", "qux="], result.map(&:label))
+        assert_equal(["qux", "qux="], result.map(&:filter_text))
+        assert_equal(["qux", "qux="], result.map { |completion| completion.text_edit.new_text })
+
+        # Test external receiver; "foo.q"
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 10, character: 5 },
         })
 
         result = server.pop_response.response
