@@ -13,7 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, VERSION_REGEX } from "../../rubyVersion";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
-import { createRubySymlinks } from "../helpers";
+import { createRubySymlinks, CONTEXT } from "../helpers";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {
@@ -21,16 +21,6 @@ suite("RubyInstaller", () => {
     console.log("This test can only run on Windows");
     return;
   }
-
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
 
   let rootPath: string;
   let workspacePath: string;
@@ -68,7 +58,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      context,
+      CONTEXT,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -88,7 +78,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      context,
+      CONTEXT,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -108,7 +98,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      context,
+      CONTEXT,
       async () => {},
     );
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
@@ -133,7 +123,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      context,
+      CONTEXT,
       async () => {},
     );
     const result = [

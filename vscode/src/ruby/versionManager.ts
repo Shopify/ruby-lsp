@@ -24,8 +24,7 @@ export abstract class VersionManager {
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
   protected readonly manuallySelectRuby: () => Promise<void>;
-
-  private readonly context: vscode.ExtensionContext;
+  protected readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
 
   constructor(
