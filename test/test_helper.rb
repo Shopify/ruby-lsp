@@ -12,6 +12,7 @@ require "ruby_lsp/internal"
 require "ruby_lsp/test_helper"
 require "rubocop/cop/ruby_lsp/use_language_server_aliases"
 require "rubocop/cop/ruby_lsp/use_register_with_handler_method"
+require "rubocop/cop/ruby_lsp/no_yard_annotations"
 
 require "ruby_lsp/test_reporters/minitest_reporter"
 require "minitest/autorun"

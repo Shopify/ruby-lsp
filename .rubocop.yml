@@ -8,6 +8,7 @@ require:
   - rubocop-rake
   - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
   - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
+  - ./lib/rubocop/cop/ruby_lsp/no_yard_annotations
 
 AllCops:
   NewCops: disable
