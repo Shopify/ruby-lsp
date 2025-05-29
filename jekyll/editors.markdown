@@ -283,11 +283,9 @@ Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when open
 
 ## Zed
 
-[Setting up Ruby LSP](https://github.com/zed-industries/zed/blob/main/docs/src/languages/ruby.md#setting-up-ruby-lsp)
+Zed has support for the Ruby LSP through the [Ruby extension](https://github.com/zed-extensions/ruby).
 
-[Zed has added support for Ruby LSP as a alternative language server](https://github.com/zed-industries/zed/pull/11768) in version v0.0.2 of the Ruby extension.
-
-See https://github.com/zed-industries/zed/issues/4834 for discussion of the limitations.
+Documentation can be found in [Setting up Ruby LSP](https://zed.dev/docs/languages/ruby#setting-up-ruby-lsp).
 
 ## RubyMine
 
@@ -313,7 +311,7 @@ To use it with Ruby LSP, you can override particular configuration items in the 
 }
 ```
 
-In the Kate settings, under the "LSP-Client" tab, the option "Incrementally synchronize documents with the LSP server" must be enabled. 
+In the Kate settings, under the "LSP-Client" tab, the option "Incrementally synchronize documents with the LSP server" must be enabled.
 Otherwise, errors like [this](https://github.com/Shopify/ruby-lsp/issues/3148) can occur when editing a Ruby file.
 
 Kate will start an instance of the Ruby LSP server in the background for any Ruby project matching the `rootIndicationFileNames`.
