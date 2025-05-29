@@ -1,15 +1,15 @@
 # Class
 
-In Ruby, a `class` is a blueprint for creating objects that share similar attributes and behaviors. Classes encapsulate data and methods, following object-oriented programming principles.
+In Ruby, a `class` is a blueprint for creating objects that encapsulate related state and behavior. Each instance of a class has its own set of instance variables and methods, allowing objects to maintain their individual state.
 
 ```ruby
 # Basic class definition
 class Person
   def initialize(name)
-    @name = name
+    @name = name # Instance variable stores state
   end
 
-  def greet
+  def greet # Instance method stores behavior
     puts "Hello, #{@name}!"
   end
 end
@@ -20,63 +20,9 @@ person.greet
 # Hello, Ruby!
 ```
 
-Classes can include instance methods, class methods, and various types of variables.
+## Instance Variables and Methods
 
-```ruby
-class Product
-  # Class variable (shared across all instances)
-  @@count = 0
-
-  # Class method
-  class << self
-    def count
-      @@count
-    end
-  end
-
-  def initialize(name, price)
-    @name = name
-    @price = price
-    @@count += 1
-  end
-
-  # Instance method
-  def details
-    "#{@name}: $#{@price}"
-  end
-end
-
-book = Product.new("Ruby Guide", 29.99)
-puts Product.count # Output: 1
-puts book.details # Output: Ruby Guide: $29.99
-```
-
-## Inheritance
-
-Classes can inherit behavior from other classes using the `<` operator. A class can only inherit from one parent class.
-
-```ruby
-# Parent class
-class Animal
-  def speak
-    "Some sound"
-  end
-end
-
-# Child class
-class Dog < Animal
-  def speak
-    "Woof!"
-  end
-end
-
-dog = Dog.new
-puts dog.speak # Output: Woof!
-```
-
-## Access Control
-
-Ruby provides three levels of method access control: `public`, `private`, and `protected`.
+Instance variables (starting with `@`) store object-specific state, while instance methods define the behavior that each object can perform.
 
 ```ruby
 class BankAccount
@@ -84,44 +30,33 @@ class BankAccount
     @balance = balance
   end
 
-  # Public method - can be called by anyone
-  def display_balance
-    "Current balance: $#{@balance}"
-  end
-
-  # Protected method - can be called by other instances
-  protected
-
-  def compare_balance(other)
-    @balance > other.balance
-  end
-
-  # Private method - can only be called internally
-  private
-
-  def update_balance(amount)
+  def deposit(amount)
     @balance += amount
+  end
+
+  def current_balance
+    @balance
   end
 end
 
 account = BankAccount.new(100)
-puts account.display_balance
-# Output: Current balance: $100
+account.deposit(50)
+puts account.current_balance # Output: 150
 ```
 
-## Class Instance Variables
+## Attribute Accessors
 
-Instance variables can be exposed using attribute accessors. Ruby provides several methods to create them.
+Ruby provides convenient methods to create getters and setters for instance variables:
 
 ```ruby
 class User
-  # Create reader and writer methods
+  # Creates both getter and setter methods
   attr_accessor :name
 
-  # Create reader only
+  # Creates getter method only
   attr_reader :created_at
 
-  # Create writer only
+  # Creates setter method only
   attr_writer :password
 
   def initialize(name)
@@ -131,9 +66,36 @@ class User
 end
 
 user = User.new("Alice")
-puts user.name # Output: Alice
-user.name = "Bob"
-puts user.name # Output: Bob
+puts user.name        # Using getter (Output: Alice)
+user.name = "Bob"     # Using setter
+puts user.name        # Output: Bob
+puts user.created_at  # Using reader
+user.password = "123" # Using writer
 ```
 
-The `class` keyword is fundamental to Ruby's object-oriented nature, allowing you to create organized, reusable, and maintainable code through encapsulation, inheritance, and polymorphism.
+## Inheritance
+
+Classes can inherit behavior from other classes using the `<` operator, allowing for code reuse and specialization.
+
+```ruby
+class Animal
+  def initialize(name)
+    @name = name
+  end
+
+  def speak
+    "Some sound"
+  end
+end
+
+class Dog < Animal
+  def speak
+    "#{@name} says: Woof!"
+  end
+end
+
+dog = Dog.new("Rex")
+puts dog.speak # Output: Rex says: Woof!
+```
+
+The `class` keyword is fundamental to Ruby's object-oriented nature, allowing you to create organized, reusable code by grouping related data and behavior into objects.

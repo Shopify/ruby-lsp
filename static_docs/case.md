@@ -46,6 +46,51 @@ else
 end
 ```
 
+## Type and Module Checking
+
+`case` statements are commonly used to check an object's type or included modules, leveraging Ruby's `===` operator.
+
+```ruby
+# Checking inheritance and module inclusion
+module Printable
+  def print_info
+    puts "[INFO] #{to_s}"
+  end
+end
+
+class Report
+  include Printable
+end
+
+class User
+end
+
+object = Report.new
+
+case object
+when Printable
+  object.print_info
+when User
+  puts "Found a user"
+else
+  puts "Unknown object type"
+end
+# Output: [INFO] #<Report:0x00007f8>
+
+# Multiple type checks
+result = 42
+
+case result
+when String
+  puts "Got a string: #{result}"
+when Integer
+  puts "Got a number: #{result}"
+when Array
+  puts "Got an array with #{result.length} items"
+end
+# Output: Got a number: 42
+```
+
 ## Pattern Matching
 
 `case` statements support pattern matching, which provides powerful ways to match and destructure data.
