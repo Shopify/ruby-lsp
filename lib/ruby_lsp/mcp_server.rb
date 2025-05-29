@@ -187,7 +187,7 @@ module RubyLsp
           tools: RubyLsp::MCP::Tool.tools.map do |tool_name, tool_class|
             {
               name: tool_name,
-              description: tool_class.description.dump, # avoid newlines in the description
+              description: tool_class.description,
               inputSchema: tool_class.input_schema,
             }
           end,

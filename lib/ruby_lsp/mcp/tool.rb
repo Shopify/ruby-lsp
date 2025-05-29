@@ -62,16 +62,8 @@ module RubyLsp
         # @override
         #: -> String
         def description
-          <<~DESCRIPTION
-            Show the details of the given classes/modules that are available in the current project and
-            its dependencies.
-            - Comments
-            - Definition location
-            - Methods
-            - Ancestors
-
-            Use `get_methods_details` tool to get the details of specific methods of a class/module.
-          DESCRIPTION
+          "Show details of classes/modules including comments, definition location, methods, and ancestors." +
+            "Use get_methods_details for specific method details."
         end
 
         # @override
@@ -139,22 +131,8 @@ module RubyLsp
         # @override
         #: -> String
         def description
-          <<~DESCRIPTION
-            Show the details of the given methods.
-            Use the following format for the signatures:
-            - Class#method
-            - Module#method
-            - Class.singleton_method
-            - Module.singleton_method
-
-            Details include:
-            - Comments
-            - Definition location
-            - Visibility
-            - Parameters
-            - Owner
-
-          DESCRIPTION
+          "Show method details including comments, location, visibility, parameters, and owner." +
+            "Use Class#method, Module#method, Class.singleton_method, or Module.singleton_method format."
         end
 
         # @override
@@ -222,12 +200,8 @@ module RubyLsp
         # @override
         #: -> String
         def description
-          <<~DESCRIPTION
-            Show all the indexed classes and modules in the current project and its dependencies when no query is provided.
-            When a query is provided, it'll return a list of classes and modules that match the query.
-            Doesn't support pagination and will return all classes and modules.
-            Stops after #{Tool::MAX_CLASSES_TO_RETURN} classes and modules.
-          DESCRIPTION
+          "Show all indexed classes and modules in the project and dependencies. When query provided, returns filtered matches. Stops after #{Tool::MAX_CLASSES_TO_RETURN} results." +
+            "Use get_class_module_details to get the details of a specific class or module."
         end
 
         # @override
