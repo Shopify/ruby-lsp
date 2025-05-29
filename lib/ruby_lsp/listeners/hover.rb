@@ -14,6 +14,7 @@ module RubyLsp
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
         Prism::ConstantPathNode,
+        Prism::DefNode,
         Prism::GlobalVariableAndWriteNode,
         Prism::GlobalVariableOperatorWriteNode,
         Prism::GlobalVariableOrWriteNode,
@@ -64,6 +65,7 @@ module RubyLsp
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_def_node_enter,
           :on_global_variable_and_write_node_enter,
           :on_global_variable_operator_write_node_enter,
           :on_global_variable_or_write_node_enter,
@@ -116,6 +118,11 @@ module RubyLsp
       #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         handle_keyword_documentation(node.class_keyword)
+      end
+
+      #: (Prism::DefNode node) -> void
+      def on_def_node_enter(node)
+        handle_keyword_documentation(node.def_keyword)
       end
 
       #: (Prism::InterpolatedStringNode node) -> void
