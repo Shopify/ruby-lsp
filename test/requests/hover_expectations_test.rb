@@ -979,6 +979,21 @@ class HoverExpectationsTest < ExpectationsTestRunner
         RUBY
         position: { line: 0, character: 2 },
       },
+      "module" => {
+        source: <<~RUBY,
+          module MyModule
+          end
+        RUBY
+        position: { line: 0, character: 2 },
+      },
+      "next" => {
+        source: <<~RUBY,
+          for i in 1..10
+            next
+          end
+        RUBY
+        position: { line: 1, character: 2 },
+      },
     }
 
     test_cases.each do |keyword, config|

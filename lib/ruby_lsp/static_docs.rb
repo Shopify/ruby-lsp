@@ -23,7 +23,7 @@ module RubyLsp
     "ensure" => "Executes the code in the ensure block regardless of whether an exception is raised or not",
     "for" => "Iterates over a collection of elements",
     "module" => "Defines a module",
-    "next" => "Skips to the next iteration of a loop",
+    "next" => "Skips the rest of the current iteration and moves to the next iteration of a loop or block",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end
