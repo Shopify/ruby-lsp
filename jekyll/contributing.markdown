@@ -39,8 +39,8 @@ When adding or changing an existing feature, first identify which request is res
 server implements that request and start thinking about the implementation.
 
 {: .note }
-When using VS Code, open the `lsp.code-workspace` file instead of just opening the regular folder. It contains
-configurations for working with the sub projects side by side effectively
+When using VS Code, open the `ruby-lsp.code-workspace` file instead of just opening the regular folder. It contains
+configurations for working with the sub projects side by side effectively.
 
 ### Debugging
 
