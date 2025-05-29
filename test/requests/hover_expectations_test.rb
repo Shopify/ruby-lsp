@@ -441,7 +441,12 @@ class HoverExpectationsTest < ExpectationsTestRunner
         method: "textDocument/hover",
         params: { textDocument: { uri: uri }, position: { character: 4, line: 11 } },
       )
-      assert_match("Hello", server.pop_response.response.contents.value)
+      value = server.pop_response.response.contents.value
+      assert_match("Hello", value)
+      assert_match(
+        "**Definitions**: [fake.rb initialize](file:///fake.rb#L4,5-4,7) | [fake.rb baz](file:///fake.rb#L12,5-12,7)",
+        value,
+      )
     end
   end
 

@@ -258,6 +258,7 @@ module RubyIndexer
       assert_nil(entry.owner)
     end
 
+    # This is documentation
     def test_class_instance_variables_inside_self_method
       index(<<~RUBY)
         class Foo

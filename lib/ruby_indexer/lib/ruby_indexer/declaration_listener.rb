@@ -471,7 +471,6 @@ module RubyIndexer
 
     #: (String name, Prism::Location node_location, Array[Entry::Signature] signatures, ?visibility: Symbol, ?comments: String?) -> void
     def add_method(name, node_location, signatures, visibility: :public, comments: nil)
-      puts "Adding method: #{name} at #{node_location}"
       location = Location.from_prism_location(node_location, @code_units_cache)
 
       @method_name = name

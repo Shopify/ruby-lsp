@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # frozen_string_literal: true
 
 module RubyLsp
@@ -47,6 +47,7 @@ module RubyLsp
         @response_builder = response_builder
         @global_state = global_state
         @index = global_state.index #: RubyIndexer::Index
+        # this is declaration documentation test for @type_inferrer
         @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @path = uri.to_standardized_path #: String?
         @node_context = node_context
