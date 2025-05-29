@@ -12,9 +12,9 @@ require "digest"
 require "time"
 require "uri"
 
-# This file is a script that will configure a composed bundle for the Ruby LSP. The composed bundle allows developers to use
-# the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
-# exact locked versions of dependencies.
+# This file is a script that will configure a composed bundle for the Ruby LSP. The composed bundle allows developers to
+# use the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to
+# the exact locked versions of dependencies.
 
 Bundler.ui.level = :silent
 
