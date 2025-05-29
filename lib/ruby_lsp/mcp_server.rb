@@ -156,8 +156,11 @@ module RubyLsp
             tool_class = RubyLsp::MCP::Tool.get(tool_name)
 
             if tool_class
-              contents = tool_class.new(@index).call(params[:arguments] || {})
+              arguments = params[:arguments] || {}
+              contents = tool_class.new(@index).call(arguments)
               generate_response(contents)
+            else
+              generate_response([])
             end
           }
         end

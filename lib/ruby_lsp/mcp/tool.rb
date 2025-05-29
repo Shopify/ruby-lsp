@@ -19,7 +19,7 @@ module RubyLsp
       end
 
       # @abstract
-      #: (Hash[String, untyped]) -> Array[Hash[Symbol, untyped]]
+      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
       def call(arguments); end
 
       class << self
@@ -86,9 +86,9 @@ module RubyLsp
       end
 
       # @override
-      #: (Hash[String, untyped]) -> Array[Hash[Symbol, untyped]]
+      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
       def call(arguments)
-        fully_qualified_names = arguments["fully_qualified_names"]
+        fully_qualified_names = arguments[:fully_qualified_names]
         fully_qualified_names.map do |fully_qualified_name|
           *nestings, name = fully_qualified_name.delete_prefix("::").split("::")
           entries = @index.resolve(name, nestings) || []
@@ -119,7 +119,7 @@ module RubyLsp
               type: type,
               ancestors: ancestors,
               methods: methods.map(&:name),
-              uris: entries.map(&:uri),
+              uris: entries.map { |entry| entry.uri.to_s },
               documentation: markdown_from_index_entries(name, entries),
             }.to_yaml,
           }
@@ -169,9 +169,9 @@ module RubyLsp
       end
 
       # @override
-      #: (Hash[String, untyped]) -> Array[Hash[Symbol, untyped]]
+      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
       def call(arguments)
-        signatures = arguments["signatures"] || []
+        signatures = arguments[:signatures]
         signatures.map do |signature|
           entries = nil
           receiver = nil
@@ -190,7 +190,7 @@ module RubyLsp
 
           entry_details = entries.map do |entry|
             {
-              uri: entry.uri,
+              uri: entry.uri.to_s,
               visibility: entry.visibility,
               comments: entry.comments,
               parameters: entry.decorated_parameters,
@@ -245,9 +245,9 @@ module RubyLsp
       end
 
       # @override
-      #: (Hash[String, untyped]) -> Array[Hash[Symbol, untyped]]
+      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
       def call(arguments)
-        query = arguments["query"]
+        query = arguments[:query]
         class_names = @index.fuzzy_search(query).map do |entry|
           case entry
           when RubyIndexer::Entry::Class
