@@ -46,9 +46,9 @@ else
 end
 ```
 
-## Pattern Matching (Ruby 2.7+)
+## Pattern Matching
 
-Starting from Ruby 2.7, `case` statements support pattern matching, which provides powerful ways to match and destructure data.
+`case` statements support pattern matching, which provides powerful ways to match and destructure data.
 
 ```ruby
 # Pattern matching with arrays

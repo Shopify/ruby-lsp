@@ -14,11 +14,11 @@ module RubyLsp
 
   # A map of keyword => short documentation to be displayed on hover or completion
   KEYWORD_DOCS = {
-    "break" => "Terminates the execution of a block, loop, or method",
+    "break" => "Terminates the execution of a block or loop",
     "case" => "Starts a case expression for pattern matching or multiple condition checking",
-    "class" => "Defines a class and its methods",
+    "class" => "Defines a class",
     "def" => "Defines a method",
-    "defined" => "Checks if a constant or method is defined",
+    "defined" => "Checks if a constant, variable or method is defined",
     "else" => "Executes the code in the else block if the condition is false",
     "ensure" => "Executes the code in the ensure block regardless of whether an exception is raised or not",
     "yield" => "Invokes the passed block with the given arguments",
