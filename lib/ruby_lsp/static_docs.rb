@@ -25,6 +25,7 @@ module RubyLsp
     "module" => "Defines a module",
     "next" => "Skips the rest of the current iteration and moves to the next iteration of a loop or block",
     "rescue" => "Handles exceptions that occur in the code block",
+    "return" => "Exits a method and returns a value",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end
