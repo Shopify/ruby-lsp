@@ -1803,6 +1803,85 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_filename_based_class_suggestion_not_in_populated_file
+    source = <<~RUBY
+      class ExistingClass
+        def some_method
+          Stud
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/student_profile.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 2, character: 8 },
+        })
+
+        result = server.pop_response.response
+        assert_includes(result.map(&:label), "StudentProfile")
+
+        descriptions = result.map { _1.label_details.description }
+        assert_equal(["class suggested from filename"], descriptions)
+      end
+    end
+  end
+
+  def test_completion_for_filename_based_class_suggestion_not_when_constant_exists
+    source = <<~RUBY
+      class StudentProfile
+        # Existing class with same name as filename
+      end
+
+      Stud
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/student_profile.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 4, character: 4 },
+        })
+
+        result = server.pop_response.response
+        student_profile_items = result.filter { |item| item.label == "StudentProfile" }
+
+        # Should have exactly one StudentProfile (from regular completion, not filename-based)
+        assert_equal(1, student_profile_items.length)
+
+        descriptions = student_profile_items.map { _1.label_details.description }
+        refute_includes(descriptions, "class suggested from filename")
+      end
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)

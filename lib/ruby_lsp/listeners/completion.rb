@@ -707,7 +707,11 @@ module RubyLsp
         filename_class = filename_to_class_name
         return unless filename_class&.start_with?(name)
 
-        # Don't suggest if there are already other matching constants (to avoid conflicts)
+        # Don't suggest if a constant with this exact name already exists
+        existing_constants = @index.constant_completion_candidates(filename_class, @node_context.nesting)
+        return unless existing_constants.empty?
+
+        # Don't suggest if there are already other matching constants for the partial name (to avoid conflicts)
         candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         return unless candidates.empty?
 
