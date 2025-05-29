@@ -59,6 +59,12 @@
           "command": "rubyLsp.goToRelevantFile",
           "when": "rubyLsp.activated",
           "group": "navigation"
+        },
+        {
+          "command": "rubyLsp.profileCurrentFile",
+          "when": "editorTextFocus && resourceLangId == ruby",
+          "group": "navigation",
+          "icon": "$(record)"
         }
       ],
       "view/title": [
@@ -191,6 +197,12 @@
         "command": "rubyLsp.showOutput",
         "title": "Show output channel",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.profileCurrentFile",
+        "title": "Profile current file",
+        "category": "Ruby LSP",
+        "icon": "$(record)"
       }
     ],
     "configuration": {

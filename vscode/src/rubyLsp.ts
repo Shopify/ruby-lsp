@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { Range } from "vscode-languageclient/node";
+import * as os from "os";
+import * as path from "path";
 
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
@@ -736,6 +738,45 @@ export class RubyLsp {
             "Couldn't find relevant files",
           );
         }
+      }),
+      vscode.commands.registerCommand(Command.ProfileCurrentFile, async () => {
+        const workspace = this.currentActiveWorkspace();
+
+        if (!workspace) {
+          vscode.window.showInformationMessage("No workspace found");
+          return;
+        }
+
+        const currentFile = vscode.window.activeTextEditor?.document.uri.fsPath;
+
+        if (!currentFile) {
+          vscode.window.showInformationMessage(
+            "No file opened in the editor to profile",
+          );
+          return;
+        }
+
+        vscode.window.showInformationMessage("Profiling in progress...");
+
+        // const { stderr } = await workspace.execute('vernier --version', true)
+
+        // if (stderr.includes("command not found")) {
+        //   await vscode.window.showInformationMessage(
+        //     "Ensure Vernier 1.8+ is installed",
+        //   );
+        //   return
+        // }
+
+        const profileUri = vscode.Uri.file(
+          path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`)
+        );
+        await workspace.execute(
+          `vernier run --output ${profileUri.fsPath} --format cpuprofile -- ruby ${currentFile}`,
+        );
+
+        await vscode.commands.executeCommand("vscode.open", profileUri, {
+          viewColumn: vscode.ViewColumn.Beside,
+        });
       }),
     ];
   }
