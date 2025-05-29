@@ -10,6 +10,7 @@ module RubyLsp
         Prism::BreakNode,
         Prism::CallNode,
         Prism::CaseNode,
+        Prism::ClassNode,
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
         Prism::ConstantPathNode,
@@ -58,6 +59,7 @@ module RubyLsp
           self,
           :on_break_node_enter,
           :on_case_node_enter,
+          :on_class_node_enter,
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
@@ -109,6 +111,11 @@ module RubyLsp
       #: (Prism::CaseNode node) -> void
       def on_case_node_enter(node)
         handle_keyword_documentation(node.case_keyword)
+      end
+
+      #: (Prism::ClassNode node) -> void
+      def on_class_node_enter(node)
+        handle_keyword_documentation(node.class_keyword)
       end
 
       #: (Prism::InterpolatedStringNode node) -> void

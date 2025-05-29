@@ -16,6 +16,7 @@ module RubyLsp
   KEYWORD_DOCS = {
     "break" => "Terminates the execution of a block, loop, or method",
     "case" => "Starts a case expression for pattern matching or multiple condition checking",
+    "class" => "Defines a class and its methods",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end
