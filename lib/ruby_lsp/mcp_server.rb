@@ -127,57 +127,6 @@ module RubyLsp
     def process_jsonrpc_request(json)
       puts "[MCP] Processing request: #{json.inspect}"
 
-      handle_json_rpc(json) do |method_name|
-        case method_name
-        when "initialize"
-          ->(_) do
-            {
-              protocolVersion: "2024-11-05",
-              capabilities: {
-                tools: { list_changed: false },
-              },
-              serverInfo: {
-                name: "ruby-lsp-mcp-server",
-                version: "0.1.0",
-              },
-            }
-          end
-        when "initialized", "notifications/initialized"
-          ->(_) do
-            {}
-          end
-        when "tools/list"
-          ->(_) do
-            {
-              tools: RubyLsp::MCP::Tool.tools.map do |tool_name, tool_class|
-                {
-                  name: tool_name,
-                  description: tool_class.description.dump, # avoid newlines in the description
-                  inputSchema: tool_class.input_schema,
-                }
-              end,
-            }
-          end
-        when "tools/call"
-          ->(params) {
-            puts "[MCP] Received tools/call request: #{params.inspect}"
-            tool_name = params[:name]
-            tool_class = RubyLsp::MCP::Tool.get(tool_name)
-
-            if tool_class
-              arguments = params[:arguments] || {}
-              contents = tool_class.new(@index).call(arguments)
-              generate_response(contents)
-            else
-              generate_response([])
-            end
-          }
-        end
-      end
-    end
-
-    #: (String) { (String) -> Proc? } -> String?
-    def handle_json_rpc(json, &block)
       # Parse JSON
       begin
         request = JSON.parse(json, symbolize_names: true)
@@ -199,24 +148,62 @@ module RubyLsp
       params = request[:params] || {}
       request_id = request[:id]
 
-      # Get method handler from block
-      handler = block.call(method_name)
-
-      unless handler
-        return generate_error_response(
-          request_id,
-          ErrorCode::METHOD_NOT_FOUND,
-          "Method not found",
-          "Method '#{method_name}' not found",
-        )
-      end
-
-      # Call the handler
       begin
-        result = handler.call(params)
-        generate_success_response(request_id, result)
+        result = process_request(method_name, params)
+
+        if result
+          generate_success_response(request_id, result)
+        else
+          generate_error_response(
+            request_id,
+            ErrorCode::METHOD_NOT_FOUND,
+            "Method not found",
+            "Method '#{method_name}' not found",
+          )
+        end
       rescue => e
         generate_error_response(request_id, ErrorCode::INTERNAL_ERROR, "Internal error", e.message)
+      end
+    end
+
+    #: (String, Hash[Symbol, untyped]) -> Hash[Symbol, untyped]?
+    def process_request(method_name, params)
+      case method_name
+      when "initialize"
+        {
+          protocolVersion: "2024-11-05",
+          capabilities: {
+            tools: { list_changed: false },
+          },
+          serverInfo: {
+            name: "ruby-lsp-mcp-server",
+            version: "0.1.0",
+          },
+        }
+      when "initialized", "notifications/initialized"
+        {}
+      when "tools/list"
+        {
+          tools: RubyLsp::MCP::Tool.tools.map do |tool_name, tool_class|
+            {
+              name: tool_name,
+              description: tool_class.description.dump, # avoid newlines in the description
+              inputSchema: tool_class.input_schema,
+            }
+          end,
+        }
+      when "tools/call"
+        puts "[MCP] Received tools/call request: #{params.inspect}"
+        tool_name = params[:name]
+        tool_class = RubyLsp::MCP::Tool.get(tool_name)
+
+        if tool_class
+          arguments = params[:arguments] || {}
+          contents = tool_class.new(@index, arguments).perform
+          generate_response(contents)
+        else
+          generate_response([])
+        end
       end
     end
 

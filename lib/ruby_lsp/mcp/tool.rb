@@ -13,14 +13,15 @@ module RubyLsp
 
       @tools = {} #: Hash[String, singleton(Tool)]
 
-      #: (RubyIndexer::Index) -> void
-      def initialize(index)
+      #: (RubyIndexer::Index, Hash[Symbol, untyped]) -> void
+      def initialize(index, arguments)
         @index = index #: RubyIndexer::Index
+        @arguments = arguments #: Hash[Symbol, untyped]
       end
 
       # @abstract
-      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
-      def call(arguments); end
+      #: -> Array[Hash[Symbol, untyped]]
+      def perform; end
 
       class << self
         #: Hash[String, singleton(Tool)]
@@ -86,9 +87,9 @@ module RubyLsp
       end
 
       # @override
-      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
-      def call(arguments)
-        fully_qualified_names = arguments[:fully_qualified_names]
+      #: -> Array[Hash[Symbol, untyped]]
+      def perform
+        fully_qualified_names = @arguments[:fully_qualified_names]
         fully_qualified_names.map do |fully_qualified_name|
           *nestings, name = fully_qualified_name.delete_prefix("::").split("::")
           entries = @index.resolve(name, nestings) || []
@@ -169,9 +170,9 @@ module RubyLsp
       end
 
       # @override
-      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
-      def call(arguments)
-        signatures = arguments[:signatures]
+      #: -> Array[Hash[Symbol, untyped]]
+      def perform
+        signatures = @arguments[:signatures]
         signatures.map do |signature|
           entries = nil
           receiver = nil
@@ -245,9 +246,9 @@ module RubyLsp
       end
 
       # @override
-      #: (Hash[Symbol, untyped]) -> Array[Hash[Symbol, untyped]]
-      def call(arguments)
-        query = arguments[:query]
+      #: -> Array[Hash[Symbol, untyped]]
+      def perform
+        query = @arguments[:query]
         class_names = @index.fuzzy_search(query).map do |entry|
           case entry
           when RubyIndexer::Entry::Class
