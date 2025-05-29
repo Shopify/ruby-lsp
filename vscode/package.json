@@ -52,6 +52,11 @@
           "when": "resourceLangId == ruby",
           "command": "workbench.action.terminal.runSelectedText",
           "group": "9_cutcopypaste"
+        },
+        {
+          "when": "resourceLangId == ruby && editorHasSelection",
+          "command": "rubyLsp.execInREPL",
+          "group": "9_cutcopypaste"
         }
       ],
       "editor/title": [
@@ -190,6 +195,44 @@
       {
         "command": "rubyLsp.showOutput",
         "title": "Show output channel",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.startREPL",
+        "title": "Start Ruby REPL",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.execInREPL",
+        "title": "Execute in Ruby REPL",
+        "category": "Ruby LSP",
+        "when": "editorFocus && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.interruptREPL",
+        "title": "Interrupt Ruby REPL",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.executeScratchPadLine",
+        "title": "Execute Current Line in Scratch Pad",
+        "category": "Ruby LSP",
+        "when": "editorTextFocus && editorLangId == ruby && resourceScheme == untitled"
+      },
+      {
+        "command": "rubyLsp.executeScratchPadSelection",
+        "title": "Execute Selection in Scratch Pad",
+        "category": "Ruby LSP",
+        "when": "editorTextFocus && editorLangId == ruby && resourceScheme == untitled"
+      },
+      {
+        "command": "rubyLsp.createIrbTerminal",
+        "title": "Start Ruby REPL (IRB)",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.createRailsConsoleTerminal",
+        "title": "Start Rails Console",
         "category": "Ruby LSP"
       }
     ],
@@ -540,6 +583,34 @@
           "description": "Controls the level of opacity for inline RBS comment signatures",
           "type": "string",
           "default": "1"
+        },
+        "rubyLsp.replSettings": {
+          "description": "Settings for the Ruby REPL integration",
+          "type": "object",
+          "properties": {
+            "showWelcomeMessage": {
+              "description": "Show welcome message with tips when starting REPL",
+              "type": "boolean",
+              "default": true
+            },
+            "executionFeedbackDuration": {
+              "description": "How long to show execution feedback decorations (in milliseconds)",
+              "type": "number",
+              "default": 3000,
+              "minimum": 1000,
+              "maximum": 10000
+            },
+            "autoOpenScratchPad": {
+              "description": "Automatically open the scratch pad when starting REPL",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "default": {
+            "showWelcomeMessage": true,
+            "executionFeedbackDuration": 3000,
+            "autoOpenScratchPad": true
+          }
         }
       }
     },
@@ -552,6 +623,18 @@
           "description": "View and manage dependencies",
           "contextualTitle": "Dependencies",
           "when": "rubyLsp.activated"
+        }
+      ]
+    },
+    "terminal": {
+      "profiles": [
+        {
+          "id": "rubyLsp.irbTerminal",
+          "title": "Ruby REPL (IRB)"
+        },
+        {
+          "id": "rubyLsp.railsConsoleTerminal",
+          "title": "Rails Console"
         }
       ]
     },
@@ -768,7 +851,21 @@
         "editor.formatOnType": true,
         "editor.wordSeparators": "`~@#$%^&*()-=+[{]}\\|;:'\",.<>/"
       }
-    }
+    },
+    "keybindings": [
+      {
+        "command": "rubyLsp.executeScratchPadLine",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus && editorLangId == ruby && resourceScheme == untitled"
+      },
+      {
+        "command": "rubyLsp.executeScratchPadSelection",
+        "key": "ctrl+shift+enter",
+        "mac": "cmd+shift+enter",
+        "when": "editorTextFocus && editorLangId == ruby && resourceScheme == untitled"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run esbuild-base --minify",
