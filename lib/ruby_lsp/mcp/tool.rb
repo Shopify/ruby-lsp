@@ -113,8 +113,7 @@ module RubyLsp
               ancestors: ancestors,
               methods: methods.map(&:name),
               uris: entries.map { |entry| entry.uri.to_s },
-              documentation: markdown_from_index_entries(name, entries),
-            }.to_yaml,
+            }.to_s,
           }
         end
       end
@@ -168,22 +167,13 @@ module RubyLsp
           next if entries.nil?
 
           entry_details = entries.map do |entry|
-            {
-              uri: entry.uri.to_s,
-              visibility: entry.visibility,
-              comments: entry.comments,
-              parameters: entry.decorated_parameters,
-              owner: entry.owner&.name,
-            }
+            "uri: #{entry.uri}, visibility: #{entry.visibility}, parameters: #{entry.decorated_parameters}," +
+              "owner: #{entry.owner&.name}"
           end
 
           {
             type: "text",
-            text: {
-              receiver: receiver,
-              method: method,
-              entry_details: entry_details,
-            }.to_yaml,
+            text: "{ receiver: #{receiver}, method: #{method}, entry_details: #{entry_details} }",
           }
         end.compact
       end
@@ -226,15 +216,9 @@ module RubyLsp
         class_names = @index.fuzzy_search(query).map do |entry|
           case entry
           when RubyIndexer::Entry::Class
-            {
-              name: entry.name,
-              type: "class",
-            }
+            "{name: #{entry.name}, type: class}"
           when RubyIndexer::Entry::Module
-            {
-              name: entry.name,
-              type: "module",
-            }
+            "{name: #{entry.name}, type: module}"
           end
         end.compact.uniq
 
@@ -246,14 +230,14 @@ module RubyLsp
             },
             {
               type: "text",
-              text: class_names.first(MAX_CLASSES_TO_RETURN).to_yaml,
+              text: class_names.first(MAX_CLASSES_TO_RETURN).join(", "),
             },
           ]
         else
           [
             {
               type: "text",
-              text: class_names.to_yaml,
+              text: class_names.join(", "),
             },
           ]
         end
