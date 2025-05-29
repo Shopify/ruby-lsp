@@ -18,7 +18,7 @@ module RubyLsp
     "case" => "Starts a case expression for pattern matching or multiple condition checking",
     "class" => "Defines a class and its methods",
     "def" => "Defines a method",
-    "defined?" => "Checks if a constant or method is defined",
+    "defined" => "Checks if a constant or method is defined",
     "else" => "Executes the code in the else block if the condition is false",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
