@@ -61,6 +61,8 @@ Lstart
 metaprogramming
 mkpath
 multibyte
+namespacing
+Namespacing
 nargs
 nodoc
 noreturn
@@ -69,6 +71,7 @@ onig # abbreviation for oniguruma
 Pacman
 pathlist
 popen
+procs
 qorge
 qtlzwssomeking
 quickfixes
@@ -115,6 +118,7 @@ unindexed
 unparser
 unresolve
 vcall
+Validatable
 Vinicius
 vscodemachineid
 vsctm
