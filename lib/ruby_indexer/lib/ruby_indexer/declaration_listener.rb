@@ -33,6 +33,7 @@ module RubyIndexer
       @indexing_errors = [] #: Array[String]
       @collect_comments = collect_comments
 
+      # tracks current method name
       @method_name = "" #: String
 
       dispatcher.register(
@@ -473,8 +474,6 @@ module RubyIndexer
     def add_method(name, node_location, signatures, visibility: :public, comments: nil)
       location = Location.from_prism_location(node_location, @code_units_cache)
 
-      @method_name = name
-
       @index.add(Entry::Method.new(
         name,
         @uri,
@@ -595,12 +594,6 @@ module RubyIndexer
       if owner && !@inside_def
         owner = @index.existing_or_new_singleton_class(owner.name)
       end
-
-      # debugger
-
-      # existing = @index[name]&.find { |entry| entry.is_a?(Entry::InstanceVariable) && entry.owner == owner }
-
-      # if ex
 
       @index.add(Entry::InstanceVariable.new(
         name,
