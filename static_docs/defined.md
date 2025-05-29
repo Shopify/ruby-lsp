@@ -16,16 +16,14 @@ The `defined?` operator can check various types of expressions and returns diffe
 # Checking different types
 class Example
   CONSTANT = "Hello"
-  @@class_var = "World"
 
   def check_definitions
     @instance_var = "!"
 
-    puts defined?(CONSTANT)     # Output: constant
-    puts defined?(@@class_var)  # Output: class variable
+    puts defined?(CONSTANT) # Output: constant
     puts defined?(@instance_var) # Output: instance-variable
-    puts defined?(yield)        # Output: yield (if block given)
-    puts defined?(super)        # Output: super (if method has super)
+    puts defined?(yield) # Output: yield (if block given)
+    puts defined?(super) # Output: super (if method has super)
   end
 end
 

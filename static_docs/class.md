@@ -28,8 +28,10 @@ class Product
   @@count = 0
 
   # Class method
-  def self.count
-    @@count
+  class << self
+    def count
+      @@count
+    end
   end
 
   def initialize(name, price)

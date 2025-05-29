@@ -84,7 +84,6 @@ Ruby also allows `case` statements without an explicit argument, which acts like
 
 ```ruby
 # Case statement without an argument
-# rubocop:disable Style/EmptyCaseCondition
 case
 when Time.now.saturday?
   puts "It's Saturday!"
@@ -93,7 +92,6 @@ when Time.now.sunday?
 else
   puts "It's a weekday"
 end
-# rubocop:enable Style/EmptyCaseCondition
 ```
 
 The case statement is particularly useful when you have multiple conditions to check against a single value, or when you want to use pattern matching to destructure complex data structures.

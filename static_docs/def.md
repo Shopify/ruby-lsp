@@ -59,15 +59,17 @@ Methods can be defined at both the instance and class level.
 
 ```ruby
 class Timer
+  # Class method - called on the class itself
+  class << self
+    def now
+      Time.now.strftime("%H:%M:%S")
+    end
+  end
+
   # Instance method - called on instances
   def start
     @time = Time.now
     "Timer started"
-  end
-
-  # Class method - called on the class itself
-  def self.now
-    Time.now.strftime("%H:%M:%S")
   end
 end
 

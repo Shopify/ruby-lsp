@@ -18,10 +18,10 @@ end
 The `else` clause can be used with various conditional structures in Ruby.
 
 ```ruby
-# With unless
+# With if (positive condition)
 temperature = 25
 
-unless temperature < 20
+if temperature >= 20
   puts "It's warm"
 else
   puts "It's cool"
