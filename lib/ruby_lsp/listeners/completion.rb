@@ -701,7 +701,7 @@ module RubyLsp
         false
       end
 
-      # Add filename-based class completion for sparse files
+      # Add filename-based class completion
       #: (Prism::ConstantReadNode node, String name, Interface::Range range) -> void
       def add_filename_based_class_completion(node, name, range)
         filename_class = filename_to_class_name
