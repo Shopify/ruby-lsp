@@ -118,6 +118,9 @@ module RubyLsp
             top_level?(complete_name),
           )
         end
+
+        # Add filename-based class suggestion if appropriate
+        add_filename_based_class_completion(node, name, range)
       end
 
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
@@ -696,6 +699,41 @@ module RubyLsp
         end
 
         false
+      end
+
+      # Add filename-based class completion for sparse files
+      #: (Prism::ConstantReadNode node, String name, Interface::Range range) -> void
+      def add_filename_based_class_completion(node, name, range)
+        filename_class = filename_to_class_name
+        return unless filename_class&.start_with?(name)
+
+        # Don't suggest if there are already other matching constants (to avoid conflicts)
+        candidates = @index.constant_completion_candidates(name, @node_context.nesting)
+        return unless candidates.empty?
+
+        @response_builder << Interface::CompletionItem.new(
+          label: filename_class,
+          filter_text: filename_class,
+          text_edit: Interface::TextEdit.new(range: range, new_text: filename_class),
+          kind: Constant::CompletionItemKind::CLASS,
+          label_details: Interface::CompletionItemLabelDetails.new(
+            description: "class suggested from filename",
+          ),
+          data: {
+            filename_suggestion: true,
+          },
+        )
+      end
+
+      # Convert filename to PascalCase class name
+      #: -> String?
+      def filename_to_class_name
+        path = @uri.path
+        return unless path&.end_with?(".rb")
+
+        basename = File.basename(path, ".rb")
+        # Convert snake_case to PascalCase
+        basename.split("_").map(&:capitalize).join
       end
     end
   end

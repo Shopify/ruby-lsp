@@ -1734,6 +1734,75 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_filename_based_class_suggestion
+    source = <<~RUBY
+      # Empty file with just a comment
+      Stud
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/student_profile.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 1, character: 4 },
+        })
+
+        result = server.pop_response.response
+        assert_includes(result.map(&:label), "StudentProfile")
+
+        # Find the StudentProfile completion item
+        student_profile_item = result.find { |item| item.label == "StudentProfile" }
+        refute_nil(student_profile_item)
+        assert_equal("StudentProfile", student_profile_item.text_edit.new_text)
+        assert_equal(LanguageServer::Protocol::Constant::CompletionItemKind::CLASS, student_profile_item.kind)
+      end
+    end
+  end
+
+  def test_completion_for_filename_based_class_suggestion_with_underscores
+    source = <<~RUBY
+      User
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server|
+      with_file_structure(server) do |tmpdir|
+        uri = URI("file://#{tmpdir}/user_authentication_service.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: 4 },
+        })
+
+        result = server.pop_response.response
+        assert_includes(result.map(&:label), "UserAuthenticationService")
+      end
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
