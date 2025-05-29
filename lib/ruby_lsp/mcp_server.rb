@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "ruby_lsp/mcp/tool"
+require "socket"
 
 module RubyLsp
   class MCPServer
@@ -35,21 +36,12 @@ module RubyLsp
       FileUtils.mkdir_p(lsp_dir)
 
       # Write port to file
-      port_file = File.join(lsp_dir, "mcp-port")
-      File.write(port_file, @port.to_s)
+      @port_file = File.join(lsp_dir, "mcp-port") #: String
+      File.write(@port_file, @port.to_s)
 
-      # Create WEBrick server
-      @server = WEBrick::HTTPServer.new(
-        Port: @port,
-        BindAddress: "127.0.0.1",
-        Logger: WEBrick::Log.new(File.join(lsp_dir, "mcp-webrick.log")),
-        AccessLog: [],
-      ) #: WEBrick::HTTPServer
-
-      # Mount the MCP handler
-      @server.mount_proc("/mcp") do |req, res|
-        handle_mcp_request(req, res)
-      end
+      # Create TCP server
+      @server = TCPServer.new("127.0.0.1", @port) #: TCPServer
+      @server_thread = nil #: Thread?
 
       @running = false #: T::Boolean
       @global_state = global_state #: GlobalState
@@ -58,75 +50,64 @@ module RubyLsp
 
     #: -> void
     def start
-      puts "[MCP] Server started on TCP port #{@port}"
-      Thread.new do
-        @server.start
+      puts "[MCP] Server started on port #{@port}"
+      @running = true
+
+      @server_thread = Thread.new do
+        while @running
+          begin
+            # Accept incoming connections
+            client = @server.accept
+
+            # Handle each client in a separate thread
+            Thread.new(client) do |client_socket|
+              handle_client(client_socket)
+            end
+          rescue => e
+            puts "[MCP] Error accepting connection: #{e.message}" if @running
+          end
+        end
       end
     end
 
     #: -> void
     def stop
-      puts "[MCP] Stopping server"
-      @server.shutdown
+      puts "[MCP] Server stopping"
+      @running = false
+      @server.close
+      @server_thread&.join
     ensure
-      # Clean up port file
-      lsp_dir = File.join(@workspace_path, ".ruby-lsp")
-      port_file = File.join(lsp_dir, "mcp-port")
-      File.delete(port_file) if File.exist?(port_file)
-
-      # Clean up log file
-      log_file = File.join(lsp_dir, "mcp-webrick.log")
-      File.delete(log_file) if File.exist?(log_file)
+      File.delete(@port_file) if File.exist?(@port_file)
     end
 
     private
 
-    #: (WEBrick::HTTPRequest, WEBrick::HTTPResponse) -> void
-    def handle_mcp_request(request, response)
-      body = request.body || ""
+    #: (TCPSocket) -> void
+    def handle_client(client_socket)
+      # Read JSON-RPC request from client
+      request_line = client_socket.gets
+      return unless request_line
 
-      puts "[MCP] Received request: #{body}"
+      request_line = request_line.strip
 
-      result = process_jsonrpc_request(body)
+      # Process the JSON-RPC request
+      response = process_jsonrpc_request(request_line)
 
-      if result.nil?
-        response.status = 500
-        response.body = {
-          jsonrpc: "2.0",
-          id: nil,
-          error: {
-            code: ErrorCode::INTERNAL_ERROR,
-            message: "Internal error",
-            data: "No response from the server",
-          },
-        }.to_json
-      else
-        response.status = 200
-        response.content_type = "application/json"
-        response.body = result
+      if response
+        client_socket.puts(response)
       end
-
-      puts "[MCP] Sent response: #{response.body}"
     rescue => e
-      puts "[MCP] Error processing request: #{e.message}"
-      puts e.backtrace&.join("\n")
+      puts "[MCP] Client error: #{e.message}"
 
-      response.status = 500
-      response.body = {
-        jsonrpc: "2.0",
-        id: nil,
-        error: {
-          code: ErrorCode::INTERNAL_ERROR,
-          message: "Internal error",
-          data: e.message,
-        },
-      }.to_json
+      # Send error response
+      error_response = generate_error_response(nil, ErrorCode::INTERNAL_ERROR, "Internal error", e.message)
+      client_socket.puts(error_response)
+    ensure
+      client_socket.close
     end
 
     #: (String) -> String?
     def process_jsonrpc_request(json)
-      puts "[MCP] Processing request: #{json.inspect}"
-
       # Parse JSON
       begin
         request = JSON.parse(json, symbolize_names: true)
@@ -193,7 +174,6 @@ module RubyLsp
           end,
         }
       when "tools/call"
-        puts "[MCP] Received tools/call request: #{params.inspect}"
         tool_name = params[:name]
         tool_class = RubyLsp::MCP::Tool.get(tool_name)
 

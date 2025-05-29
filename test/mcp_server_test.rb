@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "net/http"
+require "socket"
 
 module RubyLsp
   class MCPServerTest < Minitest::Test
@@ -13,7 +13,9 @@ module RubyLsp
       # Initialize the index with Ruby core - this is essential for method resolution!
       RubyIndexer::RBSIndexer.new(@index).index_ruby_core
       @mcp_server = MCPServer.new(@global_state)
-      @mcp_server.start
+      capture_io do
+        @mcp_server.start
+      end
 
       @mcp_port = @mcp_server.instance_variable_get(:@port)
 
@@ -213,18 +215,12 @@ module RubyLsp
     end
 
     def test_server_handles_malformed_json
-      uri = URI("http://127.0.0.1:#{@mcp_port}/mcp")
+      socket = TCPSocket.new("127.0.0.1", @mcp_port)
+      socket.puts("{ invalid json")
+      response_line = socket.gets #: as !nil
+      socket.close
 
-      http = Net::HTTP.new(uri.host, uri.port)
-      request = Net::HTTP::Post.new(uri.path)
-      request["Content-Type"] = "application/json"
-      request.body = "{ invalid json"
-
-      response = http.request(request)
-
-      assert_equal("200", response.code)
-
-      response_data = JSON.parse(response.body)
+      response_data = JSON.parse(response_line)
       assert_equal("2.0", response_data["jsonrpc"])
       assert(response_data["error"])
     end
@@ -232,29 +228,27 @@ module RubyLsp
     private
 
     def send_mcp_request(method, params)
-      uri = URI("http://127.0.0.1:#{@mcp_port}/mcp")
-
-      http = Net::HTTP.new(uri.host, uri.port)
-      request = Net::HTTP::Post.new(uri.path)
-      request["Content-Type"] = "application/json"
-      request.body = {
+      request_data = {
         jsonrpc: "2.0",
         id: 1,
         method: method,
         params: params,
       }.to_json
 
-      response = http.request(request)
+      socket = TCPSocket.new("127.0.0.1", @mcp_port)
+      socket.puts(request_data)
+      response_line = socket.gets
+      socket.close
 
-      if response.code == "200"
-        response_data = JSON.parse(response.body)
+      if response_line
+        response_data = JSON.parse(response_line)
         if response_data["error"]
           raise "MCP request failed: #{response_data["error"]}"
         end
 
         response_data["result"]
       else
-        raise "HTTP request failed: #{response.code} #{response.body}"
+        raise "No response received from TCP server"
       end
     end
   end

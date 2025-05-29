@@ -30,7 +30,6 @@ require "fileutils"
 require "open3"
 require "securerandom"
 require "shellwords"
-require "webrick"
 
 require "ruby-lsp"
 require "ruby_lsp/base_server"

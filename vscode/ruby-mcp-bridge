@@ -20,18 +20,15 @@ fi
 # Read port from file
 PORT=$(cat "$PORT_FILE")
 
-echo "Bridge started using port $PORT" >> "$LOG_FILE"
+echo "Bridge started using TCP port $PORT" >> "$LOG_FILE"
 
 while IFS= read -r line; do
   echo "================================" >> "$LOG_FILE"
   echo "Input JSON: $line" >> "$LOG_FILE"
 
-  # Send HTTP request to the WEBrick server
-  response=$(curl -s -X POST -H "Content-Type: application/json" \
-    -H "Content-Length: ${#line}" \
-    --data "$line" \
-    "http://127.0.0.1:$PORT/mcp" 2>>"$LOG_FILE") || {
-    echo "HTTP request failed" >> "$LOG_FILE"
+  # Send JSON-RPC request directly over TCP
+  response=$(echo "$line" | nc 127.0.0.1 "$PORT" 2>>"$LOG_FILE") || {
+    echo "TCP connection failed" >> "$LOG_FILE"
     continue
   }
 

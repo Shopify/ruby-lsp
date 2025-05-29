@@ -6,7 +6,6 @@ PATH
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
       sorbet-runtime (>= 0.5.10782)
-      webrick (>= 1.8)
 
 GEM
   remote: https://rubygems.org/
@@ -118,7 +117,6 @@ GEM
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
-    webrick (1.9.1)
     yard (0.9.37)
     yard-sorbet (0.9.0)
       sorbet-runtime
