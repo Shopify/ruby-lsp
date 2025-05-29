@@ -33,6 +33,7 @@ module RubyLsp
         Prism::InstanceVariableWriteNode,
         Prism::ModuleNode,
         Prism::NextNode,
+        Prism::RescueNode,
         Prism::SymbolNode,
         Prism::StringNode,
         Prism::InterpolatedStringNode,
@@ -90,6 +91,7 @@ module RubyLsp
           :on_instance_variable_target_node_enter,
           :on_module_node_enter,
           :on_next_node_enter,
+          :on_rescue_node_enter,
           :on_super_node_enter,
           :on_forwarding_super_node_enter,
           :on_string_node_enter,
@@ -164,6 +166,11 @@ module RubyLsp
 
       #: (Prism::NextNode node) -> void
       def on_next_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::RescueNode node) -> void
+      def on_rescue_node_enter(node)
         handle_keyword_documentation(node.keyword)
       end
 
