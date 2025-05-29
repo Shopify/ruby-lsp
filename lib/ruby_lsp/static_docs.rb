@@ -20,6 +20,7 @@ module RubyLsp
     "def" => "Defines a method",
     "defined" => "Checks if a constant or method is defined",
     "else" => "Executes the code in the else block if the condition is false",
+    "ensure" => "Executes the code in the ensure block regardless of whether an exception is raised or not",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end

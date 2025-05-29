@@ -17,6 +17,7 @@ module RubyLsp
         Prism::DefNode,
         Prism::DefinedNode,
         Prism::ElseNode,
+        Prism::EnsureNode,
         Prism::GlobalVariableAndWriteNode,
         Prism::GlobalVariableOperatorWriteNode,
         Prism::GlobalVariableOrWriteNode,
@@ -70,6 +71,7 @@ module RubyLsp
           :on_def_node_enter,
           :on_defined_node_enter,
           :on_else_node_enter,
+          :on_ensure_node_enter,
           :on_global_variable_and_write_node_enter,
           :on_global_variable_operator_write_node_enter,
           :on_global_variable_or_write_node_enter,
@@ -137,6 +139,11 @@ module RubyLsp
       #: (Prism::ElseNode node) -> void
       def on_else_node_enter(node)
         handle_keyword_documentation(node.else_keyword)
+      end
+
+      #: (Prism::EnsureNode node) -> void
+      def on_ensure_node_enter(node)
+        handle_keyword_documentation(node.ensure_keyword)
       end
 
       #: (Prism::InterpolatedStringNode node) -> void
