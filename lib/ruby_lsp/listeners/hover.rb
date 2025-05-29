@@ -7,6 +7,7 @@ module RubyLsp
       include Requests::Support::Common
 
       ALLOWED_TARGETS = [
+        Prism::BreakNode,
         Prism::CallNode,
         Prism::CaseNode,
         Prism::ConstantReadNode,
@@ -55,6 +56,7 @@ module RubyLsp
 
         dispatcher.register(
           self,
+          :on_break_node_enter,
           :on_case_node_enter,
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
@@ -97,6 +99,11 @@ module RubyLsp
         end
 
         generate_heredoc_hover(node)
+      end
+
+      #: (Prism::BreakNode node) -> void
+      def on_break_node_enter(node)
+        handle_keyword_documentation(node.keyword)
       end
 
       #: (Prism::CaseNode node) -> void
