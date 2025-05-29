@@ -13,7 +13,6 @@ group :development do
   gem "mocha", "~> 2.3"
   gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.2"
-  gem "rubocop-md", "~> 1.2.0", require: false
   gem "rubocop-minitest", "~> 0.36.0", require: false
   gem "rubocop-rake", "~> 0.6.0", require: false
   gem "rubocop-shopify", "~> 2.15", require: false
