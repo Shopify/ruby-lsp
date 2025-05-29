@@ -12,6 +12,30 @@ class ReferencesTest < Minitest::Test
     assert_equal([0, 3], refs)
   end
 
+  def test_finds_local_var_references
+    refs = find_references("test/fixtures/local_var_examples.rb", { line: 2, character: 2 }).map do |ref|
+      ref.range.start.line
+    end
+
+    assert_equal([2, 4, 6, 8, 10, 12], refs)
+  end
+
+  def test_finds_local_var_references_in_nested_scopes
+    refs = find_references("test/fixtures/local_var_examples.rb", { line: 20, character: 2 }).map do |ref|
+      ref.range.start.line
+    end
+
+    assert_equal([20, 22, 23], refs)
+  end
+
+  def test_finds_local_var_references_in_nested_scopes_position_in_block_args
+    refs = find_references("test/fixtures/local_var_examples.rb", { line: 22, character: 12 }).map do |ref|
+      ref.range.start.line
+    end
+
+    assert_equal([22, 23], refs)
+  end
+
   private
 
   def find_references(fixture_path, position)

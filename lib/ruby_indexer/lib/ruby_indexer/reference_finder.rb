@@ -43,6 +43,17 @@ module RubyIndexer
       end
     end
 
+    class LocalVariableTarget < Target
+      #: String
+      attr_reader :name
+
+      #: (String name) -> void
+      def initialize(name)
+        super()
+        @name = name
+      end
+    end
+
     class Reference
       #: String
       attr_reader :name
@@ -98,6 +109,13 @@ module RubyIndexer
         :on_instance_variable_operator_write_node_enter,
         :on_instance_variable_or_write_node_enter,
         :on_instance_variable_target_node_enter,
+        :on_local_variable_and_write_node_enter,
+        :on_local_variable_operator_write_node_enter,
+        :on_local_variable_or_write_node_enter,
+        :on_local_variable_read_node_enter,
+        :on_local_variable_target_node_enter,
+        :on_local_variable_write_node_enter,
+        :on_parameters_node_enter,
         :on_call_node_enter,
       )
     end
@@ -280,6 +298,45 @@ module RubyIndexer
       collect_instance_variable_references(node.name.to_s, node.location, true)
     end
 
+    #: (Prism::LocalVariableAndWriteNode node) -> void
+    def on_local_variable_and_write_node_enter(node)
+      collect_local_variable_references(node.name.to_s, node.name_loc, true)
+    end
+
+    #: (Prism::LocalVariableOperatorWriteNode node) -> void
+    def on_local_variable_operator_write_node_enter(node)
+      collect_local_variable_references(node.name.to_s, node.name_loc, true)
+    end
+
+    #: (Prism::LocalVariableOrWriteNode node) -> void
+    def on_local_variable_or_write_node_enter(node)
+      collect_local_variable_references(node.name.to_s, node.name_loc, true)
+    end
+
+    #: (Prism::LocalVariableReadNode node) -> void
+    def on_local_variable_read_node_enter(node)
+      collect_local_variable_references(node.name.to_s, node.location, false)
+    end
+
+    #: (Prism::LocalVariableTargetNode node) -> void
+    def on_local_variable_target_node_enter(node)
+      collect_local_variable_references(node.name.to_s, node.location, true)
+    end
+
+    #: (Prism::LocalVariableWriteNode node) -> void
+    def on_local_variable_write_node_enter(node)
+      collect_local_variable_references(node.name.to_s, node.name_loc, true)
+    end
+
+    #: (Prism::ParametersNode node) -> void
+    def on_parameters_node_enter(node)
+      node.requireds.each do |parameter|
+        next unless parameter.is_a?(Prism::RequiredParameterNode)
+
+        collect_local_variable_references(parameter.name.to_s, parameter.location, true)
+      end
+    end
+
     #: (Prism::CallNode node) -> void
     def on_call_node_enter(node)
       if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
@@ -330,6 +387,13 @@ module RubyIndexer
       if @target.owner_ancestors.include?(receiver_type)
         @references << Reference.new(name, location, declaration: declaration)
       end
+    end
+
+    #: (String name, Prism::Location location, bool declaration) -> void
+    def collect_local_variable_references(name, location, declaration)
+      return unless @target.is_a?(LocalVariableTarget) && name == @target.name
+
+      @references << Reference.new(name, location, declaration: declaration)
     end
   end
 end
