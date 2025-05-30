@@ -372,6 +372,17 @@ module RubyLsp
 
       perform_initial_indexing
       check_formatter_is_available
+
+      start_mcp_server
+    end
+
+    #: -> void
+    def start_mcp_server
+      return if ENV["CI"] || !@global_state.uses_ruby_mcp
+
+      @mcp_server = MCPServer.new(@global_state) #: MCPServer?
+      @mcp_server #: as !nil
+        .start
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1245,6 +1256,7 @@ module RubyLsp
     #: -> void
     def shutdown
       Addon.unload_addons
+      @mcp_server&.stop
     end
 
     #: -> void
