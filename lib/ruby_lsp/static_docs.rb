@@ -26,7 +26,7 @@ module RubyLsp
     "next" => "Skips the rest of the current iteration and moves to the next iteration of a loop or block",
     "rescue" => "Handles exceptions that occur in the code block",
     "return" => "Exits a method and returns a value",
-    "undef" => "Undefines a method",
+    "undef" => "Removes a method definition from a class or module",
     "unless" => "Executes the code in the unless block if the condition is false",
     "until" => "Executes the code in the until block until the condition is true",
     "when" => "Matches a value against a pattern",
