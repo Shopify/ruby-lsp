@@ -34,6 +34,7 @@ const RUN_PROFILE_LABEL = "Run";
 const RUN_IN_TERMINAL_PROFILE_LABEL = "Run in terminal";
 const DEBUG_PROFILE_LABEL = "Debug";
 const COVERAGE_PROFILE_LABEL = "Coverage";
+const PROFILE_PROFILE_LABEL = "Profile";
 
 export class TestController {
   // Only public for testing
@@ -42,6 +43,7 @@ export class TestController {
   readonly runInTerminalProfile: vscode.TestRunProfile;
   readonly coverageProfile: vscode.TestRunProfile;
   readonly testDebugProfile: vscode.TestRunProfile;
+  readonly profileProfile: vscode.TestRunProfile;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
   private terminal: vscode.Terminal | undefined;
   private readonly telemetry: vscode.TelemetryLogger;
@@ -143,6 +145,13 @@ export class TestController {
       false,
     );
 
+    this.profileProfile = this.testController.createRunProfile(
+      PROFILE_PROFILE_LABEL,
+      vscode.TestRunProfileKind.Run,
+      this.runTest.bind(this),
+      false,
+    );
+
     const testFileWatcher =
       vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
 
@@ -160,6 +169,7 @@ export class TestController {
       this.coverageProfile,
       this.runner,
       this.runInTerminalProfile,
+      this.profileProfile,
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
@@ -357,6 +367,42 @@ export class TestController {
     });
   }
 
+  /**
+   * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
+   */
+  profileTest(
+    _path: string,
+    _id: string,
+    command?: string,
+    _location?: any,
+    _name?: string,
+  ) {
+    // The command is passed as the third argument from the code lens
+    // If it's not provided, fall back to finding the test by active line
+    // eslint-disable-next-line no-param-reassign
+    command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
+
+    if (!command) {
+      vscode.window.showErrorMessage("No test command found to profile");
+      return;
+    }
+
+    if (this.terminal === undefined) {
+      this.terminal = this.getTerminal();
+    }
+
+    this.terminal.show();
+    this.terminal.sendText(`vernier run --format cpuprofile -- ${command}`);
+
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: {
+        label: "profile_test",
+        vscodemachineid: vscode.env.machineId,
+      },
+    });
+  }
+
   // Public for testing purposes. Receives the controller's inclusions and exclusions and builds request test items for
   // the server to resolve the command
   buildRequestTestItems(
@@ -400,6 +446,77 @@ export class TestController {
     });
 
     let profile;
+
+    // For Profile mode
+    if (mode === Mode.Profile) {
+      if (this.terminal === undefined) {
+        this.terminal = this.getTerminal();
+      }
+
+      let commandToExecute: string | undefined;
+
+      if (this.fullDiscovery) {
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(
+          testItem.uri!,
+        );
+        if (!workspaceFolder) {
+          vscode.window.showErrorMessage(
+            "Could not find workspace for the test item.",
+          );
+          return;
+        }
+        const workspace = await this.getOrActivateWorkspace(workspaceFolder);
+
+        if (
+          workspace.lspClient &&
+          workspace.lspClient.initializeResult?.capabilities.experimental
+            ?.full_test_discovery
+        ) {
+          const requestTestItems = [this.testItemToServerItem(testItem)];
+          try {
+            const response =
+              await workspace.lspClient.resolveTestCommands(requestTestItems);
+
+            if (response && response.commands && response.commands.length > 0) {
+              commandToExecute = response.commands[0];
+            } else {
+              vscode.window.showErrorMessage(
+                "LSP server did not return a command for profiling.",
+              );
+              return;
+            }
+          } catch (error: any) {
+            vscode.window.showErrorMessage(
+              `Error resolving test command for profiling: ${error.message}`,
+            );
+            this.currentWorkspace()?.outputChannel.error(
+              `Error resolving test command for profiling: ${error.message}`,
+            );
+            return;
+          }
+        } else {
+          vscode.window.showErrorMessage(
+            "Cannot profile test: Ruby LSP server does not support necessary test discovery " +
+              "features or is not ready. Please update the Ruby LSP gem or check server status.",
+          );
+          return;
+        }
+      } else {
+        // Old discovery path
+        commandToExecute = this.testCommands.get(testItem);
+      }
+
+      if (!commandToExecute) {
+        vscode.window.showErrorMessage("No test command found to profile.");
+        return;
+      }
+
+      this.terminal.show();
+      this.terminal.sendText(
+        `vernier run --format cpuprofile -- ${commandToExecute}`,
+      );
+      return;
+    }
 
     switch (mode) {
       case Mode.Debug:
@@ -636,6 +753,14 @@ export class TestController {
 
     run.end();
     linkedCancellationSource.dispose();
+
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: {
+        label: "test",
+        vscodemachineid: vscode.env.machineId,
+      },
+    });
   }
 
   // When trying to a test file or directory, we need to know which framework is used by tests inside of it to resolve
@@ -760,6 +885,17 @@ export class TestController {
         linkedCancellationSource,
       );
     }
+
+    run.end();
+    linkedCancellationSource.dispose();
+
+    this.telemetry.logUsage("ruby_lsp.code_lens", {
+      type: "counter",
+      attributes: {
+        label: "debug",
+        vscodemachineid: vscode.env.machineId,
+      },
+    });
   }
 
   private findTestInGroup(
@@ -854,7 +990,10 @@ export class TestController {
 
     this.telemetry.logUsage("ruby_lsp.code_lens", {
       type: "counter",
-      attributes: { label: "debug", vscodemachineid: vscode.env.machineId },
+      attributes: {
+        label: "debug",
+        vscodemachineid: vscode.env.machineId,
+      },
     });
   }
 
@@ -952,7 +1091,10 @@ export class TestController {
 
     this.telemetry.logUsage("ruby_lsp.code_lens", {
       type: "counter",
-      attributes: { label: "test", vscodemachineid: vscode.env.machineId },
+      attributes: {
+        label: "test",
+        vscodemachineid: vscode.env.machineId,
+      },
     });
   }
 
