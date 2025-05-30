@@ -1,7 +1,8 @@
-import * as vscode from "vscode";
-import { Range } from "vscode-languageclient/node";
 import * as os from "os";
 import * as path from "path";
+
+import * as vscode from "vscode";
+import { Range } from "vscode-languageclient/node";
 
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
@@ -747,6 +748,36 @@ export class RubyLsp {
           return;
         }
 
+        try {
+          const { stdout } = await workspace.execute("vernier --version");
+          const version = stdout.trim();
+          const [major, minor, _] = version.split(".").map(Number);
+
+          if (major < 1 || (major === 1 && minor < 8)) {
+            const install = await vscode.window.showInformationMessage(
+              "Vernier version 1.8.0 or higher is required for profiling. Would you like to install it?",
+              "Install",
+            );
+
+            if (install === "Install") {
+              await workspace.execute("gem install vernier");
+            } else {
+              return;
+            }
+          }
+        } catch (error) {
+          const install = await vscode.window.showInformationMessage(
+            "Vernier is required for profiling. Would you like to install it?",
+            "Install",
+          );
+
+          if (install === "Install") {
+            await workspace.execute("gem install vernier");
+          } else {
+            return;
+          }
+        }
+
         const currentFile = vscode.window.activeTextEditor?.document.uri.fsPath;
 
         if (!currentFile) {
@@ -764,7 +795,7 @@ export class RubyLsp {
           },
           async () => {
             const profileUri = vscode.Uri.file(
-              path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`)
+              path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`),
             );
 
             await workspace.execute(
@@ -774,7 +805,7 @@ export class RubyLsp {
             await vscode.commands.executeCommand("vscode.open", profileUri, {
               viewColumn: vscode.ViewColumn.Beside,
             });
-          }
+          },
         );
       }),
     ];
