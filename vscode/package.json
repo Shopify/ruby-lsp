@@ -21,10 +21,8 @@
     "Chat"
   ],
   "activationEvents": [
-    "onLanguage:ruby",
     "workspaceContains:Gemfile.lock",
-    "workspaceContains:gems.locked",
-    "onView:dependencies"
+    "workspaceContains:gems.locked"
   ],
   "extensionDependencies": [
     "vscode.git"
