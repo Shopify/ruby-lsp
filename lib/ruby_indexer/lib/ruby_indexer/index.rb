@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require_relative "file_index"
+
 module RubyIndexer
   class Index
     class UnresolvableAliasError < StandardError; end
@@ -12,6 +14,9 @@ module RubyIndexer
 
     #: Configuration
     attr_reader :configuration
+
+    #: RubyIndexer::FileIndex
+    attr_reader :file_index
 
     #: bool
     attr_reader :initial_indexing_completed
@@ -80,6 +85,9 @@ module RubyIndexer
       @configuration = RubyIndexer::Configuration.new #: Configuration
 
       @initial_indexing_completed = false #: bool
+
+      # File index for tracking files and their relationships
+      @file_index = FileIndex.new #: FileIndex
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
@@ -93,6 +101,7 @@ module RubyIndexer
       key = uri.to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
+      # TODO: Adjust file index on delete.
       @uris_to_entries[key]&.each do |entry|
         name = entry.name
         entries = @entries[name]
@@ -348,6 +357,9 @@ module RubyIndexer
           "The index is not empty. To prevent invalid entries, `index_all` can only be called once."
       end
 
+      # Clear the file index at the start of a full indexing
+      @file_index.clear
+
       RBSIndexer.new(self).index_ruby_core
       # Calculate how many paths are worth 1% of progress
       progress_step = (uris.length / 100.0).ceil
@@ -360,6 +372,9 @@ module RubyIndexer
 
         index_file(uri, collect_comments: false)
       end
+
+      # Bulk load all file paths into the file index
+      @file_index.bulk_load(Dir.glob("**/*.rb"))
 
       @initial_indexing_completed = true
     end
@@ -377,6 +392,8 @@ module RubyIndexer
 
       indexing_errors = listener.indexing_errors.uniq
       indexing_errors.each { |error| $stderr.puts(error) } if indexing_errors.any?
+
+      # TODO: Add file to file index
     rescue SystemStackError => e
       if e.backtrace&.first&.include?("prism")
         $stderr.puts "Prism error indexing #{uri}: #{e.message}"
