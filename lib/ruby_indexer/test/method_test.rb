@@ -258,7 +258,7 @@ module RubyIndexer
       assert_equal("####################\nDocumentation for bar\n####################\n", bar.comments)
 
       baz = @index["baz"]&.first #: as !nil
-      assert_equal("Documentation for baz", baz.comments)
+      assert_equal("test\nDocumentation for baz", baz.comments)
 
       ban = @index["ban"]&.first #: as !nil
       assert_empty(ban.comments)

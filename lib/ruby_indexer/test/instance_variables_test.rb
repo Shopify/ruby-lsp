@@ -236,5 +236,35 @@ module RubyIndexer
       assert_instance_of(Entry::SingletonClass, owner)
       assert_equal("Foo::<Class:Foo>", owner&.name)
     end
+
+    def test_class_instance_variable_comments
+      index(<<~RUBY)
+          class Foo
+            # Leading documentation for @a
+            @a = "Hello" #: String
+            @b = "World" # Trailing documentation for @b
+            @c = "!"
+            # Leading documentation for @d
+            @d = "Goodbye" # Trailing documentation for @d
+          end
+        end
+      RUBY
+
+      assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:2-4:2-6")
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      assert_equal("Leading documentation for @a", entry.comments)
+
+      assert_entry("@b", Entry::InstanceVariable, "/fake/path/foo.rb:3-4:3-6")
+      entry = @index["@b"]&.first #: as Entry::InstanceVariable
+      assert_equal("Trailing documentation for @b", entry.comments)
+
+      assert_entry("@c", Entry::InstanceVariable, "/fake/path/foo.rb:4-4:4-6")
+      entry = @index["@c"]&.first #: as Entry::InstanceVariable
+      assert_empty(entry.comments)
+
+      assert_entry("@d", Entry::InstanceVariable, "/fake/path/foo.rb:6-4:6-6")
+      entry = @index["@d"]&.first #: as Entry::InstanceVariable
+      assert_equal("Leading documentation for @d\nTrailing documentation for @d", entry.comments)
+    end
   end
 end
