@@ -28,6 +28,7 @@ module RubyLsp
     "return" => "Exits a method and returns a value",
     "undef" => "Undefines a method",
     "unless" => "Executes the code in the unless block if the condition is false",
+    "until" => "Executes the code in the until block until the condition is true",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end

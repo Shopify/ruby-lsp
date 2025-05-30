@@ -1040,6 +1040,14 @@ class HoverExpectationsTest < ExpectationsTestRunner
         RUBY
         position: { line: 0, character: 2 },
       },
+      "until" => {
+        source: <<~RUBY,
+          until condition
+            true
+          end
+        RUBY
+        position: { line: 0, character: 2 },
+      },
     }
 
     test_cases.each do |keyword, config|

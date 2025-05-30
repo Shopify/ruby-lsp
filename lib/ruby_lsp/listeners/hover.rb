@@ -39,6 +39,7 @@ module RubyLsp
         Prism::StringNode,
         Prism::UndefNode,
         Prism::UnlessNode,
+        Prism::UntilNode,
         Prism::InterpolatedStringNode,
         Prism::SuperNode,
         Prism::ForwardingSuperNode,
@@ -99,6 +100,7 @@ module RubyLsp
           :on_super_node_enter,
           :on_undef_node_enter,
           :on_unless_node_enter,
+          :on_until_node_enter,
           :on_forwarding_super_node_enter,
           :on_string_node_enter,
           :on_interpolated_string_node_enter,
@@ -192,6 +194,11 @@ module RubyLsp
 
       #: (Prism::UnlessNode node) -> void
       def on_unless_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::UntilNode node) -> void
+      def on_until_node_enter(node)
         handle_keyword_documentation(node.keyword)
       end
 
