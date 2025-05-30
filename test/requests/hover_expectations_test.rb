@@ -1020,6 +1020,18 @@ class HoverExpectationsTest < ExpectationsTestRunner
         RUBY
         position: { line: 1, character: 2 },
       },
+      "undef" => {
+        source: <<~RUBY,
+          class Example
+            def hello
+              "Hello!"
+            end
+
+            undef hello
+          end
+        RUBY
+        position: { line: 5, character: 2 },
+      },
     }
 
     test_cases.each do |keyword, config|

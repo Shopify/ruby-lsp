@@ -37,6 +37,7 @@ module RubyLsp
         Prism::ReturnNode,
         Prism::SymbolNode,
         Prism::StringNode,
+        Prism::UndefNode,
         Prism::InterpolatedStringNode,
         Prism::SuperNode,
         Prism::ForwardingSuperNode,
@@ -95,6 +96,7 @@ module RubyLsp
           :on_rescue_node_enter,
           :on_return_node_enter,
           :on_super_node_enter,
+          :on_undef_node_enter,
           :on_forwarding_super_node_enter,
           :on_string_node_enter,
           :on_interpolated_string_node_enter,
@@ -178,6 +180,11 @@ module RubyLsp
 
       #: (Prism::ReturnNode node) -> void
       def on_return_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::UndefNode node) -> void
+      def on_undef_node_enter(node)
         handle_keyword_documentation(node.keyword)
       end
 
