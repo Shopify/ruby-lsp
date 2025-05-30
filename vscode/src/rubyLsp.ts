@@ -20,6 +20,7 @@ import { Rails } from "./rails";
 import { ChatAgent } from "./chatAgent";
 import { collectRubyLspInfo } from "./infoCollector";
 import { Mode } from "./streamingRunner";
+import { ReplManager } from "./replManager";
 
 // The RubyLsp class represents an instance of the entire extension. This should only be instantiated once at the
 // activation event. One instance of this class controls all of the existing workspaces, telemetry and handles all
@@ -32,6 +33,7 @@ export class RubyLsp {
   private readonly debug: Debugger;
   private readonly telemetry: vscode.TelemetryLogger;
   private readonly rails: Rails;
+  private readonly replManager: ReplManager;
 
   // A URI => content map of virtual documents for delegate requests
   private readonly virtualDocuments = new Map<string, string>();
@@ -54,6 +56,12 @@ export class RubyLsp {
     );
     this.debug = new Debugger(context, this.workspaceResolver.bind(this));
     this.rails = new Rails(this.showWorkspacePick.bind(this));
+    this.replManager = new ReplManager(
+      context,
+      () => Array.from(this.workspaces.values()),
+      this.showWorkspacePick.bind(this),
+      this.currentActiveWorkspace.bind(this),
+    );
 
     this.statusItems = new StatusItems();
     const dependenciesTree = new DependenciesTree();
@@ -78,6 +86,9 @@ export class RubyLsp {
             this.workspaces.delete(workspaceFolder.uri.toString());
           }
         }
+
+        // Update REPL manager with remaining workspaces
+        await this.replManager.updateWorkspaces();
       }),
       // Lazily activate workspaces that do not contain a lockfile
       vscode.workspace.onDidOpenTextDocument(async (document) => {
@@ -128,6 +139,9 @@ export class RubyLsp {
   async activate() {
     await vscode.commands.executeCommand("testing.clearTestResults");
 
+    // Register REPL manager commands
+    this.context.subscriptions.push(...this.replManager.register());
+
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
 
     // We only activate the first workspace eagerly to avoid running into performance and memory issues. Having too many
@@ -135,6 +149,9 @@ export class RubyLsp {
     // activated lazily once a Ruby document is opened inside of it through the `onDidOpenTextDocument` event
     if (firstWorkspace) {
       await this.activateWorkspace(firstWorkspace, true);
+
+      // Update REPL manager after first workspace is loaded
+      await this.replManager.updateWorkspaces();
     }
 
     // If the user has the editor already opened on a Ruby file and that file does not belong to the first workspace,
@@ -167,6 +184,8 @@ export class RubyLsp {
   // Deactivate the extension, which should stop all language servers. Notice that this just stops anything that is
   // running, but doesn't dispose of existing instances
   async deactivate() {
+    this.replManager.dispose();
+
     for (const workspace of this.workspaces.values()) {
       await workspace.stop();
       await workspace.dispose();
@@ -238,6 +257,9 @@ export class RubyLsp {
     await workspace.start();
 
     this.workspaces.set(workspaceFolder.uri.toString(), workspace);
+
+    // Update REPL manager with current workspaces
+    await this.replManager.updateWorkspaces();
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
@@ -750,6 +772,11 @@ export class RubyLsp {
       workspaceFolder = vscode.workspace.getWorkspaceFolder(
         activeEditor.document.uri,
       );
+
+      // For untitled documents, use the first workspace folder
+      if (!workspaceFolder && activeEditor.document.isUntitled) {
+        workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+      }
     } else {
       // If there's no active editor, we search based on the current workspace name
       workspaceFolder = vscode.workspace.workspaceFolders?.find(
