@@ -44,6 +44,7 @@ module RubyLsp
         Prism::SuperNode,
         Prism::ForwardingSuperNode,
         Prism::WhenNode,
+        Prism::WhileNode,
         Prism::YieldNode,
         Prism::ClassVariableAndWriteNode,
         Prism::ClassVariableOperatorWriteNode,
@@ -103,6 +104,7 @@ module RubyLsp
           :on_unless_node_enter,
           :on_until_node_enter,
           :on_when_node_enter,
+          :on_while_node_enter,
           :on_forwarding_super_node_enter,
           :on_string_node_enter,
           :on_interpolated_string_node_enter,
@@ -206,6 +208,11 @@ module RubyLsp
 
       #: (Prism::WhenNode node) -> void
       def on_when_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::WhileNode node) -> void
+      def on_while_node_enter(node)
         handle_keyword_documentation(node.keyword)
       end
 

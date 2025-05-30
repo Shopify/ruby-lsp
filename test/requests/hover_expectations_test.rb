@@ -1056,6 +1056,14 @@ class HoverExpectationsTest < ExpectationsTestRunner
         RUBY
         position: { line: 1, character: 2 },
       },
+      "while" => {
+        source: <<~RUBY,
+          while condition
+            true
+          end
+        RUBY
+        position: { line: 0, character: 2 },
+      },
     }
 
     test_cases.each do |keyword, config|
