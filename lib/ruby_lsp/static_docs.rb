@@ -27,6 +27,7 @@ module RubyLsp
     "rescue" => "Handles exceptions that occur in the code block",
     "return" => "Exits a method and returns a value",
     "undef" => "Undefines a method",
+    "unless" => "Executes the code in the unless block if the condition is false",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end
