@@ -15,9 +15,6 @@ module RubyIndexer
       @uri = uri
       @enhancements = Enhancement.all(self) #: Array[Enhancement]
       @visibility_stack = [VisibilityScope.public_scope] #: Array[VisibilityScope]
-      @comments_by_line = parse_result.comments.to_h do |c|
-        [c.location.start_line, c]
-      end #: Hash[Integer, Prism::Comment]
       @inside_def = false #: bool
       @code_units_cache = parse_result
         .code_units_cache(@index.configuration.encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
@@ -32,6 +29,8 @@ module RubyIndexer
       @owner_stack = [] #: Array[Entry::Namespace]
       @indexing_errors = [] #: Array[String]
       @collect_comments = collect_comments
+
+      parse_result.attach_comments!
 
       dispatcher.register(
         self,
@@ -716,38 +715,17 @@ module RubyIndexer
 
     #: (Prism::Node node) -> String?
     def collect_comments(node)
-      return unless @collect_comments
+      comments = node.comments.map(&:slice) #: Array[String]
 
-      comments = +""
-
-      start_line = node.location.start_line - 1
-      start_line -= 1 unless comment_exists_at?(start_line)
-      start_line.downto(1) do |line|
-        comment = @comments_by_line[line]
-        break unless comment
-
-        # a trailing comment from a previous line is not a comment for this node
-        break if comment.trailing?
-
-        comment_content = comment.location.slice
-
-        # invalid encodings would raise an "invalid byte sequence" exception
-        if !comment_content.valid_encoding? || comment_content.match?(@index.configuration.magic_comment_regex)
-          next
-        end
-
-        comment_content.delete_prefix!("#")
-        comment_content.delete_prefix!(" ")
-        comments.prepend("#{comment_content}\n")
+      valid_comments = comments.select do |comment|
+        comment.valid_encoding? && !comment.start_with?("#:")
       end
 
-      comments.chomp!
-      comments
-    end
+      pretty_comments = valid_comments.map do |comment|
+        comment.delete_prefix("#").strip
+      end
 
-    #: (Integer line) -> bool
-    def comment_exists_at?(line)
-      @comments_by_line.key?(line) || !@source_lines[line - 1].to_s.strip.empty?
+      pretty_comments.join("\n")
     end
 
     #: (String name) -> String
