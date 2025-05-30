@@ -1,3 +1,6 @@
+import * as os from "os";
+import * as path from "path";
+
 import * as vscode from "vscode";
 import { Range } from "vscode-languageclient/node";
 
@@ -736,6 +739,74 @@ export class RubyLsp {
             "Couldn't find relevant files",
           );
         }
+      }),
+      vscode.commands.registerCommand(Command.ProfileCurrentFile, async () => {
+        const workspace = this.currentActiveWorkspace();
+
+        if (!workspace) {
+          vscode.window.showInformationMessage("No workspace found");
+          return;
+        }
+
+        try {
+          const { stdout } = await workspace.execute("vernier --version");
+          const version = stdout.trim();
+          const [major, minor, _] = version.split(".").map(Number);
+
+          if (major < 1 || (major === 1 && minor < 8)) {
+            const install = await vscode.window.showInformationMessage(
+              "Vernier version 1.8.0 or higher is required for profiling. Would you like to install it?",
+              "Install",
+            );
+
+            if (install === "Install") {
+              await workspace.execute("gem install vernier");
+            } else {
+              return;
+            }
+          }
+        } catch (error) {
+          const install = await vscode.window.showInformationMessage(
+            "Vernier is required for profiling. Would you like to install it?",
+            "Install",
+          );
+
+          if (install === "Install") {
+            await workspace.execute("gem install vernier");
+          } else {
+            return;
+          }
+        }
+
+        const currentFile = vscode.window.activeTextEditor?.document.uri.fsPath;
+
+        if (!currentFile) {
+          vscode.window.showInformationMessage(
+            "No file opened in the editor to profile",
+          );
+          return;
+        }
+
+        await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "Profiling in progress...",
+            cancellable: false,
+          },
+          async () => {
+            const profileUri = vscode.Uri.file(
+              path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`),
+            );
+
+            await workspace.execute(
+              `vernier run --output ${profileUri.fsPath} --format cpuprofile -- ruby ${currentFile}`,
+            );
+
+            await vscode.commands.executeCommand("vscode.open", profileUri, {
+              viewColumn: vscode.ViewColumn.Beside,
+            });
+          },
+        );
       }),
     ];
   }
