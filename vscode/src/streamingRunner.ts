@@ -29,6 +29,7 @@ export enum Mode {
   Run = "run",
   RunInTerminal = "runInTerminal",
   Debug = "debug",
+  Profile = "profile",
 }
 
 // The StreamingRunner class is responsible for executing the test process or launching the debugger while handling the
