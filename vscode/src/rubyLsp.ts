@@ -756,27 +756,26 @@ export class RubyLsp {
           return;
         }
 
-        vscode.window.showInformationMessage("Profiling in progress...");
+        await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "Profiling in progress...",
+            cancellable: false,
+          },
+          async () => {
+            const profileUri = vscode.Uri.file(
+              path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`)
+            );
 
-        // const { stderr } = await workspace.execute('vernier --version', true)
+            await workspace.execute(
+              `vernier run --output ${profileUri.fsPath} --format cpuprofile -- ruby ${currentFile}`,
+            );
 
-        // if (stderr.includes("command not found")) {
-        //   await vscode.window.showInformationMessage(
-        //     "Ensure Vernier 1.8+ is installed",
-        //   );
-        //   return
-        // }
-
-        const profileUri = vscode.Uri.file(
-          path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`)
+            await vscode.commands.executeCommand("vscode.open", profileUri, {
+              viewColumn: vscode.ViewColumn.Beside,
+            });
+          }
         );
-        await workspace.execute(
-          `vernier run --output ${profileUri.fsPath} --format cpuprofile -- ruby ${currentFile}`,
-        );
-
-        await vscode.commands.executeCommand("vscode.open", profileUri, {
-          viewColumn: vscode.ViewColumn.Beside,
-        });
       }),
     ];
   }
