@@ -65,6 +65,7 @@ module RubyLsp
       @bundler_version = bundler_version #: Gem::Version?
       @rails_app = rails_app? #: bool
       @retry = false #: bool
+      @needs_update_path = @custom_dir + "needs_update" #: Pathname
     end
 
     # Sets up the composed bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
@@ -260,19 +261,50 @@ module RubyLsp
     #: (Hash[String, String] env, ?force_install: bool) -> Hash[String, String]
     def run_bundle_install_directly(env, force_install: false)
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
+      return update(env) if @needs_update_path.exist?
 
       # The ENV can only be merged after checking if an update is required because we depend on the original value of
       # ENV["BUNDLE_GEMFILE"], which gets overridden after the merge
-      should_update = should_bundle_update?
-      ENV #: as untyped
-        .merge!(env)
+      FileUtils.touch(@needs_update_path) if should_bundle_update?
+      ENV.merge!(env)
 
-      unless should_update && !force_install
-        Bundler::CLI::Install.new({ "no-cache" => true }).run
-        correct_relative_remote_paths if @custom_lockfile.exist?
-        return env
+      $stderr.puts("Ruby LSP> Checking if the composed bundle is satisfied...")
+      missing_gems = bundle_check
+
+      unless missing_gems.empty?
+        $stderr.puts(<<~MESSAGE)
+          Ruby LSP> Running bundle install because the following gems are not installed:
+          #{missing_gems.map { |g| "#{g.name}: #{g.version}" }.join("\n")}
+        MESSAGE
+
+        bundle_install
       end
 
+      $stderr.puts("Ruby LSP> Bundle already satisfied")
+      env
+    rescue => e
+      $stderr.puts("Ruby LSP> Running bundle install because #{e.message}")
+      bundle_install
+      env
+    end
+
+    # Essentially the same as bundle check, but simplified
+    #: -> Array[Gem::Specification]
+    def bundle_check
+      definition = Bundler.definition
+      definition.validate_runtime!
+      definition.check!
+      definition.missing_specs
+    end
+
+    #: -> void
+    def bundle_install
+      Bundler::CLI::Install.new({ "no-cache" => true }).run
+      correct_relative_remote_paths if @custom_lockfile.exist?
+    end
+
+    #: (Hash[String, String]) -> Hash[String, String]
+    def update(env)
       # Try to auto upgrade the gems we depend on, unless they are in the Gemfile as that would result in undesired
       # source control changes
       gems = ["ruby-lsp", "debug", "prism"].reject { |dep| @dependencies[dep] }
@@ -280,11 +312,9 @@ module RubyLsp
 
       Bundler::CLI::Update.new({ conservative: true }, gems).run
       correct_relative_remote_paths if @custom_lockfile.exist?
+      @needs_update_path.delete
       @last_updated_path.write(Time.now.iso8601)
       env
-    rescue Bundler::GemNotFound, Bundler::GitError
-      # If a gem is not installed, skip the upgrade and try to install it with a single retry
-      @retry ? env : run_bundle_install_directly(env, force_install: true)
     end
 
     #: (Hash[String, String] env) -> Hash[String, String]
