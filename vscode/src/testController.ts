@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
+import * as os from "os";
 import path from "path";
 
 import * as vscode from "vscode";
@@ -118,12 +119,12 @@ export class TestController {
       this.fullDiscovery
         ? this.runTest.bind(this)
         : async () => {
-            await vscode.window.showInformationMessage(
-              `Running tests with coverage requires the new explorer implementation,
+          await vscode.window.showInformationMessage(
+            `Running tests with coverage requires the new explorer implementation,
                which is currently under development.
                If you wish to enable it, set the "fullTestDiscovery" feature flag to "true"`,
-            );
-          },
+          );
+        },
       false,
     );
 
@@ -367,42 +368,6 @@ export class TestController {
     });
   }
 
-  /**
-   * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
-   */
-  profileTest(
-    _path: string,
-    _id: string,
-    command?: string,
-    _location?: any,
-    _name?: string,
-  ) {
-    // The command is passed as the third argument from the code lens
-    // If it's not provided, fall back to finding the test by active line
-    // eslint-disable-next-line no-param-reassign
-    command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
-
-    if (!command) {
-      vscode.window.showErrorMessage("No test command found to profile");
-      return;
-    }
-
-    if (this.terminal === undefined) {
-      this.terminal = this.getTerminal();
-    }
-
-    this.terminal.show();
-    this.terminal.sendText(`vernier run --format cpuprofile -- ${command}`);
-
-    this.telemetry.logUsage("ruby_lsp.code_lens", {
-      type: "counter",
-      attributes: {
-        label: "profile_test",
-        vscodemachineid: vscode.env.machineId,
-      },
-    });
-  }
-
   // Public for testing purposes. Receives the controller's inclusions and exclusions and builds request test items for
   // the server to resolve the command
   buildRequestTestItems(
@@ -427,8 +392,8 @@ export class TestController {
   }
 
   // Method to run tests in any profile through code lens buttons
-  async runViaCommand(path: string, name: string, mode: Mode) {
-    const uri = vscode.Uri.file(path);
+  async runViaCommand(filePath: string, name: string, mode: Mode) {
+    const uri = vscode.Uri.file(filePath);
     const testItem = await this.findTestItem(name, uri);
     if (!testItem) return;
 
@@ -454,6 +419,7 @@ export class TestController {
       }
 
       let commandToExecute: string | undefined;
+      let workspace: Workspace | undefined;
 
       if (this.fullDiscovery) {
         const workspaceFolder = vscode.workspace.getWorkspaceFolder(
@@ -465,7 +431,7 @@ export class TestController {
           );
           return;
         }
-        const workspace = await this.getOrActivateWorkspace(workspaceFolder);
+        workspace = await this.getOrActivateWorkspace(workspaceFolder);
 
         if (
           workspace.lspClient &&
@@ -497,7 +463,7 @@ export class TestController {
         } else {
           vscode.window.showErrorMessage(
             "Cannot profile test: Ruby LSP server does not support necessary test discovery " +
-              "features or is not ready. Please update the Ruby LSP gem or check server status.",
+            "features or is not ready. Please update the Ruby LSP gem or check server status.",
           );
           return;
         }
@@ -511,9 +477,25 @@ export class TestController {
         return;
       }
 
-      this.terminal.show();
-      this.terminal.sendText(
-        `vernier run --format cpuprofile -- ${commandToExecute}`,
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Profiling in progress...",
+          cancellable: false,
+        },
+        async () => {
+          const profileUri = vscode.Uri.file(
+            path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`),
+          );
+
+          await workspace!.execute(
+            `vernier run --output ${profileUri.fsPath} --format cpuprofile -- ${commandToExecute}`,
+          );
+
+          await vscode.commands.executeCommand("vscode.open", profileUri, {
+            viewColumn: vscode.ViewColumn.Beside,
+          });
+        },
       );
       return;
     }
@@ -972,8 +954,8 @@ export class TestController {
     return previousTerminal
       ? previousTerminal
       : vscode.window.createTerminal({
-          name,
-        });
+        name,
+      });
   }
 
   private async debugHandler(
