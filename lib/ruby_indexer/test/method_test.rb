@@ -950,6 +950,16 @@ module RubyIndexer
       assert_predicate(entry, :public?)
     end
 
+    def test_handling_attr
+      index(<<~RUBY)
+        class Foo
+          attr :bar
+        end
+      RUBY
+
+      assert_entry("bar", Entry::Accessor, "/fake/path/foo.rb:1-8:1-11")
+    end
+
     private
 
     #: (Entry::Method entry, String call_string) -> void

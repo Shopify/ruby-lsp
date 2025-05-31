@@ -254,7 +254,7 @@ module RubyIndexer
       case message
       when :private_constant
         handle_private_constant(node)
-      when :attr_reader
+      when :attr_reader, :attr
         handle_attribute(node, reader: true, writer: false)
       when :attr_writer
         handle_attribute(node, reader: false, writer: true)
