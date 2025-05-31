@@ -41,7 +41,7 @@ module RubyLsp
 
       #: (Prism::ClassNode) -> void
       def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-        @spec_group_id_stack.pop
+        @spec_group_id_stack&.pop
         super
       end
 
