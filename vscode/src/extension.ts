@@ -26,8 +26,6 @@ export async function activate(context: vscode.ExtensionContext) {
     return;
   }
 
-  await migrateExperimentalFeaturesSetting();
-
   const rbs = new RBS();
 
   context.subscriptions.push(
@@ -48,21 +46,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate(): Promise<void> {
   await extension.deactivate();
-}
-
-// Remove after ~2 months. This code migrates the old experimental features setting to the new feature flag rollout
-// setting
-async function migrateExperimentalFeaturesSetting() {
-  const config = vscode.workspace.getConfiguration("rubyLsp");
-  const experimentalFeatures = config.get("enableExperimentalFeatures");
-
-  if (experimentalFeatures) {
-    // Remove the old setting
-    await config.update("enableExperimentalFeatures", undefined, true);
-
-    // Add the new one
-    await config.update("featureFlags", { all: true }, true);
-  }
 }
 
 async function createLogger(context: vscode.ExtensionContext) {
