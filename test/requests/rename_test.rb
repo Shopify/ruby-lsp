@@ -105,9 +105,53 @@ class RenameTest < Minitest::Test
     assert_equal("NewMe", untitled_change.edits[0].new_text)
   end
 
+  def test_renaming_a_local_variable
+    document, workspace_edit = document_and_rename(
+      "test/fixtures/local_variables.rb",
+      { line: 1, character: 2 },
+      "foo",
+    )
+    assert_equal(2, workspace_edit.changes.length)
+    assert_equal("foo", workspace_edit.changes[0].new_text)
+    assert_equal("foo", workspace_edit.changes[1].new_text)
+
+    workspace_edit.changes.each do |change|
+      document.push_edits(
+        [{ range: change.range.to_hash.transform_values(&:to_hash), text: change.new_text }],
+        version: 2,
+      )
+    end
+    expected = <<~RUBY
+      def my_method
+        foo = 1
+        foo
+      end
+    RUBY
+    assert_equal(expected, document.source)
+  end
+
   private
 
   def expect_renames(fixture_path, new_fixture_path, expected, position, new_name)
+    document, workspace_edit = document_and_rename(fixture_path, position, new_name)
+
+    file_renames = workspace_edit.document_changes.filter_map do |text_edit_or_rename|
+      next text_edit_or_rename unless text_edit_or_rename.is_a?(RubyLsp::Interface::TextDocumentEdit)
+
+      document.push_edits(
+        text_edit_or_rename.edits.map do |edit|
+          { range: edit.range.to_hash.transform_values(&:to_hash), text: edit.new_text }
+        end,
+        version: 2,
+      )
+      nil
+    end
+
+    assert_equal(expected, document.source)
+    assert_equal(File.expand_path(new_fixture_path), URI(file_renames.first.new_uri).to_standardized_path)
+  end
+
+  def document_and_rename(fixture_path, position, new_name)
     source = File.read(fixture_path)
     global_state = RubyLsp::GlobalState.new
     global_state.apply_options({
@@ -129,26 +173,14 @@ class RenameTest < Minitest::Test
       uri: URI::Generic.from_path(path: path),
       global_state: global_state,
     )
-    workspace_edit = RubyLsp::Requests::Rename.new(
+
+    rename = RubyLsp::Requests::Rename.new(
       global_state,
       store,
       document,
       { position: position, newName: new_name },
-    ).perform #: as !nil
+    )
 
-    file_renames = workspace_edit.document_changes.filter_map do |text_edit_or_rename|
-      next text_edit_or_rename unless text_edit_or_rename.is_a?(RubyLsp::Interface::TextDocumentEdit)
-
-      document.push_edits(
-        text_edit_or_rename.edits.map do |edit|
-          { range: edit.range.to_hash.transform_values(&:to_hash), text: edit.new_text }
-        end,
-        version: 2,
-      )
-      nil
-    end
-
-    assert_equal(expected, document.source)
-    assert_equal(File.expand_path(new_fixture_path), URI(file_renames.first.new_uri).to_standardized_path)
+    [document, rename.perform]
   end
 end

@@ -36,7 +36,18 @@ module RubyLsp
         node_context = RubyDocument.locate(
           @document.parse_result.value,
           char_position,
-          node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
+          node_types: [
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::ConstantPathTargetNode,
+            Prism::LocalVariableAndWriteNode,
+            Prism::LocalVariableOperatorWriteNode,
+            Prism::LocalVariableOrWriteNode,
+            Prism::LocalVariableReadNode,
+            Prism::LocalVariableTargetNode,
+            Prism::LocalVariableWriteNode,
+            Prism::RequiredParameterNode,
+          ],
           code_units_cache: @document.code_units_cache,
         )
         target = node_context.node
@@ -51,15 +62,27 @@ module RubyLsp
           )
         end
 
-        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode
+        case target
+        when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
+          perform_constant_rename(target, node_context.nesting)
+        when Prism::LocalVariableAndWriteNode, Prism::LocalVariableOperatorWriteNode, Prism::LocalVariableOrWriteNode,
+             Prism::LocalVariableReadNode, Prism::LocalVariableTargetNode, Prism::LocalVariableWriteNode,
+             Prism::RequiredParameterNode
+          perform_local_variable_rename(target, parent, node_context.nesting) if parent
+        end
+      end
 
+      private
+
+      #: (Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode, Array[String]) -> Interface::WorkspaceEdit?
+      def perform_constant_rename(target, nesting)
         name = RubyIndexer::Index.constant_name(target)
         return unless name
 
-        entries = @global_state.index.resolve(name, node_context.nesting)
+        entries = @global_state.index.resolve(name, nesting)
         return unless entries
 
-        if (conflict_entries = @global_state.index.resolve(@new_name, node_context.nesting))
+        if (conflict_entries = @global_state.index.resolve(@new_name, nesting))
           raise InvalidNameError, "The new name is already in use by #{conflict_entries.first&.name}"
         end
 
@@ -87,7 +110,26 @@ module RubyLsp
         Interface::WorkspaceEdit.new(document_changes: document_changes)
       end
 
-      private
+      #: (Prism::LocalVariableAndWriteNode | Prism::LocalVariableOperatorWriteNode | Prism::LocalVariableOrWriteNode | Prism::LocalVariableReadNode | Prism::LocalVariableTargetNode | Prism::LocalVariableWriteNode | Prism::RequiredParameterNode, Prism::Node, Array[String]) -> Interface::WorkspaceEdit?
+      def perform_local_variable_rename(target, parent, nesting)
+        name = target.name.to_s
+
+        reference_target = RubyIndexer::ReferenceFinder::LocalVariableTarget.new(name)
+        dispatcher = Prism::Dispatcher.new
+        finder = RubyIndexer::ReferenceFinder.new(
+          reference_target,
+          @global_state.index,
+          dispatcher,
+          @document.uri,
+        )
+        dispatcher.visit(parent)
+
+        edits = finder.references.map do |reference|
+          adjust_reference_for_edit(name, reference)
+        end
+
+        Interface::WorkspaceEdit.new(changes: edits)
+      end
 
       #: (String fully_qualified_name, Array[(Interface::RenameFile | Interface::TextDocumentEdit)] document_changes) -> void
       def collect_file_renames(fully_qualified_name, document_changes)

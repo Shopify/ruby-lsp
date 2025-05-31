@@ -363,6 +363,69 @@ module RubyIndexer
       assert_equal(8, refs[2].location.start_line)
     end
 
+    def test_finds_local_variable_references
+      refs = find_local_variable_references("foo", <<~RUBY)
+        class Foo
+          def method
+            foo = 1
+            foo &&= 2
+            foo ||= 3
+            foo += 4
+            foo, bar = []
+            foo
+          end
+        end
+      RUBY
+      assert_equal(6, refs.size)
+
+      assert_equal(["foo"], refs.map(&:name).uniq)
+      assert_equal(3, refs[0].location.start_line)
+      assert_equal(4, refs[1].location.start_line)
+      assert_equal(5, refs[2].location.start_line)
+      assert_equal(6, refs[3].location.start_line)
+      assert_equal(7, refs[4].location.start_line)
+      assert_equal(8, refs[5].location.start_line)
+    end
+
+    def test_finds_local_variable_references_in_nested_scopes
+      refs = find_local_variable_references("foo", <<~RUBY)
+        class Foo
+          def method_with_block
+            foo = 1
+
+            block do
+              foo = 2
+            end
+          end
+        end
+      RUBY
+      assert_equal(2, refs.size)
+
+      assert_equal(["foo"], refs.map(&:name).uniq)
+      assert_equal(3, refs[0].location.start_line)
+      assert_equal(6, refs[1].location.start_line)
+    end
+
+    def test_finds_local_variable_references_in_nested_scopes_with_shadowing
+      refs = find_local_variable_references("foo", <<~RUBY)
+        class Foo
+          def method_with_block_and_shadowing
+            foo = 1
+
+            block do |foo, bar|
+              foo = 2
+            end
+          end
+        end
+      RUBY
+      assert_equal(3, refs.size)
+
+      assert_equal(["foo"], refs.map(&:name).uniq)
+      assert_equal(3, refs[0].location.start_line)
+      assert_equal(5, refs[1].location.start_line)
+      assert_equal(6, refs[2].location.start_line)
+    end
+
     private
 
     def find_const_references(const_name, source)
@@ -377,6 +440,11 @@ module RubyIndexer
 
     def find_instance_variable_references(instance_variable_name, owner_ancestors, source)
       target = ReferenceFinder::InstanceVariableTarget.new(instance_variable_name, owner_ancestors)
+      find_references(target, source)
+    end
+
+    def find_local_variable_references(local_variable_name, source)
+      target = ReferenceFinder::LocalVariableTarget.new(local_variable_name)
       find_references(target, source)
     end
 

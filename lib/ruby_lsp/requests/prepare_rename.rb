@@ -24,7 +24,18 @@ module RubyLsp
         node_context = RubyDocument.locate(
           @document.parse_result.value,
           char_position,
-          node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
+          node_types: [
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::ConstantPathTargetNode,
+            Prism::LocalVariableAndWriteNode,
+            Prism::LocalVariableOperatorWriteNode,
+            Prism::LocalVariableOrWriteNode,
+            Prism::LocalVariableReadNode,
+            Prism::LocalVariableTargetNode,
+            Prism::LocalVariableWriteNode,
+            Prism::RequiredParameterNode,
+          ],
           code_units_cache: @document.code_units_cache,
         )
         target = node_context.node
