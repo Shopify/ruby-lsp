@@ -56,6 +56,25 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_chruby_activation_script
+    _stdout, stderr, status = Open3.capture3(
+      "ruby",
+      "-EUTF-8:UTF-8",
+      File.join(__dir__, "..", "vscode", "chruby_activation.rb"),
+      RUBY_VERSION,
+    )
+
+    assert_equal(0, status.exitstatus, stderr)
+
+    default_gems, gem_home, yjit, version = stderr.split("RUBY_LSP_ACTIVATION_SEPARATOR")
+
+    assert_equal(RUBY_VERSION, version)
+    # These may be switched in CI due to Bundler settings, so we use simpler assertions
+    assert(yjit)
+    assert(gem_home)
+    assert(default_gems)
+  end
+
   def test_activation_script_succeeds_on_invalid_unicode
     ENV["LC_ALL"] = "C"
     ENV["LANG"] = "C"

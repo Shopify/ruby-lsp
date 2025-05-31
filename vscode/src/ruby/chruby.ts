@@ -180,27 +180,13 @@ export class Chruby extends VersionManager {
     yjit: boolean;
     version: string;
   }> {
-    // Typically, GEM_HOME points to $HOME/.gem/ruby/version_without_patch. For example, for Ruby 3.2.2, it would be
-    // $HOME/.gem/ruby/3.2.0. However, chruby overrides GEM_HOME to use the patch part of the version, resulting in
-    // $HOME/.gem/ruby/3.2.2. In our activation script, we check if a directory using the patch exists and then prefer
-    // that over the default one.
-    const script = [
-      "user_dir = Gem.user_dir",
-      "paths = Gem.path",
-      "if paths.length > 2",
-      "  paths.delete(Gem.default_dir)",
-      "  paths.delete(Gem.user_dir)",
-      "  if paths[0]",
-      "    user_dir = paths[0] if Dir.exist?(paths[0])",
-      "  end",
-      "end",
-      `newer_gem_home = File.join(File.dirname(user_dir), "${rubyVersion.version}")`,
-      "gems = (Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir)",
-      `STDERR.print([Gem.default_dir, gems, !!defined?(RubyVM::YJIT), RUBY_VERSION].join("${ACTIVATION_SEPARATOR}"))`,
-    ].join(";");
+    const activationUri = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      "chruby_activation.rb",
+    );
 
     const result = await this.runScript(
-      `${rubyExecutableUri.fsPath} -EUTF-8:UTF-8 -e '${script}'`,
+      `${rubyExecutableUri.fsPath} -EUTF-8:UTF-8 '${activationUri.fsPath}' ${rubyVersion.version}`,
     );
 
     const [defaultGems, gemHome, yjit, version] =
