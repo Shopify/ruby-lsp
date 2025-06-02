@@ -63,12 +63,7 @@ export class Mise extends VersionManager {
         "bin",
         "mise",
       ),
-      vscode.Uri.joinPath(
-        vscode.Uri.file("/"),
-        "usr",
-        "bin",
-        "mise",
-      ),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
     ];
 
     for (const possiblePath of possiblePaths) {
