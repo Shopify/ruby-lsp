@@ -728,6 +728,30 @@ module RubyIndexer
       assert_equal(["A", "ALIAS"], @index.linearized_ancestors_of("A"))
     end
 
+    def test_linearizing_ancestors_for_classes_with_overridden_parents
+      index(<<~RUBY)
+        # Find the re-open of a class first, without specifying a parent
+        class Child
+        end
+
+        # Now, find the actual definition of the class, which includes a parent
+        class Parent; end
+        class Child < Parent
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Child",
+          "Parent",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Child"),
+      )
+    end
+
     def test_resolving_an_inherited_method
       index(<<~RUBY)
         module Foo
