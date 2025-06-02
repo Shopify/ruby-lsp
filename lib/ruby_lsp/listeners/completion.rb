@@ -516,6 +516,14 @@ module RubyLsp
 
           entry_name = entry.name
           owner_name = entry.owner&.name
+          new_text = entry_name
+
+          if entry_name.end_with?("=")
+            method_name = entry_name.delete_suffix("=")
+
+            # For writer methods, format as assignment and prefix "self." when no receiver is specified
+            new_text = node.receiver.nil? ? "self.#{method_name} = " : "#{method_name} = "
+          end
 
           label_details = Interface::CompletionItemLabelDetails.new(
             description: entry.file_name,
@@ -525,7 +533,7 @@ module RubyLsp
             label: entry_name,
             filter_text: entry_name,
             label_details: label_details,
-            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
+            text_edit: Interface::TextEdit.new(range: range, new_text: new_text),
             kind: Constant::CompletionItemKind::METHOD,
             data: {
               owner_name: owner_name,
