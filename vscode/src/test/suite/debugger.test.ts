@@ -14,9 +14,11 @@ import { LOG_CHANNEL, asyncExec } from "../../common";
 import { RUBY_VERSION } from "../rubyVersion";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
-import { createRubySymlinks } from "./helpers";
+import { createContext, createRubySymlinks, FakeContext } from "./helpers";
 
 suite("Debugger", () => {
+  let context: FakeContext;
+
   const original = vscode.workspace
     .getConfiguration("debug")
     .get("saveBeforeStart");
@@ -25,16 +27,19 @@ suite("Debugger", () => {
     await vscode.workspace
       .getConfiguration("debug")
       .update("saveBeforeStart", "none", true);
+
+    context = createContext();
   });
 
   afterEach(async () => {
     await vscode.workspace
       .getConfiguration("debug")
       .update("saveBeforeStart", original, true);
+
+    context.dispose();
   });
 
   test("Provide debug configurations returns the default configs", () => {
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const debug = new Debugger(context, () => {
       return undefined;
     });
@@ -69,7 +74,6 @@ suite("Debugger", () => {
   });
 
   test("Resolve configuration injects Ruby environment", async () => {
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = {
       env: { bogus: "hello!", overrideMe: "oldValue" },
     } as unknown as Ruby;
@@ -105,7 +109,6 @@ suite("Debugger", () => {
   });
 
   test("Resolve configuration injects Ruby environment and allows users custom environment", async () => {
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
     const workspaceFolder = {
       name: "fake",
@@ -140,7 +143,6 @@ suite("Debugger", () => {
     fs.mkdirSync(path.join(tmpPath, ".ruby-lsp"));
     fs.writeFileSync(path.join(tmpPath, ".ruby-lsp", "Gemfile"), "hello!");
 
-    const context = { subscriptions: [] } as unknown as vscode.ExtensionContext;
     const ruby = { env: { bogus: "hello!" } } as unknown as Ruby;
     const workspaceFolder = {
       name: "fake",
@@ -204,15 +206,6 @@ suite("Debugger", () => {
       'source "https://rubygems.org"\ngem "debug"',
     );
 
-    const extensionPath = path.dirname(path.dirname(path.dirname(__dirname)));
-    const context = {
-      subscriptions: [],
-      workspaceState: {
-        get: () => undefined,
-        update: () => undefined,
-      },
-      extensionUri: vscode.Uri.file(extensionPath),
-    } as unknown as vscode.ExtensionContext;
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
     const workspaceFolder: vscode.WorkspaceFolder = {
       uri: vscode.Uri.file(tmpPath),

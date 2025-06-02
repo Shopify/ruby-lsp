@@ -11,24 +11,19 @@ import { beforeEach, afterEach } from "mocha";
 import { Workspace } from "../../workspace";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+import { createContext, FakeContext } from "./helpers";
 
 suite("Workspace", () => {
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-  } as unknown as vscode.ExtensionContext;
   let workspacePath: string;
   let workspaceUri: vscode.Uri;
   let workspaceFolder: vscode.WorkspaceFolder;
   let sandbox: sinon.SinonSandbox;
   let workspace: Workspace;
+  let context: FakeContext;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    context = createContext();
     workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-workspace-"),
     );
@@ -52,6 +47,7 @@ suite("Workspace", () => {
   afterEach(() => {
     sandbox.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
+    context.dispose();
   });
 
   test("repeated rebase steps don't trigger multiple restarts", async () => {

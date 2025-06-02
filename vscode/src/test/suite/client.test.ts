@@ -33,7 +33,7 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import { MAJOR, MINOR } from "../rubyVersion";
 
 import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
-import { createRubySymlinks } from "./helpers";
+import { createContext, createRubySymlinks } from "./helpers";
 
 async function launchClient(workspaceUri: vscode.Uri) {
   const workspaceFolder: vscode.WorkspaceFolder = {
@@ -42,15 +42,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     index: 0,
   };
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.file(path.join(workspaceUri.fsPath, "vscode")),
-  } as unknown as vscode.ExtensionContext;
+  const context = createContext();
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
 

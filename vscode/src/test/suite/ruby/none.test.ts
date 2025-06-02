@@ -5,6 +5,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { None } from "../../../ruby/none";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,18 +15,20 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("None", () => {
+  let context: FakeContext;
+
+  beforeEach(() => {
+    context = createContext();
+  });
+
+  afterEach(() => {
+    context.dispose();
+  });
+
   test("Invokes Ruby directly", async () => {
-    const context = {
-      extensionMode: vscode.ExtensionMode.Test,
-      subscriptions: [],
-      workspaceState: {
-        get: (_name: string) => undefined,
-        update: (_name: string, _value: any) => Promise.resolve(),
-      },
-      extensionUri: vscode.Uri.parse("file:///fake"),
-    } as unknown as vscode.ExtensionContext;
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
     );

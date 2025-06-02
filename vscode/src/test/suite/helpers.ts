@@ -70,9 +70,19 @@ export const LSP_WORKSPACE_FOLDER: vscode.WorkspaceFolder = {
   name: path.basename(LSP_WORKSPACE_PATH),
   index: 0,
 };
-export const CONTEXT = {
-  extensionMode: vscode.ExtensionMode.Test,
-  subscriptions: [],
-  workspaceState: new FakeWorkspaceState(),
-  extensionUri: vscode.Uri.joinPath(LSP_WORKSPACE_URI, "vscode"),
-} as unknown as vscode.ExtensionContext;
+
+export type FakeContext = vscode.ExtensionContext & { dispose: () => void };
+
+export function createContext() {
+  const subscriptions: vscode.Disposable[] = [];
+
+  return {
+    extensionMode: vscode.ExtensionMode.Test,
+    subscriptions,
+    workspaceState: new FakeWorkspaceState(),
+    extensionUri: vscode.Uri.joinPath(LSP_WORKSPACE_URI, "vscode"),
+    dispose: () => {
+      subscriptions.forEach((subscription) => subscription.dispose());
+    },
+  } as unknown as FakeContext;
+}

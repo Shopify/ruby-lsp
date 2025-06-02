@@ -13,7 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, MAJOR, MINOR, VERSION_REGEX } from "../../rubyVersion";
 import { ActivationResult } from "../../../ruby/versionManager";
-import { CONTEXT } from "../helpers";
+import { createContext, FakeContext } from "../helpers";
 
 // Create links to the real Ruby installations on CI and on our local machines
 function createRubySymlinks(destination: string) {
@@ -55,6 +55,7 @@ suite("Chruby", () => {
   let workspacePath: string;
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
+  let context: FakeContext;
 
   beforeEach(() => {
     rootPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-chruby-"));
@@ -76,10 +77,12 @@ suite("Chruby", () => {
       index: 0,
     };
     outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
+    context = createContext();
   });
 
   afterEach(() => {
     fs.rmSync(rootPath, { recursive: true, force: true });
+    context.dispose();
   });
 
   test("Finds Ruby when .ruby-version is inside workspace", async () => {
@@ -88,7 +91,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -105,7 +108,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -142,7 +145,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -192,7 +195,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -227,7 +230,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [vscode.Uri.file(rubyHome)];
@@ -254,7 +257,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     configStub.restore();
@@ -279,7 +282,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -311,7 +314,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -327,7 +330,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -344,7 +347,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -362,7 +365,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -379,7 +382,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [
@@ -399,7 +402,7 @@ suite("Chruby", () => {
     const chruby = new Chruby(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     chruby.rubyInstallationUris = [

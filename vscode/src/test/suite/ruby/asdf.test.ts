@@ -4,6 +4,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Asdf } from "../../../ruby/asdf";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -13,6 +14,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("Asdf", () => {
   if (os.platform() === "win32") {
@@ -20,15 +22,18 @@ suite("Asdf", () => {
     console.log("Skipping Asdf tests on Windows");
     return;
   }
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+  let activationPath: vscode.Uri;
+
+  beforeEach(() => {
+    context = createContext();
+    activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
+  });
+
+  afterEach(() => {
+    context.dispose();
+  });
+
   // eslint-disable-next-line no-process-env
   const workspacePath = process.env.PWD!;
   const workspaceFolder = {
@@ -66,7 +71,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: "/bin/bash",
@@ -116,7 +121,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",
@@ -167,7 +172,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `/opt/homebrew/bin/asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `/opt/homebrew/bin/asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -214,7 +219,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `asdf exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

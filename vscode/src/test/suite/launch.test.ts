@@ -6,7 +6,7 @@ import os from "os";
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient/node";
 import sinon from "sinon";
-import { beforeEach } from "mocha";
+import { afterEach, beforeEach } from "mocha";
 
 import { ManagerIdentifier, Ruby } from "../../ruby";
 import Client from "../../client";
@@ -14,7 +14,7 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import * as common from "../../common";
 
 import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
-import { createRubySymlinks } from "./helpers";
+import { createContext, createRubySymlinks, FakeContext } from "./helpers";
 
 suite("Launch integrations", () => {
   const workspacePath = path.dirname(
@@ -27,15 +27,16 @@ suite("Launch integrations", () => {
     index: 0,
   };
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.joinPath(workspaceUri, "vscode"),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+
+  beforeEach(() => {
+    context = createContext();
+  });
+
+  afterEach(() => {
+    context.dispose();
+  });
+
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
 

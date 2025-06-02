@@ -4,7 +4,7 @@ import path from "path";
 import os from "os";
 
 import sinon from "sinon";
-import { before, after, beforeEach } from "mocha";
+import { before, after, beforeEach, afterEach } from "mocha";
 import * as vscode from "vscode";
 
 import * as common from "../../../common";
@@ -13,7 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, VERSION_REGEX } from "../../rubyVersion";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
-import { createRubySymlinks, CONTEXT } from "../helpers";
+import { createRubySymlinks, createContext, FakeContext } from "../helpers";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {
@@ -26,12 +26,18 @@ suite("RubyInstaller", () => {
   let workspacePath: string;
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
+  let context: FakeContext;
 
   beforeEach(() => {
     // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }
+    context = createContext();
+  });
+
+  afterEach(() => {
+    context.dispose();
   });
 
   before(() => {
@@ -58,7 +64,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -78,7 +84,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -98,7 +104,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
@@ -123,7 +129,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const result = [

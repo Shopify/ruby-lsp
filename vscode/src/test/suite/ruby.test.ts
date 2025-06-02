@@ -17,7 +17,7 @@ import {
   VALUE_SEPARATOR,
 } from "../../ruby/versionManager";
 
-import { CONTEXT } from "./helpers";
+import { createContext, FakeContext } from "./helpers";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
 suite("Ruby environment activation", () => {
@@ -31,13 +31,16 @@ suite("Ruby environment activation", () => {
   };
   const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
   let sandbox: sinon.SinonSandbox;
+  let context: FakeContext;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
+    context = createContext();
   });
 
   afterEach(() => {
     sandbox.restore();
+    context.dispose();
   });
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
@@ -58,7 +61,7 @@ suite("Ruby environment activation", () => {
     } as unknown as vscode.WorkspaceConfiguration);
 
     const ruby = new Ruby(
-      CONTEXT,
+      context,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -91,7 +94,7 @@ suite("Ruby environment activation", () => {
     } as unknown as vscode.WorkspaceConfiguration);
 
     const ruby = new Ruby(
-      CONTEXT,
+      context,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -136,7 +139,7 @@ suite("Ruby environment activation", () => {
     });
 
     const ruby = new Ruby(
-      CONTEXT,
+      context,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -151,7 +154,7 @@ suite("Ruby environment activation", () => {
 
   test("mergeComposedEnv merges environment variables", () => {
     const ruby = new Ruby(
-      CONTEXT,
+      context,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -168,7 +171,7 @@ suite("Ruby environment activation", () => {
 
   test("Ignores untrusted workspace for telemetry", async () => {
     const telemetry = { ...FAKE_TELEMETRY, logError: sinon.stub() };
-    const ruby = new Ruby(CONTEXT, workspaceFolder, outputChannel, telemetry);
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, telemetry);
 
     sandbox
       .stub(Shadowenv.prototype, "activate")
@@ -198,12 +201,12 @@ suite("Ruby environment activation", () => {
       },
     } as unknown as vscode.WorkspaceConfiguration);
 
-    await CONTEXT.workspaceState.update(
+    await context.workspaceState.update(
       `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
       "/totally/non/existent/path/ruby",
     );
     const ruby = new Ruby(
-      CONTEXT,
+      context,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -212,7 +215,7 @@ suite("Ruby environment activation", () => {
     await ruby.activateRuby();
 
     assert.strictEqual(
-      CONTEXT.workspaceState.get(
+      context.workspaceState.get(
         `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
       ),
       undefined,

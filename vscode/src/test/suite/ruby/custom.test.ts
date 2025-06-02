@@ -5,6 +5,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Custom } from "../../../ruby/custom";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,17 +15,18 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("Custom", () => {
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+
+  beforeEach(() => {
+    context = createContext();
+  });
+
+  afterEach(() => {
+    context.dispose();
+  });
 
   test("Invokes custom script and then Ruby", async () => {
     const workspacePath = fs.mkdtempSync(

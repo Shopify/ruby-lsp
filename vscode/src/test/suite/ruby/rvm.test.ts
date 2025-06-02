@@ -5,6 +5,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Rvm } from "../../../ruby/rvm";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,6 +15,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("RVM", () => {
   if (os.platform() === "win32") {
@@ -22,15 +24,13 @@ suite("RVM", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+  beforeEach(() => {
+    context = createContext();
+  });
+  afterEach(() => {
+    context.dispose();
+  });
 
   test("Populates the gem env and path", async () => {
     const workspacePath = process.env.PWD!;
@@ -71,10 +71,14 @@ suite("RVM", () => {
     });
 
     const { env, version, yjit } = await rvm.activate();
+    const activationPath = vscode.Uri.joinPath(
+      context.extensionUri,
+      "activation.rb",
+    );
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
