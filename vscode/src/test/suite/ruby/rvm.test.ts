@@ -25,10 +25,17 @@ suite("RVM", () => {
   }
 
   let context: FakeContext;
+  let activationPath: vscode.Uri;
+  let sandbox: sinon.SinonSandbox;
+
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     context = createContext();
+    activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
   });
+
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -47,7 +54,7 @@ suite("RVM", () => {
       async () => {},
     );
 
-    const installationPathStub = sinon
+    const installationPathStub = sandbox
       .stub(rvm, "findRvmInstallation")
       .resolves(
         vscode.Uri.joinPath(
@@ -65,16 +72,12 @@ suite("RVM", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const { env, version, yjit } = await rvm.activate();
-    const activationPath = vscode.Uri.joinPath(
-      context.extensionUri,
-      "activation.rb",
-    );
 
     assert.ok(
       execStub.calledOnceWithExactly(

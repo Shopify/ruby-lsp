@@ -19,12 +19,15 @@ import { createContext, FakeContext } from "../helpers";
 
 suite("Custom", () => {
   let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     context = createContext();
   });
 
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -53,12 +56,12 @@ suite("Custom", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const commandStub = sinon
+    sandbox
       .stub(custom, "customCommand")
       .returns("my_version_manager activate_env");
     const { env, version, yjit } = await custom.activate();
@@ -87,8 +90,6 @@ suite("Custom", () => {
     assert.strictEqual(yjit, true);
     assert.deepStrictEqual(env.ANY, "true");
 
-    execStub.restore();
-    commandStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
   });
 });

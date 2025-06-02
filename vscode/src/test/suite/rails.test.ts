@@ -4,6 +4,7 @@ import path from "path";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { beforeEach, afterEach } from "mocha";
 
 import { Rails } from "../../rails";
 import { Workspace } from "../../workspace";
@@ -21,8 +22,18 @@ suite("Rails", () => {
     index: 0,
   };
 
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   test("generate", async () => {
-    const executeStub = sinon.stub();
+    const executeStub = sandbox.stub();
     const workspace = {
       workspaceFolder,
       execute: executeStub.resolves({
@@ -31,8 +42,8 @@ suite("Rails", () => {
       }),
     } as unknown as Workspace;
 
-    const showDocumentStub = sinon.stub(vscode.window, "showTextDocument");
-    const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
+    const showDocumentStub = sandbox.stub(vscode.window, "showTextDocument");
+    sandbox.stub(vscode.commands, "executeCommand");
 
     const selectedWorkspace = undefined;
     const rails = new Rails(() => Promise.resolve(workspace));
@@ -64,12 +75,10 @@ suite("Rails", () => {
           { preview: false },
         ),
     );
-    showDocumentStub.restore();
-    executeCommandStub.restore();
   });
 
   test("destroy", async () => {
-    const executeStub = sinon.stub();
+    const executeStub = sandbox.stub();
     const workspace = {
       workspaceFolder,
       execute: executeStub.resolves({
@@ -78,7 +87,7 @@ suite("Rails", () => {
       }),
     } as unknown as Workspace;
 
-    const executeCommandStub = sinon.stub(vscode.commands, "executeCommand");
+    const executeCommandStub = sandbox.stub(vscode.commands, "executeCommand");
 
     const selectedWorkspace = undefined;
     const rails = new Rails(() => Promise.resolve(workspace));
@@ -110,6 +119,5 @@ suite("Rails", () => {
           vscode.Uri.joinPath(workspaceUri, "app/models/user.rb"),
         ),
     );
-    executeCommandStub.restore();
   });
 });

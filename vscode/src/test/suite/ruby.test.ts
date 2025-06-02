@@ -170,7 +170,7 @@ suite("Ruby environment activation", () => {
   });
 
   test("Ignores untrusted workspace for telemetry", async () => {
-    const telemetry = { ...FAKE_TELEMETRY, logError: sinon.stub() };
+    const telemetry = { ...FAKE_TELEMETRY, logError: sandbox.stub() };
     const ruby = new Ruby(context, workspaceFolder, outputChannel, telemetry);
 
     sandbox

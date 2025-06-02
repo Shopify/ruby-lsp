@@ -25,14 +25,17 @@ suite("Rbenv", () => {
   }
 
   let activationPath: vscode.Uri;
+  let sandbox: sinon.SinonSandbox;
   let context: FakeContext;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     context = createContext();
     activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
   });
 
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -59,7 +62,7 @@ suite("Rbenv", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
@@ -82,7 +85,6 @@ suite("Rbenv", () => {
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
-    execStub.restore();
   });
 
   test("Allows configuring where rbenv is installed", async () => {
@@ -109,7 +111,7 @@ suite("Rbenv", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });

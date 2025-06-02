@@ -28,12 +28,15 @@ suite("Launch integrations", () => {
   };
 
   let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     context = createContext();
   });
 
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -98,9 +101,8 @@ suite("Launch integrations", () => {
   });
 
   test("with launcher mode enabled", async () => {
-    const featureStub = sinon.stub(common, "featureEnabled").returns(true);
+    sandbox.stub(common, "featureEnabled").returns(true);
     const client = await createClient();
-    featureStub.restore();
 
     await startClient(client);
 

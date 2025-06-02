@@ -26,13 +26,16 @@ suite("Mise", () => {
 
   let context: FakeContext;
   let activationPath: vscode.Uri;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     context = createContext();
     activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
   });
 
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -59,11 +62,11 @@ suite("Mise", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
-    const findStub = sinon
+    const findStub = sandbox
       .stub(mise, "findMiseUri")
       .resolves(
         vscode.Uri.joinPath(
@@ -121,7 +124,7 @@ suite("Mise", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
@@ -129,7 +132,7 @@ suite("Mise", () => {
     const misePath = path.join(workspacePath, "mise");
     fs.writeFileSync(misePath, "fakeMiseBinary");
 
-    const configStub = sinon
+    const configStub = sandbox
       .stub(vscode.workspace, "getConfiguration")
       .returns({
         get: (name: string) => {

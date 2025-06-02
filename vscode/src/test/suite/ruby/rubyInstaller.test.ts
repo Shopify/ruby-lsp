@@ -27,8 +27,10 @@ suite("RubyInstaller", () => {
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
   let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
@@ -37,6 +39,7 @@ suite("RubyInstaller", () => {
   });
 
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -110,13 +113,12 @@ suite("RubyInstaller", () => {
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
       ACTIVATION_SEPARATOR,
     );
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: result,
     });
 
     await windows.activate();
-    execStub.restore();
 
     assert.strictEqual(execStub.callCount, 1);
     const callArgs = execStub.getCall(0).args;
@@ -138,13 +140,12 @@ suite("RubyInstaller", () => {
       true,
       RUBY_VERSION,
     ].join(ACTIVATION_SEPARATOR);
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: result,
     });
 
     const { gemPath } = await windows.activate();
-    execStub.restore();
 
     assert.deepStrictEqual(gemPath, [
       "\\\\?\\C:\\Ruby32\\default_gems",

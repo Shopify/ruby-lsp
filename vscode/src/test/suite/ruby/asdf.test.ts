@@ -24,13 +24,16 @@ suite("Asdf", () => {
   }
   let context: FakeContext;
   let activationPath: vscode.Uri;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     context = createContext();
     activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
   });
 
   afterEach(() => {
+    sandbox.restore();
     context.dispose();
   });
 
@@ -57,15 +60,15 @@ suite("Asdf", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const findInstallationStub = sinon
+    sandbox
       .stub(asdf, "findAsdfInstallation")
       .resolves(`${os.homedir()}/.asdf/asdf.sh`);
-    const shellStub = sinon.stub(vscode.env, "shell").get(() => "/bin/bash");
+    sandbox.stub(vscode.env, "shell").get(() => "/bin/bash");
 
     const { env, version, yjit } = await asdf.activate();
 
@@ -85,10 +88,6 @@ suite("Asdf", () => {
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
-
-    execStub.restore();
-    findInstallationStub.restore();
-    shellStub.restore();
   });
 
   test("Searches for asdf.fish when using the fish shell", async () => {
@@ -105,17 +104,15 @@ suite("Asdf", () => {
       "true",
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const findInstallationStub = sinon
+    sandbox
       .stub(asdf, "findAsdfInstallation")
       .resolves(`${os.homedir()}/.asdf/asdf.fish`);
-    const shellStub = sinon
-      .stub(vscode.env, "shell")
-      .get(() => "/opt/homebrew/bin/fish");
+    sandbox.stub(vscode.env, "shell").get(() => "/opt/homebrew/bin/fish");
 
     const { env, version, yjit } = await asdf.activate();
 
@@ -135,10 +132,6 @@ suite("Asdf", () => {
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
-
-    execStub.restore();
-    findInstallationStub.restore();
-    shellStub.restore();
   });
 
   test("Finds ASDF executable for Homebrew if script is not available", async () => {
@@ -155,16 +148,14 @@ suite("Asdf", () => {
       "true",
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const findInstallationStub = sinon
-      .stub(asdf, "findAsdfInstallation")
-      .resolves(undefined);
+    sandbox.stub(asdf, "findAsdfInstallation").resolves(undefined);
 
-    const fsStub = sinon.stub(vscode.workspace, "fs").value({
+    sandbox.stub(vscode.workspace, "fs").value({
       stat: () => Promise.resolve(undefined),
     });
 
@@ -186,10 +177,6 @@ suite("Asdf", () => {
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
-
-    fsStub.restore();
-    execStub.restore();
-    findInstallationStub.restore();
   });
 
   test("Uses ASDF executable in PATH if script and Homebrew executable are not available", async () => {
@@ -206,14 +193,12 @@ suite("Asdf", () => {
       "true",
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const findInstallationStub = sinon
-      .stub(asdf, "findAsdfInstallation")
-      .resolves(undefined);
+    sandbox.stub(asdf, "findAsdfInstallation").resolves(undefined);
 
     const { env, version, yjit } = await asdf.activate();
 
@@ -233,8 +218,5 @@ suite("Asdf", () => {
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
-
-    execStub.restore();
-    findInstallationStub.restore();
   });
 });
