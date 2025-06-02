@@ -125,9 +125,7 @@ export class Ruby implements RubyInterface {
     this.versionManager = versionManager;
     this._error = false;
 
-    const workspaceRubyPath = this.context.workspaceState.get<
-      string | undefined
-    >(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`);
+    const workspaceRubyPath = await this.cachedWorkspaceRubyPath();
 
     if (workspaceRubyPath) {
       // If a workspace specific Ruby path is configured, then we use that to activate the environment
@@ -503,5 +501,27 @@ export class Ruby implements RubyInterface {
     }
 
     return this.manuallySelectRuby();
+  }
+
+  private async cachedWorkspaceRubyPath() {
+    const workspaceRubyPath = this.context.workspaceState.get<
+      string | undefined
+    >(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`);
+
+    if (!workspaceRubyPath) {
+      return undefined;
+    }
+
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.file(workspaceRubyPath));
+      return workspaceRubyPath;
+    } catch (error: any) {
+      // If the user selected a Ruby path and then uninstalled it, we need to clear the the cached path
+      this.context.workspaceState.update(
+        `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
+        undefined,
+      );
+      return undefined;
+    }
   }
 }
