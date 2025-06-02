@@ -818,11 +818,22 @@ module RubyIndexer
     )
       # Find the first class entry that has a parent class. Notice that if the developer makes a mistake and inherits
       # from two different classes in different files, we simply ignore it
-      superclass = if singleton_levels > 0
-        self[attached_class_name]&.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-      else
-        namespace_entries.find { |n| n.is_a?(Entry::Class) && n.parent_class }
-      end #: as Entry::Class?
+      possible_parents = singleton_levels > 0 ? self[attached_class_name] : namespace_entries
+      superclass = nil #: Entry::Class?
+
+      possible_parents&.each do |n|
+        # Ignore non class entries
+        next unless n.is_a?(Entry::Class)
+
+        parent_class = n.parent_class
+        next unless parent_class
+
+        # Always set the superclass, but break early if we found one that isn't `::Object` (meaning we found an explicit
+        # parent class and not the implicit default). Note that when setting different parents to the same class, which
+        # is invalid, we pick whatever is the first one we find
+        superclass = n
+        break if parent_class != "::Object"
+      end
 
       if superclass
         # If the user makes a mistake and creates a class that inherits from itself, this method would throw a stack
