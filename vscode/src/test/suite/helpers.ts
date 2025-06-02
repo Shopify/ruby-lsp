@@ -44,6 +44,23 @@ export function createRubySymlinks() {
   }
 }
 
+class FakeWorkspaceState implements vscode.Memento {
+  private store: Record<string, any> = {};
+
+  keys(): ReadonlyArray<string> {
+    return Object.keys(this.store);
+  }
+
+  get<T>(key: string): T | undefined {
+    return this.store[key];
+  }
+
+  update(key: string, value: any): Thenable<void> {
+    this.store[key] = value;
+    return Promise.resolve();
+  }
+}
+
 export const LSP_WORKSPACE_PATH = path.dirname(
   path.dirname(path.dirname(path.dirname(__dirname))),
 );
@@ -56,9 +73,6 @@ export const LSP_WORKSPACE_FOLDER: vscode.WorkspaceFolder = {
 export const CONTEXT = {
   extensionMode: vscode.ExtensionMode.Test,
   subscriptions: [],
-  workspaceState: {
-    get: (_name: string) => undefined,
-    update: (_name: string, _value: any) => Promise.resolve(),
-  },
+  workspaceState: new FakeWorkspaceState(),
   extensionUri: vscode.Uri.joinPath(LSP_WORKSPACE_URI, "vscode"),
 } as unknown as vscode.ExtensionContext;

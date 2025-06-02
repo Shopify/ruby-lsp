@@ -4,6 +4,7 @@ import * as path from "path";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
@@ -16,6 +17,7 @@ import {
   VALUE_SEPARATOR,
 } from "../../ruby/versionManager";
 
+import { CONTEXT } from "./helpers";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
 suite("Ruby environment activation", () => {
@@ -27,37 +29,36 @@ suite("Ruby environment activation", () => {
     name: path.basename(workspacePath),
     index: 0,
   };
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    workspaceState: {
-      get: () => undefined,
-      update: () => undefined,
-    },
-    extensionUri: vscode.Uri.file(path.join(workspacePath, "vscode")),
-  } as unknown as vscode.ExtensionContext;
   const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
     const manager = process.env.CI
       ? ManagerIdentifier.None
       : ManagerIdentifier.Chruby;
 
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) => {
-          if (name === "rubyVersionManager") {
-            return { identifier: manager };
-          } else if (name === "bundleGemfile") {
-            return "";
-          }
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "rubyVersionManager") {
+          return { identifier: manager };
+        } else if (name === "bundleGemfile") {
+          return "";
+        }
 
-          return undefined;
-        },
-      } as unknown as vscode.WorkspaceConfiguration);
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
 
     const ruby = new Ruby(
-      context,
+      CONTEXT,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -70,8 +71,6 @@ suite("Ruby environment activation", () => {
       undefined,
       "Expected YJIT support to be set to true or false",
     );
-
-    configStub.restore();
   }).timeout(10000);
 
   test("Deletes verbose and GC settings from activated environment", async () => {
@@ -79,22 +78,20 @@ suite("Ruby environment activation", () => {
       ? ManagerIdentifier.None
       : ManagerIdentifier.Chruby;
 
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) => {
-          if (name === "rubyVersionManager") {
-            return { identifier: manager };
-          } else if (name === "bundleGemfile") {
-            return "";
-          }
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "rubyVersionManager") {
+          return { identifier: manager };
+        } else if (name === "bundleGemfile") {
+          return "";
+        }
 
-          return undefined;
-        },
-      } as unknown as vscode.WorkspaceConfiguration);
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
 
     const ruby = new Ruby(
-      context,
+      CONTEXT,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -111,23 +108,20 @@ suite("Ruby environment activation", () => {
     delete process.env.VERBOSE;
     delete process.env.DEBUG;
     delete process.env.RUBY_GC_HEAP_GROWTH_FACTOR;
-    configStub.restore();
   });
 
   test("Sets gem path for version managers based on shims", async () => {
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) => {
-          if (name === "rubyVersionManager") {
-            return { identifier: ManagerIdentifier.Rbenv };
-          } else if (name === "bundleGemfile") {
-            return "";
-          }
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "rubyVersionManager") {
+          return { identifier: ManagerIdentifier.Rbenv };
+        } else if (name === "bundleGemfile") {
+          return "";
+        }
 
-          return undefined;
-        },
-      } as unknown as vscode.WorkspaceConfiguration);
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
 
     const envStub = [
       "3.3.5",
@@ -136,20 +130,18 @@ suite("Ruby environment activation", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
     const ruby = new Ruby(
-      context,
+      CONTEXT,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
     );
     await ruby.activateRuby();
-    execStub.restore();
-    configStub.restore();
 
     assert.deepStrictEqual(ruby.gemPath, [
       "~/.gem/ruby/3.3.5",
@@ -159,7 +151,7 @@ suite("Ruby environment activation", () => {
 
   test("mergeComposedEnv merges environment variables", () => {
     const ruby = new Ruby(
-      context,
+      CONTEXT,
       workspaceFolder,
       outputChannel,
       FAKE_TELEMETRY,
@@ -176,9 +168,9 @@ suite("Ruby environment activation", () => {
 
   test("Ignores untrusted workspace for telemetry", async () => {
     const telemetry = { ...FAKE_TELEMETRY, logError: sinon.stub() };
-    const ruby = new Ruby(context, workspaceFolder, outputChannel, telemetry);
+    const ruby = new Ruby(CONTEXT, workspaceFolder, outputChannel, telemetry);
 
-    const failureStub = sinon
+    sandbox
       .stub(Shadowenv.prototype, "activate")
       .rejects(new UntrustedWorkspaceError());
 
@@ -187,7 +179,43 @@ suite("Ruby environment activation", () => {
     });
 
     assert.ok(!telemetry.logError.called);
+  });
 
-    failureStub.restore();
+  test("Clears outdated workspace Ruby path caches", async () => {
+    const manager = process.env.CI
+      ? ManagerIdentifier.None
+      : ManagerIdentifier.Chruby;
+
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "rubyVersionManager") {
+          return { identifier: manager };
+        } else if (name === "bundleGemfile") {
+          return "";
+        }
+
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
+
+    await CONTEXT.workspaceState.update(
+      `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
+      "/totally/non/existent/path/ruby",
+    );
+    const ruby = new Ruby(
+      CONTEXT,
+      workspaceFolder,
+      outputChannel,
+      FAKE_TELEMETRY,
+    );
+
+    await ruby.activateRuby();
+
+    assert.strictEqual(
+      CONTEXT.workspaceState.get(
+        `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
+      ),
+      undefined,
+    );
   });
 });
