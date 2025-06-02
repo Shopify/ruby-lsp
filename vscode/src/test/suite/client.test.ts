@@ -619,7 +619,7 @@ suite("Client", () => {
   test("document selectors match default gems and bundled gems appropriately", () => {
     const selector = client.clientOptions
       .documentSelector! as TextDocumentFilter[];
-    assert.strictEqual(selector.length, 10);
+    assert.strictEqual(selector.length, 5);
 
     // We don't care about the order of the document filters, just that they are present. This assertion helper is just
     // a convenience to search the registered filters
@@ -641,26 +641,14 @@ suite("Client", () => {
     };
 
     assertSelector("ruby", `${workspaceUri.fsPath}/**/*`, "file");
-    assertSelector("ruby", `${workspaceUri.fsPath}/**/*`, "git");
     assertSelector("erb", `${workspaceUri.fsPath}/**/*`, "file");
-    assertSelector("erb", `${workspaceUri.fsPath}/**/*`, "git");
-
     assertSelector(
       "ruby",
       new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
       "file",
     );
-    assertSelector(
-      "ruby",
-      new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
-      "git",
-    );
-
     assertSelector("ruby", /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/, "file");
-    assertSelector("ruby", /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/, "git");
-
     assertSelector("ruby", /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/, "file");
-    assertSelector("ruby", /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/, "git");
   });
 
   test("requests for non existing documents do not crash the server", async () => {

@@ -181,7 +181,6 @@ function collectClientOptions(
 
   const features: EnabledFeatures = configuration.get("enabledFeatures")!;
   const enabledFeatures = Object.keys(features).filter((key) => features[key]);
-  const supportedSchemes = ["file", "git"];
 
   const fsPath = workspaceFolder.uri.fsPath.replace(/\/$/, "");
 
@@ -191,9 +190,7 @@ function collectClientOptions(
   // 3. Default gems
   let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.flatMap(
     (language) => {
-      return supportedSchemes.map((scheme) => {
-        return { scheme, language, pattern: `${fsPath}/**/*` };
-      });
+      return { scheme: "file", language, pattern: `${fsPath}/**/*` };
     },
   );
 
@@ -209,34 +206,32 @@ function collectClientOptions(
   }
 
   ruby.gemPath.forEach((gemPath) => {
-    supportedSchemes.forEach((scheme) => {
-      // On Windows, gem paths may be using backslashes, but those are not valid as a glob pattern. We need to ensure
-      // that we're using forward slashes for the document selectors
-      const pathAsGlobPattern = gemPath.replace(/\\/g, "/");
+    // On Windows, gem paths may be using backslashes, but those are not valid as a glob pattern. We need to ensure
+    // that we're using forward slashes for the document selectors
+    const pathAsGlobPattern = gemPath.replace(/\\/g, "/");
 
-      documentSelector.push({
-        scheme,
-        language: "ruby",
-        pattern: `${pathAsGlobPattern}/**/*`,
-      });
-
-      // Because of how default gems are installed, the gemPath location is actually not exactly where the files are
-      // located. With the regex, we are correcting the default gem path from this (where the files are not located)
-      // /opt/rubies/3.3.1/lib/ruby/gems/3.3.0
-      //
-      // to this (where the files are actually stored)
-      // /opt/rubies/3.3.1/lib/ruby/3.3.0
-      //
-      // Notice that we still need to add the regular path to the selector because some version managers will install
-      // gems under the non-corrected path
-      if (/lib\/ruby\/gems\/(?=\d)/.test(pathAsGlobPattern)) {
-        documentSelector.push({
-          scheme,
-          language: "ruby",
-          pattern: `${pathAsGlobPattern.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
-        });
-      }
+    documentSelector.push({
+      scheme: "file",
+      language: "ruby",
+      pattern: `${pathAsGlobPattern}/**/*`,
     });
+
+    // Because of how default gems are installed, the gemPath location is actually not exactly where the files are
+    // located. With the regex, we are correcting the default gem path from this (where the files are not located)
+    // /opt/rubies/3.3.1/lib/ruby/gems/3.3.0
+    //
+    // to this (where the files are actually stored)
+    // /opt/rubies/3.3.1/lib/ruby/3.3.0
+    //
+    // Notice that we still need to add the regular path to the selector because some version managers will install
+    // gems under the non-corrected path
+    if (/lib\/ruby\/gems\/(?=\d)/.test(pathAsGlobPattern)) {
+      documentSelector.push({
+        scheme: "file",
+        language: "ruby",
+        pattern: `${pathAsGlobPattern.replace(/lib\/ruby\/gems\/(?=\d)/, "lib/ruby/")}/**/*`,
+      });
+    }
   });
 
   // This is a temporary solution as an escape hatch for users who cannot upgrade the `ruby-lsp` gem to a version that
