@@ -43,11 +43,6 @@ module RubyLsp
           range: range,
           data: { arguments: arguments, kind: "debug_test" },
         )
-
-        @code_lens << Interface::CodeLens.new(
-          range: range,
-          data: { arguments: arguments, kind: "profile_test" },
-        )
       end
 
       #: (String id) -> ResponseType?

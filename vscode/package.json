@@ -191,6 +191,11 @@
         "command": "rubyLsp.showOutput",
         "title": "Show output channel",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.profileTest",
+        "title": "Profile current test file",
+        "category": "Ruby LSP"
       }
     ],
     "configuration": {

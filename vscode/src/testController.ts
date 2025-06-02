@@ -35,7 +35,6 @@ const RUN_PROFILE_LABEL = "Run";
 const RUN_IN_TERMINAL_PROFILE_LABEL = "Run in terminal";
 const DEBUG_PROFILE_LABEL = "Debug";
 const COVERAGE_PROFILE_LABEL = "Coverage";
-const PROFILE_PROFILE_LABEL = "Profile";
 
 export class TestController {
   // Only public for testing
@@ -44,7 +43,6 @@ export class TestController {
   readonly runInTerminalProfile: vscode.TestRunProfile;
   readonly coverageProfile: vscode.TestRunProfile;
   readonly testDebugProfile: vscode.TestRunProfile;
-  readonly profileProfile: vscode.TestRunProfile;
   private readonly testCommands: WeakMap<vscode.TestItem, string>;
   private terminal: vscode.Terminal | undefined;
   private readonly telemetry: vscode.TelemetryLogger;
@@ -146,13 +144,6 @@ export class TestController {
       false,
     );
 
-    this.profileProfile = this.testController.createRunProfile(
-      PROFILE_PROFILE_LABEL,
-      vscode.TestRunProfileKind.Run,
-      this.runTest.bind(this),
-      false,
-    );
-
     const testFileWatcher =
       vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
 
@@ -170,7 +161,6 @@ export class TestController {
       this.coverageProfile,
       this.runner,
       this.runInTerminalProfile,
-      this.profileProfile,
       vscode.window.onDidCloseTerminal((terminal: vscode.Terminal): void => {
         if (terminal === this.terminal) this.terminal = undefined;
       }),
@@ -412,7 +402,6 @@ export class TestController {
 
     let profile;
 
-    // For Profile mode
     if (mode === Mode.Profile) {
       if (this.terminal === undefined) {
         this.terminal = this.getTerminal();
