@@ -14,6 +14,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL, asyncExec } from "../../../common";
 import { RUBY_VERSION } from "../../rubyVersion";
 import * as common from "../../../common";
+import { createContext, FakeContext } from "../helpers";
 
 suite("Shadowenv", () => {
   if (os.platform() === "win32") {
@@ -30,18 +31,13 @@ suite("Shadowenv", () => {
     return;
   }
 
-  const extensionPath = path.dirname(
-    path.dirname(path.dirname(path.dirname(path.dirname(__dirname)))),
-  );
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.file(path.join(extensionPath, "vscode")),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+  beforeEach(() => {
+    context = createContext();
+  });
+  afterEach(() => {
+    context.dispose();
+  });
 
   let rootPath: string;
   let workspacePath: string;

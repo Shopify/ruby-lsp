@@ -5,6 +5,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { None } from "../../../ruby/none";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,18 +15,23 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("None", () => {
+  let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    context = createContext();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    context.dispose();
+  });
+
   test("Invokes Ruby directly", async () => {
-    const context = {
-      extensionMode: vscode.ExtensionMode.Test,
-      subscriptions: [],
-      workspaceState: {
-        get: (_name: string) => undefined,
-        update: (_name: string, _value: any) => Promise.resolve(),
-      },
-      extensionUri: vscode.Uri.parse("file:///fake"),
-    } as unknown as vscode.ExtensionContext;
     const workspacePath = fs.mkdtempSync(
       path.join(os.tmpdir(), "ruby-lsp-test-"),
     );
@@ -50,7 +56,7 @@ suite("None", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
@@ -81,7 +87,6 @@ suite("None", () => {
     assert.strictEqual(yjit, true);
     assert.deepStrictEqual(env.ANY, "true");
 
-    execStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
   });
 });

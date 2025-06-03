@@ -5,6 +5,7 @@ import fs from "fs";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Mise } from "../../../ruby/mise";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,6 +15,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("Mise", () => {
   if (os.platform() === "win32") {
@@ -22,15 +24,20 @@ suite("Mise", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+  let activationPath: vscode.Uri;
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    context = createContext();
+    activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    context.dispose();
+  });
 
   test("Finds Ruby only binary path is appended to PATH", async () => {
     // eslint-disable-next-line no-process-env
@@ -55,11 +62,11 @@ suite("Mise", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
-    const findStub = sinon
+    const findStub = sandbox
       .stub(mise, "findMiseUri")
       .resolves(
         vscode.Uri.joinPath(
@@ -74,7 +81,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${os.homedir()}/.local/bin/mise x -- ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${os.homedir()}/.local/bin/mise x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -117,7 +124,7 @@ suite("Mise", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
@@ -125,7 +132,7 @@ suite("Mise", () => {
     const misePath = path.join(workspacePath, "mise");
     fs.writeFileSync(misePath, "fakeMiseBinary");
 
-    const configStub = sinon
+    const configStub = sandbox
       .stub(vscode.workspace, "getConfiguration")
       .returns({
         get: (name: string) => {
@@ -140,7 +147,7 @@ suite("Mise", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${misePath} x -- ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${misePath} x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

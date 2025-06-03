@@ -4,7 +4,7 @@ import path from "path";
 import os from "os";
 
 import sinon from "sinon";
-import { before, after, beforeEach } from "mocha";
+import { before, after, beforeEach, afterEach } from "mocha";
 import * as vscode from "vscode";
 
 import * as common from "../../../common";
@@ -13,7 +13,7 @@ import { WorkspaceChannel } from "../../../workspaceChannel";
 import { LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, VERSION_REGEX } from "../../rubyVersion";
 import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
-import { createRubySymlinks, CONTEXT } from "../helpers";
+import { createRubySymlinks, createContext, FakeContext } from "../helpers";
 
 suite("RubyInstaller", () => {
   if (os.platform() !== "win32") {
@@ -26,12 +26,21 @@ suite("RubyInstaller", () => {
   let workspacePath: string;
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
+  let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
     // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }
+    context = createContext();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    context.dispose();
   });
 
   before(() => {
@@ -58,7 +67,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -78,7 +87,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const { env, version, yjit } = await windows.activate();
@@ -98,19 +107,18 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
       ACTIVATION_SEPARATOR,
     );
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: result,
     });
 
     await windows.activate();
-    execStub.restore();
 
     assert.strictEqual(execStub.callCount, 1);
     const callArgs = execStub.getCall(0).args;
@@ -123,7 +131,7 @@ suite("RubyInstaller", () => {
     const windows = new RubyInstaller(
       workspaceFolder,
       outputChannel,
-      CONTEXT,
+      context,
       async () => {},
     );
     const result = [
@@ -132,13 +140,12 @@ suite("RubyInstaller", () => {
       true,
       RUBY_VERSION,
     ].join(ACTIVATION_SEPARATOR);
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: result,
     });
 
     const { gemPath } = await windows.activate();
-    execStub.restore();
 
     assert.deepStrictEqual(gemPath, [
       "\\\\?\\C:\\Ruby32\\default_gems",

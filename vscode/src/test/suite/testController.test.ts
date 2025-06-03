@@ -17,10 +17,11 @@ import { Debugger } from "../../debugger";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 import {
   createRubySymlinks,
-  CONTEXT,
   LSP_WORKSPACE_FOLDER,
   LSP_WORKSPACE_PATH,
   LSP_WORKSPACE_URI,
+  createContext,
+  FakeContext,
 } from "./helpers";
 
 suite("TestController", () => {
@@ -32,12 +33,15 @@ suite("TestController", () => {
   const serverTestUri = vscode.Uri.joinPath(testDirUri, "server_test.rb");
   const storeTestUri = vscode.Uri.joinPath(testDirUri, "store_test.rb");
 
+  let context: FakeContext;
+
   beforeEach(async () => {
     sandbox = sinon.createSandbox();
+    context = createContext();
     workspaceStubs = [];
 
     workspace = new Workspace(
-      CONTEXT,
+      context,
       LSP_WORKSPACE_FOLDER,
       FAKE_TELEMETRY,
       () => undefined,
@@ -47,7 +51,7 @@ suite("TestController", () => {
 
     const commonStub = sandbox.stub(common, "featureEnabled").returns(true);
     controller = new TestController(
-      CONTEXT,
+      context,
       FAKE_TELEMETRY,
       () => undefined,
       () => Promise.resolve(workspace),
@@ -62,7 +66,7 @@ suite("TestController", () => {
 
   afterEach(() => {
     sandbox.restore();
-    CONTEXT.subscriptions.forEach((subscription) => subscription.dispose());
+    context.dispose();
   });
 
   function setupLspClientStub(workspace: Workspace) {
@@ -714,7 +718,7 @@ suite("TestController", () => {
     } as any;
     sandbox.stub(controller.testController, "createTestRun").returns(runStub);
 
-    const debug = new Debugger(CONTEXT, () => workspace);
+    const debug = new Debugger(context, () => workspace);
     const startDebuggingSpy = sandbox.spy(vscode.debug, "startDebugging");
 
     const runRequest = new vscode.TestRunRequest(

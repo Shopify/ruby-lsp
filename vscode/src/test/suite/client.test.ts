@@ -25,7 +25,7 @@ import {
   ShowMessageParams,
   MessageType,
 } from "vscode-languageclient/node";
-import { after, afterEach, before, setup } from "mocha";
+import { after, afterEach, before, beforeEach, setup } from "mocha";
 
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import Client from "../../client";
@@ -33,7 +33,7 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import { MAJOR, MINOR } from "../rubyVersion";
 
 import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
-import { createRubySymlinks } from "./helpers";
+import { createContext, createRubySymlinks } from "./helpers";
 
 async function launchClient(workspaceUri: vscode.Uri) {
   const workspaceFolder: vscode.WorkspaceFolder = {
@@ -42,15 +42,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     index: 0,
   };
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.file(path.join(workspaceUri.fsPath, "vscode")),
-  } as unknown as vscode.ExtensionContext;
+  const context = createContext();
   const fakeLogger = new FakeLogger();
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
 
@@ -149,6 +141,7 @@ suite("Client", () => {
     "fake.rb",
   );
   let client: Client;
+  let sandbox: sinon.SinonSandbox;
 
   before(async function () {
     // 60000 should be plenty but we're seeing timeouts on Windows in CI
@@ -156,6 +149,10 @@ suite("Client", () => {
     // eslint-disable-next-line no-invalid-this
     this.timeout(90000);
     client = await launchClient(workspaceUri);
+  });
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
   });
 
   after(async function () {
@@ -185,6 +182,7 @@ suite("Client", () => {
   });
 
   afterEach(async () => {
+    sandbox.restore();
     await client.sendNotification("textDocument/didClose", {
       textDocument: {
         uri: documentUri.toString(),
@@ -815,7 +813,7 @@ suite("Client", () => {
       },
     });
 
-    const stub = sinon.stub(vscode.commands, "executeCommand").resolves(null);
+    const stub = sandbox.stub(vscode.commands, "executeCommand").resolves(null);
 
     await client.sendRequest("textDocument/definition", {
       textDocument: {
@@ -823,7 +821,6 @@ suite("Client", () => {
       },
       position: { line: 1, character: 5 },
     });
-    stub.restore();
 
     await client.sendNotification("textDocument/didClose", {
       textDocument: { uri },
@@ -870,7 +867,7 @@ suite("Client", () => {
       },
     });
 
-    const stub = sinon.stub(vscode.commands, "executeCommand").resolves(null);
+    const stub = sandbox.stub(vscode.commands, "executeCommand").resolves(null);
 
     await client.sendRequest("textDocument/signatureHelp", {
       textDocument: {
@@ -879,7 +876,6 @@ suite("Client", () => {
       position: { line: 1, character: 23 },
       context: {},
     });
-    stub.restore();
 
     await client.sendNotification("textDocument/didClose", {
       textDocument: { uri },
@@ -927,7 +923,7 @@ suite("Client", () => {
       },
     });
 
-    const stub = sinon.stub(vscode.commands, "executeCommand").resolves(null);
+    const stub = sandbox.stub(vscode.commands, "executeCommand").resolves(null);
 
     await client.sendRequest("textDocument/documentHighlight", {
       textDocument: {
@@ -936,7 +932,6 @@ suite("Client", () => {
       position: { line: 1, character: 4 },
       context: {},
     });
-    stub.restore();
 
     await client.sendNotification("textDocument/didClose", {
       textDocument: { uri },

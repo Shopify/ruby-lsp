@@ -8,13 +8,14 @@ import { after, afterEach, before, beforeEach } from "mocha";
 
 import { StreamingRunner } from "../../streamingRunner";
 
-import { CONTEXT } from "./helpers";
+import { createContext, FakeContext } from "./helpers";
 
 suite("StreamingRunner", () => {
   let sandbox: sinon.SinonSandbox;
   const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
   const dbUri = vscode.Uri.joinPath(tempDirUri, "test_reporter_port_db.json");
   let currentDbContents: string | undefined;
+  let context: FakeContext;
 
   before(async () => {
     try {
@@ -37,11 +38,12 @@ suite("StreamingRunner", () => {
   beforeEach(async () => {
     await vscode.workspace.fs.createDirectory(tempDirUri);
     sandbox = sinon.createSandbox();
+    context = createContext();
   });
 
   afterEach(() => {
     sandbox.restore();
-    CONTEXT.subscriptions.forEach((disposable) => disposable.dispose());
+    context.dispose();
   });
 
   test("updates port DB with new values", async () => {
@@ -57,7 +59,7 @@ suite("StreamingRunner", () => {
     );
 
     const streamingRunner = new StreamingRunner(
-      CONTEXT,
+      context,
       () => Promise.resolve(undefined),
       () => ({}) as any as vscode.TestRun,
     );

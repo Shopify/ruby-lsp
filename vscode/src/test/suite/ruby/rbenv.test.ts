@@ -5,6 +5,7 @@ import fs from "fs";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Rbenv } from "../../../ruby/rbenv";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,6 +15,7 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("Rbenv", () => {
   if (os.platform() === "win32") {
@@ -22,15 +24,20 @@ suite("Rbenv", () => {
     return;
   }
 
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  let activationPath: vscode.Uri;
+  let sandbox: sinon.SinonSandbox;
+  let context: FakeContext;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    context = createContext();
+    activationPath = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    context.dispose();
+  });
 
   test("Finds Ruby based on .ruby-version", async () => {
     // eslint-disable-next-line no-process-env
@@ -55,7 +62,7 @@ suite("Rbenv", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
@@ -64,7 +71,7 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `rbenv exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `rbenv exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
@@ -78,7 +85,6 @@ suite("Rbenv", () => {
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.strictEqual(env.ANY, "true");
-    execStub.restore();
   });
 
   test("Allows configuring where rbenv is installed", async () => {
@@ -105,7 +111,7 @@ suite("Rbenv", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
@@ -128,7 +134,7 @@ suite("Rbenv", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${rbenvPath} exec ruby -EUTF-8:UTF-8 '/fake/activation.rb'`,
+        `${rbenvPath} exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

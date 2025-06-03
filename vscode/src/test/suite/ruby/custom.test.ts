@@ -5,6 +5,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
+import { afterEach, beforeEach } from "mocha";
 
 import { Custom } from "../../../ruby/custom";
 import { WorkspaceChannel } from "../../../workspaceChannel";
@@ -14,17 +15,21 @@ import {
   FIELD_SEPARATOR,
   VALUE_SEPARATOR,
 } from "../../../ruby/versionManager";
+import { createContext, FakeContext } from "../helpers";
 
 suite("Custom", () => {
-  const context = {
-    extensionMode: vscode.ExtensionMode.Test,
-    subscriptions: [],
-    workspaceState: {
-      get: (_name: string) => undefined,
-      update: (_name: string, _value: any) => Promise.resolve(),
-    },
-    extensionUri: vscode.Uri.parse("file:///fake"),
-  } as unknown as vscode.ExtensionContext;
+  let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    context = createContext();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    context.dispose();
+  });
 
   test("Invokes custom script and then Ruby", async () => {
     const workspacePath = fs.mkdtempSync(
@@ -51,12 +56,12 @@ suite("Custom", () => {
       `ANY${VALUE_SEPARATOR}true`,
     ].join(FIELD_SEPARATOR);
 
-    const execStub = sinon.stub(common, "asyncExec").resolves({
+    const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const commandStub = sinon
+    sandbox
       .stub(custom, "customCommand")
       .returns("my_version_manager activate_env");
     const { env, version, yjit } = await custom.activate();
@@ -85,8 +90,6 @@ suite("Custom", () => {
     assert.strictEqual(yjit, true);
     assert.deepStrictEqual(env.ANY, "true");
 
-    execStub.restore();
-    commandStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
   });
 });

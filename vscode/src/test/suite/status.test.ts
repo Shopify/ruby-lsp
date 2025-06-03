@@ -20,8 +20,14 @@ suite("StatusItems", () => {
   let ruby: Ruby;
   let status: StatusItem;
   let workspace: WorkspaceInterface;
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
 
   afterEach(() => {
+    sandbox.restore();
     status.dispose();
   });
 
@@ -184,7 +190,7 @@ suite("StatusItems", () => {
         typeHierarchy: true,
       };
       const numberOfFeatures = Object.keys(features).length;
-      const stub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+      sandbox.stub(vscode.workspace, "getConfiguration").returns({
         get: () => features,
       } as unknown as vscode.WorkspaceConfiguration);
 
@@ -195,7 +201,6 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.name, "Ruby LSP Features");
       assert.strictEqual(status.item.command?.title, "Manage");
       assert.strictEqual(status.item.command.command, Command.ToggleFeatures);
-      stub.restore();
     });
 
     test("Refresh updates number of features", () => {
@@ -219,7 +224,7 @@ suite("StatusItems", () => {
         signatureHelp: true,
       };
       const numberOfFeatures = Object.keys(features).length;
-      const stub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+      sandbox.stub(vscode.workspace, "getConfiguration").returns({
         get: () => features,
       } as unknown as vscode.WorkspaceConfiguration);
 
@@ -228,8 +233,6 @@ suite("StatusItems", () => {
         status.item.text,
         `${numberOfFeatures - 1}/${numberOfFeatures} features enabled`,
       );
-
-      stub.restore();
     });
   });
 
