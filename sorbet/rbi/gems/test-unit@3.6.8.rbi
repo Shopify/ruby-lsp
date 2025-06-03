@@ -1466,7 +1466,7 @@ class Test::Unit::AutoRunner
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#181
+  # source://test-unit//lib/test/unit/autorunner.rb#185
   def debug_on_failure?; end
 
   # Returns the value of attribute default_test_paths.
@@ -1512,7 +1512,7 @@ class Test::Unit::AutoRunner
   # source://test-unit//lib/test/unit/autorunner.rb#149
   def gc_stress=(_arg0); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#456
+  # source://test-unit//lib/test/unit/autorunner.rb#460
   def keyword_display(keywords); end
 
   # Returns the value of attribute listeners.
@@ -1527,10 +1527,13 @@ class Test::Unit::AutoRunner
   # source://test-unit//lib/test/unit/autorunner.rb#146
   def listeners=(_arg0); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#496
+  # source://test-unit//lib/test/unit/autorunner.rb#500
   def load_config(file); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#203
+  # source://test-unit//lib/test/unit/autorunner.rb#522
+  def load_plain_text_config(file); end
+
+  # source://test-unit//lib/test/unit/autorunner.rb#207
   def options; end
 
   # Returns the value of attribute pattern.
@@ -1545,13 +1548,13 @@ class Test::Unit::AutoRunner
   # source://test-unit//lib/test/unit/autorunner.rb#145
   def pattern=(_arg0); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#185
+  # source://test-unit//lib/test/unit/autorunner.rb#189
   def prepare; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#191
+  # source://test-unit//lib/test/unit/autorunner.rb#195
   def process_args(args = T.unsafe(nil)); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#474
+  # source://test-unit//lib/test/unit/autorunner.rb#478
   def run; end
 
   # Sets the attribute runner
@@ -1575,7 +1578,7 @@ class Test::Unit::AutoRunner
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#177
+  # source://test-unit//lib/test/unit/autorunner.rb#181
   def stop_on_failure?; end
 
   # Returns the value of attribute suite.
@@ -1609,34 +1612,34 @@ class Test::Unit::AutoRunner
 
   private
 
-  # source://test-unit//lib/test/unit/autorunner.rb#594
+  # source://test-unit//lib/test/unit/autorunner.rb#607
   def add_location_filter(path, line); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#585
+  # source://test-unit//lib/test/unit/autorunner.rb#598
   def add_test_path(path); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#544
+  # source://test-unit//lib/test/unit/autorunner.rb#557
   def change_work_directory(&block); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#529
+  # source://test-unit//lib/test/unit/autorunner.rb#542
   def default_collector; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#519
+  # source://test-unit//lib/test/unit/autorunner.rb#532
   def default_runner; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#533
+  # source://test-unit//lib/test/unit/autorunner.rb#546
   def global_config_file; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#539
+  # source://test-unit//lib/test/unit/autorunner.rb#552
   def load_global_config; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#577
+  # source://test-unit//lib/test/unit/autorunner.rb#590
   def match_test_case_name(test, pattern); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#567
+  # source://test-unit//lib/test/unit/autorunner.rb#580
   def match_test_name(test, pattern); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#552
+  # source://test-unit//lib/test/unit/autorunner.rb#565
   def prepare_name(name); end
 
   class << self
@@ -1691,9 +1694,9 @@ Test::Unit::AutoRunner::ADDITIONAL_OPTIONS = T.let(T.unsafe(nil), Array)
 # source://test-unit//lib/test/unit/autorunner.rb#14
 Test::Unit::AutoRunner::COLLECTORS = T.let(T.unsafe(nil), Hash)
 
-# source://test-unit//lib/test/unit/autorunner.rb#610
+# source://test-unit//lib/test/unit/autorunner.rb#623
 class Test::Unit::AutoRunner::GCStressListener
-  # source://test-unit//lib/test/unit/autorunner.rb#611
+  # source://test-unit//lib/test/unit/autorunner.rb#624
   def attach_to_mediator(mediator); end
 end
 
@@ -1703,9 +1706,9 @@ Test::Unit::AutoRunner::PREPARE_HOOKS = T.let(T.unsafe(nil), Array)
 # source://test-unit//lib/test/unit/autorunner.rb#13
 Test::Unit::AutoRunner::RUNNERS = T.let(T.unsafe(nil), Hash)
 
-# source://test-unit//lib/test/unit/autorunner.rb#602
+# source://test-unit//lib/test/unit/autorunner.rb#615
 class Test::Unit::AutoRunner::StopOnFailureListener
-  # source://test-unit//lib/test/unit/autorunner.rb#603
+  # source://test-unit//lib/test/unit/autorunner.rb#616
   def attach_to_mediator(mediator); end
 end
 
@@ -3358,7 +3361,7 @@ class Test::Unit::TestCase
 
   # It's handy to be able to compare TestCase instances.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#819
+  # source://test-unit//lib/test/unit/testcase.rb#824
   def ==(other); end
 
   # Notify that the test is passed. Normally, it is not needed
@@ -3371,7 +3374,7 @@ class Test::Unit::TestCase
   #
   # @return [void]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#868
+  # source://test-unit//lib/test/unit/testcase.rb#878
   def add_pass; end
 
   # Assigns test data to the test. It is used in internal.
@@ -3424,23 +3427,23 @@ class Test::Unit::TestCase
   # * my_cleanup1
   # * cleanup
   #
-  # source://test-unit//lib/test/unit/testcase.rb#716
+  # source://test-unit//lib/test/unit/testcase.rb#721
   def cleanup; end
 
   # Returns test data for the test. If the test isn't associated
   # with any test data, it returns `nil`.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#781
+  # source://test-unit//lib/test/unit/testcase.rb#786
   def data; end
 
   # Returns a label of test data for the test. If the
   # test isn't associated with any test data, it returns
   # `nil`.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#775
+  # source://test-unit//lib/test/unit/testcase.rb#780
   def data_label; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#764
+  # source://test-unit//lib/test/unit/testcase.rb#769
   def default_test; end
 
   # Returns a description for the test. A description
@@ -3449,19 +3452,19 @@ class Test::Unit::TestCase
   #
   # Returns a name for the test for no description test.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#809
+  # source://test-unit//lib/test/unit/testcase.rb#814
   def description; end
 
   # Returns elapsed time for the test was ran.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#832
+  # source://test-unit//lib/test/unit/testcase.rb#837
   def elapsed_time; end
 
   # Returns whether the test is interrupted.
   #
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#837
+  # source://test-unit//lib/test/unit/testcase.rb#842
   def interrupted?; end
 
   # Returns a human-readable name for the specific test that this
@@ -3470,7 +3473,7 @@ class Test::Unit::TestCase
   # `#local_name` doesn't include class name. `#name` includes
   # class name.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#796
+  # source://test-unit//lib/test/unit/testcase.rb#801
   def local_name; end
 
   # Returns the value of attribute method_name.
@@ -3481,7 +3484,7 @@ class Test::Unit::TestCase
   # Returns a human-readable name for the specific test that
   # this instance of TestCase represents.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#787
+  # source://test-unit//lib/test/unit/testcase.rb#792
   def name; end
 
   # Returns whether this individual test passed or
@@ -3490,7 +3493,7 @@ class Test::Unit::TestCase
   #
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#844
+  # source://test-unit//lib/test/unit/testcase.rb#849
   def passed?; end
 
   # Notify that a problem is occurred in the test. It means that
@@ -3501,7 +3504,7 @@ class Test::Unit::TestCase
   #
   # @return [void]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#855
+  # source://test-unit//lib/test/unit/testcase.rb#860
   def problem_occurred; end
 
   # Runs the individual test method represented by this
@@ -3509,7 +3512,12 @@ class Test::Unit::TestCase
   # and errors in result.
   #
   # source://test-unit//lib/test/unit/testcase.rb#580
-  def run(result, runner_class: T.unsafe(nil)); end
+  def run(result, run_context: T.unsafe(nil)); end
+
+  # Returns test suite runner class for easy to test.
+  #
+  # source://test-unit//lib/test/unit/testcase.rb#865
+  def runner_class; end
 
   # Called before every test method runs. Can be used
   # to set up fixture information.
@@ -3554,15 +3562,15 @@ class Test::Unit::TestCase
   # * setup callback2
   # * test_my_class
   #
-  # source://test-unit//lib/test/unit/testcase.rb#669
+  # source://test-unit//lib/test/unit/testcase.rb#674
   def setup; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#768
+  # source://test-unit//lib/test/unit/testcase.rb#773
   def size; end
 
   # Returns a Time at the test was started.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#827
+  # source://test-unit//lib/test/unit/testcase.rb#832
   def start_time; end
 
   # Called after every test method runs. Can be used to tear
@@ -3608,12 +3616,12 @@ class Test::Unit::TestCase
   # * my_teardown1
   # * teardown
   #
-  # source://test-unit//lib/test/unit/testcase.rb#761
+  # source://test-unit//lib/test/unit/testcase.rb#766
   def teardown; end
 
   # Overridden to return #name.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#814
+  # source://test-unit//lib/test/unit/testcase.rb#819
   def to_s; end
 
   # Returns the test is valid test. It is used in internal.
@@ -3625,16 +3633,16 @@ class Test::Unit::TestCase
 
   private
 
-  # source://test-unit//lib/test/unit/testcase.rb#912
+  # source://test-unit//lib/test/unit/testcase.rb#922
   def add_assertion; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#873
+  # source://test-unit//lib/test/unit/testcase.rb#883
   def current_result; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#900
+  # source://test-unit//lib/test/unit/testcase.rb#910
   def handle_exception(exception); end
 
-  # source://test-unit//lib/test/unit/testcase.rb#877
+  # source://test-unit//lib/test/unit/testcase.rb#887
   def run_test; end
 
   class << self
@@ -3941,61 +3949,73 @@ Test::Unit::TestCase::FINISHED = T.let(T.unsafe(nil), String)
 # source://test-unit//lib/test/unit/testcase.rb#122
 Test::Unit::TestCase::FINISHED_OBJECT = T.let(T.unsafe(nil), String)
 
-# source://test-unit//lib/test/unit/testcase.rb#916
+# source://test-unit//lib/test/unit/testcase.rb#926
 class Test::Unit::TestCase::InternalData
   # @return [InternalData] a new instance of InternalData
   #
-  # source://test-unit//lib/test/unit/testcase.rb#919
+  # source://test-unit//lib/test/unit/testcase.rb#930
   def initialize; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#936
+  # source://test-unit//lib/test/unit/testcase.rb#948
   def assign_test_data(label, data); end
 
   # Returns the value of attribute elapsed_time.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#917
+  # source://test-unit//lib/test/unit/testcase.rb#927
   def elapsed_time; end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#941
+  # source://test-unit//lib/test/unit/testcase.rb#953
   def have_test_data?; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#957
+  # source://test-unit//lib/test/unit/testcase.rb#969
   def interrupted; end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#932
+  # source://test-unit//lib/test/unit/testcase.rb#944
   def interrupted?; end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#928
+  # source://test-unit//lib/test/unit/testcase.rb#940
   def passed?; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#953
+  # source://test-unit//lib/test/unit/testcase.rb#965
   def problem_occurred; end
+
+  # Returns the value of attribute run_context.
+  #
+  # source://test-unit//lib/test/unit/testcase.rb#929
+  def run_context; end
+
+  # Sets the attribute run_context
+  #
+  # @param value the value to set the attribute run_context to.
+  #
+  # source://test-unit//lib/test/unit/testcase.rb#929
+  def run_context=(_arg0); end
 
   # Returns the value of attribute start_time.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#917
+  # source://test-unit//lib/test/unit/testcase.rb#927
   def start_time; end
 
   # Returns the value of attribute test_data.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#918
+  # source://test-unit//lib/test/unit/testcase.rb#928
   def test_data; end
 
   # Returns the value of attribute test_data_label.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#918
+  # source://test-unit//lib/test/unit/testcase.rb#928
   def test_data_label; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#949
+  # source://test-unit//lib/test/unit/testcase.rb#961
   def test_finished; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#945
+  # source://test-unit//lib/test/unit/testcase.rb#957
   def test_started; end
 end
 
@@ -4226,7 +4246,7 @@ class Test::Unit::TestResult
   # source://test-unit//lib/test/unit/testresult.rb#39
   def run_count; end
 
-  # Returnes a string that shows result status.
+  # Returns a string that shows result status.
   #
   # source://test-unit//lib/test/unit/testresult.rb#80
   def status; end
@@ -4421,6 +4441,19 @@ module Test::Unit::TestResultPendingSupport
   def pending_summary; end
 end
 
+# source://test-unit//lib/test/unit/test-run-context.rb#9
+class Test::Unit::TestRunContext
+  # @return [TestRunContext] a new instance of TestRunContext
+  #
+  # source://test-unit//lib/test/unit/test-run-context.rb#11
+  def initialize(runner_class); end
+
+  # Returns the value of attribute runner_class.
+  #
+  # source://test-unit//lib/test/unit/test-run-context.rb#10
+  def runner_class; end
+end
+
 # A collection of tests which can be #run.
 #
 # Note: It is easy to confuse a TestSuite instance with
@@ -4440,18 +4473,18 @@ class Test::Unit::TestSuite
 
   # Adds the test to the suite.
   #
-  # source://test-unit//lib/test/unit/testsuite.rb#64
+  # source://test-unit//lib/test/unit/testsuite.rb#68
   def <<(test); end
 
   # It's handy to be able to compare TestSuite instances.
   #
-  # source://test-unit//lib/test/unit/testsuite.rb#97
+  # source://test-unit//lib/test/unit/testsuite.rb#101
   def ==(other); end
 
-  # source://test-unit//lib/test/unit/testsuite.rb#69
+  # source://test-unit//lib/test/unit/testsuite.rb#73
   def delete(test); end
 
-  # source://test-unit//lib/test/unit/testsuite.rb#73
+  # source://test-unit//lib/test/unit/testsuite.rb#77
   def delete_tests(tests); end
 
   # Returns the value of attribute elapsed_time.
@@ -4461,7 +4494,7 @@ class Test::Unit::TestSuite
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testsuite.rb#86
+  # source://test-unit//lib/test/unit/testsuite.rb#90
   def empty?; end
 
   # Returns the value of attribute name.
@@ -4476,7 +4509,7 @@ class Test::Unit::TestSuite
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testsuite.rb#103
+  # source://test-unit//lib/test/unit/testsuite.rb#107
   def passed?; end
 
   # Test suite that has higher priority is ran prior to
@@ -4495,13 +4528,13 @@ class Test::Unit::TestSuite
   # TestSuite.
   #
   # source://test-unit//lib/test/unit/testsuite.rb#50
-  def run(result, runner_class: T.unsafe(nil), &progress_block); end
+  def run(result, run_context: T.unsafe(nil), &progress_block); end
 
   # Returns the rolled up number of tests in this suite;
   # i.e. if the suite contains other suites, it counts the
   # tests within those suites, not the suites themselves.
   #
-  # source://test-unit//lib/test/unit/testsuite.rb#80
+  # source://test-unit//lib/test/unit/testsuite.rb#84
   def size; end
 
   # Returns the value of attribute start_time.
@@ -4522,7 +4555,7 @@ class Test::Unit::TestSuite
   # Overridden to return the name given the suite at
   # creation.
   #
-  # source://test-unit//lib/test/unit/testsuite.rb#92
+  # source://test-unit//lib/test/unit/testsuite.rb#96
   def to_s; end
 end
 
@@ -4578,59 +4611,81 @@ class Test::Unit::TestSuiteCreator
   end
 end
 
-# source://test-unit//lib/test/unit/test-suite-runner.rb#13
+# source://test-unit//lib/test/unit/test-suite-runner.rb#15
 class Test::Unit::TestSuiteRunner
   # @return [TestSuiteRunner] a new instance of TestSuiteRunner
   #
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#29
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#31
   def initialize(test_suite); end
 
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#33
-  def run(result, &progress_block); end
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#35
+  def run(result, run_context: T.unsafe(nil), &progress_block); end
 
   private
 
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#116
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#118
   def handle_exception(exception, result); end
 
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#106
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#108
   def run_shutdown(result); end
 
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#48
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#50
   def run_startup(result); end
 
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#64
-  def run_test(test, result); end
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#66
+  def run_test(test, result, run_context: T.unsafe(nil)); end
 
-  # source://test-unit//lib/test/unit/test-suite-runner.rb#58
-  def run_tests(result, &progress_block); end
+  # source://test-unit//lib/test/unit/test-suite-runner.rb#60
+  def run_tests(result, run_context: T.unsafe(nil), &progress_block); end
 
   class << self
-    # source://test-unit//lib/test/unit/test-suite-runner.rb#20
+    # source://test-unit//lib/test/unit/test-suite-runner.rb#22
     def n_workers; end
 
-    # source://test-unit//lib/test/unit/test-suite-runner.rb#24
+    # source://test-unit//lib/test/unit/test-suite-runner.rb#26
     def n_workers=(n); end
 
-    # source://test-unit//lib/test/unit/test-suite-runner.rb#16
+    # @yield [TestRunContext.new(self)]
+    #
+    # source://test-unit//lib/test/unit/test-suite-runner.rb#18
     def run_all_tests; end
   end
 end
 
-# source://test-unit//lib/test/unit/test-suite-thread-runner.rb#12
+# source://test-unit//lib/test/unit/test-suite-thread-runner.rb#13
 class Test::Unit::TestSuiteThreadRunner < ::Test::Unit::TestSuiteRunner
+  # source://test-unit//lib/test/unit/test-suite-thread-runner.rb#51
+  def run(result, run_context: T.unsafe(nil), &progress_block); end
+
   private
 
-  # source://test-unit//lib/test/unit/test-suite-thread-runner.rb#53
-  def run_tests(result, &progress_block); end
+  # source://test-unit//lib/test/unit/test-suite-thread-runner.rb#68
+  def run_tests(result, run_context: T.unsafe(nil), &progress_block); end
 
   class << self
-    # source://test-unit//lib/test/unit/test-suite-thread-runner.rb#19
-    def run_all_tests; end
-
+    # @yield [TestThreadRunContext.new(self, queue, shutdowns)]
+    #
     # source://test-unit//lib/test/unit/test-suite-thread-runner.rb#15
-    def task_queue; end
+    def run_all_tests; end
   end
+end
+
+# source://test-unit//lib/test/unit/test-thread-run-context.rb#11
+class Test::Unit::TestThreadRunContext < ::Test::Unit::TestRunContext
+  # @return [TestThreadRunContext] a new instance of TestThreadRunContext
+  #
+  # source://test-unit//lib/test/unit/test-thread-run-context.rb#13
+  def initialize(runner_class, queue, shutdowns); end
+
+  # Returns the value of attribute queue.
+  #
+  # source://test-unit//lib/test/unit/test-thread-run-context.rb#12
+  def queue; end
+
+  # Returns the value of attribute shutdowns.
+  #
+  # source://test-unit//lib/test/unit/test-thread-run-context.rb#12
+  def shutdowns; end
 end
 
 # source://test-unit//lib/test/unit/ui/testrunnerutilities.rb#9
@@ -4973,7 +5028,7 @@ class Test::Unit::UI::TestRunnerMediator
   #   https://github.com/test-unit/test-unit/issues/38
   #
   # source://test-unit//lib/test/unit/ui/testrunnermediator.rb#68
-  def run_suite(result = T.unsafe(nil)); end
+  def run_suite(result = T.unsafe(nil), run_context = T.unsafe(nil)); end
 
   private
 

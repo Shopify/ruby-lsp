@@ -429,9 +429,7 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("formatting", async () => {
-    const text = ["# frozen_string_literal: true", "", "def foo", "end"]
-      .join("\n")
-      .trim();
+    const text = ["  def foo", "end"].join("\n").trim();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -449,13 +447,7 @@ suite("Client", () => {
       },
     );
 
-    const expected = [
-      "# typed: strict",
-      "# frozen_string_literal: true",
-      "",
-      "def foo",
-      "end",
-    ]
+    const expected = ["# frozen_string_literal: true", "", "def foo", "end"]
       .join("\n")
       .trim();
 
