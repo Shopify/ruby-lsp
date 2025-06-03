@@ -954,10 +954,17 @@ module RubyIndexer
       index(<<~RUBY)
         class Foo
           attr :bar
+          attr :baz, true
+          attr :qux, false
         end
       RUBY
 
       assert_entry("bar", Entry::Accessor, "/fake/path/foo.rb:1-8:1-11")
+      assert_no_entry("bar=")
+      assert_entry("baz", Entry::Accessor, "/fake/path/foo.rb:2-8:2-11")
+      assert_entry("baz=", Entry::Accessor, "/fake/path/foo.rb:2-8:2-11")
+      assert_entry("qux", Entry::Accessor, "/fake/path/foo.rb:3-8:3-11")
+      assert_no_entry("qux=")
     end
 
     private

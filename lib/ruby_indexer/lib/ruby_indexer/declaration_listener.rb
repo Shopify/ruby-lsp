@@ -254,12 +254,15 @@ module RubyIndexer
       case message
       when :private_constant
         handle_private_constant(node)
-      when :attr_reader, :attr
+      when :attr_reader
         handle_attribute(node, reader: true, writer: false)
       when :attr_writer
         handle_attribute(node, reader: false, writer: true)
       when :attr_accessor
         handle_attribute(node, reader: true, writer: true)
+      when :attr
+        has_writer = node.arguments&.arguments&.last&.is_a?(Prism::TrueNode) || false
+        handle_attribute(node, reader: true, writer: has_writer)
       when :alias_method
         handle_alias_method(node)
       when :include, :prepend, :extend
