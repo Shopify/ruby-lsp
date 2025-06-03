@@ -424,6 +424,9 @@ export default class Client extends LanguageClient implements ClientInterface {
             {
               appType: "server",
               appVersion: this.serverVersion,
+              workspace: new vscode.TelemetryTrustedValue(
+                path.basename(this.workingDirectory),
+              ),
             },
           );
         } else if (event.type === "data" && this.validServerTelemetry(event)) {
