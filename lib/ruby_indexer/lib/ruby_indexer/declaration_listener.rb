@@ -726,6 +726,9 @@ module RubyIndexer
         comment = @comments_by_line[line]
         break unless comment
 
+        # a trailing comment from a previous line is not a comment for this node
+        break if comment.trailing?
+
         comment_content = comment.location.slice
 
         # invalid encodings would raise an "invalid byte sequence" exception

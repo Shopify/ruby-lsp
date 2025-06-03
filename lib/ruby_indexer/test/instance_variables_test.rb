@@ -236,5 +236,29 @@ module RubyIndexer
       assert_instance_of(Entry::SingletonClass, owner)
       assert_equal("Foo::<Class:Foo>", owner&.name)
     end
+
+    def test_class_instance_variable_comments
+      index(<<~RUBY)
+          class Foo
+            # Documentation for @a
+            @a = "Hello" #: String
+            @b = "World" # trailing comment
+            @c = "!"
+          end
+        end
+      RUBY
+
+      assert_entry("@a", Entry::InstanceVariable, "/fake/path/foo.rb:2-4:2-6")
+      entry = @index["@a"]&.first #: as Entry::InstanceVariable
+      assert_equal("Documentation for @a", entry.comments)
+
+      assert_entry("@b", Entry::InstanceVariable, "/fake/path/foo.rb:3-4:3-6")
+      entry = @index["@b"]&.first #: as Entry::InstanceVariable
+      assert_empty(entry.comments)
+
+      assert_entry("@c", Entry::InstanceVariable, "/fake/path/foo.rb:4-4:4-6")
+      entry = @index["@c"]&.first #: as Entry::InstanceVariable
+      assert_empty(entry.comments)
+    end
   end
 end
