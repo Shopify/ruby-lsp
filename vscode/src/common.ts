@@ -34,6 +34,13 @@ export enum Command {
   ShowOutput = "rubyLsp.showOutput",
   MigrateLaunchConfiguration = "rubyLsp.migrateLaunchConfiguration",
   GoToRelevantFile = "rubyLsp.goToRelevantFile",
+  StartRepl = "rubyLsp.startREPL",
+  ExecInRepl = "rubyLsp.execInREPL",
+  InterruptRepl = "rubyLsp.interruptREPL",
+  ExecuteScratchPadLine = "rubyLsp.executeScratchPadLine",
+  ExecuteScratchPadSelection = "rubyLsp.executeScratchPadSelection",
+  CreateIrbTerminal = "rubyLsp.createIrbTerminal",
+  CreateRailsConsoleTerminal = "rubyLsp.createRailsConsoleTerminal",
 }
 
 export interface RubyInterface {
