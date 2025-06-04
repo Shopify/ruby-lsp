@@ -176,7 +176,8 @@ module RubyLsp
       def initialize(source, encoding)
         @current_line = 0 #: Integer
         @pos = 0 #: Integer
-        @source = source.codepoints #: Array[Integer]
+        @source = encoding == Encoding::UTF_8 ? source.bytes : source.codepoints #: Array[Integer]
+        @text = source
         @encoding = encoding
       end
 
@@ -200,7 +201,14 @@ module RubyLsp
 
         # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
         # need to adjust for surrogate pairs
-        requested_position = @pos + position[:character]
+        requested_position = if @encoding == Encoding::UTF_8
+          character_offset = @text.byteslice(@pos, position[:character]) #: as !nil
+            .length
+          @pos + character_offset
+
+        else
+          @pos + position[:character]
+        end
 
         if @encoding == Encoding::UTF_16LE
           requested_position -= utf_16_character_position_correction(@pos, requested_position)

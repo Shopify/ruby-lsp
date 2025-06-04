@@ -59,6 +59,20 @@ class RubyDocumentTest < Minitest::Test
     RUBY
   end
 
+  def test_multibyte_character_offsets_are_bytes_in_utf8
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      bá
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 3 }, end: { line: 0, character: 3 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bár
+    RUBY
+  end
+
   def test_deletion_full_node
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
