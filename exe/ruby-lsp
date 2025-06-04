@@ -55,7 +55,7 @@ parser = OptionParser.new do |opts|
       base_command << " _#{env["BUNDLER_VERSION"]}_"
     end
 
-    exit exec(env, "#{base_command} update ruby-lsp".strip)
+    exit(exec(env, "#{base_command} update ruby-lsp".strip))
   end
 
   opts.on("-h", "--help", "Print this help") do

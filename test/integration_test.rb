@@ -363,7 +363,7 @@ class IntegrationTest < Minitest::Test
           system(File.join(@root, "exe", "ruby-lsp"), "--update-server")
         end
 
-        assert_includes stdout, "Executing server update..."
+        assert_includes(stdout, "Executing server update...")
       end
     end
   end
