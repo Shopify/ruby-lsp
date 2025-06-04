@@ -59,6 +59,48 @@ class RubyDocumentTest < Minitest::Test
     RUBY
   end
 
+  def test_multibyte_character_offsets_are_bytes_in_utf8
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      bá
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 3 }, end: { line: 0, character: 3 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bár
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_for_3_byte_character
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      bあ
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 4 }, end: { line: 0, character: 4 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bあr
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_for_4_byte_character
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      b🙂
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 0, character: 5 }, end: { line: 0, character: 5 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      b🙂r
+    RUBY
+  end
+
   def test_deletion_full_node
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       def foo
@@ -272,55 +314,6 @@ class RubyDocumentTest < Minitest::Test
       puts 'hello'
 
       puts 'hello'
-    RUBY
-  end
-
-  def test_pushing_edits_to_document_with_unicode
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
-      chars = ["億"]
-    RUBY
-
-    # Write puts 'a' in incremental edits
-    document.push_edits(
-      [{ range: { start: { line: 0, character: 13 }, end: { line: 0, character: 13 } }, text: "\n" }],
-      version: 2,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, text: "p" }],
-      version: 3,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 1 }, end: { line: 1, character: 1 } }, text: "u" }],
-      version: 4,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "t" }],
-      version: 5,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "s" }],
-      version: 6,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: " " }],
-      version: 7,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "'" }],
-      version: 8,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 6 }, end: { line: 1, character: 6 } }, text: "a" }],
-      version: 9,
-    )
-    document.push_edits(
-      [{ range: { start: { line: 1, character: 7 }, end: { line: 1, character: 7 } }, text: "'" }],
-      version: 10,
-    )
-
-    assert_equal(<<~RUBY, document.source)
-      chars = ["億"]
-      puts 'a'
     RUBY
   end
 
@@ -758,29 +751,6 @@ class RubyDocumentTest < Minitest::Test
     assert_same(document.cache_get("textDocument/codeLens"), RubyLsp::Document::EMPTY_CACHE)
     document.cache_set("textDocument/codeLens", nil)
     assert_nil(document.cache_get("textDocument/codeLens"))
-  end
-
-  def test_locating_a_non_existing_location_raises
-    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
-      class Foo
-      end
-    RUBY
-
-    # Exactly at the last character doesn't raise
-    document.locate_node({ line: 1, character: 2 })
-
-    # Anything beyond does
-    error = assert_raises(RubyLsp::Document::LocationNotFoundError) do
-      document.locate_node({ line: 3, character: 2 })
-    end
-
-    assert_match(/Requested position: {(:)?line[\s:=>]+3, (:)?character[\s:=>]+2}/, error.message)
-    assert_match(<<~MESSAGE.chomp, error.message)
-      Source:
-
-      class Foo
-      end
-    MESSAGE
   end
 
   def test_document_tracks_latest_edit_context

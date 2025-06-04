@@ -7,8 +7,6 @@ module RubyLsp
   class Document
     extend T::Generic
 
-    class LocationNotFoundError < StandardError; end
-
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code
     MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
@@ -176,7 +174,7 @@ module RubyLsp
       def initialize(source, encoding)
         @current_line = 0 #: Integer
         @pos = 0 #: Integer
-        @source = source.codepoints #: Array[Integer]
+        @bytes_or_codepoints = encoding == Encoding::UTF_8 ? source.bytes : source.codepoints #: Array[Integer]
         @encoding = encoding
       end
 
@@ -185,23 +183,40 @@ module RubyLsp
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]
-          until LINE_BREAK == @source[@pos]
-            @pos += 1
-
-            if @pos >= @source.length
-              # Pack the code points back into the original string to provide context in the error message
-              raise LocationNotFoundError, "Requested position: #{position}\nSource:\n\n#{@source.pack("U*")}"
-            end
-          end
-
+          @pos += 1 until LINE_BREAK == @bytes_or_codepoints[@pos]
           @pos += 1
           @current_line += 1
         end
 
+        # For UTF-8, the code unit length is the same as bytes, but we want to return the character index
+        requested_position = if @encoding == Encoding::UTF_8
+          character_offset = 0
+          i = @pos
+
+          # Each group of bytes is a character. We advance based on the number of bytes to count how many full
+          # characters we have in the requested offset
+          while i < @pos + position[:character] && i < @bytes_or_codepoints.length
+            byte = @bytes_or_codepoints[i] #: as !nil
+            i += if byte < 0x80 # 1-byte character
+              1
+            elsif byte < 0xE0 # 2-byte character
+              2
+            elsif byte < 0xF0 # 3-byte character
+              3
+            else # 4-byte character
+              4
+            end
+
+            character_offset += 1
+          end
+
+          @pos + character_offset
+        else
+          @pos + position[:character]
+        end
+
         # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
         # need to adjust for surrogate pairs
-        requested_position = @pos + position[:character]
-
         if @encoding == Encoding::UTF_16LE
           requested_position -= utf_16_character_position_correction(@pos, requested_position)
         end
@@ -216,7 +231,7 @@ module RubyLsp
         utf16_unicode_correction = 0
 
         until current_position == requested_position
-          codepoint = @source[current_position]
+          codepoint = @bytes_or_codepoints[current_position]
           utf16_unicode_correction += 1 if codepoint && codepoint > SURROGATE_PAIR_START
 
           current_position += 1
