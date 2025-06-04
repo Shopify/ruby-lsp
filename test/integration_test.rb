@@ -333,6 +333,41 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_update_server_command
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            stringio (3.1.7)
+
+        PLATFORMS
+          arm64-darwin-23
+          ruby
+
+        DEPENDENCIES
+          stringio
+
+        BUNDLED WITH
+          2.5.7
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+      Bundler.with_unbundled_env do
+        stdout, _ = capture_subprocess_io do
+          system(File.join(@root, "exe", "ruby-lsp"), "--update-server")
+        end
+
+        assert_includes stdout, "Executing server update..."
+      end
+    end
+  end
+
   private
 
   def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})

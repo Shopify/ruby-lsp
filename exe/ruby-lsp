@@ -37,6 +37,27 @@ parser = OptionParser.new do |opts|
     options[:launcher] = true
   end
 
+  opts.on("--update-server", "Update the Ruby LSP server") do
+    puts("Ruby LSP> Executing server update...")
+    require_relative "../lib/ruby_lsp/setup_bundler"
+
+    begin
+      env = RubyLsp::SetupBundler.new(Dir.pwd, **options).setup!
+    rescue RubyLsp::SetupBundler::BundleNotLocked
+      warn("Project contains a Gemfile, but no Gemfile.lock. Run `bundle install` to lock gems")
+      exit(78)
+    end
+
+    bundler_path = File.join(Gem.default_bindir, "bundle")
+    base_command = (!Gem.win_platform? && File.exist?(bundler_path) ? "#{Gem.ruby} #{bundler_path}" : "bundle").dup
+
+    if env["BUNDLER_VERSION"]
+      base_command << " _#{env["BUNDLER_VERSION"]}_"
+    end
+
+    exit exec(env, "#{base_command} update ruby-lsp".strip)
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
