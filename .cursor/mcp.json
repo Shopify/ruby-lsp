@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "rubyMcp": {
+      "command": "./.ruby-lsp/ruby-mcp-bridge"
+    }
+  }
+}
