@@ -34,7 +34,7 @@ module RubyLsp
         char_position, _ = @document.find_index_by_position(@position)
 
         node_context = RubyDocument.locate(
-          @document.parse_result.value,
+          @document.ast,
           char_position,
           node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
           code_units_cache: @document.code_units_cache,
@@ -136,25 +136,27 @@ module RubyLsp
           next if @store.key?(uri)
 
           parse_result = Prism.parse_file(path)
-          edits = collect_changes(target, parse_result, name, uri)
+          edits = collect_changes(target, parse_result.value, name, uri)
           changes[uri.to_s] = edits unless edits.empty?
         rescue Errno::EISDIR, Errno::ENOENT
           # If `path` is a directory, just ignore it and continue. If the file doesn't exist, then we also ignore it.
         end
 
         @store.each do |uri, document|
-          edits = collect_changes(target, document.parse_result, name, document.uri)
+          next unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
+
+          edits = collect_changes(target, document.ast, name, document.uri)
           changes[uri] = edits unless edits.empty?
         end
 
         changes
       end
 
-      #: (RubyIndexer::ReferenceFinder::Target target, Prism::ParseResult parse_result, String name, URI::Generic uri) -> Array[Interface::TextEdit]
-      def collect_changes(target, parse_result, name, uri)
+      #: (RubyIndexer::ReferenceFinder::Target target, Prism::Node ast, String name, URI::Generic uri) -> Array[Interface::TextEdit]
+      def collect_changes(target, ast, name, uri)
         dispatcher = Prism::Dispatcher.new
         finder = RubyIndexer::ReferenceFinder.new(target, @global_state.index, dispatcher, uri)
-        dispatcher.visit(parse_result.value)
+        dispatcher.visit(ast)
 
         finder.references.map do |reference|
           adjust_reference_for_edit(name, reference)

@@ -22,7 +22,7 @@ module RubyLsp
         char_position, _ = @document.find_index_by_position(@position)
 
         node_context = RubyDocument.locate(
-          @document.parse_result.value,
+          @document.ast,
           char_position,
           node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
           code_units_cache: @document.code_units_cache,
