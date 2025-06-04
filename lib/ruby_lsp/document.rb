@@ -7,8 +7,6 @@ module RubyLsp
   class Document
     extend T::Generic
 
-    class LocationNotFoundError < StandardError; end
-
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code
     MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
@@ -186,15 +184,7 @@ module RubyLsp
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]
-          until LINE_BREAK == @source[@pos]
-            @pos += 1
-
-            if @pos >= @source.length
-              # Pack the code points back into the original string to provide context in the error message
-              raise LocationNotFoundError, "Requested position: #{position}\nSource:\n\n#{@source.pack("U*")}"
-            end
-          end
-
+          @pos += 1 until LINE_BREAK == @source[@pos]
           @pos += 1
           @current_line += 1
         end
