@@ -174,8 +174,7 @@ module RubyLsp
       def initialize(source, encoding)
         @current_line = 0 #: Integer
         @pos = 0 #: Integer
-        @source = encoding == Encoding::UTF_8 ? source.bytes : source.codepoints #: Array[Integer]
-        @text = source
+        @bytes_or_codepoints = encoding == Encoding::UTF_8 ? source.bytes : source.codepoints #: Array[Integer]
         @encoding = encoding
       end
 
@@ -184,22 +183,40 @@ module RubyLsp
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]
-          @pos += 1 until LINE_BREAK == @source[@pos]
+          @pos += 1 until LINE_BREAK == @bytes_or_codepoints[@pos]
           @pos += 1
           @current_line += 1
         end
 
-        # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
-        # need to adjust for surrogate pairs
+        # For UTF-8, the code unit length is the same as bytes, but we want to return the character index
         requested_position = if @encoding == Encoding::UTF_8
-          character_offset = @text.byteslice(@pos, position[:character]) #: as !nil
-            .length
-          @pos + character_offset
+          character_offset = 0
+          i = @pos
 
+          # Each group of bytes is a character. We advance based on the number of bytes to count how many full
+          # characters we have in the requested offset
+          while i < @pos + position[:character] && i < @bytes_or_codepoints.length
+            byte = @bytes_or_codepoints[i] #: as !nil
+            i += if byte < 0x80 # 1-byte character
+              1
+            elsif byte < 0xE0 # 2-byte character
+              2
+            elsif byte < 0xF0 # 3-byte character
+              3
+            else # 4-byte character
+              4
+            end
+
+            character_offset += 1
+          end
+
+          @pos + character_offset
         else
           @pos + position[:character]
         end
 
+        # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
+        # need to adjust for surrogate pairs
         if @encoding == Encoding::UTF_16LE
           requested_position -= utf_16_character_position_correction(@pos, requested_position)
         end
@@ -214,7 +231,7 @@ module RubyLsp
         utf16_unicode_correction = 0
 
         until current_position == requested_position
-          codepoint = @source[current_position]
+          codepoint = @bytes_or_codepoints[current_position]
           utf16_unicode_correction += 1 if codepoint && codepoint > SURROGATE_PAIR_START
 
           current_position += 1
