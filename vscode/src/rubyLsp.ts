@@ -478,6 +478,12 @@ export class RubyLsp {
         },
       ),
       vscode.commands.registerCommand(
+        Command.ProfileTest,
+        (path, name, _command) => {
+          this.testController.runViaCommand(path, name, Mode.Profile)
+        },
+      ),
+      vscode.commands.registerCommand(
         Command.RunTask,
         async (command: string) => {
           let workspace = this.currentActiveWorkspace();

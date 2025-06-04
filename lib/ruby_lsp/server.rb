@@ -1520,6 +1520,9 @@ module RubyLsp
           Interface::Command.new(title: "▶ Run in terminal", command: "rubyLsp.runTestInTerminal", arguments: args)
       when "debug_test"
         code_lens[:command] = Interface::Command.new(title: "⚙ Debug", command: "rubyLsp.debugTest", arguments: args)
+      when "profile_test"
+        code_lens[:command] =
+          Interface::Command.new(title: "⏱ Profile", command: "rubyLsp.profileTest", arguments: args)
       end
 
       send_message(Result.new(
