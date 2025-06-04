@@ -153,14 +153,13 @@ module RubyLsp
 
       #: (ResponseBuilders::TestCollection, GlobalState, Prism::Dispatcher, URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
-        super
+        super(response_builder, global_state, uri)
 
         @framework = :minitest #: Symbol
         @parent_stack = [@response_builder] #: Array[(Requests::Support::TestItem | ResponseBuilders::TestCollection)?]
 
-        dispatcher.register(
-          self,
-          # Common handlers registered in parent class
+        register_events(
+          dispatcher,
           :on_class_node_enter,
           :on_def_node_enter,
           :on_call_node_enter,
@@ -169,7 +168,7 @@ module RubyLsp
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_enter(node)
+      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         with_test_ancestor_tracking(node) do |name, ancestors|
           @framework = :test_unit if ancestors.include?("Test::Unit::TestCase")
 
@@ -210,7 +209,7 @@ module RubyLsp
       end
 
       #: (Prism::DefNode node) -> void
-      def on_def_node_enter(node)
+      def on_def_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         return if @visibility_stack.last != :public
 
         name = node.name.to_s
@@ -232,7 +231,7 @@ module RubyLsp
       end
 
       #: (Prism::CallNode node) -> void
-      def on_call_node_enter(node)
+      def on_call_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         name = node.name
         return unless ACCESS_MODIFIERS.include?(name)
 
@@ -240,7 +239,7 @@ module RubyLsp
       end
 
       #: (Prism::CallNode node) -> void
-      def on_call_node_leave(node)
+      def on_call_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         name = node.name
         return unless ACCESS_MODIFIERS.include?(name)
         return unless node.arguments&.arguments

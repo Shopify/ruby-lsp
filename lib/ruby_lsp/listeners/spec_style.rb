@@ -19,21 +19,20 @@ module RubyLsp
 
       #: (ResponseBuilders::TestCollection, GlobalState, Prism::Dispatcher, URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)
-        super
+        super(response_builder, global_state, uri)
 
         @spec_group_id_stack = [] #: Array[Group?]
 
-        dispatcher.register(
-          self,
-          # Common handlers registered in parent class
+        register_events(
+          dispatcher,
           :on_class_node_enter,
-          :on_call_node_enter, # e.g. `describe` or `it`
+          :on_call_node_enter,
           :on_call_node_leave,
         )
       end
 
       #: (Prism::ClassNode) -> void
-      def on_class_node_enter(node)
+      def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         with_test_ancestor_tracking(node) do |name, ancestors|
           @spec_group_id_stack << (ancestors.include?("Minitest::Spec") ? ClassGroup.new(name) : nil)
         end
@@ -58,7 +57,7 @@ module RubyLsp
       end
 
       #: (Prism::CallNode) -> void
-      def on_call_node_enter(node)
+      def on_call_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         return unless in_spec_context?
 
         case node.name
@@ -70,7 +69,7 @@ module RubyLsp
       end
 
       #: (Prism::CallNode) -> void
-      def on_call_node_leave(node)
+      def on_call_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         return unless node.name == :describe && !node.receiver
 
         current_group = @spec_group_id_stack.last

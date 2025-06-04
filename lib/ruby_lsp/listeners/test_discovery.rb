@@ -9,24 +9,17 @@ module RubyLsp
 
       DYNAMIC_REFERENCE_MARKER = "<dynamic_reference>"
 
-      #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, Prism::Dispatcher dispatcher, URI::Generic uri) -> void
-      def initialize(response_builder, global_state, dispatcher, uri)
+      #: (ResponseBuilders::TestCollection response_builder, GlobalState global_state, URI::Generic uri) -> void
+      def initialize(response_builder, global_state, uri)
         @response_builder = response_builder
         @uri = uri
         @index = global_state.index #: RubyIndexer::Index
         @visibility_stack = [:public] #: Array[Symbol]
         @nesting = [] #: Array[String]
-
-        dispatcher.register(
-          self,
-          :on_class_node_leave,
-          :on_module_node_enter,
-          :on_module_node_leave,
-        )
       end
 
       #: (Prism::ModuleNode node) -> void
-      def on_module_node_enter(node)
+      def on_module_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack << :public
 
         name = constant_name(node.constant_path)
@@ -36,18 +29,30 @@ module RubyLsp
       end
 
       #: (Prism::ModuleNode node) -> void
-      def on_module_node_leave(node)
+      def on_module_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack.pop
         @nesting.pop
       end
 
       #: (Prism::ClassNode node) -> void
-      def on_class_node_leave(node)
+      def on_class_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @visibility_stack.pop
         @nesting.pop
       end
 
       private
+
+      #: (Prism::Dispatcher, *Symbol) -> void
+      def register_events(dispatcher, *events)
+        unique_events = events.dup.push(
+          :on_class_node_leave,
+          :on_module_node_enter,
+          :on_module_node_leave,
+        )
+
+        unique_events.uniq!
+        dispatcher.register(self, *unique_events)
+      end
 
       #: (String? name) -> String
       def calc_fully_qualified_name(name)
