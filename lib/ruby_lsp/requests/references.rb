@@ -38,6 +38,13 @@ module RubyLsp
             Prism::InstanceVariableReadNode,
             Prism::InstanceVariableTargetNode,
             Prism::InstanceVariableWriteNode,
+            Prism::LocalVariableAndWriteNode,
+            Prism::LocalVariableOperatorWriteNode,
+            Prism::LocalVariableOrWriteNode,
+            Prism::LocalVariableReadNode,
+            Prism::LocalVariableTargetNode,
+            Prism::LocalVariableWriteNode,
+            Prism::RequiredParameterNode,
             Prism::CallNode,
             Prism::DefNode,
           ],
@@ -60,6 +67,12 @@ module RubyLsp
         reference_target = create_reference_target(target, node_context)
         return @locations unless reference_target
 
+        # for LocalVariableTarget, we only need to collect references from the current document
+        if reference_target.is_a?(RubyIndexer::ReferenceFinder::LocalVariableTarget)
+          collect_references(reference_target, parent, @document.uri) if parent
+          return @locations
+        end
+
         Dir.glob(File.join(@global_state.workspace_path, "**/*.rb")).each do |path|
           uri = URI::Generic.from_path(path: path)
           # If the document is being managed by the client, then we should use whatever is present in the store instead
@@ -67,13 +80,13 @@ module RubyLsp
           next if @store.key?(uri)
 
           parse_result = Prism.parse_file(path)
-          collect_references(reference_target, parse_result, uri)
+          collect_references(reference_target, parse_result.value, uri)
         rescue Errno::EISDIR, Errno::ENOENT
           # If `path` is a directory, just ignore it and continue. If the file doesn't exist, then we also ignore it.
         end
 
         @store.each do |_uri, document|
-          collect_references(reference_target, document.parse_result, document.uri)
+          collect_references(reference_target, document.parse_result.value, document.uri)
         end
 
         @locations
@@ -81,7 +94,7 @@ module RubyLsp
 
       private
 
-      #: ((Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode) target_node, NodeContext node_context) -> RubyIndexer::ReferenceFinder::Target?
+      #: ((Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::LocalVariableAndWriteNode | Prism::LocalVariableOperatorWriteNode | Prism::LocalVariableOrWriteNode | Prism::LocalVariableReadNode | Prism::LocalVariableTargetNode | Prism::LocalVariableWriteNode | Prism::RequiredParameterNode | Prism::CallNode | Prism::DefNode) target_node, NodeContext node_context) -> RubyIndexer::ReferenceFinder::Target?
       def create_reference_target(target_node, node_context)
         case target_node
         when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
@@ -106,13 +119,23 @@ module RubyLsp
 
           ancestors = @global_state.index.linearized_ancestors_of(receiver_type.name)
           RubyIndexer::ReferenceFinder::InstanceVariableTarget.new(target_node.name.to_s, ancestors)
+        when
+          Prism::LocalVariableAndWriteNode,
+          Prism::LocalVariableOperatorWriteNode,
+          Prism::LocalVariableOrWriteNode,
+          Prism::LocalVariableReadNode,
+          Prism::LocalVariableTargetNode,
+          Prism::LocalVariableWriteNode
+          RubyIndexer::ReferenceFinder::LocalVariableTarget.new(target_node.name.to_s)
+        when Prism::RequiredParameterNode
+          RubyIndexer::ReferenceFinder::LocalVariableTarget.new(target_node.name.to_s)
         when Prism::CallNode, Prism::DefNode
           RubyIndexer::ReferenceFinder::MethodTarget.new(target_node.name.to_s)
         end
       end
 
-      #: (RubyIndexer::ReferenceFinder::Target target, Prism::ParseResult parse_result, URI::Generic uri) -> void
-      def collect_references(target, parse_result, uri)
+      #: (RubyIndexer::ReferenceFinder::Target target, Prism::Node node, URI::Generic uri) -> void
+      def collect_references(target, node, uri)
         dispatcher = Prism::Dispatcher.new
         finder = RubyIndexer::ReferenceFinder.new(
           target,
@@ -121,7 +144,7 @@ module RubyLsp
           uri,
           include_declarations: @params.dig(:context, :includeDeclaration) || true,
         )
-        dispatcher.visit(parse_result.value)
+        dispatcher.visit(node)
 
         finder.references.each do |reference|
           @locations << Interface::Location.new(
