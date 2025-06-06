@@ -929,26 +929,44 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_for_keywords
-    source = <<~RUBY
-      def foo
-        yield
+    test_cases = {
+      "yield" => {
+        source: <<~RUBY,
+          def foo
+            yield
+          end
+        RUBY
+        position: { line: 1, character: 2 },
+      },
+      "break" => {
+        source: <<~RUBY,
+          while true
+            break
+          end
+        RUBY
+        position: { line: 1, character: 2 },
+      },
+    }
+
+    test_cases.each do |keyword, config|
+      with_server(config[:source]) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: {
+            textDocument: { uri: uri },
+            position: config[:position],
+          },
+        )
+
+        contents = server.pop_response.response.contents.value
+        assert_match("```ruby\n#{keyword}\n```", contents)
+        assert_match(
+          RubyLsp::KEYWORD_DOCS[keyword] || "No documentation found for #{keyword}",
+          contents,
+        )
+        assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/#{keyword}.md)", contents)
       end
-    RUBY
-
-    with_server(source) do |server, uri|
-      server.process_message(
-        id: 1,
-        method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { character: 2, line: 1 } },
-      )
-
-      contents = server.pop_response.response.contents.value
-      assert_match("```ruby\nyield\n```", contents)
-      assert_match(
-        RubyLsp::KEYWORD_DOCS["yield"], #: as !nil
-        contents,
-      )
-      assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
     end
   end
 
