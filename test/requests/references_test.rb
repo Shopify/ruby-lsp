@@ -28,6 +28,9 @@ class ReferencesTest < Minitest::Test
       global_state: global_state,
     )
 
+    # In addition to glob files from the workspace, we also want to test references collection from the store
+    store.set(uri: URI::Generic.from_path(path: path), source: source, version: 1, language_id: :ruby)
+
     RubyLsp::Requests::References.new(
       global_state,
       store,

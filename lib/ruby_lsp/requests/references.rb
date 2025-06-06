@@ -66,7 +66,7 @@ module RubyLsp
           # of reading from disk
           next if @store.key?(uri)
 
-          parse_result = Prism.parse_file(path)
+          parse_result = Prism.parse_lex_file(path)
           collect_references(reference_target, parse_result, uri)
         rescue Errno::EISDIR, Errno::ENOENT
           # If `path` is a directory, just ignore it and continue. If the file doesn't exist, then we also ignore it.
@@ -111,7 +111,7 @@ module RubyLsp
         end
       end
 
-      #: (RubyIndexer::ReferenceFinder::Target target, Prism::ParseResult parse_result, URI::Generic uri) -> void
+      #: (RubyIndexer::ReferenceFinder::Target target, Prism::LexResult parse_result, URI::Generic uri) -> void
       def collect_references(target, parse_result, uri)
         dispatcher = Prism::Dispatcher.new
         finder = RubyIndexer::ReferenceFinder.new(
@@ -121,7 +121,7 @@ module RubyLsp
           uri,
           include_declarations: @params.dig(:context, :includeDeclaration) || true,
         )
-        dispatcher.visit(parse_result.value)
+        dispatcher.visit(parse_result.value.first)
 
         finder.references.each do |reference|
           @locations << Interface::Location.new(
