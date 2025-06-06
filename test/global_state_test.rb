@@ -199,6 +199,68 @@ module RubyLsp
       assert_predicate(state, :has_type_checker)
     end
 
+    def test_type_checker_integration_defaults_to_defer
+      state = GlobalState.new
+
+      Bundler.locked_gems.stubs(dependencies: {})
+      stub_all_dependencies("sorbet-static")
+      state.apply_options(
+        {
+          initializationOptions: { featuresConfiguration: { typeCheckerIntegration: "defer" } },
+        },
+      )
+
+      assert_predicate(state, :has_type_checker)
+    end
+
+    def test_type_checker_integration_can_be_set_to_bypass
+      state = GlobalState.new
+
+      Bundler.locked_gems.stubs(dependencies: {})
+      stub_all_dependencies("sorbet-static")
+      state.apply_options(
+        {
+          initializationOptions: { featuresConfiguration: { typeCheckerIntegration: "bypass" } },
+        },
+      )
+
+      refute_predicate(state, :has_type_checker)
+    end
+
+    def test_type_checker_integration_handles_misconfiguration_gracefully
+      state = GlobalState.new
+
+      Bundler.locked_gems.stubs(dependencies: {})
+      stub_all_dependencies("sorbet-static")
+      notifications = state.apply_options(
+        {
+          initializationOptions: { featuresConfiguration: { typeCheckerIntegration: "invalid" } },
+        },
+      )
+
+      log = notifications.find do |n|
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("typeCheckerIntegration")
+      end
+
+      refute_nil(log)
+      assert_predicate(state, :has_type_checker)
+    end
+
+    def test_environment_variable_sets_type_checker_integration
+      original_env_var = ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
+      ENV["RUBY_LSP_BYPASS_TYPECHECKER"] = "1"
+      state = GlobalState.new
+
+      Bundler.locked_gems.stubs(dependencies: {})
+      stub_all_dependencies("sorbet-static")
+      state.apply_options({ initializationOptions: {} })
+
+      refute_predicate(state, :has_type_checker)
+    ensure
+      ENV["RUBY_LSP_BYPASS_TYPECHECKER"] = original_env_var
+    end
+
     def test_addon_settings_are_stored
       global_state = GlobalState.new
 
