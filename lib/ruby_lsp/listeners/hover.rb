@@ -7,10 +7,18 @@ module RubyLsp
       include Requests::Support::Common
 
       ALLOWED_TARGETS = [
+        Prism::BreakNode,
         Prism::CallNode,
+        Prism::CaseNode,
+        Prism::ClassNode,
         Prism::ConstantReadNode,
         Prism::ConstantWriteNode,
         Prism::ConstantPathNode,
+        Prism::DefNode,
+        Prism::DefinedNode,
+        Prism::ElseNode,
+        Prism::EnsureNode,
+        Prism::ForNode,
         Prism::GlobalVariableAndWriteNode,
         Prism::GlobalVariableOperatorWriteNode,
         Prism::GlobalVariableOrWriteNode,
@@ -23,11 +31,20 @@ module RubyLsp
         Prism::InstanceVariableOrWriteNode,
         Prism::InstanceVariableTargetNode,
         Prism::InstanceVariableWriteNode,
+        Prism::ModuleNode,
+        Prism::NextNode,
+        Prism::RescueNode,
+        Prism::ReturnNode,
         Prism::SymbolNode,
         Prism::StringNode,
+        Prism::UndefNode,
+        Prism::UnlessNode,
+        Prism::UntilNode,
         Prism::InterpolatedStringNode,
         Prism::SuperNode,
         Prism::ForwardingSuperNode,
+        Prism::WhenNode,
+        Prism::WhileNode,
         Prism::YieldNode,
         Prism::ClassVariableAndWriteNode,
         Prism::ClassVariableOperatorWriteNode,
@@ -54,10 +71,18 @@ module RubyLsp
 
         dispatcher.register(
           self,
+          :on_break_node_enter,
+          :on_case_node_enter,
+          :on_class_node_enter,
           :on_constant_read_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_node_enter,
           :on_call_node_enter,
+          :on_def_node_enter,
+          :on_defined_node_enter,
+          :on_else_node_enter,
+          :on_ensure_node_enter,
+          :on_for_node_enter,
           :on_global_variable_and_write_node_enter,
           :on_global_variable_operator_write_node_enter,
           :on_global_variable_or_write_node_enter,
@@ -70,7 +95,16 @@ module RubyLsp
           :on_instance_variable_operator_write_node_enter,
           :on_instance_variable_or_write_node_enter,
           :on_instance_variable_target_node_enter,
+          :on_module_node_enter,
+          :on_next_node_enter,
+          :on_rescue_node_enter,
+          :on_return_node_enter,
           :on_super_node_enter,
+          :on_undef_node_enter,
+          :on_unless_node_enter,
+          :on_until_node_enter,
+          :on_when_node_enter,
+          :on_while_node_enter,
           :on_forwarding_super_node_enter,
           :on_string_node_enter,
           :on_interpolated_string_node_enter,
@@ -95,6 +129,91 @@ module RubyLsp
         end
 
         generate_heredoc_hover(node)
+      end
+
+      #: (Prism::BreakNode node) -> void
+      def on_break_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::CaseNode node) -> void
+      def on_case_node_enter(node)
+        handle_keyword_documentation(node.case_keyword)
+      end
+
+      #: (Prism::ClassNode node) -> void
+      def on_class_node_enter(node)
+        handle_keyword_documentation(node.class_keyword)
+      end
+
+      #: (Prism::DefNode node) -> void
+      def on_def_node_enter(node)
+        handle_keyword_documentation(node.def_keyword)
+      end
+
+      #: (Prism::DefinedNode node) -> void
+      def on_defined_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::ElseNode node) -> void
+      def on_else_node_enter(node)
+        handle_keyword_documentation(node.else_keyword)
+      end
+
+      #: (Prism::EnsureNode node) -> void
+      def on_ensure_node_enter(node)
+        handle_keyword_documentation(node.ensure_keyword)
+      end
+
+      #: (Prism::ForNode node) -> void
+      def on_for_node_enter(node)
+        handle_keyword_documentation(node.for_keyword)
+      end
+
+      #: (Prism::ModuleNode node) -> void
+      def on_module_node_enter(node)
+        handle_keyword_documentation(node.module_keyword)
+      end
+
+      #: (Prism::NextNode node) -> void
+      def on_next_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::RescueNode node) -> void
+      def on_rescue_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::ReturnNode node) -> void
+      def on_return_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::UndefNode node) -> void
+      def on_undef_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::UnlessNode node) -> void
+      def on_unless_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::UntilNode node) -> void
+      def on_until_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::WhenNode node) -> void
+      def on_when_node_enter(node)
+        handle_keyword_documentation(node.keyword)
+      end
+
+      #: (Prism::WhileNode node) -> void
+      def on_while_node_enter(node)
+        handle_keyword_documentation(node.keyword)
       end
 
       #: (Prism::InterpolatedStringNode node) -> void
