@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import os from "os";
 
 import * as vscode from "vscode";
@@ -40,7 +41,7 @@ export class RubyInstaller extends Chruby {
 
     for (const installationUri of possibleInstallationUris) {
       try {
-        await vscode.workspace.fs.stat(installationUri);
+        await stat(installationUri.fsPath);
         return vscode.Uri.joinPath(installationUri, "bin", "ruby");
       } catch (_error: any) {
         // Continue searching

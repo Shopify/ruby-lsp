@@ -1,3 +1,4 @@
+import { readdir } from "fs/promises";
 import path from "path";
 
 import * as vscode from "vscode";
@@ -204,13 +205,13 @@ class Dependency extends vscode.TreeItem implements DependenciesNode {
 
   async getChildren() {
     const dir = this.resourceUri;
-    const entries = await vscode.workspace.fs.readDirectory(dir);
+    const entries = await readdir(dir.fsPath, { withFileTypes: true });
 
-    return entries.map(([name, type]) => {
-      if (type === vscode.FileType.Directory) {
-        return new GemDirectoryPath(vscode.Uri.joinPath(dir, name));
+    return entries.map((entry) => {
+      if (entry.isDirectory()) {
+        return new GemDirectoryPath(vscode.Uri.joinPath(dir, entry.name));
       } else {
-        return new GemFilePath(vscode.Uri.joinPath(dir, name));
+        return new GemFilePath(vscode.Uri.joinPath(dir, entry.name));
       }
     });
   }
@@ -230,13 +231,13 @@ class GemDirectoryPath extends vscode.TreeItem implements DependenciesNode {
 
   async getChildren() {
     const dir = this.resourceUri;
-    const entries = await vscode.workspace.fs.readDirectory(dir);
+    const entries = await readdir(dir.fsPath, { withFileTypes: true });
 
-    return entries.map(([name, type]) => {
-      if (type === vscode.FileType.Directory) {
-        return new GemDirectoryPath(vscode.Uri.joinPath(dir, name));
+    return entries.map((entry) => {
+      if (entry.isDirectory()) {
+        return new GemDirectoryPath(vscode.Uri.joinPath(dir, entry.name));
       } else {
-        return new GemFilePath(vscode.Uri.joinPath(dir, name));
+        return new GemFilePath(vscode.Uri.joinPath(dir, entry.name));
       }
     });
   }

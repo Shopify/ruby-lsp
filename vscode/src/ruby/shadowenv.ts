@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
@@ -14,8 +15,8 @@ export class UntrustedWorkspaceError extends Error {}
 export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"),
+      await stat(
+        vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d").fsPath,
       );
     } catch (error: any) {
       throw new Error(

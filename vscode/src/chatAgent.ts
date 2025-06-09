@@ -1,3 +1,5 @@
+import { readFile } from "fs/promises";
+
 import * as vscode from "vscode";
 
 import { Command } from "./common";
@@ -149,19 +151,21 @@ export class ChatAgent implements vscode.Disposable {
 
   private async schema(workspace: Workspace) {
     try {
-      const content = await vscode.workspace.fs.readFile(
-        vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/schema.rb"),
+      const content = await readFile(
+        vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/schema.rb").fsPath,
+        'utf8'
       );
-      return content.toString();
+      return content;
     } catch (error) {
       // db/schema.rb doesn't exist
     }
 
     try {
-      const content = await vscode.workspace.fs.readFile(
-        vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/structure.sql"),
+      const content = await readFile(
+        vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/structure.sql").fsPath,
+        'utf8'
       );
-      return content.toString();
+      return content;
     } catch (error) {
       // db/structure.sql doesn't exist
     }

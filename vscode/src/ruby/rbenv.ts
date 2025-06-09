@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
@@ -43,7 +44,7 @@ export class Rbenv extends VersionManager {
 
   private async ensureRbenvExistsAt(path: string): Promise<string> {
     try {
-      await vscode.workspace.fs.stat(vscode.Uri.file(path));
+      await stat(path);
 
       return path;
     } catch (error: any) {

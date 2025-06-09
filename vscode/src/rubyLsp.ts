@@ -1,3 +1,4 @@
+import { readFile, stat } from "fs/promises";
 import * as os from "os";
 import * as path from "path";
 
@@ -129,9 +130,15 @@ export class RubyLsp {
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
   // all language servers for each existing workspace
   async activate() {
-    await vscode.commands.executeCommand("testing.clearTestResults");
+    console.error(await new Promise<string>((resolve) => setTimeout(() => resolve('blah'), 500)));
 
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
+
+    const foo = await readFile(
+      "/var/folders/z1/sh91wl0d48s8gzx1v8b5k3_h0000gn/T/ruby-lsp/test_reporter_port_db.json",
+      'utf8'
+    );
+    console.log(foo);
 
     // We only activate the first workspace eagerly to avoid running into performance and memory issues. Having too many
     // workspaces spawning the Ruby LSP server and indexing can grind the editor to a halt. All other workspaces are
@@ -139,6 +146,14 @@ export class RubyLsp {
     if (firstWorkspace) {
       await this.activateWorkspace(firstWorkspace, true);
     }
+
+    const bar = await readFile(
+      "/var/folders/z1/sh91wl0d48s8gzx1v8b5k3_h0000gn/T/ruby-lsp/test_reporter_port_db.json",
+      'utf8'
+    );
+    console.log(bar);
+
+    await vscode.commands.executeCommand("testing.clearTestResults");
 
     // If the user has the editor already opened on a Ruby file and that file does not belong to the first workspace,
     // eagerly activate the workspace for that file too
@@ -164,6 +179,7 @@ export class RubyLsp {
     }
 
     STATUS_EMITTER.fire(this.currentActiveWorkspace());
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await this.testController.activate();
   }
 
@@ -1037,8 +1053,8 @@ export class RubyLsp {
 
   private async lockfileExists(workspaceUri: vscode.Uri) {
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(workspaceUri, "Gemfile.lock"),
+      await stat(
+        vscode.Uri.joinPath(workspaceUri, "Gemfile.lock").fsPath,
       );
       return true;
     } catch (error: any) {
@@ -1046,8 +1062,8 @@ export class RubyLsp {
     }
 
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(workspaceUri, "gems.locked"),
+      await stat(
+        vscode.Uri.joinPath(workspaceUri, "gems.locked").fsPath,
       );
       return true;
     } catch (error: any) {

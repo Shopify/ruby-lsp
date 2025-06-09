@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import path from "path";
 import os from "os";
 
@@ -26,7 +27,7 @@ async function detectMise() {
 
   for (const possiblePath of possiblePaths) {
     try {
-      await vscode.workspace.fs.stat(possiblePath);
+      await stat(possiblePath.fsPath);
       return true;
     } catch (error: any) {
       // Continue looking
@@ -408,7 +409,7 @@ export class Ruby implements RubyInterface {
     }
 
     try {
-      await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
+      await stat(this.customBundleGemfile);
       this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
     } catch (error: any) {
       throw new Error(
@@ -421,8 +422,8 @@ export class Ruby implements RubyInterface {
     // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
     // created a .shadowenv.d folder
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"),
+      await stat(
+        vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d").fsPath,
       );
       this.versionManager.identifier = ManagerIdentifier.Shadowenv;
       return;
@@ -514,7 +515,7 @@ export class Ruby implements RubyInterface {
     }
 
     try {
-      await vscode.workspace.fs.stat(vscode.Uri.file(workspaceRubyPath));
+      await stat(workspaceRubyPath);
       return workspaceRubyPath;
     } catch (error: any) {
       // If the user selected a Ruby path and then uninstalled it, we need to clear the the cached path

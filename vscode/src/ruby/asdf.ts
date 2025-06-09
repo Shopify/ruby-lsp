@@ -1,5 +1,5 @@
 /* eslint-disable no-process-env */
-
+import { stat } from "fs/promises";
 import os from "os";
 import path from "path";
 
@@ -78,7 +78,7 @@ export class Asdf extends VersionManager {
 
     for (const possiblePath of possiblePaths) {
       try {
-        await vscode.workspace.fs.stat(possiblePath);
+        await stat(possiblePath.fsPath);
         return possiblePath.fsPath;
       } catch (error: any) {
         // Continue looking
@@ -104,7 +104,7 @@ export class Asdf extends VersionManager {
     const configuredPath = vscode.Uri.file(asdfPath);
 
     try {
-      await vscode.workspace.fs.stat(configuredPath);
+      await stat(configuredPath.fsPath);
       this.outputChannel.info(
         `Using configured ASDF executable path: ${asdfPath}`,
       );

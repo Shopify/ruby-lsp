@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { readFile, mkdir, writeFile } from "fs/promises";
 import net from "net";
 import os from "os";
 import path from "path";
@@ -270,8 +271,8 @@ export class StreamingRunner implements vscode.Disposable {
   }
 
   private async updatePortMap(portString: string) {
-    const tempDirUri = vscode.Uri.file(path.join(os.tmpdir(), "ruby-lsp"));
-    await vscode.workspace.fs.createDirectory(tempDirUri);
+    const tempDirPath = path.join(os.tmpdir(), "ruby-lsp");
+    await mkdir(tempDirPath, { recursive: true });
 
     const workspacePathToPortMap = Object.fromEntries(
       vscode.workspace.workspaceFolders!.map((folder) => [
@@ -279,15 +280,15 @@ export class StreamingRunner implements vscode.Disposable {
         portString,
       ]),
     );
-    const mapUri = vscode.Uri.joinPath(
-      tempDirUri,
+    const mapUri = vscode.Uri.file(path.join(
+      tempDirPath,
       "test_reporter_port_db.json",
-    );
+    ));
     let currentMap: Record<string, string>;
 
     try {
-      const contents = await vscode.workspace.fs.readFile(mapUri);
-      currentMap = JSON.parse(contents.toString());
+      const contents = await readFile(mapUri.fsPath, 'utf8');
+      currentMap = JSON.parse(contents);
     } catch (error: any) {
       currentMap = {};
     }
@@ -297,9 +298,10 @@ export class StreamingRunner implements vscode.Disposable {
       ...workspacePathToPortMap,
     };
 
-    await vscode.workspace.fs.writeFile(
-      mapUri,
-      Buffer.from(JSON.stringify(updatedMap)),
+    await writeFile(
+      mapUri.fsPath,
+      JSON.stringify(updatedMap),
+      'utf8'
     );
   }
 

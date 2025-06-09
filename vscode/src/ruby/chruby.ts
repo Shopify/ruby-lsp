@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { readFile, readdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 
@@ -145,9 +146,11 @@ export class Chruby extends VersionManager {
       let directories;
 
       try {
-        directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
-          (left, right) => right[0].localeCompare(left[0]),
-        );
+        const entries = await readdir(uri.fsPath, { withFileTypes: true });
+        directories = entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => [entry.name, vscode.FileType.Directory] as [string, vscode.FileType])
+          .sort((left, right) => right[0].localeCompare(left[0]));
       } catch (error: any) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(
@@ -206,22 +209,25 @@ export class Chruby extends VersionManager {
       try {
         // Accumulate all directories that match the `engine-version` pattern and that start with the same requested
         // major version. We do not try to approximate major versions
-        (await vscode.workspace.fs.readDirectory(uri)).forEach(([name]) => {
-          const match =
-            /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(
-              name,
-            );
+        const entries = await readdir(uri.fsPath, { withFileTypes: true });
+        entries
+          .filter(entry => entry.isDirectory())
+          .forEach((entry) => {
+            const match =
+              /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(
+                entry.name,
+              );
 
-          if (match?.groups && match.groups.version.startsWith(major)) {
-            directories.push({
-              uri: vscode.Uri.joinPath(uri, name, "bin", "ruby"),
-              rubyVersion: {
-                engine: match.groups.engine,
-                version: match.groups.version,
-              },
-            });
-          }
-        });
+            if (match?.groups && match.groups.version.startsWith(major)) {
+              directories.push({
+                uri: vscode.Uri.joinPath(uri, entry.name, "bin", "ruby"),
+                rubyVersion: {
+                  engine: match.groups.engine,
+                  version: match.groups.version,
+                },
+              });
+            }
+          });
       } catch (error: any) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(
@@ -265,8 +271,8 @@ export class Chruby extends VersionManager {
     while (uri.fsPath !== root) {
       try {
         rubyVersionUri = vscode.Uri.joinPath(uri, ".ruby-version");
-        const content = await vscode.workspace.fs.readFile(rubyVersionUri);
-        version = content.toString().trim();
+        const content = await readFile(rubyVersionUri.fsPath, 'utf8');
+        version = content.trim();
       } catch (error: any) {
         // If the file doesn't exist, continue going up the directory tree
         uri = vscode.Uri.file(path.dirname(uri.fsPath));
@@ -306,8 +312,9 @@ export class Chruby extends VersionManager {
     let gemfileContents;
 
     try {
-      gemfileContents = await vscode.workspace.fs.readFile(
-        vscode.Uri.joinPath(this.workspaceFolder.uri, "Gemfile"),
+      gemfileContents = await readFile(
+        vscode.Uri.joinPath(this.workspaceFolder.uri, "Gemfile").fsPath,
+        'utf8'
       );
     } catch (error: any) {
       // The Gemfile doesn't exist
@@ -316,7 +323,7 @@ export class Chruby extends VersionManager {
     // If the Gemfile includes ruby version restrictions, then trying to fall back may lead to errors
     if (
       gemfileContents &&
-      /^ruby(\s|\()("|')[\d.]+/.test(gemfileContents.toString())
+      /^ruby(\s|\()("|')[\d.]+/.test(gemfileContents)
     ) {
       throw errorFn();
     }
@@ -378,9 +385,11 @@ export class Chruby extends VersionManager {
       let directories;
 
       try {
-        directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
-          (left, right) => right[0].localeCompare(left[0]),
-        );
+        const entries = await readdir(uri.fsPath, { withFileTypes: true });
+        directories = entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => [entry.name, vscode.FileType.Directory] as [string, vscode.FileType])
+          .sort((left, right) => right[0].localeCompare(left[0]));
 
         directories.forEach((directory) => {
           items.push({
@@ -414,9 +423,10 @@ export class Chruby extends VersionManager {
       throw errorFn();
     }
 
-    await vscode.workspace.fs.writeFile(
-      vscode.Uri.joinPath(targetDirectory[0], ".ruby-version"),
-      Buffer.from(answer.label),
+    await writeFile(
+      vscode.Uri.joinPath(targetDirectory[0], ".ruby-version").fsPath,
+      answer.label,
+      'utf8'
     );
   }
 
@@ -428,9 +438,11 @@ export class Chruby extends VersionManager {
       let directories;
 
       try {
-        directories = (await vscode.workspace.fs.readDirectory(uri)).sort(
-          (left, right) => right[0].localeCompare(left[0]),
-        );
+        const entries = await readdir(uri.fsPath, { withFileTypes: true });
+        directories = entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => [entry.name, vscode.FileType.Directory] as [string, vscode.FileType])
+          .sort((left, right) => right[0].localeCompare(left[0]));
 
         let groups;
         let targetDirectory;

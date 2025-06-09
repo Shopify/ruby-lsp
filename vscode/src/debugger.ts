@@ -1,3 +1,4 @@
+import { readdir } from "fs/promises";
 import net from "net";
 import os from "os";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
@@ -97,11 +98,11 @@ export class Debugger
   // Resolve the user's debugger configuration. Here we receive what is configured in launch.json and can modify and
   // insert defaults for the user. The most important thing is making sure the Ruby environment is a part of it so that
   // we launch using the right bundle and Ruby version
-  resolveDebugConfiguration?(
+  async resolveDebugConfiguration?(
     folder: vscode.WorkspaceFolder | undefined,
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken,
-  ): vscode.ProviderResult<vscode.DebugConfiguration> {
+  ): Promise<vscode.DebugConfiguration> {
     const workspace = this.workspaceResolver(folder?.uri);
 
     if (!workspace) {
@@ -135,26 +136,26 @@ export class Debugger
 
     const customBundleUri = vscode.Uri.joinPath(workspaceUri, ".ruby-lsp");
 
-    return vscode.workspace.fs.readDirectory(customBundleUri).then(
-      (value) => {
-        if (value.some((entry) => entry[0] === "Gemfile")) {
-          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
-            customBundleUri,
-            "Gemfile",
-          ).fsPath;
-        } else if (value.some((entry) => entry[0] === "gems.rb")) {
-          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
-            customBundleUri,
-            "gems.rb",
-          ).fsPath;
-        }
+    try {
+      const entries = await readdir(customBundleUri.fsPath, { withFileTypes: true });
+      const entryNames = entries.map(entry => entry.name);
 
-        return debugConfiguration;
-      },
-      () => {
-        return debugConfiguration;
-      },
-    );
+      if (entryNames.includes("Gemfile")) {
+        debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
+          customBundleUri,
+          "Gemfile",
+        ).fsPath;
+      } else if (entryNames.includes("gems.rb")) {
+        debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
+          customBundleUri,
+          "gems.rb",
+        ).fsPath;
+      }
+
+      return debugConfiguration;
+    } catch (error) {
+      return debugConfiguration;
+    }
   }
 
   // If the extension is deactivating, we need to ensure the debug process is terminated or else it may continue running

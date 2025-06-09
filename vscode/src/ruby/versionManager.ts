@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import path from "path";
 import os from "os";
 
@@ -117,7 +118,7 @@ export abstract class VersionManager {
     for (const uri of directories) {
       try {
         const fullUri = vscode.Uri.joinPath(uri, execName);
-        await vscode.workspace.fs.stat(fullUri);
+        await stat(fullUri.fsPath);
         this.outputChannel.info(
           `Found ${execName} executable at ${uri.fsPath}`,
         );

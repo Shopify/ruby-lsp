@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import os from "os";
 
 import * as vscode from "vscode";
@@ -35,7 +36,7 @@ export class Mise extends VersionManager {
       const configuredPath = vscode.Uri.file(misePath);
 
       try {
-        await vscode.workspace.fs.stat(configuredPath);
+        await stat(configuredPath.fsPath);
         return configuredPath;
       } catch (error: any) {
         throw new Error(
@@ -68,7 +69,7 @@ export class Mise extends VersionManager {
 
     for (const possiblePath of possiblePaths) {
       try {
-        await vscode.workspace.fs.stat(possiblePath);
+        await stat(possiblePath.fsPath);
         return possiblePath;
       } catch (error: any) {
         // Continue looking

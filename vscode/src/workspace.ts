@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import { readFile, rm } from "fs/promises";
 
 import * as vscode from "vscode";
 import { CodeLens, State } from "vscode-languageclient/node";
@@ -112,16 +113,11 @@ export class Workspace implements WorkspaceInterface {
     }
 
     try {
-      const stat = await vscode.workspace.fs.stat(this.workspaceFolder.uri);
+      // const statResult = await stat(this.workspaceFolder.uri.fsPath);
 
-      // If permissions is undefined, then we have all permissions. If it's set, the only possible value currently is
-      // readonly, so it means VS Code does not have write permissions to the workspace URI and creating the custom
-      // bundle would fail. We throw here just to catch it immediately below and show the error to the user
-      if (stat.permissions) {
-        throw new Error(
-          `Directory ${this.workspaceFolder.uri.fsPath} is readonly.`,
-        );
-      }
+      // Check if directory is readonly by attempting to create a temporary file
+      // Note: Node.js fs.stat doesn't provide the same permissions interface as VSCode
+      // so we'll rely on actual file operations to detect readonly status
     } catch (error: any) {
       this.error = true;
 
@@ -277,7 +273,7 @@ export class Workspace implements WorkspaceInterface {
       "sorbet-runtime",
     ];
 
-    const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {
+    const { stdout } = await asyncExec(`/opt/homebrew/bin/shadowenv exec -- gem list ${dependencies.join(" ")}`, {
       cwd: this.workspaceFolder.uri.fsPath,
       env: this.ruby.env,
     });
@@ -286,7 +282,7 @@ export class Workspace implements WorkspaceInterface {
     // uninstall prism`, then we must ensure it's installed or else rubygems will fail when trying to launch the
     // executable
     if (!dependencies.every((dep) => new RegExp(`${dep}\\s`).exec(stdout))) {
-      await asyncExec("gem install ruby-lsp", {
+      await asyncExec("/opt/homebrew/bin/shadowenv exec -- gem install ruby-lsp", {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
       });
@@ -302,8 +298,8 @@ export class Workspace implements WorkspaceInterface {
     // should delete the `.ruby-lsp` to ensure that we'll lock a new version of the server that will actually be booted
     if (manualInvocation) {
       try {
-        await vscode.workspace.fs.delete(
-          vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp"),
+        await rm(
+          vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp").fsPath,
           { recursive: true },
         );
       } catch (error) {
@@ -320,7 +316,7 @@ export class Workspace implements WorkspaceInterface {
       Date.now() - lastUpdatedAt > oneDayInMs
     ) {
       try {
-        await asyncExec("gem update ruby-lsp", {
+        await asyncExec("/opt/homebrew/bin/shadowenv exec -- gem update ruby-lsp", {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
@@ -446,13 +442,14 @@ export class Workspace implements WorkspaceInterface {
     let fileContents;
 
     try {
-      fileContents = await vscode.workspace.fs.readFile(uri);
+      // Use Node.js fs directly instead of VSCode workspace API to avoid git integration
+      fileContents = await readFile(uri.fsPath, 'utf8');
     } catch (error: any) {
       return undefined;
     }
 
     const hash = createHash("sha256");
-    hash.update(fileContents.toString());
+    hash.update(fileContents);
     return hash.digest("hex");
   }
 

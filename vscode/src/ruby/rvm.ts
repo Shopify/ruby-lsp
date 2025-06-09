@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import { stat } from "fs/promises";
 import os from "os";
 
 import * as vscode from "vscode";
@@ -58,7 +59,7 @@ export class Rvm extends VersionManager {
 
     for (const uri of possiblePaths) {
       try {
-        await vscode.workspace.fs.stat(uri);
+        await stat(uri.fsPath);
         return uri;
       } catch (_error: any) {
         // Continue to the next installation path
