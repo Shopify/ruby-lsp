@@ -155,6 +155,10 @@ module RubyLsp
             Constant::SymbolKind::PROPERTY
           when RubyIndexer::Entry::InstanceVariable
             Constant::SymbolKind::FIELD
+          when RubyIndexer::Entry::GlobalVariable
+            Constant::SymbolKind::VARIABLE
+          else
+            Constant::SymbolKind::NULL
           end
         end
       end
