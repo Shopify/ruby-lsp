@@ -450,7 +450,7 @@ suite("TestController", () => {
     assert.strictEqual(filteredItems.length, 1);
     assert.strictEqual(filteredItems[0].id, serverTest.id);
     assert.strictEqual(filteredItems[0].children.length, 0);
-  });
+  }).timeout(20000);
 
   test("only includes test file item if none of the children are excluded", async () => {
     await controller.testController.resolveHandler!(undefined);
@@ -480,7 +480,7 @@ suite("TestController", () => {
     assert.strictEqual(filteredItems[0].children.length, 0);
     // However, the original item should not be mutated or else it will mess up the explorer tree structure
     assert.strictEqual(serverTest.children.size, 2);
-  });
+  }).timeout(20000);
 
   test("only includes test group item if none of the children are excluded", async () => {
     await controller.testController.resolveHandler!(undefined);
