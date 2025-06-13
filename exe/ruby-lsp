@@ -88,6 +88,13 @@ if ENV["BUNDLE_GEMFILE"].nil?
   exit exec(env, "#{base_command} exec ruby-lsp #{original_args.join(" ")}".strip)
 end
 
+$stdin.sync = true
+$stdout.sync = true
+$stderr.sync = true
+$stdin.binmode
+$stdout.binmode
+$stderr.binmode
+
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 
 require "ruby_lsp/load_sorbet"
@@ -147,8 +154,10 @@ if options[:doctor]
   return
 end
 
+server = RubyLsp::Server.new
+
 # Ensure all output goes out stderr by default to allow puts/p/pp to work
 # without specifying output device.
 $> = $stderr
 
-RubyLsp::Server.new.start
+server.start
