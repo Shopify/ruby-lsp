@@ -125,10 +125,7 @@ end
 # Now that the bundle is set up, we can begin actually launching the server. Note that `Bundler.setup` will have already
 # configured the load path using the version of the Ruby LSP present in the composed bundle. Do not push any Ruby LSP
 # paths into the load path manually or we may end up requiring the wrong version of the gem
-require "ruby_lsp/load_sorbet"
 require "ruby_lsp/internal"
-
-T::Utils.run_all_sig_blocks
 
 if ARGV.include?("--debug")
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
