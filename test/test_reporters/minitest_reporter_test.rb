@@ -167,7 +167,75 @@ module RubyLsp
       )
     end
 
+    def test_prerecord_with_activesupport_prerecord_result_class
+      fake_path = "test/fake_file.rb"
+      uri = URI::Generic.from_path(path: File.expand_path(fake_path)).to_s
+
+      # ActiveSupport parallel testing passes PrerecordResultClass instead of test class
+      prerecord_result = Struct.new(:klass, :source_location).new(
+        "MyTestClass",
+        [fake_path, 42],
+      )
+
+      events = capture_lsp_output do
+        MinitestReporter.new.prerecord(prerecord_result, "test_something")
+      end
+
+      expected = [
+        {
+          "method" => "start",
+          "params" => {
+            "id" => "MyTestClass#test_something",
+            "uri" => uri,
+            "line" => 41, # 42 - 1 for zero-based line numbers
+          },
+        },
+      ]
+
+      assert_equal(expected, events)
+    end
+
+    def test_prerecord_with_invalid_object
+      # Create an object that doesn't respond to instance_method or required methods
+      invalid_object = Object.new
+
+      events = capture_lsp_output do
+        MinitestReporter.new.prerecord(invalid_object, "test_something")
+      end
+
+      expected = []
+      assert_equal(expected, events)
+    end
+
     private
+
+    def capture_lsp_output(&block)
+      # Reset the singleton instance to get a fresh StringIO
+      io = StringIO.new
+      original_io = LspReporter.instance.instance_variable_get(:@io)
+      LspReporter.instance.instance_variable_set(:@io, io)
+
+      yield
+
+      # Read and parse any JSON messages that were written
+      io.rewind
+      content = io.read || ""
+      events = []
+
+      # Extract and parse JSON messages
+      json_start = content.index("{")
+      if json_start
+        events << JSON.parse(
+          content[json_start..-1], #: as !nil
+        )
+      end
+
+      events
+    ensure
+      # Restore original IO and close the StringIO
+      LspReporter.instance.instance_variable_set(:@io, original_io) if original_io
+      io&.close
+    end
 
     #: (URI::Generic, ?output: Symbol) -> Array[Hash[untyped, untyped]]
     def gather_events(uri, output: :stdout)

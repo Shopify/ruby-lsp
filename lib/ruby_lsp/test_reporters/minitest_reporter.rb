@@ -55,6 +55,8 @@ module RubyLsp
   end
 
   class MinitestReporter < Minitest::AbstractReporter
+    NO_LOCATION = [nil, nil, nil].freeze
+
     class << self
       #: (Hash[untyped, untyped]) -> void
       def minitest_plugin_init(_options)
@@ -74,12 +76,17 @@ module RubyLsp
       end
     end
 
-    #: (singleton(Minitest::Test) test_class, String method_name) -> void
-    def prerecord(test_class, method_name)
-      uri, line = LspReporter.instance.uri_and_line_for(test_class.instance_method(method_name))
+    #: (untyped, String) -> void
+    def prerecord(test_context, method_name)
+      # The test_context can be either:
+      # 1. A test class (Class) - the normal Minitest case
+      # 2. A PrerecordResultClass (Struct) - used by ActiveSupport's parallel testing with processes
+      #    This struct contains only the class name and source location since actual class objects
+      #    cannot be passed across process boundaries via DRb.
+      uri, line, class_name = extract_test_location(test_context, method_name)
       return unless uri
 
-      id = "#{test_class.name}##{handle_spec_test_id(method_name, line)}"
+      id = "#{class_name}##{handle_spec_test_id(method_name, line)}"
       LspReporter.instance.start_test(id: id, uri: uri, line: line)
     end
 
@@ -115,6 +122,45 @@ module RubyLsp
     #: (String, Integer?) -> String
     def handle_spec_test_id(method_name, line)
       method_name.gsub(/(?<=test_)\d{4}(?=_)/, format("%04d", line.to_s))
+    end
+
+    private
+
+    #: (untyped, String) -> [URI::Generic?, Integer?, String?]
+    def extract_test_location(test_context, method_name)
+      if test_context.respond_to?(:instance_method)
+        extract_from_test_class(test_context, method_name)
+      else
+        extract_from_prerecord_result(test_context)
+      end
+    end
+
+    #: (singleton(Minitest::Test), String) -> [URI::Generic?, Integer?, String?]
+    def extract_from_test_class(test_class, method_name)
+      uri, line = LspReporter.instance.uri_and_line_for(test_class.instance_method(method_name))
+      return NO_LOCATION unless uri
+
+      [uri, line, test_class.name]
+    end
+
+    #: (untyped) -> [URI::Generic?, Integer?, String?]
+    def extract_from_prerecord_result(prerecord_result)
+      # PrerecordResultClass has:
+      # - klass: String (the test class name, e.g., "MyTest")
+      # - source_location: Array[String, Integer] ([file_path, line_number])
+      return NO_LOCATION unless prerecord_result.respond_to?(:klass) &&
+        prerecord_result.respond_to?(:source_location)
+
+      class_name = prerecord_result.klass
+      source_location = prerecord_result.source_location
+
+      return NO_LOCATION unless source_location&.is_a?(Array) && source_location[0]
+
+      file_path, line = source_location
+      uri = URI::Generic.from_path(path: File.expand_path(file_path))
+      zero_based_line = line ? line - 1 : nil
+
+      [uri, zero_based_line, class_name]
     end
   end
 end
