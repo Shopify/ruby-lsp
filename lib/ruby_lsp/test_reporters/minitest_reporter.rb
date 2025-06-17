@@ -74,12 +74,25 @@ module RubyLsp
       end
     end
 
-    #: (singleton(Minitest::Test) test_class, String method_name) -> void
-    def prerecord(test_class, method_name)
-      uri, line = LspReporter.instance.uri_and_line_for(test_class.instance_method(method_name))
+    #: (untyped, String) -> void
+    def prerecord(test_class_or_wrapper, method_name)
+      # In frameworks like Rails, they can control the Minitest execution by wrapping the test class
+      # But they conform to responding to `name`, so we can use that as a guarantee
+      # We are interested in the test class, not the wrapper
+      name = test_class_or_wrapper.name
+
+      klass = begin
+        Object.const_get(name) # rubocop:disable Sorbet/ConstantsFromStrings
+      rescue NameError
+        # Handle Minitest specs that create classes with invalid constant names like "MySpec::when something is true"
+        # If we can't resolve the constant, it means we were given the actual test class object, not the wrapper
+        test_class_or_wrapper
+      end
+
+      uri, line = LspReporter.instance.uri_and_line_for(klass.instance_method(method_name))
       return unless uri
 
-      id = "#{test_class.name}##{handle_spec_test_id(method_name, line)}"
+      id = "#{name}##{handle_spec_test_id(method_name, line)}"
       LspReporter.instance.start_test(id: id, uri: uri, line: line)
     end
 
