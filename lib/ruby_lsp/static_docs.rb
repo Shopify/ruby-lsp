@@ -14,6 +14,7 @@ module RubyLsp
 
   # A map of keyword => short documentation to be displayed on hover or completion
   KEYWORD_DOCS = {
+    "break" => "Terminates the execution of a block or loop",
     "yield" => "Invokes the passed block with the given arguments",
   }.freeze #: Hash[String, String]
 end
