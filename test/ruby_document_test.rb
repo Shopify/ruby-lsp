@@ -59,16 +59,86 @@ class RubyDocumentTest < Minitest::Test
     RUBY
   end
 
+  def test_pushing_edit_on_empty_file_utf8
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: @global_state)
+    position = { line: 0, character: 0 }
+    document.push_edits([{ range: { start: position, end: position }, text: "r" }], version: 2)
+    assert_equal("r", document.source)
+  end
+
+  def test_pushing_edit_on_empty_file_utf16
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: global_state)
+    position = { line: 0, character: 0 }
+    document.push_edits([{ range: { start: position, end: position }, text: "r" }], version: 2)
+    assert_equal("r", document.source)
+  end
+
+  def test_pushing_edit_on_empty_file_utf32
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-32"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: global_state)
+    position = { line: 0, character: 0 }
+    document.push_edits([{ range: { start: position, end: position }, text: "r" }], version: 2)
+    assert_equal("r", document.source)
+  end
+
+  def test_pushing_edit_on_non_existing_location_utf8
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: @global_state)
+    position = { line: 1, character: 0 }
+
+    assert_raises(RubyLsp::Document::InvalidLocationError) do
+      document.push_edits([{ range: { start: position, end: position }, text: "r" }], version: 2)
+    end
+  end
+
+  def test_pushing_edit_on_non_existing_location_utf16
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: global_state)
+    position = { line: 1, character: 0 }
+
+    assert_raises(RubyLsp::Document::InvalidLocationError) do
+      document.push_edits([{ range: { start: position, end: position }, text: "r" }], version: 2)
+    end
+  end
+
+  def test_pushing_edit_on_non_existing_location_utf32
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-32"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +"", version: 1, uri: @uri, global_state: global_state)
+    position = { line: 1, character: 0 }
+
+    assert_raises(RubyLsp::Document::InvalidLocationError) do
+      document.push_edits([{ range: { start: position, end: position }, text: "r" }], version: 2)
+    end
+  end
+
   def test_multibyte_character_offsets_are_bytes_in_utf8
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      bá
       bá
     RUBY
 
     document.push_edits(
-      [{ range: { start: { line: 0, character: 3 }, end: { line: 0, character: 3 } }, text: "r" }], version: 2
+      [{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "r" }], version: 2
     )
 
     assert_equal(<<~RUBY, document.source)
+      bá
       bár
     RUBY
   end
@@ -76,13 +146,15 @@ class RubyDocumentTest < Minitest::Test
   def test_multibyte_character_offsets_for_3_byte_character
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       bあ
+      bあ
     RUBY
 
     document.push_edits(
-      [{ range: { start: { line: 0, character: 4 }, end: { line: 0, character: 4 } }, text: "r" }], version: 2
+      [{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: "r" }], version: 2
     )
 
     assert_equal(<<~RUBY, document.source)
+      bあ
       bあr
     RUBY
   end
@@ -90,13 +162,199 @@ class RubyDocumentTest < Minitest::Test
   def test_multibyte_character_offsets_for_4_byte_character
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       b🙂
+      b🙂
     RUBY
 
     document.push_edits(
-      [{ range: { start: { line: 0, character: 5 }, end: { line: 0, character: 5 } }, text: "r" }], version: 2
+      [{ range: { start: { line: 1, character: 5 }, end: { line: 1, character: 5 } }, text: "r" }], version: 2
     )
 
     assert_equal(<<~RUBY, document.source)
+      b🙂
+      b🙂r
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_are_bytes_in_utf16
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      bá
+      bá
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bá
+      bár
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_for_3_byte_character_utf16
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      bあ
+      bあ
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bあ
+      bあr
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_for_4_byte_character_utf16
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      b🙂
+      b🙂
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 3 }, end: { line: 1, character: 3 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      b🙂
+      b🙂r
+    RUBY
+  end
+
+  def test_many_multibyte_characters_utf8
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      🙂🙂🙂🙂
+      🙂🙂🙂🙂
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 15 }, end: { line: 1, character: 15 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      🙂🙂🙂🙂
+      🙂🙂🙂🙂r
+    RUBY
+  end
+
+  def test_many_multibyte_characters_utf16
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-16"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      🙂🙂🙂🙂
+      🙂🙂🙂🙂
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 8 }, end: { line: 1, character: 8 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      🙂🙂🙂🙂
+      🙂🙂🙂🙂r
+    RUBY
+  end
+
+  def test_many_multibyte_characters_utf32
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-32"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      🙂🙂🙂🙂
+      🙂🙂🙂🙂
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 4 }, end: { line: 1, character: 4 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      🙂🙂🙂🙂
+      🙂🙂🙂🙂r
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_are_bytes_in_utf32
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-32"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      bá
+      bá
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bá
+      bár
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_for_3_byte_character_utf32
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-32"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      bあ
+      bあ
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      bあ
+      bあr
+    RUBY
+  end
+
+  def test_multibyte_character_offsets_for_4_byte_character_utf32
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: {},
+      capabilities: { general: { positionEncodings: ["utf-32"] } },
+    })
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: global_state)
+      b🙂
+      b🙂
+    RUBY
+
+    document.push_edits(
+      [{ range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } }, text: "r" }], version: 2
+    )
+
+    assert_equal(<<~RUBY, document.source)
+      b🙂
       b🙂r
     RUBY
   end
