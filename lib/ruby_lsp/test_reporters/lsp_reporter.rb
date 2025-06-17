@@ -20,8 +20,6 @@ module RubyLsp
       dir_path = File.join(Dir.tmpdir, "ruby-lsp")
       FileUtils.mkdir_p(dir_path)
 
-      # Remove in 1 month once updates have rolled out
-      legacy_port_path = File.join(dir_path, "test_reporter_port")
       port_db_path = File.join(dir_path, "test_reporter_port_db.json")
       port = ENV["RUBY_LSP_REPORTER_PORT"]
 
@@ -32,8 +30,6 @@ module RubyLsp
         elsif File.exist?(port_db_path)
           db = JSON.load_file(port_db_path)
           TCPSocket.new("localhost", db[Dir.pwd])
-        elsif File.exist?(legacy_port_path)
-          TCPSocket.new("localhost", File.read(legacy_port_path))
         else
           # For tests that don't spawn the TCP server
           require "stringio"
