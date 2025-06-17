@@ -27,7 +27,9 @@ async function gatherLspInfo(
   const rubyLspExtensionVersion = rubyLspExtension.packageJSON.version;
   const rubyLspVersion = workspace.lspClient?.serverVersion ?? "Unknown";
   const rubyLspAddons =
-    workspace.lspClient?.addons?.map((addon) => addon.name) ?? [];
+    workspace.lspClient?.addons?.map(
+      (addon) => `${addon.name} (${addon.version ?? "unknown"})`,
+    ) ?? [];
   const extensions = await getPublicExtensions();
 
   // Fetch rubyLsp settings
