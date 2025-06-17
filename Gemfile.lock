@@ -10,7 +10,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    ast (2.4.2)
+    ast (2.4.3)
     benchmark (0.4.1)
     date (3.4.1)
     debug (1.10.0)
@@ -31,7 +31,7 @@ GEM
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
     parallel (1.27.0)
-    parser (3.3.7.1)
+    parser (3.3.8.0)
       ast (~> 2.4.1)
       racc
     power_assert (2.0.5)
@@ -71,15 +71,16 @@ GEM
       rubocop-ast (>= 1.38.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.38.0)
-      parser (>= 3.3.1.0)
+    rubocop-ast (1.45.1)
+      parser (>= 3.3.7.2)
+      prism (~> 1.4)
     rubocop-minitest (0.36.0)
       rubocop (>= 1.61, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
-    rubocop-shopify (2.15.1)
-      rubocop (~> 1.51)
+    rubocop-shopify (2.17.1)
+      rubocop (~> 1.62)
     rubocop-sorbet (0.8.7)
       rubocop (>= 1)
     ruby-progressbar (1.13.0)

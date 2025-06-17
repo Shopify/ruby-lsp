@@ -232,8 +232,8 @@ module RubyIndexer
       signatures = entry.signatures
       assert_equal(2, signatures.length)
 
-      # def self.select: [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array) -> [ Array[X], Array[Y], Array[Z] ] # rubocop:disable Layout/LineLength
-      #   | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Time::_Timeout? timeout) -> [ Array[X], Array[Y], Array[Z] ]? # rubocop:disable Layout/LineLength
+      # def self.select: [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array) -> [ Array[X], Array[Y], Array[Z] ]
+      #   | [X, Y, Z] (::Array[X & io]? read_array, ?::Array[Y & io]? write_array, ?::Array[Z & io]? error_array, Time::_Timeout? timeout) -> [ Array[X], Array[Y], Array[Z] ]?
 
       parameters = signatures[0]&.parameters #: as !nil
       assert_equal([:read_array, :write_array, :error_array], parameters.map(&:name))
