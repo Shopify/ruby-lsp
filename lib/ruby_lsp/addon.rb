@@ -176,24 +176,24 @@ module RubyLsp
     # reading information into memory or even spawning a separate process
     # @abstract
     #: (GlobalState, Thread::Queue) -> void
-    def activate(global_state, outgoing_queue); end
+    def activate(global_state, outgoing_queue) = raise(NotImplementedError, "Abstract method called")
 
     # Each add-on should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process
     # @abstract
     #: -> void
-    def deactivate; end
+    def deactivate = raise(NotImplementedError, "Abstract method called")
 
     # Add-ons should override the `name` method to return the add-on name
     # @abstract
     #: -> String
-    def name; end
+    def name = raise(NotImplementedError, "Abstract method called")
 
     # Add-ons should override the `version` method to return a semantic version string representing the add-on's
     # version. This is used for compatibility checks
     # @abstract
     #: -> String
-    def version; end
+    def version = raise(NotImplementedError, "Abstract method called")
 
     # Handle a response from a window/showMessageRequest request. Add-ons must include the addon_name as part of the
     # original request so that the response is delegated to the correct add-on and must override this method to handle

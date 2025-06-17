@@ -12,6 +12,18 @@ module RubyLsp
   class LspReporter
     include Singleton
 
+    # https://code.visualstudio.com/api/references/vscode-api#Position
+    #: type position = {line: Integer, character: Integer}
+
+    # https://code.visualstudio.com/api/references/vscode-api#Range
+    #: type range = {start: position, end: position}
+
+    # https://code.visualstudio.com/api/references/vscode-api#BranchCoverage
+    #: type branch_coverage = {executed: Integer, label: String, location: range}
+
+    # https://code.visualstudio.com/api/references/vscode-api#StatementCoverage
+    #: type statement_coverage = {executed: Integer, location: position, branches: Array[branch_coverage]}
+
     #: bool
     attr_reader :invoked_shutdown
 
@@ -129,7 +141,7 @@ module RubyLsp
     #       ["Foo", :bar, 6, 21, 6, 65] => 0
     #     }
     # }
-    #: -> Hash[String, StatementCoverage]
+    #: -> Hash[String, statement_coverage]
     def gather_coverage_results
       # Ignore coverage results inside dependencies
       bundle_path = Bundler.bundle_path.to_s

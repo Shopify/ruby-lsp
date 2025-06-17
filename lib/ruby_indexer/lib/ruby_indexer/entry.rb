@@ -294,7 +294,7 @@ module RubyIndexer
 
       # @abstract
       #: -> Array[Signature]
-      def signatures; end
+      def signatures = raise(NotImplementedError, "Abstract method called")
 
       #: -> String
       def decorated_parameters

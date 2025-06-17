@@ -50,7 +50,7 @@ module RubyLsp
 
     # @abstract
     #: -> Hash[Symbol, untyped]
-    def to_hash; end
+    def to_hash = raise(NotImplementedError, "Abstract method called")
   end
 
   class Notification < Message
