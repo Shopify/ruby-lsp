@@ -10,6 +10,7 @@ module RubyLsp
         attr_reader :activated, :field, :settings
 
         def initialize
+          @activated = false
           @field = 123
           super
         end
@@ -100,6 +101,10 @@ module RubyLsp
         def deactivate; end
 
         def workspace_did_change_watched_files(changes); end
+
+        def name
+          "Some Addon"
+        end
       end
 
       Addon.load_addons(@global_state, @outgoing_queue)
@@ -189,6 +194,43 @@ module RubyLsp
         assert_equal("Project Addon", addon.name)
         assert_predicate(addon, :hello)
       end
+    end
+
+    def test_disabled_addons_are_not_loaded
+      @global_state = GlobalState.new
+      @global_state.apply_options({
+        initializationOptions: {
+          addonSettings: {
+            "My Add-on": {
+              enabled: false,
+            },
+          },
+        },
+      })
+
+      Addon.load_addons(@global_state, @outgoing_queue)
+
+      assert_raises(Addon::AddonNotFoundError) do
+        Addon.get("My Add-on", "0.1.0")
+      end
+    end
+
+    def test_enabled_addons_are_loaded
+      @global_state = GlobalState.new
+      @global_state.apply_options({
+        initializationOptions: {
+          addonSettings: {
+            "My Add-on": {
+              enabled: true,
+            },
+          },
+        },
+      })
+
+      Addon.load_addons(@global_state, @outgoing_queue)
+
+      addon = Addon.get("My Add-on", "0.1.0")
+      assert_equal("My Add-on", addon.name)
     end
   end
 end
