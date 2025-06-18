@@ -115,7 +115,7 @@ module RubyLsp
       end
     rescue DelegateRequestError
       send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))
-    rescue StandardError, LoadError => e
+    rescue StandardError, LoadError, SystemExit => e
       # If an error occurred in a request, we have to return an error response or else the editor will hang
       if message[:id]
         # If a document is deleted before we are able to process all of its enqueued requests, we will try to read it
