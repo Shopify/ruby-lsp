@@ -26,7 +26,7 @@ module RubyLsp
         queue = node.child_nodes.compact #: Array[Prism::Node?]
         closest = node
         parent = nil #: Prism::Node?
-        nesting_nodes = [] #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] # rubocop:disable Layout/LineLength
+        nesting_nodes = [] #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)]
 
         nesting_nodes << node if node.is_a?(Prism::ProgramNode)
         call_node = nil #: Prism::CallNode?

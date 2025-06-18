@@ -266,7 +266,7 @@ module RubyIndexer
     def constant_completion_candidates(name, nesting)
       # If we have a top level reference, then we don't need to include completions inside the current nesting
       if name.start_with?("::")
-        return @entries_tree.search(name.delete_prefix("::")) #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]] # rubocop:disable Layout/LineLength
+        return @entries_tree.search(name.delete_prefix("::")) #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]]
       end
 
       # Otherwise, we have to include every possible constant the user might be referring to. This is essentially the
@@ -292,7 +292,7 @@ module RubyIndexer
       # Top level constants
       entries.concat(@entries_tree.search(name))
       entries.uniq!
-      entries #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]] # rubocop:disable Layout/LineLength
+      entries #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]]
     end
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
