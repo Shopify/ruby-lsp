@@ -37,10 +37,12 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   private
 
   def default_args(source)
-    end_position = source.lines.count > 1 ? { line: 1, character: 1 } : { line: 0, character: 1 }
+    end_line = source.lines.count > 1 ? 1 : 0
+    end_character = source.empty? ? 0 : 1
     {
       range: {
-        start: { line: 0, character: 0 }, end: end_position,
+        start: { line: 0, character: 0 },
+        end: { line: end_line, character: end_character },
       },
       context: {
         diagnostics: [],

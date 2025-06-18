@@ -9,7 +9,7 @@
                     "character": 0
                 },
                 "end": {
-                    "line": 2,
+                    "line": 1,
                     "character": 6
                 }
             },
@@ -37,7 +37,7 @@
                                     "character": 0
                                 }
                             },
-                            "newText": "def new_method\n  a = 5 + 2\n  a * 10\n  \nend\n\n"
+                            "newText": "def new_method\n  a = 5 + 2\n  a * 10\nend\n\n"
                         },
                         {
                             "range": {
@@ -46,7 +46,7 @@
                                     "character": 0
                                 },
                                 "end": {
-                                    "line": 2,
+                                    "line": 1,
                                     "character": 6
                                 }
                             },

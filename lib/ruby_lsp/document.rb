@@ -7,6 +7,7 @@ module RubyLsp
   class Document
     extend T::Generic
 
+    class InvalidLocationError < StandardError; end
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code
     MAXIMUM_CHARACTERS_FOR_EXPENSIVE_FEATURES = 100_000
@@ -145,7 +146,14 @@ module RubyLsp
 
     #: -> Scanner
     def create_scanner
-      Scanner.new(@source, @encoding)
+      case @encoding
+      when Encoding::UTF_8
+        Utf8Scanner.new(@source)
+      when Encoding::UTF_16LE
+        Utf16Scanner.new(@source)
+      else
+        Utf32Scanner.new(@source)
+      end
     end
 
     # @abstract
@@ -163,6 +171,11 @@ module RubyLsp
     class Replace < Edit; end
     class Delete < Edit; end
 
+    # Parent class for all position scanners. Scanners are used to translate a position given by the editor into a
+    # string index that we can use to find the right place in the document source. The logic for finding the correct
+    # index depends on the encoding negotiated with the editor, so we have different subclasses for each encoding.
+    # See https://microsoft.github.io/language-server-protocol/specification/#positionEncodingKind for more information
+    # @abstract
     class Scanner
       extend T::Sig
 
@@ -170,74 +183,157 @@ module RubyLsp
       # After character 0xFFFF, UTF-16 considers characters to have length 2 and we have to account for that
       SURROGATE_PAIR_START = 0xFFFF #: Integer
 
-      #: (String source, Encoding encoding) -> void
-      def initialize(source, encoding)
+      #: -> void
+      def initialize
         @current_line = 0 #: Integer
         @pos = 0 #: Integer
-        @bytes_or_codepoints = encoding == Encoding::UTF_8 ? source.bytes : source.codepoints #: Array[Integer]
-        @encoding = encoding
       end
 
-      # Finds the character index inside the source string for a given line and column
+      # Finds the character index inside the source string for a given line and column. This method always returns the
+      # character index regardless of whether we are searching positions based on bytes, code units, or codepoints.
+      # @abstract
+      #: (Hash[Symbol, untyped] position) -> Integer
+      def find_char_position(position); end
+    end
+
+    # For the UTF-8 encoding, positions correspond to bytes
+    class Utf8Scanner < Scanner
+      #: (String source) -> void
+      def initialize(source)
+        super()
+        @bytes = source.bytes #: Array[Integer]
+        @character_length = 0 #: Integer
+      end
+
+      # @override
+      #: (Hash[Symbol, untyped] position) -> Integer
+      def find_char_position(position)
+        # Each group of bytes is a character. We advance based on the number of bytes to count how many full characters
+        # we have in the requested offset
+        until @current_line == position[:line]
+          byte = @bytes[@pos] #: Integer?
+          raise InvalidLocationError unless byte
+
+          until LINE_BREAK == byte
+            @pos += character_byte_length(byte)
+            @character_length += 1
+            byte = @bytes[@pos]
+            raise InvalidLocationError unless byte
+          end
+
+          @pos += 1
+          @character_length += 1
+          @current_line += 1
+        end
+
+        # @character_length has the number of characters until the beginning of the line. We don't accumulate on it for
+        # the character part because locating the same position twice must return the same value
+        line_byte_offset = 0
+        line_characters = 0
+
+        while line_byte_offset < position[:character]
+          byte = @bytes[@pos + line_byte_offset] #: Integer?
+          raise InvalidLocationError unless byte
+
+          line_byte_offset += character_byte_length(byte)
+          line_characters += 1
+        end
+
+        @character_length + line_characters
+      end
+
+      private
+
+      #: (Integer) -> Integer
+      def character_byte_length(byte)
+        if byte < 0x80 # 1-byte character
+          1
+        elsif byte < 0xE0 # 2-byte character
+          2
+        elsif byte < 0xF0 # 3-byte character
+          3
+        else # 4-byte character
+          4
+        end
+      end
+    end
+
+    # For the UTF-16 encoding, positions correspond to UTF-16 code units, which count characters beyond the surrogate
+    # pair as length 2
+    class Utf16Scanner < Scanner
+      #: (String) -> void
+      def initialize(source)
+        super()
+        @codepoints = source.codepoints #: Array[Integer]
+      end
+
+      # @override
       #: (Hash[Symbol, untyped] position) -> Integer
       def find_char_position(position)
         # Find the character index for the beginning of the requested line
         until @current_line == position[:line]
-          @pos += 1 until LINE_BREAK == @bytes_or_codepoints[@pos]
+          codepoint = @codepoints[@pos] #: Integer?
+          raise InvalidLocationError unless codepoint
+
+          until LINE_BREAK == @codepoints[@pos]
+            @pos += 1
+            codepoint = @codepoints[@pos] #: Integer?
+            raise InvalidLocationError unless codepoint
+          end
+
           @pos += 1
           @current_line += 1
         end
 
-        # For UTF-8, the code unit length is the same as bytes, but we want to return the character index
-        requested_position = if @encoding == Encoding::UTF_8
-          character_offset = 0
-          i = @pos
-
-          # Each group of bytes is a character. We advance based on the number of bytes to count how many full
-          # characters we have in the requested offset
-          while i < @pos + position[:character] && i < @bytes_or_codepoints.length
-            byte = @bytes_or_codepoints[i] #: as !nil
-            i += if byte < 0x80 # 1-byte character
-              1
-            elsif byte < 0xE0 # 2-byte character
-              2
-            elsif byte < 0xF0 # 3-byte character
-              3
-            else # 4-byte character
-              4
-            end
-
-            character_offset += 1
-          end
-
-          @pos + character_offset
-        else
-          @pos + position[:character]
-        end
-
         # The final position is the beginning of the line plus the requested column. If the encoding is UTF-16, we also
         # need to adjust for surrogate pairs
-        if @encoding == Encoding::UTF_16LE
-          requested_position -= utf_16_character_position_correction(@pos, requested_position)
+        line_characters = 0
+        line_code_units = 0
+
+        while line_code_units < position[:character]
+          code_point = @codepoints[@pos + line_characters]
+          raise InvalidLocationError unless code_point
+
+          line_code_units += if code_point > SURROGATE_PAIR_START
+            2 # Surrogate pair, so we skip the next code unit
+          else
+            1 # Single code unit character
+          end
+
+          line_characters += 1
         end
 
-        requested_position
+        @pos + line_characters
+      end
+    end
+
+    # For the UTF-32 encoding, positions correspond directly to codepoints
+    class Utf32Scanner < Scanner
+      #: (String) -> void
+      def initialize(source)
+        super()
+        @codepoints = source.codepoints #: Array[Integer]
       end
 
-      # Subtract 1 for each character after 0xFFFF in the current line from the column position, so that we hit the
-      # right character in the UTF-8 representation
-      #: (Integer current_position, Integer requested_position) -> Integer
-      def utf_16_character_position_correction(current_position, requested_position)
-        utf16_unicode_correction = 0
+      # @override
+      #: (Hash[Symbol, untyped] position) -> Integer
+      def find_char_position(position)
+        # Find the character index for the beginning of the requested line
+        until @current_line == position[:line]
+          codepoint = @codepoints[@pos] #: Integer?
+          raise InvalidLocationError unless codepoint
 
-        until current_position == requested_position
-          codepoint = @bytes_or_codepoints[current_position]
-          utf16_unicode_correction += 1 if codepoint && codepoint > SURROGATE_PAIR_START
+          until LINE_BREAK == @codepoints[@pos]
+            @pos += 1
+            codepoint = @codepoints[@pos] #: Integer?
+            raise InvalidLocationError unless codepoint
+          end
 
-          current_position += 1
+          @pos += 1
+          @current_line += 1
         end
 
-        utf16_unicode_correction
+        @pos + position[:character]
       end
     end
   end
