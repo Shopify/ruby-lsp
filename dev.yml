@@ -8,7 +8,7 @@ up:
   - bundler
   - node:
       yarn: true
-      version: 20.9.0
+      version: 22.15.1
       packages:
         - vscode
 

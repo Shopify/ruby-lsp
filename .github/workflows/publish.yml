@@ -18,7 +18,7 @@ jobs:
         env:
           DISABLE_V8_COMPILE_CACHE: "1"
         with:
-          node-version: "20.9"
+          node-version: "22.15"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
