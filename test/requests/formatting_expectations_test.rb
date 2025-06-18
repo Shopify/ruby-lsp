@@ -16,10 +16,12 @@ class FormattingExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(
       source: source,
       version: 1,
-      uri: URI::Generic.from_path(path: __FILE__),
+      uri: URI::Generic.from_path(path: File.expand_path(__FILE__)),
       global_state: @global_state,
     )
     RubyLsp::Requests::Formatting.new(@global_state, document).perform&.first&.new_text
+  rescue RubyLsp::Requests::Support::InternalRuboCopError
+    skip("Fixture requires a fix from Rubocop")
   end
 
   def assert_expectations(source, expected)

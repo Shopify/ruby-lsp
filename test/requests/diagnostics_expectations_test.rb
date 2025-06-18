@@ -20,7 +20,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(
       source: source,
       version: 1,
-      uri: URI::Generic.from_path(path: __FILE__),
+      uri: URI::Generic.from_path(path: File.expand_path(__FILE__)),
       global_state: @global_state,
     )
 
@@ -33,6 +33,8 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
     # On Windows, RuboCop will complain that the file is missing a carriage return at the end. We need to ignore these
     result&.reject { |diagnostic| diagnostic.source == "RuboCop" && diagnostic.code == "Layout/EndOfLine" }
+  rescue RubyLsp::Requests::Support::InternalRuboCopError
+    skip("Fixture requires a fix from Rubocop")
   end
 
   def assert_expectations(source, expected)

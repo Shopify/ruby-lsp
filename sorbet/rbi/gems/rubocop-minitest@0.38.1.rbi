@@ -869,12 +869,12 @@ class RuboCop::Cop::Minitest::DuplicateTestRun < ::RuboCop::Cop::Base
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/duplicate_test_run.rb#64
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/duplicate_test_run.rb#63
   def parent_class_has_test_methods?(class_node); end
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/duplicate_test_run.rb#78
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/duplicate_test_run.rb#77
   def test_methods?(class_node); end
 end
 
@@ -1057,44 +1057,44 @@ class RuboCop::Cop::Minitest::GlobalExpectations < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::ConfigurableEnforcedStyle
   extend ::RuboCop::Cop::AutoCorrector
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#120
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#110
   def block_receiver?(param0 = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#108
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#98
   def on_send(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#124
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#114
   def value_receiver?(param0 = T.unsafe(nil)); end
 
   private
 
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#128
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#118
   def method_allowed?(method); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#132
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#122
   def preferred_method; end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#136
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#126
   def preferred_receiver(node); end
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#147
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#137
   def register_offense(node, method); end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#99
+# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#91
 RuboCop::Cop::Minitest::GlobalExpectations::BLOCK_MATCHERS = T.let(T.unsafe(nil), Array)
 
 # There are aliases for the `_` method - `expect` and `value`
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#106
+# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#96
 RuboCop::Cop::Minitest::GlobalExpectations::DSL_METHODS = T.let(T.unsafe(nil), Array)
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#88
 RuboCop::Cop::Minitest::GlobalExpectations::MSG = T.let(T.unsafe(nil), String)
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#103
+# source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#93
 RuboCop::Cop::Minitest::GlobalExpectations::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
 # source://rubocop-minitest//lib/rubocop/cop/minitest/global_expectations.rb#90
@@ -1271,7 +1271,7 @@ class RuboCop::Cop::Minitest::MultipleAssertions < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::DefNode
   include ::RuboCop::Cop::MinitestExplorationHelpers
 
-  # source://rubocop/1.72.0/lib/rubocop/cop/exclude_limit.rb#11
+  # source://rubocop/1.76.2/lib/rubocop/cop/exclude_limit.rb#11
   def max=(value); end
 
   # source://rubocop-minitest//lib/rubocop/cop/minitest/multiple_assertions.rb#37
@@ -1335,6 +1335,8 @@ RuboCop::Cop::Minitest::NilAssertionHandleable::MSG = T.let(T.unsafe(nil), Strin
 
 # Checks if test cases contain any assertion calls.
 #
+# Matchers such as `must_equal` and `wont_match` are also treated as assertion methods.
+#
 # @example
 #   # bad
 #   class FooTest < Minitest::Test
@@ -1349,17 +1351,34 @@ RuboCop::Cop::Minitest::NilAssertionHandleable::MSG = T.let(T.unsafe(nil), Strin
 #   end
 #   end
 #
-# source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#22
+#   # bad
+#   class FooTest < ActiveSupport::TestCase
+#   describe 'foo' do
+#   it 'test equal' do
+#   end
+#   end
+#   end
+#
+#   # good
+#   class FooTest < ActiveSupport::TestCase
+#   describe 'foo' do
+#   it 'test equal' do
+#   musts.must_equal expected_musts
+#   end
+#   end
+#   end
+#
+# source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#41
 class RuboCop::Cop::Minitest::NoAssertions < ::RuboCop::Cop::Base
   include ::RuboCop::Cop::VisibilityHelp
   include ::RuboCop::Cop::DefNode
   include ::RuboCop::Cop::MinitestExplorationHelpers
 
-  # source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#27
+  # source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#46
   def on_class(class_node); end
 end
 
-# source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#25
+# source://rubocop-minitest//lib/rubocop/cop/minitest/no_assertions.rb#44
 RuboCop::Cop::Minitest::NoAssertions::MSG = T.let(T.unsafe(nil), String)
 
 # Checks if test class contains any test cases.
@@ -1493,7 +1512,7 @@ RuboCop::Cop::Minitest::NonPublicTestMethod::MSG = T.let(T.unsafe(nil), String)
 module RuboCop::Cop::Minitest::PredicateAssertionHandleable
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#22
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#21
   def autocorrect(corrector, node, arguments); end
 
   # @api private
@@ -1505,23 +1524,23 @@ module RuboCop::Cop::Minitest::PredicateAssertionHandleable
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#51
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#50
   def correct_receiver(receiver); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#44
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#43
   def new_arguments(arguments); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#36
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#35
   def offense_message(arguments); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#32
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/predicate_assertion_handleable.rb#31
   def predicate_method?(first_argument); end
 end
 
@@ -2494,87 +2513,102 @@ module RuboCop::Cop::MinitestExplorationHelpers
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#103
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#118
   def assertion_method?(node); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#82
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#97
   def assertions(def_node); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#96
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#111
   def assertions_count(node); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#67
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#82
   def class_def_nodes(class_node); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#116
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#130
   def lifecycle_hook_method?(node); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#62
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#77
   def lifecycle_hooks(class_node); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#58
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#73
   def test_block?(block_node); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#32
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#47
   def test_case?(node); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#78
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#93
   def test_case_name?(name); end
 
   # @api private
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#40
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#55
   def test_cases(class_node, visibility_check: T.unsafe(nil)); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#28
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#43
   def test_class?(class_node); end
 
   # @api private
   # @return [Boolean]
   #
-  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#52
+  # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#67
   def test_method?(def_node, visibility_check: T.unsafe(nil)); end
 end
 
 # @api private
 #
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#13
+# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#28
 RuboCop::Cop::MinitestExplorationHelpers::ASSERTION_PREFIXES = T.let(T.unsafe(nil), Array)
 
 # @api private
 #
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#24
+# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#22
+RuboCop::Cop::MinitestExplorationHelpers::BLOCK_MATCHERS = T.let(T.unsafe(nil), Array)
+
+# @api private
+#
+# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#39
 RuboCop::Cop::MinitestExplorationHelpers::LIFECYCLE_HOOK_METHODS = T.let(T.unsafe(nil), Set)
 
 # @api private
 #
-# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#15
+# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#30
 RuboCop::Cop::MinitestExplorationHelpers::LIFECYCLE_HOOK_METHODS_IN_ORDER = T.let(T.unsafe(nil), Array)
 
-# RuboCop minitest project namespace
+# @api private
+#
+# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#26
+RuboCop::Cop::MinitestExplorationHelpers::MATCHER_METHODS = T.let(T.unsafe(nil), Array)
+
+# @api private
+#
+# source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_exploration_helpers.rb#13
+RuboCop::Cop::MinitestExplorationHelpers::VALUE_MATCHERS = T.let(T.unsafe(nil), Array)
+
+# RuboCop minitest project namespace.
 #
 # source://rubocop-minitest//lib/rubocop/minitest.rb#5
 module RuboCop::Minitest; end
@@ -2664,7 +2698,7 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#108
   def assert_offense(source, file = T.unsafe(nil), **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#214
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#215
   def configuration; end
 
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#78
@@ -2676,47 +2710,43 @@ module RuboCop::Minitest::AssertOffense
   # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#87
   def format_offense(source, **replacements); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#182
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#183
   def inspect_source(source, cop, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#189
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#190
   def investigate(cop, processed_source); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#201
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#202
   def parse_source!(source, file = T.unsafe(nil)); end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#236
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#237
   def parser_engine; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#222
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#223
   def registry; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#231
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#232
   def ruby_version; end
 
-  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#177
+  # source://rubocop-minitest//lib/rubocop/minitest/assert_offense.rb#178
   def setup_assertion; end
 end
 
-# source://rubocop-minitest//lib/rubocop/minitest.rb#8
-RuboCop::Minitest::CONFIG = T.let(T.unsafe(nil), Hash)
-
-# source://rubocop-minitest//lib/rubocop/minitest.rb#7
-RuboCop::Minitest::CONFIG_DEFAULT = T.let(T.unsafe(nil), Pathname)
-
-# Because RuboCop doesn't yet support plugins, we have to monkey patch in a
-# bit of our configuration.
+# A plugin that integrates RuboCop Minitest with RuboCop's plugin system.
 #
-# source://rubocop-minitest//lib/rubocop/minitest/inject.rb#7
-module RuboCop::Minitest::Inject
-  class << self
-    # source://rubocop-minitest//lib/rubocop/minitest/inject.rb#8
-    def defaults!; end
-  end
-end
+# source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#8
+class RuboCop::Minitest::Plugin < ::LintRoller::Plugin
+  # source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#9
+  def about; end
 
-# source://rubocop-minitest//lib/rubocop/minitest.rb#6
-RuboCop::Minitest::PROJECT_ROOT = T.let(T.unsafe(nil), Pathname)
+  # source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#22
+  def rules(_context); end
+
+  # @return [Boolean]
+  #
+  # source://rubocop-minitest//lib/rubocop/minitest/plugin.rb#18
+  def supported?(context); end
+end
 
 # This module holds the RuboCop Minitest version information.
 #

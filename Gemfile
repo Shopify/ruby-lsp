@@ -13,9 +13,9 @@ group :development do
   gem "mocha", "~> 2.3"
   gem "psych", "~> 5.1", require: false
   gem "rake", "~> 13.2"
-  gem "rubocop-minitest", "~> 0.36.0", require: false
-  gem "rubocop-rake", "~> 0.6.0", require: false
-  gem "rubocop-shopify", "~> 2.15", require: false
+  gem "rubocop-minitest", "~> 0.38", require: false
+  gem "rubocop-rake", "~> 0.7", require: false
+  gem "rubocop-shopify", "~> 2.16", require: false
   gem "rubocop-sorbet", "~> 0.8", require: false
   gem "rubocop", "~> 1.70"
   gem "syntax_tree", ">= 6.1.1", "< 7"
