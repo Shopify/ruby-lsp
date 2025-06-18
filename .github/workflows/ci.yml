@@ -13,7 +13,7 @@ jobs:
           DISABLE_V8_COMPILE_CACHE: "1"
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "20.9"
+          node-version: "22.15"
 
       - name: Run cspell
         run: |
@@ -72,7 +72,7 @@ jobs:
           DISABLE_V8_COMPILE_CACHE: "1"
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "20.9"
+          node-version: "22.15"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
@@ -96,7 +96,7 @@ jobs:
         env:
           DISABLE_V8_COMPILE_CACHE: 1
         with:
-          node-version: "20.9"
+          node-version: "22.15"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
