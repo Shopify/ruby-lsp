@@ -81,6 +81,7 @@ module RubyLsp
           @offenses = [] #: Array[::RuboCop::Cop::Offense]
           @errors = [] #: Array[String]
           @warnings = [] #: Array[String]
+          @prism_result = nil #: Prism::ParseLexResult?
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
@@ -92,14 +93,15 @@ module RubyLsp
           super(rubocop_options, config_store)
         end
 
-        #: (String path, String contents) -> void
-        def run(path, contents)
+        #: (String, String, Prism::ParseLexResult) -> void
+        def run(path, contents, prism_result)
           # Clear Runner state between runs since we get a single instance of this class
           # on every use site.
           @errors = []
           @warnings = []
           @offenses = []
           @options[:stdin] = contents
+          @prism_result = prism_result
 
           super([path])
 
