@@ -60,7 +60,9 @@ module RubyLsp
 
     # @abstract
     #: -> Symbol
-    def language_id; end
+    def language_id
+      raise AbstractMethodInvokedError
+    end
 
     #: [T] (String request_name) { (Document[ParseResultType] document) -> T } -> T
     def cache_fetch(request_name, &block)
@@ -120,11 +122,15 @@ module RubyLsp
     # Returns `true` if the document was parsed and `false` if nothing needed parsing
     # @abstract
     #: -> bool
-    def parse!; end
+    def parse!
+      raise AbstractMethodInvokedError
+    end
 
     # @abstract
     #: -> bool
-    def syntax_error?; end
+    def syntax_error?
+      raise AbstractMethodInvokedError
+    end
 
     #: -> bool
     def past_expensive_limit?
@@ -190,7 +196,9 @@ module RubyLsp
       # character index regardless of whether we are searching positions based on bytes, code units, or codepoints.
       # @abstract
       #: (Hash[Symbol, untyped] position) -> Integer
-      def find_char_position(position); end
+      def find_char_position(position)
+        raise AbstractMethodInvokedError
+      end
     end
 
     # For the UTF-8 encoding, positions correspond to bytes

@@ -128,11 +128,15 @@ module RubyLsp
 
     # @abstract
     #: (Hash[Symbol, untyped] message) -> void
-    def process_message(message); end
+    def process_message(message)
+      raise AbstractMethodInvokedError
+    end
 
     # @abstract
     #: -> void
-    def shutdown; end
+    def shutdown
+      raise AbstractMethodInvokedError
+    end
 
     #: (Integer id, String message, ?type: Integer) -> void
     def fail_request_and_notify(id, message, type: Constant::MessageType::INFO)

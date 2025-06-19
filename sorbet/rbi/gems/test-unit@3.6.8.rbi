@@ -170,7 +170,7 @@ module Test::Unit::Assertions
   # @since 3.4.4
   # @since 3.4.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1797
+  # source://test-unit//lib/test/unit/assertions.rb#1823
   def assert_all?(collection, message = T.unsafe(nil)); end
 
   # The assertion upon which all other assertions are based. Passes if the
@@ -295,7 +295,7 @@ module Test::Unit::Assertions
   #   assert_include(1..10, 20)             # -> fail
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1671
+  # source://test-unit//lib/test/unit/assertions.rb#1688
   def assert_includes(collection, object, message = T.unsafe(nil)); end
 
   # Passes if `object`.instance_of?(`klass`). When `klass` is
@@ -420,7 +420,7 @@ module Test::Unit::Assertions
   #   assert_not_include(1..10, 5)              # -> fail
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1698
+  # source://test-unit//lib/test/unit/assertions.rb#1715
   def assert_not_includes(collection, object, message = T.unsafe(nil)); end
 
   # Passes if `object`.instance_of?(`klass`) does not hold.
@@ -669,7 +669,7 @@ module Test::Unit::Assertions
   #   assert_raise(MyError.new("XXX"))      {raise "XXX"} # -> fail
   #   assert_raise(RuntimeError.new("ZZZ")) {raise "XXX"} # -> fail
   #
-  # source://test-unit//lib/test/unit/assertions.rb#269
+  # source://test-unit//lib/test/unit/assertions.rb#291
   def assert_raises(*args, &block); end
 
   # Passes if `object` .respond_to? `method`
@@ -723,7 +723,7 @@ module Test::Unit::Assertions
   #   end
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#857
+  # source://test-unit//lib/test/unit/assertions.rb#894
   def assert_throws(expected_object, message = T.unsafe(nil), &proc); end
 
   # Passes if `actual` is true.
@@ -778,7 +778,7 @@ module Test::Unit::Assertions
   #   assert_not_empty({})                       # -> fail
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1755
+  # source://test-unit//lib/test/unit/assertions.rb#1771
   def refute_empty(object, message = T.unsafe(nil)); end
 
   # Passes if `expected` != `actual`
@@ -788,7 +788,7 @@ module Test::Unit::Assertions
   #   assert_not_equal 'some string', 5
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#740
+  # source://test-unit//lib/test/unit/assertions.rb#750
   def refute_equal(expected, actual, message = T.unsafe(nil)); end
 
   # Passes if `expected_float` and `actual_float` are
@@ -800,7 +800,7 @@ module Test::Unit::Assertions
   #   assert_not_in_delta(0.05, (50000.0 / 10**6), 0.00001) # -> fail
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#971
+  # source://test-unit//lib/test/unit/assertions.rb#1009
   def refute_in_delta(expected_float, actual_float, delta = T.unsafe(nil), message = T.unsafe(nil)); end
 
   # Passes if `expected_float` and `actual_float` are
@@ -813,7 +813,7 @@ module Test::Unit::Assertions
   #   assert_not_in_epsilon(10000.0, 9899.0, 0.1) # -> pass
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1150
+  # source://test-unit//lib/test/unit/assertions.rb#1197
   def refute_in_epsilon(expected_float, actual_float, epsilon = T.unsafe(nil), message = T.unsafe(nil)); end
 
   # Passes if `collection` doesn't include `object`.
@@ -826,7 +826,7 @@ module Test::Unit::Assertions
   #   assert_not_include(1..10, 5)              # -> fail
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1698
+  # source://test-unit//lib/test/unit/assertions.rb#1720
   def refute_includes(collection, object, message = T.unsafe(nil)); end
 
   # Passes if `object`.instance_of?(`klass`) does not hold.
@@ -841,7 +841,7 @@ module Test::Unit::Assertions
   # @since 3.0.0
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#427
+  # source://test-unit//lib/test/unit/assertions.rb#455
   def refute_instance_of(klass, object, message = T.unsafe(nil)); end
 
   # Passes if `object`.kind_of?(`klass`) does not hold.
@@ -856,7 +856,7 @@ module Test::Unit::Assertions
   # @since 3.0.0
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#516
+  # source://test-unit//lib/test/unit/assertions.rb#544
   def refute_kind_of(klass, object, message = T.unsafe(nil)); end
 
   # Passes if `regexp` !~ `string`
@@ -867,7 +867,7 @@ module Test::Unit::Assertions
   #   assert_not_match(/three/, 'one 2 three') # -> fail
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#775
+  # source://test-unit//lib/test/unit/assertions.rb#788
   def refute_match(pattern, string, message = T.unsafe(nil)); end
 
   # Passes if ! `object` .nil?
@@ -877,7 +877,7 @@ module Test::Unit::Assertions
   #   assert_not_nil '1 two 3'.sub!(/two/, '2')
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#757
+  # source://test-unit//lib/test/unit/assertions.rb#767
   def refute_nil(object, message = T.unsafe(nil)); end
 
   # Compares the `object1` with `object2` using `operator`.
@@ -891,7 +891,7 @@ module Test::Unit::Assertions
   # @since 3.0.0
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#658
+  # source://test-unit//lib/test/unit/assertions.rb#674
   def refute_operator(object1, operator, object2, message = T.unsafe(nil)); end
 
   # Passes if `object`.`predicate` is false or nil.
@@ -902,7 +902,7 @@ module Test::Unit::Assertions
   #   assert_not_predicate([], :empty?)  # -> fail
   # @since 3.0.0
   #
-  # source://test-unit//lib/test/unit/assertions.rb#1558
+  # source://test-unit//lib/test/unit/assertions.rb#1577
   def refute_predicate(object, predicate, message = T.unsafe(nil)); end
 
   # Passes if `object` does not .respond_to? `method`.
@@ -913,7 +913,7 @@ module Test::Unit::Assertions
   #   assert_not_respond_to('bugbear', :size)         # -> fail
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#574
+  # source://test-unit//lib/test/unit/assertions.rb#594
   def refute_respond_to(object, method, message = T.unsafe(nil)); end
 
   # Passes if ! `actual` .equal? `expected`
@@ -923,7 +923,7 @@ module Test::Unit::Assertions
   #   assert_not_same Object.new, Object.new
   # @since 2.5.3
   #
-  # source://test-unit//lib/test/unit/assertions.rb#720
+  # source://test-unit//lib/test/unit/assertions.rb#733
   def refute_same(expected, actual, message = T.unsafe(nil)); end
 
   private
@@ -1186,6 +1186,7 @@ class Test::Unit::Assertions::AssertionMessage::Inspector
   # source://test-unit//lib/test/unit/assertions.rb#2123
   def inspect; end
 
+  # source://test-unit//lib/test/unit/assertions.rb#2122
   def native_inspect; end
 
   # Returns the value of attribute object.
@@ -2314,7 +2315,7 @@ class Test::Unit::Error
 
   # Deprecated
   #
-  # source://test-unit//lib/test/unit/error.rb#57
+  # source://test-unit//lib/test/unit/error.rb#60
   def backtrace; end
 
   # @return [Boolean]
@@ -3356,12 +3357,12 @@ class Test::Unit::TestCase
   #
   # @return [TestCase] a new instance of TestCase
   #
-  # source://test-unit//lib/test/unit/testcase.rb#553
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def initialize(test_method_name); end
 
   # It's handy to be able to compare TestCase instances.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#824
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def ==(other); end
 
   # Notify that the test is passed. Normally, it is not needed
@@ -3374,12 +3375,12 @@ class Test::Unit::TestCase
   #
   # @return [void]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#878
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def add_pass; end
 
   # Assigns test data to the test. It is used in internal.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#559
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def assign_test_data(label, data); end
 
   # Called after every test method runs but the test
@@ -3427,23 +3428,23 @@ class Test::Unit::TestCase
   # * my_cleanup1
   # * cleanup
   #
-  # source://test-unit//lib/test/unit/testcase.rb#721
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def cleanup; end
 
   # Returns test data for the test. If the test isn't associated
   # with any test data, it returns `nil`.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#786
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def data; end
 
   # Returns a label of test data for the test. If the
   # test isn't associated with any test data, it returns
   # `nil`.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#780
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def data_label; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#769
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def default_test; end
 
   # Returns a description for the test. A description
@@ -3452,19 +3453,19 @@ class Test::Unit::TestCase
   #
   # Returns a name for the test for no description test.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#814
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def description; end
 
   # Returns elapsed time for the test was ran.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#837
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def elapsed_time; end
 
   # Returns whether the test is interrupted.
   #
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#842
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def interrupted?; end
 
   # Returns a human-readable name for the specific test that this
@@ -3473,18 +3474,18 @@ class Test::Unit::TestCase
   # `#local_name` doesn't include class name. `#name` includes
   # class name.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#801
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def local_name; end
 
   # Returns the value of attribute method_name.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#549
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def method_name; end
 
   # Returns a human-readable name for the specific test that
   # this instance of TestCase represents.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#792
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def name; end
 
   # Returns whether this individual test passed or
@@ -3493,7 +3494,7 @@ class Test::Unit::TestCase
   #
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#849
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def passed?; end
 
   # Notify that a problem is occurred in the test. It means that
@@ -3504,19 +3505,19 @@ class Test::Unit::TestCase
   #
   # @return [void]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#860
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def problem_occurred; end
 
   # Runs the individual test method represented by this
   # instance of the fixture, collecting statistics, failures
   # and errors in result.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#580
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def run(result, run_context: T.unsafe(nil)); end
 
   # Returns test suite runner class for easy to test.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#865
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def runner_class; end
 
   # Called before every test method runs. Can be used
@@ -3562,15 +3563,15 @@ class Test::Unit::TestCase
   # * setup callback2
   # * test_my_class
   #
-  # source://test-unit//lib/test/unit/testcase.rb#674
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def setup; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#773
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def size; end
 
   # Returns a Time at the test was started.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#832
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def start_time; end
 
   # Called after every test method runs. Can be used to tear
@@ -3616,33 +3617,33 @@ class Test::Unit::TestCase
   # * my_teardown1
   # * teardown
   #
-  # source://test-unit//lib/test/unit/testcase.rb#766
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def teardown; end
 
   # Overridden to return #name.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#819
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def to_s; end
 
   # Returns the test is valid test. It is used in internal.
   #
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#564
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def valid?; end
 
   private
 
-  # source://test-unit//lib/test/unit/testcase.rb#922
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def add_assertion; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#883
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def current_result; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#910
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def handle_exception(exception); end
 
-  # source://test-unit//lib/test/unit/testcase.rb#887
+  # source://test-unit//lib/test/unit/testcase.rb#170
   def run_test; end
 
   class << self
@@ -3902,13 +3903,10 @@ class Test::Unit::TestCase
     # Here are the available _order_:
     #
     # :alphabetic
-    # : Default. Tests are sorted in alphabetic order.
     #
     # :random
-    # : Tests are sorted in random order.
     #
     # :defined
-    # : Tests are sorted in defined order.
     #
     # source://test-unit//lib/test/unit/testcase.rb#311
     def test_order=(order); end
@@ -5242,7 +5240,7 @@ class Test::Unit::Util::ProcWrapper
   # source://test-unit//lib/test/unit/util/procwrapper.rb#32
   def ==(other); end
 
-  # source://test-unit//lib/test/unit/util/procwrapper.rb#32
+  # source://test-unit//lib/test/unit/util/procwrapper.rb#40
   def eql?(other); end
 
   # source://test-unit//lib/test/unit/util/procwrapper.rb#28

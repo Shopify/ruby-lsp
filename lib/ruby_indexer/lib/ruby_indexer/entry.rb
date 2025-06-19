@@ -294,7 +294,9 @@ module RubyIndexer
 
       # @abstract
       #: -> Array[Signature]
-      def signatures; end
+      def signatures
+        raise AbstractMethodInvokedError
+      end
 
       #: -> String
       def decorated_parameters

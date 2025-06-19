@@ -44,7 +44,7 @@ class RuboCop::Cop::Rake::ClassDefinitionInTask < ::RuboCop::Cop::Base
   # source://rubocop-rake//lib/rubocop/cop/rake/class_definition_in_task.rb#34
   def on_class(node); end
 
-  # source://rubocop-rake//lib/rubocop/cop/rake/class_definition_in_task.rb#34
+  # source://rubocop-rake//lib/rubocop/cop/rake/class_definition_in_task.rb#41
   def on_module(node); end
 end
 
@@ -295,7 +295,7 @@ class RuboCop::Cop::Rake::MethodDefinitionInTask < ::RuboCop::Cop::Base
   # source://rubocop-rake//lib/rubocop/cop/rake/method_definition_in_task.rb#36
   def on_def(node); end
 
-  # source://rubocop-rake//lib/rubocop/cop/rake/method_definition_in_task.rb#36
+  # source://rubocop-rake//lib/rubocop/cop/rake/method_definition_in_task.rb#43
   def on_defs(node); end
 end
 
