@@ -190,5 +190,40 @@ module RubyLsp
         assert_predicate(addon, :hello)
       end
     end
+
+    def test_loading_project_addons_ignores_bundle_path
+      Dir.mktmpdir do |dir|
+        addon_dir = File.join(dir, "vendor", "bundle", "ruby_lsp", "test_addon")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class ProjectAddon < RubyLsp::Addon
+            attr_reader :hello
+
+            def activate(global_state, outgoing_queue)
+              @hello = true
+            end
+
+            def name
+              "Project Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+        })
+
+        Bundler.stubs(:bundle_path).returns(Pathname.new(File.join(dir, "vendor", "bundle")))
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        assert_raises(Addon::AddonNotFoundError) do
+          Addon.get("Project Addon", "0.1.0")
+        end
+      end
+    end
   end
 end

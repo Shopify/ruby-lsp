@@ -56,7 +56,13 @@ module RubyLsp
         addon_files = Gem.find_files("ruby_lsp/**/addon.rb")
 
         if include_project_addons
-          addon_files.concat(Dir.glob(File.join(global_state.workspace_path, "**", "ruby_lsp/**/addon.rb")))
+          project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
+
+          # Ignore add-ons from dependencies if the bundle is stored inside the project. We already found those with
+          # `Gem.find_files`
+          bundle_path = Bundler.bundle_path.to_s
+          project_addons.reject! { |path| path.start_with?(bundle_path) }
+          addon_files.concat(project_addons)
         end
 
         errors = addon_files.filter_map do |addon_path|
