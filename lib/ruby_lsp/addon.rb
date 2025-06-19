@@ -186,7 +186,7 @@ module RubyLsp
       raise AbstractMethodInvokedError
     end
 
-    # Each add-on should implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
+    # Each add-on must implement `MyAddon#deactivate` and use to perform any clean up, like shutting down a
     # child process
     # @abstract
     #: -> void
