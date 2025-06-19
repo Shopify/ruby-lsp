@@ -1605,6 +1605,48 @@ class ServerTest < Minitest::Test
     })
   end
 
+  def test_addons_are_unable_to_exit_the_server_process
+    Class.new(RubyLsp::Addon) do
+      def activate(global_state, outgoing_queue); end
+
+      def workspace_did_change_watched_files(changes)
+        exit
+      end
+
+      def name
+        "Bad add-on"
+      end
+
+      def deactivate; end
+
+      def version
+        "0.1.0"
+      end
+    end
+
+    @server.load_addons
+
+    begin
+      @server.global_state.index.index_all(uris: [])
+      @server.process_message({
+        method: "workspace/didChangeWatchedFiles",
+        params: {
+          changes: [
+            {
+              uri: URI::Generic.from_path(path: File.join(Dir.pwd, "lib", "server.rb")).to_s,
+              type: RubyLsp::Constant::FileChangeType::CHANGED,
+            },
+          ],
+        },
+      })
+      pass
+    rescue SystemExit
+      flunk("Add-on was able to exit the server process")
+    ensure
+      RubyLsp::Addon.unload_addons
+    end
+  end
+
   private
 
   def wait_for_indexing
