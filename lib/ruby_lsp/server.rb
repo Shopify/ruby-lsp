@@ -94,7 +94,13 @@ module RubyLsp
             id: message[:id],
             response:
               Addon.addons.map do |addon|
-                { name: addon.name, version: addon.version, errored: addon.error? }
+                version = begin
+                  addon.version
+                rescue NotImplementedError
+                  "[unknown version]"
+                end
+
+                { name: addon.name, version: version, errored: addon.error? }
               end,
           ),
         )

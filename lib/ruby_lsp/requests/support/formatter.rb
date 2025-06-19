@@ -9,15 +9,15 @@ module RubyLsp
       module Formatter
         # @abstract
         #: (URI::Generic, RubyLsp::RubyDocument) -> String?
-        def run_formatting(uri, document); end
+        def run_formatting(uri, document) = raise(NotImplementedError, "Abstract method called")
 
         # @abstract
         #: (URI::Generic, String, Integer) -> String?
-        def run_range_formatting(uri, source, base_indentation); end
+        def run_range_formatting(uri, source, base_indentation) = raise(NotImplementedError, "Abstract method called")
 
         # @abstract
         #: (URI::Generic, RubyLsp::RubyDocument) -> Array[Interface::Diagnostic]?
-        def run_diagnostic(uri, document); end
+        def run_diagnostic(uri, document) = raise(NotImplementedError, "Abstract method called")
       end
     end
   end

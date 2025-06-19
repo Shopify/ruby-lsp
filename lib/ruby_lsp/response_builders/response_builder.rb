@@ -7,7 +7,7 @@ module RubyLsp
     class ResponseBuilder
       # @abstract
       #: -> top
-      def response; end
+      def response = raise(NotImplementedError, "Abstract method called")
     end
   end
 end

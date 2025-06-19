@@ -9,7 +9,7 @@ module RubyLsp
 
       # @abstract
       #: -> untyped
-      def perform; end
+      def perform = raise(NotImplementedError, "Abstract method called")
 
       private
 
