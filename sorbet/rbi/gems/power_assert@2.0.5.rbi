@@ -140,63 +140,92 @@ class PowerAssert::Context::Value < ::Struct
   # Returns the value of attribute column
   #
   # @return [Object] the current value of column
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def column; end
 
   # Sets the attribute column
   #
   # @param value [Object] the value to set the attribute column to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def column=(_); end
 
   # Returns the value of attribute display_offset
   #
   # @return [Object] the current value of display_offset
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def display_offset; end
 
   # Sets the attribute display_offset
   #
   # @param value [Object] the value to set the attribute display_offset to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def display_offset=(_); end
 
   # Returns the value of attribute lineno
   #
   # @return [Object] the current value of lineno
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def lineno; end
 
   # Sets the attribute lineno
   #
   # @param value [Object] the value to set the attribute lineno to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def lineno=(_); end
 
   # Returns the value of attribute name
   #
   # @return [Object] the current value of name
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def name; end
 
   # Sets the attribute name
   #
   # @param value [Object] the value to set the attribute name to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def name=(_); end
 
   # Returns the value of attribute value
   #
   # @return [Object] the current value of value
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def value; end
 
   # Sets the attribute value
   #
   # @param value [Object] the value to set the attribute value to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/context.rb#8
   def value=(_); end
 
   class << self
+    # source://power_assert//lib/power_assert/context.rb#8
     def [](*_arg0); end
+
+    # source://power_assert//lib/power_assert/context.rb#8
     def inspect; end
+
+    # source://power_assert//lib/power_assert/context.rb#8
     def keyword_init?; end
+
+    # source://power_assert//lib/power_assert/context.rb#8
     def members; end
+
+    # source://power_assert//lib/power_assert/context.rb#8
     def new(*_arg0); end
   end
 end
@@ -325,41 +354,62 @@ class PowerAssert::Parser::Ident < ::Struct
   # Returns the value of attribute column
   #
   # @return [Object] the current value of column
+  #
+  # source://power_assert//lib/power_assert/parser.rb#5
   def column; end
 
   # Sets the attribute column
   #
   # @param value [Object] the value to set the attribute column to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/parser.rb#5
   def column=(_); end
 
   # Returns the value of attribute name
   #
   # @return [Object] the current value of name
+  #
+  # source://power_assert//lib/power_assert/parser.rb#5
   def name; end
 
   # Sets the attribute name
   #
   # @param value [Object] the value to set the attribute name to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/parser.rb#5
   def name=(_); end
 
   # Returns the value of attribute type
   #
   # @return [Object] the current value of type
+  #
+  # source://power_assert//lib/power_assert/parser.rb#5
   def type; end
 
   # Sets the attribute type
   #
   # @param value [Object] the value to set the attribute type to.
   # @return [Object] the newly set value
+  #
+  # source://power_assert//lib/power_assert/parser.rb#5
   def type=(_); end
 
   class << self
+    # source://power_assert//lib/power_assert/parser.rb#5
     def [](*_arg0); end
+
+    # source://power_assert//lib/power_assert/parser.rb#5
     def inspect; end
+
+    # source://power_assert//lib/power_assert/parser.rb#5
     def keyword_init?; end
+
+    # source://power_assert//lib/power_assert/parser.rb#5
     def members; end
+
+    # source://power_assert//lib/power_assert/parser.rb#5
     def new(*_arg0); end
   end
 end

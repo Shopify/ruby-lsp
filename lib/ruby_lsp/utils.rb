@@ -31,6 +31,8 @@ module RubyLsp
     CODE = -32900
   end
 
+  class AbstractMethodInvokedError < StandardError; end
+
   BUNDLE_COMPOSE_FAILED_CODE = -33000
 
   # A notification to be sent to the client
@@ -50,7 +52,9 @@ module RubyLsp
 
     # @abstract
     #: -> Hash[Symbol, untyped]
-    def to_hash; end
+    def to_hash
+      raise AbstractMethodInvokedError
+    end
   end
 
   class Notification < Message

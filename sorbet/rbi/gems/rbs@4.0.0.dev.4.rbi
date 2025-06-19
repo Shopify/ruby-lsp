@@ -45,7 +45,7 @@ class RBS::AST::Annotation
   # source://rbs//lib/rbs/ast/annotation.rb#14
   def ==(other); end
 
-  # source://rbs//lib/rbs/ast/annotation.rb#14
+  # source://rbs//lib/rbs/ast/annotation.rb#18
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/annotation.rb#20
@@ -75,7 +75,7 @@ class RBS::AST::Comment
   # source://rbs//lib/rbs/ast/comment.rb#14
   def ==(other); end
 
-  # source://rbs//lib/rbs/ast/comment.rb#14
+  # source://rbs//lib/rbs/ast/comment.rb#18
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/comment.rb#20
@@ -118,7 +118,7 @@ class RBS::AST::Declarations::AliasDecl < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#424
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#434
+  # source://rbs//lib/rbs/ast/declarations.rb#440
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#442
@@ -166,7 +166,7 @@ class RBS::AST::Declarations::Class < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#95
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#119
+  # source://rbs//lib/rbs/ast/declarations.rb#127
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#129
@@ -219,7 +219,7 @@ class RBS::AST::Declarations::Class::Super
   # source://rbs//lib/rbs/ast/declarations.rb#58
   def args; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#67
+  # source://rbs//lib/rbs/ast/declarations.rb#71
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#73
@@ -265,7 +265,7 @@ class RBS::AST::Declarations::Constant < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#351
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#362
+  # source://rbs//lib/rbs/ast/declarations.rb#368
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#370
@@ -310,7 +310,7 @@ class RBS::AST::Declarations::Global < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#389
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#400
+  # source://rbs//lib/rbs/ast/declarations.rb#406
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#408
@@ -357,7 +357,7 @@ class RBS::AST::Declarations::Interface < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#254
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#278
+  # source://rbs//lib/rbs/ast/declarations.rb#285
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#287
@@ -419,7 +419,7 @@ class RBS::AST::Declarations::Module < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#195
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#220
+  # source://rbs//lib/rbs/ast/declarations.rb#228
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#230
@@ -472,7 +472,7 @@ class RBS::AST::Declarations::Module::Self
   # source://rbs//lib/rbs/ast/declarations.rb#150
   def args; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#159
+  # source://rbs//lib/rbs/ast/declarations.rb#163
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#165
@@ -530,7 +530,7 @@ class RBS::AST::Declarations::TypeAlias < ::RBS::AST::Declarations::Base
   # source://rbs//lib/rbs/ast/declarations.rb#310
   def comment; end
 
-  # source://rbs//lib/rbs/ast/declarations.rb#321
+  # source://rbs//lib/rbs/ast/declarations.rb#328
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/declarations.rb#330
@@ -666,7 +666,7 @@ class RBS::AST::Members::Alias < ::RBS::AST::Members::Base
   # source://rbs//lib/rbs/ast/members.rb#405
   def comment; end
 
-  # source://rbs//lib/rbs/ast/members.rb#416
+  # source://rbs//lib/rbs/ast/members.rb#423
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/members.rb#425
@@ -748,7 +748,7 @@ module RBS::AST::Members::Attribute
   # source://rbs//lib/rbs/ast/members.rb#267
   def comment; end
 
-  # source://rbs//lib/rbs/ast/members.rb#281
+  # source://rbs//lib/rbs/ast/members.rb#290
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/members.rb#292
@@ -839,7 +839,7 @@ module RBS::AST::Members::LocationOnly
   # source://rbs//lib/rbs/ast/members.rb#372
   def ==(other); end
 
-  # source://rbs//lib/rbs/ast/members.rb#372
+  # source://rbs//lib/rbs/ast/members.rb#376
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/members.rb#378
@@ -871,7 +871,7 @@ class RBS::AST::Members::MethodDefinition < ::RBS::AST::Members::Base
   # source://rbs//lib/rbs/ast/members.rb#51
   def comment; end
 
-  # source://rbs//lib/rbs/ast/members.rb#66
+  # source://rbs//lib/rbs/ast/members.rb#75
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/members.rb#77
@@ -944,7 +944,7 @@ class RBS::AST::Members::MethodDefinition::Overload
   # source://rbs//lib/rbs/ast/members.rb#11
   def annotations; end
 
-  # source://rbs//lib/rbs/ast/members.rb#18
+  # source://rbs//lib/rbs/ast/members.rb#26
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/members.rb#22
@@ -1044,7 +1044,7 @@ module RBS::AST::Members::Var
   # source://rbs//lib/rbs/ast/members.rb#125
   def comment; end
 
-  # source://rbs//lib/rbs/ast/members.rb#134
+  # source://rbs//lib/rbs/ast/members.rb#138
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/members.rb#140
@@ -1281,16 +1281,32 @@ end
 
 # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
 class RBS::AST::Ruby::CommentBlock::AnnotationSyntaxError < ::Struct
+  # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
   def error; end
+
+  # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
   def error=(_); end
+
+  # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
   def location; end
+
+  # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
   def location=(_); end
 
   class << self
+    # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
     def inspect; end
+
+    # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
     def members; end
+
+    # source://rbs//lib/rbs/ast/ruby/comment_block.rb#96
     def new(*_arg0); end
   end
 end
@@ -1534,7 +1550,7 @@ class RBS::AST::TypeParam
   # source://rbs//lib/rbs/ast/type_param.rb#6
   def default_type; end
 
-  # source://rbs//lib/rbs/ast/type_param.rb#33
+  # source://rbs//lib/rbs/ast/type_param.rb#42
   def eql?(other); end
 
   # source://rbs//lib/rbs/ast/type_param.rb#44
@@ -1740,28 +1756,52 @@ end
 
 # source://rbs//lib/rbs/ancestor_graph.rb#5
 class RBS::AncestorGraph::InstanceNode < ::Struct
+  # source://rbs//lib/rbs/ancestor_graph.rb#5
   def type_name; end
+
+  # source://rbs//lib/rbs/ancestor_graph.rb#5
   def type_name=(_); end
 
   class << self
+    # source://rbs//lib/rbs/ancestor_graph.rb#5
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#5
     def inspect; end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#5
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#5
     def members; end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#5
     def new(*_arg0); end
   end
 end
 
 # source://rbs//lib/rbs/ancestor_graph.rb#6
 class RBS::AncestorGraph::SingletonNode < ::Struct
+  # source://rbs//lib/rbs/ancestor_graph.rb#6
   def type_name; end
+
+  # source://rbs//lib/rbs/ancestor_graph.rb#6
   def type_name=(_); end
 
   class << self
+    # source://rbs//lib/rbs/ancestor_graph.rb#6
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#6
     def inspect; end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#6
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#6
     def members; end
+
+    # source://rbs//lib/rbs/ancestor_graph.rb#6
     def new(*_arg0); end
   end
 end
@@ -2432,7 +2472,10 @@ class RBS::Collection::Sources::Rubygems
   class << self
     private
 
+    # source://rbs//lib/rbs/collection/sources/rubygems.rb#11
     def allocate; end
+
+    # source://rbs//lib/rbs/collection/sources/rubygems.rb#11
     def new(*_arg0); end
   end
 end
@@ -2471,7 +2514,10 @@ class RBS::Collection::Sources::Stdlib
   class << self
     private
 
+    # source://rbs//lib/rbs/collection/sources/stdlib.rb#11
     def allocate; end
+
+    # source://rbs//lib/rbs/collection/sources/stdlib.rb#11
     def new(*_arg0); end
   end
 end
@@ -2494,7 +2540,7 @@ class RBS::Constant
   # source://rbs//lib/rbs/constant.rb#7
   def entry; end
 
-  # source://rbs//lib/rbs/constant.rb#15
+  # source://rbs//lib/rbs/constant.rb#22
   def eql?(other); end
 
   # source://rbs//lib/rbs/constant.rb#24
@@ -2665,7 +2711,7 @@ class RBS::Definition::Ancestor::Instance
   # source://rbs//lib/rbs/definition.rb#211
   def args; end
 
-  # source://rbs//lib/rbs/definition.rb#219
+  # source://rbs//lib/rbs/definition.rb#223
   def eql?(other); end
 
   # source://rbs//lib/rbs/definition.rb#225
@@ -2692,7 +2738,7 @@ class RBS::Definition::Ancestor::Singleton
   # source://rbs//lib/rbs/definition.rb#237
   def ==(other); end
 
-  # source://rbs//lib/rbs/definition.rb#237
+  # source://rbs//lib/rbs/definition.rb#241
   def eql?(other); end
 
   # source://rbs//lib/rbs/definition.rb#243
@@ -2771,7 +2817,7 @@ class RBS::Definition::Method
   # source://rbs//lib/rbs/definition.rb#100
   def defs; end
 
-  # source://rbs//lib/rbs/definition.rb#117
+  # source://rbs//lib/rbs/definition.rb#127
   def eql?(other); end
 
   # Returns the value of attribute extra_annotations.
@@ -2848,7 +2894,7 @@ class RBS::Definition::Method::TypeDef
   # source://rbs//lib/rbs/definition.rb#89
   def each_annotation(&block); end
 
-  # source://rbs//lib/rbs/definition.rb#50
+  # source://rbs//lib/rbs/definition.rb#58
   def eql?(other); end
 
   # source://rbs//lib/rbs/definition.rb#60
@@ -3958,42 +4004,78 @@ end
 
 # source://rbs//lib/rbs/environment_walker.rb#5
 class RBS::EnvironmentWalker::InstanceNode < ::Struct
+  # source://rbs//lib/rbs/environment_walker.rb#5
   def type_name; end
+
+  # source://rbs//lib/rbs/environment_walker.rb#5
   def type_name=(_); end
 
   class << self
+    # source://rbs//lib/rbs/environment_walker.rb#5
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/environment_walker.rb#5
     def inspect; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#5
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#5
     def members; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#5
     def new(*_arg0); end
   end
 end
 
 # source://rbs//lib/rbs/environment_walker.rb#6
 class RBS::EnvironmentWalker::SingletonNode < ::Struct
+  # source://rbs//lib/rbs/environment_walker.rb#6
   def type_name; end
+
+  # source://rbs//lib/rbs/environment_walker.rb#6
   def type_name=(_); end
 
   class << self
+    # source://rbs//lib/rbs/environment_walker.rb#6
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/environment_walker.rb#6
     def inspect; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#6
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#6
     def members; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#6
     def new(*_arg0); end
   end
 end
 
 # source://rbs//lib/rbs/environment_walker.rb#7
 class RBS::EnvironmentWalker::TypeNameNode < ::Struct
+  # source://rbs//lib/rbs/environment_walker.rb#7
   def type_name; end
+
+  # source://rbs//lib/rbs/environment_walker.rb#7
   def type_name=(_); end
 
   class << self
+    # source://rbs//lib/rbs/environment_walker.rb#7
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/environment_walker.rb#7
     def inspect; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#7
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#7
     def members; end
+
+    # source://rbs//lib/rbs/environment_walker.rb#7
     def new(*_arg0); end
   end
 end
@@ -4392,18 +4474,34 @@ class RBS::LoadingError < ::RBS::BaseError; end
 
 # source://rbs//lib/rbs/location_aux.rb#4
 class RBS::Location
+  # source://rbs//lib/rbs.rb#72
   def initialize(_arg0, _arg1, _arg2); end
 
   # source://rbs//lib/rbs/location_aux.rb#79
   def ==(other); end
 
+  # source://rbs//lib/rbs.rb#72
   def [](_arg0); end
+
+  # source://rbs//lib/rbs.rb#72
   def _add_optional_child(_arg0, _arg1, _arg2); end
+
+  # source://rbs//lib/rbs.rb#72
   def _add_optional_no_child(_arg0); end
+
+  # source://rbs//lib/rbs.rb#72
   def _add_required_child(_arg0, _arg1, _arg2); end
+
+  # source://rbs//lib/rbs.rb#72
   def _end_pos; end
+
+  # source://rbs//lib/rbs.rb#72
   def _optional_keys; end
+
+  # source://rbs//lib/rbs.rb#72
   def _required_keys; end
+
+  # source://rbs//lib/rbs.rb#72
   def _start_pos; end
 
   # source://rbs//lib/rbs/location_aux.rb#110
@@ -4412,7 +4510,10 @@ class RBS::Location
   # source://rbs//lib/rbs/location_aux.rb#106
   def add_required_child(name, range); end
 
+  # source://rbs//lib/rbs/location_aux.rb#27
   def aref(_arg0); end
+
+  # source://rbs//lib/rbs.rb#72
   def buffer; end
 
   # source://rbs//lib/rbs/location_aux.rb#118
@@ -4486,6 +4587,7 @@ class RBS::Location
 
   private
 
+  # source://rbs//lib/rbs.rb#72
   def initialize_copy(_arg0); end
 
   class << self
@@ -4697,7 +4799,7 @@ class RBS::Namespace
   # source://rbs//lib/rbs/namespace.rb#55
   def empty?; end
 
-  # source://rbs//lib/rbs/namespace.rb#59
+  # source://rbs//lib/rbs/namespace.rb#63
   def eql?(other); end
 
   # source://rbs//lib/rbs/namespace.rb#65
@@ -4864,12 +4966,25 @@ end
 # source://rbs//lib/rbs/parser/lex_result.rb#4
 class RBS::Parser
   class << self
+    # source://rbs//lib/rbs.rb#72
     def _lex(_arg0, _arg1); end
+
+    # source://rbs//lib/rbs.rb#72
     def _parse_inline_leading_annotation(_arg0, _arg1, _arg2, _arg3); end
+
+    # source://rbs//lib/rbs.rb#72
     def _parse_inline_trailing_annotation(_arg0, _arg1, _arg2, _arg3); end
+
+    # source://rbs//lib/rbs.rb#72
     def _parse_method_type(_arg0, _arg1, _arg2, _arg3, _arg4); end
+
+    # source://rbs//lib/rbs.rb#72
     def _parse_signature(_arg0, _arg1, _arg2); end
+
+    # source://rbs//lib/rbs.rb#72
     def _parse_type(_arg0, _arg1, _arg2, _arg3, _arg4); end
+
+    # source://rbs//lib/rbs.rb#72
     def _parse_type_params(_arg0, _arg1, _arg2, _arg3); end
 
     # source://rbs//lib/rbs/parser_aux.rb#76
@@ -5087,7 +5202,7 @@ class RBS::Prototype::RB
 
   # backward compatible
   #
-  # source://rbs//lib/rbs/prototype/rb.rb#719
+  # source://rbs//lib/rbs/prototype/rb.rb#762
   def node_type(node, default: T.unsafe(nil)); end
 
   # source://rbs//lib/rbs/prototype/rb.rb#719
@@ -5374,7 +5489,6 @@ class RBS::Prototype::Runtime::DataGenerator < ::RBS::Prototype::Runtime::ValueO
   def add_decl_members(decl); end
 
   # def self.new: (untyped foo, untyped bar) -> instance
-  #             | (foo: untyped, bar: untyped) -> instance
   #
   # source://rbs//lib/rbs/prototype/runtime/value_object_generator.rb#237
   def build_s_new; end
@@ -5442,7 +5556,6 @@ class RBS::Prototype::Runtime::StructGenerator < ::RBS::Prototype::Runtime::Valu
   def build_s_keyword_init_p; end
 
   # def self.new: (?untyped foo, ?untyped bar) -> instance
-  #             | (?foo: untyped, ?bar: untyped) -> instance
   #
   # source://rbs//lib/rbs/prototype/runtime/value_object_generator.rb#117
   def build_s_new; end
@@ -5746,18 +5859,38 @@ end
 
 # source://rbs//lib/rbs/repository.rb#69
 class RBS::Repository::VersionPath < ::Struct
+  # source://rbs//lib/rbs/repository.rb#69
   def gem; end
+
+  # source://rbs//lib/rbs/repository.rb#69
   def gem=(_); end
+
+  # source://rbs//lib/rbs/repository.rb#69
   def path; end
+
+  # source://rbs//lib/rbs/repository.rb#69
   def path=(_); end
+
+  # source://rbs//lib/rbs/repository.rb#69
   def version; end
+
+  # source://rbs//lib/rbs/repository.rb#69
   def version=(_); end
 
   class << self
+    # source://rbs//lib/rbs/repository.rb#69
     def [](*_arg0); end
+
+    # source://rbs//lib/rbs/repository.rb#69
     def inspect; end
+
+    # source://rbs//lib/rbs/repository.rb#69
     def keyword_init?; end
+
+    # source://rbs//lib/rbs/repository.rb#69
     def members; end
+
+    # source://rbs//lib/rbs/repository.rb#69
     def new(*_arg0); end
   end
 end
@@ -5971,7 +6104,7 @@ class RBS::Substitution
   # source://rbs//lib/rbs/substitution.rb#66
   def +(other); end
 
-  # source://rbs//lib/rbs/substitution.rb#37
+  # source://rbs//lib/rbs/substitution.rb#53
   def [](ty); end
 
   # source://rbs//lib/rbs/substitution.rb#16
@@ -6248,7 +6381,7 @@ class RBS::TypeName
   # source://rbs//lib/rbs/type_name.rb#47
   def class?; end
 
-  # source://rbs//lib/rbs/type_name.rb#25
+  # source://rbs//lib/rbs/type_name.rb#29
   def eql?(other); end
 
   # source://rbs//lib/rbs/type_name.rb#31
@@ -6366,7 +6499,7 @@ module RBS::Types::Application
   # source://rbs//lib/rbs/types.rb#284
   def each_type(&block); end
 
-  # source://rbs//lib/rbs/types.rb#258
+  # source://rbs//lib/rbs/types.rb#262
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#268
@@ -6428,7 +6561,7 @@ class RBS::Types::Bases::Base
   # source://rbs//lib/rbs/types.rb#49
   def ==(other); end
 
-  # source://rbs//lib/rbs/types.rb#49
+  # source://rbs//lib/rbs/types.rb#57
   def eql?(other); end
 
   # @return [Boolean]
@@ -6569,7 +6702,7 @@ class RBS::Types::ClassSingleton
   # source://rbs//lib/rbs/types.rb#211
   def ==(other); end
 
-  # source://rbs//lib/rbs/types.rb#211
+  # source://rbs//lib/rbs/types.rb#215
   def eql?(other); end
 
   # @return [Boolean]
@@ -6649,7 +6782,7 @@ class RBS::Types::Function
   # source://rbs//lib/rbs/types.rb#1153
   def empty?; end
 
-  # source://rbs//lib/rbs/types.rb#972
+  # source://rbs//lib/rbs/types.rb#984
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#998
@@ -6761,7 +6894,7 @@ class RBS::Types::Function::Param
   # source://rbs//lib/rbs/types.rb#917
   def ==(other); end
 
-  # source://rbs//lib/rbs/types.rb#917
+  # source://rbs//lib/rbs/types.rb#921
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#923
@@ -6832,7 +6965,7 @@ class RBS::Types::Intersection
   # source://rbs//lib/rbs/types.rb#869
   def each_type(&block); end
 
-  # source://rbs//lib/rbs/types.rb#831
+  # source://rbs//lib/rbs/types.rb#835
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#841
@@ -6897,7 +7030,7 @@ class RBS::Types::Literal
   # source://rbs//lib/rbs/types.rb#1529
   def ==(other); end
 
-  # source://rbs//lib/rbs/types.rb#1529
+  # source://rbs//lib/rbs/types.rb#1533
   def eql?(other); end
 
   # @return [Boolean]
@@ -6974,7 +7107,7 @@ class RBS::Types::Optional
   # source://rbs//lib/rbs/types.rb#692
   def each_type; end
 
-  # source://rbs//lib/rbs/types.rb#654
+  # source://rbs//lib/rbs/types.rb#658
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#664
@@ -7042,7 +7175,7 @@ class RBS::Types::Proc
   # source://rbs//lib/rbs/types.rb#1464
   def each_type(&block); end
 
-  # source://rbs//lib/rbs/types.rb#1410
+  # source://rbs//lib/rbs/types.rb#1414
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#1420
@@ -7115,7 +7248,7 @@ class RBS::Types::Record
   # source://rbs//lib/rbs/types.rb#605
   def each_type(&block); end
 
-  # source://rbs//lib/rbs/types.rb#555
+  # source://rbs//lib/rbs/types.rb#559
   def eql?(other); end
 
   # Returns the value of attribute fields.
@@ -7196,7 +7329,7 @@ class RBS::Types::Tuple
   # source://rbs//lib/rbs/types.rb#488
   def each_type(&block); end
 
-  # source://rbs//lib/rbs/types.rb#451
+  # source://rbs//lib/rbs/types.rb#455
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#461
@@ -7259,7 +7392,7 @@ class RBS::Types::Union
   # source://rbs//lib/rbs/types.rb#786
   def each_type(&block); end
 
-  # source://rbs//lib/rbs/types.rb#740
+  # source://rbs//lib/rbs/types.rb#744
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#750
@@ -7330,7 +7463,7 @@ class RBS::Types::UntypedFunction
   # source://rbs//lib/rbs/types.rb#1302
   def empty?; end
 
-  # source://rbs//lib/rbs/types.rb#1326
+  # source://rbs//lib/rbs/types.rb#1330
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#1248
@@ -7397,7 +7530,7 @@ class RBS::Types::Variable
   # source://rbs//lib/rbs/types.rb#144
   def ==(other); end
 
-  # source://rbs//lib/rbs/types.rb#144
+  # source://rbs//lib/rbs/types.rb#148
   def eql?(other); end
 
   # source://rbs//lib/rbs/types.rb#154

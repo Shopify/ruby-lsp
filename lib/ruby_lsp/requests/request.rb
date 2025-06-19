@@ -9,7 +9,9 @@ module RubyLsp
 
       # @abstract
       #: -> untyped
-      def perform; end
+      def perform
+        raise AbstractMethodInvokedError
+      end
 
       private
 

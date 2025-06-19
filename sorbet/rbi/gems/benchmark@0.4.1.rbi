@@ -290,7 +290,7 @@ module Benchmark
     #       >total:   2.930000   0.000000   2.930000 (  2.932889)
     #       >avg:     0.976667   0.000000   0.976667 (  0.977630)
     #
-    # source://benchmark//lib/benchmark.rb#171
+    # source://benchmark//lib/benchmark.rb#328
     def benchmark(caption = T.unsafe(nil), label_width = T.unsafe(nil), format = T.unsafe(nil), *labels); end
 
     # A simple interface to the #benchmark method, #bm generates sequential
@@ -313,7 +313,7 @@ module Benchmark
     #       times:    0.960000   0.000000   0.960000 (  0.960423)
     #       upto:     0.950000   0.000000   0.950000 (  0.954864)
     #
-    # source://benchmark//lib/benchmark.rb#216
+    # source://benchmark//lib/benchmark.rb#328
     def bm(label_width = T.unsafe(nil), *labels, &blk); end
 
     # Sometimes benchmark results are skewed because code executed
@@ -353,7 +353,7 @@ module Benchmark
     # #bmbm yields a Benchmark::Job object and returns an array of
     # Benchmark::Tms objects.
     #
-    # source://benchmark//lib/benchmark.rb#258
+    # source://benchmark//lib/benchmark.rb#328
     def bmbm(width = T.unsafe(nil)); end
 
     # Returns the time used to execute the given block as a
@@ -372,7 +372,7 @@ module Benchmark
     #
     #        0.220000   0.000000   0.220000 (  0.227313)
     #
-    # source://benchmark//lib/benchmark.rb#303
+    # source://benchmark//lib/benchmark.rb#328
     def measure(label = T.unsafe(nil)); end
 
     # Returns the elapsed real time used to execute the given block.
@@ -381,7 +381,7 @@ module Benchmark
     #       Benchmark.realtime { "a" * 1_000_000_000 }
     #       #=> 0.5098029999935534
     #
-    # source://benchmark//lib/benchmark.rb#322
+    # source://benchmark//lib/benchmark.rb#328
     def realtime; end
   end
 end
@@ -418,7 +418,7 @@ class Benchmark::Job
   #
   # @raise [ArgumentError]
   #
-  # source://benchmark//lib/benchmark.rb#350
+  # source://benchmark//lib/benchmark.rb#359
   def report(label = T.unsafe(nil), &blk); end
 
   # Length of the widest label in the #list.
@@ -464,7 +464,7 @@ class Benchmark::Report
   # formatted by +format+. See Tms#format for the
   # formatting rules.
   #
-  # source://benchmark//lib/benchmark.rb#389
+  # source://benchmark//lib/benchmark.rb#396
   def report(label = T.unsafe(nil), *format, &blk); end
 
   # An array of Benchmark::Tms objects representing each item.
