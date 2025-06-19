@@ -5,9 +5,6 @@ module RubyLsp
   class Store
     class NonExistingDocumentError < StandardError; end
 
-    #: Hash[Symbol, RequestConfig]
-    attr_accessor :features_configuration
-
     #: String
     attr_accessor :client_name
 
@@ -15,13 +12,6 @@ module RubyLsp
     def initialize(global_state)
       @global_state = global_state
       @state = {} #: Hash[String, Document[untyped]]
-      @features_configuration = {
-        inlayHint: RequestConfig.new({
-          enableAll: false,
-          implicitRescue: false,
-          implicitHashValue: false,
-        }),
-      } #: Hash[Symbol, RequestConfig]
       @client_name = "Unknown" #: String
     end
 

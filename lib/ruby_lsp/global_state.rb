@@ -56,6 +56,13 @@ module RubyLsp
       @enabled_feature_flags = {} #: Hash[Symbol, bool]
       @mutex = Mutex.new #: Mutex
       @telemetry_machine_id = nil #: String?
+      @feature_configuration = {
+        inlayHint: RequestConfig.new({
+          enableAll: false,
+          implicitRescue: false,
+          implicitHashValue: false,
+        }),
+      } #: Hash[Symbol, RequestConfig]
     end
 
     #: [T] { -> T } -> T
@@ -175,7 +182,17 @@ module RubyLsp
       @enabled_feature_flags = enabled_flags if enabled_flags
 
       @telemetry_machine_id = options.dig(:initializationOptions, :telemetryMachineId)
+
+      options.dig(:initializationOptions, :featuresConfiguration)&.each do |feature_name, config|
+        @feature_configuration[feature_name]&.merge!(config)
+      end
+
       notifications
+    end
+
+    #: (Symbol) -> RequestConfig?
+    def feature_configuration(feature_name)
+      @feature_configuration[feature_name]
     end
 
     #: (Symbol flag) -> bool?

@@ -8,10 +8,12 @@ module RubyLsp
 
       RESCUE_STRING_LENGTH = "rescue".length #: Integer
 
-      #: (ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint] response_builder, RequestConfig hints_configuration, Prism::Dispatcher dispatcher) -> void
-      def initialize(response_builder, hints_configuration, dispatcher)
+      #: (GlobalState, ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint], Prism::Dispatcher) -> void
+      def initialize(global_state, response_builder, dispatcher)
         @response_builder = response_builder
-        @hints_configuration = hints_configuration
+        @hints_configuration = ( # rubocop:disable Style/RedundantParentheses
+          global_state.feature_configuration(:inlayHint) #: as !nil
+        ) #: RequestConfig
 
         dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
       end
