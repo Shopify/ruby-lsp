@@ -22,7 +22,7 @@ group :development do
 
   platforms :ruby do # C Ruby (MRI), Rubinius or TruffleRuby, but NOT Windows
     # sorbet-static is not available on Windows. We also skip Tapioca since it depends on sorbet-static-and-runtime
-    gem "sorbet-static-and-runtime"
+    gem "sorbet-static"
     gem "tapioca", "~> 0.16", require: false
   end
 end

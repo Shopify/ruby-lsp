@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "rubocop"
-require "sorbet-runtime"
 
 module RuboCop
   module Cop

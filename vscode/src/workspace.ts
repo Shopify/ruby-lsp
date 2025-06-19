@@ -274,7 +274,6 @@ export class Workspace implements WorkspaceInterface {
       "language_server-protocol",
       "prism",
       "rbs",
-      "sorbet-runtime",
     ];
 
     const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {

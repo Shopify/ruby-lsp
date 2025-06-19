@@ -3,12 +3,8 @@
 
 # This executable checks if all automatic LSP requests run successfully on every Ruby file under the current directory
 
-require "ruby_lsp/load_sorbet"
-
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"
-
-T::Utils.run_all_sig_blocks
 
 files = Dir.glob("#{Dir.pwd}/**/*.rb")
 

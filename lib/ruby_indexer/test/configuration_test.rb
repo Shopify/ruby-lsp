@@ -20,7 +20,7 @@ module RubyIndexer
       assert(uris.none? { |uri| uri.full_path.include?("test/fixtures") })
       assert(uris.none? { |uri| uri.full_path.include?(bundle_path.join("minitest-reporters").to_s) })
       assert(uris.none? { |uri| uri.full_path.include?(bundle_path.join("ansi").to_s) })
-      assert(uris.any? { |uri| uri.full_path.include?(bundle_path.join("sorbet-runtime").to_s) })
+      assert(uris.any? { |uri| uri.full_path.include?(bundle_path.join("prism").to_s) })
       assert(uris.none? { |uri| uri.full_path == __FILE__ })
     end
 

@@ -5,7 +5,6 @@ PATH
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
-      sorbet-runtime (>= 0.5.10782)
 
 GEM
   remote: https://rubygems.org/
@@ -148,7 +147,7 @@ DEPENDENCIES
   rubocop-shopify (~> 2.16)
   rubocop-sorbet (~> 0.8)
   ruby-lsp!
-  sorbet-static-and-runtime
+  sorbet-static
   syntax_tree (>= 6.1.1, < 7)
   tapioca (~> 0.16)
   test-unit
