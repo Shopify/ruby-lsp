@@ -139,12 +139,10 @@ module RubyLsp
 
     #: (Hash[Symbol, untyped] start_pos, ?Hash[Symbol, untyped]? end_pos) -> [Integer, Integer?]
     def find_index_by_position(start_pos, end_pos = nil)
-      @global_state.synchronize do
-        scanner = create_scanner
-        start_index = scanner.find_char_position(start_pos)
-        end_index = scanner.find_char_position(end_pos) if end_pos
-        [start_index, end_index]
-      end
+      scanner = create_scanner
+      start_index = scanner.find_char_position(start_pos)
+      end_index = scanner.find_char_position(end_pos) if end_pos
+      [start_index, end_index]
     end
 
     private
