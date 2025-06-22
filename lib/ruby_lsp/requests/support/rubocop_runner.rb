@@ -61,6 +61,12 @@ module RubyLsp
           "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
         ] #: Array[String]
 
+        CONFIG_FILES = [
+          ".rubocop.yml",
+          ".rubocop",
+          ".rubocop_todo.yml",
+        ] #: Array[String]
+
         #: Array[::RuboCop::Cop::Offense]
         attr_reader :offenses
 

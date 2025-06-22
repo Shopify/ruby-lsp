@@ -1123,8 +1123,6 @@ class ServerTest < Minitest::Test
   end
 
   def test_rubocop_config_changes_trigger_workspace_diagnostic_refresh
-    uri = URI::Generic.from_path(path: File.join(Dir.pwd, ".rubocop.yml"))
-
     @server.process_message({
       id: 1,
       method: "initialize",
@@ -1140,20 +1138,10 @@ class ServerTest < Minitest::Test
     })
 
     @server.global_state.index.index_all(uris: [])
-    @server.process_message({
-      method: "workspace/didChangeWatchedFiles",
-      params: {
-        changes: [
-          {
-            uri: uri,
-            type: RubyLsp::Constant::FileChangeType::CHANGED,
-          },
-        ],
-      },
-    })
 
-    request = find_message(RubyLsp::Request)
-    assert_equal("workspace/diagnostic/refresh", request.method)
+    RubyLsp::Requests::Support::RuboCopRunner::CONFIG_FILES.each do |config_file|
+      assert_rubocop_config_triggers_diagnostic_refresh_without_setup(config_file)
+    end
   end
 
   def test_compose_bundle_creates_file_to_skip_next_compose
@@ -1710,6 +1698,46 @@ class ServerTest < Minitest::Test
 
       def deactivate; end
     end
+  end
+
+  def assert_rubocop_config_triggers_diagnostic_refresh(config_file)
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, config_file))
+
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {
+          general: {
+            positionEncodings: ["utf-8"],
+          },
+          workspace: { diagnostics: { refreshSupport: true } },
+        },
+      },
+    })
+
+    @server.global_state.index.index_all(uris: [])
+    assert_rubocop_config_triggers_diagnostic_refresh_without_setup(config_file)
+  end
+
+  def assert_rubocop_config_triggers_diagnostic_refresh_without_setup(config_file)
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, config_file))
+
+    @server.process_message({
+      method: "workspace/didChangeWatchedFiles",
+      params: {
+        changes: [
+          {
+            uri: uri,
+            type: RubyLsp::Constant::FileChangeType::CHANGED,
+          },
+        ],
+      },
+    })
+
+    request = find_message(RubyLsp::Request)
+    assert_equal("workspace/diagnostic/refresh", request.method)
   end
 
   #: (Class desired_class, ?String? desired_method, ?id: Integer?) -> untyped
