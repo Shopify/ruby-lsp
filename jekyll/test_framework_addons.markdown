@@ -16,7 +16,7 @@ test frameworks, like [Active Support test case](rails-add-on) and [RSpec](https
 There are 3 main parts for contributing support for a new framework:
 
 - [Test discovery](#test-discovery): identifying tests within the codebase and their structure
-- Command resolution: determining how to execute a specific test or group of tests
+- [Command resolution](#command-resolution): determining how to execute a specific test or group of tests
 - Custom reporting: displaying test execution results in the test explorer
 
 ## Test discovery
@@ -220,3 +220,114 @@ module RubyLsp
   end
 end
 ```
+
+## Command resolution
+
+Command resolution is the process of receiving a hierarchy of tests selected in the UI and determining the shell commands required to run them. It's important that we minimize the number of these commands, to avoid having to spawn too many Ruby processes.
+
+For example, this is what consolidated commands could look like when trying to run two specific examples in different
+frameworks:
+
+```shell
+# Rails style execution (very similar to RSpec)
+bin/rails test /project/test/models/user_test.rb:10:25
+
+# Test Unit style execution based on regexes
+bundle exec ruby -Itest /test/model_test.rb --testcase \"/^ModelTest\\$/\" --name \"/test_something\\$/
+
+# Minitest style execution based on regexes
+bundle exec ruby -Itest /test/model_test.rb --name \"/^ModelTest#test_something\\$/\"
+```
+
+The add-on's responsibility is to figure out how to execute test items that are associated with the framework they add
+support for. Add-ons mark test items with the right framework during discovery and should only resolve items that
+belong to them.
+
+Another important point is that test groups with an empty children array are being fully executed. For example:
+
+```ruby
+# A test item hierarchy that means: execute the ModelTest#test_something specific example and no other tests
+[
+  {
+    id: "ModelTest",
+    uri: "file:///test/model_test.rb",
+    label: "ModelTest",
+    range: {
+      start: { line: 0, character: 0 },
+      end: { line: 30, character: 3 },
+    },
+    tags: ["framework:minitest", "test_group"],
+    children: [
+      {
+        id: "ModelTest#test_something",
+        uri: "file:///test/model_test.rb",
+        label: "test_something",
+        range: {
+          start: { line: 1, character: 2 },
+          end: { line: 10, character: 3 },
+        },
+        tags: ["framework:minitest"],
+        children: [],
+      },
+    ],
+  },
+]
+
+# A test item hierarchy that means: execute the entire ModelTest group with all examples and nested groups inside
+[
+  {
+    id: "ModelTest",
+    uri: "file:///test/model_test.rb",
+    label: "ModelTest",
+    range: {
+      start: { line: 0, character: 0 },
+      end: { line: 30, character: 3 },
+    },
+    tags: ["framework:minitest", "test_group"],
+    children: [],
+  },
+]
+```
+
+Add-ons can define the `resolve_test_commands` method to define how to resolve the commands required to execute a
+hierarchy. It is the responsibility of the add-on to filter the hierarchy to only the items that are related to them.
+
+```ruby
+module RubyLsp
+  module MyTestFrameworkGem
+    class Addon < ::RubyLsp::Addon
+      # Items is the hierarchy of test items to be executed. The return is the list of minimum shell commands required
+      # to run them
+      #: (Array[Hash[Symbol, untyped]]) -> Array[String]
+      def resolve_test_commands(items)
+        commands = []
+        queue = items.dup
+
+        until queue.empty?
+          item = queue.shift
+          tags = Set.new(item[:tags])
+          next unless tags.include?("framework:my_framework")
+
+          children = item[:children]
+
+          if tags.include?("test_dir")
+            # Handle running entire directories
+          elsif tags.include?("test_file")
+            # Handle running entire files
+          elsif tags.include?("test_group")
+            # Handle running groups
+          else
+            # Handle running examples
+          end
+
+          queue.concat(children) unless children.empty?
+        end
+
+        commands
+      end
+    end
+  end
+end
+```
+
+You can refer to implementation examples for [Minitest and Test Unit](https://github.com/Shopify/ruby-lsp/blob/d86f4d4c567a2a3f8ae6f69caa10e21c4066e23e/lib/ruby_lsp/listeners/test_style.rb#L10) or [Rails](https://github.com/Shopify/ruby-lsp-rails/blob/cb9556d454c8bb20a1a73a99c8deb8788a520007/lib/ruby_lsp/ruby_lsp_rails/rails_test_style.rb#L11).
