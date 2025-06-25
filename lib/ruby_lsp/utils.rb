@@ -247,9 +247,6 @@ module RubyLsp
 
   # A request configuration, to turn on/off features
   class RequestConfig
-    #: Hash[Symbol, bool]
-    attr_accessor :configuration
-
     #: (Hash[Symbol, bool] configuration) -> void
     def initialize(configuration)
       @configuration = configuration
@@ -258,6 +255,11 @@ module RubyLsp
     #: (Symbol feature) -> bool?
     def enabled?(feature)
       @configuration[:enableAll] || @configuration[feature]
+    end
+
+    #: (Hash[Symbol, bool]) -> void
+    def merge!(hash)
+      @configuration.merge!(hash)
     end
   end
 

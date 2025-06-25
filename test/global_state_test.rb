@@ -314,6 +314,67 @@ module RubyLsp
       assert_equal("test_machine_id", state.telemetry_machine_id)
     end
 
+    def test_default_feature_configuration
+      state = GlobalState.new
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      refute(inlay_hint_config.enabled?(:implicitRescue))
+      refute(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
+    def test_feature_configuration_with_provided_configuration
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              implicitRescue: true,
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      assert(inlay_hint_config.enabled?(:implicitRescue))
+      assert(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
+    def test_feature_configuration_with_partially_provided_configuration
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      refute(inlay_hint_config.enabled?(:implicitRescue))
+      assert(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
+    def test_initialize_features_with_enable_all_configuration
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              enableAll: true,
+
+            },
+          },
+        },
+      })
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      assert(inlay_hint_config.enabled?(:implicitRescue))
+      assert(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
     private
 
     def stub_direct_dependencies(dependencies)

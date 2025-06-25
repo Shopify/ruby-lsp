@@ -209,10 +209,6 @@ module RubyLsp
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
 
-      configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
-      @store.features_configuration.dig(:inlayHint) #: as !nil
-        .configuration.merge!(configured_hints) if configured_hints
-
       enabled_features = case configured_features
       when Array
         # If the configuration is using an array, then absent features are disabled and present ones are enabled. That's
@@ -479,8 +475,8 @@ module RubyLsp
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
       inlay_hint = Requests::InlayHints.new(
+        @global_state,
         document,
-        @store.features_configuration.dig(:inlayHint), #: as !nil
         dispatcher,
       )
 
@@ -827,7 +823,6 @@ module RubyLsp
         return
       end
 
-      hints_configurations = @store.features_configuration.dig(:inlayHint) #: as !nil
       dispatcher = Prism::Dispatcher.new
 
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
@@ -835,7 +830,7 @@ module RubyLsp
         return
       end
 
-      request = Requests::InlayHints.new(document, hints_configurations, dispatcher)
+      request = Requests::InlayHints.new(@global_state, document, dispatcher)
       dispatcher.visit(document.ast)
       result = request.perform
       document.cache_set("textDocument/inlayHint", result)

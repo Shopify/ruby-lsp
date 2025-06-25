@@ -16,13 +16,13 @@ module RubyLsp
         end
       end
 
-      #: ((RubyDocument | ERBDocument) document, RequestConfig hints_configuration, Prism::Dispatcher dispatcher) -> void
-      def initialize(document, hints_configuration, dispatcher)
+      #: (GlobalState, (RubyDocument | ERBDocument), Prism::Dispatcher) -> void
+      def initialize(global_state, document, dispatcher)
         super()
 
         @response_builder = ResponseBuilders::CollectionResponseBuilder
           .new #: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint]
-        Listeners::InlayHints.new(@response_builder, hints_configuration, dispatcher)
+        Listeners::InlayHints.new(global_state, @response_builder, dispatcher)
       end
 
       # @override
