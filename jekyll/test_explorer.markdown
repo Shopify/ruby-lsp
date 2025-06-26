@@ -49,6 +49,11 @@ There is limited support to using multiple test frameworks in the same codebase.
 and we will not make further investments into supporting it, in line with our design principle of [favoring common
 setups](design-and-roadmap#favoring-common-development-setups)
 
+{: .important }
+To discover all test files in the workspace with decent performance, the Ruby LSP uses a glob pattern based on
+conventions. For a test file to be discovered, the file path must match this glob:
+`**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}`
+
 ### Dynamically defined tests
 
 There is limited support for tests defined via meta-programming. Initially, they will not be present in the test
