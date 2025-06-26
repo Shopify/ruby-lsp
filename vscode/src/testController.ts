@@ -384,7 +384,17 @@ export class TestController {
   async runViaCommand(path: string, name: string, mode: Mode) {
     const uri = vscode.Uri.file(path);
     const testItem = await this.findTestItem(name, uri);
-    if (!testItem) return;
+
+    if (!testItem) {
+      await vscode.window.showErrorMessage(
+        `Attempted to run "${name}" defined in "${path}", but that test has not been discovered.
+        Does the file path match the expected glob pattern?
+        [Read more](https://shopify.github.io/ruby-lsp/test_explorer.html)
+
+        Expected pattern: "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"`,
+      );
+      return;
+    }
 
     if (mode === Mode.Run) {
       await vscode.commands.executeCommand(

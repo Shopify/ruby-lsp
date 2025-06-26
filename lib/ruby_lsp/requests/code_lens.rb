@@ -27,8 +27,10 @@ module RubyLsp
         @document = document
         @test_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
         uri = document.uri
+        file_path = uri.full_path
         code_lens_config = global_state.feature_configuration(:codeLens)
-        test_lenses_enabled = !code_lens_config || code_lens_config.enabled?(:enableTestCodeLens)
+        test_lenses_enabled = (!code_lens_config || code_lens_config.enabled?(:enableTestCodeLens)) &&
+          file_path && File.fnmatch?(TEST_PATH_PATTERN, file_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
 
         if global_state.enabled_feature?(:fullTestDiscovery)
           if test_lenses_enabled

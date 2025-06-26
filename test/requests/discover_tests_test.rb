@@ -143,7 +143,7 @@ module RubyLsp
         end
       RUBY
 
-      with_server(source) do |server, uri|
+      with_server(source, URI::Generic.from_path(path: "/test/foo_test.rb")) do |server, uri|
         server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
           module Test
             module Unit
@@ -227,7 +227,7 @@ module RubyLsp
         end
       RUBY
 
-      with_server(source) do |server, uri|
+      with_server(source, URI::Generic.from_path(path: "/test/foo_test.rb")) do |server, uri|
         server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
           module Test
             module Unit
@@ -247,6 +247,39 @@ module RubyLsp
             },
           },
         })
+
+        server.process_message(id: 1, method: "textDocument/codeLens", params: {
+          textDocument: { uri: uri },
+        })
+
+        # Discard the indexing log message
+        server.pop_response
+        items = get_response(server)
+        assert_empty(items)
+      end
+    end
+
+    def test_does_not_collect_code_lenses_for_files_not_matching_path_convention
+      source = <<~RUBY
+        module Foo
+          class MyTest < Test::Unit::TestCase
+            def test_something; end
+
+            def test_something_else; end
+          end
+        end
+      RUBY
+
+      with_server(source, URI::Generic.from_path(path: "/tests/something.rb")) do |server, uri|
+        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+          module Test
+            module Unit
+              class TestCase; end
+            end
+          end
+        RUBY
+
+        server.global_state.stubs(:enabled_feature?).returns(true)
 
         server.process_message(id: 1, method: "textDocument/codeLens", params: {
           textDocument: { uri: uri },
