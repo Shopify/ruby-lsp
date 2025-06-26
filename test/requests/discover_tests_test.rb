@@ -216,6 +216,49 @@ module RubyLsp
       end
     end
 
+    def test_does_not_collect_code_lenses_when_disabled
+      source = <<~RUBY
+        module Foo
+          class MyTest < Test::Unit::TestCase
+            def test_something; end
+
+            def test_something_else; end
+          end
+        end
+      RUBY
+
+      with_server(source) do |server, uri|
+        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+          module Test
+            module Unit
+              class TestCase; end
+            end
+          end
+        RUBY
+
+        state = server.global_state
+        state.stubs(:enabled_feature?).returns(true)
+        state.apply_options({
+          initializationOptions: {
+            featuresConfiguration: {
+              codeLens: {
+                enableTestCodeLens: false,
+              },
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/codeLens", params: {
+          textDocument: { uri: uri },
+        })
+
+        # Discard the indexing log message
+        server.pop_response
+        items = get_response(server)
+        assert_empty(items)
+      end
+    end
+
     def test_ignores_minitest_tests_that_extend_active_support_declarative
       source = <<~RUBY
         class MyTest < ActiveSupport::TestCase

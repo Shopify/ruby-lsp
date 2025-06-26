@@ -342,6 +342,20 @@
                   "type": "boolean"
                 }
               }
+            },
+            "codeLens": {
+              "description": "Customize code lens features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "enableTestCodeLens": {
+                  "description": "Enable the run, run in terminal, debug code and other test related code lenses",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
             }
           }
         },

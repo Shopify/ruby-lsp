@@ -62,6 +62,10 @@ module RubyLsp
           implicitRescue: false,
           implicitHashValue: false,
         }),
+        codeLens: RequestConfig.new({
+          enableAll: false,
+          enableTestCodeLens: true,
+        }),
       } #: Hash[Symbol, RequestConfig]
     end
 

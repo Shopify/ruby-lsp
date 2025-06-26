@@ -27,10 +27,14 @@ module RubyLsp
         @document = document
         @test_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
         uri = document.uri
+        code_lens_config = global_state.feature_configuration(:codeLens)
+        test_lenses_enabled = !code_lens_config || code_lens_config.enabled?(:enableTestCodeLens)
 
         if global_state.enabled_feature?(:fullTestDiscovery)
-          Listeners::TestStyle.new(@test_builder, global_state, dispatcher, uri)
-          Listeners::SpecStyle.new(@test_builder, global_state, dispatcher, uri)
+          if test_lenses_enabled
+            Listeners::TestStyle.new(@test_builder, global_state, dispatcher, uri)
+            Listeners::SpecStyle.new(@test_builder, global_state, dispatcher, uri)
+          end
         else
           Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
         end
@@ -38,7 +42,7 @@ module RubyLsp
         Addon.addons.each do |addon|
           addon.create_code_lens_listener(@response_builder, uri, dispatcher)
 
-          if global_state.enabled_feature?(:fullTestDiscovery)
+          if global_state.enabled_feature?(:fullTestDiscovery) && test_lenses_enabled
             addon.create_discover_tests_listener(@test_builder, dispatcher, uri)
           end
         end
