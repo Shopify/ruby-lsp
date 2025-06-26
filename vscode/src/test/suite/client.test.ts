@@ -359,10 +359,15 @@ suite("Client", () => {
       "  end",
       "end",
     ].join("\n");
+    const uri = vscode.Uri.joinPath(
+      workspaceUri,
+      "test",
+      "server_test.rb",
+    ).toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
-        uri: documentUri.toString(),
+        uri,
         version: 1,
         text,
       },
@@ -371,7 +376,7 @@ suite("Client", () => {
       "textDocument/codeLens",
       {
         textDocument: {
-          uri: documentUri.toString(),
+          uri,
         },
       },
     );

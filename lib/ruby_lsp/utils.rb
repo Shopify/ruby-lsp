@@ -20,6 +20,7 @@ module RubyLsp
     "Gemfile"
   end #: String
   GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
+  TEST_PATH_PATTERN = "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"
 
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
   # use this custom error class as a way to return a signal to the client that the request should be delegated to the
