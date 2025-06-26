@@ -362,6 +362,7 @@ module RubyLsp
 
       perform_initial_indexing
       check_formatter_is_available
+      update_server if @global_state.enabled_feature?(:launcher)
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1406,8 +1407,38 @@ module RubyLsp
 
       # We compose the bundle in a thread so that the LSP continues to work while we're checking for its validity. Once
       # we return the response back to the editor, then the restart is triggered
+      launch_bundle_compose("Recomposing the bundle ahead of restart") do |stderr, status|
+        if status&.exitstatus == 0
+          # Create a signal for the restart that it can skip composing the bundle and launch directly
+          FileUtils.touch(already_composed_path)
+          send_message(Result.new(id: id, response: { success: true }))
+        else
+          # This special error code makes the extension avoid restarting in case we already know that the composed
+          # bundle is not valid
+          send_message(
+            Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle\n#{stderr}"),
+          )
+        end
+      end
+    end
+
+    #: -> void
+    def update_server
+      return unless File.exist?(File.join(@global_state.workspace_path, ".ruby-lsp", "needs_update"))
+
+      launch_bundle_compose("Trying to update server") do |stderr, status|
+        if status&.exitstatus == 0
+          send_log_message("Successfully updated the server")
+        else
+          send_log_message("Failed to update server\n#{stderr}", type: Constant::MessageType::ERROR)
+        end
+      end
+    end
+
+    #: (String) { (IO, Process::Status?) -> void } -> Thread
+    def launch_bundle_compose(log, &block)
       Thread.new do
-        send_log_message("Recomposing the bundle ahead of restart")
+        send_log_message(log)
 
         _stdout, stderr, status = Bundler.with_unbundled_env do
           Open3.capture3(
@@ -1422,17 +1453,7 @@ module RubyLsp
           )
         end
 
-        if status&.exitstatus == 0
-          # Create a signal for the restart that it can skip composing the bundle and launch directly
-          FileUtils.touch(already_composed_path)
-          send_message(Result.new(id: id, response: { success: true }))
-        else
-          # This special error code makes the extension avoid restarting in case we already know that the composed
-          # bundle is not valid
-          send_message(
-            Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle\n#{stderr}"),
-          )
-        end
+        block.call(stderr, status)
       end
     end
 
