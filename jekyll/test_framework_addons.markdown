@@ -335,7 +335,7 @@ You can refer to implementation examples for [Minitest and Test Unit](https://gi
 ## Custom reporting
 
 To report test execution results to the extension side, frameworks should be hooked up with a custom reporter that sends
-JSON RPC events. To hook up the custom reporter, add-ons should include whatever CLI arguments necessary as part of
+JSON RPC events. To hook up the custom reporter, add-ons should include all CLI arguments necessary as part of
 resolving test commands. For example:
 
 ```shell
@@ -394,7 +394,7 @@ The IDs and URIs used to report results **must match** the ones used during test
 are associated with the right items.
 
 {: .note }
-If your test framework is based on Minitest or Test Unit, reusing their reporting structure, you may not need to
-register custom reporters and can simply rely on the ones automatically registered by the Ruby LSP.
+If your test framework is based on Minitest or Test Unit and leverages their reporting structure, you may not need to
+add custom reporters. Instead, you can simply rely on the ones automatically registered and provided by the Ruby LSP.
 
 See our reporters for [Minitest](https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_lsp/test_reporters/minitest_reporter.rb) and [Test Unit](https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_lsp/test_reporters/test_unit_reporter.rb) as examples.
