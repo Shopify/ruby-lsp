@@ -17,7 +17,7 @@ There are 3 main parts for contributing support for a new framework:
 
 - [Test discovery](#test-discovery): identifying tests within the codebase and their structure
 - [Command resolution](#command-resolution): determining how to execute a specific test or group of tests
-- Custom reporting: displaying test execution results in the test explorer
+- [Custom reporting](#custom-reporting): displaying test execution results in the test explorer
 
 ## Test discovery
 
@@ -331,3 +331,70 @@ end
 ```
 
 You can refer to implementation examples for [Minitest and Test Unit](https://github.com/Shopify/ruby-lsp/blob/d86f4d4c567a2a3f8ae6f69caa10e21c4066e23e/lib/ruby_lsp/listeners/test_style.rb#L10) or [Rails](https://github.com/Shopify/ruby-lsp-rails/blob/cb9556d454c8bb20a1a73a99c8deb8788a520007/lib/ruby_lsp/ruby_lsp_rails/rails_test_style.rb#L11).
+
+## Custom reporting
+
+To report test execution results to the extension side, frameworks should be hooked up with a custom reporter that sends
+JSON RPC events. To hook up the custom reporter, add-ons should include whatever CLI arguments necessary as part of
+resolving test commands. For example:
+
+```shell
+bundle exec my_framework /path/to/project/test/foo_test.rb --reporter MyFrameworkLspReporter
+```
+
+To implement the reporter, the Ruby LSP already provides helpers for all of the supported events. It is a matter of
+ensuring that all events are produced when the test framework performs the associated actions.
+
+```ruby
+# An Lsp reporter for our example test framework
+# See lib/ruby_lsp/test_reporters/lsp_reporter.rb for all available helpers and events
+class MyFrameworkGemLspReporter
+  # Record that an example started running. This shows the example as running in the UI
+  def test_started_running(test_object)
+    id = "#{test_object.class.name}##{test_object.method_name}"
+    uri = URI::Generic.from_path(path: test_object.file_path)
+    RubyLsp::LspReporter.instance.start_test(id: id, uri: uri, line: test_object.line_number)
+  end
+
+  # Record that an example passed, which shows a green checkmark in the UI
+  def test_passed(test_object)
+    RubyLsp::LspReporter.instance.record_pass(id: id, uri: uri)
+  end
+
+  # Record that an example errored, which shows a red X in the UI and displays the exception message
+  def test_errored(test_object)
+    RubyLsp::LspReporter.instance.record_skip(id: id, uri: uri, message: "Test errored because...")
+  end
+
+  # Record that an example failed, which shows a red X in the UI and displays the failure message
+  def test_failed(test_object)
+    RubyLsp::LspReporter.instance.record_fail(id: id, uri: uri, message: "Test failed because...")
+  end
+
+  # Record that an example skipped, which shows a skipped status in the UI
+  def test_skipped(test_object)
+    RubyLsp::LspReporter.instance.record_skip(id: id, uri: uri)
+  end
+
+  # Normal shutdown flow, when all tests ran without crashing the test process itself
+  def after_all_tests_finished_running
+    LspReporter.instance.shutdown
+  end
+end
+
+# This is required to cleanup the explorer in case the normal execution of tests errors. For example, if the user
+# writes a bad require and the test process crashes before even starting to run examples
+MyFrameworkGem.after_run_is_completed do
+  RubyLsp::LspReporter.instance.at_exit
+end
+```
+
+{: .important }
+The IDs and URIs used to report results **must match** the ones used during test discovery to ensure that the outcomes
+are associated with the right items.
+
+{: .note }
+If your test framework is based on Minitest or Test Unit, reusing their reporting structure, you may not need to
+register custom reporters and can simply rely on the ones automatically registered by the Ruby LSP.
+
+See our reporters for [Minitest](https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_lsp/test_reporters/minitest_reporter.rb) and [Test Unit](https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_lsp/test_reporters/test_unit_reporter.rb) as examples.
