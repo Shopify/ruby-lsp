@@ -367,52 +367,48 @@ module RubyLsp
 
     #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_open(message)
-      @global_state.synchronize do
-        text_document = message.dig(:params, :textDocument)
-        language_id = case text_document[:languageId]
-        when "erb", "eruby"
-          :erb
-        when "rbs"
-          :rbs
-        else
-          :ruby
-        end
+      text_document = message.dig(:params, :textDocument)
+      language_id = case text_document[:languageId]
+      when "erb", "eruby"
+        :erb
+      when "rbs"
+        :rbs
+      else
+        :ruby
+      end
 
-        document = @store.set(
-          uri: text_document[:uri],
-          source: text_document[:text],
-          version: text_document[:version],
-          language_id: language_id,
-        )
+      document = @store.set(
+        uri: text_document[:uri],
+        source: text_document[:text],
+        version: text_document[:version],
+        language_id: language_id,
+      )
 
-        if document.past_expensive_limit? && text_document[:uri].scheme == "file"
-          log_message = <<~MESSAGE
-            The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
-            diagnostics will be disabled.
-          MESSAGE
+      if document.past_expensive_limit? && text_document[:uri].scheme == "file"
+        log_message = <<~MESSAGE
+          The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
+          diagnostics will be disabled.
+        MESSAGE
 
-          send_message(
-            Notification.new(
-              method: "window/logMessage",
-              params: Interface::LogMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: log_message,
-              ),
+        send_message(
+          Notification.new(
+            method: "window/logMessage",
+            params: Interface::LogMessageParams.new(
+              type: Constant::MessageType::WARNING,
+              message: log_message,
             ),
-          )
-        end
+          ),
+        )
       end
     end
 
     #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_close(message)
-      @global_state.synchronize do
-        uri = message.dig(:params, :textDocument, :uri)
-        @store.delete(uri)
+      uri = message.dig(:params, :textDocument, :uri)
+      @store.delete(uri)
 
-        # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-        send_message(Notification.publish_diagnostics(uri.to_s, []))
-      end
+      # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
+      send_message(Notification.publish_diagnostics(uri.to_s, []))
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -420,9 +416,7 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
-      @global_state.synchronize do
-        @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
-      end
+      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1105,11 +1099,7 @@ module RubyLsp
       @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
 
       # Clear all document caches for pull diagnostics
-      @global_state.synchronize do
-        @store.each do |_uri, document|
-          document.clear_cache("textDocument/diagnostic")
-        end
-      end
+      @store.each { |_uri, document| document.clear_cache("textDocument/diagnostic") }
 
       # Request a pull diagnostic refresh from the editor
       if @global_state.client_capabilities.supports_diagnostic_refresh
