@@ -812,9 +812,9 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.27.7",
+    "@babel/core": "^7.28.0",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.30.0",
+    "@eslint/js": "^9.30.1",
     "@shopify/eslint-plugin": "^48.0.2",
     "@shopify/prettier-config": "^1.1.4",
     "@types/glob": "^8.1.0",
