@@ -37,16 +37,12 @@ export abstract class VersionManager {
     this.outputChannel = outputChannel;
     this.context = context;
     this.manuallySelectRuby = manuallySelectRuby;
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
+    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
 
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
         ? customBundleGemfile
-        : path.resolve(
-            path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
-          );
+        : path.resolve(path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile));
     }
 
     this.bundleUri = this.customBundleGemfile
@@ -58,32 +54,20 @@ export abstract class VersionManager {
   // language server
   abstract activate(): Promise<ActivationResult>;
 
-  protected async runEnvActivationScript(
-    activatedRuby: string,
-  ): Promise<ActivationResult> {
-    const activationUri = vscode.Uri.joinPath(
-      this.context.extensionUri,
-      "activation.rb",
-    );
+  protected async runEnvActivationScript(activatedRuby: string): Promise<ActivationResult> {
+    const activationUri = vscode.Uri.joinPath(this.context.extensionUri, "activation.rb");
 
-    const result = await this.runScript(
-      `${activatedRuby} -EUTF-8:UTF-8 '${activationUri.fsPath}'`,
-    );
+    const result = await this.runScript(`${activatedRuby} -EUTF-8:UTF-8 '${activationUri.fsPath}'`);
 
-    const activationContent = new RegExp(
-      `${ACTIVATION_SEPARATOR}([^]*)${ACTIVATION_SEPARATOR}`,
-    ).exec(result.stderr);
+    const activationContent = new RegExp(`${ACTIVATION_SEPARATOR}([^]*)${ACTIVATION_SEPARATOR}`).exec(result.stderr);
 
-    const [version, gemPath, yjit, ...envEntries] =
-      activationContent![1].split(FIELD_SEPARATOR);
+    const [version, gemPath, yjit, ...envEntries] = activationContent![1].split(FIELD_SEPARATOR);
 
     return {
       version,
       gemPath: gemPath.split(","),
       yjit: yjit === "true",
-      env: Object.fromEntries(
-        envEntries.map((entry) => entry.split(VALUE_SEPARATOR)),
-      ),
+      env: Object.fromEntries(envEntries.map((entry) => entry.split(VALUE_SEPARATOR))),
     };
   }
 
@@ -99,9 +83,7 @@ export abstract class VersionManager {
       shell = vscode.env.shell;
     }
 
-    this.outputChannel.info(
-      `Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`,
-    );
+    this.outputChannel.info(`Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`);
 
     return asyncExec(command, {
       cwd: this.bundleUri.fsPath,
@@ -118,9 +100,7 @@ export abstract class VersionManager {
       try {
         const fullUri = vscode.Uri.joinPath(uri, execName);
         await vscode.workspace.fs.stat(fullUri);
-        this.outputChannel.info(
-          `Found ${execName} executable at ${uri.fsPath}`,
-        );
+        this.outputChannel.info(`Found ${execName} executable at ${uri.fsPath}`);
         return fullUri.fsPath;
       } catch (error: any) {
         // continue searching

@@ -46,20 +46,13 @@ export class TestController {
   private terminal: vscode.Terminal | undefined;
   private readonly telemetry: vscode.TelemetryLogger;
   // We allow the timeout to be configured in seconds, but exec expects it in milliseconds
-  private readonly testTimeout = vscode.workspace
-    .getConfiguration("rubyLsp")
-    .get("testTimeout") as number;
+  private readonly testTimeout = vscode.workspace.getConfiguration("rubyLsp").get("testTimeout") as number;
 
   private readonly currentWorkspace: () => Workspace | undefined;
-  private readonly getOrActivateWorkspace: (
-    workspaceFolder: vscode.WorkspaceFolder,
-  ) => Promise<Workspace>;
+  private readonly getOrActivateWorkspace: (workspaceFolder: vscode.WorkspaceFolder) => Promise<Workspace>;
 
   private readonly fullDiscovery = featureEnabled("fullTestDiscovery");
-  private readonly coverageData = new WeakMap<
-    vscode.FileCoverage,
-    vscode.FileCoverageDetail[]
-  >();
+  private readonly coverageData = new WeakMap<vscode.FileCoverage, vscode.FileCoverageDetail[]>();
 
   private readonly runner: StreamingRunner;
 
@@ -67,17 +60,12 @@ export class TestController {
     context: vscode.ExtensionContext,
     telemetry: vscode.TelemetryLogger,
     currentWorkspace: () => Workspace | undefined,
-    getOrActivateWorkspace: (
-      workspaceFolder: vscode.WorkspaceFolder,
-    ) => Promise<Workspace>,
+    getOrActivateWorkspace: (workspaceFolder: vscode.WorkspaceFolder) => Promise<Workspace>,
   ) {
     this.telemetry = telemetry;
     this.currentWorkspace = currentWorkspace;
     this.getOrActivateWorkspace = getOrActivateWorkspace;
-    this.testController = vscode.tests.createTestController(
-      "rubyTests",
-      "Ruby Tests",
-    );
+    this.testController = vscode.tests.createTestController("rubyTests", "Ruby Tests");
     this.runner = new StreamingRunner(
       context,
       this.findTestItem.bind(this),
@@ -103,9 +91,7 @@ export class TestController {
     this.testDebugProfile = this.testController.createRunProfile(
       DEBUG_PROFILE_LABEL,
       vscode.TestRunProfileKind.Debug,
-      this.fullDiscovery
-        ? this.runTest.bind(this)
-        : this.debugHandler.bind(this),
+      this.fullDiscovery ? this.runTest.bind(this) : this.debugHandler.bind(this),
       false,
       DEBUG_TAG,
     );
@@ -128,11 +114,7 @@ export class TestController {
     // This method is invoked when a document is opened in the UI to gather any additional details about coverage for
     // inline decorations. We save all of the available details in the `coverageData` map ahead of time, so we just need
     // to return the existing data
-    this.coverageProfile.loadDetailedCoverage = async (
-      _testRun,
-      fileCoverage,
-      _token,
-    ) => {
+    this.coverageProfile.loadDetailedCoverage = async (_testRun, fileCoverage, _token) => {
       return this.coverageData.get(fileCoverage)!;
     };
 
@@ -143,15 +125,9 @@ export class TestController {
       false,
     );
 
-    const testFileWatcher =
-      vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
+    const testFileWatcher = vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN);
 
-    const nestedTestDirWatcher = vscode.workspace.createFileSystemWatcher(
-      NESTED_TEST_DIR_PATTERN,
-      true,
-      true,
-      false,
-    );
+    const nestedTestDirWatcher = vscode.workspace.createFileSystemWatcher(NESTED_TEST_DIR_PATTERN, true, true, false);
 
     context.subscriptions.push(
       this.testController,
@@ -240,11 +216,7 @@ export class TestController {
 
     response.forEach((res) => {
       const [_, name, command, location, label] = res.command!.arguments!;
-      const testItem: vscode.TestItem = this.testController.createTestItem(
-        name,
-        label || name,
-        uri,
-      );
+      const testItem: vscode.TestItem = this.testController.createTestItem(name, label || name, uri);
 
       const data: CodeLensData = res.data;
 
@@ -319,8 +291,7 @@ export class TestController {
     if (!test) return;
 
     await vscode.commands.executeCommand("vscode.revealTestInExplorer", test);
-    let tokenSource: vscode.CancellationTokenSource | null =
-      new vscode.CancellationTokenSource();
+    let tokenSource: vscode.CancellationTokenSource | null = new vscode.CancellationTokenSource();
 
     tokenSource.token.onCancellationRequested(async () => {
       tokenSource?.dispose();
@@ -343,9 +314,7 @@ export class TestController {
     const workspace = this.currentWorkspace();
 
     if (!workspace) {
-      throw new Error(
-        "No workspace found. Debugging requires a workspace to be opened",
-      );
+      throw new Error("No workspace found. Debugging requires a workspace to be opened");
     }
 
     return vscode.debug.startDebugging(workspace.workspaceFolder, {
@@ -397,10 +366,7 @@ export class TestController {
     }
 
     if (mode === Mode.Run) {
-      await vscode.commands.executeCommand(
-        "vscode.revealTestInExplorer",
-        testItem,
-      );
+      await vscode.commands.executeCommand("vscode.revealTestInExplorer", testItem);
     }
 
     const tokenSource = new vscode.CancellationTokenSource();
@@ -427,10 +393,7 @@ export class TestController {
     return this.runTest(request, tokenSource.token);
   }
 
-  async runTest(
-    request: vscode.TestRunRequest,
-    token: vscode.CancellationToken,
-  ) {
+  async runTest(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
     this.telemetry.logUsage("ruby_lsp.test_explorer", {
       type: "counter",
       attributes: {
@@ -442,12 +405,7 @@ export class TestController {
     if (request.continuous) {
       const disposables: vscode.Disposable[] = [];
 
-      const testFileWatcher = vscode.workspace.createFileSystemWatcher(
-        TEST_FILE_PATTERN,
-        true,
-        false,
-        true,
-      );
+      const testFileWatcher = vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN, true, false, true);
 
       disposables.push(
         testFileWatcher,
@@ -537,10 +495,7 @@ export class TestController {
     await this.testController.resolveHandler!(undefined);
   }
 
-  private async handleTests(
-    request: vscode.TestRunRequest,
-    token: vscode.CancellationToken,
-  ) {
+  private async handleTests(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
     const run = this.testController.createTestRun(request);
 
     // Gather all included test items
@@ -553,10 +508,7 @@ export class TestController {
 
     await this.discoverFrameworkTag(items);
 
-    const workspaceToTestItems = new Map<
-      vscode.WorkspaceFolder,
-      vscode.TestItem[]
-    >();
+    const workspaceToTestItems = new Map<vscode.WorkspaceFolder, vscode.TestItem[]>();
 
     // Organize the tests based on their workspace folder. Each workspace has their own LSP server running and may be
     // using a different test framework, so we need to use the workspace associated with each item
@@ -571,10 +523,7 @@ export class TestController {
       }
     });
 
-    const linkedCancellationSource = new LinkedCancellationSource(
-      token,
-      run.token,
-    );
+    const linkedCancellationSource = new LinkedCancellationSource(token, run.token);
 
     for (const [workspaceFolder, testItems] of workspaceToTestItems) {
       if (linkedCancellationSource.isCancellationRequested()) {
@@ -583,16 +532,10 @@ export class TestController {
 
       // Build the test item parameters that we send to the server, filtering out exclusions. Then ask the server for
       // the resolved test commands
-      const requestTestItems = this.buildRequestTestItems(
-        testItems,
-        request.exclude,
-      );
+      const requestTestItems = this.buildRequestTestItems(testItems, request.exclude);
       const workspace = await this.getOrActivateWorkspace(workspaceFolder);
 
-      if (
-        !workspace.lspClient?.initializeResult?.capabilities.experimental
-          ?.full_test_discovery
-      ) {
+      if (!workspace.lspClient?.initializeResult?.capabilities.experimental?.full_test_discovery) {
         run.appendOutput(
           `The version of the Ruby LSP server being used by ${workspaceFolder.name} does not support the new
            test explorer functionality. Please make sure you are using the latest version of the server.
@@ -601,17 +544,11 @@ export class TestController {
         break;
       }
 
-      const response =
-        await workspace.lspClient?.resolveTestCommands(requestTestItems);
+      const response = await workspace.lspClient?.resolveTestCommands(requestTestItems);
 
       if (!response) {
         testItems.forEach((test) =>
-          run.errored(
-            test,
-            new vscode.TestMessage(
-              "Could not resolve test command to run selected tests",
-            ),
-          ),
+          run.errored(test, new vscode.TestMessage("Could not resolve test command to run selected tests")),
         );
         continue;
       }
@@ -627,20 +564,9 @@ export class TestController {
         profile.label === RUN_IN_TERMINAL_PROFILE_LABEL ||
         profile.label === COVERAGE_PROFILE_LABEL
       ) {
-        await this.executeTestCommands(
-          response,
-          workspace,
-          run,
-          profile,
-          linkedCancellationSource,
-        );
+        await this.executeTestCommands(response, workspace, run, profile, linkedCancellationSource);
       } else if (profile.label === DEBUG_PROFILE_LABEL) {
-        await this.debugTestCommands(
-          response,
-          workspace,
-          run,
-          linkedCancellationSource,
-        );
+        await this.debugTestCommands(response, workspace, run, linkedCancellationSource);
       }
     }
 
@@ -705,13 +631,10 @@ export class TestController {
     // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
     // file path for Minitest, it will fail with unrecognized argument errors
     const commonOpts = `-rbundler/setup ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`;
-    const rubyOpt = workspace.ruby.env.RUBYOPT
-      ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}`
-      : commonOpts;
+    const rubyOpt = workspace.ruby.env.RUBYOPT ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}` : commonOpts;
 
     const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
-    const mode =
-      profile === this.runInTerminalProfile ? Mode.RunInTerminal : Mode.Run;
+    const mode = profile === this.runInTerminalProfile ? Mode.RunInTerminal : Mode.Run;
 
     for await (const command of response.commands) {
       try {
@@ -728,9 +651,7 @@ export class TestController {
           linkedCancellationSource,
         );
       } catch (error: any) {
-        await vscode.window.showErrorMessage(
-          `Running ${command} failed: ${error.message}`,
-        );
+        await vscode.window.showErrorMessage(`Running ${command} failed: ${error.message}`);
       }
     }
 
@@ -753,9 +674,7 @@ export class TestController {
         break;
       }
       const commonOpts = `-rbundler/setup ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`;
-      const rubyOpt = workspace.ruby.env.RUBYOPT
-        ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}`
-        : commonOpts;
+      const rubyOpt = workspace.ruby.env.RUBYOPT ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}` : commonOpts;
 
       await this.runner.execute(
         run,
@@ -772,11 +691,7 @@ export class TestController {
     }
   }
 
-  private findTestInGroup(
-    id: string,
-    group: vscode.TestItem,
-    line: number | undefined,
-  ): vscode.TestItem | undefined {
+  private findTestInGroup(id: string, group: vscode.TestItem, line: number | undefined): vscode.TestItem | undefined {
     let found: vscode.TestItem | undefined;
 
     group.children.forEach((item) => {
@@ -808,22 +723,13 @@ export class TestController {
     // If neither of the previous are true, then this test is dynamically defined and we need to create the items for it
     // automatically
     const label = id.split("#")[1]!;
-    const testItem = this.testController.createTestItem(
-      id,
-      `★ ${label}`,
-      found.uri,
-    );
+    const testItem = this.testController.createTestItem(id, `★ ${label}`, found.uri);
 
     testItem.description = "dynamic test";
 
-    testItem.range = new vscode.Range(
-      new vscode.Position(line, 0),
-      new vscode.Position(line, 1),
-    );
+    testItem.range = new vscode.Range(new vscode.Position(line, 0), new vscode.Position(line, 1));
 
-    const frameworkTag = found.tags.find((tag) =>
-      tag.id.startsWith("framework"),
-    );
+    const frameworkTag = found.tags.find((tag) => tag.id.startsWith("framework"));
 
     testItem.tags = frameworkTag ? [DEBUG_TAG, frameworkTag] : [DEBUG_TAG];
     found.children.add(testItem);
@@ -835,13 +741,9 @@ export class TestController {
   // generic name
   private getTerminal() {
     const workspace = this.currentWorkspace();
-    const name = workspace
-      ? `${workspace.workspaceFolder.name}: test`
-      : "Ruby LSP: test";
+    const name = workspace ? `${workspace.workspaceFolder.name}: test` : "Ruby LSP: test";
 
-    const previousTerminal = vscode.window.terminals.find(
-      (terminal) => terminal.name === name,
-    );
+    const previousTerminal = vscode.window.terminals.find((terminal) => terminal.name === name);
 
     return previousTerminal
       ? previousTerminal
@@ -850,10 +752,7 @@ export class TestController {
         });
   }
 
-  private async debugHandler(
-    request: vscode.TestRunRequest,
-    _token: vscode.CancellationToken,
-  ) {
+  private async debugHandler(request: vscode.TestRunRequest, _token: vscode.CancellationToken) {
     const run = this.testController.createTestRun(request, undefined, true);
     const test = request.include![0];
 
@@ -868,10 +767,7 @@ export class TestController {
     });
   }
 
-  private async runHandler(
-    request: vscode.TestRunRequest,
-    token: vscode.CancellationToken,
-  ) {
+  private async runHandler(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
     const run = this.testController.createTestRun(request, undefined, true);
     const queue: vscode.TestItem[] = [];
     const enqueue = (test: vscode.TestItem) => {
@@ -912,22 +808,12 @@ export class TestController {
           run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
           run.passed(test, Date.now() - start);
         } catch (err: any) {
-          run.appendOutput(
-            err.message.replace(/\r?\n/g, "\r\n"),
-            undefined,
-            test,
-          );
+          run.appendOutput(err.message.replace(/\r?\n/g, "\r\n"), undefined, test);
 
           const duration = Date.now() - start;
 
           if (err.killed) {
-            run.errored(
-              test,
-              new vscode.TestMessage(
-                `Test timed out after ${this.testTimeout} seconds`,
-              ),
-              duration,
-            );
+            run.errored(test, new vscode.TestMessage(`Test timed out after ${this.testTimeout} seconds`), duration);
             continue;
           }
 
@@ -941,10 +827,7 @@ export class TestController {
               ? messageArr.slice(10, messageArr.length - 2).join("\n")
               : messageArr.slice(4, messageArr.length - 9).join("\n");
 
-          const messages = [
-            new vscode.TestMessage(err.message),
-            new vscode.TestMessage(summary),
-          ];
+          const messages = [new vscode.TestMessage(err.message), new vscode.TestMessage(summary)];
 
           if (messageArr.find((elem: string) => elem === "F")) {
             run.failed(test, messages, duration);
@@ -966,11 +849,7 @@ export class TestController {
     });
   }
 
-  private async assertTestPasses(
-    test: vscode.TestItem,
-    cwd: string,
-    env: NodeJS.ProcessEnv,
-  ) {
+  private async assertTestPasses(test: vscode.TestItem, cwd: string, env: NodeJS.ProcessEnv) {
     try {
       const result = await asyncExec(this.testCommands.get(test)!, {
         cwd,
@@ -987,10 +866,7 @@ export class TestController {
     }
   }
 
-  private findTestById(
-    testId: string,
-    testItems: vscode.TestItemCollection = this.testController.items,
-  ) {
+  private findTestById(testId: string, testItems: vscode.TestItemCollection = this.testController.items) {
     if (!testId) {
       return this.findTestByActiveLine();
     }
@@ -1063,10 +939,7 @@ export class TestController {
       } else if (!item.tags.some((tag) => tag === TEST_GROUP_TAG)) {
         const workspace = await this.getOrActivateWorkspace(workspaceFolder);
 
-        if (
-          !workspace.lspClient?.initializeResult?.capabilities.experimental
-            ?.full_test_discovery
-        ) {
+        if (!workspace.lspClient?.initializeResult?.capabilities.experimental?.full_test_discovery) {
           await vscode.window.showWarningMessage(
             `The version of the Ruby LSP server being used by ${workspaceFolder.name} does not support the new
              test explorer functionality. Please make sure you are using the latest version of the server.
@@ -1102,11 +975,7 @@ export class TestController {
         }
 
         const uri = workspaceFolder.uri;
-        const testItem = this.testController.createTestItem(
-          uri.toString(),
-          workspaceFolder.name,
-          uri,
-        );
+        const testItem = this.testController.createTestItem(uri.toString(), workspaceFolder.name, uri);
         testItem.canResolveChildren = true;
         testItem.tags = [WORKSPACE_TAG, DEBUG_TAG];
         this.testController.items.add(testItem);
@@ -1150,11 +1019,7 @@ export class TestController {
     }
 
     // Get the appropriate collection to add the test file to, creating any necessary hierarchy levels
-    const { firstLevel, secondLevel } = await this.getOrCreateHierarchyLevels(
-      uri,
-      workspaceFolder,
-      initialCollection,
-    );
+    const { firstLevel, secondLevel } = await this.getOrCreateHierarchyLevels(uri, workspaceFolder, initialCollection);
 
     const finalItem = secondLevel ?? firstLevel;
     const testItem = this.testController.createTestItem(
@@ -1185,23 +1050,15 @@ export class TestController {
 
     // Get the first level test directory item (e.g., test/, spec/, features/)
     const firstLevelName = pathParts.slice(0, dirPosition + 1).join(path.sep);
-    const firstLevelUri = vscode.Uri.joinPath(
-      workspaceFolder.uri,
-      firstLevelName,
-    );
+    const firstLevelUri = vscode.Uri.joinPath(workspaceFolder.uri, firstLevelName);
 
     // In Rails apps, it's also very common to divide the test directory into a second hierarchy level, like models or
     // controllers. Here we try to find out if there is a second level, allowing users to run all tests for models for
     // example
-    const secondLevelName = pathParts
-      .slice(dirPosition + 1, dirPosition + 2)
-      .join(path.sep);
+    const secondLevelName = pathParts.slice(dirPosition + 1, dirPosition + 2).join(path.sep);
 
     if (secondLevelName.length > 0) {
-      const secondLevelUri = vscode.Uri.joinPath(
-        firstLevelUri,
-        secondLevelName,
-      );
+      const secondLevelUri = vscode.Uri.joinPath(firstLevelUri, secondLevelName);
 
       try {
         const fileStat = await vscode.workspace.fs.stat(secondLevelUri);
@@ -1227,28 +1084,19 @@ export class TestController {
     firstLevel: vscode.TestItem;
     secondLevel: vscode.TestItem | undefined;
   }> {
-    const { firstLevel, secondLevel } = await this.detectHierarchyLevels(
-      uri,
-      workspaceFolder,
-    );
+    const { firstLevel, secondLevel } = await this.detectHierarchyLevels(uri, workspaceFolder);
 
     // Get or create the first level test directory item
     let firstLevelItem = collection.get(firstLevel.uri.toString());
     if (!firstLevelItem) {
-      firstLevelItem = this.testController.createTestItem(
-        firstLevel.uri.toString(),
-        firstLevel.name,
-        firstLevel.uri,
-      );
+      firstLevelItem = this.testController.createTestItem(firstLevel.uri.toString(), firstLevel.name, firstLevel.uri);
       firstLevelItem.tags = [TEST_DIR_TAG, DEBUG_TAG];
       collection.add(firstLevelItem);
     }
 
     // If we have a second level, get or create it
     if (secondLevel) {
-      let secondLevelItem = firstLevelItem.children.get(
-        secondLevel.uri.toString(),
-      );
+      let secondLevelItem = firstLevelItem.children.get(secondLevel.uri.toString());
 
       if (!secondLevelItem) {
         secondLevelItem = this.testController.createTestItem(
@@ -1317,9 +1165,7 @@ export class TestController {
     if (workspaceFolders.length > 1) {
       workspaceFolder = vscode.workspace.getWorkspaceFolder(uri)!;
 
-      const workspaceTestItem = initialCollection.get(
-        workspaceFolder.uri.toString(),
-      );
+      const workspaceTestItem = initialCollection.get(workspaceFolder.uri.toString());
       initialCollection = workspaceTestItem!.children;
 
       if (initialCollection.size === 0) {
@@ -1328,10 +1174,7 @@ export class TestController {
     }
 
     // Get the hierarchy levels and find the appropriate test item
-    const { firstLevel, secondLevel } = await this.detectHierarchyLevels(
-      uri,
-      workspaceFolder,
-    );
+    const { firstLevel, secondLevel } = await this.detectHierarchyLevels(uri, workspaceFolder);
 
     let item = initialCollection.get(firstLevel.uri.toString());
     if (secondLevel) {
@@ -1341,20 +1184,13 @@ export class TestController {
     return item;
   }
 
-  private addDiscoveredItems(
-    testItems: ServerTestItem[],
-    parent: vscode.TestItem,
-  ) {
+  private addDiscoveredItems(testItems: ServerTestItem[], parent: vscode.TestItem) {
     if (testItems.length === 0) {
       return;
     }
 
     testItems.forEach((item) => {
-      const testItem = this.testController.createTestItem(
-        item.id,
-        item.label,
-        vscode.Uri.parse(item.uri),
-      );
+      const testItem = this.testController.createTestItem(item.id, item.label, vscode.Uri.parse(item.uri));
 
       testItem.canResolveChildren = item.children.length > 0;
       const start = item.range.start;
@@ -1378,9 +1214,7 @@ export class TestController {
       }
     });
 
-    const framework = testItems[0].tags.find((tag) =>
-      tag.startsWith("framework"),
-    );
+    const framework = testItems[0].tags.find((tag) => tag.startsWith("framework"));
 
     if (!framework) {
       return;
@@ -1391,10 +1225,7 @@ export class TestController {
     }
   }
 
-  private recursivelyFilter(
-    item: vscode.TestItem,
-    exclusions: ReadonlyArray<vscode.TestItem>,
-  ): LspTestItem | null {
+  private recursivelyFilter(item: vscode.TestItem, exclusions: ReadonlyArray<vscode.TestItem>): LspTestItem | null {
     // If the item is excluded, then remove it directly
     if (exclusions.includes(item)) {
       return null;
@@ -1484,30 +1315,18 @@ export class TestController {
     };
   }
 
-  private async processTestCoverageResults(
-    run: vscode.TestRun,
-    workspaceFolder: vscode.WorkspaceFolder,
-  ) {
+  private async processTestCoverageResults(run: vscode.TestRun, workspaceFolder: vscode.WorkspaceFolder) {
     try {
       // Read the coverage data generated by the server during test execution
       const rawData = await vscode.workspace.fs.readFile(
-        vscode.Uri.joinPath(
-          workspaceFolder.uri,
-          ".ruby-lsp",
-          "coverage_result.json",
-        ),
+        vscode.Uri.joinPath(workspaceFolder.uri, ".ruby-lsp", "coverage_result.json"),
       );
 
-      const data: Record<string, vscode.FileCoverageDetail[]> = JSON.parse(
-        rawData.toString(),
-      );
+      const data: Record<string, vscode.FileCoverageDetail[]> = JSON.parse(rawData.toString());
 
       // Add the coverage data for all files as part of this run
       Object.entries(data).forEach(([uri, coverageData]) => {
-        const fileCoverage = vscode.FileCoverage.fromDetails(
-          vscode.Uri.parse(uri),
-          coverageData,
-        );
+        const fileCoverage = vscode.FileCoverage.fromDetails(vscode.Uri.parse(uri), coverageData);
 
         run.addCoverage(fileCoverage);
         this.coverageData.set(fileCoverage, coverageData);

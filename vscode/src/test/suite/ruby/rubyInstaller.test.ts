@@ -64,19 +64,11 @@ suite("RubyInstaller", () => {
   test("Finds Ruby when under C:/RubyXY-arch", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const windows = new RubyInstaller(workspaceFolder, outputChannel, context, async () => {});
     const { env, version, yjit } = await windows.activate();
 
     assert.match(env.GEM_PATH!, new RegExp(`ruby\\\\${VERSION_REGEX}`));
-    assert.match(
-      env.GEM_PATH!,
-      new RegExp(`lib\\\\ruby\\\\gems\\\\${VERSION_REGEX}`),
-    );
+    assert.match(env.GEM_PATH!, new RegExp(`lib\\\\ruby\\\\gems\\\\${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
@@ -84,19 +76,11 @@ suite("RubyInstaller", () => {
   test("Finds Ruby when under C:/Users/Username/RubyXY-arch", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const windows = new RubyInstaller(workspaceFolder, outputChannel, context, async () => {});
     const { env, version, yjit } = await windows.activate();
 
     assert.match(env.GEM_PATH!, new RegExp(`ruby\\\\${VERSION_REGEX}`));
-    assert.match(
-      env.GEM_PATH!,
-      new RegExp(`lib\\\\ruby\\\\gems\\\\${VERSION_REGEX}`),
-    );
+    assert.match(env.GEM_PATH!, new RegExp(`lib\\\\ruby\\\\gems\\\\${VERSION_REGEX}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
@@ -104,15 +88,8 @@ suite("RubyInstaller", () => {
   test("Doesn't set the shell when invoking activation script", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(
-      ACTIVATION_SEPARATOR,
-    );
+    const windows = new RubyInstaller(workspaceFolder, outputChannel, context, async () => {});
+    const result = ["/fake/dir", "/other/fake/dir", true, RUBY_VERSION].join(ACTIVATION_SEPARATOR);
     const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: result,
@@ -128,18 +105,8 @@ suite("RubyInstaller", () => {
   test("Normalizes long file formats to back slashes", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const windows = new RubyInstaller(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    const result = [
-      "//?/C:/Ruby32/gems",
-      "//?/C:/Ruby32/default_gems",
-      true,
-      RUBY_VERSION,
-    ].join(ACTIVATION_SEPARATOR);
+    const windows = new RubyInstaller(workspaceFolder, outputChannel, context, async () => {});
+    const result = ["//?/C:/Ruby32/gems", "//?/C:/Ruby32/default_gems", true, RUBY_VERSION].join(ACTIVATION_SEPARATOR);
     sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
       stderr: result,
@@ -147,9 +114,6 @@ suite("RubyInstaller", () => {
 
     const { gemPath } = await windows.activate();
 
-    assert.deepStrictEqual(gemPath, [
-      "\\\\?\\C:\\Ruby32\\default_gems",
-      "\\\\?\\C:\\Ruby32\\gems",
-    ]);
+    assert.deepStrictEqual(gemPath, ["\\\\?\\C:\\Ruby32\\default_gems", "\\\\?\\C:\\Ruby32\\gems"]);
   });
 });

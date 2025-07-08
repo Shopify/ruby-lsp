@@ -20,26 +20,13 @@ export function createRubySymlinks() {
 
     if (!fs.existsSync(linkPath)) {
       fs.mkdirSync(path.join(os.homedir(), ".rubies"), { recursive: true });
-      fs.symlinkSync(
-        `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64`,
-        linkPath,
-      );
+      fs.symlinkSync(`/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64`, linkPath);
     }
   } else {
     const linkPath = path.join("C:", `Ruby${MAJOR}${MINOR}-${os.arch()}`);
 
     if (!fs.existsSync(linkPath)) {
-      fs.symlinkSync(
-        path.join(
-          "C:",
-          "hostedtoolcache",
-          "windows",
-          "Ruby",
-          RUBY_VERSION,
-          "x64",
-        ),
-        linkPath,
-      );
+      fs.symlinkSync(path.join("C:", "hostedtoolcache", "windows", "Ruby", RUBY_VERSION, "x64"), linkPath);
     }
   }
 }
@@ -61,9 +48,7 @@ class FakeWorkspaceState implements vscode.Memento {
   }
 }
 
-export const LSP_WORKSPACE_PATH = path.dirname(
-  path.dirname(path.dirname(path.dirname(__dirname))),
-);
+export const LSP_WORKSPACE_PATH = path.dirname(path.dirname(path.dirname(path.dirname(__dirname))));
 export const LSP_WORKSPACE_URI = vscode.Uri.file(LSP_WORKSPACE_PATH);
 export const LSP_WORKSPACE_FOLDER: vscode.WorkspaceFolder = {
   uri: LSP_WORKSPACE_URI,

@@ -18,15 +18,9 @@ import { createContext, FakeContext } from "../helpers";
 // Create links to the real Ruby installations on CI and on our local machines
 function createRubySymlinks(destination: string) {
   if (process.env.CI && os.platform() === "linux") {
-    fs.symlinkSync(
-      `/opt/hostedtoolcache/Ruby/${RUBY_VERSION}/x64/bin/ruby`,
-      destination,
-    );
+    fs.symlinkSync(`/opt/hostedtoolcache/Ruby/${RUBY_VERSION}/x64/bin/ruby`, destination);
   } else if (process.env.CI) {
-    fs.symlinkSync(
-      `/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64/bin/ruby`,
-      destination,
-    );
+    fs.symlinkSync(`/Users/runner/hostedtoolcache/Ruby/${RUBY_VERSION}/arm64/bin/ruby`, destination);
   } else {
     const possibleLocations = [
       `${os.homedir()}/.rubies/${RUBY_VERSION}/bin/ruby`,
@@ -64,9 +58,7 @@ suite("Chruby", () => {
       recursive: true,
     });
 
-    createRubySymlinks(
-      path.join(rootPath, "opt", "rubies", RUBY_VERSION, "bin", "ruby"),
-    );
+    createRubySymlinks(path.join(rootPath, "opt", "rubies", RUBY_VERSION, "bin", "ruby"));
 
     workspacePath = path.join(rootPath, "workspace");
     fs.mkdirSync(workspacePath);
@@ -88,15 +80,8 @@ suite("Chruby", () => {
   test("Finds Ruby when .ruby-version is inside workspace", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);
@@ -105,15 +90,8 @@ suite("Chruby", () => {
   test("Finds Ruby when .ruby-version is inside on parent directories", async () => {
     fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);
@@ -122,45 +100,23 @@ suite("Chruby", () => {
   test("Considers any version with a suffix to be the latest", async () => {
     // chruby always considers anything with a suffix to be the latest version, even if that's not accurate. For
     // example, 3.3.0-rc1 is older than the stable 3.3.0, but running `chruby 3.3.0` will prefer the release candidate
-    fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin"),
-      {
-        recursive: true,
-      },
-    );
+    fs.mkdirSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin"), {
+      recursive: true,
+    });
 
-    createRubySymlinks(
-      path.join(
-        rootPath,
-        "opt",
-        "rubies",
-        `${RUBY_VERSION}-rc1`,
-        "bin",
-        "ruby",
-      ),
-    );
+    createRubySymlinks(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin", "ruby"));
 
     fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const { env, yjit } = await chruby.activate();
 
     // Since we symlink the stable Ruby as if it were a release candidate, we cannot assert the version of gem paths
     // because those will match the stable version that is running the activation script. It is enough to verify that we
     // inserted the correct Ruby path into the PATH
-    assert.match(
-      env.PATH!,
-      new RegExp(`\\/opt\\/rubies\\/${VERSION_REGEX}-rc1`),
-    );
+    assert.match(env.PATH!, new RegExp(`\\/opt\\/rubies\\/${VERSION_REGEX}-rc1`));
     assert.notStrictEqual(yjit, undefined);
     fs.rmSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`), {
       recursive: true,
@@ -169,45 +125,20 @@ suite("Chruby", () => {
   });
 
   test("Finds right Ruby with explicit release candidate but omitted engine", async () => {
-    fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin"),
-      {
-        recursive: true,
-      },
-    );
+    fs.mkdirSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin"), {
+      recursive: true,
+    });
 
-    createRubySymlinks(
-      path.join(
-        rootPath,
-        "opt",
-        "rubies",
-        `${RUBY_VERSION}-rc1`,
-        "bin",
-        "ruby",
-      ),
-    );
+    createRubySymlinks(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`, "bin", "ruby"));
 
-    fs.writeFileSync(
-      path.join(rootPath, ".ruby-version"),
-      `${RUBY_VERSION}-rc1`,
-    );
+    fs.writeFileSync(path.join(rootPath, ".ruby-version"), `${RUBY_VERSION}-rc1`);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const { env, yjit } = await chruby.activate();
 
-    assert.match(
-      env.PATH!,
-      new RegExp(`\\/opt\\/rubies\\/${VERSION_REGEX}-rc1`),
-    );
+    assert.match(env.PATH!, new RegExp(`\\/opt\\/rubies\\/${VERSION_REGEX}-rc1`));
     assert.notStrictEqual(yjit, undefined);
     fs.rmSync(path.join(rootPath, "opt", "rubies", `${RUBY_VERSION}-rc1`), {
       recursive: true,
@@ -221,18 +152,11 @@ suite("Chruby", () => {
       recursive: true,
     });
 
-    createRubySymlinks(
-      path.join(rubyHome, `ruby-${RUBY_VERSION}`, "bin", "ruby"),
-    );
+    createRubySymlinks(path.join(rubyHome, `ruby-${RUBY_VERSION}`, "bin", "ruby"));
 
     fs.writeFileSync(path.join(rootPath, ".ruby-version"), RUBY_VERSION);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
     chruby.rubyInstallationUris = [vscode.Uri.file(rubyHome)];
 
     const { env, version, yjit } = await chruby.activate();
@@ -245,21 +169,11 @@ suite("Chruby", () => {
   test("Finds Ruby when extra RUBIES are configured", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), RUBY_VERSION);
 
-    const configStub = sinon
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: (name: string) =>
-          name === "rubyVersionManager.chrubyRubies"
-            ? [path.join(rootPath, "opt", "rubies")]
-            : "",
-      } as any);
+    const configStub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => (name === "rubyVersionManager.chrubyRubies" ? [path.join(rootPath, "opt", "rubies")] : ""),
+    } as any);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
     configStub.restore();
 
     const result = await chruby.activate();
@@ -267,27 +181,14 @@ suite("Chruby", () => {
   });
 
   test("Finds Ruby when .ruby-version omits patch", async () => {
-    fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`, "bin"),
-      {
-        recursive: true,
-      },
-    );
+    fs.mkdirSync(path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`, "bin"), {
+      recursive: true,
+    });
 
-    fs.writeFileSync(
-      path.join(workspacePath, ".ruby-version"),
-      `${MAJOR}.${MINOR}`,
-    );
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), `${MAJOR}.${MINOR}`);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);
@@ -299,24 +200,13 @@ suite("Chruby", () => {
   });
 
   test("Continues searching if first directory doesn't exist for omitted patch", async () => {
-    fs.mkdirSync(
-      path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`, "bin"),
-      {
-        recursive: true,
-      },
-    );
+    fs.mkdirSync(path.join(rootPath, "opt", "rubies", `${MAJOR}.${MINOR}.0`, "bin"), {
+      recursive: true,
+    });
 
-    fs.writeFileSync(
-      path.join(workspacePath, ".ruby-version"),
-      `${MAJOR}.${MINOR}`,
-    );
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), `${MAJOR}.${MINOR}`);
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
     chruby.rubyInstallationUris = [
       vscode.Uri.file(path.join(rootPath, ".rubies")),
       vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
@@ -327,15 +217,8 @@ suite("Chruby", () => {
   });
 
   test("Uses latest Ruby as a fallback if no .ruby-version is found", async () => {
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);
@@ -344,15 +227,8 @@ suite("Chruby", () => {
   test("Doesn't try to fallback to latest version if there's a Gemfile with ruby constraints", async () => {
     fs.writeFileSync(path.join(workspacePath, "Gemfile"), "ruby '3.3.0'");
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     await assert.rejects(() => {
       return chruby.activate();
@@ -362,15 +238,8 @@ suite("Chruby", () => {
   test("Uses closest Ruby if the version specified in .ruby-version is not installed (patch difference)", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.3.3'");
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);
@@ -379,35 +248,18 @@ suite("Chruby", () => {
   test("Uses closest Ruby if the version specified in .ruby-version is not installed (minor difference)", async () => {
     fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.2.0'");
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);
   }).timeout(20000);
 
   test("Uses closest Ruby if the version specified in .ruby-version is not installed (previews)", async () => {
-    fs.writeFileSync(
-      path.join(workspacePath, ".ruby-version"),
-      "ruby '3.4.0-preview1'",
-    );
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.4.0-preview1'");
 
-    const chruby = new Chruby(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
-    chruby.rubyInstallationUris = [
-      vscode.Uri.file(path.join(rootPath, "opt", "rubies")),
-    ];
+    const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
+    chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
 
     const result = await chruby.activate();
     assertActivatedRuby(result);

@@ -17,9 +17,7 @@ import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
 import { createContext, createRubySymlinks, FakeContext } from "./helpers";
 
 suite("Launch integrations", () => {
-  const workspacePath = path.dirname(
-    path.dirname(path.dirname(path.dirname(__dirname))),
-  );
+  const workspacePath = path.dirname(path.dirname(path.dirname(path.dirname(__dirname))));
   const workspaceUri = vscode.Uri.file(workspacePath);
   const workspaceFolder: vscode.WorkspaceFolder = {
     uri: workspaceUri,
@@ -44,12 +42,7 @@ suite("Launch integrations", () => {
   const outputChannel = new WorkspaceChannel("fake", fakeLogger as any);
 
   async function createClient() {
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
 
     if (process.env.CI && os.platform() === "win32") {
       await ruby.activateRuby({ identifier: ManagerIdentifier.RubyInstaller });
@@ -70,9 +63,7 @@ suite("Launch integrations", () => {
     );
 
     client.clientOptions.initializationFailedHandler = (error) => {
-      assert.fail(
-        `Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`,
-      );
+      assert.fail(`Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`);
     };
 
     return client;
@@ -82,9 +73,7 @@ suite("Launch integrations", () => {
     try {
       await client.start();
     } catch (error: any) {
-      assert.fail(
-        `Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`,
-      );
+      assert.fail(`Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`);
     }
     assert.strictEqual(client.state, State.Running);
 
@@ -110,9 +99,7 @@ suite("Launch integrations", () => {
       await client.stop();
       await client.dispose();
     } catch (error: any) {
-      assert.fail(
-        `Failed to stop server: ${error.message}\n${fakeLogger.receivedMessages}`,
-      );
+      assert.fail(`Failed to stop server: ${error.message}\n${fakeLogger.receivedMessages}`);
     }
   }).timeout(120000);
 });

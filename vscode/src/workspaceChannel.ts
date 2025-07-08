@@ -56,10 +56,7 @@ export class WorkspaceChannel implements vscode.LogOutputChannel {
   }
 
   show(preserveFocus?: boolean | undefined): void;
-  show(
-    column?: vscode.ViewColumn | undefined,
-    preserveFocus?: boolean | undefined,
-  ): void;
+  show(column?: vscode.ViewColumn | undefined, preserveFocus?: boolean | undefined): void;
 
   show(_column?: unknown, preserveFocus?: boolean | undefined): void {
     this.actualChannel.show(preserveFocus);

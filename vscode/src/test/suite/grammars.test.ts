@@ -92,38 +92,25 @@ suite("Grammars", () => {
     let rbsGrammar: vsctm.IGrammar | null = null;
 
     suiteSetup(async () => {
-      const wasmBin = await fs.readFile(
-        path.join(
-          repoRoot,
-          "./node_modules/vscode-oniguruma/release/onig.wasm",
-        ),
-      );
-      const vscodeOnigurumaLib = oniguruma
-        .loadWASM(Buffer.from(wasmBin).buffer)
-        .then(() => {
-          return {
-            createOnigScanner(patterns: string[]) {
-              return new oniguruma.OnigScanner(patterns);
-            },
-            createOnigString(str: string) {
-              return new oniguruma.OnigString(str);
-            },
-          };
-        });
+      const wasmBin = await fs.readFile(path.join(repoRoot, "./node_modules/vscode-oniguruma/release/onig.wasm"));
+      const vscodeOnigurumaLib = oniguruma.loadWASM(Buffer.from(wasmBin).buffer).then(() => {
+        return {
+          createOnigScanner(patterns: string[]) {
+            return new oniguruma.OnigScanner(patterns);
+          },
+          createOnigString(str: string) {
+            return new oniguruma.OnigString(str);
+          },
+        };
+      });
       const registry = new vsctm.Registry({
         onigLib: vscodeOnigurumaLib,
         loadGrammar: async (scopeName) => {
           if (scopeName === "source.ruby") {
-            const data = await fs.readFile(
-              path.join(repoRoot, grammarPath),
-              "utf8",
-            );
+            const data = await fs.readFile(path.join(repoRoot, grammarPath), "utf8");
             return vsctm.parseRawGrammar(data, grammarPath);
           } else if (scopeName === "rbs-comment.injection") {
-            const data = await fs.readFile(
-              path.join(repoRoot, rbsGrammarPath),
-              "utf8",
-            );
+            const data = await fs.readFile(path.join(repoRoot, rbsGrammarPath), "utf8");
             return vsctm.parseRawGrammar(data, rbsGrammarPath);
           }
 
@@ -148,27 +135,21 @@ suite("Grammars", () => {
       const languageConfigs: LanguageConfig[] = EMBEDDED_HEREDOC_LANGUAGES.map(
         (languageConfigOrLabel: InferrableLanguageConfigOrLabel) => {
           const languageConfig =
-            typeof languageConfigOrLabel === "string"
-              ? { label: languageConfigOrLabel }
-              : languageConfigOrLabel;
+            typeof languageConfigOrLabel === "string" ? { label: languageConfigOrLabel } : languageConfigOrLabel;
 
           const label: string = languageConfig.label;
 
           // Infer omitted values
           const id: string = languageConfig.id ?? label.toLowerCase();
           const name = `meta.embedded.block.${id}`;
-          const contentName: string =
-            languageConfig.contentName ?? `source.${id}`;
+          const contentName: string = languageConfig.contentName ?? `source.${id}`;
           const includeName: string = languageConfig.includeName ?? contentName;
 
           // Infer, normalize, and validate delimiters
-          let delimiters: string | string[] =
-            languageConfig.delimiters ?? id.toUpperCase();
+          let delimiters: string | string[] = languageConfig.delimiters ?? id.toUpperCase();
           if (Array.isArray(delimiters)) {
             if (delimiters.length === 0) {
-              throw new Error(
-                `Must provide at least one delimiter for ${label}`,
-              );
+              throw new Error(`Must provide at least one delimiter for ${label}`);
             }
           } else {
             delimiters = [delimiters];
@@ -180,14 +161,9 @@ suite("Grammars", () => {
       languageConfigs.forEach((languageConfig) => {
         test(`Config for ${languageConfig.label} is included`, async () => {
           const grammar = await readRelativeJSONFile(grammarPath);
-          const actual = grammar.patterns.find(
-            (pattern: { name: string }) => pattern.name === languageConfig.name,
-          );
+          const actual = grammar.patterns.find((pattern: { name: string }) => pattern.name === languageConfig.name);
 
-          assert(
-            actual,
-            `No grammar pattern found for ${languageConfig.name} in ${grammarPath}`,
-          );
+          assert(actual, `No grammar pattern found for ${languageConfig.name} in ${grammarPath}`);
 
           const expected = expectedEmbeddedLanguageConfig(languageConfig);
 
@@ -203,22 +179,8 @@ suite("Grammars", () => {
         languageConfig.delimiters.forEach((delimiter) => {
           test(`HEREDOC using ${delimiter} is tokenized correctly`, () => {
             const expectedTokens = [
-              [
-                `<<~${delimiter}`,
-                [
-                  "source.ruby",
-                  languageConfig.name,
-                  "string.definition.begin.ruby",
-                ],
-              ],
-              [
-                delimiter,
-                [
-                  "source.ruby",
-                  languageConfig.name,
-                  "string.definition.end.ruby",
-                ],
-              ],
+              [`<<~${delimiter}`, ["source.ruby", languageConfig.name, "string.definition.begin.ruby"]],
+              [delimiter, ["source.ruby", languageConfig.name, "string.definition.end.ruby"]],
             ];
             const ruby = expectedTokens.map((token) => token[0]).join("\n");
             const actualTokens = tokenizeRuby(ruby);
@@ -234,9 +196,7 @@ suite("Grammars", () => {
 
       test("No unknown languages are included", async () => {
         const grammar = await readRelativeJSONFile(grammarPath);
-        const expected = languageConfigs
-          .map((languageConfig) => languageConfig.name)
-          .sort();
+        const expected = languageConfigs.map((languageConfig) => languageConfig.name).sort();
         const actual = grammar.patterns
           .map((pattern: { name: string }) => pattern.name)
           .filter((name?: string) => name?.startsWith("meta.embedded.block."))
@@ -244,9 +204,7 @@ suite("Grammars", () => {
 
         const filename = path.relative(path.join(repoRoot, "out"), __filename);
 
-        const unexpected = actual.filter(
-          (name: string) => !expected.includes(name),
-        );
+        const unexpected = actual.filter((name: string) => !expected.includes(name));
 
         assert.deepStrictEqual(
           unexpected,
@@ -257,18 +215,14 @@ suite("Grammars", () => {
       });
 
       test("EMBEDDED_HEREDOC_LANGUAGES is sorted", () => {
-        const isLabel = (
-          languageConfigOrLabel: InferrableLanguageConfigOrLabel,
-        ): languageConfigOrLabel is string => {
+        const isLabel = (languageConfigOrLabel: InferrableLanguageConfigOrLabel): languageConfigOrLabel is string => {
           return typeof languageConfigOrLabel === "string";
         };
-        const sortedLanguages = EMBEDDED_HEREDOC_LANGUAGES.toSorted(
-          (language1, language2) => {
-            const label1 = isLabel(language1) ? language1 : language1.label;
-            const label2 = isLabel(language2) ? language2 : language2.label;
-            return label1.localeCompare(label2);
-          },
-        );
+        const sortedLanguages = EMBEDDED_HEREDOC_LANGUAGES.toSorted((language1, language2) => {
+          const label1 = isLabel(language1) ? language1 : language1.label;
+          const label2 = isLabel(language2) ? language2 : language2.label;
+          return label1.localeCompare(label2);
+        });
 
         const [labelsOnly, objects] = [
           sortedLanguages.filter((object) => isLabel(object)),
@@ -285,63 +239,14 @@ suite("Grammars", () => {
       test("HEREDOC only matches the content and not the delimiters", () => {
         const ruby = "foo(<<~FOO, bar)\nfoo\nFOO";
         const expectedTokens = [
-          [
-            "foo",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "entity.name.function.ruby",
-            ],
-          ],
-          [
-            "(",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "punctuation.section.function.ruby",
-            ],
-          ],
-          [
-            "<<~FOO",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "string.definition.begin.ruby",
-            ],
-          ],
-          [
-            ",",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "punctuation.separator.object.ruby",
-            ],
-          ],
+          ["foo", ["source.ruby", "meta.function-call.ruby", "entity.name.function.ruby"]],
+          ["(", ["source.ruby", "meta.function-call.ruby", "punctuation.section.function.ruby"]],
+          ["<<~FOO", ["source.ruby", "meta.function-call.ruby", "string.definition.begin.ruby"]],
+          [",", ["source.ruby", "meta.function-call.ruby", "punctuation.separator.object.ruby"]],
           [" bar", ["source.ruby", "meta.function-call.ruby"]],
-          [
-            ")",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "punctuation.section.function.ruby",
-            ],
-          ],
-          [
-            "foo",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "string.unquoted.heredoc.ruby",
-            ],
-          ],
-          [
-            "FOO",
-            [
-              "source.ruby",
-              "meta.function-call.ruby",
-              "string.definition.end.ruby",
-            ],
-          ],
+          [")", ["source.ruby", "meta.function-call.ruby", "punctuation.section.function.ruby"]],
+          ["foo", ["source.ruby", "meta.function-call.ruby", "string.unquoted.heredoc.ruby"]],
+          ["FOO", ["source.ruby", "meta.function-call.ruby", "string.definition.end.ruby"]],
         ];
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -352,23 +257,9 @@ suite("Grammars", () => {
       test("Standard backtick string", () => {
         const ruby = "`ruby`";
         const expectedTokens = [
-          [
-            "`",
-            [
-              "source.ruby",
-              "string.interpolated.ruby",
-              "punctuation.definition.string.begin.ruby",
-            ],
-          ],
+          ["`", ["source.ruby", "string.interpolated.ruby", "punctuation.definition.string.begin.ruby"]],
           ["ruby", ["source.ruby", "string.interpolated.ruby"]],
-          [
-            "`",
-            [
-              "source.ruby",
-              "string.interpolated.ruby",
-              "punctuation.definition.string.end.ruby",
-            ],
-          ],
+          ["`", ["source.ruby", "string.interpolated.ruby", "punctuation.definition.string.end.ruby"]],
         ];
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -380,23 +271,9 @@ suite("Grammars", () => {
           ["Kernel", ["source.ruby", "variable.other.constant.ruby"]],
           [".", ["source.ruby", "punctuation.separator.method.ruby"]],
           ["`", ["source.ruby"]],
-          [
-            '"',
-            [
-              "source.ruby",
-              "string.quoted.double.interpolated.ruby",
-              "punctuation.definition.string.begin.ruby",
-            ],
-          ],
+          ['"', ["source.ruby", "string.quoted.double.interpolated.ruby", "punctuation.definition.string.begin.ruby"]],
           ["ls", ["source.ruby", "string.quoted.double.interpolated.ruby"]],
-          [
-            '"',
-            [
-              "source.ruby",
-              "string.quoted.double.interpolated.ruby",
-              "punctuation.definition.string.end.ruby",
-            ],
-          ],
+          ['"', ["source.ruby", "string.quoted.double.interpolated.ruby", "punctuation.definition.string.end.ruby"]],
         ];
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -409,46 +286,19 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            "String",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          ["String", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.signature.return.rbs",
-            ],
-          ],
+          ["->", ["meta.type.signature.rbs", "punctuation.section.signature.return.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            "String",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          ["String", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "|",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["|", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           ["nil", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -459,59 +309,23 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            "String",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          ["String", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "{",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["{", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            "String",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          ["String", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.signature.return.rbs",
-            ],
-          ],
+          ["->", ["meta.type.signature.rbs", "punctuation.section.signature.return.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           ["boolish", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "}",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["}", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.signature.return.rbs",
-            ],
-          ],
+          ["->", ["meta.type.signature.rbs", "punctuation.section.signature.return.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
@@ -524,23 +338,11 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           ["#|", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.signature.return.rbs",
-            ],
-          ],
+          ["->", ["meta.type.signature.rbs", "punctuation.section.signature.return.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
@@ -553,66 +355,24 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "[",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.type_parameters.rbs",
-            ],
-          ],
+          ["[", ["meta.type.signature.rbs", "punctuation.section.type_parameters.rbs"]],
           ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [
-            "]",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.type_parameters.rbs",
-            ],
-          ],
+          ["]", ["meta.type.signature.rbs", "punctuation.section.type_parameters.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "&",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["&", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "Object",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["Object", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.signature.return.rbs",
-            ],
-          ],
+          ["->", ["meta.type.signature.rbs", "punctuation.section.signature.return.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           ["Class", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [
-            "[",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.type_parameters.rbs",
-            ],
-          ],
+          ["[", ["meta.type.signature.rbs", "punctuation.section.type_parameters.rbs"]],
           ["X", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [
-            "]",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.type_parameters.rbs",
-            ],
-          ],
+          ["]", ["meta.type.signature.rbs", "punctuation.section.type_parameters.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -623,41 +383,17 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "(",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            "*",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["(", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          ["*", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           ["Foo", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [
-            ",",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          [",", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "*",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
-          [
-            "*",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["*", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
+          ["*", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           ["Bar", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
-          [
-            ")",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          [")", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "->",
-            [
-              "meta.type.signature.rbs",
-              "punctuation.section.signature.return.rbs",
-            ],
-          ],
+          ["->", ["meta.type.signature.rbs", "punctuation.section.signature.return.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
           ["void", ["meta.type.signature.rbs", "support.type.builtin.rbs"]],
         ];
@@ -671,22 +407,10 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "return",
-            [
-              "meta.type.signature.rbs",
-              "constant.other.symbol.hashkey.parameter.function.rbs",
-            ],
-          ],
-          [
-            ":",
-            ["meta.type.signature.rbs", "punctuation.section.signature.rbs"],
-          ],
+          ["return", ["meta.type.signature.rbs", "constant.other.symbol.hashkey.parameter.function.rbs"]],
+          [":", ["meta.type.signature.rbs", "punctuation.section.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "String",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
+          ["String", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -711,10 +435,7 @@ suite("Grammars", () => {
           [" ", ["meta.type.signature.rbs"]],
           ["Foo", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "# some comments",
-            ["meta.type.signature.rbs", "comment.line.number-sign.rbs"],
-          ],
+          ["# some comments", ["meta.type.signature.rbs", "comment.line.number-sign.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -740,10 +461,7 @@ suite("Grammars", () => {
           ["attr_reader :name ", []],
           ["#:", ["meta.type.signature.rbs", "comment.line.signature.rbs"]],
           [" ", ["meta.type.signature.rbs"]],
-          [
-            "String",
-            ["meta.type.signature.rbs", "variable.other.constant.rbs"],
-          ],
+          ["String", ["meta.type.signature.rbs", "variable.other.constant.rbs"]],
         ];
         const actualTokens = tokenizeRBS(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -768,10 +486,7 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["local", ["source.ruby", "variable.ruby"]],
           [" ", ["source.ruby"]],
-          [
-            "||=",
-            ["source.ruby", "keyword.operator.assignment.augmented.ruby"],
-          ],
+          ["||=", ["source.ruby", "keyword.operator.assignment.augmented.ruby"]],
           [" ", ["source.ruby"]],
           ["1", ["source.ruby", "constant.numeric.ruby"]],
         ];
@@ -786,10 +501,7 @@ suite("Grammars", () => {
           [" ", ["source.ruby"]],
           ["local", ["source.ruby", "variable.ruby"]],
           [" ", ["source.ruby"]],
-          [
-            "&&=",
-            ["source.ruby", "keyword.operator.assignment.augmented.ruby"],
-          ],
+          ["&&=", ["source.ruby", "keyword.operator.assignment.augmented.ruby"]],
           [" ", ["source.ruby"]],
           ["1", ["source.ruby", "constant.numeric.ruby"]],
         ];
@@ -832,23 +544,9 @@ suite("Grammars", () => {
         const expectedTokens = [
           ["local", ["source.ruby", "variable.ruby"]],
           ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
-          [
-            "'",
-            [
-              "source.ruby",
-              "string.quoted.single.ruby",
-              "punctuation.definition.string.begin.ruby",
-            ],
-          ],
+          ["'", ["source.ruby", "string.quoted.single.ruby", "punctuation.definition.string.begin.ruby"]],
           ["string", ["source.ruby", "string.quoted.single.ruby"]],
-          [
-            "'",
-            [
-              "source.ruby",
-              "string.quoted.single.ruby",
-              "punctuation.definition.string.end.ruby",
-            ],
-          ],
+          ["'", ["source.ruby", "string.quoted.single.ruby", "punctuation.definition.string.end.ruby"]],
         ];
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -944,10 +642,8 @@ suite("Grammars", () => {
     }
 
     function expectedEmbeddedLanguageConfig(languageConfig: LanguageConfig) {
-      const { label, name, delimiters, contentName, includeName } =
-        languageConfig;
-      const delimiter =
-        delimiters.length > 1 ? `(?:${delimiters.join("|")})` : delimiters;
+      const { label, name, delimiters, contentName, includeName } = languageConfig;
+      const delimiter = delimiters.length > 1 ? `(?:${delimiters.join("|")})` : delimiters;
 
       return {
         begin: `(?=(?><<[-~](["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1))`,
@@ -981,7 +677,5 @@ suite("Grammars", () => {
 });
 
 async function readRelativeJSONFile(relativePath: string) {
-  return JSON.parse(
-    await fs.readFile(path.join(repoRoot, relativePath), "utf8"),
-  );
+  return JSON.parse(await fs.readFile(path.join(repoRoot, relativePath), "utf8"));
 }

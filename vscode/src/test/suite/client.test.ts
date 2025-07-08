@@ -50,12 +50,8 @@ async function launchClient(workspaceUri: vscode.Uri) {
 
   // Ensure that we're activating the correct Ruby version on CI
   if (process.env.CI) {
-    await vscode.workspace
-      .getConfiguration("rubyLsp")
-      .update("formatter", "rubocop_internal", true);
-    await vscode.workspace
-      .getConfiguration("rubyLsp")
-      .update("linters", ["rubocop_internal"], true);
+    await vscode.workspace.getConfiguration("rubyLsp").update("formatter", "rubocop_internal", true);
+    await vscode.workspace.getConfiguration("rubyLsp").update("linters", ["rubocop_internal"], true);
 
     createRubySymlinks();
 
@@ -66,12 +62,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     }
   }
 
-  const ruby = new Ruby(
-    context,
-    workspaceFolder,
-    outputChannel,
-    FAKE_TELEMETRY,
-  );
+  const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
   await ruby.activateRuby(managerConfig);
   ruby.env.RUBY_LSP_BYPASS_TYPECHECKER = "true";
 
@@ -90,20 +81,10 @@ async function launchClient(workspaceUri: vscode.Uri) {
     },
   });
 
-  const client = new Client(
-    context,
-    FAKE_TELEMETRY,
-    ruby,
-    () => {},
-    workspaceFolder,
-    outputChannel,
-    virtualDocuments,
-  );
+  const client = new Client(context, FAKE_TELEMETRY, ruby, () => {}, workspaceFolder, outputChannel, virtualDocuments);
 
   client.clientOptions.initializationFailedHandler = (error) => {
-    assert.fail(
-      `Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`,
-    );
+    assert.fail(`Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`);
   };
 
   client.onNotification("window/showMessage", (params: ShowMessageParams) => {
@@ -130,16 +111,9 @@ async function launchClient(workspaceUri: vscode.Uri) {
 }
 
 suite("Client", () => {
-  const workspacePath = path.dirname(
-    path.dirname(path.dirname(path.dirname(__dirname))),
-  );
+  const workspacePath = path.dirname(path.dirname(path.dirname(path.dirname(__dirname))));
   const workspaceUri = vscode.Uri.file(workspacePath);
-  const documentUri = vscode.Uri.joinPath(
-    workspaceUri,
-    "lib",
-    "ruby_lsp",
-    "fake.rb",
-  );
+  const documentUri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "fake.rb");
   let client: Client;
   let sandbox: sinon.SinonSandbox;
 
@@ -191,13 +165,7 @@ suite("Client", () => {
   });
 
   test("document symbol", async () => {
-    const text = [
-      "class Foo",
-      "  def initialize",
-      "    @bar = 1",
-      "  end",
-      "end",
-    ].join("\n");
+    const text = ["class Foo", "  def initialize", "    @bar = 1", "  end", "end"].join("\n");
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -206,14 +174,11 @@ suite("Client", () => {
         text,
       },
     });
-    const response: vscode.DocumentSymbol[] = await client.sendRequest(
-      "textDocument/documentSymbol",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
+    const response: vscode.DocumentSymbol[] = await client.sendRequest("textDocument/documentSymbol", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+    });
 
     assert.strictEqual(response[0].name, "Foo");
     assert.strictEqual(response[0].children[0].name, "initialize");
@@ -230,15 +195,12 @@ suite("Client", () => {
         text,
       },
     });
-    const response: vscode.DocumentHighlight[] = await client.sendRequest(
-      "textDocument/documentHighlight",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
-        position: { line: 0, character: 1 },
+    const response: vscode.DocumentHighlight[] = await client.sendRequest("textDocument/documentHighlight", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+      position: { line: 0, character: 1 },
+    });
 
     assert.strictEqual(response.length, 1);
     assert.strictEqual(response[0].kind, DocumentHighlightKind.Write);
@@ -277,15 +239,12 @@ suite("Client", () => {
         text,
       },
     });
-    const response: LocationLink[] = await client.sendRequest(
-      "textDocument/definition",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
-        position: { line: 0, character: 11 },
+    const response: LocationLink[] = await client.sendRequest("textDocument/definition", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+      position: { line: 0, character: 11 },
+    });
 
     assert.strictEqual(response.length, 1);
     assert.match(response[0].targetUri, /server\.rb/);
@@ -301,14 +260,11 @@ suite("Client", () => {
         text,
       },
     });
-    const response: SemanticTokens = await client.sendRequest(
-      "textDocument/semanticTokens/full",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
+    const response: SemanticTokens = await client.sendRequest("textDocument/semanticTokens/full", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+    });
 
     assert.deepStrictEqual(response.data, [0, 0, 3, 13, 0]);
   }).timeout(20000);
@@ -323,28 +279,20 @@ suite("Client", () => {
         text,
       },
     });
-    const response: DocumentLink[] = await client.sendRequest(
-      "textDocument/documentLink",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
+    const response: DocumentLink[] = await client.sendRequest("textDocument/documentLink", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+    });
 
     assert.strictEqual(response.length, 1);
     assert.match(response[0].target!, /erb\.rb/);
   }).timeout(20000);
 
   test("workspace symbol", async () => {
-    const response: WorkspaceSymbol[] = await client.sendRequest(
-      "workspace/symbol",
-      {},
-    );
+    const response: WorkspaceSymbol[] = await client.sendRequest("workspace/symbol", {});
 
-    const server = response.find(
-      (symbol) => symbol.name === "RubyLsp::Server",
-    )!;
+    const server = response.find((symbol) => symbol.name === "RubyLsp::Server")!;
     assert.strictEqual(server.name, "RubyLsp::Server");
     assert.strictEqual(server.kind, SymbolKind.Class);
   }).timeout(20000);
@@ -359,11 +307,7 @@ suite("Client", () => {
       "  end",
       "end",
     ].join("\n");
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "test",
-      "server_test.rb",
-    ).toString();
+    const uri = vscode.Uri.joinPath(workspaceUri, "test", "server_test.rb").toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -372,14 +316,11 @@ suite("Client", () => {
         text,
       },
     });
-    const response: CodeLens[] = await client.sendRequest(
-      "textDocument/codeLens",
-      {
-        textDocument: {
-          uri,
-        },
+    const response: CodeLens[] = await client.sendRequest("textDocument/codeLens", {
+      textDocument: {
+        uri,
       },
-    );
+    });
 
     // 3 for the class, 3 for the example
     assert.strictEqual(response.length, 6);
@@ -395,19 +336,13 @@ suite("Client", () => {
         text,
       },
     });
-    const response: FullDocumentDiagnosticReport = await client.sendRequest(
-      "textDocument/diagnostic",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
+    const response: FullDocumentDiagnosticReport = await client.sendRequest("textDocument/diagnostic", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+    });
 
-    assert.strictEqual(
-      response.items[0].message,
-      "mismatched indentations at 'end' with 'def' at 1",
-    );
+    assert.strictEqual(response.items[0].message, "mismatched indentations at 'end' with 'def' at 1");
   }).timeout(20000);
 
   test("folding range", async () => {
@@ -420,23 +355,18 @@ suite("Client", () => {
         text,
       },
     });
-    const response: FoldingRange[] = await client.sendRequest(
-      "textDocument/foldingRange",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
+    const response: FoldingRange[] = await client.sendRequest("textDocument/foldingRange", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+    });
 
     assert.strictEqual(response.length, 1);
     assert.strictEqual(response[0].kind, "region");
   }).timeout(20000);
 
   test("formatting", async () => {
-    const text = ["# frozen_string_literal: true", "", "def foo", "end"]
-      .join("\n")
-      .trim();
+    const text = ["# frozen_string_literal: true", "", "def foo", "end"].join("\n").trim();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -445,24 +375,13 @@ suite("Client", () => {
         text,
       },
     });
-    const response: TextEdit[] = await client.sendRequest(
-      "textDocument/formatting",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
+    const response: TextEdit[] = await client.sendRequest("textDocument/formatting", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+    });
 
-    const expected = [
-      "# typed: strict",
-      "# frozen_string_literal: true",
-      "",
-      "def foo",
-      "end",
-    ]
-      .join("\n")
-      .trim();
+    const expected = ["# typed: strict", "# frozen_string_literal: true", "", "def foo", "end"].join("\n").trim();
 
     assert.strictEqual(response[0].newText.trim(), expected);
   }).timeout(20000);
@@ -477,15 +396,12 @@ suite("Client", () => {
         text,
       },
     });
-    const response: SelectionRange[] = await client.sendRequest(
-      "textDocument/selectionRange",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
-        positions: [{ line: 0, character: 0 }],
+    const response: SelectionRange[] = await client.sendRequest("textDocument/selectionRange", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+      positions: [{ line: 0, character: 0 }],
+    });
 
     const range = response[0].range;
     assert.strictEqual(range.start.line, 0);
@@ -504,16 +420,13 @@ suite("Client", () => {
         text,
       },
     });
-    const response: TextEdit[] = await client.sendRequest(
-      "textDocument/onTypeFormatting",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
-        position: { line: 1, character: 2 },
-        ch: "\n",
+    const response: TextEdit[] = await client.sendRequest("textDocument/onTypeFormatting", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+      position: { line: 1, character: 2 },
+      ch: "\n",
+    });
 
     assert.strictEqual(response.length, 3);
     assert.strictEqual(response[1].newText, "end");
@@ -530,61 +443,58 @@ suite("Client", () => {
       },
     });
 
-    const response: CodeAction[] = await client.sendRequest(
-      "textDocument/codeAction",
-      {
-        textDocument: {
-          uri: documentUri.toString(),
-        },
-        range: {
-          start: { line: 0, character: 1 },
-          end: { line: 0, character: 2 },
-        },
-        context: {
-          diagnostics: [
-            {
-              range: {
-                start: { line: 0, character: 0 },
-                end: { line: 1, character: 2 },
-              },
-              message: "Layout/EmptyLines: Extra blank line detected.",
-              data: {
-                correctable: true,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                code_actions: [
-                  {
-                    title: "Autocorrect Layout/EmptyLines",
-                    kind: "quickfix",
-                    isPreferred: true,
-                    edit: {
-                      documentChanges: [
-                        {
-                          textDocument: {
-                            uri: documentUri.toString(),
-                          },
-                          edits: [
-                            {
-                              range: {
-                                start: { line: 2, character: 0 },
-                                end: { line: 3, character: 0 },
-                              },
-                              newText: "",
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-              code: "Layout/EmptyLines",
-              severity: 3,
-              source: "RuboCop",
-            },
-          ],
-        },
+    const response: CodeAction[] = await client.sendRequest("textDocument/codeAction", {
+      textDocument: {
+        uri: documentUri.toString(),
       },
-    );
+      range: {
+        start: { line: 0, character: 1 },
+        end: { line: 0, character: 2 },
+      },
+      context: {
+        diagnostics: [
+          {
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 1, character: 2 },
+            },
+            message: "Layout/EmptyLines: Extra blank line detected.",
+            data: {
+              correctable: true,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              code_actions: [
+                {
+                  title: "Autocorrect Layout/EmptyLines",
+                  kind: "quickfix",
+                  isPreferred: true,
+                  edit: {
+                    documentChanges: [
+                      {
+                        textDocument: {
+                          uri: documentUri.toString(),
+                        },
+                        edits: [
+                          {
+                            range: {
+                              start: { line: 2, character: 0 },
+                              end: { line: 3, character: 0 },
+                            },
+                            newText: "",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            code: "Layout/EmptyLines",
+            severity: 3,
+            source: "RuboCop",
+          },
+        ],
+      },
+    });
 
     const quickfix = response.find((action) => action.kind === "quickfix")!;
     assert.match(quickfix.title, /Autocorrect Layout\/EmptyLines/);
@@ -601,43 +511,33 @@ suite("Client", () => {
       },
     });
 
-    const response: CodeAction = await client.sendRequest(
-      "codeAction/resolve",
-      {
-        kind: "refactor.extract",
-        title: "Refactor: Extract Variable",
-        data: {
-          range: {
-            start: { line: 1, character: 1 },
-            end: { line: 1, character: 3 },
-          },
-          uri: documentUri.toString(),
+    const response: CodeAction = await client.sendRequest("codeAction/resolve", {
+      kind: "refactor.extract",
+      title: "Refactor: Extract Variable",
+      data: {
+        range: {
+          start: { line: 1, character: 1 },
+          end: { line: 1, character: 3 },
         },
+        uri: documentUri.toString(),
       },
-    );
+    });
 
     assert.strictEqual(response.title, "Refactor: Extract Variable");
   }).timeout(20000);
 
   test("document selectors match default gems and bundled gems appropriately", () => {
-    const selector = client.clientOptions
-      .documentSelector! as TextDocumentFilter[];
+    const selector = client.clientOptions.documentSelector! as TextDocumentFilter[];
     assert.strictEqual(selector.length, 5);
 
     // We don't care about the order of the document filters, just that they are present. This assertion helper is just
     // a convenience to search the registered filters
-    const assertSelector = (
-      language: string | undefined,
-      pattern: RegExp | string,
-      scheme: string | undefined,
-    ) => {
+    const assertSelector = (language: string | undefined, pattern: RegExp | string, scheme: string | undefined) => {
       assert.ok(
         selector.find(
           (filter: TextDocumentFilter) =>
             filter.language === language &&
-            (typeof pattern === "string"
-              ? pattern === filter.pattern
-              : pattern.test(filter.pattern!)) &&
+            (typeof pattern === "string" ? pattern === filter.pattern : pattern.test(filter.pattern!)) &&
             filter.scheme === scheme,
         ),
       );
@@ -645,11 +545,7 @@ suite("Client", () => {
 
     assertSelector("ruby", `${workspaceUri.fsPath}/**/*`, "file");
     assertSelector("erb", `${workspaceUri.fsPath}/**/*`, "file");
-    assertSelector(
-      "ruby",
-      new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`),
-      "file",
-    );
+    assertSelector("ruby", new RegExp(`ruby\\/\\d\\.\\d\\.\\d\\/\\*\\*\\/\\*`), "file");
     assertSelector("ruby", /lib\/ruby\/gems\/\d\.\d\.\d\/\*\*\/\*/, "file");
     assertSelector("ruby", /lib\/ruby\/\d\.\d\.\d\/\*\*\/\*/, "file");
   });
@@ -679,15 +575,8 @@ suite("Client", () => {
       },
     });
 
-    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join(
-      "\n",
-    );
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "lib",
-      "ruby_lsp",
-      "index.html.erb",
-    ).toString();
+    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join("\n");
+    const uri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "index.html.erb").toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -698,20 +587,15 @@ suite("Client", () => {
       },
     });
 
-    const stub = sinon
-      .stub(vscode.commands, "executeCommand")
-      .resolves({ items: [{ label: "div" }] });
+    const stub = sinon.stub(vscode.commands, "executeCommand").resolves({ items: [{ label: "div" }] });
 
-    const response: vscode.CompletionList = await client.sendRequest(
-      "textDocument/completion",
-      {
-        textDocument: {
-          uri,
-        },
-        position: { line: 1, character: 5 },
-        context: {},
+    const response: vscode.CompletionList = await client.sendRequest("textDocument/completion", {
+      textDocument: {
+        uri,
       },
-    );
+      position: { line: 1, character: 5 },
+      context: {},
+    });
     stub.restore();
 
     await client.sendNotification("textDocument/didClose", {
@@ -726,9 +610,7 @@ suite("Client", () => {
     assert.ok(
       stub.calledWithExactly(
         "vscode.executeCompletionItemProvider",
-        vscode.Uri.parse(
-          `embedded-content://html/${encodeURIComponent(uri)}.html`,
-        ),
+        vscode.Uri.parse(`embedded-content://html/${encodeURIComponent(uri)}.html`),
         { line: 1, character: 5 },
         undefined,
       ),
@@ -744,15 +626,8 @@ suite("Client", () => {
       },
     });
 
-    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join(
-      "\n",
-    );
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "lib",
-      "ruby_lsp",
-      "index.html.erb",
-    ).toString();
+    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join("\n");
+    const uri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "index.html.erb").toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -782,9 +657,7 @@ suite("Client", () => {
     assert.ok(
       stub.calledWithExactly(
         "vscode.executeHoverProvider",
-        vscode.Uri.parse(
-          `embedded-content://html/${encodeURIComponent(uri)}.html`,
-        ),
+        vscode.Uri.parse(`embedded-content://html/${encodeURIComponent(uri)}.html`),
         { line: 1, character: 5 },
       ),
     );
@@ -799,15 +672,8 @@ suite("Client", () => {
       },
     });
 
-    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join(
-      "\n",
-    );
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "lib",
-      "ruby_lsp",
-      "index.html.erb",
-    ).toString();
+    const text = ["<% @users.each do |user| %>", "  <di", "<% end %>"].join("\n");
+    const uri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "index.html.erb").toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -834,9 +700,7 @@ suite("Client", () => {
     assert.ok(
       stub.calledWithExactly(
         "vscode.executeDefinitionProvider",
-        vscode.Uri.parse(
-          `embedded-content://html/${encodeURIComponent(uri)}.html`,
-        ),
+        vscode.Uri.parse(`embedded-content://html/${encodeURIComponent(uri)}.html`),
         { line: 1, character: 5 },
       ),
     );
@@ -851,17 +715,8 @@ suite("Client", () => {
       },
     });
 
-    const text = [
-      "<% @users.each do |user| %>",
-      "  <div onclick='alert(;'>",
-      "<% end %>",
-    ].join("\n");
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "lib",
-      "ruby_lsp",
-      "index.html.erb",
-    ).toString();
+    const text = ["<% @users.each do |user| %>", "  <div onclick='alert(;'>", "<% end %>"].join("\n");
+    const uri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "index.html.erb").toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -889,9 +744,7 @@ suite("Client", () => {
     assert.ok(
       stub.calledWithExactly(
         "vscode.executeSignatureHelpProvider",
-        vscode.Uri.parse(
-          `embedded-content://html/${encodeURIComponent(uri)}.html`,
-        ),
+        vscode.Uri.parse(`embedded-content://html/${encodeURIComponent(uri)}.html`),
         { line: 1, character: 23 },
         undefined,
       ),
@@ -907,17 +760,8 @@ suite("Client", () => {
       },
     });
 
-    const text = [
-      "<% @users.each do |user| %>",
-      "  <div></div>",
-      "<% end %>",
-    ].join("\n");
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "lib",
-      "ruby_lsp",
-      "index.html.erb",
-    ).toString();
+    const text = ["<% @users.each do |user| %>", "  <div></div>", "<% end %>"].join("\n");
+    const uri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "index.html.erb").toString();
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -945,30 +789,20 @@ suite("Client", () => {
     assert.ok(
       stub.calledWithExactly(
         "vscode.executeDocumentHighlights",
-        vscode.Uri.parse(
-          `embedded-content://html/${encodeURIComponent(uri)}.html`,
-        ),
+        vscode.Uri.parse(`embedded-content://html/${encodeURIComponent(uri)}.html`),
         { line: 1, character: 4 },
       ),
     );
   }).timeout(20000);
 
   test("requests for documents that were not opened by the client", async () => {
-    const uri = vscode.Uri.joinPath(
-      workspaceUri,
-      "lib",
-      "ruby_lsp",
-      "server.rb",
-    );
+    const uri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "server.rb");
 
-    const response: vscode.DocumentSymbol[] = await client.sendRequest(
-      "textDocument/documentSymbol",
-      {
-        textDocument: {
-          uri: uri.toString(),
-        },
+    const response: vscode.DocumentSymbol[] = await client.sendRequest("textDocument/documentSymbol", {
+      textDocument: {
+        uri: uri.toString(),
       },
-    );
+    });
 
     assert.ok(response.length > 0);
   }).timeout(20000);
@@ -978,66 +812,40 @@ suite("Client", () => {
     let implUri: vscode.Uri;
 
     setup(() => {
-      testUri = vscode.Uri.joinPath(
-        workspaceUri,
-        "test",
-        "requests",
-        "go_to_relevant_file_test.rb",
-      );
-      implUri = vscode.Uri.joinPath(
-        workspaceUri,
-        "lib",
-        "ruby_lsp",
-        "requests",
-        "go_to_relevant_file.rb",
-      );
+      testUri = vscode.Uri.joinPath(workspaceUri, "test", "requests", "go_to_relevant_file_test.rb");
+      implUri = vscode.Uri.joinPath(workspaceUri, "lib", "ruby_lsp", "requests", "go_to_relevant_file.rb");
     });
 
     test("for test file", async () => {
-      const response: { locations: string[] } = await client.sendRequest(
-        "experimental/goToRelevantFile",
-        {
-          textDocument: {
-            uri: testUri.toString(),
-          },
+      const response: { locations: string[] } = await client.sendRequest("experimental/goToRelevantFile", {
+        textDocument: {
+          uri: testUri.toString(),
         },
-      );
+      });
 
       assert.ok(response.locations.length === 1);
-      assert.match(
-        response.locations[0],
-        /lib\/ruby_lsp\/requests\/go_to_relevant_file\.rb$/,
-      );
+      assert.match(response.locations[0], /lib\/ruby_lsp\/requests\/go_to_relevant_file\.rb$/);
     }).timeout(20000);
 
     test("for implementation file", async () => {
-      const response: { locations: string[] } = await client.sendRequest(
-        "experimental/goToRelevantFile",
-        {
-          textDocument: {
-            uri: implUri.toString(),
-          },
+      const response: { locations: string[] } = await client.sendRequest("experimental/goToRelevantFile", {
+        textDocument: {
+          uri: implUri.toString(),
         },
-      );
+      });
 
       assert.ok(response.locations.length === 1);
-      assert.match(
-        response.locations[0],
-        /test\/requests\/go_to_relevant_file_test\.rb$/,
-      );
+      assert.match(response.locations[0], /test\/requests\/go_to_relevant_file_test\.rb$/);
     }).timeout(20000);
 
     test("returns empty array for invalid file", async () => {
       const uri = vscode.Uri.joinPath(workspaceUri, "nonexistent", "file.rb");
 
-      const response: { locations: string[] } = await client.sendRequest(
-        "experimental/goToRelevantFile",
-        {
-          textDocument: {
-            uri: uri.toString(),
-          },
+      const response: { locations: string[] } = await client.sendRequest("experimental/goToRelevantFile", {
+        textDocument: {
+          uri: uri.toString(),
         },
-      );
+      });
 
       assert.deepStrictEqual(response, { locations: [] });
     }).timeout(20000);

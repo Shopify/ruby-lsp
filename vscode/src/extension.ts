@@ -79,19 +79,13 @@ async function createLogger(context: vscode.ExtensionContext) {
         while (!sender && counter < 5) {
           await vscode.commands.executeCommand("getTelemetrySenderObject");
 
-          sender =
-            await vscode.commands.executeCommand<vscode.TelemetrySender | null>(
-              "getTelemetrySenderObject",
-            );
+          sender = await vscode.commands.executeCommand<vscode.TelemetrySender | null>("getTelemetrySenderObject");
 
           counter++;
         }
       } catch (error: any) {
         sender = {
-          sendEventData: (
-            _eventName: string,
-            _data?: Record<string, any>,
-          ) => {},
+          sendEventData: (_eventName: string, _data?: Record<string, any>) => {},
           sendErrorData: (_error: Error, _data?: Record<string, any>) => {},
         };
       }

@@ -10,9 +10,7 @@ export class Rbenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const rbenvExec = await this.findRbenv();
 
-    const parsedResult = await this.runEnvActivationScript(
-      `${rbenvExec} exec ruby`,
-    );
+    const parsedResult = await this.runEnvActivationScript(`${rbenvExec} exec ruby`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -24,20 +22,12 @@ export class Rbenv extends VersionManager {
 
   private async findRbenv(): Promise<string> {
     const config = vscode.workspace.getConfiguration("rubyLsp");
-    const configuredRbenvPath = config.get<string | undefined>(
-      "rubyVersionManager.rbenvExecutablePath",
-    );
+    const configuredRbenvPath = config.get<string | undefined>("rubyVersionManager.rbenvExecutablePath");
 
     if (configuredRbenvPath) {
       return this.ensureRbenvExistsAt(configuredRbenvPath);
     } else {
-      return this.findExec(
-        [
-          vscode.Uri.file("/opt/homebrew/bin"),
-          vscode.Uri.file("/usr/local/bin"),
-        ],
-        "rbenv",
-      );
+      return this.findExec([vscode.Uri.file("/opt/homebrew/bin"), vscode.Uri.file("/usr/local/bin")], "rbenv");
     }
   }
 
@@ -47,9 +37,7 @@ export class Rbenv extends VersionManager {
 
       return path;
     } catch (error: any) {
-      throw new Error(
-        `The Ruby LSP version manager is configured to be rbenv, but ${path} does not exist`,
-      );
+      throw new Error(`The Ruby LSP version manager is configured to be rbenv, but ${path} does not exist`);
     }
   }
 }

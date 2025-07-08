@@ -18,12 +18,7 @@ export async function openFile(
   sourceLocation: SourceLocation,
 ) {
   const { file, ...location } = sourceLocation;
-  const {
-    line,
-    character = 0,
-    endLine = line,
-    endCharacter = character,
-  } = location;
+  const { line, character = 0, endLine = line, endCharacter = character } = location;
   const selection = new vscode.Range(line, character, endLine, endCharacter);
   const uri = vscode.Uri.parse(`file://${file}`);
   const doc = await vscode.workspace.openTextDocument(uri);
@@ -45,24 +40,19 @@ export async function openFile(
 // `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
 export async function openUris(uris: string[]) {
   if (uris.length === 1) {
-    await vscode.commands.executeCommand(
-      "vscode.open",
-      vscode.Uri.parse(uris[0]),
-    );
+    await vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(uris[0]));
     return;
   }
 
-  const items: ({ uri: vscode.Uri } & vscode.QuickPickItem)[] = uris.map(
-    (uriString) => {
-      const uri = vscode.Uri.parse(uriString);
+  const items: ({ uri: vscode.Uri } & vscode.QuickPickItem)[] = uris.map((uriString) => {
+    const uri = vscode.Uri.parse(uriString);
 
-      return {
-        label: path.basename(uri.fsPath),
-        iconPath: new vscode.ThemeIcon("go-to-file"),
-        uri,
-      };
-    },
-  );
+    return {
+      label: path.basename(uri.fsPath),
+      iconPath: new vscode.ThemeIcon("go-to-file"),
+      uri,
+    };
+  });
 
   const pickedFile = await vscode.window.showQuickPick(items, {
     title: "Select a file to jump to",

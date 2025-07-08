@@ -19,20 +19,12 @@ class TerminalLogger {
   }
 }
 
-export class Debugger
-  implements
-    vscode.DebugAdapterDescriptorFactory,
-    vscode.DebugConfigurationProvider
-{
+export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.DebugConfigurationProvider {
   private debugProcess?: ChildProcessWithoutNullStreams;
   // eslint-disable-next-line no-process-env
-  private readonly console = process.env.CI
-    ? new TerminalLogger()
-    : vscode.debug.activeDebugConsole;
+  private readonly console = process.env.CI ? new TerminalLogger() : vscode.debug.activeDebugConsole;
 
-  private readonly workspaceResolver: (
-    uri: vscode.Uri | undefined,
-  ) => Workspace | undefined;
+  private readonly workspaceResolver: (uri: vscode.Uri | undefined) => Workspace | undefined;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -59,9 +51,7 @@ export class Debugger
     } else {
       return new Promise((_resolve, reject) =>
         reject(
-          new Error(
-            `Unknown request type: ${session.configuration.request}. Please review your launch configurations`,
-          ),
+          new Error(`Unknown request type: ${session.configuration.request}. Please review your launch configurations`),
         ),
       );
     }
@@ -105,17 +95,12 @@ export class Debugger
     const workspace = this.workspaceResolver(folder?.uri);
 
     if (!workspace) {
-      throw new Error(
-        `Couldn't find a workspace for URI: ${folder?.uri} or editor: ${vscode.window.activeTextEditor}`,
-      );
+      throw new Error(`Couldn't find a workspace for URI: ${folder?.uri} or editor: ${vscode.window.activeTextEditor}`);
     }
 
     if (debugConfiguration.env) {
       // If the user has their own debug launch configurations, we still need to inject the Ruby environment
-      debugConfiguration.env = Object.assign(
-        workspace.ruby.env,
-        debugConfiguration.env,
-      );
+      debugConfiguration.env = Object.assign(workspace.ruby.env, debugConfiguration.env);
     } else {
       debugConfiguration.env = workspace.ruby.env;
     }
@@ -138,15 +123,9 @@ export class Debugger
     return vscode.workspace.fs.readDirectory(customBundleUri).then(
       (value) => {
         if (value.some((entry) => entry[0] === "Gemfile")) {
-          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
-            customBundleUri,
-            "Gemfile",
-          ).fsPath;
+          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(customBundleUri, "Gemfile").fsPath;
         } else if (value.some((entry) => entry[0] === "gems.rb")) {
-          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
-            customBundleUri,
-            "gems.rb",
-          ).fsPath;
+          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(customBundleUri, "gems.rb").fsPath;
         }
 
         return debugConfiguration;
@@ -192,9 +171,7 @@ export class Debugger
     return sockets;
   }
 
-  private async attachDebuggee(
-    session: vscode.DebugSession,
-  ): Promise<vscode.DebugAdapterDescriptor> {
+  private async attachDebuggee(session: vscode.DebugSession): Promise<vscode.DebugAdapterDescriptor> {
     const debugPort = session.configuration.debugPort;
 
     if (debugPort) {
@@ -243,8 +220,7 @@ export class Debugger
     const configuration = session.configuration;
     const workspaceFolder = configuration.targetFolder;
     const cwd = workspaceFolder.path;
-    const port =
-      os.platform() === "win32" ? await this.availablePort() : undefined;
+    const port = os.platform() === "win32" ? await this.availablePort() : undefined;
 
     return new Promise((resolve, reject) => {
       const args = ["exec", "rdbg"];
@@ -275,13 +251,10 @@ export class Debugger
 
         // When stderr includes a complete wait for debugger connection message, then we're done initializing and can
         // resolve the promise. If we try to resolve earlier, VS Code will simply fail to connect
-        if (
-          initialMessage.includes("DEBUGGER: wait for debugger connection...")
-        ) {
+        if (initialMessage.includes("DEBUGGER: wait for debugger connection...")) {
           initialized = true;
 
-          const regex =
-            /DEBUGGER: Debugger can attach via UNIX domain socket \((.*)\)/;
+          const regex = /DEBUGGER: Debugger can attach via UNIX domain socket \((.*)\)/;
           const sockPath = RegExp(regex).exec(initialMessage);
 
           if (port) {
@@ -333,8 +306,7 @@ export class Debugger
       // the port that was assigned
       server.listen(0, () => {
         const address = server.address();
-        const port =
-          typeof address === "string" ? Number(address) : address?.port;
+        const port = typeof address === "string" ? Number(address) : address?.port;
 
         server.close(() => {
           resolve(port);

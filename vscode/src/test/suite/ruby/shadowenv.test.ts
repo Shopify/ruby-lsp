@@ -47,34 +47,14 @@ suite("Shadowenv", () => {
   const [major, minor, patch] = RUBY_VERSION.split(".");
 
   if (process.env.CI && os.platform() === "linux") {
-    rubyBinPath = path.join(
-      "/",
-      "opt",
-      "hostedtoolcache",
-      "Ruby",
-      RUBY_VERSION,
-      "x64",
-      "bin",
-    );
+    rubyBinPath = path.join("/", "opt", "hostedtoolcache", "Ruby", RUBY_VERSION, "x64", "bin");
   } else if (process.env.CI) {
-    rubyBinPath = path.join(
-      "/",
-      "Users",
-      "runner",
-      "hostedtoolcache",
-      "Ruby",
-      RUBY_VERSION,
-      "arm64",
-      "bin",
-    );
+    rubyBinPath = path.join("/", "Users", "runner", "hostedtoolcache", "Ruby", RUBY_VERSION, "arm64", "bin");
   } else {
     rubyBinPath = path.join("/", "opt", "rubies", RUBY_VERSION, "bin");
   }
 
-  assert.ok(
-    fs.existsSync(rubyBinPath),
-    `Ruby bin path does not exist ${rubyBinPath}`,
-  );
+  assert.ok(fs.existsSync(rubyBinPath), `Ruby bin path does not exist ${rubyBinPath}`);
 
   const shadowLispFile = `
     (provide "ruby" "${RUBY_VERSION}")
@@ -111,9 +91,7 @@ suite("Shadowenv", () => {
   `;
 
   beforeEach(() => {
-    rootPath = fs.mkdtempSync(
-      path.join(os.tmpdir(), "ruby-lsp-test-shadowenv-"),
-    );
+    rootPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-shadowenv-"));
     workspacePath = path.join(rootPath, "workspace");
 
     fs.mkdirSync(workspacePath);
@@ -139,12 +117,7 @@ suite("Shadowenv", () => {
       `(env/prepend-to-pathlist "PATH" "${rubyBinPath}")`,
     );
 
-    const shadowenv = new Shadowenv(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
     const { env, version, yjit } = await shadowenv.activate();
 
     assert.match(env.PATH!, new RegExp(rubyBinPath));
@@ -155,51 +128,27 @@ suite("Shadowenv", () => {
   test("Finds Ruby on a complete shadowenv configuration", async () => {
     await asyncExec("shadowenv trust", { cwd: workspacePath });
 
-    fs.writeFileSync(
-      path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"),
-      shadowLispFile,
-    );
+    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
 
-    const shadowenv = new Shadowenv(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
     const { env, version, yjit } = await shadowenv.activate();
 
     assert.match(env.PATH!, new RegExp(rubyBinPath));
-    assert.strictEqual(
-      env.GEM_ROOT,
-      `${path.dirname(rubyBinPath)}/lib/ruby/gems/${major}.${minor}.0`,
-    );
+    assert.strictEqual(env.GEM_ROOT, `${path.dirname(rubyBinPath)}/lib/ruby/gems/${major}.${minor}.0`);
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
   });
 
   test("Untrusted workspace offers to trust it", async () => {
-    fs.writeFileSync(
-      path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"),
-      shadowLispFile,
-    );
+    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
 
-    const stub = sinon
-      .stub(vscode.window, "showErrorMessage")
-      .resolves("Trust workspace" as any);
+    const stub = sinon.stub(vscode.window, "showErrorMessage").resolves("Trust workspace" as any);
 
-    const shadowenv = new Shadowenv(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
     const { env, version, yjit } = await shadowenv.activate();
 
     assert.match(env.PATH!, new RegExp(rubyBinPath));
-    assert.match(
-      env.GEM_HOME!,
-      new RegExp(`\\.gem\\/ruby\\/${major}\\.${minor}\\.${patch}`),
-    );
+    assert.match(env.GEM_HOME!, new RegExp(`\\.gem\\/ruby\\/${major}\\.${minor}\\.${patch}`));
     assert.strictEqual(version, RUBY_VERSION);
     assert.notStrictEqual(yjit, undefined);
 
@@ -209,21 +158,11 @@ suite("Shadowenv", () => {
   });
 
   test("Deciding not to trust the workspace fails activation", async () => {
-    fs.writeFileSync(
-      path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"),
-      shadowLispFile,
-    );
+    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
 
-    const stub = sinon
-      .stub(vscode.window, "showErrorMessage")
-      .resolves("Cancel" as any);
+    const stub = sinon.stub(vscode.window, "showErrorMessage").resolves("Cancel" as any);
 
-    const shadowenv = new Shadowenv(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
 
     await assert.rejects(async () => {
       await shadowenv.activate();
@@ -237,17 +176,9 @@ suite("Shadowenv", () => {
   test("Warns user is shadowenv executable can't be found", async () => {
     await asyncExec("shadowenv trust", { cwd: workspacePath });
 
-    fs.writeFileSync(
-      path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"),
-      shadowLispFile,
-    );
+    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
 
-    const shadowenv = new Shadowenv(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
 
     // First, reject the call to `shadowenv exec`. Then resolve the call to `which shadowenv` to return nothing
     const execStub = sinon

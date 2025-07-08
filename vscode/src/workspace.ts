@@ -5,13 +5,7 @@ import { CodeLens, State } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
 import Client from "./client";
-import {
-  asyncExec,
-  LOG_CHANNEL,
-  WorkspaceInterface,
-  STATUS_EMITTER,
-  debounce,
-} from "./common";
+import { asyncExec, LOG_CHANNEL, WorkspaceInterface, STATUS_EMITTER, debounce } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 
 const WATCHED_FILES = ["Gemfile.lock", "gems.locked"];
@@ -51,17 +45,9 @@ export class Workspace implements WorkspaceInterface {
   ) {
     this.context = context;
     this.workspaceFolder = workspaceFolder;
-    this.outputChannel = new WorkspaceChannel(
-      workspaceFolder.name,
-      LOG_CHANNEL,
-    );
+    this.outputChannel = new WorkspaceChannel(workspaceFolder.name, LOG_CHANNEL);
     this.telemetry = telemetry;
-    this.ruby = new Ruby(
-      context,
-      workspaceFolder,
-      this.outputChannel,
-      telemetry,
-    );
+    this.ruby = new Ruby(context, workspaceFolder, this.outputChannel, telemetry);
     this.createTestItems = createTestItems;
     this.isMainWorkspace = isMainWorkspace;
     this.virtualDocuments = virtualDocuments;
@@ -83,10 +69,7 @@ export class Workspace implements WorkspaceInterface {
       }
     }
 
-    this.registerCreateDeleteWatcher(
-      rootGitUri,
-      ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}",
-    );
+    this.registerCreateDeleteWatcher(rootGitUri, ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}");
 
     this.registerRestarts();
 
@@ -118,9 +101,7 @@ export class Workspace implements WorkspaceInterface {
       // readonly, so it means VS Code does not have write permissions to the workspace URI and creating the custom
       // bundle would fail. We throw here just to catch it immediately below and show the error to the user
       if (stat.permissions) {
-        throw new Error(
-          `Directory ${this.workspaceFolder.uri.fsPath} is readonly.`,
-        );
+        throw new Error(`Directory ${this.workspaceFolder.uri.fsPath} is readonly.`);
       }
     } catch (error: any) {
       this.error = true;
@@ -182,9 +163,7 @@ export class Workspace implements WorkspaceInterface {
       // server can now handle shutdown requests
       if (this.needsRestart) {
         this.needsRestart = false;
-        await this.debouncedRestart(
-          "a restart was requested while the server was still booting",
-        );
+        await this.debouncedRestart("a restart was requested while the server was still booting");
       }
     } catch (error: any) {
       this.error = true;
@@ -223,8 +202,8 @@ export class Workspace implements WorkspaceInterface {
           // If the server doesn't support checking the validity of the composed bundle or if composing the bundle was
           // successful, then we can restart
           canRestart =
-            !this.lspClient.initializeResult?.capabilities.experimental
-              .compose_bundle || (await this.composingBundleSucceeds());
+            !this.lspClient.initializeResult?.capabilities.experimental.compose_bundle ||
+            (await this.composingBundleSucceeds());
 
           if (canRestart) {
             await this.stop();
@@ -255,26 +234,17 @@ export class Workspace implements WorkspaceInterface {
   async installOrUpdateServer(manualInvocation: boolean): Promise<void> {
     // If there's a user configured custom bundle to run the LSP, then we do not perform auto-updates and let the user
     // manage that custom bundle themselves
-    const customBundle: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
+    const customBundle: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
 
     if (customBundle.length > 0) {
       return;
     }
 
     const oneDayInMs = 24 * 60 * 60 * 1000;
-    const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
-      "rubyLsp.lastGemUpdate",
-    );
+    const lastUpdatedAt: number | undefined = this.context.workspaceState.get("rubyLsp.lastGemUpdate");
 
     // Theses are the Ruby LSP's own dependencies, listed in `ruby-lsp.gemspec`
-    const dependencies = [
-      "ruby-lsp",
-      "language_server-protocol",
-      "prism",
-      "rbs",
-    ];
+    const dependencies = ["ruby-lsp", "language_server-protocol", "prism", "rbs"];
 
     const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {
       cwd: this.workspaceFolder.uri.fsPath,
@@ -290,10 +260,7 @@ export class Workspace implements WorkspaceInterface {
         env: this.ruby.env,
       });
 
-      await this.context.workspaceState.update(
-        "rubyLsp.lastGemUpdate",
-        Date.now(),
-      );
+      await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
       return;
     }
 
@@ -301,10 +268,9 @@ export class Workspace implements WorkspaceInterface {
     // should delete the `.ruby-lsp` to ensure that we'll lock a new version of the server that will actually be booted
     if (manualInvocation) {
       try {
-        await vscode.workspace.fs.delete(
-          vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp"),
-          { recursive: true },
-        );
+        await vscode.workspace.fs.delete(vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp"), {
+          recursive: true,
+        });
       } catch (error) {
         this.outputChannel.info(
           `Tried deleting ${vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp")}, but it doesn't exist`,
@@ -313,25 +279,16 @@ export class Workspace implements WorkspaceInterface {
     }
 
     // If we haven't updated the gem in the last 24 hours or if the user manually asked for an update, update it
-    if (
-      manualInvocation ||
-      lastUpdatedAt === undefined ||
-      Date.now() - lastUpdatedAt > oneDayInMs
-    ) {
+    if (manualInvocation || lastUpdatedAt === undefined || Date.now() - lastUpdatedAt > oneDayInMs) {
       try {
         await asyncExec("gem update ruby-lsp", {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
-        await this.context.workspaceState.update(
-          "rubyLsp.lastGemUpdate",
-          Date.now(),
-        );
+        await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
       } catch (error) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
-        this.outputChannel.error(
-          `Failed to update global ruby-lsp gem: ${error}`,
-        );
+        this.outputChannel.error(`Failed to update global ruby-lsp gem: ${error}`);
       }
     }
   }
@@ -386,9 +343,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   private createRestartWatcher(pattern: string) {
-    const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workspaceFolder, pattern),
-    );
+    const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(this.workspaceFolder, pattern));
 
     // Handler for only triggering restart if the contents of the file have been modified. If the file was just touched,
     // but the contents are the same, we don't want to restart
@@ -419,9 +374,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   private registerCreateDeleteWatcher(base: vscode.Uri, glob: string) {
-    const workspaceWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(base, glob),
-    );
+    const workspaceWatcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(base, glob));
 
     const start = () => {
       this.#inhibitRestart = true;
@@ -461,9 +414,7 @@ export class Workspace implements WorkspaceInterface {
     }
 
     try {
-      const response: { success: boolean } = await this.lspClient.sendRequest(
-        "rubyLsp/composeBundle",
-      );
+      const response: { success: boolean } = await this.lspClient.sendRequest("rubyLsp/composeBundle");
       return response.success;
     } catch (error: any) {
       return false;

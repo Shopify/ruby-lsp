@@ -11,15 +11,11 @@ interface DependenciesNode {
 
 type BundlerTreeNode = Dependency | GemDirectoryPath | GemFilePath;
 
-export class DependenciesTree
-  implements vscode.TreeDataProvider<BundlerTreeNode>, vscode.Disposable
-{
-  private readonly _onDidChangeTreeData: vscode.EventEmitter<any> =
-    new vscode.EventEmitter<any>();
+export class DependenciesTree implements vscode.TreeDataProvider<BundlerTreeNode>, vscode.Disposable {
+  private readonly _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  readonly onDidChangeTreeData: vscode.Event<any> =
-    this._onDidChangeTreeData.event;
+  readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
 
   private currentWorkspace: WorkspaceInterface | undefined;
   private readonly treeView: vscode.TreeView<BundlerTreeNode>;
@@ -35,12 +31,8 @@ export class DependenciesTree
 
     this.subscriptions.push(
       STATUS_EMITTER.event(this.workspaceDidChange.bind(this)),
-      vscode.window.onDidChangeActiveTextEditor(
-        this.activeEditorDidChange.bind(this),
-      ),
-      this.treeView.onDidChangeVisibility(
-        this.treeVisibilityDidChange.bind(this),
-      ),
+      vscode.window.onDidChangeActiveTextEditor(this.activeEditorDidChange.bind(this)),
+      this.treeView.onDidChangeVisibility(this.treeVisibilityDidChange.bind(this)),
     );
   }
 
@@ -49,15 +41,11 @@ export class DependenciesTree
     this.treeView.dispose();
   }
 
-  getTreeItem(
-    element: BundlerTreeNode,
-  ): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  getTreeItem(element: BundlerTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
   }
 
-  getChildren(
-    element?: BundlerTreeNode | undefined,
-  ): vscode.ProviderResult<BundlerTreeNode[]> {
+  getChildren(element?: BundlerTreeNode | undefined): vscode.ProviderResult<BundlerTreeNode[]> {
     if (element) {
       return element.getChildren();
     } else {
@@ -93,9 +81,7 @@ export class DependenciesTree
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  private async workspaceDidChange(
-    workspace: WorkspaceInterface | undefined,
-  ): Promise<void> {
+  private async workspaceDidChange(workspace: WorkspaceInterface | undefined): Promise<void> {
     if (!workspace || workspace === this.currentWorkspace) {
       return;
     }
@@ -104,9 +90,7 @@ export class DependenciesTree
     return this.refresh();
   }
 
-  private async activeEditorDidChange(
-    editor: vscode.TextEditor | undefined,
-  ): Promise<void> {
+  private async activeEditorDidChange(editor: vscode.TextEditor | undefined): Promise<void> {
     const uri = editor?.document.uri;
 
     if (!uri) {
@@ -122,18 +106,14 @@ export class DependenciesTree
     }
   }
 
-  private async treeVisibilityDidChange(
-    event: vscode.TreeViewVisibilityChangeEvent,
-  ): Promise<void> {
+  private async treeVisibilityDidChange(event: vscode.TreeViewVisibilityChangeEvent): Promise<void> {
     if (this.currentVisibleItem && event.visible) {
       await this.revealElement(this.currentVisibleItem);
     }
   }
 
   private async revealElement(element: BundlerTreeNode): Promise<void> {
-    const autoReveal: boolean | undefined = vscode.workspace
-      .getConfiguration("explorer")
-      .get("autoReveal");
+    const autoReveal: boolean | undefined = vscode.workspace.getConfiguration("explorer").get("autoReveal");
 
     if (autoReveal) {
       await this.treeView.reveal(element, {
@@ -159,10 +139,7 @@ export class DependenciesTree
       return [];
     }
 
-    const resp = (await client.sendRequest(
-      "rubyLsp/workspace/dependencies",
-      {},
-    )) as [
+    const resp = (await client.sendRequest("rubyLsp/workspace/dependencies", {})) as [
       { name: string; version: string; path: string; dependency: boolean },
     ];
 

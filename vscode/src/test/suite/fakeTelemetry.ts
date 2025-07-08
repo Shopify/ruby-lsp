@@ -9,10 +9,7 @@ class FakeSender implements vscode.TelemetrySender {
     this.receivedErrors = [];
   }
 
-  sendEventData(
-    eventName: string,
-    data?: Record<string, any> | undefined,
-  ): void {
+  sendEventData(eventName: string, data?: Record<string, any> | undefined): void {
     this.receivedEvents.push({ eventName, data });
   }
 
@@ -21,12 +18,9 @@ class FakeSender implements vscode.TelemetrySender {
   }
 }
 
-export const FAKE_TELEMETRY = vscode.env.createTelemetryLogger(
-  new FakeSender(),
-  {
-    ignoreUnhandledErrors: true,
-  },
-);
+export const FAKE_TELEMETRY = vscode.env.createTelemetryLogger(new FakeSender(), {
+  ignoreUnhandledErrors: true,
+});
 
 export class FakeLogger {
   receivedMessages = "";

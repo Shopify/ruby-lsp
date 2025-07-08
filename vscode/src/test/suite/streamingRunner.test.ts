@@ -28,10 +28,7 @@ suite("StreamingRunner", () => {
 
   after(async () => {
     if (currentDbContents) {
-      await vscode.workspace.fs.writeFile(
-        dbUri,
-        Buffer.from(currentDbContents),
-      );
+      await vscode.workspace.fs.writeFile(dbUri, Buffer.from(currentDbContents));
     }
   });
 
@@ -53,10 +50,7 @@ suite("StreamingRunner", () => {
     };
 
     // Write the initial DB as if we had opened the editor previously
-    await vscode.workspace.fs.writeFile(
-      dbUri,
-      Buffer.from(JSON.stringify(initialDb)),
-    );
+    await vscode.workspace.fs.writeFile(dbUri, Buffer.from(JSON.stringify(initialDb)));
 
     const streamingRunner = new StreamingRunner(
       context,
@@ -74,9 +68,6 @@ suite("StreamingRunner", () => {
     const newDb = JSON.parse(newDbContents.toString());
 
     assert.strictEqual(newDb["/some/path/to/project"], "1234");
-    assert.strictEqual(
-      newDb[newWorkspaceUri.fsPath],
-      streamingRunner.tcpPort!.toString(),
-    );
+    assert.strictEqual(newDb[newWorkspaceUri.fsPath], streamingRunner.tcpPort!.toString());
   });
 });

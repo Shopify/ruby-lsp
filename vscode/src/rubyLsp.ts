@@ -6,13 +6,7 @@ import { Range } from "vscode-languageclient/node";
 
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import {
-  Command,
-  featureEnabled,
-  LOG_CHANNEL,
-  STATUS_EMITTER,
-  SUPPORTED_LANGUAGE_IDS,
-} from "./common";
+import { Command, featureEnabled, LOG_CHANNEL, STATUS_EMITTER, SUPPORTED_LANGUAGE_IDS } from "./common";
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
@@ -38,15 +32,9 @@ export class RubyLsp {
 
   // A URI => content map of virtual documents for delegate requests
   private readonly virtualDocuments = new Map<string, string>();
-  private readonly workspacesBeingLaunched = new Map<
-    number,
-    Promise<Workspace | undefined>
-  >();
+  private readonly workspacesBeingLaunched = new Map<number, Promise<Workspace | undefined>>();
 
-  constructor(
-    context: vscode.ExtensionContext,
-    telemetry: vscode.TelemetryLogger,
-  ) {
+  constructor(context: vscode.ExtensionContext, telemetry: vscode.TelemetryLogger) {
     this.context = context;
     this.telemetry = telemetry;
     this.testController = new TestController(
@@ -88,9 +76,7 @@ export class RubyLsp {
           return;
         }
 
-        const workspaceFolder = vscode.workspace.getWorkspaceFolder(
-          document.uri,
-        );
+        const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
 
         if (!workspaceFolder) {
           return;
@@ -118,10 +104,7 @@ export class RubyLsp {
         },
       }),
       LOG_CHANNEL,
-      vscode.workspace.registerTextDocumentContentProvider(
-        "ruby-lsp",
-        new DocumentProvider(),
-      ),
+      vscode.workspace.registerTextDocumentContentProvider("ruby-lsp", new DocumentProvider()),
       ...this.registerCommands(),
     );
   }
@@ -144,18 +127,11 @@ export class RubyLsp {
     // eagerly activate the workspace for that file too
     const activeDocument = vscode.window.activeTextEditor?.document;
 
-    if (
-      activeDocument &&
-      SUPPORTED_LANGUAGE_IDS.includes(activeDocument.languageId)
-    ) {
-      const workspaceFolder = vscode.workspace.getWorkspaceFolder(
-        activeDocument.uri,
-      );
+    if (activeDocument && SUPPORTED_LANGUAGE_IDS.includes(activeDocument.languageId)) {
+      const workspaceFolder = vscode.workspace.getWorkspaceFolder(activeDocument.uri);
 
       if (workspaceFolder) {
-        const existingWorkspace = this.workspaces.get(
-          workspaceFolder.uri.toString(),
-        );
+        const existingWorkspace = this.workspaces.get(workspaceFolder.uri.toString());
 
         if (!existingWorkspace) {
           await this.activateWorkspace(workspaceFolder, false);
@@ -178,23 +154,15 @@ export class RubyLsp {
 
   // Overloaded signatures because when the workspace activation is lazy, it is guaranteed to return `Workspace`, which
   // avoids checking for undefined in the caller
-  private async activateWorkspace(
-    workspaceFolder: vscode.WorkspaceFolder,
-    eager: true,
-  ): Promise<Workspace | undefined>;
+  private async activateWorkspace(workspaceFolder: vscode.WorkspaceFolder, eager: true): Promise<Workspace | undefined>;
 
-  private async activateWorkspace(
-    workspaceFolder: vscode.WorkspaceFolder,
-    eager: false,
-  ): Promise<Workspace>;
+  private async activateWorkspace(workspaceFolder: vscode.WorkspaceFolder, eager: false): Promise<Workspace>;
 
   private async activateWorkspace(
     workspaceFolder: vscode.WorkspaceFolder,
     eager: boolean,
   ): Promise<Workspace | undefined> {
-    const existingActivationPromise = this.workspacesBeingLaunched.get(
-      workspaceFolder.index,
-    );
+    const existingActivationPromise = this.workspacesBeingLaunched.get(workspaceFolder.index);
     if (existingActivationPromise) {
       return existingActivationPromise;
     }
@@ -204,13 +172,8 @@ export class RubyLsp {
     return activationPromise;
   }
 
-  private async runActivation(
-    workspaceFolder: vscode.WorkspaceFolder,
-    eager: boolean,
-  ) {
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
+  private async runActivation(workspaceFolder: vscode.WorkspaceFolder, eager: boolean) {
+    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
 
     const lockfileExists = await this.lockfileExists(workspaceFolder.uri);
 
@@ -244,11 +207,7 @@ export class RubyLsp {
 
     // If we successfully activated a workspace, then we can start showing the dependencies tree view. This is necessary
     // so that we can avoid showing it on non Ruby projects
-    await vscode.commands.executeCommand(
-      "setContext",
-      "rubyLsp.activated",
-      true,
-    );
+    await vscode.commands.executeCommand("setContext", "rubyLsp.activated", true);
     await this.showFormatOnSaveModeWarning(workspace);
     this.workspacesBeingLaunched.delete(workspaceFolder.index);
     return workspace;
@@ -279,14 +238,8 @@ export class RubyLsp {
         const workspace = await this.showWorkspacePick();
         await workspace?.dispose();
       }),
-      vscode.commands.registerCommand(
-        Command.ShowSyntaxTree,
-        this.showSyntaxTree.bind(this),
-      ),
-      vscode.commands.registerCommand(
-        Command.DiagnoseState,
-        this.diagnoseState.bind(this),
-      ),
+      vscode.commands.registerCommand(Command.ShowSyntaxTree, this.showSyntaxTree.bind(this)),
+      vscode.commands.registerCommand(Command.DiagnoseState, this.diagnoseState.bind(this)),
       vscode.commands.registerCommand(Command.ShowServerChangelog, () => {
         const version = this.currentActiveWorkspace()?.lspClient?.serverVersion;
 
@@ -294,16 +247,12 @@ export class RubyLsp {
           return;
         }
         return vscode.env.openExternal(
-          vscode.Uri.parse(
-            `https://github.com/Shopify/ruby-lsp/releases/tag/v${version}`,
-          ),
+          vscode.Uri.parse(`https://github.com/Shopify/ruby-lsp/releases/tag/v${version}`),
         );
       }),
       vscode.commands.registerCommand(Command.FormatterHelp, () => {
         return vscode.env.openExternal(
-          vscode.Uri.parse(
-            "https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#formatting",
-          ),
+          vscode.Uri.parse("https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#formatting"),
         );
       }),
       vscode.commands.registerCommand(Command.DisplayAddons, async () => {
@@ -344,20 +293,17 @@ export class RubyLsp {
       vscode.commands.registerCommand(Command.ToggleFeatures, async () => {
         // Extract feature descriptions from our package.json
         const enabledFeaturesProperties =
-          vscode.extensions.getExtension("Shopify.ruby-lsp")!.packageJSON
-            .contributes.configuration.properties["rubyLsp.enabledFeatures"]
-            .properties;
+          vscode.extensions.getExtension("Shopify.ruby-lsp")!.packageJSON.contributes.configuration.properties[
+            "rubyLsp.enabledFeatures"
+          ].properties;
 
         const descriptions: Record<string, string> = {};
-        Object.entries(enabledFeaturesProperties).forEach(
-          ([key, value]: [string, any]) => {
-            descriptions[key] = value.description;
-          },
-        );
+        Object.entries(enabledFeaturesProperties).forEach(([key, value]: [string, any]) => {
+          descriptions[key] = value.description;
+        });
 
         const configuration = vscode.workspace.getConfiguration("rubyLsp");
-        const features: Record<string, boolean> =
-          configuration.get("enabledFeatures")!;
+        const features: Record<string, boolean> = configuration.get("enabledFeatures")!;
         const allFeatures = Object.keys(features);
         const options: vscode.QuickPickItem[] = allFeatures.map((label) => {
           return {
@@ -376,33 +322,19 @@ export class RubyLsp {
           // The `picked` property is only used to determine if the checkbox is checked initially. When we receive the
           // response back from the QuickPick, we need to use inclusion to check if the feature was selected
           allFeatures.forEach((feature) => {
-            features[feature] = toggledFeatures.some(
-              (selected) => selected.label === feature,
-            );
+            features[feature] = toggledFeatures.some((selected) => selected.label === feature);
           });
 
-          await vscode.workspace
-            .getConfiguration("rubyLsp")
-            .update("enabledFeatures", features, true, true);
+          await vscode.workspace.getConfiguration("rubyLsp").update("enabledFeatures", features, true, true);
         }
       }),
-      vscode.commands.registerCommand(
-        Command.ToggleExperimentalFeatures,
-        async () => {
-          const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
-          const experimentalFeaturesEnabled = lspConfig.get(
-            "enableExperimentalFeatures",
-          );
-          await lspConfig.update(
-            "enableExperimentalFeatures",
-            !experimentalFeaturesEnabled,
-            true,
-            true,
-          );
+      vscode.commands.registerCommand(Command.ToggleExperimentalFeatures, async () => {
+        const lspConfig = vscode.workspace.getConfiguration("rubyLsp");
+        const experimentalFeaturesEnabled = lspConfig.get("enableExperimentalFeatures");
+        await lspConfig.update("enableExperimentalFeatures", !experimentalFeaturesEnabled, true, true);
 
-          STATUS_EMITTER.fire(this.currentActiveWorkspace());
-        },
-      ),
+        STATUS_EMITTER.fire(this.currentActiveWorkspace());
+      }),
       vscode.commands.registerCommand(
         Command.ServerOptions,
         async (options: [{ label: string; description: string }]) => {
@@ -410,142 +342,111 @@ export class RubyLsp {
             placeHolder: "Select server action",
           });
 
-          if (result !== undefined)
-            await vscode.commands.executeCommand(result.description);
+          if (result !== undefined) await vscode.commands.executeCommand(result.description);
         },
       ),
-      vscode.commands.registerCommand(
-        Command.SelectVersionManager,
-        async () => {
-          const answer = await vscode.window.showQuickPick(
-            ["Change version manager", "Change manual Ruby configuration"],
-            { placeHolder: "What would you like to do?" },
-          );
+      vscode.commands.registerCommand(Command.SelectVersionManager, async () => {
+        const answer = await vscode.window.showQuickPick(
+          ["Change version manager", "Change manual Ruby configuration"],
+          { placeHolder: "What would you like to do?" },
+        );
 
-          if (!answer) {
-            return;
+        if (!answer) {
+          return;
+        }
+
+        if (answer === "Change version manager") {
+          const configuration = vscode.workspace.getConfiguration("rubyLsp");
+          const managerConfig = configuration.get<ManagerConfiguration>("rubyVersionManager")!;
+          const options = Object.values(ManagerIdentifier);
+          const manager = (await vscode.window.showQuickPick(options, {
+            placeHolder: `Current: ${managerConfig.identifier}`,
+          })) as ManagerIdentifier | undefined;
+
+          if (manager !== undefined) {
+            managerConfig.identifier = manager;
+            await configuration.update("rubyVersionManager", managerConfig, true);
           }
 
-          if (answer === "Change version manager") {
-            const configuration = vscode.workspace.getConfiguration("rubyLsp");
-            const managerConfig =
-              configuration.get<ManagerConfiguration>("rubyVersionManager")!;
-            const options = Object.values(ManagerIdentifier);
-            const manager = (await vscode.window.showQuickPick(options, {
-              placeHolder: `Current: ${managerConfig.identifier}`,
-            })) as ManagerIdentifier | undefined;
+          return;
+        }
 
-            if (manager !== undefined) {
-              managerConfig.identifier = manager;
-              await configuration.update(
-                "rubyVersionManager",
-                managerConfig,
-                true,
-              );
-            }
+        const workspace = await this.showWorkspacePick();
 
-            return;
-          }
+        if (!workspace) {
+          return;
+        }
 
-          const workspace = await this.showWorkspacePick();
+        await workspace.ruby.manuallySelectRuby();
+      }),
+      vscode.commands.registerCommand(Command.RunTest, (path, name, _command) => {
+        return featureEnabled("fullTestDiscovery")
+          ? this.testController.runViaCommand(path, name, Mode.Run)
+          : this.testController.runOnClick(name);
+      }),
+      vscode.commands.registerCommand(Command.RunTestInTerminal, (path, name, command) => {
+        return featureEnabled("fullTestDiscovery")
+          ? this.testController.runViaCommand(path, name, Mode.RunInTerminal)
+          : this.testController.runTestInTerminal(path, name, command);
+      }),
+      vscode.commands.registerCommand(Command.DebugTest, (path, name, command) => {
+        return featureEnabled("fullTestDiscovery")
+          ? this.testController.runViaCommand(path, name, Mode.Debug)
+          : this.testController.debugTest(path, name, command);
+      }),
+      vscode.commands.registerCommand(Command.RunTask, async (command: string) => {
+        let workspace = this.currentActiveWorkspace();
 
-          if (!workspace) {
-            return;
-          }
+        if (!workspace) {
+          workspace = await this.showWorkspacePick();
+        }
 
-          await workspace.ruby.manuallySelectRuby();
-        },
-      ),
-      vscode.commands.registerCommand(
-        Command.RunTest,
-        (path, name, _command) => {
-          return featureEnabled("fullTestDiscovery")
-            ? this.testController.runViaCommand(path, name, Mode.Run)
-            : this.testController.runOnClick(name);
-        },
-      ),
-      vscode.commands.registerCommand(
-        Command.RunTestInTerminal,
-        (path, name, command) => {
-          return featureEnabled("fullTestDiscovery")
-            ? this.testController.runViaCommand(path, name, Mode.RunInTerminal)
-            : this.testController.runTestInTerminal(path, name, command);
-        },
-      ),
-      vscode.commands.registerCommand(
-        Command.DebugTest,
-        (path, name, command) => {
-          return featureEnabled("fullTestDiscovery")
-            ? this.testController.runViaCommand(path, name, Mode.Debug)
-            : this.testController.debugTest(path, name, command);
-        },
-      ),
-      vscode.commands.registerCommand(
-        Command.RunTask,
-        async (command: string) => {
-          let workspace = this.currentActiveWorkspace();
+        if (!workspace) {
+          return;
+        }
 
-          if (!workspace) {
-            workspace = await this.showWorkspacePick();
-          }
+        await workspace.execute(command, true);
+      }),
+      vscode.commands.registerCommand(Command.BundleInstall, (workspaceUri: string) => {
+        const workspace = this.workspaces.get(workspaceUri);
 
-          if (!workspace) {
-            return;
-          }
+        if (!workspace) {
+          return;
+        }
 
-          await workspace.execute(command, true);
-        },
-      ),
-      vscode.commands.registerCommand(
-        Command.BundleInstall,
-        (workspaceUri: string) => {
-          const workspace = this.workspaces.get(workspaceUri);
+        const terminal = vscode.window.createTerminal({
+          name: "Bundle install",
+          cwd: workspace.workspaceFolder.uri.fsPath,
+          env: workspace.ruby.env,
+        });
 
-          if (!workspace) {
-            return;
-          }
+        terminal.show();
+        terminal.sendText("bundle install");
+      }),
+      vscode.commands.registerCommand(Command.OpenFile, (rubySourceLocation: [string, string] | string[]) => {
+        // New command format: accepts an array of URIs
+        if (typeof rubySourceLocation[0] === "string") {
+          return openUris(rubySourceLocation);
+        }
 
-          const terminal = vscode.window.createTerminal({
-            name: "Bundle install",
-            cwd: workspace.workspaceFolder.uri.fsPath,
-            env: workspace.ruby.env,
-          });
-
-          terminal.show();
-          terminal.sendText("bundle install");
-        },
-      ),
-      vscode.commands.registerCommand(
-        Command.OpenFile,
-        (rubySourceLocation: [string, string] | string[]) => {
-          // New command format: accepts an array of URIs
-          if (typeof rubySourceLocation[0] === "string") {
-            return openUris(rubySourceLocation);
-          }
-
-          // Old format: we can remove after the Rails add-on has been using the new format for a while
-          const [file, line] = rubySourceLocation;
-          const workspace = this.currentActiveWorkspace();
-          return openFile(this.telemetry, workspace, {
-            file,
-            line: parseInt(line, 10) - 1,
-          });
-        },
-      ),
+        // Old format: we can remove after the Rails add-on has been using the new format for a while
+        const [file, line] = rubySourceLocation;
+        const workspace = this.currentActiveWorkspace();
+        return openFile(this.telemetry, workspace, {
+          file,
+          line: parseInt(line, 10) - 1,
+        });
+      }),
       vscode.commands.registerCommand(
         Command.RailsGenerate,
-        async (
-          generatorWithArguments: string | string[] | undefined,
-          workspace: Workspace | undefined,
-        ) => {
+        async (generatorWithArguments: string | string[] | undefined, workspace: Workspace | undefined) => {
           // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
           // to show a UI so that the user can pick the arguments to generate
           const command =
             generatorWithArguments ??
             (await vscode.window.showInputBox({
               title: "Rails generate arguments",
-              placeHolder:
-                "model User name:string | scaffold Post title:string",
+              placeHolder: "model User name:string | scaffold Post title:string",
             }));
 
           if (!command) {
@@ -564,18 +465,14 @@ export class RubyLsp {
       ),
       vscode.commands.registerCommand(
         Command.RailsDestroy,
-        async (
-          generatorWithArguments: string | string[] | undefined,
-          workspace: Workspace | undefined,
-        ) => {
+        async (generatorWithArguments: string | string[] | undefined, workspace: Workspace | undefined) => {
           // If the command was invoked programmatically, then the arguments will already be present. Otherwise, we need
           // to show a UI so that the user can pick the arguments to destroy
           const command =
             generatorWithArguments ??
             (await vscode.window.showInputBox({
               title: "Rails destroy arguments",
-              placeHolder:
-                "model User name:string | scaffold Post title:string",
+              placeHolder: "model User name:string | scaffold Post title:string",
             }));
 
           if (!command) {
@@ -612,11 +509,7 @@ export class RubyLsp {
           },
         ];
 
-        if (
-          workspace.lspClient?.addons?.some(
-            (addon) => addon.name === "Ruby LSP Rails",
-          )
-        ) {
+        if (workspace.lspClient?.addons?.some((addon) => addon.name === "Ruby LSP Rails")) {
           items.push(
             {
               label: "Rails generate",
@@ -650,94 +543,74 @@ export class RubyLsp {
         const workspace = await this.showWorkspacePick();
         await collectRubyLspInfo(workspace);
       }),
-      vscode.commands.registerCommand(
-        Command.StartServerInDebugMode,
-        async () => {
-          const workspace = await this.showWorkspacePick();
-          await workspace?.start(true);
-        },
-      ),
+      vscode.commands.registerCommand(Command.StartServerInDebugMode, async () => {
+        const workspace = await this.showWorkspacePick();
+        await workspace?.start(true);
+      }),
       vscode.commands.registerCommand(Command.ShowOutput, async () => {
         LOG_CHANNEL.show();
       }),
-      vscode.commands.registerCommand(
-        Command.MigrateLaunchConfiguration,
-        async () => {
-          const workspace = await this.showWorkspacePick();
+      vscode.commands.registerCommand(Command.MigrateLaunchConfiguration, async () => {
+        const workspace = await this.showWorkspacePick();
 
-          if (!workspace) {
-            return;
-          }
+        if (!workspace) {
+          return;
+        }
 
-          const launchConfig =
-            (vscode.workspace
-              .getConfiguration("launch")
-              ?.get("configurations") as any[]) || [];
+        const launchConfig = (vscode.workspace.getConfiguration("launch")?.get("configurations") as any[]) || [];
 
-          const updatedLaunchConfig = launchConfig.map((config: any) => {
-            if (config.type === "rdbg") {
-              if (config.request === "launch") {
-                const newConfig = { ...config };
-                newConfig.type = "ruby_lsp";
+        const updatedLaunchConfig = launchConfig.map((config: any) => {
+          if (config.type === "rdbg") {
+            if (config.request === "launch") {
+              const newConfig = { ...config };
+              newConfig.type = "ruby_lsp";
 
-                if (newConfig.askParameters !== true) {
-                  delete newConfig.rdbgPath;
-                  delete newConfig.cwd;
-                  delete newConfig.useBundler;
+              if (newConfig.askParameters !== true) {
+                delete newConfig.rdbgPath;
+                delete newConfig.cwd;
+                delete newConfig.useBundler;
 
-                  const command = (newConfig.command || "").replace(
-                    `\${workspaceRoot}/`,
-                    "",
-                  );
-                  const script = newConfig.script || "";
-                  const args = (newConfig.args || []).join(" ");
-                  newConfig.program = `${command} ${script} ${args}`.trim();
+                const command = (newConfig.command || "").replace(`\${workspaceRoot}/`, "");
+                const script = newConfig.script || "";
+                const args = (newConfig.args || []).join(" ");
+                newConfig.program = `${command} ${script} ${args}`.trim();
 
-                  delete newConfig.command;
-                  delete newConfig.script;
-                  delete newConfig.args;
-                  delete newConfig.askParameters;
-                }
-
-                return newConfig;
-              } else if (config.request === "attach") {
-                const newConfig = { ...config };
-                newConfig.type = "ruby_lsp";
-                // rdbg's `debugPort` could be a socket path, or port number, or host:port
-                // we don't do complex parsing here, just assume it's socket path
-                newConfig.debugSocketPath = config.debugPort;
-
-                return newConfig;
+                delete newConfig.command;
+                delete newConfig.script;
+                delete newConfig.args;
+                delete newConfig.askParameters;
               }
-            }
-            return config;
-          });
 
-          await vscode.workspace
-            .getConfiguration("launch")
-            .update(
-              "configurations",
-              updatedLaunchConfig,
-              vscode.ConfigurationTarget.Workspace,
-            );
-        },
-      ),
+              return newConfig;
+            } else if (config.request === "attach") {
+              const newConfig = { ...config };
+              newConfig.type = "ruby_lsp";
+              // rdbg's `debugPort` could be a socket path, or port number, or host:port
+              // we don't do complex parsing here, just assume it's socket path
+              newConfig.debugSocketPath = config.debugPort;
+
+              return newConfig;
+            }
+          }
+          return config;
+        });
+
+        await vscode.workspace
+          .getConfiguration("launch")
+          .update("configurations", updatedLaunchConfig, vscode.ConfigurationTarget.Workspace);
+      }),
       vscode.commands.registerCommand(Command.GoToRelevantFile, async () => {
         const uri = vscode.window.activeTextEditor?.document.uri;
         if (!uri) {
           return;
         }
         const response: { locations: string[] } | null | undefined =
-          await this.currentActiveWorkspace()?.lspClient?.sendGoToRelevantFileRequest(
-            uri,
-          );
+          await this.currentActiveWorkspace()?.lspClient?.sendGoToRelevantFileRequest(uri);
 
         if (response && response.locations.length > 0) {
           return openUris(response.locations);
         } else {
-          await vscode.window.showInformationMessage(
-            "Couldn't find relevant files",
-          );
+          await vscode.window.showInformationMessage("Couldn't find relevant files");
         }
       }),
       vscode.commands.registerCommand(Command.ProfileCurrentFile, async () => {
@@ -781,9 +654,7 @@ export class RubyLsp {
         const currentFile = vscode.window.activeTextEditor?.document.uri.fsPath;
 
         if (!currentFile) {
-          vscode.window.showInformationMessage(
-            "No file opened in the editor to profile",
-          );
+          vscode.window.showInformationMessage("No file opened in the editor to profile");
           return;
         }
 
@@ -794,9 +665,7 @@ export class RubyLsp {
             cancellable: false,
           },
           async () => {
-            const profileUri = vscode.Uri.file(
-              path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`),
-            );
+            const profileUri = vscode.Uri.file(path.join(os.tmpdir(), `profile-${Date.now()}.cpuprofile`));
 
             await workspace.execute(
               `vernier run --output ${profileUri.fsPath} --format cpuprofile -- ruby ${currentFile}`,
@@ -812,20 +681,14 @@ export class RubyLsp {
   }
 
   // Get the current active workspace based on which file is opened in the editor
-  private currentActiveWorkspace(
-    activeEditor = vscode.window.activeTextEditor,
-  ): Workspace | undefined {
+  private currentActiveWorkspace(activeEditor = vscode.window.activeTextEditor): Workspace | undefined {
     let workspaceFolder: vscode.WorkspaceFolder | undefined;
 
     if (activeEditor) {
-      workspaceFolder = vscode.workspace.getWorkspaceFolder(
-        activeEditor.document.uri,
-      );
+      workspaceFolder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
     } else {
       // If there's no active editor, we search based on the current workspace name
-      workspaceFolder = vscode.workspace.workspaceFolders?.find(
-        (folder) => folder.name === vscode.workspace.name,
-      );
+      workspaceFolder = vscode.workspace.workspaceFolders?.find((folder) => folder.name === vscode.workspace.name);
     }
 
     if (!workspaceFolder) {
@@ -835,9 +698,7 @@ export class RubyLsp {
     return this.getWorkspace(workspaceFolder.uri);
   }
 
-  private async getOrActivateWorkspace(
-    workspaceFolder: vscode.WorkspaceFolder,
-  ): Promise<Workspace> {
+  private async getOrActivateWorkspace(workspaceFolder: vscode.WorkspaceFolder): Promise<Workspace> {
     const workspace = this.getWorkspace(workspaceFolder.uri);
 
     if (workspace) {
@@ -860,9 +721,7 @@ export class RubyLsp {
     return this.workspaces.get(uri.toString());
   }
 
-  private workspaceResolver(
-    uri: vscode.Uri | undefined,
-  ): Workspace | undefined {
+  private workspaceResolver(uri: vscode.Uri | undefined): Workspace | undefined {
     // If no URI is passed, we try to figured out what the active workspace is
     if (!uri) {
       return this.currentActiveWorkspace();
@@ -909,9 +768,7 @@ export class RubyLsp {
           incomingQueueSize: number;
         }
       | null
-      | undefined = await workspace?.lspClient?.sendRequest(
-      "rubyLsp/diagnoseState",
-    );
+      | undefined = await workspace?.lspClient?.sendRequest("rubyLsp/diagnoseState");
 
     if (response) {
       const documentData = Object.entries(response.documents);
@@ -920,9 +777,7 @@ export class RubyLsp {
         `Incoming queue size: ${response.incomingQueueSize}`,
         `Backtrace:\n${response.backtrace.join("\n")}\n`,
         `=========== Documents (${documentData.length}) ===========`,
-        ...documentData.map(
-          ([uri, source]) => `URI: ${uri}\n\n${source}\n===========`,
-        ),
+        ...documentData.map(([uri, source]) => `URI: ${uri}\n\n${source}\n===========`),
       ].join("\n");
 
       const document = await vscode.workspace.openTextDocument(
@@ -948,9 +803,7 @@ export class RubyLsp {
       const document = activeEditor.document;
 
       if (document.languageId !== "ruby") {
-        await vscode.window.showErrorMessage(
-          "Show syntax tree: not a Ruby file",
-        );
+        await vscode.window.showErrorMessage("Show syntax tree: not a Ruby file");
         return;
       }
 
@@ -986,11 +839,10 @@ export class RubyLsp {
         }
       }
 
-      const response: { ast: string } | null | undefined =
-        await workspace?.lspClient?.sendShowSyntaxTreeRequest(
-          document.uri,
-          range,
-        );
+      const response: { ast: string } | null | undefined = await workspace?.lspClient?.sendShowSyntaxTreeRequest(
+        document.uri,
+        range,
+      );
 
       if (response) {
         const document = await vscode.workspace.openTextDocument(
@@ -1027,28 +879,20 @@ export class RubyLsp {
     );
 
     if (answer === "Change setting to 'file'") {
-      await setting.update(
-        "formatOnSaveMode",
-        "file",
-        vscode.ConfigurationTarget.Global,
-      );
+      await setting.update("formatOnSaveMode", "file", vscode.ConfigurationTarget.Global);
     }
   }
 
   private async lockfileExists(workspaceUri: vscode.Uri) {
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(workspaceUri, "Gemfile.lock"),
-      );
+      await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, "Gemfile.lock"));
       return true;
     } catch (error: any) {
       // Gemfile.lock doesn't exist, try the next
     }
 
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(workspaceUri, "gems.locked"),
-      );
+      await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, "gems.locked"));
       return true;
     } catch (error: any) {
       // gems.locked doesn't exist
@@ -1066,8 +910,7 @@ export class RubyLsp {
       },
       async (progress, token) => {
         progress.report({
-          message:
-            "If working in a monorepo, cancel to see configuration instructions",
+          message: "If working in a monorepo, cancel to see configuration instructions",
         });
 
         await new Promise<void>((resolve) => {

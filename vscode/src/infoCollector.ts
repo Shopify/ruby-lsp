@@ -9,12 +9,9 @@ export async function collectRubyLspInfo(workspace: Workspace | undefined) {
   }
 
   const lspInfo = await gatherLspInfo(workspace);
-  const panel = vscode.window.createWebviewPanel(
-    "rubyLspInfo",
-    "Ruby LSP Information",
-    vscode.ViewColumn.One,
-    { enableScripts: true },
-  );
+  const panel = vscode.window.createWebviewPanel("rubyLspInfo", "Ruby LSP Information", vscode.ViewColumn.One, {
+    enableScripts: true,
+  });
 
   panel.webview.html = generateRubyLspInfoReport(lspInfo);
 }
@@ -27,16 +24,11 @@ async function gatherLspInfo(
   const rubyLspExtensionVersion = rubyLspExtension.packageJSON.version;
   const rubyLspVersion = workspace.lspClient?.serverVersion ?? "Unknown";
   const rubyLspAddons =
-    workspace.lspClient?.addons?.map(
-      (addon) => `${addon.name} (${addon.version ?? "unknown"})`,
-    ) ?? [];
+    workspace.lspClient?.addons?.map((addon) => `${addon.name} (${addon.version ?? "unknown"})`) ?? [];
   const extensions = await getPublicExtensions();
 
   // Fetch rubyLsp settings
-  const workspaceSettings = vscode.workspace.getConfiguration(
-    "rubyLsp",
-    workspace.workspaceFolder,
-  );
+  const workspaceSettings = vscode.workspace.getConfiguration("rubyLsp", workspace.workspaceFolder);
   const userSettings = vscode.workspace.getConfiguration("rubyLsp");
 
   // Get only the workspace-specific settings
@@ -73,10 +65,7 @@ async function getPublicExtensions(): Promise<string[]> {
       }
 
       // Assume if an extension doesn't have a license, it's private and should not be listed
-      if (
-        ext.packageJSON.license === "UNLICENSED" ||
-        !ext.packageJSON.license
-      ) {
+      if (ext.packageJSON.license === "UNLICENSED" || !ext.packageJSON.license) {
         return false;
       }
 
@@ -85,25 +74,21 @@ async function getPublicExtensions(): Promise<string[]> {
     .map((ext) => `${ext.packageJSON.name} (${ext.packageJSON.version})`);
 }
 
-function generateRubyLspInfoReport(
-  info: Record<string, string | string[] | Record<string, unknown>>,
-): string {
+function generateRubyLspInfoReport(info: Record<string, string | string[] | Record<string, unknown>>): string {
   let markdown = "\n### Ruby LSP Information\n\n";
 
   for (const [key, value] of Object.entries(info)) {
     markdown += `#### ${key}\n\n`;
     if (Array.isArray(value)) {
       if (key === "Installed Extensions") {
-        markdown +=
-          "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
+        markdown += "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
         markdown += `${value.map((val) => `- ${val}`).join("\n")}\n`;
         markdown += "&lt;/details&gt;\n";
       } else {
         markdown += `${value.map((val) => `- ${val}`).join("\n")}\n`;
       }
     } else if (typeof value === "object" && value !== null) {
-      markdown +=
-        "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
+      markdown += "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
       for (const [subKey, subValue] of Object.entries(value)) {
         markdown += `##### ${subKey}\n\n`;
         markdown += `\`\`\`json\n${JSON.stringify(subValue, null, 2)}\n\`\`\`\n\n`;

@@ -1,12 +1,7 @@
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient";
 
-import {
-  Command,
-  STATUS_EMITTER,
-  WorkspaceInterface,
-  SUPPORTED_LANGUAGE_IDS,
-} from "./common";
+import { Command, STATUS_EMITTER, WorkspaceInterface, SUPPORTED_LANGUAGE_IDS } from "./common";
 
 const STOPPED_SERVER_OPTIONS = [
   { label: "Ruby LSP: Start", description: Command.Start },
@@ -136,15 +131,10 @@ export class FeaturesStatus extends StatusItem {
 
   refresh(_workspace: WorkspaceInterface): void {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const features: Record<string, boolean> =
-      configuration.get("enabledFeatures")!;
-    const enabledFeatures = Object.keys(features).filter(
-      (key) => features[key],
-    );
+    const features: Record<string, boolean> = configuration.get("enabledFeatures")!;
+    const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
-    this.item.text = `${enabledFeatures.length}/${
-      Object.keys(features).length
-    } features enabled`;
+    this.item.text = `${enabledFeatures.length}/${Object.keys(features).length} features enabled`;
   }
 }
 
@@ -165,8 +155,7 @@ export class FormatterStatus extends StatusItem {
       if (workspace.lspClient.formatter) {
         this.item.text = `Formatter: ${workspace.lspClient.formatter}`;
       } else {
-        this.item.text =
-          "Formatter: requires server to be v0.12.4 or higher to display this field";
+        this.item.text = "Formatter: requires server to be v0.12.4 or higher to display this field";
       }
     }
   }
@@ -185,8 +174,7 @@ export class AddonsStatus extends StatusItem {
       return;
     }
     if (workspace.lspClient.addons === undefined) {
-      this.item.text =
-        "Addons: requires server to be v0.17.4 or higher to display this field";
+      this.item.text = "Addons: requires server to be v0.17.4 or higher to display this field";
     } else if (workspace.lspClient.addons.length === 0) {
       this.item.text = "Addons: none";
     } else {

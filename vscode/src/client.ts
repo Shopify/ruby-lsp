@@ -30,14 +30,7 @@ import {
   ErrorCodes,
 } from "vscode-languageclient/node";
 
-import {
-  LSP_NAME,
-  ClientInterface,
-  Addon,
-  SUPPORTED_LANGUAGE_IDS,
-  FEATURE_FLAGS,
-  featureEnabled,
-} from "./common";
+import { LSP_NAME, ClientInterface, Addon, SUPPORTED_LANGUAGE_IDS, FEATURE_FLAGS, featureEnabled } from "./common";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -73,15 +66,10 @@ interface ServerDataTelemetryEvent {
   eventName: string;
   data: {
     attributes: Record<string, string>;
-  } & (
-    | { type: "histogram"; value: number; bounds?: number[] }
-    | { type: "counter"; value?: number }
-  );
+  } & ({ type: "histogram"; value: number; bounds?: number[] } | { type: "counter"; value?: number });
 }
 
-type ServerTelemetryEvent =
-  | ServerErrorTelemetryEvent
-  | ServerDataTelemetryEvent;
+type ServerTelemetryEvent = ServerErrorTelemetryEvent | ServerDataTelemetryEvent;
 
 function enabledFeatureFlags(): Record<string, boolean> {
   const allKeys = Object.keys(FEATURE_FLAGS) as (keyof typeof FEATURE_FLAGS)[];
@@ -89,10 +77,7 @@ function enabledFeatureFlags(): Record<string, boolean> {
 }
 
 // Get the executables to start the server based on the user's configuration
-function getLspExecutables(
-  workspaceFolder: vscode.WorkspaceFolder,
-  env: NodeJS.ProcessEnv,
-): ServerOptions {
+function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.ProcessEnv): ServerOptions {
   let run: Executable;
   let debug: Executable;
   const config = vscode.workspace.getConfiguration("rubyLsp");
@@ -103,9 +88,7 @@ function getLspExecutables(
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
-    env: bypassTypechecker
-      ? { ...env, RUBY_LSP_BYPASS_TYPECHECKER: "true" }
-      : env,
+    env: bypassTypechecker ? { ...env, RUBY_LSP_BYPASS_TYPECHECKER: "true" } : env,
     shell: true,
   };
 
@@ -171,8 +154,7 @@ function collectClientOptions(
   isMainWorkspace: boolean,
   telemetry: vscode.TelemetryLogger,
 ): LanguageClientOptions {
-  const pullOn: "change" | "save" | "both" =
-    configuration.get("pullDiagnosticsOn")!;
+  const pullOn: "change" | "save" | "both" = configuration.get("pullDiagnosticsOn")!;
 
   const diagnosticPullOptions = {
     onChange: pullOn === "change" || pullOn === "both",
@@ -188,11 +170,9 @@ function collectClientOptions(
   // 1. Files inside of the workspace itself
   // 2. Bundled gems
   // 3. Default gems
-  let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.flatMap(
-    (language) => {
-      return { scheme: "file", language, pattern: `${fsPath}/**/*` };
-    },
-  );
+  let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.flatMap((language) => {
+    return { scheme: "file", language, pattern: `${fsPath}/**/*` };
+  });
 
   // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
   // all workspaces
@@ -267,10 +247,7 @@ class ClientErrorHandler implements ErrorHandler {
   private readonly workspaceFolder: vscode.WorkspaceFolder;
   private readonly telemetry: vscode.TelemetryLogger;
 
-  constructor(
-    workspaceFolder: vscode.WorkspaceFolder,
-    telemetry: vscode.TelemetryLogger,
-  ) {
+  constructor(workspaceFolder: vscode.WorkspaceFolder, telemetry: vscode.TelemetryLogger) {
     this.workspaceFolder = workspaceFolder;
     this.telemetry = telemetry;
   }
@@ -284,11 +261,7 @@ class ClientErrorHandler implements ErrorHandler {
   }
 
   async closed(): Promise<CloseHandlerResult> {
-    const label = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("useLauncher")
-      ? "launcher"
-      : "direct";
+    const label = vscode.workspace.getConfiguration("rubyLsp").get("useLauncher") ? "launcher" : "direct";
 
     this.telemetry.logUsage("ruby_lsp.launch_failure", {
       type: "counter",
@@ -325,10 +298,7 @@ class ExperimentalCapabilities implements StaticFeature {
     };
   }
 
-  initialize(
-    _capabilities: ServerCapabilities,
-    _documentSelector: DocumentSelector | undefined,
-  ): void {}
+  initialize(_capabilities: ServerCapabilities, _documentSelector: DocumentSelector | undefined): void {}
 
   getState(): FeatureState {
     return { kind: "static" };
@@ -407,10 +377,7 @@ export default class Client extends LanguageClient implements ClientInterface {
       // When the server processes changes to an ERB document, it will send this custom notification to update the state
       // of the virtual documents
       this.onNotification("delegate/textDocument/virtualState", (params) => {
-        this.virtualDocuments.set(
-          params.textDocument.uri,
-          params.textDocument.text,
-        );
+        this.virtualDocuments.set(params.textDocument.uri, params.textDocument.text);
       }),
 
       this.onTelemetry((event: ServerTelemetryEvent) => {
@@ -424,9 +391,7 @@ export default class Client extends LanguageClient implements ClientInterface {
             {
               appType: "server",
               appVersion: this.serverVersion,
-              workspace: new vscode.TelemetryTrustedValue(
-                path.basename(this.workingDirectory),
-              ),
+              workspace: new vscode.TelemetryTrustedValue(path.basename(this.workingDirectory)),
             },
           );
         } else if (event.type === "data" && this.validServerTelemetry(event)) {
@@ -436,11 +401,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     );
 
     this.indexingPromise = new Promise<void>((resolve) => {
-      this.clientOptions.middleware!.handleWorkDoneProgress = (
-        token,
-        params,
-        next,
-      ) => {
+      this.clientOptions.middleware!.handleWorkDoneProgress = (token, params, next) => {
         if (token.toString() === "indexing-progress" && params.kind === "end") {
           resolve();
         }
@@ -470,9 +431,7 @@ export default class Client extends LanguageClient implements ClientInterface {
       try {
         this.addons = await this.sendRequest("rubyLsp/workspace/addons", {});
       } catch (error: any) {
-        this.workspaceOutputChannel.error(
-          `Error while fetching addons: ${error.data.errorMessage}`,
-        );
+        this.workspaceOutputChannel.error(`Error while fetching addons: ${error.data.errorMessage}`);
       }
     }
   }
@@ -493,10 +452,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     this.#context = context;
   }
 
-  async sendShowSyntaxTreeRequest(
-    uri: vscode.Uri,
-    range?: Range,
-  ): Promise<{ ast: string } | null> {
+  async sendShowSyntaxTreeRequest(uri: vscode.Uri, range?: Range): Promise<{ ast: string } | null> {
     return this.sendRequest("rubyLsp/textDocument/showSyntaxTree", {
       textDocument: { uri: uri.toString() },
       range,
@@ -521,9 +477,7 @@ export default class Client extends LanguageClient implements ClientInterface {
     return super.dispose(timeout);
   }
 
-  async sendGoToRelevantFileRequest(
-    uri: vscode.Uri,
-  ): Promise<{ locations: string[] } | null> {
+  async sendGoToRelevantFileRequest(uri: vscode.Uri): Promise<{ locations: string[] } | null> {
     return this.sendRequest("experimental/goToRelevantFile", {
       textDocument: { uri: uri.toString() },
     });
@@ -546,11 +500,7 @@ export default class Client extends LanguageClient implements ClientInterface {
       const result = await runRequest();
       Perf.mark(`${request}.end`);
 
-      const bench = Perf.measure(
-        "benchmarks",
-        `${request}.start`,
-        `${request}.end`,
-      );
+      const bench = Perf.measure("benchmarks", `${request}.start`, `${request}.end`);
 
       this.logResponseTime(bench.duration, request);
       return result;
@@ -562,10 +512,7 @@ export default class Client extends LanguageClient implements ClientInterface {
       }
 
       if (error.data) {
-        if (
-          this.baseFolder === "ruby-lsp" ||
-          this.baseFolder === "ruby-lsp-rails"
-        ) {
+        if (this.baseFolder === "ruby-lsp" || this.baseFolder === "ruby-lsp-rails") {
           await vscode.window.showErrorMessage(
             `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
           );
@@ -575,12 +522,7 @@ export default class Client extends LanguageClient implements ClientInterface {
           // We only want to produce telemetry events for errors that have all the data we need and that are internal
           // server errors. Other errors do not necessarily indicate bugs in the server. You can check LSP error codes
           // here https://microsoft.github.io/language-server-protocol/specification/#errorCodes
-          if (
-            errorMessage &&
-            errorClass &&
-            backtrace &&
-            error.code === ErrorCodes.InternalError
-          ) {
+          if (errorMessage && errorClass && backtrace && error.code === ErrorCodes.InternalError) {
             // Sanitize the backtrace coming from the server to remove the user's home directory from it, then mark it
             // as a trusted value. Otherwise the VS Code telemetry logger redacts the entire backtrace and we are unable
             // to see where in the server the error occurred
@@ -601,9 +543,7 @@ export default class Client extends LanguageClient implements ClientInterface {
                 ...error.data,
                 appType: "server",
                 appVersion: this.serverVersion,
-                workspace: new vscode.TelemetryTrustedValue(
-                  path.basename(this.workingDirectory),
-                ),
+                workspace: new vscode.TelemetryTrustedValue(path.basename(this.workingDirectory)),
               },
             );
           }
@@ -617,10 +557,7 @@ export default class Client extends LanguageClient implements ClientInterface {
   // Delegate a request to the appropriate language service. Note that only position based requests are delegated here.
   // Full file requests, such as folding range, have their own separate middleware to merge the embedded Ruby + host
   // language responses
-  private async executeDelegateRequest(
-    type: string | MessageSignature,
-    params: any,
-  ): Promise<any> {
+  private async executeDelegateRequest(type: string | MessageSignature, params: any): Promise<any> {
     const request = typeof type === "string" ? type : type.method;
     const originalUri = params.textDocument.uri;
 
@@ -649,11 +586,7 @@ export default class Client extends LanguageClient implements ClientInterface {
             response.items.forEach((item) => {
               // For whatever reason, HTML completion items don't include the `kind` and that causes a failure in the
               // editor. It might be a mistake in the delegation
-              if (
-                item.documentation &&
-                typeof item.documentation !== "string" &&
-                "value" in item.documentation
-              ) {
+              if (item.documentation && typeof item.documentation !== "string" && "value" in item.documentation) {
                 item.documentation.kind = "markdown";
               }
 
@@ -688,9 +621,7 @@ export default class Client extends LanguageClient implements ClientInterface {
           params.position,
         );
       default:
-        this.workspaceOutputChannel.warn(
-          `Attempted to delegate unsupported request ${request}`,
-        );
+        this.workspaceOutputChannel.warn(`Attempted to delegate unsupported request ${request}`);
         return null;
     }
   }
@@ -702,9 +633,7 @@ export default class Client extends LanguageClient implements ClientInterface {
         const response = await next(document, token);
 
         if (response) {
-          const testLenses = response.filter(
-            (codeLens) => (codeLens as CodeLens).data?.type === "test",
-          ) as CodeLens[];
+          const testLenses = response.filter((codeLens) => (codeLens as CodeLens).data?.type === "test") as CodeLens[];
 
           if (testLenses.length) {
             this.createTestItems(testLenses);
@@ -713,14 +642,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
         return response;
       },
-      provideOnTypeFormattingEdits: async (
-        document,
-        position,
-        ch,
-        options,
-        token,
-        _next,
-      ) => {
+      provideOnTypeFormattingEdits: async (document, position, ch, options, token, _next) => {
         const response: vscode.TextEdit[] | null = await this.sendRequest(
           "textDocument/onTypeFormatting",
           {
@@ -752,15 +674,11 @@ export default class Client extends LanguageClient implements ClientInterface {
         const editor = vscode.window.activeTextEditor!;
 
         // This should happen before applying the edits, otherwise the cursor will be moved to the wrong position
-        const existingText = editor.document.lineAt(
-          cursorPosition.range.start.line,
-        ).text;
+        const existingText = editor.document.lineAt(cursorPosition.range.start.line).text;
 
         await vscode.workspace.applyEdit(workspaceEdit);
 
-        const indentChar = vscode.window.activeTextEditor?.options.insertSpaces
-          ? " "
-          : "\t";
+        const indentChar = vscode.window.activeTextEditor?.options.insertSpaces ? " " : "\t";
 
         // If the line is not empty, we don't want to indent the cursor
         let indentationLength = 0;
@@ -774,10 +692,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
         await vscode.window.activeTextEditor!.insertSnippet(
           new vscode.SnippetString(`${indentation}${cursorPosition.newText}`),
-          new vscode.Selection(
-            cursorPosition.range.start,
-            cursorPosition.range.end,
-          ),
+          new vscode.Selection(cursorPosition.range.start, cursorPosition.range.end),
         );
 
         return null;
@@ -786,15 +701,9 @@ export default class Client extends LanguageClient implements ClientInterface {
         type: string | MessageSignature,
         param: TP | undefined,
         token: vscode.CancellationToken,
-        next: (
-          type: string | MessageSignature,
-          param?: TP,
-          token?: vscode.CancellationToken,
-        ) => Promise<T>,
+        next: (type: string | MessageSignature, param?: TP, token?: vscode.CancellationToken) => Promise<T>,
       ) => {
-        return this.benchmarkMiddleware(type, param, () =>
-          next(type, param, token),
-        );
+        return this.benchmarkMiddleware(type, param, () => next(type, param, token));
       },
       sendNotification: async <TR>(
         type: string | MessageSignature,
@@ -812,14 +721,10 @@ export default class Client extends LanguageClient implements ClientInterface {
       // **** Full document request delegation middleware below ****
       provideFoldingRanges: async (document, context, token, next) => {
         if (document.languageId === "erb") {
-          const virtualDocumentUri = this.virtualDocumentUri(
-            document.uri.toString(true),
-          );
+          const virtualDocumentUri = this.virtualDocumentUri(document.uri.toString(true));
 
           // Execute folding range for the host language
-          const hostResponse = await vscode.commands.executeCommand<
-            vscode.FoldingRange[]
-          >(
+          const hostResponse = await vscode.commands.executeCommand<vscode.FoldingRange[]>(
             "vscode.executeFoldingRangeProvider",
             vscode.Uri.parse(virtualDocumentUri),
           );
@@ -833,14 +738,13 @@ export default class Client extends LanguageClient implements ClientInterface {
       },
       provideDocumentLinks: async (document, token, next) => {
         if (document.languageId === "erb") {
-          const virtualDocumentUri = this.virtualDocumentUri(
-            document.uri.toString(true),
-          );
+          const virtualDocumentUri = this.virtualDocumentUri(document.uri.toString(true));
 
           // Execute document links for the host language
-          const hostResponse = await vscode.commands.executeCommand<
-            vscode.DocumentLink[]
-          >("vscode.executeLinkProvider", vscode.Uri.parse(virtualDocumentUri));
+          const hostResponse = await vscode.commands.executeCommand<vscode.DocumentLink[]>(
+            "vscode.executeLinkProvider",
+            vscode.Uri.parse(virtualDocumentUri),
+          );
 
           // Execute document links for the embedded Ruby
           const rubyResponse = await next(document, token);
@@ -854,9 +758,7 @@ export default class Client extends LanguageClient implements ClientInterface {
 
   private virtualDocumentUri(originalUri: string) {
     const hostLanguage = /\.([^.]+)\.erb$/.exec(originalUri)?.[1] || "html";
-    return `embedded-content://${hostLanguage}/${encodeURIComponent(
-      originalUri,
-    )}.${hostLanguage}`;
+    return `embedded-content://${hostLanguage}/${encodeURIComponent(originalUri)}.${hostLanguage}`;
   }
 
   private logResponseTime(duration: number, label: string) {

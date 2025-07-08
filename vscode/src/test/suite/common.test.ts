@@ -24,11 +24,7 @@ suite("Common", () => {
     for (let i = 0; i < 50; i++) {
       const result = featureEnabled("tapiocaAddon");
 
-      assert.strictEqual(
-        firstCall,
-        result,
-        "Feature flag should be deterministic",
-      );
+      assert.strictEqual(firstCall, result, "Feature flag should be deterministic");
     }
   });
 
@@ -115,25 +111,21 @@ suite("Common", () => {
     (FEATURE_FLAGS as any).fakeFeature = -1;
 
     // With only `all` enabled
-    const firstStub = sandbox
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: () => {
-          return { all: true };
-        },
-      } as any);
+    const firstStub = sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: () => {
+        return { all: true };
+      },
+    } as any);
 
     firstStub.restore();
     assert.strictEqual(featureEnabled("fakeFeature" as any), false);
 
     // With fakeFeature enabled
-    const secondStub = sandbox
-      .stub(vscode.workspace, "getConfiguration")
-      .returns({
-        get: () => {
-          return { all: true, fakeFeature: true };
-        },
-      } as any);
+    const secondStub = sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: () => {
+        return { all: true, fakeFeature: true };
+      },
+    } as any);
 
     assert.strictEqual(featureEnabled("fakeFeature" as any), true);
     secondStub.restore();

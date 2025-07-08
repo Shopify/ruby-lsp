@@ -14,9 +14,7 @@ export class UntrustedWorkspaceError extends Error {}
 export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"),
-      );
+      await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"));
     } catch (error: any) {
       throw new Error(
         "The Ruby LSP version manager is configured to be shadowenv, \
@@ -24,15 +22,10 @@ export class Shadowenv extends VersionManager {
       );
     }
 
-    const shadowenvExec = await this.findExec(
-      [vscode.Uri.file("/opt/homebrew/bin")],
-      "shadowenv",
-    );
+    const shadowenvExec = await this.findExec([vscode.Uri.file("/opt/homebrew/bin")], "shadowenv");
 
     try {
-      const parsedResult = await this.runEnvActivationScript(
-        `${shadowenvExec} exec -- ruby`,
-      );
+      const parsedResult = await this.runEnvActivationScript(`${shadowenvExec} exec -- ruby`);
 
       // Do not let Shadowenv change the BUNDLE_GEMFILE. The server has to be able to control this in order to properly
       // set up the environment
@@ -59,9 +52,7 @@ export class Shadowenv extends VersionManager {
           return this.activate();
         }
 
-        throw new UntrustedWorkspaceError(
-          "Cannot activate Ruby environment in an untrusted workspace",
-        );
+        throw new UntrustedWorkspaceError("Cannot activate Ruby environment in an untrusted workspace");
       }
 
       try {
@@ -75,9 +66,7 @@ export class Shadowenv extends VersionManager {
       }
 
       // If it failed for some other reason, present the error to the user
-      throw new Error(
-        `Failed to activate Ruby environment with Shadowenv: ${error.message}`,
-      );
+      throw new Error(`Failed to activate Ruby environment with Shadowenv: ${error.message}`);
     }
   }
 }

@@ -12,9 +12,7 @@ import { ActivationResult, VersionManager } from "./versionManager";
 export class Rvm extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const installationPath = await this.findRvmInstallation();
-    const parsedResult = await this.runEnvActivationScript(
-      installationPath.fsPath,
-    );
+    const parsedResult = await this.runEnvActivationScript(installationPath.fsPath);
 
     const activatedKeys = Object.entries(parsedResult.env)
       .map(([key, value]) => `${key}=${value}`)
@@ -32,28 +30,9 @@ export class Rvm extends VersionManager {
 
   async findRvmInstallation(): Promise<vscode.Uri> {
     const possiblePaths = [
-      vscode.Uri.joinPath(
-        vscode.Uri.file(os.homedir()),
-        ".rvm",
-        "bin",
-        "rvm-auto-ruby",
-      ),
-      vscode.Uri.joinPath(
-        vscode.Uri.file("/"),
-        "usr",
-        "local",
-        "rvm",
-        "bin",
-        "rvm-auto-ruby",
-      ),
-      vscode.Uri.joinPath(
-        vscode.Uri.file("/"),
-        "usr",
-        "share",
-        "rvm",
-        "bin",
-        "rvm-auto-ruby",
-      ),
+      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rvm", "bin", "rvm-auto-ruby"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "rvm", "bin", "rvm-auto-ruby"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "share", "rvm", "bin", "rvm-auto-ruby"),
     ];
 
     for (const uri of possiblePaths) {
