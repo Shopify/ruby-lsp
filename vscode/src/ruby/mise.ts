@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import os from "os";
 
 import * as vscode from "vscode";
@@ -33,8 +32,8 @@ export class Mise extends VersionManager {
       try {
         await vscode.workspace.fs.stat(configuredPath);
         return configuredPath;
-      } catch (error: any) {
-        throw new Error(`Mise executable configured as ${configuredPath}, but that file doesn't exist`);
+      } catch (_error: any) {
+        throw new Error(`Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
       }
     }
 
@@ -53,7 +52,7 @@ export class Mise extends VersionManager {
       try {
         await vscode.workspace.fs.stat(possiblePath);
         return possiblePath;
-      } catch (error: any) {
+      } catch (_error: any) {
         // Continue looking
       }
     }

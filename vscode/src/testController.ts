@@ -18,7 +18,6 @@ const TEST_FILE_PATTERN = `${NESTED_TEST_DIR_PATTERN}{*_test.rb,test_*.rb,*_spec
 
 interface CodeLensData {
   type: string;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   group_id: number;
   id?: number;
   kind: string;
@@ -114,6 +113,7 @@ export class TestController {
     // This method is invoked when a document is opened in the UI to gather any additional details about coverage for
     // inline decorations. We save all of the available details in the `coverageData` map ahead of time, so we just need
     // to return the existing data
+    // eslint-disable-next-line @typescript-eslint/require-await
     this.coverageProfile.loadDetailedCoverage = async (_testRun, fileCoverage, _token) => {
       return this.coverageData.get(fileCoverage)!;
     };
@@ -263,7 +263,6 @@ export class TestController {
    * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
    */
   runTestInTerminal(_path: string, _name: string, command?: string) {
-    // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
 
     if (this.terminal === undefined) {
@@ -308,7 +307,6 @@ export class TestController {
    * @deprecated by {@link runViaCommand}. To be removed once the new test explorer is fully rolled out
    */
   debugTest(_path: string, _name: string, command?: string) {
-    // eslint-disable-next-line no-param-reassign
     command ??= this.testCommands.get(this.findTestByActiveLine()!) || "";
 
     const workspace = this.currentWorkspace();
@@ -636,7 +634,7 @@ export class TestController {
     const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
     const mode = profile === this.runInTerminalProfile ? Mode.RunInTerminal : Mode.Run;
 
-    for await (const command of response.commands) {
+    for (const command of response.commands) {
       try {
         await this.runner.execute(
           run,
@@ -722,7 +720,7 @@ export class TestController {
 
     // If neither of the previous are true, then this test is dynamically defined and we need to create the items for it
     // automatically
-    const label = id.split("#")[1]!;
+    const label = id.split("#")[1];
     const testItem = this.testController.createTestItem(id, `★ ${label}`, found.uri);
 
     testItem.description = "dynamic test";
@@ -757,7 +755,7 @@ export class TestController {
     const test = request.include![0];
 
     const start = Date.now();
-    await this.debugTest("", "", this.testCommands.get(test)!);
+    await this.debugTest("", "", this.testCommands.get(test));
     run.passed(test, Date.now() - start);
     run.end();
 
@@ -807,7 +805,8 @@ export class TestController {
 
           run.appendOutput(output.replace(/\r?\n/g, "\r\n"), undefined, test);
           run.passed(test, Date.now() - start);
-        } catch (err: any) {
+        } catch (error: any) {
+          const err = error as { message: string; killed: boolean };
           run.appendOutput(err.message.replace(/\r?\n/g, "\r\n"), undefined, test);
 
           const duration = Date.now() - start;
@@ -897,10 +896,13 @@ export class TestController {
     testItems.forEach((test) => {
       if (testItem) return;
 
+      const range = test.range;
+
       if (
         test.uri?.toString() === editor.document.uri.toString() &&
-        test.range?.start.line! <= line &&
-        test.range?.end.line! >= line
+        range &&
+        range.start.line <= line &&
+        range.end.line >= line
       ) {
         testItem = test;
       }
@@ -1068,7 +1070,7 @@ export class TestController {
             secondLevel: { name: secondLevelName, uri: secondLevelUri },
           };
         }
-      } catch (error: any) {
+      } catch (_error: any) {
         // Do nothing
       }
     }

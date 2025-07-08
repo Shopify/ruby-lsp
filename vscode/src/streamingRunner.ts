@@ -164,11 +164,11 @@ export class StreamingRunner implements vscode.Disposable {
         cwd,
       });
 
-      testProcess.stdout.on("data", (data) => {
+      testProcess.stdout.on("data", (data: Buffer) => {
         this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
       });
 
-      testProcess.stderr.on("data", (data) => {
+      testProcess.stderr.on("data", (data: Buffer) => {
         this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
       });
 
@@ -188,6 +188,7 @@ export class StreamingRunner implements vscode.Disposable {
       server.on("error", reject);
       server.unref();
 
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       server.listen(0, "localhost", async () => {
         const address = server.address();
 
@@ -196,7 +197,7 @@ export class StreamingRunner implements vscode.Disposable {
         }
         this.tcpPort = typeof address === "string" ? address : address.port.toString();
 
-        const portString = this.tcpPort!.toString();
+        const portString = this.tcpPort.toString();
         await this.updatePortMap(portString);
 
         // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
@@ -237,7 +238,7 @@ export class StreamingRunner implements vscode.Disposable {
     try {
       const contents = await vscode.workspace.fs.readFile(mapUri);
       currentMap = JSON.parse(contents.toString());
-    } catch (error: any) {
+    } catch (_error: any) {
       currentMap = {};
     }
 
@@ -294,6 +295,7 @@ export class StreamingRunner implements vscode.Disposable {
     };
 
     // Handle the JSON events being emitted by the tests
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.disposables.push(this.connection.onNotification(NOTIFICATION_TYPES.finish, () => this.finalize(false)));
 
     this.disposables.push(

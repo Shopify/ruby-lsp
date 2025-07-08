@@ -55,7 +55,6 @@ suite("None", () => {
       execStub.calledOnceWithExactly(`ruby -EUTF-8:UTF-8 '${activationUri.fsPath}'`, {
         cwd: uri.fsPath,
         shell,
-        // eslint-disable-next-line no-process-env
         env: process.env,
         encoding: "utf-8",
       }),

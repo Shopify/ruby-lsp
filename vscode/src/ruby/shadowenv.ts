@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
@@ -15,7 +14,7 @@ export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"));
-    } catch (error: any) {
+    } catch (_error: any) {
       throw new Error(
         "The Ruby LSP version manager is configured to be shadowenv, \
         but no .shadowenv.d directory was found in the workspace",
@@ -38,8 +37,9 @@ export class Shadowenv extends VersionManager {
         gemPath: parsedResult.gemPath,
       };
     } catch (error: any) {
+      const err = error as Error;
       // If the workspace is untrusted, offer to trust it for the user
-      if (error.message.includes("untrusted shadowenv program")) {
+      if (err.message.includes("untrusted shadowenv program")) {
         const answer = await vscode.window.showErrorMessage(
           `Tried to activate Shadowenv, but the workspace is untrusted.
            Workspaces must be trusted to before allowing Shadowenv to load the environment for security reasons.`,

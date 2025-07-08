@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";

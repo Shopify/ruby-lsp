@@ -255,7 +255,7 @@ export class RubyLsp {
           vscode.Uri.parse("https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md#formatting"),
         );
       }),
-      vscode.commands.registerCommand(Command.DisplayAddons, async () => {
+      vscode.commands.registerCommand(Command.DisplayAddons, () => {
         const client = this.currentActiveWorkspace()?.lspClient;
 
         if (!client || !client.addons) {
@@ -547,7 +547,7 @@ export class RubyLsp {
         const workspace = await this.showWorkspacePick();
         await workspace?.start(true);
       }),
-      vscode.commands.registerCommand(Command.ShowOutput, async () => {
+      vscode.commands.registerCommand(Command.ShowOutput, () => {
         LOG_CHANNEL.show();
       }),
       vscode.commands.registerCommand(Command.MigrateLaunchConfiguration, async () => {
@@ -562,7 +562,17 @@ export class RubyLsp {
         const updatedLaunchConfig = launchConfig.map((config: any) => {
           if (config.type === "rdbg") {
             if (config.request === "launch") {
-              const newConfig = { ...config };
+              const newConfig: {
+                command?: string;
+                script?: string;
+                args?: string[];
+                type?: string;
+                askParameters?: boolean;
+                useBundler?: boolean;
+                rdbgPath?: string;
+                cwd?: string;
+                program?: string;
+              } = { ...config };
               newConfig.type = "ruby_lsp";
 
               if (newConfig.askParameters !== true) {
@@ -570,9 +580,9 @@ export class RubyLsp {
                 delete newConfig.cwd;
                 delete newConfig.useBundler;
 
-                const command = (newConfig.command || "").replace(`\${workspaceRoot}/`, "");
-                const script = newConfig.script || "";
-                const args = (newConfig.args || []).join(" ");
+                const command = (newConfig.command ?? "").replace(`\${workspaceRoot}/`, "");
+                const script = newConfig.script ?? "";
+                const args = (newConfig.args ?? []).join(" ");
                 newConfig.program = `${command} ${script} ${args}`.trim();
 
                 delete newConfig.command;
@@ -638,7 +648,7 @@ export class RubyLsp {
               return;
             }
           }
-        } catch (error) {
+        } catch (_error) {
           const install = await vscode.window.showInformationMessage(
             "Vernier is required for profiling. Would you like to install it?",
             "Install",
@@ -887,14 +897,14 @@ export class RubyLsp {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, "Gemfile.lock"));
       return true;
-    } catch (error: any) {
+    } catch (_error: any) {
       // Gemfile.lock doesn't exist, try the next
     }
 
     try {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, "gems.locked"));
       return true;
-    } catch (error: any) {
+    } catch (_error: any) {
       // gems.locked doesn't exist
     }
 

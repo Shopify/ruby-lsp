@@ -643,7 +643,7 @@ suite("Grammars", () => {
 
     function expectedEmbeddedLanguageConfig(languageConfig: LanguageConfig) {
       const { label, name, delimiters, contentName, includeName } = languageConfig;
-      const delimiter = delimiters.length > 1 ? `(?:${delimiters.join("|")})` : delimiters;
+      const delimiter = delimiters.length > 1 ? `(?:${delimiters.join("|")})` : delimiters[0];
 
       return {
         begin: `(?=(?><<[-~](["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1))`,
@@ -654,13 +654,11 @@ suite("Grammars", () => {
           {
             begin: `(?><<[-~](["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1)`,
             beginCaptures: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               "0": { name: "string.definition.begin.ruby" },
             },
             contentName,
             end: "^\\s*\\2$\\n?",
             endCaptures: {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               "0": { name: "string.definition.end.ruby" },
             },
             patterns: [

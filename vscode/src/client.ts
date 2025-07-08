@@ -517,7 +517,11 @@ export default class Client extends LanguageClient implements ClientInterface {
             `Ruby LSP error ${error.data.errorClass}: ${error.data.errorMessage}\n\n${error.data.backtrace}`,
           );
         } else {
-          const { errorMessage, errorClass, backtrace } = error.data;
+          const { errorMessage, errorClass, backtrace } = error.data as {
+            errorMessage?: string;
+            errorClass?: string;
+            backtrace?: string;
+          };
 
           // We only want to produce telemetry events for errors that have all the data we need and that are internal
           // server errors. Other errors do not necessarily indicate bugs in the server. You can check LSP error codes

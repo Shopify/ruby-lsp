@@ -36,7 +36,6 @@ suite("Rbenv", () => {
   });
 
   test("Finds Ruby based on .ruby-version", async () => {
-    // eslint-disable-next-line no-process-env
     const workspacePath = process.env.PWD!;
     const workspaceFolder = {
       uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
@@ -59,7 +58,7 @@ suite("Rbenv", () => {
       execStub.calledOnceWithExactly(`rbenv exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
-        // eslint-disable-next-line no-process-env
+
         env: process.env,
         encoding: "utf-8",
       }),
@@ -105,7 +104,7 @@ suite("Rbenv", () => {
       execStub.calledOnceWithExactly(`${rbenvPath} exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
-        // eslint-disable-next-line no-process-env
+
         env: process.env,
         encoding: "utf-8",
       }),

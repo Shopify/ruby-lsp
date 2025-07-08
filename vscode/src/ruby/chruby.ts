@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import os from "os";
 import path from "path";
 
@@ -135,7 +134,7 @@ export class Chruby extends VersionManager {
         directories = (await vscode.workspace.fs.readDirectory(uri)).sort((left, right) =>
           right[0].localeCompare(left[0]),
         );
-      } catch (error: any) {
+      } catch (_error: any) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(`Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`);
         continue;
@@ -198,7 +197,7 @@ export class Chruby extends VersionManager {
             });
           }
         });
-      } catch (error: any) {
+      } catch (_error: any) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(`Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`);
         continue;
@@ -241,21 +240,21 @@ export class Chruby extends VersionManager {
         rubyVersionUri = vscode.Uri.joinPath(uri, ".ruby-version");
         const content = await vscode.workspace.fs.readFile(rubyVersionUri);
         version = content.toString().trim();
-      } catch (error: any) {
+      } catch (_error: any) {
         // If the file doesn't exist, continue going up the directory tree
         uri = vscode.Uri.file(path.dirname(uri.fsPath));
         continue;
       }
 
       if (version === "") {
-        throw new Error(`Ruby version file ${rubyVersionUri} is empty`);
+        throw new Error(`Ruby version file ${rubyVersionUri.fsPath} is empty`);
       }
 
       const match = /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(version);
 
       if (!match?.groups) {
         throw new Error(
-          `Ruby version file ${rubyVersionUri} contains invalid format. Expected (engine-)?version, got ${version}`,
+          `Ruby version file ${rubyVersionUri.fsPath} contains invalid format. Expected (engine-)?version, got ${version}`,
         );
       }
 
@@ -276,7 +275,7 @@ export class Chruby extends VersionManager {
 
     try {
       gemfileContents = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(this.workspaceFolder.uri, "Gemfile"));
-    } catch (error: any) {
+    } catch (_error: any) {
       // The Gemfile doesn't exist
     }
 
@@ -351,7 +350,7 @@ export class Chruby extends VersionManager {
             label: directory[0],
           });
         });
-      } catch (error: any) {
+      } catch (_error: any) {
         continue;
       }
     }
@@ -409,16 +408,16 @@ export class Chruby extends VersionManager {
           }
         }
 
-        if (targetDirectory) {
+        if (targetDirectory && groups) {
           return {
             uri: vscode.Uri.joinPath(uri, targetDirectory[0], "bin", "ruby"),
             rubyVersion: {
-              engine: groups!.engine,
-              version: groups!.version,
+              engine: groups.engine,
+              version: groups.version,
             },
           };
         }
-      } catch (error: any) {
+      } catch (_error: any) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(`Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`);
         continue;

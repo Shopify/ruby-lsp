@@ -8,7 +8,7 @@ export async function collectRubyLspInfo(workspace: Workspace | undefined) {
     return;
   }
 
-  const lspInfo = await gatherLspInfo(workspace);
+  const lspInfo = gatherLspInfo(workspace);
   const panel = vscode.window.createWebviewPanel("rubyLspInfo", "Ruby LSP Information", vscode.ViewColumn.One, {
     enableScripts: true,
   });
@@ -16,16 +16,14 @@ export async function collectRubyLspInfo(workspace: Workspace | undefined) {
   panel.webview.html = generateRubyLspInfoReport(lspInfo);
 }
 
-async function gatherLspInfo(
-  workspace: Workspace,
-): Promise<Record<string, string | string[] | Record<string, unknown>>> {
+function gatherLspInfo(workspace: Workspace): Record<string, string | string[] | Record<string, unknown>> {
   const vscodeVersion = vscode.version;
   const rubyLspExtension = vscode.extensions.getExtension("Shopify.ruby-lsp")!;
   const rubyLspExtensionVersion = rubyLspExtension.packageJSON.version;
   const rubyLspVersion = workspace.lspClient?.serverVersion ?? "Unknown";
   const rubyLspAddons =
     workspace.lspClient?.addons?.map((addon) => `${addon.name} (${addon.version ?? "unknown"})`) ?? [];
-  const extensions = await getPublicExtensions();
+  const extensions = getPublicExtensions();
 
   // Fetch rubyLsp settings
   const workspaceSettings = vscode.workspace.getConfiguration("rubyLsp", workspace.workspaceFolder);
@@ -40,7 +38,6 @@ async function gatherLspInfo(
   }
 
   return {
-    /* eslint-disable @typescript-eslint/naming-convention */
     "VS Code Version": vscodeVersion,
     "Ruby LSP Extension Version": rubyLspExtensionVersion,
     "Ruby LSP Server Version": rubyLspVersion,
@@ -52,11 +49,10 @@ async function gatherLspInfo(
       Workspace: workspaceSpecificSettings,
       User: userSettings,
     },
-    /* eslint-enable @typescript-eslint/naming-convention */
   };
 }
 
-async function getPublicExtensions(): Promise<string[]> {
+function getPublicExtensions(): string[] {
   return vscode.extensions.all
     .filter((ext) => {
       // Filter out built-in extensions

@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import path from "path";
 import os from "os";
 
@@ -102,7 +101,7 @@ export abstract class VersionManager {
         await vscode.workspace.fs.stat(fullUri);
         this.outputChannel.info(`Found ${execName} executable at ${uri.fsPath}`);
         return fullUri.fsPath;
-      } catch (error: any) {
+      } catch (_error: any) {
         // continue searching
       }
     }

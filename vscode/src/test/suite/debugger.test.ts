@@ -170,7 +170,6 @@ suite("Debugger", () => {
     const manager =
       os.platform() === "win32" ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
 
-    // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }

@@ -31,7 +31,6 @@ suite("RubyInstaller", () => {
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }

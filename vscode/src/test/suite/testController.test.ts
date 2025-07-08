@@ -128,7 +128,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -143,7 +142,7 @@ suite("TestController", () => {
     const item = await controller.findTestItem(itemId, itemUri);
     assert.ok(item);
     assert.deepStrictEqual(
-      item!.tags.map((tag) => tag.id),
+      item.tags.map((tag) => tag.id),
       tags,
     );
   }
@@ -202,18 +201,16 @@ suite("TestController", () => {
             "test_do_something",
             "bundle exec ruby -Itest test/fake_test.rb --name FakeTest#test_do_something",
             {
-              /* eslint-disable @typescript-eslint/naming-convention */
               start_line: 0,
               start_column: 0,
               end_line: 10,
               end_column: 10,
-              /* eslint-enable @typescript-eslint/naming-convention */
             },
           ],
         },
         data: {
           type: "test",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           group_id: 100,
           kind: "example",
         },
@@ -238,7 +235,7 @@ suite("TestController", () => {
     const workspaceItem = collection.get(firstWorkspace.workspaceFolder.uri.toString());
     assert.ok(workspaceItem);
     assert.deepStrictEqual(
-      workspaceItem!.tags.map((tag) => tag.id),
+      workspaceItem.tags.map((tag) => tag.id),
       ["workspace", "debug"],
     );
 
@@ -293,7 +290,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -303,19 +299,19 @@ suite("TestController", () => {
 
     await controller.testController.resolveHandler!(workspaceItem);
 
-    const testDir = workspaceItem!.children.get(
+    const testDir = workspaceItem.children.get(
       vscode.Uri.joinPath(firstWorkspace.workspaceFolder.uri, "test").toString(),
     );
     assert.ok(testDir);
     assert.deepStrictEqual(
-      testDir!.tags.map((tag) => tag.id),
+      testDir.tags.map((tag) => tag.id),
       ["test_dir", "debug"],
     );
 
-    const firstWorkspaceTest = testDir!.children.get(firstWorkspace.testFileUri.toString());
+    const firstWorkspaceTest = testDir.children.get(firstWorkspace.testFileUri.toString());
     assert.ok(firstWorkspaceTest);
     assert.deepStrictEqual(
-      firstWorkspaceTest!.tags.map((tag) => tag.id),
+      firstWorkspaceTest.tags.map((tag) => tag.id),
       ["test_file", "debug"],
     );
 
@@ -323,25 +319,25 @@ suite("TestController", () => {
     const secondWorkspaceItem = collection.get(secondWorkspace.workspaceFolder.uri.toString());
     assert.ok(secondWorkspaceItem);
     assert.deepStrictEqual(
-      secondWorkspaceItem!.tags.map((tag) => tag.id),
+      secondWorkspaceItem.tags.map((tag) => tag.id),
       ["workspace", "debug"],
     );
 
     await controller.testController.resolveHandler!(secondWorkspaceItem);
 
-    const secondTestDir = secondWorkspaceItem!.children.get(
+    const secondTestDir = secondWorkspaceItem.children.get(
       vscode.Uri.joinPath(secondWorkspace.workspaceFolder.uri, "test").toString(),
     );
     assert.ok(secondTestDir);
     assert.deepStrictEqual(
-      secondTestDir!.tags.map((tag) => tag.id),
+      secondTestDir.tags.map((tag) => tag.id),
       ["test_dir", "debug"],
     );
 
-    const otherTest = secondTestDir!.children.get(secondWorkspace.testFileUri.toString());
+    const otherTest = secondTestDir.children.get(secondWorkspace.testFileUri.toString());
     assert.ok(otherTest);
     assert.deepStrictEqual(
-      otherTest!.tags.map((tag) => tag.id),
+      otherTest.tags.map((tag) => tag.id),
       ["test_file", "debug"],
     );
   });
@@ -385,7 +381,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -412,7 +407,7 @@ suite("TestController", () => {
     const collection = controller.testController.items;
     const testDir = collection.get(testDirUri.toString());
     assert.ok(testDir);
-    const serverTest = testDir!.children.get(serverTestUri.toString())!;
+    const serverTest = testDir.children.get(serverTestUri.toString())!;
     await controller.testController.resolveHandler!(serverTest);
 
     await assertTags(testDir.uri!.toString(), testDir.uri!, controller, ["test_dir", "debug"]);
@@ -537,7 +532,6 @@ suite("TestController", () => {
     const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
     workspace.ruby.mergeComposedEnvironment({
-      // eslint-disable-next-line no-process-env
       ...process.env,
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
@@ -550,7 +544,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -583,7 +576,6 @@ suite("TestController", () => {
     const manager =
       os.platform() === "win32" ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
 
-    // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }
@@ -605,7 +597,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -659,7 +650,6 @@ suite("TestController", () => {
     const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
     workspace.ruby.mergeComposedEnvironment({
-      // eslint-disable-next-line no-process-env
       ...process.env,
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
@@ -671,7 +661,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -693,7 +682,6 @@ suite("TestController", () => {
     const runRequest = new vscode.TestRunRequest([testItem], [], controller.coverageProfile);
     const fakeFileContents = Buffer.from(
       JSON.stringify({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         "file:///test/server_test.rb": [
           {
             executed: 1,
@@ -727,10 +715,7 @@ suite("TestController", () => {
 
     const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
-    workspace.ruby.mergeComposedEnvironment(
-      // eslint-disable-next-line no-process-env
-      process.env as any,
-    );
+    workspace.ruby.mergeComposedEnvironment(process.env as any);
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
         commands: [`node ${fakeServerPath} ${controller.streamingPort!}`],
@@ -739,7 +724,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -853,7 +837,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -876,7 +859,6 @@ suite("TestController", () => {
     const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
     workspace.ruby.mergeComposedEnvironment({
-      // eslint-disable-next-line no-process-env
       ...process.env,
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
@@ -889,7 +871,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },

@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import path from "path";
 import os from "os";
 
@@ -28,7 +27,7 @@ async function detectMise() {
     try {
       await vscode.workspace.fs.stat(possiblePath);
       return true;
-    } catch (error: any) {
+    } catch (_error: any) {
       // Continue looking
     }
   }
@@ -347,7 +346,7 @@ export class Ruby implements RubyInterface {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
       this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
-    } catch (error: any) {
+    } catch (_error: any) {
       throw new Error(`The configured bundle gemfile ${this.customBundleGemfile} does not exist`);
     }
   }
@@ -359,7 +358,7 @@ export class Ruby implements RubyInterface {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"));
       this.versionManager.identifier = ManagerIdentifier.Shadowenv;
       return;
-    } catch (error: any) {
+    } catch (_error: any) {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
@@ -442,7 +441,7 @@ export class Ruby implements RubyInterface {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.file(workspaceRubyPath));
       return workspaceRubyPath;
-    } catch (error: any) {
+    } catch (_error: any) {
       // If the user selected a Ruby path and then uninstalled it, we need to clear the the cached path
       this.context.workspaceState.update(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`, undefined);
       return undefined;

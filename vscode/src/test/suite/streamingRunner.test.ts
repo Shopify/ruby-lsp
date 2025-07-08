@@ -45,7 +45,6 @@ suite("StreamingRunner", () => {
 
   test("updates port DB with new values", async () => {
     const initialDb = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       "/some/path/to/project": "1234",
     };
 

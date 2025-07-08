@@ -33,7 +33,6 @@ suite("Asdf", () => {
     context.dispose();
   });
 
-  // eslint-disable-next-line no-process-env
   const workspacePath = process.env.PWD!;
   const workspaceFolder = {
     uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
@@ -62,7 +61,7 @@ suite("Asdf", () => {
         {
           cwd: workspacePath,
           shell: "/bin/bash",
-          // eslint-disable-next-line no-process-env
+
           env: process.env,
           encoding: "utf-8",
         },
@@ -94,7 +93,7 @@ suite("Asdf", () => {
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",
-          // eslint-disable-next-line no-process-env
+
           env: process.env,
           encoding: "utf-8",
         },
@@ -127,7 +126,7 @@ suite("Asdf", () => {
       execStub.calledOnceWithExactly(`/opt/homebrew/bin/asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
-        // eslint-disable-next-line no-process-env
+
         env: process.env,
         encoding: "utf-8",
       }),
@@ -155,7 +154,7 @@ suite("Asdf", () => {
       execStub.calledOnceWithExactly(`asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
-        // eslint-disable-next-line no-process-env
+
         env: process.env,
         encoding: "utf-8",
       }),

@@ -9,11 +9,11 @@ class FakeSender implements vscode.TelemetrySender {
     this.receivedErrors = [];
   }
 
-  sendEventData(eventName: string, data?: Record<string, any> | undefined): void {
+  sendEventData(eventName: string, data?: Record<string, any>): void {
     this.receivedEvents.push({ eventName, data });
   }
 
-  sendErrorData(error: Error, data?: Record<string, any> | undefined): void {
+  sendErrorData(error: Error, data?: Record<string, any>): void {
     this.receivedErrors.push({ error, data });
   }
 }

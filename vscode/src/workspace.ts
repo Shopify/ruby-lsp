@@ -10,6 +10,14 @@ import { WorkspaceChannel } from "./workspaceChannel";
 
 const WATCHED_FILES = ["Gemfile.lock", "gems.locked"];
 
+interface GitExtension {
+  exports: {
+    getAPI: (version: number) => {
+      openRepository: (uri: vscode.Uri) => Promise<{ rootUri: vscode.Uri } | undefined>;
+    };
+  };
+}
+
 export class Workspace implements WorkspaceInterface {
   public lspClient?: Client;
   public readonly ruby: Ruby;
@@ -56,7 +64,7 @@ export class Workspace implements WorkspaceInterface {
   // Activate this workspace. This method is intended to be invoked only once, unlikely `start` which may be invoked
   // multiple times due to restarts
   async activate() {
-    const gitExtension = vscode.extensions.getExtension("vscode.git");
+    const gitExtension: GitExtension | undefined = vscode.extensions.getExtension("vscode.git");
     let rootGitUri = this.workspaceFolder.uri;
 
     // If the git extension is available, use that to find the root of the git repository
@@ -103,7 +111,7 @@ export class Workspace implements WorkspaceInterface {
       if (stat.permissions) {
         throw new Error(`Directory ${this.workspaceFolder.uri.fsPath} is readonly.`);
       }
-    } catch (error: any) {
+    } catch (_error: any) {
       this.error = true;
 
       await vscode.window.showErrorMessage(
@@ -267,14 +275,14 @@ export class Workspace implements WorkspaceInterface {
     // In addition to updating the global installation of the ruby-lsp gem, if the user manually requested an update, we
     // should delete the `.ruby-lsp` to ensure that we'll lock a new version of the server that will actually be booted
     if (manualInvocation) {
+      const composedBundleUri = vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp");
+
       try {
-        await vscode.workspace.fs.delete(vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp"), {
+        await vscode.workspace.fs.delete(composedBundleUri, {
           recursive: true,
         });
-      } catch (error) {
-        this.outputChannel.info(
-          `Tried deleting ${vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp")}, but it doesn't exist`,
-        );
+      } catch (_error) {
+        this.outputChannel.info(`Tried deleting ${composedBundleUri.fsPath}, but it doesn't exist`);
       }
     }
 
@@ -286,7 +294,7 @@ export class Workspace implements WorkspaceInterface {
           env: this.ruby.env,
         });
         await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
-      } catch (error) {
+      } catch (error: any) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
         this.outputChannel.error(`Failed to update global ruby-lsp gem: ${error}`);
       }
@@ -399,7 +407,7 @@ export class Workspace implements WorkspaceInterface {
 
     try {
       fileContents = await vscode.workspace.fs.readFile(uri);
-    } catch (error: any) {
+    } catch (_error: any) {
       return undefined;
     }
 
@@ -416,7 +424,7 @@ export class Workspace implements WorkspaceInterface {
     try {
       const response: { success: boolean } = await this.lspClient.sendRequest("rubyLsp/composeBundle");
       return response.success;
-    } catch (error: any) {
+    } catch (_error: any) {
       return false;
     }
   }

@@ -14,7 +14,6 @@ type BundlerTreeNode = Dependency | GemDirectoryPath | GemFilePath;
 export class DependenciesTree implements vscode.TreeDataProvider<BundlerTreeNode>, vscode.Disposable {
   private readonly _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
 
   private currentWorkspace: WorkspaceInterface | undefined;
@@ -45,7 +44,7 @@ export class DependenciesTree implements vscode.TreeDataProvider<BundlerTreeNode
     return element;
   }
 
-  getChildren(element?: BundlerTreeNode | undefined): vscode.ProviderResult<BundlerTreeNode[]> {
+  getChildren(element?: BundlerTreeNode): vscode.ProviderResult<BundlerTreeNode[]> {
     if (element) {
       return element.getChildren();
     } else {
@@ -139,9 +138,14 @@ export class DependenciesTree implements vscode.TreeDataProvider<BundlerTreeNode
       return [];
     }
 
-    const resp = (await client.sendRequest("rubyLsp/workspace/dependencies", {})) as [
-      { name: string; version: string; path: string; dependency: boolean },
-    ];
+    const resp: [
+      {
+        name: string;
+        version: string;
+        path: string;
+        dependency: boolean;
+      },
+    ] = await client.sendRequest("rubyLsp/workspace/dependencies", {});
 
     const dependencies = resp
       .sort((left, right) => {

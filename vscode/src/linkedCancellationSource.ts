@@ -19,7 +19,7 @@ export class LinkedCancellationSource implements vscode.Disposable {
     return this.tokenSource.token.isCancellationRequested;
   }
 
-  onCancellationRequested(callback: () => void) {
+  onCancellationRequested(callback: () => void | Promise<void>) {
     this.tokenSource.token.onCancellationRequested(callback);
   }
 }

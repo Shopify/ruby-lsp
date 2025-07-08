@@ -36,7 +36,6 @@ suite("Mise", () => {
   });
 
   test("Finds Ruby only binary path is appended to PATH", async () => {
-    // eslint-disable-next-line no-process-env
     const workspacePath = process.env.PWD!;
     const workspaceFolder = {
       uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
@@ -64,7 +63,7 @@ suite("Mise", () => {
         {
           cwd: workspacePath,
           shell: vscode.env.shell,
-          // eslint-disable-next-line no-process-env
+
           env: process.env,
           encoding: "utf-8",
         },
@@ -114,7 +113,7 @@ suite("Mise", () => {
       execStub.calledOnceWithExactly(`${misePath} x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
-        // eslint-disable-next-line no-process-env
+
         env: process.env,
         encoding: "utf-8",
       }),

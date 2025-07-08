@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import assert from "assert";
 import path from "path";
 import os from "os";
@@ -461,7 +460,6 @@ suite("Client", () => {
             message: "Layout/EmptyLines: Extra blank line detected.",
             data: {
               correctable: true,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               code_actions: [
                 {
                   title: "Autocorrect Layout/EmptyLines",

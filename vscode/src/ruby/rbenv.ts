@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
@@ -36,7 +35,7 @@ export class Rbenv extends VersionManager {
       await vscode.workspace.fs.stat(vscode.Uri.file(path));
 
       return path;
-    } catch (error: any) {
+    } catch (_error: any) {
       throw new Error(`The Ruby LSP version manager is configured to be rbenv, but ${path} does not exist`);
     }
   }

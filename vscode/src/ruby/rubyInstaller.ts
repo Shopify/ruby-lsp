@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import os from "os";
 
 import * as vscode from "vscode";

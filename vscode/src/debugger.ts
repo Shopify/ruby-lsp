@@ -21,7 +21,6 @@ class TerminalLogger {
 
 export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.DebugConfigurationProvider {
   private debugProcess?: ChildProcessWithoutNullStreams;
-  // eslint-disable-next-line no-process-env
   private readonly console = process.env.CI ? new TerminalLogger() : vscode.debug.activeDebugConsole;
 
   private readonly workspaceResolver: (uri: vscode.Uri | undefined) => Workspace | undefined;
@@ -92,10 +91,11 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
-    const workspace = this.workspaceResolver(folder?.uri);
+    const uri = folder?.uri;
+    const workspace = this.workspaceResolver(uri);
 
     if (!workspace) {
-      throw new Error(`Couldn't find a workspace for URI: ${folder?.uri} or editor: ${vscode.window.activeTextEditor}`);
+      throw new Error(`Couldn't find a workspace for URI: ${uri?.toString()}`);
     }
 
     if (debugConfiguration.env) {
@@ -241,7 +241,7 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
         cwd,
       });
 
-      this.debugProcess.stderr.on("data", (data) => {
+      this.debugProcess.stderr.on("data", (data: Buffer) => {
         const message = data.toString();
         this.logDebuggerMessage(message);
 
@@ -268,7 +268,7 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
       });
 
       // Anything printed by debug to stdout we want to show in the Ruby LSP output channel
-      this.debugProcess.stdout.on("data", (data) => {
+      this.debugProcess.stdout.on("data", (data: Buffer) => {
         this.logDebuggerMessage(data.toString());
       });
 

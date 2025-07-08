@@ -139,7 +139,7 @@ export class ChatAgent implements vscode.Disposable {
         vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/schema.rb"),
       );
       return content.toString();
-    } catch (error) {
+    } catch (_error) {
       // db/schema.rb doesn't exist
     }
 
@@ -148,7 +148,7 @@ export class ChatAgent implements vscode.Disposable {
         vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/structure.sql"),
       );
       return content.toString();
-    } catch (error) {
+    } catch (_error) {
       // db/structure.sql doesn't exist
     }
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import * as assert from "assert";
 import * as path from "path";
 

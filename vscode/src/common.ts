@@ -108,7 +108,7 @@ export function debounce(fn: (...args: any[]) => Promise<void>, delay: number) {
       timeoutID = setTimeout(() => {
         fn(...args)
           .then((result) => resolve(result))
-          .catch((error) => reject(error));
+          .catch((error: Error) => reject(error));
       }, delay);
     });
   };

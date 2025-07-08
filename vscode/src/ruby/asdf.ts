@@ -1,5 +1,3 @@
-/* eslint-disable no-process-env */
-
 import os from "os";
 import path from "path";
 
@@ -60,7 +58,7 @@ export class Asdf extends VersionManager {
       try {
         await vscode.workspace.fs.stat(possiblePath);
         return possiblePath.fsPath;
-      } catch (error: any) {
+      } catch (_error: any) {
         // Continue looking
       }
     }
@@ -83,8 +81,8 @@ export class Asdf extends VersionManager {
       await vscode.workspace.fs.stat(configuredPath);
       this.outputChannel.info(`Using configured ASDF executable path: ${asdfPath}`);
       return configuredPath.fsPath;
-    } catch (error: any) {
-      throw new Error(`ASDF executable configured as ${configuredPath}, but that file doesn't exist`);
+    } catch (_error: any) {
+      throw new Error(`ASDF executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
     }
   }
 }

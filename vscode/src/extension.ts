@@ -30,7 +30,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     rbs,
-    vscode.workspace.onDidChangeConfiguration(async (event) => {
+    vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration("rubyLsp.sigOpacityLevel")) {
         rbs.reload();
       }
@@ -83,7 +83,7 @@ async function createLogger(context: vscode.ExtensionContext) {
 
           counter++;
         }
-      } catch (error: any) {
+      } catch (_error: any) {
         sender = {
           sendEventData: (_eventName: string, _data?: Record<string, any>) => {},
           sendErrorData: (_error: Error, _data?: Record<string, any>) => {},
