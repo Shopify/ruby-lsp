@@ -914,6 +914,28 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_is_resilient_to_pipe_being_closed_by_client_during_compose
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:run_bundle_install_directly).raises(Errno::EPIPE)
+            compose.setup!
+            refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)

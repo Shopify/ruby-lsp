@@ -234,6 +234,14 @@ module RubyLsp
         # If no error occurred, then clear previous errors
         @error_path.delete if @error_path.exist?
         $stderr.puts("Ruby LSP> Composed bundle installation complete")
+      rescue Errno::EPIPE
+        # If the $stderr pipe was closed by the client, for example when closing the editor during running bundle
+        # install, we don't want to write the error to a file or else we will report to telemetry on the next launch and
+        # it does not represent an actual error.
+        #
+        # This situation may happen because while running bundle install, the server is not yet ready to receive
+        # shutdown requests and we may continue doing work until the process is killed.
+        @error_path.delete if @error_path.exist?
       rescue => e
         # Write the error object to a file so that we can read it from the parent process
         @error_path.write(Marshal.dump(e))
