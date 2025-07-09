@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import path from "path";
 import os from "os";
 
@@ -28,7 +27,7 @@ async function detectMise() {
     try {
       await vscode.workspace.fs.stat(possiblePath);
       return true;
-    } catch (error: any) {
+    } catch (_error: any) {
       // Continue looking
     }
   }
@@ -83,16 +82,12 @@ export class Ruby implements RubyInterface {
     this.outputChannel = outputChannel;
     this.telemetry = telemetry;
 
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
+    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
 
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
         ? customBundleGemfile
-        : path.resolve(
-            path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
-          );
+        : path.resolve(path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile));
     }
   }
 
@@ -100,9 +95,7 @@ export class Ruby implements RubyInterface {
     return this.#versionManager;
   }
 
-  private set versionManager(
-    versionManager: ManagerConfiguration | ManagerIdentifier,
-  ) {
+  private set versionManager(versionManager: ManagerConfiguration | ManagerIdentifier) {
     if (typeof versionManager === "string") {
       this.#versionManager.identifier = versionManager;
     } else {
@@ -143,9 +136,7 @@ export class Ruby implements RubyInterface {
       // If the version manager is auto, discover the actual manager before trying to activate anything
       if (this.versionManager.identifier === ManagerIdentifier.Auto) {
         await this.discoverVersionManager();
-        this.outputChannel.info(
-          `Discovered version manager ${this.versionManager.identifier}`,
-        );
+        this.outputChannel.info(`Discovered version manager ${this.versionManager.identifier}`);
       }
 
       try {
@@ -156,9 +147,7 @@ export class Ruby implements RubyInterface {
             appType: "extension",
             appVersion: this.context.extension.packageJSON.version,
             versionManager: this.versionManager.identifier,
-            workspace: new vscode.TelemetryTrustedValue(
-              this.workspaceFolder.name,
-            ),
+            workspace: new vscode.TelemetryTrustedValue(this.workspaceFolder.name),
           });
         }
 
@@ -210,10 +199,7 @@ export class Ruby implements RubyInterface {
     }
 
     if (manualSelection === "clear previous workspace selection") {
-      await this.context.workspaceState.update(
-        `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
-        undefined,
-      );
+      await this.context.workspaceState.update(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`, undefined);
       return this.activateRuby();
     }
 
@@ -230,15 +216,10 @@ export class Ruby implements RubyInterface {
     const selectedPath = selection[0].fsPath;
 
     if (manualSelection === "global") {
-      await vscode.workspace
-        .getConfiguration("rubyLsp")
-        .update("rubyExecutablePath", selectedPath, true);
+      await vscode.workspace.getConfiguration("rubyLsp").update("rubyExecutablePath", selectedPath, true);
     } else {
       // We must update the cached Ruby path for this workspace if the user decided to change it
-      await this.context.workspaceState.update(
-        `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
-        selectedPath,
-      );
+      await this.context.workspaceState.update(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`, selectedPath);
     }
 
     return this.activateRuby();
@@ -309,92 +290,47 @@ export class Ruby implements RubyInterface {
     switch (this.versionManager.identifier) {
       case ManagerIdentifier.Asdf:
         await this.runActivation(
-          new Asdf(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Asdf(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.Chruby:
         await this.runActivation(
-          new Chruby(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Chruby(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.Rbenv:
         await this.runActivation(
-          new Rbenv(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Rbenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.Rvm:
         await this.runActivation(
-          new Rvm(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Rvm(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.Mise:
         await this.runActivation(
-          new Mise(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Mise(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.RubyInstaller:
         await this.runActivation(
-          new RubyInstaller(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new RubyInstaller(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.Custom:
         await this.runActivation(
-          new Custom(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Custom(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.None:
         await this.runActivation(
-          new None(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new None(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       default:
         await this.runActivation(
-          new Shadowenv(
-            this.workspaceFolder,
-            this.outputChannel,
-            this.context,
-            this.manuallySelectRuby.bind(this),
-          ),
+          new Shadowenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
     }
@@ -410,10 +346,8 @@ export class Ruby implements RubyInterface {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
       this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
-    } catch (error: any) {
-      throw new Error(
-        `The configured bundle gemfile ${this.customBundleGemfile} does not exist`,
-      );
+    } catch (_error: any) {
+      throw new Error(`The configured bundle gemfile ${this.customBundleGemfile} does not exist`);
     }
   }
 
@@ -421,21 +355,14 @@ export class Ruby implements RubyInterface {
     // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
     // created a .shadowenv.d folder
     try {
-      await vscode.workspace.fs.stat(
-        vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"),
-      );
+      await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"));
       this.versionManager.identifier = ManagerIdentifier.Shadowenv;
       return;
-    } catch (error: any) {
+    } catch (_error: any) {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managers = [
-      ManagerIdentifier.Chruby,
-      ManagerIdentifier.Rbenv,
-      ManagerIdentifier.Rvm,
-      ManagerIdentifier.Asdf,
-    ];
+    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Asdf];
 
     for (const tool of managers) {
       const exists = await this.toolExists(tool);
@@ -469,9 +396,7 @@ export class Ruby implements RubyInterface {
         command += "'";
       }
 
-      this.outputChannel.info(
-        `Checking if ${tool} is available on the path with command: ${command}`,
-      );
+      this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${command}`);
 
       await asyncExec(command, {
         cwd: this.workspaceFolder.uri.fsPath,
@@ -505,9 +430,9 @@ export class Ruby implements RubyInterface {
   }
 
   private async cachedWorkspaceRubyPath() {
-    const workspaceRubyPath = this.context.workspaceState.get<
-      string | undefined
-    >(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`);
+    const workspaceRubyPath = this.context.workspaceState.get<string | undefined>(
+      `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
+    );
 
     if (!workspaceRubyPath) {
       return undefined;
@@ -516,12 +441,9 @@ export class Ruby implements RubyInterface {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.file(workspaceRubyPath));
       return workspaceRubyPath;
-    } catch (error: any) {
+    } catch (_error: any) {
       // If the user selected a Ruby path and then uninstalled it, we need to clear the the cached path
-      this.context.workspaceState.update(
-        `rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`,
-        undefined,
-      );
+      this.context.workspaceState.update(`rubyLsp.workspaceRubyPath.${this.workspaceFolder.name}`, undefined);
       return undefined;
     }
   }

@@ -56,11 +56,7 @@ export interface ClientInterface {
   addons?: Addon[];
   serverVersion?: string;
   degraded: boolean;
-  sendRequest<T>(
-    method: string,
-    param: any,
-    token?: vscode.CancellationToken,
-  ): Promise<T>;
+  sendRequest<T>(method: string, param: any, token?: vscode.CancellationToken): Promise<T>;
 }
 
 export interface WorkspaceInterface {
@@ -70,9 +66,7 @@ export interface WorkspaceInterface {
 }
 
 // Event emitter used to signal that the language status items need to be refreshed
-export const STATUS_EMITTER = new vscode.EventEmitter<
-  WorkspaceInterface | undefined
->();
+export const STATUS_EMITTER = new vscode.EventEmitter<WorkspaceInterface | undefined>();
 
 export const asyncExec = promisify(exec);
 export const LSP_NAME = "Ruby LSP";
@@ -114,7 +108,7 @@ export function debounce(fn: (...args: any[]) => Promise<void>, delay: number) {
       timeoutID = setTimeout(() => {
         fn(...args)
           .then((result) => resolve(result))
-          .catch((error) => reject(error));
+          .catch((error: Error) => reject(error));
       }, delay);
     });
   };
@@ -124,9 +118,7 @@ export function debounce(fn: (...args: any[]) => Promise<void>, delay: number) {
 export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   const flagConfiguration = vscode.workspace
     .getConfiguration("rubyLsp")
-    .get<
-      Record<FeatureFlagConfigurationKey, boolean | undefined>
-    >("featureFlags")!;
+    .get<Record<FeatureFlagConfigurationKey, boolean | undefined>>("featureFlags")!;
 
   // If the user opted out of this feature, return false. We explicitly check for `false` because `undefined` means
   // nothing was configured
@@ -137,19 +129,14 @@ export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   const percentage = FEATURE_FLAGS[feature];
 
   // If the user opted-in to all features, return true
-  if (
-    (flagConfiguration.all && percentage !== -1) ||
-    flagConfiguration[feature]
-  ) {
+  if ((flagConfiguration.all && percentage !== -1) || flagConfiguration[feature]) {
     return true;
   }
 
   const machineId = vscode.env.machineId;
   // Create a digest of the concatenated machine ID and feature name, which will generate a unique hash for this
   // user-feature combination
-  const hash = createHash("sha256")
-    .update(`${machineId}-${feature}`)
-    .digest("hex");
+  const hash = createHash("sha256").update(`${machineId}-${feature}`).digest("hex");
 
   // Convert the first 8 characters of the hash to a number between 0 and 1
   const hashNum = parseInt(hash.substring(0, 8), 16) / 0xffffffff;

@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import os from "os";
 
 import * as vscode from "vscode";
@@ -28,14 +27,8 @@ export class RubyInstaller extends Chruby {
     const [major, minor, _patch] = rubyVersion.version.split(".").map(Number);
 
     const possibleInstallationUris = [
-      vscode.Uri.joinPath(
-        vscode.Uri.file("C:"),
-        `Ruby${major}${minor}-${os.arch()}`,
-      ),
-      vscode.Uri.joinPath(
-        vscode.Uri.file(os.homedir()),
-        `Ruby${major}${minor}-${os.arch()}`,
-      ),
+      vscode.Uri.joinPath(vscode.Uri.file("C:"), `Ruby${major}${minor}-${os.arch()}`),
+      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), `Ruby${major}${minor}-${os.arch()}`),
     ];
 
     for (const installationUri of possibleInstallationUris) {
@@ -62,16 +55,10 @@ export class RubyInstaller extends Chruby {
     yjit: boolean;
     version: string;
   }> {
-    const activationResult = await super.runActivationScript(
-      rubyExecutableUri,
-      rubyVersion,
-    );
+    const activationResult = await super.runActivationScript(rubyExecutableUri, rubyVersion);
 
     activationResult.gemHome = activationResult.gemHome.replace(/\//g, "\\");
-    activationResult.defaultGems = activationResult.defaultGems.replace(
-      /\//g,
-      "\\",
-    );
+    activationResult.defaultGems = activationResult.defaultGems.replace(/\//g, "\\");
 
     return activationResult;
   }

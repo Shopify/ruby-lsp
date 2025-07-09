@@ -1,5 +1,3 @@
-/* eslint-disable no-process-env */
-
 import os from "os";
 import path from "path";
 
@@ -27,12 +25,9 @@ export class Asdf extends VersionManager {
 
     // If there's no extension name, then we are using the ASDF executable directly. If there is an extension, then it's
     // a shell script and we have to source it first
-    const baseCommand =
-      path.extname(asdfPath) === "" ? asdfPath : `. ${asdfPath} && asdf`;
+    const baseCommand = path.extname(asdfPath) === "" ? asdfPath : `. ${asdfPath} && asdf`;
 
-    const parsedResult = await this.runEnvActivationScript(
-      `${baseCommand} exec ruby`,
-    );
+    const parsedResult = await this.runEnvActivationScript(`${baseCommand} exec ruby`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -44,8 +39,7 @@ export class Asdf extends VersionManager {
 
   // Only public for testing. Finds the ASDF installation URI based on what's advertised in the ASDF documentation
   async findAsdfInstallation(): Promise<string | undefined> {
-    const scriptName =
-      path.basename(vscode.env.shell) === "fish" ? "asdf.fish" : "asdf.sh";
+    const scriptName = path.basename(vscode.env.shell) === "fish" ? "asdf.fish" : "asdf.sh";
 
     // Possible ASDF installation paths as described in https://asdf-vm.com/guide/getting-started.html#_3-install-asdf.
     // In order, the methods of installation are:
@@ -56,46 +50,26 @@ export class Asdf extends VersionManager {
     const possiblePaths = [
       vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".asdf", scriptName),
       vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "asdf-vm", scriptName),
-      vscode.Uri.joinPath(
-        vscode.Uri.file("/"),
-        "opt",
-        "homebrew",
-        "opt",
-        "asdf",
-        "libexec",
-        scriptName,
-      ),
-      vscode.Uri.joinPath(
-        vscode.Uri.file("/"),
-        "usr",
-        "local",
-        "opt",
-        "asdf",
-        "libexec",
-        scriptName,
-      ),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "opt", "asdf", "libexec", scriptName),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "opt", "asdf", "libexec", scriptName),
     ];
 
     for (const possiblePath of possiblePaths) {
       try {
         await vscode.workspace.fs.stat(possiblePath);
         return possiblePath.fsPath;
-      } catch (error: any) {
+      } catch (_error: any) {
         // Continue looking
       }
     }
 
-    this.outputChannel.info(
-      `Could not find installation for ASDF < v0.16. Searched in ${possiblePaths.join(", ")}`,
-    );
+    this.outputChannel.info(`Could not find installation for ASDF < v0.16. Searched in ${possiblePaths.join(", ")}`);
     return undefined;
   }
 
   private async getConfiguredAsdfPath(): Promise<string | undefined> {
     const config = vscode.workspace.getConfiguration("rubyLsp");
-    const asdfPath = config.get<string | undefined>(
-      "rubyVersionManager.asdfExecutablePath",
-    );
+    const asdfPath = config.get<string | undefined>("rubyVersionManager.asdfExecutablePath");
 
     if (!asdfPath) {
       return;
@@ -105,14 +79,10 @@ export class Asdf extends VersionManager {
 
     try {
       await vscode.workspace.fs.stat(configuredPath);
-      this.outputChannel.info(
-        `Using configured ASDF executable path: ${asdfPath}`,
-      );
+      this.outputChannel.info(`Using configured ASDF executable path: ${asdfPath}`);
       return configuredPath.fsPath;
-    } catch (error: any) {
-      throw new Error(
-        `ASDF executable configured as ${configuredPath}, but that file doesn't exist`,
-      );
+    } catch (_error: any) {
+      throw new Error(`ASDF executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
     }
   }
 }

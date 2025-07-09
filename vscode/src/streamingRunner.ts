@@ -37,23 +37,13 @@ export class StreamingRunner implements vscode.Disposable {
   tcpPort: string | undefined;
   private promises: Promise<void>[] = [];
   private disposables: vscode.Disposable[] = [];
-  private readonly findTestItem: (
-    id: string,
-    uri: vscode.Uri,
-    line?: number,
-  ) => Promise<vscode.TestItem | undefined>;
+  private readonly findTestItem: (id: string, uri: vscode.Uri, line?: number) => Promise<vscode.TestItem | undefined>;
 
-  private readonly createTestRun: (
-    request: vscode.TestRunRequest,
-    name?: string,
-    persist?: boolean,
-  ) => vscode.TestRun;
+  private readonly createTestRun: (request: vscode.TestRunRequest, name?: string, persist?: boolean) => vscode.TestRun;
 
   private tcpServer: net.Server | undefined;
   private connection: rpc.MessageConnection | undefined;
-  private executionPromise:
-    | { resolve: () => void; reject: (error: Error) => void }
-    | undefined;
+  private executionPromise: { resolve: () => void; reject: (error: Error) => void } | undefined;
 
   private run: vscode.TestRun | undefined;
   private terminals = new Map<string, vscode.Terminal>();
@@ -61,15 +51,8 @@ export class StreamingRunner implements vscode.Disposable {
 
   constructor(
     context: vscode.ExtensionContext,
-    findTestItem: (
-      id: string,
-      uri: vscode.Uri,
-    ) => Promise<vscode.TestItem | undefined>,
-    createTestRun: (
-      request: vscode.TestRunRequest,
-      name?: string,
-      persist?: boolean,
-    ) => vscode.TestRun,
+    findTestItem: (id: string, uri: vscode.Uri) => Promise<vscode.TestItem | undefined>,
+    createTestRun: (request: vscode.TestRunRequest, name?: string, persist?: boolean) => vscode.TestRun,
   ) {
     this.findTestItem = findTestItem;
     this.createTestRun = createTestRun;
@@ -107,12 +90,7 @@ export class StreamingRunner implements vscode.Disposable {
       });
 
       if (mode === Mode.Run) {
-        this.spawnTestProcess(
-          command,
-          env,
-          workspace.workspaceFolder.uri.fsPath,
-          abortController,
-        );
+        this.spawnTestProcess(command, env, workspace.workspaceFolder.uri.fsPath, abortController);
       } else if (mode === Mode.RunInTerminal) {
         this.runInTerminal(command, workspace.workspaceFolder);
       } else {
@@ -128,11 +106,7 @@ export class StreamingRunner implements vscode.Disposable {
   }
 
   // Launches the debugger with streaming updates
-  private async launchDebugger(
-    command: string,
-    env: NodeJS.ProcessEnv,
-    workspace: Workspace,
-  ) {
+  private async launchDebugger(command: string, env: NodeJS.ProcessEnv, workspace: Workspace) {
     const successFullyStarted = await vscode.debug.startDebugging(
       workspace.workspaceFolder,
       {
@@ -146,9 +120,7 @@ export class StreamingRunner implements vscode.Disposable {
     );
 
     if (!successFullyStarted) {
-      this.executionPromise!.reject(
-        new Error("Failed to start debugging session"),
-      );
+      this.executionPromise!.reject(new Error("Failed to start debugging session"));
     }
 
     const promise = new Promise<void>((resolve) => {
@@ -162,10 +134,7 @@ export class StreamingRunner implements vscode.Disposable {
   }
 
   // Run the given test in the terminal
-  private runInTerminal(
-    command: string,
-    workspaceFolder: vscode.WorkspaceFolder,
-  ) {
+  private runInTerminal(command: string, workspaceFolder: vscode.WorkspaceFolder) {
     const cwd = workspaceFolder.uri.fsPath;
     const name = `${workspaceFolder.name}: test`;
     let terminal = vscode.window.terminals.find((t) => t.name === name);
@@ -180,19 +149,12 @@ export class StreamingRunner implements vscode.Disposable {
 
     terminal.show();
     const exec =
-      path.basename(cwd) === "ruby-lsp" && os.platform() !== "win32"
-        ? "exe/ruby-lsp-test-exec"
-        : "ruby-lsp-test-exec";
+      path.basename(cwd) === "ruby-lsp" && os.platform() !== "win32" ? "exe/ruby-lsp-test-exec" : "ruby-lsp-test-exec";
     terminal.sendText(`${exec} ${command}`);
   }
 
   // Spawns the test process and redirects any stdout or stderr output to the test run output
-  private spawnTestProcess(
-    command: string,
-    env: NodeJS.ProcessEnv,
-    cwd: string,
-    abortController: AbortController,
-  ) {
+  private spawnTestProcess(command: string, env: NodeJS.ProcessEnv, cwd: string, abortController: AbortController) {
     const promise = new Promise<void>((resolve, _reject) => {
       const testProcess = spawn(command, {
         env,
@@ -202,11 +164,11 @@ export class StreamingRunner implements vscode.Disposable {
         cwd,
       });
 
-      testProcess.stdout.on("data", (data) => {
+      testProcess.stdout.on("data", (data: Buffer) => {
         this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
       });
 
-      testProcess.stderr.on("data", (data) => {
+      testProcess.stderr.on("data", (data: Buffer) => {
         this.run!.appendOutput(data.toString().replace(/\n/g, "\r\n"));
       });
 
@@ -226,16 +188,16 @@ export class StreamingRunner implements vscode.Disposable {
       server.on("error", reject);
       server.unref();
 
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       server.listen(0, "localhost", async () => {
         const address = server.address();
 
         if (!address) {
           throw new Error("Failed setup TCP server for streaming updates");
         }
-        this.tcpPort =
-          typeof address === "string" ? address : address.port.toString();
+        this.tcpPort = typeof address === "string" ? address : address.port.toString();
 
-        const portString = this.tcpPort!.toString();
+        const portString = this.tcpPort.toString();
         await this.updatePortMap(portString);
 
         // On any new connection to the TCP server, attach the JSON RPC reader and the events we defined
@@ -250,13 +212,7 @@ export class StreamingRunner implements vscode.Disposable {
 
           if (!this.run) {
             this.run = this.createTestRun(
-              new vscode.TestRunRequest(
-                undefined,
-                undefined,
-                undefined,
-                undefined,
-                true,
-              ),
+              new vscode.TestRunRequest(undefined, undefined, undefined, undefined, true),
               "on_demand_run_in_terminal",
             );
           }
@@ -274,21 +230,15 @@ export class StreamingRunner implements vscode.Disposable {
     await vscode.workspace.fs.createDirectory(tempDirUri);
 
     const workspacePathToPortMap = Object.fromEntries(
-      vscode.workspace.workspaceFolders!.map((folder) => [
-        folder.uri.fsPath,
-        portString,
-      ]),
+      vscode.workspace.workspaceFolders!.map((folder) => [folder.uri.fsPath, portString]),
     );
-    const mapUri = vscode.Uri.joinPath(
-      tempDirUri,
-      "test_reporter_port_db.json",
-    );
+    const mapUri = vscode.Uri.joinPath(tempDirUri, "test_reporter_port_db.json");
     let currentMap: Record<string, string>;
 
     try {
       const contents = await vscode.workspace.fs.readFile(mapUri);
       currentMap = JSON.parse(contents.toString());
-    } catch (error: any) {
+    } catch (_error: any) {
       currentMap = {};
     }
 
@@ -297,18 +247,13 @@ export class StreamingRunner implements vscode.Disposable {
       ...workspacePathToPortMap,
     };
 
-    await vscode.workspace.fs.writeFile(
-      mapUri,
-      Buffer.from(JSON.stringify(updatedMap)),
-    );
+    await vscode.workspace.fs.writeFile(mapUri, Buffer.from(JSON.stringify(updatedMap)));
   }
 
   private async finalize(cancellation: boolean) {
     if (cancellation && this.currentWorkspace) {
       // If the tests are being executed in a terminal, send a CTRL+C signal to stop them
-      const terminal = this.terminals.get(
-        `${this.currentWorkspace.workspaceFolder.name}: test`,
-      );
+      const terminal = this.terminals.get(`${this.currentWorkspace.workspaceFolder.name}: test`);
 
       if (terminal) {
         terminal.sendText("\u0003");
@@ -343,30 +288,20 @@ export class StreamingRunner implements vscode.Disposable {
     }
 
     const startTimestamps = new Map<string, number>();
-    const withDuration = (
-      id: string,
-      callback: (duration?: number) => void,
-    ) => {
+    const withDuration = (id: string, callback: (duration?: number) => void) => {
       const startTime = startTimestamps.get(id);
       const duration = startTime ? Date.now() - startTime : undefined;
       callback(duration);
     };
 
     // Handle the JSON events being emitted by the tests
-    this.disposables.push(
-      this.connection.onNotification(NOTIFICATION_TYPES.finish, () =>
-        this.finalize(false),
-      ),
-    );
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    this.disposables.push(this.connection.onNotification(NOTIFICATION_TYPES.finish, () => this.finalize(false)));
 
     this.disposables.push(
       this.connection.onNotification(NOTIFICATION_TYPES.start, (params) => {
         this.promises.push(
-          this.findTestItem(
-            params.id,
-            vscode.Uri.parse(params.uri),
-            params.line,
-          ).then((test) => {
+          this.findTestItem(params.id, vscode.Uri.parse(params.uri), params.line).then((test) => {
             if (test) {
               this.run!.started(test);
               startTimestamps.set(test.id, Date.now());
@@ -379,15 +314,11 @@ export class StreamingRunner implements vscode.Disposable {
     this.disposables.push(
       this.connection.onNotification(NOTIFICATION_TYPES.pass, (params) => {
         this.promises.push(
-          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-            (test) => {
-              if (test) {
-                withDuration(test.id, (duration) =>
-                  this.run!.passed(test, duration),
-                );
-              }
-            },
-          ),
+          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then((test) => {
+            if (test) {
+              withDuration(test.id, (duration) => this.run!.passed(test, duration));
+            }
+          }),
         );
       }),
     );
@@ -395,19 +326,13 @@ export class StreamingRunner implements vscode.Disposable {
     this.disposables.push(
       this.connection.onNotification(NOTIFICATION_TYPES.fail, (params) => {
         this.promises.push(
-          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-            (test) => {
-              if (test) {
-                withDuration(test.id, (duration) =>
-                  this.run!.failed(
-                    test,
-                    new vscode.TestMessage(params.message),
-                    duration,
-                  ),
-                );
-              }
-            },
-          ),
+          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then((test) => {
+            if (test) {
+              withDuration(test.id, (duration) =>
+                this.run!.failed(test, new vscode.TestMessage(params.message), duration),
+              );
+            }
+          }),
         );
       }),
     );
@@ -415,19 +340,13 @@ export class StreamingRunner implements vscode.Disposable {
     this.disposables.push(
       this.connection.onNotification(NOTIFICATION_TYPES.error, (params) => {
         this.promises.push(
-          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-            (test) => {
-              if (test) {
-                withDuration(test.id, (duration) =>
-                  this.run!.errored(
-                    test,
-                    new vscode.TestMessage(params.message),
-                    duration,
-                  ),
-                );
-              }
-            },
-          ),
+          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then((test) => {
+            if (test) {
+              withDuration(test.id, (duration) =>
+                this.run!.errored(test, new vscode.TestMessage(params.message), duration),
+              );
+            }
+          }),
         );
       }),
     );
@@ -435,13 +354,11 @@ export class StreamingRunner implements vscode.Disposable {
     this.disposables.push(
       this.connection.onNotification(NOTIFICATION_TYPES.skip, (params) => {
         this.promises.push(
-          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then(
-            (test) => {
-              if (test) {
-                this.run!.skipped(test);
-              }
-            },
-          ),
+          this.findTestItem(params.id, vscode.Uri.parse(params.uri)).then((test) => {
+            if (test) {
+              this.run!.skipped(test);
+            }
+          }),
         );
       }),
     );

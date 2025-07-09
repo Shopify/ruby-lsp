@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import * as assert from "assert";
 import * as path from "path";
 
@@ -11,19 +10,13 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
 import { Shadowenv, UntrustedWorkspaceError } from "../../ruby/shadowenv";
-import {
-  ACTIVATION_SEPARATOR,
-  FIELD_SEPARATOR,
-  VALUE_SEPARATOR,
-} from "../../ruby/versionManager";
+import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR } from "../../ruby/versionManager";
 
 import { createContext, FakeContext } from "./helpers";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 
 suite("Ruby environment activation", () => {
-  const workspacePath = path.dirname(
-    path.dirname(path.dirname(path.dirname(__dirname))),
-  );
+  const workspacePath = path.dirname(path.dirname(path.dirname(path.dirname(__dirname))));
   const workspaceFolder: vscode.WorkspaceFolder = {
     uri: vscode.Uri.file(workspacePath),
     name: path.basename(workspacePath),
@@ -44,9 +37,7 @@ suite("Ruby environment activation", () => {
   });
 
   test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
-    const manager = process.env.CI
-      ? ManagerIdentifier.None
-      : ManagerIdentifier.Chruby;
+    const manager = process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby;
 
     sandbox.stub(vscode.workspace, "getConfiguration").returns({
       get: (name: string) => {
@@ -60,26 +51,15 @@ suite("Ruby environment activation", () => {
       },
     } as unknown as vscode.WorkspaceConfiguration);
 
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
     await ruby.activateRuby();
 
     assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
-    assert.notStrictEqual(
-      ruby.yjitEnabled,
-      undefined,
-      "Expected YJIT support to be set to true or false",
-    );
+    assert.notStrictEqual(ruby.yjitEnabled, undefined, "Expected YJIT support to be set to true or false");
   }).timeout(10000);
 
   test("Deletes verbose and GC settings from activated environment", async () => {
-    const manager = process.env.CI
-      ? ManagerIdentifier.None
-      : ManagerIdentifier.Chruby;
+    const manager = process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby;
 
     sandbox.stub(vscode.workspace, "getConfiguration").returns({
       get: (name: string) => {
@@ -93,12 +73,7 @@ suite("Ruby environment activation", () => {
       },
     } as unknown as vscode.WorkspaceConfiguration);
 
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
 
     process.env.VERBOSE = "1";
     process.env.DEBUG = "WARN";
@@ -138,27 +113,14 @@ suite("Ruby environment activation", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
     await ruby.activateRuby();
 
-    assert.deepStrictEqual(ruby.gemPath, [
-      "~/.gem/ruby/3.3.5",
-      "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
-    ]);
+    assert.deepStrictEqual(ruby.gemPath, ["~/.gem/ruby/3.3.5", "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0"]);
   });
 
   test("mergeComposedEnv merges environment variables", () => {
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
 
     assert.deepStrictEqual(ruby.env, {});
 
@@ -173,9 +135,7 @@ suite("Ruby environment activation", () => {
     const telemetry = { ...FAKE_TELEMETRY, logError: sandbox.stub() };
     const ruby = new Ruby(context, workspaceFolder, outputChannel, telemetry);
 
-    sandbox
-      .stub(Shadowenv.prototype, "activate")
-      .rejects(new UntrustedWorkspaceError());
+    sandbox.stub(Shadowenv.prototype, "activate").rejects(new UntrustedWorkspaceError());
 
     await assert.rejects(async () => {
       await ruby.activateRuby({ identifier: ManagerIdentifier.Shadowenv });
@@ -185,9 +145,7 @@ suite("Ruby environment activation", () => {
   });
 
   test("Clears outdated workspace Ruby path caches", async () => {
-    const manager = process.env.CI
-      ? ManagerIdentifier.None
-      : ManagerIdentifier.Chruby;
+    const manager = process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby;
 
     sandbox.stub(vscode.workspace, "getConfiguration").returns({
       get: (name: string) => {
@@ -205,20 +163,10 @@ suite("Ruby environment activation", () => {
       `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
       "/totally/non/existent/path/ruby",
     );
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
 
     await ruby.activateRuby();
 
-    assert.strictEqual(
-      context.workspaceState.get(
-        `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
-      ),
-      undefined,
-    );
+    assert.strictEqual(context.workspaceState.get(`rubyLsp.workspaceRubyPath.${workspaceFolder.name}`), undefined);
   });
 });

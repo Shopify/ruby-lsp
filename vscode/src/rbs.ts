@@ -17,9 +17,7 @@ export class RBS {
 
   constructor() {
     this.decorationType = vscode.window.createTextEditorDecorationType({
-      opacity: vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get<string>("sigOpacityLevel")!,
+      opacity: vscode.workspace.getConfiguration("rubyLsp").get<string>("sigOpacityLevel")!,
     });
 
     // Register event handlers
@@ -33,9 +31,7 @@ export class RBS {
   }
 
   reload() {
-    const opacity = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get<string>("sigOpacityLevel")!;
+    const opacity = vscode.workspace.getConfiguration("rubyLsp").get<string>("sigOpacityLevel")!;
 
     this.decorationType.dispose();
     this.decorationType = vscode.window.createTextEditorDecorationType({

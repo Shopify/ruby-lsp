@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import assert from "assert";
 import path from "path";
 import os from "os";
@@ -24,9 +23,7 @@ suite("Workspace", () => {
   beforeEach(() => {
     sandbox = sinon.createSandbox();
     context = createContext();
-    workspacePath = fs.mkdtempSync(
-      path.join(os.tmpdir(), "ruby-lsp-test-workspace-"),
-    );
+    workspacePath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-workspace-"));
     workspaceUri = vscode.Uri.file(workspacePath);
 
     workspaceFolder = {
@@ -35,13 +32,7 @@ suite("Workspace", () => {
       index: 0,
     };
 
-    workspace = new Workspace(
-      context,
-      workspaceFolder,
-      FAKE_TELEMETRY,
-      () => {},
-      new Map(),
-    );
+    workspace = new Workspace(context, workspaceFolder, FAKE_TELEMETRY, () => {}, new Map());
   });
 
   afterEach(() => {
@@ -75,9 +66,7 @@ suite("Workspace", () => {
   }).timeout(60000);
 
   test("does not restart when watched files are touched without modifying contents", async () => {
-    const lockfileUri = vscode.Uri.file(
-      path.join(workspacePath, "Gemfile.lock"),
-    );
+    const lockfileUri = vscode.Uri.file(path.join(workspacePath, "Gemfile.lock"));
     const contents = Buffer.from("hello");
     await vscode.workspace.fs.writeFile(lockfileUri, contents);
 

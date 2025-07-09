@@ -3,10 +3,7 @@ import * as vscode from "vscode";
 export class LinkedCancellationSource implements vscode.Disposable {
   private readonly tokenSource = new vscode.CancellationTokenSource();
 
-  constructor(
-    token: vscode.CancellationToken,
-    ...additionalTokens: vscode.CancellationToken[]
-  ) {
+  constructor(token: vscode.CancellationToken, ...additionalTokens: vscode.CancellationToken[]) {
     [token, ...additionalTokens].forEach((token) => {
       token.onCancellationRequested(() => {
         this.tokenSource.cancel();
@@ -22,7 +19,7 @@ export class LinkedCancellationSource implements vscode.Disposable {
     return this.tokenSource.token.isCancellationRequested;
   }
 
-  onCancellationRequested(callback: () => void) {
+  onCancellationRequested(callback: () => void | Promise<void>) {
     this.tokenSource.token.onCancellationRequested(callback);
   }
 }

@@ -30,12 +30,14 @@ export function run(): Promise<void> {
         } catch (err) {
           // eslint-disable-next-line no-console
           console.error(err);
-          reject(err);
+          const error = err as Error;
+          reject(error);
         }
       })
       .catch((globError) => {
         if (globError) {
-          return reject(globError);
+          const error = globError as Error;
+          return reject(error);
         }
       });
   });

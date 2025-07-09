@@ -19,9 +19,7 @@ suite("LinkedCancellationSource", () => {
 
   test("isCancellationRequested", async () => {
     const cancellationSource = new vscode.CancellationTokenSource();
-    const linkedCancellationSource = new LinkedCancellationSource(
-      cancellationSource.token,
-    );
+    const linkedCancellationSource = new LinkedCancellationSource(cancellationSource.token);
     let callbackCalled = false;
 
     await new Promise<void>((resolve) => {
@@ -47,9 +45,7 @@ suite("LinkedCancellationSource", () => {
       isCancellationRequested: () => false,
     }));
 
-    const linkedCancellationSource = new LinkedCancellationSource(
-      cancellationSource.token,
-    );
+    const linkedCancellationSource = new LinkedCancellationSource(cancellationSource.token);
 
     linkedCancellationSource.dispose();
     assert.ok(spy.notCalled);

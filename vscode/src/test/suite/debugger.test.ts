@@ -19,22 +19,16 @@ import { createContext, createRubySymlinks, FakeContext } from "./helpers";
 suite("Debugger", () => {
   let context: FakeContext;
 
-  const original = vscode.workspace
-    .getConfiguration("debug")
-    .get("saveBeforeStart");
+  const original = vscode.workspace.getConfiguration("debug").get("saveBeforeStart");
 
   beforeEach(async () => {
-    await vscode.workspace
-      .getConfiguration("debug")
-      .update("saveBeforeStart", "none", true);
+    await vscode.workspace.getConfiguration("debug").update("saveBeforeStart", "none", true);
 
     context = createContext();
   });
 
   afterEach(async () => {
-    await vscode.workspace
-      .getConfiguration("debug")
-      .update("saveBeforeStart", original, true);
+    await vscode.workspace.getConfiguration("debug").update("saveBeforeStart", original, true);
 
     context.dispose();
   });
@@ -88,19 +82,16 @@ suite("Debugger", () => {
         workspaceFolder,
       } as Workspace;
     });
-    const configs: any = await debug.resolveDebugConfiguration!(
-      workspaceFolder,
-      {
-        type: "ruby_lsp",
-        name: "Debug",
-        request: "launch",
-        // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby ${file}",
-        env: {
-          overrideMe: "newValue",
-        },
+    const configs: any = await debug.resolveDebugConfiguration!(workspaceFolder, {
+      type: "ruby_lsp",
+      name: "Debug",
+      request: "launch",
+      // eslint-disable-next-line no-template-curly-in-string
+      program: "ruby ${file}",
+      env: {
+        overrideMe: "newValue",
       },
-    );
+    });
 
     assert.strictEqual(configs.env.bogus, "hello!");
     assert.strictEqual(configs.env.overrideMe, "newValue");
@@ -121,17 +112,14 @@ suite("Debugger", () => {
         workspaceFolder,
       } as Workspace;
     });
-    const configs: any = await debug.resolveDebugConfiguration!(
-      workspaceFolder,
-      {
-        type: "ruby_lsp",
-        name: "Debug",
-        request: "launch",
-        // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby ${file}",
-        env: { parallel: "1" },
-      },
-    );
+    const configs: any = await debug.resolveDebugConfiguration!(workspaceFolder, {
+      type: "ruby_lsp",
+      name: "Debug",
+      request: "launch",
+      // eslint-disable-next-line no-template-curly-in-string
+      program: "ruby ${file}",
+      env: { parallel: "1" },
+    });
 
     assert.deepEqual({ parallel: "1", ...ruby.env }, configs.env);
     debug.dispose();
@@ -155,27 +143,20 @@ suite("Debugger", () => {
         workspaceFolder,
       } as Workspace;
     });
-    const configs: any = await debug.resolveDebugConfiguration!(
-      workspaceFolder,
-      {
-        type: "ruby_lsp",
-        name: "Debug",
-        request: "launch",
-        // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby ${file}",
-        env: { parallel: "1" },
-      },
-    );
+    const configs: any = await debug.resolveDebugConfiguration!(workspaceFolder, {
+      type: "ruby_lsp",
+      name: "Debug",
+      request: "launch",
+      // eslint-disable-next-line no-template-curly-in-string
+      program: "ruby ${file}",
+      env: { parallel: "1" },
+    });
 
     assert.deepEqual(
       {
         parallel: "1",
         ...ruby.env,
-        BUNDLE_GEMFILE: vscode.Uri.joinPath(
-          vscode.Uri.file(tmpPath),
-          ".ruby-lsp",
-          "Gemfile",
-        ).fsPath,
+        BUNDLE_GEMFILE: vscode.Uri.joinPath(vscode.Uri.file(tmpPath), ".ruby-lsp", "Gemfile").fsPath,
       },
       configs.env,
     );
@@ -187,24 +168,16 @@ suite("Debugger", () => {
 
   test("Launching the debugger", async () => {
     const manager =
-      os.platform() === "win32"
-        ? { identifier: ManagerIdentifier.None }
-        : { identifier: ManagerIdentifier.Chruby };
+      os.platform() === "win32" ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
 
-    // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }
 
-    const tmpPath = fs.mkdtempSync(
-      path.join(os.tmpdir(), "ruby-lsp-test-debugger"),
-    );
+    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-debugger"));
     fs.writeFileSync(path.join(tmpPath, "test.rb"), "1 + 1");
     fs.writeFileSync(path.join(tmpPath, ".ruby-version"), RUBY_VERSION);
-    fs.writeFileSync(
-      path.join(tmpPath, "Gemfile"),
-      'source "https://rubygems.org"\ngem "debug"',
-    );
+    fs.writeFileSync(path.join(tmpPath, "Gemfile"), 'source "https://rubygems.org"\ngem "debug"');
 
     const outputChannel = new WorkspaceChannel("fake", LOG_CHANNEL);
     const workspaceFolder: vscode.WorkspaceFolder = {
@@ -213,12 +186,7 @@ suite("Debugger", () => {
       index: 0,
     };
 
-    const ruby = new Ruby(
-      context,
-      workspaceFolder,
-      outputChannel,
-      FAKE_TELEMETRY,
-    );
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
     await ruby.activateRuby(manager);
 
     try {
@@ -228,10 +196,7 @@ suite("Debugger", () => {
     }
 
     assert.ok(fs.existsSync(path.join(tmpPath, "Gemfile.lock")));
-    assert.match(
-      fs.readFileSync(path.join(tmpPath, "Gemfile.lock")).toString(),
-      /debug/,
-    );
+    assert.match(fs.readFileSync(path.join(tmpPath, "Gemfile.lock")).toString(), /debug/);
 
     const debug = new Debugger(context, () => {
       return {

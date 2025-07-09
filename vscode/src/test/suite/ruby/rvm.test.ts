@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import assert from "assert";
 import path from "path";
 import os from "os";
@@ -10,11 +9,7 @@ import { afterEach, beforeEach } from "mocha";
 import { Rvm } from "../../../ruby/rvm";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import {
-  ACTIVATION_SEPARATOR,
-  FIELD_SEPARATOR,
-  VALUE_SEPARATOR,
-} from "../../../ruby/versionManager";
+import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR } from "../../../ruby/versionManager";
 import { createContext, FakeContext } from "../helpers";
 
 suite("RVM", () => {
@@ -47,30 +42,13 @@ suite("RVM", () => {
       index: 0,
     };
     const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
-    const rvm = new Rvm(
-      workspaceFolder,
-      outputChannel,
-      context,
-      async () => {},
-    );
+    const rvm = new Rvm(workspaceFolder, outputChannel, context, async () => {});
 
     const installationPathStub = sandbox
       .stub(rvm, "findRvmInstallation")
-      .resolves(
-        vscode.Uri.joinPath(
-          vscode.Uri.file(os.homedir()),
-          ".rvm",
-          "bin",
-          "rvm-auto-ruby",
-        ),
-      );
+      .resolves(vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rvm", "bin", "rvm-auto-ruby"));
 
-    const envStub = [
-      "3.0.0",
-      "/path/to/gems",
-      "true",
-      `ANY${VALUE_SEPARATOR}true`,
-    ].join(FIELD_SEPARATOR);
+    const envStub = ["3.0.0", "/path/to/gems", "true", `ANY${VALUE_SEPARATOR}true`].join(FIELD_SEPARATOR);
 
     const execStub = sandbox.stub(common, "asyncExec").resolves({
       stdout: "",

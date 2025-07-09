@@ -40,14 +40,7 @@ suite("TestController", () => {
     context = createContext();
     workspaceStubs = [];
 
-    workspace = new Workspace(
-      context,
-      LSP_WORKSPACE_FOLDER,
-      FAKE_TELEMETRY,
-      () => undefined,
-      new Map(),
-      true,
-    );
+    workspace = new Workspace(context, LSP_WORKSPACE_FOLDER, FAKE_TELEMETRY, () => undefined, new Map(), true);
 
     const commonStub = sandbox.stub(common, "featureEnabled").returns(true);
     controller = new TestController(
@@ -135,7 +128,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -146,32 +138,22 @@ suite("TestController", () => {
     sandbox.stub(workspace, "lspClient").value(fakeClient);
   }
 
-  async function assertTags(
-    itemId: string,
-    itemUri: vscode.Uri,
-    controller: TestController,
-    tags: string[],
-  ) {
+  async function assertTags(itemId: string, itemUri: vscode.Uri, controller: TestController, tags: string[]) {
     const item = await controller.findTestItem(itemId, itemUri);
     assert.ok(item);
     assert.deepStrictEqual(
-      item!.tags.map((tag) => tag.id),
+      item.tags.map((tag) => tag.id),
       tags,
     );
   }
 
   function createWorkspaceWithTestFile() {
-    const workspacePath = fs.mkdtempSync(
-      path.join(os.tmpdir(), "ruby-lsp-test-controller-"),
-    );
+    const workspacePath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-controller-"));
     const workspaceUri = vscode.Uri.file(workspacePath);
 
     fs.mkdirSync(path.join(workspaceUri.fsPath, "test"));
     const testFilePath = path.join(workspaceUri.fsPath, "test", "foo_test.rb");
-    fs.writeFileSync(
-      testFilePath,
-      "require 'test_helper'\n\nclass FooTest < Minitest::Test; def test_foo; end; end",
-    );
+    fs.writeFileSync(testFilePath, "require 'test_helper'\n\nclass FooTest < Minitest::Test; def test_foo; end; end");
 
     const workspaceFolder: vscode.WorkspaceFolder = {
       uri: workspaceUri,
@@ -186,9 +168,7 @@ suite("TestController", () => {
     workspaceStubs.forEach((stub) => stub.restore());
     workspaceStubs = [];
 
-    workspaceStubs.push(
-      sandbox.stub(vscode.workspace, "workspaceFolders").get(() => workspaces),
-    );
+    workspaceStubs.push(sandbox.stub(vscode.workspace, "workspaceFolders").get(() => workspaces));
 
     workspaceStubs.push(
       sandbox.stub(vscode.workspace, "asRelativePath").callsFake((uri) => {
@@ -204,9 +184,7 @@ suite("TestController", () => {
 
     workspaceStubs.push(
       sandbox.stub(vscode.workspace, "getWorkspaceFolder").callsFake((uri) => {
-        return workspaces.find((workspace) =>
-          uri.fsPath.startsWith(workspace.uri.fsPath),
-        );
+        return workspaces.find((workspace) => uri.fsPath.startsWith(workspace.uri.fsPath));
       }),
     );
   }
@@ -223,18 +201,16 @@ suite("TestController", () => {
             "test_do_something",
             "bundle exec ruby -Itest test/fake_test.rb --name FakeTest#test_do_something",
             {
-              /* eslint-disable @typescript-eslint/naming-convention */
               start_line: 0,
               start_column: 0,
               end_line: 10,
               end_column: 10,
-              /* eslint-enable @typescript-eslint/naming-convention */
             },
           ],
         },
         data: {
           type: "test",
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           group_id: 100,
           kind: "example",
         },
@@ -250,30 +226,23 @@ suite("TestController", () => {
     const firstWorkspace = createWorkspaceWithTestFile();
     const secondWorkspace = createWorkspaceWithTestFile();
 
-    stubWorkspaceOperations(
-      firstWorkspace.workspaceFolder,
-      secondWorkspace.workspaceFolder,
-    );
+    stubWorkspaceOperations(firstWorkspace.workspaceFolder, secondWorkspace.workspaceFolder);
 
     await controller.testController.resolveHandler!(undefined);
     const collection = controller.testController.items;
 
     // First workspace
-    const workspaceItem = collection.get(
-      firstWorkspace.workspaceFolder.uri.toString(),
-    );
+    const workspaceItem = collection.get(firstWorkspace.workspaceFolder.uri.toString());
     assert.ok(workspaceItem);
     assert.deepStrictEqual(
-      workspaceItem!.tags.map((tag) => tag.id),
+      workspaceItem.tags.map((tag) => tag.id),
       ["workspace", "debug"],
     );
 
     const fakeClient = {
       discoverTests: (fileUri: vscode.Uri) => {
         let uri;
-        if (
-          fileUri.fsPath.startsWith(firstWorkspace.workspaceFolder.uri.fsPath)
-        ) {
+        if (fileUri.fsPath.startsWith(firstWorkspace.workspaceFolder.uri.fsPath)) {
           uri = firstWorkspace.testFileUri.toString();
         } else {
           uri = secondWorkspace.testFileUri.toString();
@@ -321,7 +290,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -331,57 +299,45 @@ suite("TestController", () => {
 
     await controller.testController.resolveHandler!(workspaceItem);
 
-    const testDir = workspaceItem!.children.get(
-      vscode.Uri.joinPath(
-        firstWorkspace.workspaceFolder.uri,
-        "test",
-      ).toString(),
+    const testDir = workspaceItem.children.get(
+      vscode.Uri.joinPath(firstWorkspace.workspaceFolder.uri, "test").toString(),
     );
     assert.ok(testDir);
     assert.deepStrictEqual(
-      testDir!.tags.map((tag) => tag.id),
+      testDir.tags.map((tag) => tag.id),
       ["test_dir", "debug"],
     );
 
-    const firstWorkspaceTest = testDir!.children.get(
-      firstWorkspace.testFileUri.toString(),
-    );
+    const firstWorkspaceTest = testDir.children.get(firstWorkspace.testFileUri.toString());
     assert.ok(firstWorkspaceTest);
     assert.deepStrictEqual(
-      firstWorkspaceTest!.tags.map((tag) => tag.id),
+      firstWorkspaceTest.tags.map((tag) => tag.id),
       ["test_file", "debug"],
     );
 
     // Second workspace
-    const secondWorkspaceItem = collection.get(
-      secondWorkspace.workspaceFolder.uri.toString(),
-    );
+    const secondWorkspaceItem = collection.get(secondWorkspace.workspaceFolder.uri.toString());
     assert.ok(secondWorkspaceItem);
     assert.deepStrictEqual(
-      secondWorkspaceItem!.tags.map((tag) => tag.id),
+      secondWorkspaceItem.tags.map((tag) => tag.id),
       ["workspace", "debug"],
     );
 
     await controller.testController.resolveHandler!(secondWorkspaceItem);
 
-    const secondTestDir = secondWorkspaceItem!.children.get(
-      vscode.Uri.joinPath(
-        secondWorkspace.workspaceFolder.uri,
-        "test",
-      ).toString(),
+    const secondTestDir = secondWorkspaceItem.children.get(
+      vscode.Uri.joinPath(secondWorkspace.workspaceFolder.uri, "test").toString(),
     );
     assert.ok(secondTestDir);
     assert.deepStrictEqual(
-      secondTestDir!.tags.map((tag) => tag.id),
+      secondTestDir.tags.map((tag) => tag.id),
       ["test_dir", "debug"],
     );
 
-    const otherTest = secondTestDir!.children.get(
-      secondWorkspace.testFileUri.toString(),
-    );
+    const otherTest = secondTestDir.children.get(secondWorkspace.testFileUri.toString());
     assert.ok(otherTest);
     assert.deepStrictEqual(
-      otherTest!.tags.map((tag) => tag.id),
+      otherTest.tags.map((tag) => tag.id),
       ["test_file", "debug"],
     );
   });
@@ -425,7 +381,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -436,16 +391,10 @@ suite("TestController", () => {
     storeTest.children.replace([]);
     await controller.testController.resolveHandler!(storeTest);
 
-    const excludedExample = await controller.findTestItem(
-      "StoreTest#test_store",
-      storeTestUri,
-    );
+    const excludedExample = await controller.findTestItem("StoreTest#test_store", storeTestUri);
     assert.ok(excludedExample);
 
-    const filteredItems = controller.buildRequestTestItems(
-      [serverTest, storeTest],
-      [excludedExample],
-    );
+    const filteredItems = controller.buildRequestTestItems([serverTest, storeTest], [excludedExample]);
 
     assert.strictEqual(filteredItems.length, 1);
     assert.strictEqual(filteredItems[0].id, serverTest.id);
@@ -458,13 +407,10 @@ suite("TestController", () => {
     const collection = controller.testController.items;
     const testDir = collection.get(testDirUri.toString());
     assert.ok(testDir);
-    const serverTest = testDir!.children.get(serverTestUri.toString())!;
+    const serverTest = testDir.children.get(serverTestUri.toString())!;
     await controller.testController.resolveHandler!(serverTest);
 
-    await assertTags(testDir.uri!.toString(), testDir.uri!, controller, [
-      "test_dir",
-      "debug",
-    ]);
+    await assertTags(testDir.uri!.toString(), testDir.uri!, controller, ["test_dir", "debug"]);
     await assertTags(serverTest.uri!.toString(), serverTest.uri!, controller, [
       "test_file",
       "debug",
@@ -497,10 +443,7 @@ suite("TestController", () => {
       .children.get("OtherServerTest#test_other_thing")!;
     assert.ok(excludedExample);
 
-    const filteredItems = controller.buildRequestTestItems(
-      [serverTest],
-      [excludedExample],
-    );
+    const filteredItems = controller.buildRequestTestItems([serverTest], [excludedExample]);
 
     assert.strictEqual(filteredItems.length, 1);
     assert.strictEqual(filteredItems[0].id, serverTest.id);
@@ -530,39 +473,24 @@ suite("TestController", () => {
     const nestedGroup = group.children.get("ServerTest::NestedTest");
     assert.ok(nestedGroup);
 
-    const example = nestedGroup.children.get(
-      "ServerTest::NestedTest#test_something",
-    );
+    const example = nestedGroup.children.get("ServerTest::NestedTest#test_something");
     assert.ok(example);
 
-    assert.strictEqual(
-      group,
-      await controller.findTestItem(group.id, group.uri!),
-    );
-    assert.strictEqual(
-      example,
-      await controller.findTestItem(example.id, example.uri!),
-    );
+    assert.strictEqual(group, await controller.findTestItem(group.id, group.uri!));
+    assert.strictEqual(example, await controller.findTestItem(example.id, example.uri!));
   });
 
   test("find test items based on URI and ID when nested groups exist", async () => {
     await controller.testController.resolveHandler!(undefined);
 
-    assert.strictEqual(
-      "ServerTest",
-      (await controller.findTestItem("ServerTest", serverTestUri))!.id,
-    );
+    assert.strictEqual("ServerTest", (await controller.findTestItem("ServerTest", serverTestUri))!.id);
     assert.strictEqual(
       "ServerTest::NestedTest",
-      (await controller.findTestItem("ServerTest::NestedTest", serverTestUri))!
-        .id,
+      (await controller.findTestItem("ServerTest::NestedTest", serverTestUri))!.id,
     );
     assert.strictEqual(
       "ServerTest::NestedTest#test_something",
-      (await controller.findTestItem(
-        "ServerTest::NestedTest#test_something",
-        serverTestUri,
-      ))!.id,
+      (await controller.findTestItem("ServerTest::NestedTest#test_something", serverTestUri))!.id,
     );
   });
 
@@ -587,10 +515,7 @@ suite("TestController", () => {
     const firstWorkspace = createWorkspaceWithTestFile();
     const secondWorkspace = createWorkspaceWithTestFile();
 
-    stubWorkspaceOperations(
-      firstWorkspace.workspaceFolder,
-      secondWorkspace.workspaceFolder,
-    );
+    stubWorkspaceOperations(firstWorkspace.workspaceFolder, secondWorkspace.workspaceFolder);
 
     const serverTest = await controller.findTestItem(
       "ServerTest::NestedTest#test_something",
@@ -602,24 +527,11 @@ suite("TestController", () => {
   test("running a test", async () => {
     await controller.testController.resolveHandler!(undefined);
 
-    const testItem = (await controller.findTestItem(
-      "ServerTest::NestedTest#test_something",
-      serverTestUri,
-    ))!;
+    const testItem = (await controller.findTestItem("ServerTest::NestedTest#test_something", serverTestUri))!;
 
-    const fakeServerPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "src",
-      "test",
-      "suite",
-      "fakeTestServer.js",
-    );
+    const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
     workspace.ruby.mergeComposedEnvironment({
-      // eslint-disable-next-line no-process-env
       ...process.env,
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
@@ -632,7 +544,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -663,11 +574,8 @@ suite("TestController", () => {
     await controller.testController.resolveHandler!(undefined);
 
     const manager =
-      os.platform() === "win32"
-        ? { identifier: ManagerIdentifier.None }
-        : { identifier: ManagerIdentifier.Chruby };
+      os.platform() === "win32" ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
 
-    // eslint-disable-next-line no-process-env
     if (process.env.CI) {
       createRubySymlinks();
     }
@@ -677,30 +585,18 @@ suite("TestController", () => {
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
 
-    const testItem = (await controller.findTestItem(
-      "ServerTest::NestedTest#test_something",
-      serverTestUri,
-    ))!;
+    const testItem = (await controller.findTestItem("ServerTest::NestedTest#test_something", serverTestUri))!;
 
     const program = `bundle exec ruby -Itest ${path.join("test", "fixtures", "minitest_example.rb")}`;
 
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
         commands: [program],
-        reporterPaths: [
-          path.join(
-            LSP_WORKSPACE_PATH,
-            "lib",
-            "ruby_lsp",
-            "test_reporters",
-            "minitest_reporter.rb",
-          ),
-        ],
+        reporterPaths: [path.join(LSP_WORKSPACE_PATH, "lib", "ruby_lsp", "test_reporters", "minitest_reporter.rb")],
       }),
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -721,11 +617,7 @@ suite("TestController", () => {
     const debug = new Debugger(context, () => workspace);
     const startDebuggingSpy = sandbox.spy(vscode.debug, "startDebugging");
 
-    const runRequest = new vscode.TestRunRequest(
-      [testItem],
-      [],
-      controller.testDebugProfile,
-    );
+    const runRequest = new vscode.TestRunRequest([testItem], [], controller.testDebugProfile);
     await controller.runTest(runRequest, cancellationSource.token);
 
     assert.ok(runStub.end.calledWithExactly());
@@ -753,24 +645,11 @@ suite("TestController", () => {
   test("running a test with the coverage profile", async () => {
     await controller.testController.resolveHandler!(undefined);
 
-    const testItem = (await controller.findTestItem(
-      "ServerTest::NestedTest#test_something",
-      serverTestUri,
-    ))!;
+    const testItem = (await controller.findTestItem("ServerTest::NestedTest#test_something", serverTestUri))!;
 
-    const fakeServerPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "src",
-      "test",
-      "suite",
-      "fakeTestServer.js",
-    );
+    const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
     workspace.ruby.mergeComposedEnvironment({
-      // eslint-disable-next-line no-process-env
       ...process.env,
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
@@ -782,7 +661,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -801,14 +679,9 @@ suite("TestController", () => {
     } as any;
     sandbox.stub(controller.testController, "createTestRun").returns(runStub);
 
-    const runRequest = new vscode.TestRunRequest(
-      [testItem],
-      [],
-      controller.coverageProfile,
-    );
+    const runRequest = new vscode.TestRunRequest([testItem], [], controller.coverageProfile);
     const fakeFileContents = Buffer.from(
       JSON.stringify({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         "file:///test/server_test.rb": [
           {
             executed: 1,
@@ -831,37 +704,18 @@ suite("TestController", () => {
     assert.ok(runStub.started.calledWith(testItem));
     assert.ok(runStub.passed.calledWith(testItem));
     assert.ok(runStub.end.calledWithExactly());
-    assert.ok(
-      runStub.appendOutput.calledWithExactly(
-        "\r\n\r\nProcessing test coverage results...\r\n\r\n",
-      ),
-    );
+    assert.ok(runStub.appendOutput.calledWithExactly("\r\n\r\nProcessing test coverage results...\r\n\r\n"));
     assert.ok(runStub.addCoverage.calledOnce);
   }).timeout(10000);
 
   test("running a test with the run in terminal profile", async () => {
     await controller.testController.resolveHandler!(undefined);
 
-    const testItem = (await controller.findTestItem(
-      "ServerTest::NestedTest#test_something",
-      serverTestUri,
-    ))!;
+    const testItem = (await controller.findTestItem("ServerTest::NestedTest#test_something", serverTestUri))!;
 
-    const fakeServerPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "src",
-      "test",
-      "suite",
-      "fakeTestServer.js",
-    );
+    const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
-    workspace.ruby.mergeComposedEnvironment(
-      // eslint-disable-next-line no-process-env
-      process.env as any,
-    );
+    workspace.ruby.mergeComposedEnvironment(process.env as any);
     sandbox.stub(workspace, "lspClient").value({
       resolveTestCommands: sinon.stub().resolves({
         commands: [`node ${fakeServerPath} ${controller.streamingPort!}`],
@@ -870,7 +724,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -889,11 +742,7 @@ suite("TestController", () => {
     } as any;
     sandbox.stub(controller.testController, "createTestRun").returns(runStub);
 
-    const runRequest = new vscode.TestRunRequest(
-      [testItem],
-      [],
-      controller.runInTerminalProfile,
-    );
+    const runRequest = new vscode.TestRunRequest([testItem], [], controller.runInTerminalProfile);
     await controller.runTest(runRequest, cancellationSource.token);
 
     assert.ok(runStub.enqueued.calledWith(testItem));
@@ -921,14 +770,10 @@ suite("TestController", () => {
   });
 
   test("findTestItem creates items automatically when line is passed", async () => {
-    assert.strictEqual(
-      "ServerTest",
-      (await controller.findTestItem("ServerTest", serverTestUri))!.id,
-    );
+    assert.strictEqual("ServerTest", (await controller.findTestItem("ServerTest", serverTestUri))!.id);
     assert.strictEqual(
       "ServerTest::NestedTest",
-      (await controller.findTestItem("ServerTest::NestedTest", serverTestUri))!
-        .id,
+      (await controller.findTestItem("ServerTest::NestedTest", serverTestUri))!.id,
     );
 
     const dynamicallyDefinedTest = await controller.findTestItem(
@@ -938,15 +783,9 @@ suite("TestController", () => {
     );
 
     assert.ok(dynamicallyDefinedTest);
-    assert.strictEqual(
-      "ServerTest#test_dynamically_defined",
-      dynamicallyDefinedTest.id,
-    );
+    assert.strictEqual("ServerTest#test_dynamically_defined", dynamicallyDefinedTest.id);
     assert.strictEqual("dynamic test", dynamicallyDefinedTest.description);
-    assert.strictEqual(
-      "★ test_dynamically_defined",
-      dynamicallyDefinedTest.label,
-    );
+    assert.strictEqual("★ test_dynamically_defined", dynamicallyDefinedTest.label);
 
     const dynamicallyDefinedNestedTest = await controller.findTestItem(
       "ServerTest::NestedTest#test_nested_dynamically_defined",
@@ -955,18 +794,9 @@ suite("TestController", () => {
     );
 
     assert.ok(dynamicallyDefinedNestedTest);
-    assert.strictEqual(
-      "ServerTest::NestedTest#test_nested_dynamically_defined",
-      dynamicallyDefinedNestedTest.id,
-    );
-    assert.strictEqual(
-      "dynamic test",
-      dynamicallyDefinedNestedTest.description,
-    );
-    assert.strictEqual(
-      "★ test_nested_dynamically_defined",
-      dynamicallyDefinedNestedTest.label,
-    );
+    assert.strictEqual("ServerTest::NestedTest#test_nested_dynamically_defined", dynamicallyDefinedNestedTest.id);
+    assert.strictEqual("dynamic test", dynamicallyDefinedNestedTest.description);
+    assert.strictEqual("★ test_nested_dynamically_defined", dynamicallyDefinedNestedTest.label);
   });
 
   test("finding a file with no tests inside doesn't reset framework tag", async () => {
@@ -1007,7 +837,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -1023,26 +852,13 @@ suite("TestController", () => {
 
   test("running tests lazily discovers framework", async () => {
     await controller.testController.resolveHandler!(undefined);
-    const testItem = (await controller.findTestItem(
-      testDirUri.toString(),
-      testDirUri,
-    ))!;
+    const testItem = (await controller.findTestItem(testDirUri.toString(), testDirUri))!;
 
     assert.ok(!testItem.tags.some((tag) => tag.id.startsWith("framework:")));
 
-    const fakeServerPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "src",
-      "test",
-      "suite",
-      "fakeTestServer.js",
-    );
+    const fakeServerPath = path.join(__dirname, "..", "..", "..", "src", "test", "suite", "fakeTestServer.js");
 
     workspace.ruby.mergeComposedEnvironment({
-      // eslint-disable-next-line no-process-env
       ...process.env,
       RUBY_LSP_REPORTER_PORT: controller.streamingPort!,
     });
@@ -1055,7 +871,6 @@ suite("TestController", () => {
       initializeResult: {
         capabilities: {
           experimental: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             full_test_discovery: true,
           },
         },
@@ -1102,9 +917,7 @@ suite("TestController", () => {
     const runRequest = new vscode.TestRunRequest([testItem]);
     await controller.runTest(runRequest, cancellationSource.token);
 
-    assert.ok(
-      testItem.tags.find((tag) => tag.id.startsWith("framework:minitest")),
-    );
+    assert.ok(testItem.tags.find((tag) => tag.id.startsWith("framework:minitest")));
   }).timeout(10000);
 
   test("trying to populate test files twice doesn't do duplicate work", async () => {

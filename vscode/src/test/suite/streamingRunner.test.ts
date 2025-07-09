@@ -28,10 +28,7 @@ suite("StreamingRunner", () => {
 
   after(async () => {
     if (currentDbContents) {
-      await vscode.workspace.fs.writeFile(
-        dbUri,
-        Buffer.from(currentDbContents),
-      );
+      await vscode.workspace.fs.writeFile(dbUri, Buffer.from(currentDbContents));
     }
   });
 
@@ -48,15 +45,11 @@ suite("StreamingRunner", () => {
 
   test("updates port DB with new values", async () => {
     const initialDb = {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       "/some/path/to/project": "1234",
     };
 
     // Write the initial DB as if we had opened the editor previously
-    await vscode.workspace.fs.writeFile(
-      dbUri,
-      Buffer.from(JSON.stringify(initialDb)),
-    );
+    await vscode.workspace.fs.writeFile(dbUri, Buffer.from(JSON.stringify(initialDb)));
 
     const streamingRunner = new StreamingRunner(
       context,
@@ -74,9 +67,6 @@ suite("StreamingRunner", () => {
     const newDb = JSON.parse(newDbContents.toString());
 
     assert.strictEqual(newDb["/some/path/to/project"], "1234");
-    assert.strictEqual(
-      newDb[newWorkspaceUri.fsPath],
-      streamingRunner.tcpPort!.toString(),
-    );
+    assert.strictEqual(newDb[newWorkspaceUri.fsPath], streamingRunner.tcpPort!.toString());
   });
 });
