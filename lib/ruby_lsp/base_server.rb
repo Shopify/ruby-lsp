@@ -101,19 +101,6 @@ module RubyLsp
       end
     end
 
-    #: -> void
-    def run_shutdown
-      @incoming_queue.clear
-      @outgoing_queue.clear
-      @incoming_queue.close
-      @outgoing_queue.close
-      @cancelled_requests.clear
-
-      @worker.terminate
-      @outgoing_dispatcher.terminate
-      @store.clear
-    end
-
     # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
     #: -> untyped
     def pop_response
@@ -131,6 +118,21 @@ module RubyLsp
     def process_message(message)
       raise AbstractMethodInvokedError
     end
+
+    #: -> void
+    def run_shutdown
+      @incoming_queue.clear
+      @outgoing_queue.clear
+      @incoming_queue.close
+      @outgoing_queue.close
+      @cancelled_requests.clear
+
+      @worker.terminate
+      @outgoing_dispatcher.terminate
+      @store.clear
+    end
+
+    private
 
     # @abstract
     #: -> void
