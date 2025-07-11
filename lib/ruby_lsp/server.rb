@@ -1224,7 +1224,7 @@ module RubyLsp
             }
           end
         end
-      rescue Bundler::GemNotFound
+      rescue Bundler::GemNotFound, Bundler::GemfileNotFound
         []
       end
 
