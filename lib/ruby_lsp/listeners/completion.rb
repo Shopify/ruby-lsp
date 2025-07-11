@@ -445,11 +445,14 @@ module RubyLsp
         return unless arguments_node
 
         path_node_to_complete = arguments_node.arguments.first
-
         return unless path_node_to_complete.is_a?(Prism::StringNode)
 
-        origin_dir = Pathname.new(@uri.to_standardized_path).dirname
+        # If the file is unsaved (e.g.: untitled:Untitled-1), we can't provide relative completion as we don't know
+        # where the user intends to save it
+        full_path = @uri.to_standardized_path
+        return unless full_path
 
+        origin_dir = Pathname.new(full_path).dirname
         content = path_node_to_complete.content
         # if the path is not a directory, glob all possible next characters
         # for example ../somethi| (where | is the cursor position)

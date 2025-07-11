@@ -1761,6 +1761,25 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_require_relative_returns_empty_result_for_unsaved_files
+    prefix = "support/"
+    source = <<~RUBY
+      require_relative "#{prefix}"
+    RUBY
+    end_char = source.rindex('"') #: as !nil
+
+    with_server(source, URI("untitled:Untitled-1")) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        assert_empty(server.pop_response.response)
+      end
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
