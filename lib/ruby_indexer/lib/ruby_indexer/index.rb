@@ -291,6 +291,15 @@ module RubyIndexer
 
       # Top level constants
       entries.concat(@entries_tree.search(name))
+
+      # Filter only constants since methods may have names that look like constants
+      entries.each do |definitions|
+        definitions.select! do |entry|
+          entry.is_a?(Entry::Constant) || entry.is_a?(Entry::ConstantAlias) ||
+            entry.is_a?(Entry::Namespace) || entry.is_a?(Entry::UnresolvedConstantAlias)
+        end
+      end
+
       entries.uniq!
       entries #: as Array[Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]]
     end

@@ -1983,6 +1983,18 @@ module RubyIndexer
       assert_equal(["XQRK"], result.map { |entries| entries.first&.name })
     end
 
+    def test_constant_completion_does_not_confuse_uppercase_methods
+      index(<<~RUBY)
+        class Foo
+          def Qux
+          end
+        end
+      RUBY
+
+      candidates = @index.constant_completion_candidates("Q", [])
+      refute_includes(candidates.flat_map { |entries| entries.map(&:name) }, "Qux")
+    end
+
     def test_constant_completion_candidates_for_empty_name
       index(<<~RUBY)
         module Foo
