@@ -75,8 +75,9 @@ module RubyLsp
 
           unless full_files.empty?
             specs, tests = full_files.partition { |path| spec?(path) }
-            commands << "#{BASE_COMMAND} -Itest -e \"ARGV.each { |f| require f }\" #{tests.join(" ")}" if tests.any?
-            commands << "#{BASE_COMMAND} -Ispec -e \"ARGV.each { |f| require f }\" #{specs.join(" ")}" if specs.any?
+
+            commands << "#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" #{tests.join(" ")}" if tests.any?
+            commands << "#{COMMAND} -Ispec -e \"ARGV.each { |f| require f }\" #{specs.join(" ")}" if specs.any?
           end
 
           commands
@@ -113,7 +114,7 @@ module RubyLsp
           end
 
           load_path = spec?(file_path) ? "-Ispec" : "-Itest"
-          "#{BASE_COMMAND} #{load_path} #{file_path} --name \"/#{regex}/\""
+          "#{COMMAND} #{load_path} #{file_path} --name \"/#{regex}/\""
         end
 
         #: (String, Hash[String, Hash[Symbol, untyped]]) -> Array[String]
@@ -124,7 +125,7 @@ module RubyLsp
               Shellwords.escape(TestDiscovery::DYNAMIC_REFERENCE_MARKER),
               ".*",
             )
-            command = +"#{BASE_COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}\\$/\""
+            command = +"#{COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}\\$/\""
 
             unless examples.empty?
               command << if examples.length == 1
@@ -143,13 +144,14 @@ module RubyLsp
 
       MINITEST_REPORTER_PATH = File.expand_path("../test_reporters/minitest_reporter.rb", __dir__) #: String
       TEST_UNIT_REPORTER_PATH = File.expand_path("../test_reporters/test_unit_reporter.rb", __dir__) #: String
-      ACCESS_MODIFIERS = [:public, :private, :protected].freeze
       BASE_COMMAND = begin
         Bundler.with_original_env { Bundler.default_lockfile }
         "bundle exec ruby"
       rescue Bundler::GemfileNotFound
         "ruby"
       end #: String
+      COMMAND = "#{BASE_COMMAND} -r#{MINITEST_REPORTER_PATH} -r#{TEST_UNIT_REPORTER_PATH}" #: String
+      ACCESS_MODIFIERS = [:public, :private, :protected].freeze
 
       #: (ResponseBuilders::TestCollection, GlobalState, Prism::Dispatcher, URI::Generic) -> void
       def initialize(response_builder, global_state, dispatcher, uri)

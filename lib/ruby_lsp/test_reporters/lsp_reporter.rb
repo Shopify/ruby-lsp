@@ -24,9 +24,6 @@ module RubyLsp
     # https://code.visualstudio.com/api/references/vscode-api#StatementCoverage
     #: type statement_coverage = { executed: Integer, location: position, branches: Array[branch_coverage] }
 
-    #: bool
-    attr_reader :invoked_shutdown
-
     #: -> void
     def initialize
       dir_path = File.join(Dir.tmpdir, "ruby-lsp")
@@ -195,7 +192,7 @@ module RubyLsp
 
     #: -> void
     def at_exit
-      internal_shutdown unless invoked_shutdown
+      internal_shutdown unless @invoked_shutdown
     end
 
     class << self

@@ -1376,21 +1376,6 @@ class ServerTest < Minitest::Test
     end
   end
 
-  def test_resolve_test_commands_returns_custom_reporters
-    @server.process_message({
-      id: 1,
-      method: "rubyLsp/resolveTestCommands",
-      params: {
-        items: [],
-      },
-    })
-    result = find_message(RubyLsp::Result, id: 1)
-    reporters = result.response[:reporterPaths]
-
-    assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_reporters/minitest_reporter.rb", __dir__))
-    assert_includes(reporters, File.expand_path("../lib/ruby_lsp/test_reporters/test_unit_reporter.rb", __dir__))
-  end
-
   def test_requests_code_lens_refresh_after_indexing
     @server.process_message({
       id: 1,
