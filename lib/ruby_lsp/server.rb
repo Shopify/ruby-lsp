@@ -167,6 +167,7 @@ module RubyLsp
       return if @setup_error
 
       errors = Addon.load_addons(@global_state, @outgoing_queue, include_project_addons: include_project_addons)
+      return if test_mode?
 
       if errors.any?
         send_log_message(
@@ -179,21 +180,13 @@ module RubyLsp
 
       if errored_addons.any?
         send_message(
-          Notification.new(
-            method: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::WARNING,
-              message: "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
-            ),
+          Notification.window_show_message(
+            "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
+            type: Constant::MessageType::WARNING,
           ),
         )
 
-        unless @test_mode
-          send_log_message(
-            errored_addons.map(&:errors_details).join("\n\n"),
-            type: Constant::MessageType::WARNING,
-          )
-        end
+        send_log_message(errored_addons.map(&:errors_details).join("\n\n"), type: Constant::MessageType::WARNING)
       end
     end
 
