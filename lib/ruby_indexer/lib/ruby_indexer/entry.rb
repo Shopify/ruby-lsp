@@ -333,6 +333,7 @@ module RubyIndexer
     end
 
     class Method < Member
+      # @override
       #: Array[Signature]
       attr_reader :signatures
 
