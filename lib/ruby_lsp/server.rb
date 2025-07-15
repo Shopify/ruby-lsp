@@ -1510,10 +1510,7 @@ module RubyLsp
 
       send_message(Result.new(
         id: message[:id],
-        response: {
-          commands: commands,
-          reporterPaths: [Listeners::TestStyle::MINITEST_REPORTER_PATH, Listeners::TestStyle::TEST_UNIT_REPORTER_PATH],
-        },
+        response: { commands: commands },
       ))
     end
 

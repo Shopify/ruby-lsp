@@ -625,16 +625,20 @@ export class TestController {
     profile: vscode.TestRunProfile | undefined,
     linkedCancellationSource: LinkedCancellationSource,
   ) {
-    // Require the custom JSON RPC reporters through RUBYOPT. We cannot use Ruby's `-r` flag because the moment the
-    // test framework is loaded, it might change which options are accepted. For example, if we append `-r` after the
-    // file path for Minitest, it will fail with unrecognized argument errors
-    const commonOpts = `-rbundler/setup ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`;
-    const rubyOpt = workspace.ruby.env.RUBYOPT ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}` : commonOpts;
+    let rubyOpt;
+    // Support for the old mechanism of requiring reporters not through test command, but through RUBYOPT. Remove
+    // after a few months of running new releases of server v0.26
+    if (response.reporterPaths) {
+      const commonOpts = `-rbundler/setup ${response.reporterPaths.map((path) => `-r${path}`).join(" ")}`;
+      rubyOpt = workspace.ruby.env.RUBYOPT ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}` : commonOpts;
+    }
 
     const runnerMode = profile === this.coverageProfile ? "coverage" : "run";
     const mode = profile === this.runInTerminalProfile ? Mode.RunInTerminal : Mode.Run;
 
     for (const command of response.commands) {
+      run.appendOutput(`Running tests with command:\r\n"${command}"\r\n\r\n`);
+
       try {
         await this.runner.execute(
           run,
@@ -671,8 +675,14 @@ export class TestController {
       if (linkedCancellationSource.isCancellationRequested()) {
         break;
       }
-      const commonOpts = `-rbundler/setup ${response.reporterPaths?.map((path) => `-r${path}`).join(" ")}`;
-      const rubyOpt = workspace.ruby.env.RUBYOPT ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}` : commonOpts;
+
+      let rubyOpt;
+      // Support for the old mechanism of requiring reporters not through test command, but through RUBYOPT. Remove
+      // after a few months of running new releases of server v0.26
+      if (response.reporterPaths) {
+        const commonOpts = `-rbundler/setup ${response.reporterPaths.map((path) => `-r${path}`).join(" ")}`;
+        rubyOpt = workspace.ruby.env.RUBYOPT ? `${workspace.ruby.env.RUBYOPT} ${commonOpts}` : commonOpts;
+      }
 
       await this.runner.execute(
         run,
