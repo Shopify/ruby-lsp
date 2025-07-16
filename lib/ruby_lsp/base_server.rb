@@ -118,6 +118,11 @@ module RubyLsp
       raise AbstractMethodInvokedError
     end
 
+    #: -> bool?
+    def test_mode?
+      @test_mode
+    end
+
     #: -> void
     def run_shutdown
       @incoming_queue.clear

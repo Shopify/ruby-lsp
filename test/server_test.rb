@@ -573,14 +573,16 @@ class ServerTest < Minitest::Test
 
   def test_workspace_addons
     create_test_addons
+
+    @server.stubs(:test_mode?).returns(false)
     @server.load_addons
 
     @server.process_message({ id: 1, method: "rubyLsp/workspace/addons" })
 
-    addon_error_notification = @server.pop_response
+    addon_error_notification = find_message(RubyLsp::Notification, "window/showMessage")
     assert_equal("window/showMessage", addon_error_notification.method)
     assert_equal("Error loading add-ons:\n\nBar:\n  boom\n", addon_error_notification.params.message)
-    addons_info = @server.pop_response.response
+    addons_info = find_message(RubyLsp::Result, id: 1).response
     addons_info.delete_if { |addon_info| addon_info[:name] == "RuboCop" }
 
     assert_equal("Foo", addons_info[0][:name])
