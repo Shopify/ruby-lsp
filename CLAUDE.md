@@ -23,7 +23,7 @@ bundle exec rake
 bin/test test/requests/completion_test.rb
 
 # Run tests matching a pattern
-bin/test -n /test_name_pattern/
+bin/test test/requests/completion_test.rb test_name_pattern
 
 # Type check with Sorbet
 bundle exec srb tc
@@ -179,20 +179,24 @@ Test fixtures are in `test/fixtures/` and expectations in `test/expectations/`.
 
 The Ruby Indexer (`lib/ruby_indexer/`) handles:
 
-- Building symbol tables
-- Resolving constant references
+- Building symbol tables for classes, modules, methods, and constants
+- Resolving constant references and method calls
 - Finding definitions across files
+- Providing completion candidates for constants and methods
+- Dealing with inheritance and ancestor linearization
 
 ### Typechecking with Sorbet
 
 Ruby LSP uses Sorbet (typed: strict) with inline RBS annotations for static typechecking.
 
 **Key Guidelines:**
+
 - Use RBS inline annotations (`#:`) exclusively - never use RBI style `sig { }`
 - Place type annotations immediately before method definitions or after variable assignments
 - Run `bundle exec srb tc` to ensure typechecking passes
 
 **Common RBS Patterns:**
+
 ```ruby
 # Method signatures (placed above method definition)
 #: (String name) -> void
@@ -218,18 +222,3 @@ result = nil #: (String | Symbol)?
 ```
 
 **Type Syntax Reference:** <https://sorbet.org/docs/rbs-support>
-
-### Debugging
-
-1. Enable debug logging: Set `RUBY_LSP_DEBUG=true`
-2. Use VS Code launch configurations in `.vscode/launch.json`
-3. Add `binding.irb` for debugging Ruby code
-
-## Important Files
-
-- `lib/ruby_lsp/server.rb` - Main server entry point
-- `lib/ruby_lsp/executor.rb` - Request routing and execution
-- `lib/ruby_lsp/document.rb` - Document management
-- `vscode/src/client.ts` - VS Code extension client
-- `Gemfile` - Ruby dependencies
-- `ruby-lsp.gemspec` - Gem specification

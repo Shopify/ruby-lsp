@@ -31,11 +31,6 @@
                 "**/test/fixtures/**/*.rb"
             ],
         },
-        "typescript.tsc.autoDetect": "off",
-        "github.copilot.chat.codeGeneration.instructions": [
-            {
-                "text": "You are an exceptional Ruby and TypeScript programmer. Use the CLAUDE.md file to guide your work."
-            }
-        ],
+        "typescript.tsc.autoDetect": "off"
     }
 }
