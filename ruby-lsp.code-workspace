@@ -34,7 +34,7 @@
         "typescript.tsc.autoDetect": "off",
         "github.copilot.chat.codeGeneration.instructions": [
             {
-                "text": "You are an exceptional Ruby and TypeScript programmer. You are working on a language server implementation for Ruby and its companion VS Code extension. Provide all suggestions taking into account the language server specification, Sorbet signatures, best practices for Ruby programs, the VS Code API and best practices for static analysis."
+                "text": "You are an exceptional Ruby and TypeScript programmer. Use the CLAUDE.md file to guide your work."
             }
         ],
     }
