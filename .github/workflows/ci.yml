@@ -105,7 +105,7 @@ jobs:
         uses: ruby/setup-ruby@bb6434c747fa7022e12fa1cae2a0951fcffcff26 # v1.253.0
         with:
           bundler-cache: true
-          cache-version: 2
+          cache-version: 3
 
       - name: Download shadowenv
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
