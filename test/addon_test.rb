@@ -225,5 +225,39 @@ module RubyLsp
         end
       end
     end
+
+    def test_loading_project_addons_ignores_vendor_bundle
+      # Some users have gems installed under `vendor/bundle` despite not having their BUNDLE_PATH configured to be so.
+      # That leads to loading the same add-on multiple times if they have the same gem installed both in their
+      # BUNDLE_PATH and in `vendor/bundle`
+      Dir.mktmpdir do |dir|
+        addon_dir = File.join(dir, "vendor", "bundle", "rubocop-1.73.0", "lib", "ruby_lsp", "rubocop")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class OldRuboCopAddon < RubyLsp::Addon
+            def activate(global_state, outgoing_queue)
+            end
+
+            def name
+              "Old RuboCop Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+        })
+
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        assert_raises(Addon::AddonNotFoundError) do
+          Addon.get("Project Addon", "0.1.0")
+        end
+      end
+    end
   end
 end
