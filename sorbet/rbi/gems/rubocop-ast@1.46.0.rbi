@@ -235,7 +235,7 @@ class RuboCop::AST::AsgnNode < ::RuboCop::AST::Node
 end
 
 # Common functionality for primitive literal nodes: `sym`, `str`,
-# `int`, `float`, `rational`...
+# `int`, `float`, `rational`, `complex`...
 #
 # source://rubocop-ast//lib/rubocop/ast/node/mixin/basic_literal_node.rb#7
 module RuboCop::AST::BasicLiteralNode
@@ -452,7 +452,7 @@ end
 #   parser = Parser::Ruby25.new(builder)
 #   root_node = parser.parse(buffer)
 #
-# source://rubocop-ast//lib/rubocop/ast/builder.rb#128
+# source://rubocop-ast//lib/rubocop/ast/builder.rb#129
 class RuboCop::AST::Builder < ::Parser::Builders::Default
   include ::RuboCop::AST::BuilderExtensions
 end
@@ -468,7 +468,7 @@ module RuboCop::AST::BuilderExtensions
   # @api private
   # @return [Node] the generated node
   #
-  # source://rubocop-ast//lib/rubocop/ast/builder.rb#100
+  # source://rubocop-ast//lib/rubocop/ast/builder.rb#101
   def n(type, children, source_map); end
 
   # Overwrite the base method to allow strings with invalid encoding
@@ -476,14 +476,14 @@ module RuboCop::AST::BuilderExtensions
   #
   # @api private
   #
-  # source://rubocop-ast//lib/rubocop/ast/builder.rb#106
+  # source://rubocop-ast//lib/rubocop/ast/builder.rb#107
   def string_value(token); end
 
   private
 
   # @api private
   #
-  # source://rubocop-ast//lib/rubocop/ast/builder.rb#112
+  # source://rubocop-ast//lib/rubocop/ast/builder.rb#113
   def node_klass(type); end
 
   class << self
@@ -1087,6 +1087,16 @@ end
 
 # source://rubocop-ast//lib/rubocop/ast/node/mixin/collection_node.rb#9
 RuboCop::AST::CollectionNode::ARRAY_METHODS = T.let(T.unsafe(nil), Array)
+
+# A node extension for `complex` nodes. This will be used in place of a plain
+# node when the builder constructs the AST, making its methods available to
+# all `complex` nodes within RuboCop.
+#
+# source://rubocop-ast//lib/rubocop/ast/node/complex_node.rb#8
+class RuboCop::AST::ComplexNode < ::RuboCop::AST::Node
+  include ::RuboCop::AST::BasicLiteralNode
+  include ::RuboCop::AST::NumericNode
+end
 
 # Common functionality for nodes that have conditions:
 # `if`, `while`, `until`, `case`.
@@ -5717,7 +5727,7 @@ RuboCop::AST::NodePattern::Sets::SET_____2 = T.let(T.unsafe(nil), Set)
 # source://rubocop-ast//lib/rubocop/ast/node_pattern.rb#55
 RuboCop::AST::NodePattern::VAR = T.let(T.unsafe(nil), String)
 
-# Common functionality for primitive numeric nodes: `int`, `float`, `rational`...
+# Common functionality for primitive numeric nodes: `int`, `float`, `rational`, `complex`...
 #
 # source://rubocop-ast//lib/rubocop/ast/node/mixin/numeric_node.rb#6
 module RuboCop::AST::NumericNode

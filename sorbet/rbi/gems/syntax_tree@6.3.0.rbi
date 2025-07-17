@@ -1091,45 +1091,45 @@ end
 #
 #     method(key1: value1, key2: value2)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1834
+# source://syntax_tree//lib/syntax_tree/node.rb#1849
 class SyntaxTree::BareAssocHash < ::SyntaxTree::Node
   # @return [BareAssocHash] a new instance of BareAssocHash
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1841
+  # source://syntax_tree//lib/syntax_tree/node.rb#1856
   def initialize(assocs:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1876
+  # source://syntax_tree//lib/syntax_tree/node.rb#1891
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1847
+  # source://syntax_tree//lib/syntax_tree/node.rb#1862
   def accept(visitor); end
 
   # [Array[ Assoc | AssocSplat ]]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1836
+  # source://syntax_tree//lib/syntax_tree/node.rb#1851
   def assocs; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1851
+  # source://syntax_tree//lib/syntax_tree/node.rb#1866
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1839
+  # source://syntax_tree//lib/syntax_tree/node.rb#1854
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1855
+  # source://syntax_tree//lib/syntax_tree/node.rb#1870
   def copy(assocs: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1866
+  # source://syntax_tree//lib/syntax_tree/node.rb#1881
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1868
+  # source://syntax_tree//lib/syntax_tree/node.rb#1883
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1872
+  # source://syntax_tree//lib/syntax_tree/node.rb#1887
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1880
+  # source://syntax_tree//lib/syntax_tree/node.rb#1895
   def format_key(q, key); end
 end
 
@@ -1280,42 +1280,42 @@ end
 #       value
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1899
+# source://syntax_tree//lib/syntax_tree/node.rb#1914
 class SyntaxTree::Begin < ::SyntaxTree::Node
   # @return [Begin] a new instance of Begin
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1906
+  # source://syntax_tree//lib/syntax_tree/node.rb#1921
   def initialize(bodystmt:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1951
+  # source://syntax_tree//lib/syntax_tree/node.rb#1966
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1912
+  # source://syntax_tree//lib/syntax_tree/node.rb#1927
   def accept(visitor); end
 
   # [BodyStmt] the bodystmt that contains the contents of this begin block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1901
+  # source://syntax_tree//lib/syntax_tree/node.rb#1916
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1916
+  # source://syntax_tree//lib/syntax_tree/node.rb#1931
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1904
+  # source://syntax_tree//lib/syntax_tree/node.rb#1919
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1920
+  # source://syntax_tree//lib/syntax_tree/node.rb#1935
   def copy(bodystmt: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1931
+  # source://syntax_tree//lib/syntax_tree/node.rb#1946
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1933
+  # source://syntax_tree//lib/syntax_tree/node.rb#1948
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1937
+  # source://syntax_tree//lib/syntax_tree/node.rb#1952
   def format(q); end
 end
 
@@ -1329,52 +1329,52 @@ end
 #
 #     array << value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2029
+# source://syntax_tree//lib/syntax_tree/node.rb#2044
 class SyntaxTree::Binary < ::SyntaxTree::Node
   # @return [Binary] a new instance of Binary
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2056
+  # source://syntax_tree//lib/syntax_tree/node.rb#2071
   def initialize(left:, operator:, right:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2128
+  # source://syntax_tree//lib/syntax_tree/node.rb#2143
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2064
+  # source://syntax_tree//lib/syntax_tree/node.rb#2079
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2068
+  # source://syntax_tree//lib/syntax_tree/node.rb#2083
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2054
+  # source://syntax_tree//lib/syntax_tree/node.rb#2069
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2072
+  # source://syntax_tree//lib/syntax_tree/node.rb#2087
   def copy(left: T.unsafe(nil), operator: T.unsafe(nil), right: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2085
+  # source://syntax_tree//lib/syntax_tree/node.rb#2100
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2087
+  # source://syntax_tree//lib/syntax_tree/node.rb#2102
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2097
+  # source://syntax_tree//lib/syntax_tree/node.rb#2112
   def format(q); end
 
   # [Node] the left-hand side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2045
+  # source://syntax_tree//lib/syntax_tree/node.rb#2060
   def left; end
 
   # [Symbol] the operator used between the two expressions
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2048
+  # source://syntax_tree//lib/syntax_tree/node.rb#2063
   def operator; end
 
   # [Node] the right-hand side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2051
+  # source://syntax_tree//lib/syntax_tree/node.rb#2066
   def right; end
 end
 
@@ -1382,42 +1382,42 @@ end
 #
 #     def method(&block); end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2227
+# source://syntax_tree//lib/syntax_tree/node.rb#2242
 class SyntaxTree::BlockArg < ::SyntaxTree::Node
   # @return [BlockArg] a new instance of BlockArg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2234
+  # source://syntax_tree//lib/syntax_tree/node.rb#2249
   def initialize(name:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2270
+  # source://syntax_tree//lib/syntax_tree/node.rb#2285
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2240
+  # source://syntax_tree//lib/syntax_tree/node.rb#2255
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2244
+  # source://syntax_tree//lib/syntax_tree/node.rb#2259
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2232
+  # source://syntax_tree//lib/syntax_tree/node.rb#2247
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2248
+  # source://syntax_tree//lib/syntax_tree/node.rb#2263
   def copy(name: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2259
+  # source://syntax_tree//lib/syntax_tree/node.rb#2274
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2261
+  # source://syntax_tree//lib/syntax_tree/node.rb#2276
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2265
+  # source://syntax_tree//lib/syntax_tree/node.rb#2280
   def format(q); end
 
   # [nil | Ident] the name of the block argument
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2229
+  # source://syntax_tree//lib/syntax_tree/node.rb#2244
   def name; end
 end
 
@@ -1429,60 +1429,60 @@ end
 #
 #     method { |value| }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4312
+# source://syntax_tree//lib/syntax_tree/node.rb#4327
 class SyntaxTree::BlockNode < ::SyntaxTree::Node
   # @return [BlockNode] a new instance of BlockNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4347
+  # source://syntax_tree//lib/syntax_tree/node.rb#4362
   def initialize(opening:, block_var:, bodystmt:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4420
+  # source://syntax_tree//lib/syntax_tree/node.rb#4435
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4355
+  # source://syntax_tree//lib/syntax_tree/node.rb#4370
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4429
+  # source://syntax_tree//lib/syntax_tree/node.rb#4444
   def arity; end
 
   # [nil | BlockVar] the optional variable declaration within this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4339
+  # source://syntax_tree//lib/syntax_tree/node.rb#4354
   def block_var; end
 
   # [BodyStmt | Statements] the expressions to be executed within this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4342
+  # source://syntax_tree//lib/syntax_tree/node.rb#4357
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4359
+  # source://syntax_tree//lib/syntax_tree/node.rb#4374
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4345
+  # source://syntax_tree//lib/syntax_tree/node.rb#4360
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4363
+  # source://syntax_tree//lib/syntax_tree/node.rb#4378
   def copy(opening: T.unsafe(nil), block_var: T.unsafe(nil), bodystmt: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4376
+  # source://syntax_tree//lib/syntax_tree/node.rb#4391
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4378
+  # source://syntax_tree//lib/syntax_tree/node.rb#4393
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4388
+  # source://syntax_tree//lib/syntax_tree/node.rb#4403
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4425
+  # source://syntax_tree//lib/syntax_tree/node.rb#4440
   def keywords?; end
 
   # [LBrace | Kw] the left brace or the do keyword that opens this block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4336
+  # source://syntax_tree//lib/syntax_tree/node.rb#4351
   def opening; end
 
   private
@@ -1492,7 +1492,7 @@ class SyntaxTree::BlockNode < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4471
+  # source://syntax_tree//lib/syntax_tree/node.rb#4486
   def forced_brace_bounds?(q); end
 
   # If we're a sibling of a control-flow keyword, then we're going to have to
@@ -1500,13 +1500,13 @@ class SyntaxTree::BlockNode < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4460
+  # source://syntax_tree//lib/syntax_tree/node.rb#4475
   def forced_do_end_bounds?(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4487
+  # source://syntax_tree//lib/syntax_tree/node.rb#4502
   def format_break(q, break_opening, break_closing); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4507
+  # source://syntax_tree//lib/syntax_tree/node.rb#4522
   def format_flat(q, flat_opening, flat_closing); end
 
   # If this is nested anywhere inside certain nodes, then we can't change
@@ -1514,33 +1514,33 @@ class SyntaxTree::BlockNode < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4442
+  # source://syntax_tree//lib/syntax_tree/node.rb#4457
   def unchangeable_bounds?(q); end
 end
 
 # Formats the opening brace or keyword of a block.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4314
+# source://syntax_tree//lib/syntax_tree/node.rb#4329
 class SyntaxTree::BlockNode::BlockOpenFormatter
   # @return [BlockOpenFormatter] a new instance of BlockOpenFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4321
+  # source://syntax_tree//lib/syntax_tree/node.rb#4336
   def initialize(text, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4326
+  # source://syntax_tree//lib/syntax_tree/node.rb#4341
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4330
+  # source://syntax_tree//lib/syntax_tree/node.rb#4345
   def format(q); end
 
   # [LBrace | Keyword] the node that is being represented
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4319
+  # source://syntax_tree//lib/syntax_tree/node.rb#4334
   def node; end
 
   # [String] the actual output that should be printed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4316
+  # source://syntax_tree//lib/syntax_tree/node.rb#4331
   def text; end
 end
 
@@ -1551,17 +1551,17 @@ end
 #     method do |positional, optional = value, keyword:, &block; local|
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2141
+# source://syntax_tree//lib/syntax_tree/node.rb#2156
 class SyntaxTree::BlockVar < ::SyntaxTree::Node
   # @return [BlockVar] a new instance of BlockVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2151
+  # source://syntax_tree//lib/syntax_tree/node.rb#2166
   def initialize(params:, locals:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2209
+  # source://syntax_tree//lib/syntax_tree/node.rb#2224
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2158
+  # source://syntax_tree//lib/syntax_tree/node.rb#2173
   def accept(visitor); end
 
   # When a single required parameter is declared for a block, it gets
@@ -1569,52 +1569,52 @@ class SyntaxTree::BlockVar < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2216
+  # source://syntax_tree//lib/syntax_tree/node.rb#2231
   def arg0?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2162
+  # source://syntax_tree//lib/syntax_tree/node.rb#2177
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2149
+  # source://syntax_tree//lib/syntax_tree/node.rb#2164
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2166
+  # source://syntax_tree//lib/syntax_tree/node.rb#2181
   def copy(params: T.unsafe(nil), locals: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2178
+  # source://syntax_tree//lib/syntax_tree/node.rb#2193
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2180
+  # source://syntax_tree//lib/syntax_tree/node.rb#2195
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2196
+  # source://syntax_tree//lib/syntax_tree/node.rb#2211
   def format(q); end
 
   # [Array[ Ident ]] the list of block-local variable declarations
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2146
+  # source://syntax_tree//lib/syntax_tree/node.rb#2161
   def locals; end
 
   # [Params] the parameters being declared with the block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2143
+  # source://syntax_tree//lib/syntax_tree/node.rb#2158
   def params; end
 end
 
 # We'll keep a single instance of this separator around for all block vars
 # to cut down on allocations.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2194
+# source://syntax_tree//lib/syntax_tree/node.rb#2209
 SyntaxTree::BlockVar::SEPARATOR = T.let(T.unsafe(nil), SyntaxTree::BlockVar::Separator)
 
 # Within the pipes of the block declaration, we don't want any spaces. So
 # we'll separate the parameters with a comma and space but no breakables.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2186
+# source://syntax_tree//lib/syntax_tree/node.rb#2201
 class SyntaxTree::BlockVar::Separator
-  # source://syntax_tree//lib/syntax_tree/node.rb#2187
+  # source://syntax_tree//lib/syntax_tree/node.rb#2202
   def call(q); end
 end
 
@@ -1622,70 +1622,70 @@ end
 # doesn't necessarily know where it started. So the parent node needs to
 # report back down into this one where it goes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2278
+# source://syntax_tree//lib/syntax_tree/node.rb#2293
 class SyntaxTree::BodyStmt < ::SyntaxTree::Node
   # @return [BodyStmt] a new instance of BodyStmt
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2297
+  # source://syntax_tree//lib/syntax_tree/node.rb#2312
   def initialize(statements:, rescue_clause:, else_keyword:, else_clause:, ensure_clause:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2428
+  # source://syntax_tree//lib/syntax_tree/node.rb#2443
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2352
+  # source://syntax_tree//lib/syntax_tree/node.rb#2367
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2314
+  # source://syntax_tree//lib/syntax_tree/node.rb#2329
   def bind(parser, start_char, start_column, end_char, end_column); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2356
+  # source://syntax_tree//lib/syntax_tree/node.rb#2371
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2295
+  # source://syntax_tree//lib/syntax_tree/node.rb#2310
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2360
+  # source://syntax_tree//lib/syntax_tree/node.rb#2375
   def copy(statements: T.unsafe(nil), rescue_clause: T.unsafe(nil), else_keyword: T.unsafe(nil), else_clause: T.unsafe(nil), ensure_clause: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2382
+  # source://syntax_tree//lib/syntax_tree/node.rb#2397
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2384
+  # source://syntax_tree//lib/syntax_tree/node.rb#2399
   def deconstruct_keys(_keys); end
 
   # [nil | Statements] the optional set of statements inside the else clause
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2289
+  # source://syntax_tree//lib/syntax_tree/node.rb#2304
   def else_clause; end
 
   # [nil | Kw] the optional else keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2286
+  # source://syntax_tree//lib/syntax_tree/node.rb#2301
   def else_keyword; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2348
+  # source://syntax_tree//lib/syntax_tree/node.rb#2363
   def empty?; end
 
   # [nil | Ensure] the optional ensure clause
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2292
+  # source://syntax_tree//lib/syntax_tree/node.rb#2307
   def ensure_clause; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2396
+  # source://syntax_tree//lib/syntax_tree/node.rb#2411
   def format(q); end
 
   # [nil | Rescue] the optional rescue chain attached to the begin clause
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2283
+  # source://syntax_tree//lib/syntax_tree/node.rb#2298
   def rescue_clause; end
 
   # [Statements] the list of statements inside the begin clause
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2280
+  # source://syntax_tree//lib/syntax_tree/node.rb#2295
   def statements; end
 end
 
@@ -1697,42 +1697,42 @@ end
 #
 #     break 1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2634
+# source://syntax_tree//lib/syntax_tree/node.rb#2649
 class SyntaxTree::Break < ::SyntaxTree::Node
   # @return [Break] a new instance of Break
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2641
+  # source://syntax_tree//lib/syntax_tree/node.rb#2656
   def initialize(arguments:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2676
+  # source://syntax_tree//lib/syntax_tree/node.rb#2691
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2647
+  # source://syntax_tree//lib/syntax_tree/node.rb#2662
   def accept(visitor); end
 
   # [Args] the arguments being sent to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2636
+  # source://syntax_tree//lib/syntax_tree/node.rb#2651
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2651
+  # source://syntax_tree//lib/syntax_tree/node.rb#2666
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2639
+  # source://syntax_tree//lib/syntax_tree/node.rb#2654
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2655
+  # source://syntax_tree//lib/syntax_tree/node.rb#2670
   def copy(arguments: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2666
+  # source://syntax_tree//lib/syntax_tree/node.rb#2681
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2668
+  # source://syntax_tree//lib/syntax_tree/node.rb#2683
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2672
+  # source://syntax_tree//lib/syntax_tree/node.rb#2687
   def format(q); end
 end
 
@@ -1791,105 +1791,105 @@ module SyntaxTree::CLI
     # Run the CLI over the given array of strings that make up the arguments
     # passed to the invocation.
     #
-    # source://syntax_tree//lib/syntax_tree/cli.rb#565
+    # source://syntax_tree//lib/syntax_tree/cli.rb#599
     def run(argv); end
 
     private
 
     # Take a line of Ruby source and colorize the output.
     #
-    # source://syntax_tree//lib/syntax_tree/cli.rb#721
+    # source://syntax_tree//lib/syntax_tree/cli.rb#776
     def colorize_line(line); end
 
     # These are the options we're going to pass into IRB::Color.colorize_code.
     # Since we support multiple versions of IRB, we're going to need to do
     # some reflection to make sure we always pass valid options.
     #
-    # source://syntax_tree//lib/syntax_tree/cli.rb#729
+    # source://syntax_tree//lib/syntax_tree/cli.rb#784
     def colorize_options; end
 
     # Highlights a snippet from a source and parse error.
     #
-    # source://syntax_tree//lib/syntax_tree/cli.rb#697
+    # source://syntax_tree//lib/syntax_tree/cli.rb#752
     def highlight_error(error, source); end
 
     # Processes each item in the queue with the given action. Returns whether
     # or not any errors were encountered.
     #
-    # source://syntax_tree//lib/syntax_tree/cli.rb#653
+    # source://syntax_tree//lib/syntax_tree/cli.rb#708
     def process_queue(queue, action); end
   end
 end
 
 # An action of the CLI that prints out the AST for the given source.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#121
+# source://syntax_tree//lib/syntax_tree/cli.rb#126
 class SyntaxTree::CLI::AST < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#122
+  # source://syntax_tree//lib/syntax_tree/cli.rb#127
   def run(item); end
 end
 
 # The parent action class for the CLI that implements the basics.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#103
+# source://syntax_tree//lib/syntax_tree/cli.rb#108
 class SyntaxTree::CLI::Action
   # @return [Action] a new instance of Action
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#106
+  # source://syntax_tree//lib/syntax_tree/cli.rb#111
   def initialize(options); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#116
+  # source://syntax_tree//lib/syntax_tree/cli.rb#121
   def failure; end
 
   # Returns the value of attribute options.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#104
+  # source://syntax_tree//lib/syntax_tree/cli.rb#109
   def options; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#110
+  # source://syntax_tree//lib/syntax_tree/cli.rb#115
   def run(item); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#113
+  # source://syntax_tree//lib/syntax_tree/cli.rb#118
   def success; end
 end
 
 # An action of the CLI that generates ctags for the given source.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#158
+# source://syntax_tree//lib/syntax_tree/cli.rb#163
 class SyntaxTree::CLI::CTags < ::SyntaxTree::CLI::Action
   # @return [CTags] a new instance of CTags
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#161
+  # source://syntax_tree//lib/syntax_tree/cli.rb#166
   def initialize(options); end
 
   # Returns the value of attribute entries.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#159
+  # source://syntax_tree//lib/syntax_tree/cli.rb#164
   def entries; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#166
+  # source://syntax_tree//lib/syntax_tree/cli.rb#171
   def run(item); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#233
+  # source://syntax_tree//lib/syntax_tree/cli.rb#238
   def success; end
 end
 
 # An action of the CLI that ensures that the filepath is formatted as
 # expected.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#129
+# source://syntax_tree//lib/syntax_tree/cli.rb#134
 class SyntaxTree::CLI::Check < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#152
+  # source://syntax_tree//lib/syntax_tree/cli.rb#157
   def failure; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#133
+  # source://syntax_tree//lib/syntax_tree/cli.rb#138
   def run(item); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#148
+  # source://syntax_tree//lib/syntax_tree/cli.rb#153
   def success; end
 end
 
-# source://syntax_tree//lib/syntax_tree/cli.rb#130
+# source://syntax_tree//lib/syntax_tree/cli.rb#135
 class SyntaxTree::CLI::Check::UnformattedError < ::StandardError; end
 
 # A utility wrapper around colored strings in the output.
@@ -1939,62 +1939,62 @@ end
 # When invoking the CLI, we will read this config file and then parse it if
 # it exists in the current working directory.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#544
+# source://syntax_tree//lib/syntax_tree/cli.rb#570
 class SyntaxTree::CLI::ConfigFile
   # @return [ConfigFile] a new instance of ConfigFile
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#549
-  def initialize; end
+  # source://syntax_tree//lib/syntax_tree/cli.rb#575
+  def initialize(filepath = T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#557
+  # source://syntax_tree//lib/syntax_tree/cli.rb#591
   def arguments; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#553
+  # source://syntax_tree//lib/syntax_tree/cli.rb#587
   def exists?; end
 
   # Returns the value of attribute filepath.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#547
+  # source://syntax_tree//lib/syntax_tree/cli.rb#573
   def filepath; end
 end
 
-# source://syntax_tree//lib/syntax_tree/cli.rb#545
+# source://syntax_tree//lib/syntax_tree/cli.rb#571
 SyntaxTree::CLI::ConfigFile::FILENAME = T.let(T.unsafe(nil), String)
 
 # An action of the CLI that formats the source twice to check if the first
 # format is not idempotent.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#245
+# source://syntax_tree//lib/syntax_tree/cli.rb#250
 class SyntaxTree::CLI::Debug < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#277
+  # source://syntax_tree//lib/syntax_tree/cli.rb#282
   def failure; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#249
+  # source://syntax_tree//lib/syntax_tree/cli.rb#254
   def run(item); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#273
+  # source://syntax_tree//lib/syntax_tree/cli.rb#278
   def success; end
 end
 
-# source://syntax_tree//lib/syntax_tree/cli.rb#246
+# source://syntax_tree//lib/syntax_tree/cli.rb#251
 class SyntaxTree::CLI::Debug::NonIdempotentFormatError < ::StandardError; end
 
 # An action of the CLI that prints out the doc tree IR for the given source.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#283
+# source://syntax_tree//lib/syntax_tree/cli.rb#288
 class SyntaxTree::CLI::Doc < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#284
+  # source://syntax_tree//lib/syntax_tree/cli.rb#289
   def run(item); end
 end
 
 # An action of the CLI that outputs a pattern-matching Ruby expression that
 # would match the first expression of the input given.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#297
+# source://syntax_tree//lib/syntax_tree/cli.rb#302
 class SyntaxTree::CLI::Expr < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#298
+  # source://syntax_tree//lib/syntax_tree/cli.rb#303
   def run(item); end
 end
 
@@ -2026,33 +2026,33 @@ end
 
 # An action of the CLI that formats the input source and prints it out.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#311
+# source://syntax_tree//lib/syntax_tree/cli.rb#316
 class SyntaxTree::CLI::Format < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#312
+  # source://syntax_tree//lib/syntax_tree/cli.rb#317
   def run(item); end
 end
 
 # The help message displayed if the input arguments are not correctly
 # ordered or formatted.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#409
+# source://syntax_tree//lib/syntax_tree/cli.rb#414
 SyntaxTree::CLI::HELP = T.let(T.unsafe(nil), String)
 
 # An action of the CLI that converts the source into its equivalent JSON
 # representation.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#326
+# source://syntax_tree//lib/syntax_tree/cli.rb#331
 class SyntaxTree::CLI::Json < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#327
+  # source://syntax_tree//lib/syntax_tree/cli.rb#332
   def run(item); end
 end
 
 # An action of the CLI that outputs a pattern-matching Ruby expression that
 # would match the input given.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#335
+# source://syntax_tree//lib/syntax_tree/cli.rb#340
 class SyntaxTree::CLI::Match < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#336
+  # source://syntax_tree//lib/syntax_tree/cli.rb#341
   def run(item); end
 end
 
@@ -2060,66 +2060,76 @@ end
 # responsible for parsing the list and then returning the file paths at the
 # end.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#466
+# source://syntax_tree//lib/syntax_tree/cli.rb#483
 class SyntaxTree::CLI::Options
   # @return [Options] a new instance of Options
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#473
+  # source://syntax_tree//lib/syntax_tree/cli.rb#491
   def initialize; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#481
+  # Returns the value of attribute extension.
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#484
+  def extension; end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#500
   def formatter_options; end
 
   # Returns the value of attribute ignore_files.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  # source://syntax_tree//lib/syntax_tree/cli.rb#484
   def ignore_files; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#486
+  # source://syntax_tree//lib/syntax_tree/cli.rb#505
   def parse(arguments); end
 
   # Returns the value of attribute plugins.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  # source://syntax_tree//lib/syntax_tree/cli.rb#484
   def plugins; end
 
   # Returns the value of attribute print_width.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  # source://syntax_tree//lib/syntax_tree/cli.rb#484
   def print_width; end
 
   # Returns the value of attribute scripts.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  # source://syntax_tree//lib/syntax_tree/cli.rb#484
   def scripts; end
 
   # Returns the value of attribute target_ruby_version.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#467
+  # source://syntax_tree//lib/syntax_tree/cli.rb#484
   def target_ruby_version; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#492
+  # source://syntax_tree//lib/syntax_tree/cli.rb#511
   def parser; end
 end
 
 # An item of work that correspond to the content passed in via stdin.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#84
+# source://syntax_tree//lib/syntax_tree/cli.rb#85
 class SyntaxTree::CLI::STDINItem
-  # source://syntax_tree//lib/syntax_tree/cli.rb#89
+  # @return [STDINItem] a new instance of STDINItem
+  #
+  # source://syntax_tree//lib/syntax_tree/cli.rb#86
+  def initialize(extension); end
+
+  # source://syntax_tree//lib/syntax_tree/cli.rb#94
   def filepath; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#85
+  # source://syntax_tree//lib/syntax_tree/cli.rb#90
   def handler; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#93
+  # source://syntax_tree//lib/syntax_tree/cli.rb#98
   def source; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#97
+  # source://syntax_tree//lib/syntax_tree/cli.rb#102
   def writable?; end
 end
 
@@ -2131,12 +2141,12 @@ class SyntaxTree::CLI::ScriptItem
   # @return [ScriptItem] a new instance of ScriptItem
   #
   # source://syntax_tree//lib/syntax_tree/cli.rb#66
-  def initialize(source); end
+  def initialize(source, extension); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#74
+  # source://syntax_tree//lib/syntax_tree/cli.rb#75
   def filepath; end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#70
+  # source://syntax_tree//lib/syntax_tree/cli.rb#71
   def handler; end
 
   # Returns the value of attribute source.
@@ -2146,35 +2156,35 @@ class SyntaxTree::CLI::ScriptItem
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#78
+  # source://syntax_tree//lib/syntax_tree/cli.rb#79
   def writable?; end
 end
 
 # An action of the CLI that searches for the given pattern matching pattern
 # in the given files.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#343
+# source://syntax_tree//lib/syntax_tree/cli.rb#348
 class SyntaxTree::CLI::Search < ::SyntaxTree::CLI::Action
   # @return [Search] a new instance of Search
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#346
+  # source://syntax_tree//lib/syntax_tree/cli.rb#351
   def initialize(query); end
 
-  # source://syntax_tree//lib/syntax_tree/cli.rb#359
+  # source://syntax_tree//lib/syntax_tree/cli.rb#364
   def run(item); end
 
   # Returns the value of attribute search.
   #
-  # source://syntax_tree//lib/syntax_tree/cli.rb#344
+  # source://syntax_tree//lib/syntax_tree/cli.rb#349
   def search; end
 end
 
 # An action of the CLI that formats the input source and writes the
 # formatted output back to the file.
 #
-# source://syntax_tree//lib/syntax_tree/cli.rb#381
+# source://syntax_tree//lib/syntax_tree/cli.rb#386
 class SyntaxTree::CLI::Write < ::SyntaxTree::CLI::Action
-  # source://syntax_tree//lib/syntax_tree/cli.rb#382
+  # source://syntax_tree//lib/syntax_tree/cli.rb#387
   def run(item); end
 end
 
@@ -2182,42 +2192,42 @@ end
 #
 #     @@variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4046
+# source://syntax_tree//lib/syntax_tree/node.rb#4061
 class SyntaxTree::CVar < ::SyntaxTree::Node
   # @return [CVar] a new instance of CVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4053
+  # source://syntax_tree//lib/syntax_tree/node.rb#4068
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4088
+  # source://syntax_tree//lib/syntax_tree/node.rb#4103
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4059
+  # source://syntax_tree//lib/syntax_tree/node.rb#4074
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4063
+  # source://syntax_tree//lib/syntax_tree/node.rb#4078
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4051
+  # source://syntax_tree//lib/syntax_tree/node.rb#4066
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4067
+  # source://syntax_tree//lib/syntax_tree/node.rb#4082
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4078
+  # source://syntax_tree//lib/syntax_tree/node.rb#4093
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4080
+  # source://syntax_tree//lib/syntax_tree/node.rb#4095
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4084
+  # source://syntax_tree//lib/syntax_tree/node.rb#4099
   def format(q); end
 
   # [String] the name of the class variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4048
+  # source://syntax_tree//lib/syntax_tree/node.rb#4063
   def value; end
 end
 
@@ -2236,22 +2246,22 @@ end
 # Of course there are a lot of caveats to that, including trailing operators
 # when necessary, where comments are places, how blocks are aligned, etc.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2721
+# source://syntax_tree//lib/syntax_tree/node.rb#2736
 class SyntaxTree::CallChainFormatter
   # @return [CallChainFormatter] a new instance of CallChainFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2725
+  # source://syntax_tree//lib/syntax_tree/node.rb#2740
   def initialize(node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2729
+  # source://syntax_tree//lib/syntax_tree/node.rb#2744
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2795
+  # source://syntax_tree//lib/syntax_tree/node.rb#2810
   def format_chain(q, children); end
 
   # [CallNode | MethodAddBlock] the top of the call chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2723
+  # source://syntax_tree//lib/syntax_tree/node.rb#2738
   def node; end
 
   private
@@ -2262,16 +2272,16 @@ class SyntaxTree::CallChainFormatter
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2898
+  # source://syntax_tree//lib/syntax_tree/node.rb#2913
   def attach_directly?(node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2908
+  # source://syntax_tree//lib/syntax_tree/node.rb#2923
   def format_child(q, child, skip_comments: T.unsafe(nil), skip_operator: T.unsafe(nil), skip_attached: T.unsafe(nil)); end
 
   class << self
     # @return [Boolean]
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#2879
+    # source://syntax_tree//lib/syntax_tree/node.rb#2894
     def chained?(node); end
   end
 end
@@ -2280,91 +2290,91 @@ end
 #
 #     receiver.message
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2946
+# source://syntax_tree//lib/syntax_tree/node.rb#2961
 class SyntaxTree::CallNode < ::SyntaxTree::Node
   # @return [CallNode] a new instance of CallNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2962
+  # source://syntax_tree//lib/syntax_tree/node.rb#2977
   def initialize(receiver:, operator:, message:, arguments:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3057
+  # source://syntax_tree//lib/syntax_tree/node.rb#3072
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2971
+  # source://syntax_tree//lib/syntax_tree/node.rb#2986
   def accept(visitor); end
 
   # [nil | ArgParen | Args] the arguments to the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2957
+  # source://syntax_tree//lib/syntax_tree/node.rb#2972
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3103
+  # source://syntax_tree//lib/syntax_tree/node.rb#3118
   def arity; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2975
+  # source://syntax_tree//lib/syntax_tree/node.rb#2990
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2960
+  # source://syntax_tree//lib/syntax_tree/node.rb#2975
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2984
+  # source://syntax_tree//lib/syntax_tree/node.rb#2999
   def copy(receiver: T.unsafe(nil), operator: T.unsafe(nil), message: T.unsafe(nil), arguments: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3004
+  # source://syntax_tree//lib/syntax_tree/node.rb#3019
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3006
+  # source://syntax_tree//lib/syntax_tree/node.rb#3021
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3017
+  # source://syntax_tree//lib/syntax_tree/node.rb#3032
   def format(q); end
 
   # Print out the arguments to this call. If there are no arguments, then do
   # nothing.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3065
+  # source://syntax_tree//lib/syntax_tree/node.rb#3080
   def format_arguments(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3075
+  # source://syntax_tree//lib/syntax_tree/node.rb#3090
   def format_contents(q); end
 
   # [:call | Backtick | Const | Ident | Op] the message being sent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2954
+  # source://syntax_tree//lib/syntax_tree/node.rb#2969
   def message; end
 
   # [nil | :"::" | Op | Period] the operator being used to send the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2951
+  # source://syntax_tree//lib/syntax_tree/node.rb#2966
   def operator; end
 
   # [nil | Node] the receiver of the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2948
+  # source://syntax_tree//lib/syntax_tree/node.rb#2963
   def receiver; end
 end
 
 # Wraps a call operator (which can be a string literal :: or an Op node or a
 # Period node) and formats it when called.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2683
+# source://syntax_tree//lib/syntax_tree/node.rb#2698
 class SyntaxTree::CallOperatorFormatter
   # @return [CallOperatorFormatter] a new instance of CallOperatorFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2687
+  # source://syntax_tree//lib/syntax_tree/node.rb#2702
   def initialize(operator); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2691
+  # source://syntax_tree//lib/syntax_tree/node.rb#2706
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2695
+  # source://syntax_tree//lib/syntax_tree/node.rb#2710
   def format(q); end
 
   # [:"::" | Op | Period] the operator being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2685
+  # source://syntax_tree//lib/syntax_tree/node.rb#2700
   def operator; end
 end
 
@@ -2379,52 +2389,52 @@ end
 #       "number"
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3119
+# source://syntax_tree//lib/syntax_tree/node.rb#3134
 class SyntaxTree::Case < ::SyntaxTree::Node
   # @return [Case] a new instance of Case
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3132
+  # source://syntax_tree//lib/syntax_tree/node.rb#3147
   def initialize(keyword:, value:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3190
+  # source://syntax_tree//lib/syntax_tree/node.rb#3205
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3140
+  # source://syntax_tree//lib/syntax_tree/node.rb#3155
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3144
+  # source://syntax_tree//lib/syntax_tree/node.rb#3159
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3130
+  # source://syntax_tree//lib/syntax_tree/node.rb#3145
   def comments; end
 
   # [In | When] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3127
+  # source://syntax_tree//lib/syntax_tree/node.rb#3142
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3148
+  # source://syntax_tree//lib/syntax_tree/node.rb#3163
   def copy(keyword: T.unsafe(nil), value: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3161
+  # source://syntax_tree//lib/syntax_tree/node.rb#3176
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3163
+  # source://syntax_tree//lib/syntax_tree/node.rb#3178
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3173
+  # source://syntax_tree//lib/syntax_tree/node.rb#3188
   def format(q); end
 
   # [Kw] the keyword that opens this expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3121
+  # source://syntax_tree//lib/syntax_tree/node.rb#3136
   def keyword; end
 
   # [nil | Node] optional value being switched on
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3124
+  # source://syntax_tree//lib/syntax_tree/node.rb#3139
   def value; end
 end
 
@@ -2460,91 +2470,91 @@ end
 #     class Child < method
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3315
+# source://syntax_tree//lib/syntax_tree/node.rb#3330
 class SyntaxTree::ClassDeclaration < ::SyntaxTree::Node
   # @return [ClassDeclaration] a new instance of ClassDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3329
+  # source://syntax_tree//lib/syntax_tree/node.rb#3344
   def initialize(constant:, superclass:, bodystmt:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3392
+  # source://syntax_tree//lib/syntax_tree/node.rb#3407
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3337
+  # source://syntax_tree//lib/syntax_tree/node.rb#3352
   def accept(visitor); end
 
   # [BodyStmt] the expressions to execute within the context of the class
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3324
+  # source://syntax_tree//lib/syntax_tree/node.rb#3339
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3341
+  # source://syntax_tree//lib/syntax_tree/node.rb#3356
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3327
+  # source://syntax_tree//lib/syntax_tree/node.rb#3342
   def comments; end
 
   # [ConstPathRef | ConstRef | TopConstRef] the name of the class being
   # defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3318
+  # source://syntax_tree//lib/syntax_tree/node.rb#3333
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3345
+  # source://syntax_tree//lib/syntax_tree/node.rb#3360
   def copy(constant: T.unsafe(nil), superclass: T.unsafe(nil), bodystmt: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3358
+  # source://syntax_tree//lib/syntax_tree/node.rb#3373
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3360
+  # source://syntax_tree//lib/syntax_tree/node.rb#3375
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3370
+  # source://syntax_tree//lib/syntax_tree/node.rb#3385
   def format(q); end
 
   # [nil | Node] the optional superclass declaration
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3321
+  # source://syntax_tree//lib/syntax_tree/node.rb#3336
   def superclass; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3399
+  # source://syntax_tree//lib/syntax_tree/node.rb#3414
   def format_declaration(q); end
 end
 
 # Comma represents the use of the , operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3413
+# source://syntax_tree//lib/syntax_tree/node.rb#3428
 class SyntaxTree::Comma < ::SyntaxTree::Node
   # @return [Comma] a new instance of Comma
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3417
+  # source://syntax_tree//lib/syntax_tree/node.rb#3432
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3440
+  # source://syntax_tree//lib/syntax_tree/node.rb#3455
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3422
+  # source://syntax_tree//lib/syntax_tree/node.rb#3437
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3426
+  # source://syntax_tree//lib/syntax_tree/node.rb#3441
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3430
+  # source://syntax_tree//lib/syntax_tree/node.rb#3445
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3434
+  # source://syntax_tree//lib/syntax_tree/node.rb#3449
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3436
+  # source://syntax_tree//lib/syntax_tree/node.rb#3451
   def deconstruct_keys(_keys); end
 
   # [String] the comma in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3415
+  # source://syntax_tree//lib/syntax_tree/node.rb#3430
   def value; end
 end
 
@@ -2554,60 +2564,60 @@ end
 #
 #     method argument
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3451
+# source://syntax_tree//lib/syntax_tree/node.rb#3466
 class SyntaxTree::Command < ::SyntaxTree::Node
   # @return [Command] a new instance of Command
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3464
+  # source://syntax_tree//lib/syntax_tree/node.rb#3479
   def initialize(message:, arguments:, block:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3514
+  # source://syntax_tree//lib/syntax_tree/node.rb#3529
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3472
+  # source://syntax_tree//lib/syntax_tree/node.rb#3487
   def accept(visitor); end
 
   # [Args] the arguments being sent with the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3456
+  # source://syntax_tree//lib/syntax_tree/node.rb#3471
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3519
+  # source://syntax_tree//lib/syntax_tree/node.rb#3534
   def arity; end
 
   # [nil | BlockNode] the optional block being passed to the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3459
+  # source://syntax_tree//lib/syntax_tree/node.rb#3474
   def block; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3476
+  # source://syntax_tree//lib/syntax_tree/node.rb#3491
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3462
+  # source://syntax_tree//lib/syntax_tree/node.rb#3477
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3480
+  # source://syntax_tree//lib/syntax_tree/node.rb#3495
   def copy(message: T.unsafe(nil), arguments: T.unsafe(nil), block: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3493
+  # source://syntax_tree//lib/syntax_tree/node.rb#3508
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3495
+  # source://syntax_tree//lib/syntax_tree/node.rb#3510
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3505
+  # source://syntax_tree//lib/syntax_tree/node.rb#3520
   def format(q); end
 
   # [Const | Ident] the message being sent to the implicit receiver
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3453
+  # source://syntax_tree//lib/syntax_tree/node.rb#3468
   def message; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3525
+  # source://syntax_tree//lib/syntax_tree/node.rb#3540
   def align(q, node, &block); end
 end
 
@@ -2616,70 +2626,70 @@ end
 #
 #     object.method argument
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3563
+# source://syntax_tree//lib/syntax_tree/node.rb#3578
 class SyntaxTree::CommandCall < ::SyntaxTree::Node
   # @return [CommandCall] a new instance of CommandCall
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3582
+  # source://syntax_tree//lib/syntax_tree/node.rb#3597
   def initialize(receiver:, operator:, message:, arguments:, block:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3686
+  # source://syntax_tree//lib/syntax_tree/node.rb#3701
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3599
+  # source://syntax_tree//lib/syntax_tree/node.rb#3614
   def accept(visitor); end
 
   # [nil | Args | ArgParen] the arguments going along with the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3574
+  # source://syntax_tree//lib/syntax_tree/node.rb#3589
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3692
+  # source://syntax_tree//lib/syntax_tree/node.rb#3707
   def arity; end
 
   # [nil | BlockNode] the block associated with this method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3577
+  # source://syntax_tree//lib/syntax_tree/node.rb#3592
   def block; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3603
+  # source://syntax_tree//lib/syntax_tree/node.rb#3618
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3580
+  # source://syntax_tree//lib/syntax_tree/node.rb#3595
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3607
+  # source://syntax_tree//lib/syntax_tree/node.rb#3622
   def copy(receiver: T.unsafe(nil), operator: T.unsafe(nil), message: T.unsafe(nil), arguments: T.unsafe(nil), block: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3629
+  # source://syntax_tree//lib/syntax_tree/node.rb#3644
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3631
+  # source://syntax_tree//lib/syntax_tree/node.rb#3646
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3643
+  # source://syntax_tree//lib/syntax_tree/node.rb#3658
   def format(q); end
 
   # [:call | Const | Ident | Op] the message being send
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3571
+  # source://syntax_tree//lib/syntax_tree/node.rb#3586
   def message; end
 
   # [nil | :"::" | Op | Period] the operator used to send the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3568
+  # source://syntax_tree//lib/syntax_tree/node.rb#3583
   def operator; end
 
   # [nil | Node] the receiver of the message
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3565
+  # source://syntax_tree//lib/syntax_tree/node.rb#3580
   def receiver; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3698
+  # source://syntax_tree//lib/syntax_tree/node.rb#3713
   def argument_alignment(q, doc); end
 end
 
@@ -2687,112 +2697,112 @@ end
 #
 #     # comment
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3725
+# source://syntax_tree//lib/syntax_tree/node.rb#3740
 class SyntaxTree::Comment < ::SyntaxTree::Node
   # @return [Comment] a new instance of Comment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3734
+  # source://syntax_tree//lib/syntax_tree/node.rb#3749
   def initialize(value:, inline:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3793
+  # source://syntax_tree//lib/syntax_tree/node.rb#3808
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3767
+  # source://syntax_tree//lib/syntax_tree/node.rb#3782
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3771
+  # source://syntax_tree//lib/syntax_tree/node.rb#3786
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3763
+  # source://syntax_tree//lib/syntax_tree/node.rb#3778
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3775
+  # source://syntax_tree//lib/syntax_tree/node.rb#3790
   def copy(value: T.unsafe(nil), inline: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3783
+  # source://syntax_tree//lib/syntax_tree/node.rb#3798
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3785
+  # source://syntax_tree//lib/syntax_tree/node.rb#3800
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3789
+  # source://syntax_tree//lib/syntax_tree/node.rb#3804
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3759
+  # source://syntax_tree//lib/syntax_tree/node.rb#3774
   def ignore?; end
 
   # [boolean] whether or not there is code on the same line as this comment.
   # If there is, then inline will be true.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3731
+  # source://syntax_tree//lib/syntax_tree/node.rb#3746
   def inline; end
 
   # [boolean] whether or not there is code on the same line as this comment.
   # If there is, then inline will be true.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3732
+  # source://syntax_tree//lib/syntax_tree/node.rb#3747
   def inline?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3743
+  # source://syntax_tree//lib/syntax_tree/node.rb#3758
   def leading!; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3747
+  # source://syntax_tree//lib/syntax_tree/node.rb#3762
   def leading?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3751
+  # source://syntax_tree//lib/syntax_tree/node.rb#3766
   def trailing!; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3755
+  # source://syntax_tree//lib/syntax_tree/node.rb#3770
   def trailing?; end
 
   # [String] the contents of the comment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3727
+  # source://syntax_tree//lib/syntax_tree/node.rb#3742
   def value; end
 end
 
 # Formats an If or Unless node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6317
+# source://syntax_tree//lib/syntax_tree/node.rb#6332
 class SyntaxTree::ConditionalFormatter
   # @return [ConditionalFormatter] a new instance of ConditionalFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6324
+  # source://syntax_tree//lib/syntax_tree/node.rb#6339
   def initialize(keyword, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6329
+  # source://syntax_tree//lib/syntax_tree/node.rb#6344
   def format(q); end
 
   # [String] the keyword associated with this conditional
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6319
+  # source://syntax_tree//lib/syntax_tree/node.rb#6334
   def keyword; end
 
   # [If | Unless] the node that is being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6322
+  # source://syntax_tree//lib/syntax_tree/node.rb#6337
   def node; end
 
   private
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6453
+  # source://syntax_tree//lib/syntax_tree/node.rb#6468
   def contains_conditional?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6388
+  # source://syntax_tree//lib/syntax_tree/node.rb#6403
   def format_break(q, force:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6380
+  # source://syntax_tree//lib/syntax_tree/node.rb#6395
   def format_flat(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6408
+  # source://syntax_tree//lib/syntax_tree/node.rb#6423
   def format_ternary(q); end
 end
 
@@ -2810,42 +2820,42 @@ end
 #
 #     :Constant
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3812
+# source://syntax_tree//lib/syntax_tree/node.rb#3827
 class SyntaxTree::Const < ::SyntaxTree::Node
   # @return [Const] a new instance of Const
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3819
+  # source://syntax_tree//lib/syntax_tree/node.rb#3834
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3854
+  # source://syntax_tree//lib/syntax_tree/node.rb#3869
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3825
+  # source://syntax_tree//lib/syntax_tree/node.rb#3840
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3829
+  # source://syntax_tree//lib/syntax_tree/node.rb#3844
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3817
+  # source://syntax_tree//lib/syntax_tree/node.rb#3832
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3833
+  # source://syntax_tree//lib/syntax_tree/node.rb#3848
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3844
+  # source://syntax_tree//lib/syntax_tree/node.rb#3859
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3846
+  # source://syntax_tree//lib/syntax_tree/node.rb#3861
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3850
+  # source://syntax_tree//lib/syntax_tree/node.rb#3865
   def format(q); end
 
   # [String] the name of the constant
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3814
+  # source://syntax_tree//lib/syntax_tree/node.rb#3829
   def value; end
 end
 
@@ -2855,47 +2865,47 @@ end
 #
 #     object::Const = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3865
+# source://syntax_tree//lib/syntax_tree/node.rb#3880
 class SyntaxTree::ConstPathField < ::SyntaxTree::Node
   # @return [ConstPathField] a new instance of ConstPathField
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3875
+  # source://syntax_tree//lib/syntax_tree/node.rb#3890
   def initialize(parent:, constant:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3919
+  # source://syntax_tree//lib/syntax_tree/node.rb#3934
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3882
+  # source://syntax_tree//lib/syntax_tree/node.rb#3897
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3886
+  # source://syntax_tree//lib/syntax_tree/node.rb#3901
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3873
+  # source://syntax_tree//lib/syntax_tree/node.rb#3888
   def comments; end
 
   # [Const] the constant itself
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3870
+  # source://syntax_tree//lib/syntax_tree/node.rb#3885
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3890
+  # source://syntax_tree//lib/syntax_tree/node.rb#3905
   def copy(parent: T.unsafe(nil), constant: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3902
+  # source://syntax_tree//lib/syntax_tree/node.rb#3917
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3904
+  # source://syntax_tree//lib/syntax_tree/node.rb#3919
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3913
+  # source://syntax_tree//lib/syntax_tree/node.rb#3928
   def format(q); end
 
   # [Node] the source of the constant
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3867
+  # source://syntax_tree//lib/syntax_tree/node.rb#3882
   def parent; end
 end
 
@@ -2903,47 +2913,47 @@ end
 #
 #     object::Const
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3929
+# source://syntax_tree//lib/syntax_tree/node.rb#3944
 class SyntaxTree::ConstPathRef < ::SyntaxTree::Node
   # @return [ConstPathRef] a new instance of ConstPathRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3939
+  # source://syntax_tree//lib/syntax_tree/node.rb#3954
   def initialize(parent:, constant:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3983
+  # source://syntax_tree//lib/syntax_tree/node.rb#3998
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3946
+  # source://syntax_tree//lib/syntax_tree/node.rb#3961
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3950
+  # source://syntax_tree//lib/syntax_tree/node.rb#3965
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3937
+  # source://syntax_tree//lib/syntax_tree/node.rb#3952
   def comments; end
 
   # [Const] the constant itself
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3934
+  # source://syntax_tree//lib/syntax_tree/node.rb#3949
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3954
+  # source://syntax_tree//lib/syntax_tree/node.rb#3969
   def copy(parent: T.unsafe(nil), constant: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3966
+  # source://syntax_tree//lib/syntax_tree/node.rb#3981
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3968
+  # source://syntax_tree//lib/syntax_tree/node.rb#3983
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3977
+  # source://syntax_tree//lib/syntax_tree/node.rb#3992
   def format(q); end
 
   # [Node] the source of the constant
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3931
+  # source://syntax_tree//lib/syntax_tree/node.rb#3946
   def parent; end
 end
 
@@ -2953,42 +2963,42 @@ end
 #     class Container
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3995
+# source://syntax_tree//lib/syntax_tree/node.rb#4010
 class SyntaxTree::ConstRef < ::SyntaxTree::Node
   # @return [ConstRef] a new instance of ConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4002
+  # source://syntax_tree//lib/syntax_tree/node.rb#4017
   def initialize(constant:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4037
+  # source://syntax_tree//lib/syntax_tree/node.rb#4052
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4008
+  # source://syntax_tree//lib/syntax_tree/node.rb#4023
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4012
+  # source://syntax_tree//lib/syntax_tree/node.rb#4027
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4000
+  # source://syntax_tree//lib/syntax_tree/node.rb#4015
   def comments; end
 
   # [Const] the constant itself
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3997
+  # source://syntax_tree//lib/syntax_tree/node.rb#4012
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4016
+  # source://syntax_tree//lib/syntax_tree/node.rb#4031
   def copy(constant: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4027
+  # source://syntax_tree//lib/syntax_tree/node.rb#4042
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4029
+  # source://syntax_tree//lib/syntax_tree/node.rb#4044
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4033
+  # source://syntax_tree//lib/syntax_tree/node.rb#4048
   def format(q); end
 end
 
@@ -2997,10 +3007,10 @@ end
 # statements inside the conditional) then we can't use the modifier form
 # and we must use the block form.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6232
+# source://syntax_tree//lib/syntax_tree/node.rb#6247
 module SyntaxTree::ContainsAssignment
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#6233
+    # source://syntax_tree//lib/syntax_tree/node.rb#6248
     def call(parent); end
   end
 end
@@ -4010,42 +4020,42 @@ end
 #     def method(param) result end
 #     def object.method(param) result end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4098
+# source://syntax_tree//lib/syntax_tree/node.rb#4113
 class SyntaxTree::DefNode < ::SyntaxTree::Node
   # @return [DefNode] a new instance of DefNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4117
+  # source://syntax_tree//lib/syntax_tree/node.rb#4132
   def initialize(target:, operator:, name:, params:, bodystmt:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4217
+  # source://syntax_tree//lib/syntax_tree/node.rb#4232
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4127
+  # source://syntax_tree//lib/syntax_tree/node.rb#4142
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4230
+  # source://syntax_tree//lib/syntax_tree/node.rb#4245
   def arity; end
 
   # [BodyStmt | Node] the expressions to be executed by the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4112
+  # source://syntax_tree//lib/syntax_tree/node.rb#4127
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4131
+  # source://syntax_tree//lib/syntax_tree/node.rb#4146
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4115
+  # source://syntax_tree//lib/syntax_tree/node.rb#4130
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4135
+  # source://syntax_tree//lib/syntax_tree/node.rb#4150
   def copy(target: T.unsafe(nil), operator: T.unsafe(nil), name: T.unsafe(nil), params: T.unsafe(nil), bodystmt: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4157
+  # source://syntax_tree//lib/syntax_tree/node.rb#4172
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4159
+  # source://syntax_tree//lib/syntax_tree/node.rb#4174
   def deconstruct_keys(_keys); end
 
   # Returns true if the method was found in the source in the "endless" form,
@@ -4054,30 +4064,30 @@ class SyntaxTree::DefNode < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4226
+  # source://syntax_tree//lib/syntax_tree/node.rb#4241
   def endless?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4171
+  # source://syntax_tree//lib/syntax_tree/node.rb#4186
   def format(q); end
 
   # [Backtick | Const | Ident | Kw | Op] the name of the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4106
+  # source://syntax_tree//lib/syntax_tree/node.rb#4121
   def name; end
 
   # [nil | Op | Period] the operator being used to declare the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4103
+  # source://syntax_tree//lib/syntax_tree/node.rb#4118
   def operator; end
 
   # [nil | Params | Paren] the parameter declaration for the method
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4109
+  # source://syntax_tree//lib/syntax_tree/node.rb#4124
   def params; end
 
   # [nil | Node] the target where the method is being defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4100
+  # source://syntax_tree//lib/syntax_tree/node.rb#4115
   def target; end
 end
 
@@ -4086,42 +4096,42 @@ end
 #
 #     defined?(variable)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4249
+# source://syntax_tree//lib/syntax_tree/node.rb#4264
 class SyntaxTree::Defined < ::SyntaxTree::Node
   # @return [Defined] a new instance of Defined
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4256
+  # source://syntax_tree//lib/syntax_tree/node.rb#4271
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4299
+  # source://syntax_tree//lib/syntax_tree/node.rb#4314
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4262
+  # source://syntax_tree//lib/syntax_tree/node.rb#4277
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4266
+  # source://syntax_tree//lib/syntax_tree/node.rb#4281
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4254
+  # source://syntax_tree//lib/syntax_tree/node.rb#4269
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4270
+  # source://syntax_tree//lib/syntax_tree/node.rb#4285
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4281
+  # source://syntax_tree//lib/syntax_tree/node.rb#4296
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4283
+  # source://syntax_tree//lib/syntax_tree/node.rb#4298
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4287
+  # source://syntax_tree//lib/syntax_tree/node.rb#4302
   def format(q); end
 
   # [Node] the value being sent to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4251
+  # source://syntax_tree//lib/syntax_tree/node.rb#4266
   def value; end
 end
 
@@ -4134,48 +4144,48 @@ end
 #
 #     { "#{key}": value }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4663
+# source://syntax_tree//lib/syntax_tree/node.rb#4678
 class SyntaxTree::DynaSymbol < ::SyntaxTree::Node
   # @return [DynaSymbol] a new instance of DynaSymbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4674
+  # source://syntax_tree//lib/syntax_tree/node.rb#4689
   def initialize(parts:, quote:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4736
+  # source://syntax_tree//lib/syntax_tree/node.rb#4751
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4681
+  # source://syntax_tree//lib/syntax_tree/node.rb#4696
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4685
+  # source://syntax_tree//lib/syntax_tree/node.rb#4700
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4672
+  # source://syntax_tree//lib/syntax_tree/node.rb#4687
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4689
+  # source://syntax_tree//lib/syntax_tree/node.rb#4704
   def copy(parts: T.unsafe(nil), quote: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4701
+  # source://syntax_tree//lib/syntax_tree/node.rb#4716
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4703
+  # source://syntax_tree//lib/syntax_tree/node.rb#4718
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4707
+  # source://syntax_tree//lib/syntax_tree/node.rb#4722
   def format(q); end
 
   # [Array[ StringDVar | StringEmbExpr | TStringContent ]] the parts of the
   # dynamic symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4666
+  # source://syntax_tree//lib/syntax_tree/node.rb#4681
   def parts; end
 
   # [nil | String] the quote used to delimit the dynamic symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4669
+  # source://syntax_tree//lib/syntax_tree/node.rb#4684
   def quote; end
 
   private
@@ -4184,7 +4194,7 @@ class SyntaxTree::DynaSymbol < ::SyntaxTree::Node
   # lot of rules because it could be in many different contexts with many
   # different kinds of escaping.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4746
+  # source://syntax_tree//lib/syntax_tree/node.rb#4761
   def quotes(q); end
 end
 
@@ -4248,47 +4258,47 @@ end
 #     else
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4792
+# source://syntax_tree//lib/syntax_tree/node.rb#4807
 class SyntaxTree::Else < ::SyntaxTree::Node
   # @return [Else] a new instance of Else
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4802
+  # source://syntax_tree//lib/syntax_tree/node.rb#4817
   def initialize(keyword:, statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4853
+  # source://syntax_tree//lib/syntax_tree/node.rb#4868
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4809
+  # source://syntax_tree//lib/syntax_tree/node.rb#4824
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4813
+  # source://syntax_tree//lib/syntax_tree/node.rb#4828
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4800
+  # source://syntax_tree//lib/syntax_tree/node.rb#4815
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4817
+  # source://syntax_tree//lib/syntax_tree/node.rb#4832
   def copy(keyword: T.unsafe(nil), statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4829
+  # source://syntax_tree//lib/syntax_tree/node.rb#4844
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4831
+  # source://syntax_tree//lib/syntax_tree/node.rb#4846
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4840
+  # source://syntax_tree//lib/syntax_tree/node.rb#4855
   def format(q); end
 
   # [Kw] the else keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4794
+  # source://syntax_tree//lib/syntax_tree/node.rb#4809
   def keyword; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4797
+  # source://syntax_tree//lib/syntax_tree/node.rb#4812
   def statements; end
 end
 
@@ -4298,52 +4308,52 @@ end
 #     elsif other_variable
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4865
+# source://syntax_tree//lib/syntax_tree/node.rb#4880
 class SyntaxTree::Elsif < ::SyntaxTree::Node
   # @return [Elsif] a new instance of Elsif
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4878
+  # source://syntax_tree//lib/syntax_tree/node.rb#4893
   def initialize(predicate:, statements:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4942
+  # source://syntax_tree//lib/syntax_tree/node.rb#4957
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4886
+  # source://syntax_tree//lib/syntax_tree/node.rb#4901
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4890
+  # source://syntax_tree//lib/syntax_tree/node.rb#4905
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4876
+  # source://syntax_tree//lib/syntax_tree/node.rb#4891
   def comments; end
 
   # [nil | Elsif | Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4873
+  # source://syntax_tree//lib/syntax_tree/node.rb#4888
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4894
+  # source://syntax_tree//lib/syntax_tree/node.rb#4909
   def copy(predicate: T.unsafe(nil), statements: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4907
+  # source://syntax_tree//lib/syntax_tree/node.rb#4922
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4909
+  # source://syntax_tree//lib/syntax_tree/node.rb#4924
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4919
+  # source://syntax_tree//lib/syntax_tree/node.rb#4934
   def format(q); end
 
   # [Node] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4867
+  # source://syntax_tree//lib/syntax_tree/node.rb#4882
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4870
+  # source://syntax_tree//lib/syntax_tree/node.rb#4885
   def statements; end
 end
 
@@ -4354,66 +4364,66 @@ end
 #     second line
 #     =end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4955
+# source://syntax_tree//lib/syntax_tree/node.rb#4970
 class SyntaxTree::EmbDoc < ::SyntaxTree::Node
   # @return [EmbDoc] a new instance of EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4959
+  # source://syntax_tree//lib/syntax_tree/node.rb#4974
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5027
+  # source://syntax_tree//lib/syntax_tree/node.rb#5042
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4995
+  # source://syntax_tree//lib/syntax_tree/node.rb#5010
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4999
+  # source://syntax_tree//lib/syntax_tree/node.rb#5014
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4991
+  # source://syntax_tree//lib/syntax_tree/node.rb#5006
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5003
+  # source://syntax_tree//lib/syntax_tree/node.rb#5018
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5010
+  # source://syntax_tree//lib/syntax_tree/node.rb#5025
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5012
+  # source://syntax_tree//lib/syntax_tree/node.rb#5027
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5016
+  # source://syntax_tree//lib/syntax_tree/node.rb#5031
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4987
+  # source://syntax_tree//lib/syntax_tree/node.rb#5002
   def ignore?; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4983
+  # source://syntax_tree//lib/syntax_tree/node.rb#4998
   def inline?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4967
+  # source://syntax_tree//lib/syntax_tree/node.rb#4982
   def leading!; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4971
+  # source://syntax_tree//lib/syntax_tree/node.rb#4986
   def leading?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4975
+  # source://syntax_tree//lib/syntax_tree/node.rb#4990
   def trailing!; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4979
+  # source://syntax_tree//lib/syntax_tree/node.rb#4994
   def trailing?; end
 
   # [String] the contents of the comment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4957
+  # source://syntax_tree//lib/syntax_tree/node.rb#4972
   def value; end
 end
 
@@ -4423,34 +4433,34 @@ end
 #
 #     "Hello, #{person}!"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5038
+# source://syntax_tree//lib/syntax_tree/node.rb#5053
 class SyntaxTree::EmbExprBeg < ::SyntaxTree::Node
   # @return [EmbExprBeg] a new instance of EmbExprBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5042
+  # source://syntax_tree//lib/syntax_tree/node.rb#5057
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5068
+  # source://syntax_tree//lib/syntax_tree/node.rb#5083
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5047
+  # source://syntax_tree//lib/syntax_tree/node.rb#5062
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5051
+  # source://syntax_tree//lib/syntax_tree/node.rb#5066
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5055
+  # source://syntax_tree//lib/syntax_tree/node.rb#5070
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5062
+  # source://syntax_tree//lib/syntax_tree/node.rb#5077
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5064
+  # source://syntax_tree//lib/syntax_tree/node.rb#5079
   def deconstruct_keys(_keys); end
 
   # [String] the #{ used in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5040
+  # source://syntax_tree//lib/syntax_tree/node.rb#5055
   def value; end
 end
 
@@ -4460,34 +4470,34 @@ end
 #
 #     "Hello, #{person}!"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5079
+# source://syntax_tree//lib/syntax_tree/node.rb#5094
 class SyntaxTree::EmbExprEnd < ::SyntaxTree::Node
   # @return [EmbExprEnd] a new instance of EmbExprEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5083
+  # source://syntax_tree//lib/syntax_tree/node.rb#5098
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5109
+  # source://syntax_tree//lib/syntax_tree/node.rb#5124
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5088
+  # source://syntax_tree//lib/syntax_tree/node.rb#5103
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5092
+  # source://syntax_tree//lib/syntax_tree/node.rb#5107
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5096
+  # source://syntax_tree//lib/syntax_tree/node.rb#5111
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5103
+  # source://syntax_tree//lib/syntax_tree/node.rb#5118
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5105
+  # source://syntax_tree//lib/syntax_tree/node.rb#5120
   def deconstruct_keys(_keys); end
 
   # [String] the } used in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5081
+  # source://syntax_tree//lib/syntax_tree/node.rb#5096
   def value; end
 end
 
@@ -4499,34 +4509,34 @@ end
 #
 # In the example above, an EmbVar node represents the # because it forces
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5122
+# source://syntax_tree//lib/syntax_tree/node.rb#5137
 class SyntaxTree::EmbVar < ::SyntaxTree::Node
   # @return [EmbVar] a new instance of EmbVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5126
+  # source://syntax_tree//lib/syntax_tree/node.rb#5141
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5152
+  # source://syntax_tree//lib/syntax_tree/node.rb#5167
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5131
+  # source://syntax_tree//lib/syntax_tree/node.rb#5146
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5135
+  # source://syntax_tree//lib/syntax_tree/node.rb#5150
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5139
+  # source://syntax_tree//lib/syntax_tree/node.rb#5154
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5146
+  # source://syntax_tree//lib/syntax_tree/node.rb#5161
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5148
+  # source://syntax_tree//lib/syntax_tree/node.rb#5163
   def deconstruct_keys(_keys); end
 
   # [String] the # used in the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5124
+  # source://syntax_tree//lib/syntax_tree/node.rb#5139
   def value; end
 end
 
@@ -4585,47 +4595,47 @@ end
 #     ensure
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5164
+# source://syntax_tree//lib/syntax_tree/node.rb#5179
 class SyntaxTree::Ensure < ::SyntaxTree::Node
   # @return [Ensure] a new instance of Ensure
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5174
+  # source://syntax_tree//lib/syntax_tree/node.rb#5189
   def initialize(keyword:, statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5223
+  # source://syntax_tree//lib/syntax_tree/node.rb#5238
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5181
+  # source://syntax_tree//lib/syntax_tree/node.rb#5196
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5185
+  # source://syntax_tree//lib/syntax_tree/node.rb#5200
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5172
+  # source://syntax_tree//lib/syntax_tree/node.rb#5187
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5189
+  # source://syntax_tree//lib/syntax_tree/node.rb#5204
   def copy(keyword: T.unsafe(nil), statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5201
+  # source://syntax_tree//lib/syntax_tree/node.rb#5216
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5203
+  # source://syntax_tree//lib/syntax_tree/node.rb#5218
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5212
+  # source://syntax_tree//lib/syntax_tree/node.rb#5227
   def format(q); end
 
   # [Kw] the ensure keyword that began this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5166
+  # source://syntax_tree//lib/syntax_tree/node.rb#5181
   def keyword; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5169
+  # source://syntax_tree//lib/syntax_tree/node.rb#5184
   def statements; end
 end
 
@@ -4640,42 +4650,42 @@ end
 # position typically represents a rest-type parameter, but in this case is
 # used to indicate that a trailing comma was used.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5239
+# source://syntax_tree//lib/syntax_tree/node.rb#5254
 class SyntaxTree::ExcessedComma < ::SyntaxTree::Node
   # @return [ExcessedComma] a new instance of ExcessedComma
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5246
+  # source://syntax_tree//lib/syntax_tree/node.rb#5261
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5281
+  # source://syntax_tree//lib/syntax_tree/node.rb#5296
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5252
+  # source://syntax_tree//lib/syntax_tree/node.rb#5267
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5256
+  # source://syntax_tree//lib/syntax_tree/node.rb#5271
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5244
+  # source://syntax_tree//lib/syntax_tree/node.rb#5259
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5260
+  # source://syntax_tree//lib/syntax_tree/node.rb#5275
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5271
+  # source://syntax_tree//lib/syntax_tree/node.rb#5286
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5273
+  # source://syntax_tree//lib/syntax_tree/node.rb#5288
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5277
+  # source://syntax_tree//lib/syntax_tree/node.rb#5292
   def format(q); end
 
   # [String] the comma
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5241
+  # source://syntax_tree//lib/syntax_tree/node.rb#5256
   def value; end
 end
 
@@ -4684,52 +4694,52 @@ end
 #
 #     object.variable = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5291
+# source://syntax_tree//lib/syntax_tree/node.rb#5306
 class SyntaxTree::Field < ::SyntaxTree::Node
   # @return [Field] a new instance of Field
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5304
+  # source://syntax_tree//lib/syntax_tree/node.rb#5319
   def initialize(parent:, operator:, name:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5354
+  # source://syntax_tree//lib/syntax_tree/node.rb#5369
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5312
+  # source://syntax_tree//lib/syntax_tree/node.rb#5327
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5316
+  # source://syntax_tree//lib/syntax_tree/node.rb#5331
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5302
+  # source://syntax_tree//lib/syntax_tree/node.rb#5317
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5321
+  # source://syntax_tree//lib/syntax_tree/node.rb#5336
   def copy(parent: T.unsafe(nil), operator: T.unsafe(nil), name: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5334
+  # source://syntax_tree//lib/syntax_tree/node.rb#5349
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5336
+  # source://syntax_tree//lib/syntax_tree/node.rb#5351
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5346
+  # source://syntax_tree//lib/syntax_tree/node.rb#5361
   def format(q); end
 
   # [Const | Ident] the name of the field being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5299
+  # source://syntax_tree//lib/syntax_tree/node.rb#5314
   def name; end
 
   # [:"::" | Op | Period] the operator being used for the assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5296
+  # source://syntax_tree//lib/syntax_tree/node.rb#5311
   def operator; end
 
   # [Node] the parent object that owns the field being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5293
+  # source://syntax_tree//lib/syntax_tree/node.rb#5308
   def parent; end
 end
 
@@ -5241,78 +5251,78 @@ end
 #
 #     1.0
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5364
+# source://syntax_tree//lib/syntax_tree/node.rb#5379
 class SyntaxTree::FloatLiteral < ::SyntaxTree::Node
   # @return [FloatLiteral] a new instance of FloatLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5371
+  # source://syntax_tree//lib/syntax_tree/node.rb#5386
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5406
+  # source://syntax_tree//lib/syntax_tree/node.rb#5421
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5377
+  # source://syntax_tree//lib/syntax_tree/node.rb#5392
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5381
+  # source://syntax_tree//lib/syntax_tree/node.rb#5396
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5369
+  # source://syntax_tree//lib/syntax_tree/node.rb#5384
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5385
+  # source://syntax_tree//lib/syntax_tree/node.rb#5400
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5396
+  # source://syntax_tree//lib/syntax_tree/node.rb#5411
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5398
+  # source://syntax_tree//lib/syntax_tree/node.rb#5413
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5402
+  # source://syntax_tree//lib/syntax_tree/node.rb#5417
   def format(q); end
 
   # [String] the value of the floating point number literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5366
+  # source://syntax_tree//lib/syntax_tree/node.rb#5381
   def value; end
 end
 
 # Formats either a Break, Next, or Return node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#2438
+# source://syntax_tree//lib/syntax_tree/node.rb#2453
 class SyntaxTree::FlowControlFormatter
   # @return [FlowControlFormatter] a new instance of FlowControlFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2445
+  # source://syntax_tree//lib/syntax_tree/node.rb#2460
   def initialize(keyword, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2450
+  # source://syntax_tree//lib/syntax_tree/node.rb#2465
   def format(q); end
 
   # [String] the keyword to print
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2440
+  # source://syntax_tree//lib/syntax_tree/node.rb#2455
   def keyword; end
 
   # [Break | Next | Return] the node being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2443
+  # source://syntax_tree//lib/syntax_tree/node.rb#2458
   def node; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2599
+  # source://syntax_tree//lib/syntax_tree/node.rb#2614
   def format_arguments(q, opening, closing); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2589
+  # source://syntax_tree//lib/syntax_tree/node.rb#2604
   def format_array_contents(q, array); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#2609
+  # source://syntax_tree//lib/syntax_tree/node.rb#2624
   def skip_parens?(node); end
 end
 
@@ -5323,58 +5333,58 @@ end
 #     in [*, 7, *]
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5418
+# source://syntax_tree//lib/syntax_tree/node.rb#5433
 class SyntaxTree::FndPtn < ::SyntaxTree::Node
   # @return [FndPtn] a new instance of FndPtn
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5435
+  # source://syntax_tree//lib/syntax_tree/node.rb#5450
   def initialize(constant:, left:, values:, right:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5504
+  # source://syntax_tree//lib/syntax_tree/node.rb#5519
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5444
+  # source://syntax_tree//lib/syntax_tree/node.rb#5459
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5448
+  # source://syntax_tree//lib/syntax_tree/node.rb#5463
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5433
+  # source://syntax_tree//lib/syntax_tree/node.rb#5448
   def comments; end
 
   # [nil | VarRef | ConstPathRef] the optional constant wrapper
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5420
+  # source://syntax_tree//lib/syntax_tree/node.rb#5435
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5452
+  # source://syntax_tree//lib/syntax_tree/node.rb#5467
   def copy(constant: T.unsafe(nil), left: T.unsafe(nil), values: T.unsafe(nil), right: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5466
+  # source://syntax_tree//lib/syntax_tree/node.rb#5481
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5468
+  # source://syntax_tree//lib/syntax_tree/node.rb#5483
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5479
+  # source://syntax_tree//lib/syntax_tree/node.rb#5494
   def format(q); end
 
   # [VarField] the splat on the left-hand side
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5423
+  # source://syntax_tree//lib/syntax_tree/node.rb#5438
   def left; end
 
   # [VarField] the splat on the right-hand side
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5430
+  # source://syntax_tree//lib/syntax_tree/node.rb#5445
   def right; end
 
   # [Array[ Node ]] the list of positional expressions in the pattern that
   # are being matched
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5427
+  # source://syntax_tree//lib/syntax_tree/node.rb#5442
   def values; end
 end
 
@@ -5383,53 +5393,53 @@ end
 #     for value in list do
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5516
+# source://syntax_tree//lib/syntax_tree/node.rb#5531
 class SyntaxTree::For < ::SyntaxTree::Node
   # @return [For] a new instance of For
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5530
+  # source://syntax_tree//lib/syntax_tree/node.rb#5545
   def initialize(index:, collection:, statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5590
+  # source://syntax_tree//lib/syntax_tree/node.rb#5605
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5538
+  # source://syntax_tree//lib/syntax_tree/node.rb#5553
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5542
+  # source://syntax_tree//lib/syntax_tree/node.rb#5557
   def child_nodes; end
 
   # [Node] the object being enumerated in the loop
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5522
+  # source://syntax_tree//lib/syntax_tree/node.rb#5537
   def collection; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5528
+  # source://syntax_tree//lib/syntax_tree/node.rb#5543
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5546
+  # source://syntax_tree//lib/syntax_tree/node.rb#5561
   def copy(index: T.unsafe(nil), collection: T.unsafe(nil), statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5559
+  # source://syntax_tree//lib/syntax_tree/node.rb#5574
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5561
+  # source://syntax_tree//lib/syntax_tree/node.rb#5576
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5571
+  # source://syntax_tree//lib/syntax_tree/node.rb#5586
   def format(q); end
 
   # [MLHS | VarField] the variable declaration being used to
   # pull values out of the object being enumerated
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5519
+  # source://syntax_tree//lib/syntax_tree/node.rb#5534
   def index; end
 
   # [Statements] the statements to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5525
+  # source://syntax_tree//lib/syntax_tree/node.rb#5540
   def statements; end
 end
 
@@ -5586,42 +5596,42 @@ end
 #
 #     $variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5600
+# source://syntax_tree//lib/syntax_tree/node.rb#5615
 class SyntaxTree::GVar < ::SyntaxTree::Node
   # @return [GVar] a new instance of GVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5607
+  # source://syntax_tree//lib/syntax_tree/node.rb#5622
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5642
+  # source://syntax_tree//lib/syntax_tree/node.rb#5657
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5613
+  # source://syntax_tree//lib/syntax_tree/node.rb#5628
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5617
+  # source://syntax_tree//lib/syntax_tree/node.rb#5632
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5605
+  # source://syntax_tree//lib/syntax_tree/node.rb#5620
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5621
+  # source://syntax_tree//lib/syntax_tree/node.rb#5636
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5632
+  # source://syntax_tree//lib/syntax_tree/node.rb#5647
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5634
+  # source://syntax_tree//lib/syntax_tree/node.rb#5649
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5638
+  # source://syntax_tree//lib/syntax_tree/node.rb#5653
   def format(q); end
 
   # [String] the name of the global variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5602
+  # source://syntax_tree//lib/syntax_tree/node.rb#5617
   def value; end
 end
 
@@ -5638,8 +5648,15 @@ SyntaxTree::HANDLERS = T.let(T.unsafe(nil), Hash)
 # source://syntax_tree//lib/syntax_tree/node.rb#1728
 module SyntaxTree::HashKeyFormatter
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#1786
+    # source://syntax_tree//lib/syntax_tree/node.rb#1787
     def for(container); end
+
+    private
+
+    # @return [Boolean]
+    #
+    # source://syntax_tree//lib/syntax_tree/node.rb#1837
+    def omitted_value?(assocs); end
   end
 end
 
@@ -5676,50 +5693,50 @@ end
 #
 #     { key => value }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5651
+# source://syntax_tree//lib/syntax_tree/node.rb#5666
 class SyntaxTree::HashLiteral < ::SyntaxTree::Node
   # @return [HashLiteral] a new instance of HashLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5687
+  # source://syntax_tree//lib/syntax_tree/node.rb#5702
   def initialize(lbrace:, assocs:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5728
+  # source://syntax_tree//lib/syntax_tree/node.rb#5743
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5694
+  # source://syntax_tree//lib/syntax_tree/node.rb#5709
   def accept(visitor); end
 
   # [Array[ Assoc | AssocSplat ]] the optional contents of the hash
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5682
+  # source://syntax_tree//lib/syntax_tree/node.rb#5697
   def assocs; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5698
+  # source://syntax_tree//lib/syntax_tree/node.rb#5713
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5685
+  # source://syntax_tree//lib/syntax_tree/node.rb#5700
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5702
+  # source://syntax_tree//lib/syntax_tree/node.rb#5717
   def copy(lbrace: T.unsafe(nil), assocs: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5714
+  # source://syntax_tree//lib/syntax_tree/node.rb#5729
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5716
+  # source://syntax_tree//lib/syntax_tree/node.rb#5731
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5720
+  # source://syntax_tree//lib/syntax_tree/node.rb#5735
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5733
+  # source://syntax_tree//lib/syntax_tree/node.rb#5748
   def format_key(q, key); end
 
   # [LBrace] the left brace that opens this hash
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5679
+  # source://syntax_tree//lib/syntax_tree/node.rb#5694
   def lbrace; end
 
   private
@@ -5729,10 +5746,10 @@ class SyntaxTree::HashLiteral < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5741
+  # source://syntax_tree//lib/syntax_tree/node.rb#5756
   def empty_with_comments?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5745
+  # source://syntax_tree//lib/syntax_tree/node.rb#5760
   def format_contents(q); end
 end
 
@@ -5740,19 +5757,19 @@ end
 # but _does_ contain comments. In this case we do some special formatting to
 # make sure the comments gets indented properly.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5655
+# source://syntax_tree//lib/syntax_tree/node.rb#5670
 class SyntaxTree::HashLiteral::EmptyWithCommentsFormatter
   # @return [EmptyWithCommentsFormatter] a new instance of EmptyWithCommentsFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5659
+  # source://syntax_tree//lib/syntax_tree/node.rb#5674
   def initialize(lbrace); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5663
+  # source://syntax_tree//lib/syntax_tree/node.rb#5678
   def format(q); end
 
   # [LBrace] the opening brace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5657
+  # source://syntax_tree//lib/syntax_tree/node.rb#5672
   def lbrace; end
 end
 
@@ -5762,65 +5779,65 @@ end
 #       contents
 #     DOC
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5774
+# source://syntax_tree//lib/syntax_tree/node.rb#5789
 class SyntaxTree::Heredoc < ::SyntaxTree::Node
   # @return [Heredoc] a new instance of Heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5791
+  # source://syntax_tree//lib/syntax_tree/node.rb#5806
   def initialize(beginning:, location:, ending: T.unsafe(nil), dedent: T.unsafe(nil), parts: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5873
+  # source://syntax_tree//lib/syntax_tree/node.rb#5888
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5800
+  # source://syntax_tree//lib/syntax_tree/node.rb#5815
   def accept(visitor); end
 
   # [HeredocBeg] the opening of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5776
+  # source://syntax_tree//lib/syntax_tree/node.rb#5791
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5804
+  # source://syntax_tree//lib/syntax_tree/node.rb#5819
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5789
+  # source://syntax_tree//lib/syntax_tree/node.rb#5804
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5808
+  # source://syntax_tree//lib/syntax_tree/node.rb#5823
   def copy(beginning: T.unsafe(nil), location: T.unsafe(nil), ending: T.unsafe(nil), parts: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5821
+  # source://syntax_tree//lib/syntax_tree/node.rb#5836
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5823
+  # source://syntax_tree//lib/syntax_tree/node.rb#5838
   def deconstruct_keys(_keys); end
 
   # [Integer] how far to dedent the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5782
+  # source://syntax_tree//lib/syntax_tree/node.rb#5797
   def dedent; end
 
   # [HeredocEnd] the ending of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5779
+  # source://syntax_tree//lib/syntax_tree/node.rb#5794
   def ending; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5838
+  # source://syntax_tree//lib/syntax_tree/node.rb#5853
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # heredoc string literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5786
+  # source://syntax_tree//lib/syntax_tree/node.rb#5801
   def parts; end
 end
 
 # This is a very specific behavior where you want to force a newline, but
 # don't want to force the break parent.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5835
+# source://syntax_tree//lib/syntax_tree/node.rb#5850
 SyntaxTree::Heredoc::SEPARATOR = T.let(T.unsafe(nil), PrettierPrint::Breakable)
 
 # HeredocBeg represents the beginning declaration of a heredoc.
@@ -5831,42 +5848,42 @@ SyntaxTree::Heredoc::SEPARATOR = T.let(T.unsafe(nil), PrettierPrint::Breakable)
 #
 # In the example above the HeredocBeg node represents <<~DOC.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5886
+# source://syntax_tree//lib/syntax_tree/node.rb#5901
 class SyntaxTree::HeredocBeg < ::SyntaxTree::Node
   # @return [HeredocBeg] a new instance of HeredocBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5893
+  # source://syntax_tree//lib/syntax_tree/node.rb#5908
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5928
+  # source://syntax_tree//lib/syntax_tree/node.rb#5943
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5899
+  # source://syntax_tree//lib/syntax_tree/node.rb#5914
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5903
+  # source://syntax_tree//lib/syntax_tree/node.rb#5918
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5891
+  # source://syntax_tree//lib/syntax_tree/node.rb#5906
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5907
+  # source://syntax_tree//lib/syntax_tree/node.rb#5922
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5918
+  # source://syntax_tree//lib/syntax_tree/node.rb#5933
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5920
+  # source://syntax_tree//lib/syntax_tree/node.rb#5935
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5924
+  # source://syntax_tree//lib/syntax_tree/node.rb#5939
   def format(q); end
 
   # [String] the opening declaration of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5888
+  # source://syntax_tree//lib/syntax_tree/node.rb#5903
   def value; end
 end
 
@@ -5878,42 +5895,42 @@ end
 #
 # In the example above the HeredocEnd node represents the closing DOC.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5940
+# source://syntax_tree//lib/syntax_tree/node.rb#5955
 class SyntaxTree::HeredocEnd < ::SyntaxTree::Node
   # @return [HeredocEnd] a new instance of HeredocEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5947
+  # source://syntax_tree//lib/syntax_tree/node.rb#5962
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5982
+  # source://syntax_tree//lib/syntax_tree/node.rb#5997
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5953
+  # source://syntax_tree//lib/syntax_tree/node.rb#5968
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5957
+  # source://syntax_tree//lib/syntax_tree/node.rb#5972
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5945
+  # source://syntax_tree//lib/syntax_tree/node.rb#5960
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5961
+  # source://syntax_tree//lib/syntax_tree/node.rb#5976
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5972
+  # source://syntax_tree//lib/syntax_tree/node.rb#5987
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5974
+  # source://syntax_tree//lib/syntax_tree/node.rb#5989
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#5978
+  # source://syntax_tree//lib/syntax_tree/node.rb#5993
   def format(q); end
 
   # [String] the closing declaration of the heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5942
+  # source://syntax_tree//lib/syntax_tree/node.rb#5957
   def value; end
 end
 
@@ -5924,105 +5941,105 @@ end
 #     in { key: }
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5994
+# source://syntax_tree//lib/syntax_tree/node.rb#6009
 class SyntaxTree::HshPtn < ::SyntaxTree::Node
   # @return [HshPtn] a new instance of HshPtn
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6054
+  # source://syntax_tree//lib/syntax_tree/node.rb#6069
   def initialize(constant:, keywords:, keyword_rest:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6147
+  # source://syntax_tree//lib/syntax_tree/node.rb#6162
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6062
+  # source://syntax_tree//lib/syntax_tree/node.rb#6077
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6066
+  # source://syntax_tree//lib/syntax_tree/node.rb#6081
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6052
+  # source://syntax_tree//lib/syntax_tree/node.rb#6067
   def comments; end
 
   # [nil | VarRef | ConstPathRef] the optional constant wrapper
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6042
+  # source://syntax_tree//lib/syntax_tree/node.rb#6057
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6070
+  # source://syntax_tree//lib/syntax_tree/node.rb#6085
   def copy(constant: T.unsafe(nil), keywords: T.unsafe(nil), keyword_rest: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6083
+  # source://syntax_tree//lib/syntax_tree/node.rb#6098
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6085
+  # source://syntax_tree//lib/syntax_tree/node.rb#6100
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6095
+  # source://syntax_tree//lib/syntax_tree/node.rb#6110
   def format(q); end
 
   # [nil | VarField] an optional parameter to gather up all remaining keywords
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6049
+  # source://syntax_tree//lib/syntax_tree/node.rb#6064
   def keyword_rest; end
 
   # [Array[ [DynaSymbol | Label, nil | Node] ]] the set of tuples
   # representing the keywords that should be matched against in the pattern
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6046
+  # source://syntax_tree//lib/syntax_tree/node.rb#6061
   def keywords; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6158
+  # source://syntax_tree//lib/syntax_tree/node.rb#6173
   def format_contents(q, parts, nested); end
 end
 
 # Formats a key-value pair in a hash pattern. The value is optional.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#5996
+# source://syntax_tree//lib/syntax_tree/node.rb#6011
 class SyntaxTree::HshPtn::KeywordFormatter
   # @return [KeywordFormatter] a new instance of KeywordFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6003
+  # source://syntax_tree//lib/syntax_tree/node.rb#6018
   def initialize(key, value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6008
+  # source://syntax_tree//lib/syntax_tree/node.rb#6023
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6012
+  # source://syntax_tree//lib/syntax_tree/node.rb#6027
   def format(q); end
 
   # [Label] the keyword being used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#5998
+  # source://syntax_tree//lib/syntax_tree/node.rb#6013
   def key; end
 
   # [Node] the optional value for the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6001
+  # source://syntax_tree//lib/syntax_tree/node.rb#6016
   def value; end
 end
 
 # Formats the optional double-splat from the pattern.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6023
+# source://syntax_tree//lib/syntax_tree/node.rb#6038
 class SyntaxTree::HshPtn::KeywordRestFormatter
   # @return [KeywordRestFormatter] a new instance of KeywordRestFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6027
+  # source://syntax_tree//lib/syntax_tree/node.rb#6042
   def initialize(keyword_rest); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6031
+  # source://syntax_tree//lib/syntax_tree/node.rb#6046
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6035
+  # source://syntax_tree//lib/syntax_tree/node.rb#6050
   def format(q); end
 
   # [VarField] the parameter that matches the remaining keywords
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6025
+  # source://syntax_tree//lib/syntax_tree/node.rb#6040
   def keyword_rest; end
 end
 
@@ -6030,42 +6047,42 @@ end
 #
 #     @variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6878
+# source://syntax_tree//lib/syntax_tree/node.rb#6893
 class SyntaxTree::IVar < ::SyntaxTree::Node
   # @return [IVar] a new instance of IVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6885
+  # source://syntax_tree//lib/syntax_tree/node.rb#6900
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6920
+  # source://syntax_tree//lib/syntax_tree/node.rb#6935
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6891
+  # source://syntax_tree//lib/syntax_tree/node.rb#6906
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6895
+  # source://syntax_tree//lib/syntax_tree/node.rb#6910
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6883
+  # source://syntax_tree//lib/syntax_tree/node.rb#6898
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6899
+  # source://syntax_tree//lib/syntax_tree/node.rb#6914
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6910
+  # source://syntax_tree//lib/syntax_tree/node.rb#6925
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6912
+  # source://syntax_tree//lib/syntax_tree/node.rb#6927
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6916
+  # source://syntax_tree//lib/syntax_tree/node.rb#6931
   def format(q); end
 
   # [String] the name of the instance variable
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6880
+  # source://syntax_tree//lib/syntax_tree/node.rb#6895
   def value; end
 end
 
@@ -6074,42 +6091,42 @@ end
 #
 #     value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6181
+# source://syntax_tree//lib/syntax_tree/node.rb#6196
 class SyntaxTree::Ident < ::SyntaxTree::Node
   # @return [Ident] a new instance of Ident
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6188
+  # source://syntax_tree//lib/syntax_tree/node.rb#6203
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6223
+  # source://syntax_tree//lib/syntax_tree/node.rb#6238
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6194
+  # source://syntax_tree//lib/syntax_tree/node.rb#6209
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6198
+  # source://syntax_tree//lib/syntax_tree/node.rb#6213
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6186
+  # source://syntax_tree//lib/syntax_tree/node.rb#6201
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6202
+  # source://syntax_tree//lib/syntax_tree/node.rb#6217
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6213
+  # source://syntax_tree//lib/syntax_tree/node.rb#6228
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6215
+  # source://syntax_tree//lib/syntax_tree/node.rb#6230
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6219
+  # source://syntax_tree//lib/syntax_tree/node.rb#6234
   def format(q); end
 
   # [String] the value of the identifier
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6183
+  # source://syntax_tree//lib/syntax_tree/node.rb#6198
   def value; end
 end
 
@@ -6118,59 +6135,59 @@ end
 #     if predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6471
+# source://syntax_tree//lib/syntax_tree/node.rb#6486
 class SyntaxTree::IfNode < ::SyntaxTree::Node
   # @return [IfNode] a new instance of IfNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6484
+  # source://syntax_tree//lib/syntax_tree/node.rb#6499
   def initialize(predicate:, statements:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6529
+  # source://syntax_tree//lib/syntax_tree/node.rb#6544
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6492
+  # source://syntax_tree//lib/syntax_tree/node.rb#6507
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6496
+  # source://syntax_tree//lib/syntax_tree/node.rb#6511
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6482
+  # source://syntax_tree//lib/syntax_tree/node.rb#6497
   def comments; end
 
   # [nil | Elsif | Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6479
+  # source://syntax_tree//lib/syntax_tree/node.rb#6494
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6500
+  # source://syntax_tree//lib/syntax_tree/node.rb#6515
   def copy(predicate: T.unsafe(nil), statements: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6513
+  # source://syntax_tree//lib/syntax_tree/node.rb#6528
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6515
+  # source://syntax_tree//lib/syntax_tree/node.rb#6530
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6525
+  # source://syntax_tree//lib/syntax_tree/node.rb#6540
   def format(q); end
 
   # Checks if the node was originally found in the modifier form.
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6535
+  # source://syntax_tree//lib/syntax_tree/node.rb#6550
   def modifier?; end
 
   # [Node] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6473
+  # source://syntax_tree//lib/syntax_tree/node.rb#6488
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6476
+  # source://syntax_tree//lib/syntax_tree/node.rb#6491
   def statements; end
 end
 
@@ -6178,60 +6195,60 @@ end
 #
 #     predicate ? truthy : falsy
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6544
+# source://syntax_tree//lib/syntax_tree/node.rb#6559
 class SyntaxTree::IfOp < ::SyntaxTree::Node
   # @return [IfOp] a new instance of IfOp
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6557
+  # source://syntax_tree//lib/syntax_tree/node.rb#6572
   def initialize(predicate:, truthy:, falsy:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6631
+  # source://syntax_tree//lib/syntax_tree/node.rb#6646
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6565
+  # source://syntax_tree//lib/syntax_tree/node.rb#6580
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6569
+  # source://syntax_tree//lib/syntax_tree/node.rb#6584
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6555
+  # source://syntax_tree//lib/syntax_tree/node.rb#6570
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6573
+  # source://syntax_tree//lib/syntax_tree/node.rb#6588
   def copy(predicate: T.unsafe(nil), truthy: T.unsafe(nil), falsy: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6586
+  # source://syntax_tree//lib/syntax_tree/node.rb#6601
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6588
+  # source://syntax_tree//lib/syntax_tree/node.rb#6603
   def deconstruct_keys(_keys); end
 
   # [Node] the expression to be executed if the predicate is falsy
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6552
+  # source://syntax_tree//lib/syntax_tree/node.rb#6567
   def falsy; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6598
+  # source://syntax_tree//lib/syntax_tree/node.rb#6613
   def format(q); end
 
   # [Node] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6546
+  # source://syntax_tree//lib/syntax_tree/node.rb#6561
   def predicate; end
 
   # [Node] the expression to be executed if the predicate is truthy
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6549
+  # source://syntax_tree//lib/syntax_tree/node.rb#6564
   def truthy; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6638
+  # source://syntax_tree//lib/syntax_tree/node.rb#6653
   def format_break(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6661
+  # source://syntax_tree//lib/syntax_tree/node.rb#6676
   def format_flat(q); end
 end
 
@@ -6239,42 +6256,42 @@ end
 #
 #     1i
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6680
+# source://syntax_tree//lib/syntax_tree/node.rb#6695
 class SyntaxTree::Imaginary < ::SyntaxTree::Node
   # @return [Imaginary] a new instance of Imaginary
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6687
+  # source://syntax_tree//lib/syntax_tree/node.rb#6702
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6722
+  # source://syntax_tree//lib/syntax_tree/node.rb#6737
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6693
+  # source://syntax_tree//lib/syntax_tree/node.rb#6708
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6697
+  # source://syntax_tree//lib/syntax_tree/node.rb#6712
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6685
+  # source://syntax_tree//lib/syntax_tree/node.rb#6700
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6701
+  # source://syntax_tree//lib/syntax_tree/node.rb#6716
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6712
+  # source://syntax_tree//lib/syntax_tree/node.rb#6727
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6714
+  # source://syntax_tree//lib/syntax_tree/node.rb#6729
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6718
+  # source://syntax_tree//lib/syntax_tree/node.rb#6733
   def format(q); end
 
   # [String] the value of the imaginary number literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6682
+  # source://syntax_tree//lib/syntax_tree/node.rb#6697
   def value; end
 end
 
@@ -6285,52 +6302,52 @@ end
 #     in pattern
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6734
+# source://syntax_tree//lib/syntax_tree/node.rb#6749
 class SyntaxTree::In < ::SyntaxTree::Node
   # @return [In] a new instance of In
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6747
+  # source://syntax_tree//lib/syntax_tree/node.rb#6762
   def initialize(pattern:, statements:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6812
+  # source://syntax_tree//lib/syntax_tree/node.rb#6827
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6755
+  # source://syntax_tree//lib/syntax_tree/node.rb#6770
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6759
+  # source://syntax_tree//lib/syntax_tree/node.rb#6774
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6745
+  # source://syntax_tree//lib/syntax_tree/node.rb#6760
   def comments; end
 
   # [nil | In | Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6742
+  # source://syntax_tree//lib/syntax_tree/node.rb#6757
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6763
+  # source://syntax_tree//lib/syntax_tree/node.rb#6778
   def copy(pattern: T.unsafe(nil), statements: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6776
+  # source://syntax_tree//lib/syntax_tree/node.rb#6791
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6778
+  # source://syntax_tree//lib/syntax_tree/node.rb#6793
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6788
+  # source://syntax_tree//lib/syntax_tree/node.rb#6803
   def format(q); end
 
   # [Node] the pattern to check against
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6736
+  # source://syntax_tree//lib/syntax_tree/node.rb#6751
   def pattern; end
 
   # [Statements] the expressions to execute if the pattern matched
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6739
+  # source://syntax_tree//lib/syntax_tree/node.rb#6754
   def statements; end
 end
 
@@ -6795,42 +6812,42 @@ end
 #
 #     1
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6822
+# source://syntax_tree//lib/syntax_tree/node.rb#6837
 class SyntaxTree::Int < ::SyntaxTree::Node
   # @return [Int] a new instance of Int
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6829
+  # source://syntax_tree//lib/syntax_tree/node.rb#6844
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6869
+  # source://syntax_tree//lib/syntax_tree/node.rb#6884
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6835
+  # source://syntax_tree//lib/syntax_tree/node.rb#6850
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6839
+  # source://syntax_tree//lib/syntax_tree/node.rb#6854
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6827
+  # source://syntax_tree//lib/syntax_tree/node.rb#6842
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6843
+  # source://syntax_tree//lib/syntax_tree/node.rb#6858
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6851
+  # source://syntax_tree//lib/syntax_tree/node.rb#6866
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6853
+  # source://syntax_tree//lib/syntax_tree/node.rb#6868
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6857
+  # source://syntax_tree//lib/syntax_tree/node.rb#6872
   def format(q); end
 
   # [String] the value of the integer
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6824
+  # source://syntax_tree//lib/syntax_tree/node.rb#6839
   def value; end
 end
 
@@ -6887,47 +6904,47 @@ end
 #
 # then the contents of the symbol node will contain a Kw node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6938
+# source://syntax_tree//lib/syntax_tree/node.rb#6953
 class SyntaxTree::Kw < ::SyntaxTree::Node
   # @return [Kw] a new instance of Kw
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6948
+  # source://syntax_tree//lib/syntax_tree/node.rb#6963
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6981
+  # source://syntax_tree//lib/syntax_tree/node.rb#6996
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6955
+  # source://syntax_tree//lib/syntax_tree/node.rb#6970
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6959
+  # source://syntax_tree//lib/syntax_tree/node.rb#6974
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6946
+  # source://syntax_tree//lib/syntax_tree/node.rb#6961
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6963
+  # source://syntax_tree//lib/syntax_tree/node.rb#6978
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6971
+  # source://syntax_tree//lib/syntax_tree/node.rb#6986
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6973
+  # source://syntax_tree//lib/syntax_tree/node.rb#6988
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#6977
+  # source://syntax_tree//lib/syntax_tree/node.rb#6992
   def format(q); end
 
   # [Symbol] the symbol version of the value
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6943
+  # source://syntax_tree//lib/syntax_tree/node.rb#6958
   def name; end
 
   # [String] the value of the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6940
+  # source://syntax_tree//lib/syntax_tree/node.rb#6955
   def value; end
 end
 
@@ -6936,83 +6953,83 @@ end
 #
 #     def method(**kwargs) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6991
+# source://syntax_tree//lib/syntax_tree/node.rb#7006
 class SyntaxTree::KwRestParam < ::SyntaxTree::Node
   # @return [KwRestParam] a new instance of KwRestParam
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6998
+  # source://syntax_tree//lib/syntax_tree/node.rb#7013
   def initialize(name:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7034
+  # source://syntax_tree//lib/syntax_tree/node.rb#7049
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7004
+  # source://syntax_tree//lib/syntax_tree/node.rb#7019
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7008
+  # source://syntax_tree//lib/syntax_tree/node.rb#7023
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6996
+  # source://syntax_tree//lib/syntax_tree/node.rb#7011
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7012
+  # source://syntax_tree//lib/syntax_tree/node.rb#7027
   def copy(name: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7023
+  # source://syntax_tree//lib/syntax_tree/node.rb#7038
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7025
+  # source://syntax_tree//lib/syntax_tree/node.rb#7040
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7029
+  # source://syntax_tree//lib/syntax_tree/node.rb#7044
   def format(q); end
 
   # [nil | Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#6993
+  # source://syntax_tree//lib/syntax_tree/node.rb#7008
   def name; end
 end
 
 # LBrace represents the use of a left brace, i.e., {.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7316
+# source://syntax_tree//lib/syntax_tree/node.rb#7331
 class SyntaxTree::LBrace < ::SyntaxTree::Node
   # @return [LBrace] a new instance of LBrace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7323
+  # source://syntax_tree//lib/syntax_tree/node.rb#7338
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7358
+  # source://syntax_tree//lib/syntax_tree/node.rb#7373
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7329
+  # source://syntax_tree//lib/syntax_tree/node.rb#7344
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7333
+  # source://syntax_tree//lib/syntax_tree/node.rb#7348
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7321
+  # source://syntax_tree//lib/syntax_tree/node.rb#7336
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7337
+  # source://syntax_tree//lib/syntax_tree/node.rb#7352
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7348
+  # source://syntax_tree//lib/syntax_tree/node.rb#7363
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7350
+  # source://syntax_tree//lib/syntax_tree/node.rb#7365
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7354
+  # source://syntax_tree//lib/syntax_tree/node.rb#7369
   def format(q); end
 
   # [String] the left brace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7318
+  # source://syntax_tree//lib/syntax_tree/node.rb#7333
   def value; end
 
   class << self
@@ -7022,49 +7039,49 @@ class SyntaxTree::LBrace < ::SyntaxTree::Node
     # easier to create LBrace nodes without any specific value, this method
     # provides a default node.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#7367
+    # source://syntax_tree//lib/syntax_tree/node.rb#7382
     def default; end
   end
 end
 
 # LBracket represents the use of a left bracket, i.e., [.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7373
+# source://syntax_tree//lib/syntax_tree/node.rb#7388
 class SyntaxTree::LBracket < ::SyntaxTree::Node
   # @return [LBracket] a new instance of LBracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7380
+  # source://syntax_tree//lib/syntax_tree/node.rb#7395
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7415
+  # source://syntax_tree//lib/syntax_tree/node.rb#7430
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7386
+  # source://syntax_tree//lib/syntax_tree/node.rb#7401
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7390
+  # source://syntax_tree//lib/syntax_tree/node.rb#7405
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7378
+  # source://syntax_tree//lib/syntax_tree/node.rb#7393
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7394
+  # source://syntax_tree//lib/syntax_tree/node.rb#7409
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7405
+  # source://syntax_tree//lib/syntax_tree/node.rb#7420
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7407
+  # source://syntax_tree//lib/syntax_tree/node.rb#7422
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7411
+  # source://syntax_tree//lib/syntax_tree/node.rb#7426
   def format(q); end
 
   # [String] the left bracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7375
+  # source://syntax_tree//lib/syntax_tree/node.rb#7390
   def value; end
 
   class << self
@@ -7074,49 +7091,49 @@ class SyntaxTree::LBracket < ::SyntaxTree::Node
     # easier to create LBracket nodes without any specific value, this method
     # provides a default node.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#7424
+    # source://syntax_tree//lib/syntax_tree/node.rb#7439
     def default; end
   end
 end
 
 # LParen represents the use of a left parenthesis, i.e., (.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7430
+# source://syntax_tree//lib/syntax_tree/node.rb#7445
 class SyntaxTree::LParen < ::SyntaxTree::Node
   # @return [LParen] a new instance of LParen
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7437
+  # source://syntax_tree//lib/syntax_tree/node.rb#7452
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7472
+  # source://syntax_tree//lib/syntax_tree/node.rb#7487
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7443
+  # source://syntax_tree//lib/syntax_tree/node.rb#7458
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7447
+  # source://syntax_tree//lib/syntax_tree/node.rb#7462
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7435
+  # source://syntax_tree//lib/syntax_tree/node.rb#7450
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7451
+  # source://syntax_tree//lib/syntax_tree/node.rb#7466
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7462
+  # source://syntax_tree//lib/syntax_tree/node.rb#7477
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7464
+  # source://syntax_tree//lib/syntax_tree/node.rb#7479
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7468
+  # source://syntax_tree//lib/syntax_tree/node.rb#7483
   def format(q); end
 
   # [String] the left parenthesis
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7432
+  # source://syntax_tree//lib/syntax_tree/node.rb#7447
   def value; end
 
   class << self
@@ -7126,7 +7143,7 @@ class SyntaxTree::LParen < ::SyntaxTree::Node
     # easier to create LParen nodes without any specific value, this method
     # provides a default node.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#7481
+    # source://syntax_tree//lib/syntax_tree/node.rb#7496
     def default; end
   end
 end
@@ -7145,42 +7162,42 @@ end
 #
 # In this case "key:" would be the body of the label.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7052
+# source://syntax_tree//lib/syntax_tree/node.rb#7067
 class SyntaxTree::Label < ::SyntaxTree::Node
   # @return [Label] a new instance of Label
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7059
+  # source://syntax_tree//lib/syntax_tree/node.rb#7074
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7094
+  # source://syntax_tree//lib/syntax_tree/node.rb#7109
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7065
+  # source://syntax_tree//lib/syntax_tree/node.rb#7080
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7069
+  # source://syntax_tree//lib/syntax_tree/node.rb#7084
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7057
+  # source://syntax_tree//lib/syntax_tree/node.rb#7072
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7073
+  # source://syntax_tree//lib/syntax_tree/node.rb#7088
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7084
+  # source://syntax_tree//lib/syntax_tree/node.rb#7099
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7086
+  # source://syntax_tree//lib/syntax_tree/node.rb#7101
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7090
+  # source://syntax_tree//lib/syntax_tree/node.rb#7105
   def format(q); end
 
   # [String] the value of the label
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7054
+  # source://syntax_tree//lib/syntax_tree/node.rb#7069
   def value; end
 end
 
@@ -7192,34 +7209,34 @@ end
 # hash key. This node is important for determining the type of quote being
 # used by the label.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7106
+# source://syntax_tree//lib/syntax_tree/node.rb#7121
 class SyntaxTree::LabelEnd < ::SyntaxTree::Node
   # @return [LabelEnd] a new instance of LabelEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7110
+  # source://syntax_tree//lib/syntax_tree/node.rb#7125
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7136
+  # source://syntax_tree//lib/syntax_tree/node.rb#7151
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7115
+  # source://syntax_tree//lib/syntax_tree/node.rb#7130
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7119
+  # source://syntax_tree//lib/syntax_tree/node.rb#7134
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7123
+  # source://syntax_tree//lib/syntax_tree/node.rb#7138
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7130
+  # source://syntax_tree//lib/syntax_tree/node.rb#7145
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7132
+  # source://syntax_tree//lib/syntax_tree/node.rb#7147
   def deconstruct_keys(_keys); end
 
   # [String] the end of the label
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7108
+  # source://syntax_tree//lib/syntax_tree/node.rb#7123
   def value; end
 end
 
@@ -7227,47 +7244,47 @@ end
 #
 #     ->(value) { value * 2 }
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7145
+# source://syntax_tree//lib/syntax_tree/node.rb#7160
 class SyntaxTree::Lambda < ::SyntaxTree::Node
   # @return [Lambda] a new instance of Lambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7155
+  # source://syntax_tree//lib/syntax_tree/node.rb#7170
   def initialize(params:, statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7239
+  # source://syntax_tree//lib/syntax_tree/node.rb#7254
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7162
+  # source://syntax_tree//lib/syntax_tree/node.rb#7177
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7166
+  # source://syntax_tree//lib/syntax_tree/node.rb#7181
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7153
+  # source://syntax_tree//lib/syntax_tree/node.rb#7168
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7170
+  # source://syntax_tree//lib/syntax_tree/node.rb#7185
   def copy(params: T.unsafe(nil), statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7182
+  # source://syntax_tree//lib/syntax_tree/node.rb#7197
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7184
+  # source://syntax_tree//lib/syntax_tree/node.rb#7199
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7193
+  # source://syntax_tree//lib/syntax_tree/node.rb#7208
   def format(q); end
 
   # [LambdaVar | Paren] the parameter declaration for this lambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7147
+  # source://syntax_tree//lib/syntax_tree/node.rb#7162
   def params; end
 
   # [BodyStmt | Statements] the expressions to be executed in this lambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7150
+  # source://syntax_tree//lib/syntax_tree/node.rb#7165
   def statements; end
 end
 
@@ -7279,52 +7296,52 @@ end
 #     -> (positional, optional = value, keyword:, &block; local) do
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7253
+# source://syntax_tree//lib/syntax_tree/node.rb#7268
 class SyntaxTree::LambdaVar < ::SyntaxTree::Node
   # @return [LambdaVar] a new instance of LambdaVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7263
+  # source://syntax_tree//lib/syntax_tree/node.rb#7278
   def initialize(params:, locals:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7309
+  # source://syntax_tree//lib/syntax_tree/node.rb#7324
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7270
+  # source://syntax_tree//lib/syntax_tree/node.rb#7285
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7274
+  # source://syntax_tree//lib/syntax_tree/node.rb#7289
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7261
+  # source://syntax_tree//lib/syntax_tree/node.rb#7276
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7278
+  # source://syntax_tree//lib/syntax_tree/node.rb#7293
   def copy(params: T.unsafe(nil), locals: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7290
+  # source://syntax_tree//lib/syntax_tree/node.rb#7305
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7292
+  # source://syntax_tree//lib/syntax_tree/node.rb#7307
   def deconstruct_keys(_keys); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7296
+  # source://syntax_tree//lib/syntax_tree/node.rb#7311
   def empty?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7300
+  # source://syntax_tree//lib/syntax_tree/node.rb#7315
   def format(q); end
 
   # [Array[ Ident ]] the list of block-local variable declarations
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7258
+  # source://syntax_tree//lib/syntax_tree/node.rb#7273
   def locals; end
 
   # [Params] the parameters being declared with the block
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7255
+  # source://syntax_tree//lib/syntax_tree/node.rb#7270
   def params; end
 end
 
@@ -7338,7 +7355,7 @@ class SyntaxTree::LanguageServer
   # @return [LanguageServer] a new instance of LanguageServer
   #
   # source://syntax_tree//lib/syntax_tree/language_server.rb#217
-  def initialize(input: T.unsafe(nil), output: T.unsafe(nil), print_width: T.unsafe(nil)); end
+  def initialize(input: T.unsafe(nil), output: T.unsafe(nil), print_width: T.unsafe(nil), ignore_files: T.unsafe(nil)); end
 
   # Returns the value of attribute input.
   #
@@ -7355,24 +7372,24 @@ class SyntaxTree::LanguageServer
   # source://syntax_tree//lib/syntax_tree/language_server.rb#215
   def print_width; end
 
-  # source://syntax_tree//lib/syntax_tree/language_server.rb#228
+  # source://syntax_tree//lib/syntax_tree/language_server.rb#230
   def run; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/language_server.rb#280
+  # source://syntax_tree//lib/syntax_tree/language_server.rb#286
   def capabilities; end
 
-  # source://syntax_tree//lib/syntax_tree/language_server.rb#293
+  # source://syntax_tree//lib/syntax_tree/language_server.rb#299
   def format(source, extension); end
 
-  # source://syntax_tree//lib/syntax_tree/language_server.rb#317
+  # source://syntax_tree//lib/syntax_tree/language_server.rb#323
   def inlay_hints(source); end
 
-  # source://syntax_tree//lib/syntax_tree/language_server.rb#333
+  # source://syntax_tree//lib/syntax_tree/language_server.rb#339
   def log(message); end
 
-  # source://syntax_tree//lib/syntax_tree/language_server.rb#327
+  # source://syntax_tree//lib/syntax_tree/language_server.rb#333
   def write(value); end
 end
 
@@ -7571,29 +7588,29 @@ end
 
 # Formats an Until or While node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11378
+# source://syntax_tree//lib/syntax_tree/node.rb#11393
 class SyntaxTree::LoopFormatter
   # @return [LoopFormatter] a new instance of LoopFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11385
+  # source://syntax_tree//lib/syntax_tree/node.rb#11400
   def initialize(keyword, node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11390
+  # source://syntax_tree//lib/syntax_tree/node.rb#11405
   def format(q); end
 
   # [String] the name of the keyword used for this loop
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11380
+  # source://syntax_tree//lib/syntax_tree/node.rb#11395
   def keyword; end
 
   # [Until | While] the node that is being formatted
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11383
+  # source://syntax_tree//lib/syntax_tree/node.rb#11398
   def node; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11437
+  # source://syntax_tree//lib/syntax_tree/node.rb#11452
   def format_break(q); end
 end
 
@@ -7611,47 +7628,47 @@ end
 #
 #     first, = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7500
+# source://syntax_tree//lib/syntax_tree/node.rb#7515
 class SyntaxTree::MAssign < ::SyntaxTree::Node
   # @return [MAssign] a new instance of MAssign
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7510
+  # source://syntax_tree//lib/syntax_tree/node.rb#7525
   def initialize(target:, value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7554
+  # source://syntax_tree//lib/syntax_tree/node.rb#7569
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7517
+  # source://syntax_tree//lib/syntax_tree/node.rb#7532
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7521
+  # source://syntax_tree//lib/syntax_tree/node.rb#7536
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7508
+  # source://syntax_tree//lib/syntax_tree/node.rb#7523
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7525
+  # source://syntax_tree//lib/syntax_tree/node.rb#7540
   def copy(target: T.unsafe(nil), value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7537
+  # source://syntax_tree//lib/syntax_tree/node.rb#7552
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7539
+  # source://syntax_tree//lib/syntax_tree/node.rb#7554
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7543
+  # source://syntax_tree//lib/syntax_tree/node.rb#7558
   def format(q); end
 
   # [MLHS | MLHSParen] the target of the multiple assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7502
+  # source://syntax_tree//lib/syntax_tree/node.rb#7517
   def target; end
 
   # [Node] the value being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7505
+  # source://syntax_tree//lib/syntax_tree/node.rb#7520
   def value; end
 end
 
@@ -7660,51 +7677,51 @@ end
 #
 #     first, second, third = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7638
+# source://syntax_tree//lib/syntax_tree/node.rb#7653
 class SyntaxTree::MLHS < ::SyntaxTree::Node
   # @return [MLHS] a new instance of MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7655
+  # source://syntax_tree//lib/syntax_tree/node.rb#7670
   def initialize(parts:, location:, comma: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7693
+  # source://syntax_tree//lib/syntax_tree/node.rb#7708
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7662
+  # source://syntax_tree//lib/syntax_tree/node.rb#7677
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7666
+  # source://syntax_tree//lib/syntax_tree/node.rb#7681
   def child_nodes; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7650
+  # source://syntax_tree//lib/syntax_tree/node.rb#7665
   def comma; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7650
+  # source://syntax_tree//lib/syntax_tree/node.rb#7665
   def comma=(_arg0); end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7653
+  # source://syntax_tree//lib/syntax_tree/node.rb#7668
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7670
+  # source://syntax_tree//lib/syntax_tree/node.rb#7685
   def copy(parts: T.unsafe(nil), location: T.unsafe(nil), comma: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7682
+  # source://syntax_tree//lib/syntax_tree/node.rb#7697
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7684
+  # source://syntax_tree//lib/syntax_tree/node.rb#7699
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7688
+  # source://syntax_tree//lib/syntax_tree/node.rb#7703
   def format(q); end
 
   # [
@@ -7714,7 +7731,7 @@ class SyntaxTree::MLHS < ::SyntaxTree::Node
   #   ]
   # ] the parts of the left-hand side of a multiple assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7645
+  # source://syntax_tree//lib/syntax_tree/node.rb#7660
   def parts; end
 end
 
@@ -7723,56 +7740,56 @@ end
 #
 #     (left, right) = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7704
+# source://syntax_tree//lib/syntax_tree/node.rb#7719
 class SyntaxTree::MLHSParen < ::SyntaxTree::Node
   # @return [MLHSParen] a new instance of MLHSParen
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7716
+  # source://syntax_tree//lib/syntax_tree/node.rb#7731
   def initialize(contents:, location:, comma: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7769
+  # source://syntax_tree//lib/syntax_tree/node.rb#7784
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7723
+  # source://syntax_tree//lib/syntax_tree/node.rb#7738
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7727
+  # source://syntax_tree//lib/syntax_tree/node.rb#7742
   def child_nodes; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7711
+  # source://syntax_tree//lib/syntax_tree/node.rb#7726
   def comma; end
 
   # [boolean] whether or not there is a trailing comma at the end of this
   # list, which impacts destructuring. It's an attr_accessor so that while
   # the syntax tree is being built it can be set by its parent node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7711
+  # source://syntax_tree//lib/syntax_tree/node.rb#7726
   def comma=(_arg0); end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7714
+  # source://syntax_tree//lib/syntax_tree/node.rb#7729
   def comments; end
 
   # [MLHS | MLHSParen] the contents inside of the parentheses
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7706
+  # source://syntax_tree//lib/syntax_tree/node.rb#7721
   def contents; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7731
+  # source://syntax_tree//lib/syntax_tree/node.rb#7746
   def copy(contents: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7742
+  # source://syntax_tree//lib/syntax_tree/node.rb#7757
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7744
+  # source://syntax_tree//lib/syntax_tree/node.rb#7759
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7748
+  # source://syntax_tree//lib/syntax_tree/node.rb#7763
   def format(q); end
 end
 
@@ -7781,42 +7798,42 @@ end
 #
 #     values = first, second, third
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7869
+# source://syntax_tree//lib/syntax_tree/node.rb#7884
 class SyntaxTree::MRHS < ::SyntaxTree::Node
   # @return [MRHS] a new instance of MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7876
+  # source://syntax_tree//lib/syntax_tree/node.rb#7891
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7911
+  # source://syntax_tree//lib/syntax_tree/node.rb#7926
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7882
+  # source://syntax_tree//lib/syntax_tree/node.rb#7897
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7886
+  # source://syntax_tree//lib/syntax_tree/node.rb#7901
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7874
+  # source://syntax_tree//lib/syntax_tree/node.rb#7889
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7890
+  # source://syntax_tree//lib/syntax_tree/node.rb#7905
   def copy(parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7901
+  # source://syntax_tree//lib/syntax_tree/node.rb#7916
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7903
+  # source://syntax_tree//lib/syntax_tree/node.rb#7918
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7907
+  # source://syntax_tree//lib/syntax_tree/node.rb#7922
   def format(q); end
 
   # [Array[Node]] the parts that are being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7871
+  # source://syntax_tree//lib/syntax_tree/node.rb#7886
   def parts; end
 end
 
@@ -8073,50 +8090,50 @@ end
 #
 #     method {}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7563
+# source://syntax_tree//lib/syntax_tree/node.rb#7578
 class SyntaxTree::MethodAddBlock < ::SyntaxTree::Node
   # @return [MethodAddBlock] a new instance of MethodAddBlock
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7573
+  # source://syntax_tree//lib/syntax_tree/node.rb#7588
   def initialize(call:, block:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7622
+  # source://syntax_tree//lib/syntax_tree/node.rb#7637
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7580
+  # source://syntax_tree//lib/syntax_tree/node.rb#7595
   def accept(visitor); end
 
   # [BlockNode] the block being sent with the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7568
+  # source://syntax_tree//lib/syntax_tree/node.rb#7583
   def block; end
 
   # [ARef | CallNode | Command | CommandCall | Super | ZSuper] the method call
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7565
+  # source://syntax_tree//lib/syntax_tree/node.rb#7580
   def call; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7584
+  # source://syntax_tree//lib/syntax_tree/node.rb#7599
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7571
+  # source://syntax_tree//lib/syntax_tree/node.rb#7586
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7588
+  # source://syntax_tree//lib/syntax_tree/node.rb#7603
   def copy(call: T.unsafe(nil), block: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7600
+  # source://syntax_tree//lib/syntax_tree/node.rb#7615
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7602
+  # source://syntax_tree//lib/syntax_tree/node.rb#7617
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7606
+  # source://syntax_tree//lib/syntax_tree/node.rb#7621
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7627
+  # source://syntax_tree//lib/syntax_tree/node.rb#7642
   def format_contents(q); end
 end
 
@@ -8125,52 +8142,52 @@ end
 #     module Namespace
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7779
+# source://syntax_tree//lib/syntax_tree/node.rb#7794
 class SyntaxTree::ModuleDeclaration < ::SyntaxTree::Node
   # @return [ModuleDeclaration] a new instance of ModuleDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7789
+  # source://syntax_tree//lib/syntax_tree/node.rb#7804
   def initialize(constant:, bodystmt:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7849
+  # source://syntax_tree//lib/syntax_tree/node.rb#7864
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7796
+  # source://syntax_tree//lib/syntax_tree/node.rb#7811
   def accept(visitor); end
 
   # [BodyStmt] the expressions to be executed in the context of the module
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7784
+  # source://syntax_tree//lib/syntax_tree/node.rb#7799
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7800
+  # source://syntax_tree//lib/syntax_tree/node.rb#7815
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7787
+  # source://syntax_tree//lib/syntax_tree/node.rb#7802
   def comments; end
 
   # [ConstPathRef | ConstRef | TopConstRef] the name of the module
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7781
+  # source://syntax_tree//lib/syntax_tree/node.rb#7796
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7804
+  # source://syntax_tree//lib/syntax_tree/node.rb#7819
   def copy(constant: T.unsafe(nil), bodystmt: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7816
+  # source://syntax_tree//lib/syntax_tree/node.rb#7831
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7818
+  # source://syntax_tree//lib/syntax_tree/node.rb#7833
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7827
+  # source://syntax_tree//lib/syntax_tree/node.rb#7842
   def format(q); end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7856
+  # source://syntax_tree//lib/syntax_tree/node.rb#7871
   def format_declaration(q); end
 end
 
@@ -8673,42 +8690,42 @@ end
 #
 #     next(value)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7933
+# source://syntax_tree//lib/syntax_tree/node.rb#7948
 class SyntaxTree::Next < ::SyntaxTree::Node
   # @return [Next] a new instance of Next
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7940
+  # source://syntax_tree//lib/syntax_tree/node.rb#7955
   def initialize(arguments:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7975
+  # source://syntax_tree//lib/syntax_tree/node.rb#7990
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7946
+  # source://syntax_tree//lib/syntax_tree/node.rb#7961
   def accept(visitor); end
 
   # [Args] the arguments passed to the next keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7935
+  # source://syntax_tree//lib/syntax_tree/node.rb#7950
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7950
+  # source://syntax_tree//lib/syntax_tree/node.rb#7965
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7938
+  # source://syntax_tree//lib/syntax_tree/node.rb#7953
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7954
+  # source://syntax_tree//lib/syntax_tree/node.rb#7969
   def copy(arguments: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7965
+  # source://syntax_tree//lib/syntax_tree/node.rb#7980
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7967
+  # source://syntax_tree//lib/syntax_tree/node.rb#7982
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#7971
+  # source://syntax_tree//lib/syntax_tree/node.rb#7986
   def format(q); end
 end
 
@@ -8771,52 +8788,52 @@ end
 #
 #     not value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11077
+# source://syntax_tree//lib/syntax_tree/node.rb#11092
 class SyntaxTree::Not < ::SyntaxTree::Node
   # @return [Not] a new instance of Not
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11088
+  # source://syntax_tree//lib/syntax_tree/node.rb#11103
   def initialize(statement:, parentheses:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11150
+  # source://syntax_tree//lib/syntax_tree/node.rb#11165
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11095
+  # source://syntax_tree//lib/syntax_tree/node.rb#11110
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11099
+  # source://syntax_tree//lib/syntax_tree/node.rb#11114
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11086
+  # source://syntax_tree//lib/syntax_tree/node.rb#11101
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11103
+  # source://syntax_tree//lib/syntax_tree/node.rb#11118
   def copy(statement: T.unsafe(nil), parentheses: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11115
+  # source://syntax_tree//lib/syntax_tree/node.rb#11130
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11117
+  # source://syntax_tree//lib/syntax_tree/node.rb#11132
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11126
+  # source://syntax_tree//lib/syntax_tree/node.rb#11141
   def format(q); end
 
   # [boolean] whether or not parentheses were used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11082
+  # source://syntax_tree//lib/syntax_tree/node.rb#11097
   def parentheses; end
 
   # [boolean] whether or not parentheses were used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11083
+  # source://syntax_tree//lib/syntax_tree/node.rb#11098
   def parentheses?; end
 
   # [nil | Node] the statement on which to operate
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11079
+  # source://syntax_tree//lib/syntax_tree/node.rb#11094
   def statement; end
 end
 
@@ -8826,47 +8843,47 @@ end
 #
 # In the example above, the Op node represents the + operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#7985
+# source://syntax_tree//lib/syntax_tree/node.rb#8000
 class SyntaxTree::Op < ::SyntaxTree::Node
   # @return [Op] a new instance of Op
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7995
+  # source://syntax_tree//lib/syntax_tree/node.rb#8010
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8028
+  # source://syntax_tree//lib/syntax_tree/node.rb#8043
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8002
+  # source://syntax_tree//lib/syntax_tree/node.rb#8017
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8006
+  # source://syntax_tree//lib/syntax_tree/node.rb#8021
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7993
+  # source://syntax_tree//lib/syntax_tree/node.rb#8008
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8010
+  # source://syntax_tree//lib/syntax_tree/node.rb#8025
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8018
+  # source://syntax_tree//lib/syntax_tree/node.rb#8033
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8020
+  # source://syntax_tree//lib/syntax_tree/node.rb#8035
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8024
+  # source://syntax_tree//lib/syntax_tree/node.rb#8039
   def format(q); end
 
   # [Symbol] the symbol version of the value
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7990
+  # source://syntax_tree//lib/syntax_tree/node.rb#8005
   def name; end
 
   # [String] the operator
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#7987
+  # source://syntax_tree//lib/syntax_tree/node.rb#8002
   def value; end
 end
 
@@ -8875,84 +8892,84 @@ end
 #
 #     variable += value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8038
+# source://syntax_tree//lib/syntax_tree/node.rb#8053
 class SyntaxTree::OpAssign < ::SyntaxTree::Node
   # @return [OpAssign] a new instance of OpAssign
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8052
+  # source://syntax_tree//lib/syntax_tree/node.rb#8067
   def initialize(target:, operator:, value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8111
+  # source://syntax_tree//lib/syntax_tree/node.rb#8126
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8060
+  # source://syntax_tree//lib/syntax_tree/node.rb#8075
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8064
+  # source://syntax_tree//lib/syntax_tree/node.rb#8079
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8050
+  # source://syntax_tree//lib/syntax_tree/node.rb#8065
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8068
+  # source://syntax_tree//lib/syntax_tree/node.rb#8083
   def copy(target: T.unsafe(nil), operator: T.unsafe(nil), value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8081
+  # source://syntax_tree//lib/syntax_tree/node.rb#8096
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8083
+  # source://syntax_tree//lib/syntax_tree/node.rb#8098
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8093
+  # source://syntax_tree//lib/syntax_tree/node.rb#8108
   def format(q); end
 
   # [Op] the operator being used for the assignment
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8044
+  # source://syntax_tree//lib/syntax_tree/node.rb#8059
   def operator; end
 
   # [ARefField | ConstPathField | Field | TopConstField | VarField] the target
   # to assign the result of the expression to
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8041
+  # source://syntax_tree//lib/syntax_tree/node.rb#8056
   def target; end
 
   # [Node] the expression to be assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8047
+  # source://syntax_tree//lib/syntax_tree/node.rb#8062
   def value; end
 
   private
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8118
+  # source://syntax_tree//lib/syntax_tree/node.rb#8133
   def skip_indent?; end
 end
 
 # The list of nodes that represent patterns inside of pattern matching so that
 # when a pattern is being printed it knows if it's nested.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6174
+# source://syntax_tree//lib/syntax_tree/node.rb#6189
 SyntaxTree::PATTERNS = T.let(T.unsafe(nil), Array)
 
 # Params represents defining parameters on a method or lambda.
 #
 #     def method(param) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8196
+# source://syntax_tree//lib/syntax_tree/node.rb#8211
 class SyntaxTree::Params < ::SyntaxTree::Node
   # @return [Params] a new instance of Params
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8298
+  # source://syntax_tree//lib/syntax_tree/node.rb#8313
   def initialize(location:, requireds: T.unsafe(nil), optionals: T.unsafe(nil), rest: T.unsafe(nil), posts: T.unsafe(nil), keywords: T.unsafe(nil), keyword_rest: T.unsafe(nil), block: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8428
+  # source://syntax_tree//lib/syntax_tree/node.rb#8443
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8328
+  # source://syntax_tree//lib/syntax_tree/node.rb#8343
   def accept(visitor); end
 
   # Returns a range representing the possible number of arguments accepted
@@ -8964,29 +8981,29 @@ class SyntaxTree::Params < ::SyntaxTree::Node
   #
   # has arity 2..4.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8451
+  # source://syntax_tree//lib/syntax_tree/node.rb#8466
   def arity; end
 
   # [nil | BlockArg] the optional block parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8293
+  # source://syntax_tree//lib/syntax_tree/node.rb#8308
   def block; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8332
+  # source://syntax_tree//lib/syntax_tree/node.rb#8347
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8296
+  # source://syntax_tree//lib/syntax_tree/node.rb#8311
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8346
+  # source://syntax_tree//lib/syntax_tree/node.rb#8361
   def copy(location: T.unsafe(nil), requireds: T.unsafe(nil), optionals: T.unsafe(nil), rest: T.unsafe(nil), posts: T.unsafe(nil), keywords: T.unsafe(nil), keyword_rest: T.unsafe(nil), block: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8372
+  # source://syntax_tree//lib/syntax_tree/node.rb#8387
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8374
+  # source://syntax_tree//lib/syntax_tree/node.rb#8389
   def deconstruct_keys(_keys); end
 
   # Params nodes are the most complicated in the tree. Occasionally you want
@@ -8996,126 +9013,126 @@ class SyntaxTree::Params < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8323
+  # source://syntax_tree//lib/syntax_tree/node.rb#8338
   def empty?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8388
+  # source://syntax_tree//lib/syntax_tree/node.rb#8403
   def format(q); end
 
   # [nil | :nil | ArgsForward | KwRestParam] the optional keyword rest
   # parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8290
+  # source://syntax_tree//lib/syntax_tree/node.rb#8305
   def keyword_rest; end
 
   # [Array[ [ Label, nil | Node ] ]] any keyword parameters and their
   # optional default values
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8286
+  # source://syntax_tree//lib/syntax_tree/node.rb#8301
   def keywords; end
 
   # [Array[ [ Ident, Node ] ]] any optional parameters and their default
   # values
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8274
+  # source://syntax_tree//lib/syntax_tree/node.rb#8289
   def optionals; end
 
   # [Array[ Ident | MLHSParen ]] any positional parameters that exist after a
   #  rest parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8282
+  # source://syntax_tree//lib/syntax_tree/node.rb#8297
   def posts; end
 
   # [Array[ Ident | MLHSParen ]] any required parameters
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8270
+  # source://syntax_tree//lib/syntax_tree/node.rb#8285
   def requireds; end
 
   # [nil | ArgsForward | ExcessedComma | RestParam] the optional rest
   # parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8278
+  # source://syntax_tree//lib/syntax_tree/node.rb#8293
   def rest; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8467
+  # source://syntax_tree//lib/syntax_tree/node.rb#8482
   def format_contents(q, parts); end
 end
 
 # Formats the keyword position of the parameters. This includes the label,
 # as well as an optional default value.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8224
+# source://syntax_tree//lib/syntax_tree/node.rb#8239
 class SyntaxTree::Params::KeywordFormatter
   # @return [KeywordFormatter] a new instance of KeywordFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8231
+  # source://syntax_tree//lib/syntax_tree/node.rb#8246
   def initialize(name, value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8236
+  # source://syntax_tree//lib/syntax_tree/node.rb#8251
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8240
+  # source://syntax_tree//lib/syntax_tree/node.rb#8255
   def format(q); end
 
   # [Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8226
+  # source://syntax_tree//lib/syntax_tree/node.rb#8241
   def name; end
 
   # [nil | Node] the value of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8229
+  # source://syntax_tree//lib/syntax_tree/node.rb#8244
   def value; end
 end
 
 # Formats the keyword_rest position of the parameters. This can be the **nil
 # syntax, the ... syntax, or the ** syntax.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8252
+# source://syntax_tree//lib/syntax_tree/node.rb#8267
 class SyntaxTree::Params::KeywordRestFormatter
   # @return [KeywordRestFormatter] a new instance of KeywordRestFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8256
+  # source://syntax_tree//lib/syntax_tree/node.rb#8271
   def initialize(value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8260
+  # source://syntax_tree//lib/syntax_tree/node.rb#8275
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8264
+  # source://syntax_tree//lib/syntax_tree/node.rb#8279
   def format(q); end
 
   # [:nil | ArgsForward | KwRestParam] the value of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8254
+  # source://syntax_tree//lib/syntax_tree/node.rb#8269
   def value; end
 end
 
 # Formats the optional position of the parameters. This includes the label,
 # as well as the default value.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8199
+# source://syntax_tree//lib/syntax_tree/node.rb#8214
 class SyntaxTree::Params::OptionalFormatter
   # @return [OptionalFormatter] a new instance of OptionalFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8206
+  # source://syntax_tree//lib/syntax_tree/node.rb#8221
   def initialize(name, value); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8211
+  # source://syntax_tree//lib/syntax_tree/node.rb#8226
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8215
+  # source://syntax_tree//lib/syntax_tree/node.rb#8230
   def format(q); end
 
   # [Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8201
+  # source://syntax_tree//lib/syntax_tree/node.rb#8216
   def name; end
 
   # [Node] the value of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8204
+  # source://syntax_tree//lib/syntax_tree/node.rb#8219
   def value; end
 end
 
@@ -9125,47 +9142,47 @@ end
 #
 #     (1 + 2)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8479
+# source://syntax_tree//lib/syntax_tree/node.rb#8494
 class SyntaxTree::Paren < ::SyntaxTree::Node
   # @return [Paren] a new instance of Paren
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8489
+  # source://syntax_tree//lib/syntax_tree/node.rb#8504
   def initialize(lparen:, contents:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8545
+  # source://syntax_tree//lib/syntax_tree/node.rb#8560
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8496
+  # source://syntax_tree//lib/syntax_tree/node.rb#8511
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8500
+  # source://syntax_tree//lib/syntax_tree/node.rb#8515
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8487
+  # source://syntax_tree//lib/syntax_tree/node.rb#8502
   def comments; end
 
   # [nil | Node] the expression inside the parentheses
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8484
+  # source://syntax_tree//lib/syntax_tree/node.rb#8499
   def contents; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8504
+  # source://syntax_tree//lib/syntax_tree/node.rb#8519
   def copy(lparen: T.unsafe(nil), contents: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8516
+  # source://syntax_tree//lib/syntax_tree/node.rb#8531
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8518
+  # source://syntax_tree//lib/syntax_tree/node.rb#8533
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8527
+  # source://syntax_tree//lib/syntax_tree/node.rb#8542
   def format(q); end
 
   # [LParen] the left parenthesis that opened this statement
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8481
+  # source://syntax_tree//lib/syntax_tree/node.rb#8496
   def lparen; end
 end
 
@@ -9201,18 +9218,18 @@ end
 # This approach maintains the nice conciseness of the inline version, while
 # keeping the correct semantic meaning.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8155
+# source://syntax_tree//lib/syntax_tree/node.rb#8170
 module SyntaxTree::Parentheses
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#8175
+    # source://syntax_tree//lib/syntax_tree/node.rb#8190
     def break(q); end
 
-    # source://syntax_tree//lib/syntax_tree/node.rb#8167
+    # source://syntax_tree//lib/syntax_tree/node.rb#8182
     def flat(q); end
   end
 end
 
-# source://syntax_tree//lib/syntax_tree/node.rb#8156
+# source://syntax_tree//lib/syntax_tree/node.rb#8171
 SyntaxTree::Parentheses::NODES = T.let(T.unsafe(nil), Array)
 
 # Parser is a subclass of the Ripper library that subscribes to the stream of
@@ -9254,7 +9271,7 @@ class SyntaxTree::Parser < ::Ripper
   # Attaches comments to the nodes in the tree that most closely correspond to
   # the location of the comments.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2911
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2916
   def attach_comments(program, comments); end
 
   # This represents the current place in the source string that we've gotten
@@ -9265,6 +9282,14 @@ class SyntaxTree::Parser < ::Ripper
   #
   # source://syntax_tree//lib/syntax_tree/parser.rb#197
   def char_pos; end
+
+  # If we encounter a parse error, just immediately bail out so that our
+  # runner can catch it.
+  #
+  # @raise [ParseError]
+  #
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2874
+  def compile_error(error, *_arg1); end
 
   # @raise [ParseError]
   #
@@ -9358,13 +9383,13 @@ class SyntaxTree::Parser < ::Ripper
   # declaration has block-local variables. Once it does, we parse those out
   # and convert them into Ident nodes.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2362
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2366
   def lambda_locals(source); end
 
   # Responsible for finding the nearest nodes to the given comment within the
   # context of the given encapsulating node.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2946
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2951
   def nearest_nodes(node, comment); end
 
   # :call-seq:
@@ -9405,7 +9430,7 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2866
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2870
   def on_alias_error(error, *_arg1); end
 
   # :call-seq:
@@ -9479,7 +9504,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Array[untyped]) posts
   #   ) -> AryPtn
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#701
+  # source://syntax_tree//lib/syntax_tree/parser.rb#705
   def on_aryptn(constant, requireds, rest, posts); end
 
   # :call-seq:
@@ -9494,7 +9519,7 @@ class SyntaxTree::Parser < ::Ripper
   #     untyped value
   #   ) -> Assign
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#756
+  # source://syntax_tree//lib/syntax_tree/parser.rb#760
   def on_assign(target, value); end
 
   # If we encounter a parse error, just immediately bail out so that our
@@ -9502,31 +9527,31 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2867
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2871
   def on_assign_error(error, *_arg1); end
 
   # :call-seq:
   #   on_assoc_new: (untyped key, untyped value) -> Assoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#766
+  # source://syntax_tree//lib/syntax_tree/parser.rb#770
   def on_assoc_new(key, value); end
 
   # :call-seq:
   #   on_assoc_splat: (untyped value) -> AssocSplat
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#775
+  # source://syntax_tree//lib/syntax_tree/parser.rb#779
   def on_assoc_splat(value); end
 
   # :call-seq:
   #   on_backref: (String value) -> Backref
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#790
+  # source://syntax_tree//lib/syntax_tree/parser.rb#794
   def on_backref(value); end
 
   # :call-seq:
   #   on_backtick: (String value) -> Backtick
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#805
+  # source://syntax_tree//lib/syntax_tree/parser.rb#809
   def on_backtick(value); end
 
   # :call-seq:
@@ -9534,13 +9559,13 @@ class SyntaxTree::Parser < ::Ripper
   #     Array[AssocNew | AssocSplat] assocs
   #   ) -> BareAssocHash
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#826
+  # source://syntax_tree//lib/syntax_tree/parser.rb#830
   def on_bare_assoc_hash(assocs); end
 
   # :call-seq:
   #   on_begin: (untyped bodystmt) -> Begin | PinnedBegin
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#835
+  # source://syntax_tree//lib/syntax_tree/parser.rb#839
   def on_begin(bodystmt); end
 
   # :call-seq:
@@ -9550,19 +9575,19 @@ class SyntaxTree::Parser < ::Ripper
   #     untyped right
   #   ) -> Binary
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#874
+  # source://syntax_tree//lib/syntax_tree/parser.rb#878
   def on_binary(left, operator, right); end
 
   # :call-seq:
   #   on_block_var: (Params params, (nil | Array[Ident]) locals) -> BlockVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#906
+  # source://syntax_tree//lib/syntax_tree/parser.rb#910
   def on_block_var(params, locals); end
 
   # :call-seq:
   #   on_blockarg: (Ident name) -> BlockArg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#946
+  # source://syntax_tree//lib/syntax_tree/parser.rb#950
   def on_blockarg(name); end
 
   # :call-seq:
@@ -9573,7 +9598,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Ensure) ensure_clause
   #   ) -> BodyStmt
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#962
+  # source://syntax_tree//lib/syntax_tree/parser.rb#966
   def on_bodystmt(statements, rescue_clause, else_clause, ensure_clause); end
 
   # :call-seq:
@@ -9582,13 +9607,13 @@ class SyntaxTree::Parser < ::Ripper
   #     Statements statements
   #   ) -> BlockNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#988
+  # source://syntax_tree//lib/syntax_tree/parser.rb#992
   def on_brace_block(block_var, statements); end
 
   # :call-seq:
   #   on_break: (Args arguments) -> Break
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1025
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1029
   def on_break(arguments); end
 
   # :call-seq:
@@ -9598,13 +9623,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (:call | Backtick | Const | Ident | Op) message
   #   ) -> CallNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1040
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1044
   def on_call(receiver, operator, message); end
 
   # :call-seq:
   #   on_case: (untyped value, untyped consequent) -> Case | RAssign
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1061
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1065
   def on_case(value, consequent); end
 
   # :call-seq:
@@ -9614,7 +9639,7 @@ class SyntaxTree::Parser < ::Ripper
   #     BodyStmt bodystmt
   #   ) -> ClassDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1096
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1100
   def on_class(constant, superclass, bodystmt); end
 
   # If we encounter a parse error, just immediately bail out so that our
@@ -9622,19 +9647,19 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2868
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2872
   def on_class_name_error(error, *_arg1); end
 
   # :call-seq:
   #   on_comma: (String value) -> Comma
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1120
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1124
   def on_comma(value); end
 
   # :call-seq:
   #   on_command: ((Const | Ident) message, Args arguments) -> Command
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1139
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1143
   def on_command(message, arguments); end
 
   # :call-seq:
@@ -9645,44 +9670,44 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Args) arguments
   #   ) -> CommandCall
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1155
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1159
   def on_command_call(receiver, operator, message, arguments); end
 
   # :call-seq:
   #   on_comment: (String value) -> Comment
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1170
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1174
   def on_comment(value); end
 
   # :call-seq:
   #   on_const: (String value) -> Const
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1208
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1212
   def on_const(value); end
 
   # :call-seq:
   #   on_const_path_field: (untyped parent, Const constant) ->
   #     ConstPathField | Field
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1224
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1228
   def on_const_path_field(parent, constant); end
 
   # :call-seq:
   #   on_const_path_ref: (untyped parent, Const constant) -> ConstPathRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1243
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1247
   def on_const_path_ref(parent, constant); end
 
   # :call-seq:
   #   on_const_ref: (Const constant) -> ConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1253
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1257
   def on_const_ref(constant); end
 
   # :call-seq:
   #   on_cvar: (String value) -> CVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1259
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1263
   def on_cvar(value); end
 
   # :call-seq:
@@ -9692,13 +9717,13 @@ class SyntaxTree::Parser < ::Ripper
   #     untyped bodystmt
   #   ) -> DefNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1278
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1282
   def on_def(name, params, bodystmt); end
 
   # :call-seq:
   #   on_defined: (untyped value) -> Defined
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1346
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1350
   def on_defined(value); end
 
   # :call-seq:
@@ -9710,37 +9735,37 @@ class SyntaxTree::Parser < ::Ripper
   #     BodyStmt bodystmt
   #   ) -> DefNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1370
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1374
   def on_defs(target, operator, name, params, bodystmt); end
 
   # :call-seq:
   #   on_do_block: (BlockVar block_var, BodyStmt bodystmt) -> BlockNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1435
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1439
   def on_do_block(block_var, bodystmt); end
 
   # :call-seq:
   #   on_dot2: ((nil | untyped) left, (nil | untyped) right) -> RangeNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1459
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1463
   def on_dot2(left, right); end
 
   # :call-seq:
   #   on_dot3: ((nil | untyped) left, (nil | untyped) right) -> RangeNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1475
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1479
   def on_dot3(left, right); end
 
   # :call-seq:
   #   on_dyna_symbol: (StringContent string_content) -> DynaSymbol
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1491
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1495
   def on_dyna_symbol(string_content); end
 
   # :call-seq:
   #   on_else: (Statements statements) -> Else
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1517
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1521
   def on_else(statements); end
 
   # :call-seq:
@@ -9750,49 +9775,49 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Elsif | Else) consequent
   #   ) -> Elsif
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1558
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1562
   def on_elsif(predicate, statements, consequent); end
 
   # :call-seq:
   #   on_embdoc: (String value) -> EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1588
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1592
   def on_embdoc(value); end
 
   # :call-seq:
   #   on_embdoc_beg: (String value) -> EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1595
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1599
   def on_embdoc_beg(value); end
 
   # :call-seq:
   #   on_embdoc_end: (String value) -> EmbDoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1606
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1610
   def on_embdoc_end(value); end
 
   # :call-seq:
   #   on_embexpr_beg: (String value) -> EmbExprBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1630
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1634
   def on_embexpr_beg(value); end
 
   # :call-seq:
   #   on_embexpr_end: (String value) -> EmbExprEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1649
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1653
   def on_embexpr_end(value); end
 
   # :call-seq:
   #   on_embvar: (String value) -> EmbVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1668
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1672
   def on_embvar(value); end
 
   # :call-seq:
   #   on_ensure: (Statements statements) -> Ensure
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1687
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1691
   def on_ensure(statements); end
 
   # The handler for this event accepts no parameters (though in previous
@@ -9801,29 +9826,29 @@ class SyntaxTree::Parser < ::Ripper
   # :call-seq:
   #   on_excessed_comma: () -> ExcessedComma
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1714
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1718
   def on_excessed_comma(*_arg0); end
 
   # :call-seq:
   #   on_fcall: ((Const | Ident) value) -> CallNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1722
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1726
   def on_fcall(value); end
 
   # :call-seq:
   #   on_field: (
   #     untyped parent,
-  #     (:"::" | Op | Period) operator
+  #     (:"::" | Op | Period | 73) operator
   #     (Const | Ident) name
   #   ) -> Field
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1738
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1742
   def on_field(parent, operator, name); end
 
   # :call-seq:
   #   on_float: (String value) -> FloatLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1749
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1753
   def on_float(value); end
 
   # :call-seq:
@@ -9834,7 +9859,7 @@ class SyntaxTree::Parser < ::Ripper
   #     VarField right
   #   ) -> FndPtn
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1769
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1773
   def on_fndptn(constant, left, values, right); end
 
   # :call-seq:
@@ -9844,37 +9869,37 @@ class SyntaxTree::Parser < ::Ripper
   #     Statements statements
   #   ) -> For
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1821
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1825
   def on_for(index, collection, statements); end
 
   # :call-seq:
   #   on_gvar: (String value) -> GVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1859
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1863
   def on_gvar(value); end
 
   # :call-seq:
   #   on_hash: ((nil | Array[AssocNew | AssocSplat]) assocs) -> HashLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1874
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1878
   def on_hash(assocs); end
 
   # :call-seq:
   #   on_heredoc_beg: (String value) -> HeredocBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1887
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1891
   def on_heredoc_beg(value); end
 
   # :call-seq:
   #   on_heredoc_dedent: (StringContent string, Integer width) -> Heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1906
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1910
   def on_heredoc_dedent(string, width); end
 
   # :call-seq:
   #   on_heredoc_end: (String value) -> Heredoc
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1920
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1924
   def on_heredoc_end(value); end
 
   # :call-seq:
@@ -9884,13 +9909,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | VarField) keyword_rest
   #   ) -> HshPtn
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#1956
+  # source://syntax_tree//lib/syntax_tree/parser.rb#1960
   def on_hshptn(constant, keywords, keyword_rest); end
 
   # :call-seq:
   #   on_ident: (String value) -> Ident
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2026
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2030
   def on_ident(value); end
 
   # :call-seq:
@@ -9900,25 +9925,25 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Elsif | Else) consequent
   #   ) -> IfNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2045
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2049
   def on_if(predicate, statements, consequent); end
 
   # :call-seq:
   #   on_if_mod: (untyped predicate, untyped statement) -> IfNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2085
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2089
   def on_if_mod(predicate, statement); end
 
   # :call-seq:
   #   on_ifop: (untyped predicate, untyped truthy, untyped falsy) -> IfOp
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2074
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2078
   def on_ifop(predicate, truthy, falsy); end
 
   # :call-seq:
   #   on_imaginary: (String value) -> Imaginary
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2107
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2111
   def on_imaginary(value); end
 
   # :call-seq:
@@ -9928,43 +9953,43 @@ class SyntaxTree::Parser < ::Ripper
   #            (nil | In | Else) consequent
   #          ) -> In
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2127
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2131
   def on_in(pattern, statements, consequent); end
 
   # :call-seq:
   #   on_int: (String value) -> Int
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2172
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2176
   def on_int(value); end
 
   # :call-seq:
   #   on_ivar: (String value) -> IVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2187
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2191
   def on_ivar(value); end
 
   # :call-seq:
   #   on_kw: (String value) -> Kw
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2202
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2206
   def on_kw(value); end
 
   # :call-seq:
   #   on_kwrest_param: ((nil | Ident) name) -> KwRestParam
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2221
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2225
   def on_kwrest_param(name); end
 
   # :call-seq:
   #   on_label: (String value) -> Label
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2230
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2234
   def on_label(value); end
 
   # :call-seq:
   #   on_label_end: (String value) -> LabelEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2245
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2249
   def on_label_end(value); end
 
   # :call-seq:
@@ -9973,37 +9998,37 @@ class SyntaxTree::Parser < ::Ripper
   #     (BodyStmt | Statements) statements
   #   ) -> Lambda
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2267
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2271
   def on_lambda(params, statements); end
 
   # :call-seq:
   #   on_lambda_var: (Params params, Array[ Ident ] locals) -> LambdaVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2349
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2353
   def on_lambda_var(params, locals); end
 
   # :call-seq:
   #   on_lbrace: (String value) -> LBrace
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2432
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2436
   def on_lbrace(value); end
 
   # :call-seq:
   #   on_lbracket: (String value) -> LBracket
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2451
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2455
   def on_lbracket(value); end
 
   # :call-seq:
   #   on_lparen: (String value) -> LParen
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2470
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2474
   def on_lparen(value); end
 
   # :call-seq:
   #   on_massign: ((MLHS | MLHSParen) target, untyped value) -> MAssign
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2493
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2497
   def on_massign(target, value); end
 
   # :call-seq:
@@ -10012,7 +10037,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (ArgParen | Args) arguments
   #   ) -> CallNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2509
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2513
   def on_method_add_arg(call, arguments); end
 
   # :call-seq:
@@ -10021,7 +10046,7 @@ class SyntaxTree::Parser < ::Ripper
   #     Block block
   #   ) -> Break | MethodAddBlock
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2527
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2531
   def on_method_add_block(call, block); end
 
   # :call-seq:
@@ -10030,13 +10055,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (ARefField | Field | Ident | MLHSParen | VarField) part
   #   ) -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2556
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2560
   def on_mlhs_add(mlhs, part); end
 
   # :call-seq:
   #   on_mlhs_add_post: (MLHS left, MLHS right) -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2565
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2569
   def on_mlhs_add_post(left, right); end
 
   # :call-seq:
@@ -10045,19 +10070,19 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | ARefField | Field | Ident | VarField) part
   #   ) -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2577
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2581
   def on_mlhs_add_star(mlhs, part); end
 
   # :call-seq:
   #   on_mlhs_new: () -> MLHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2590
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2594
   def on_mlhs_new; end
 
   # :call-seq:
   #   on_mlhs_paren: ((MLHS | MLHSParen) contents) -> MLHSParen
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2600
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2604
   def on_mlhs_paren(contents); end
 
   # :call-seq:
@@ -10066,43 +10091,43 @@ class SyntaxTree::Parser < ::Ripper
   #     BodyStmt bodystmt
   #   ) -> ModuleDeclaration
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2618
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2622
   def on_module(constant, bodystmt); end
 
   # :call-seq:
   #   on_mrhs_add: (MRHS mrhs, untyped part) -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2650
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2654
   def on_mrhs_add(mrhs, part); end
 
   # :call-seq:
   #   on_mrhs_add_star: (MRHS mrhs, untyped value) -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2659
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2663
   def on_mrhs_add_star(mrhs, value); end
 
   # :call-seq:
   #   on_mrhs_new: () -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2640
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2644
   def on_mrhs_new; end
 
   # :call-seq:
   #   on_mrhs_new_from_args: (Args arguments) -> MRHS
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2681
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2685
   def on_mrhs_new_from_args(arguments); end
 
   # :call-seq:
   #   on_next: (Args arguments) -> Next
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2687
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2691
   def on_next(arguments); end
 
   # :call-seq:
   #   on_op: (String value) -> Op
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2706
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2710
   def on_op(value); end
 
   # :call-seq:
@@ -10118,7 +10143,7 @@ class SyntaxTree::Parser < ::Ripper
   #     untyped value
   #   ) -> OpAssign
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2735
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2739
   def on_opassign(target, operator, value); end
 
   # If we encounter a parse error, just immediately bail out so that our
@@ -10126,7 +10151,7 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2869
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2873
   def on_param_error(error, *_arg1); end
 
   # :call-seq:
@@ -10140,13 +10165,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | :& | BlockArg) block
   #   ) -> Params
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2758
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2762
   def on_params(requireds, optionals, rest, posts, keywords, keyword_rest, block); end
 
   # :call-seq:
   #   on_paren: (untyped contents) -> Paren
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2823
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2827
   def on_paren(contents); end
 
   # If we encounter a parse error, just immediately bail out so that our
@@ -10154,79 +10179,79 @@ class SyntaxTree::Parser < ::Ripper
   #
   # @raise [ParseError]
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2863
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2867
   def on_parse_error(error, *_arg1); end
 
   # :call-seq:
   #   on_period: (String value) -> Period
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2873
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2878
   def on_period(value); end
 
   # :call-seq:
   #   on_program: (Statements statements) -> Program
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#2888
+  # source://syntax_tree//lib/syntax_tree/parser.rb#2893
   def on_program(statements); end
 
   # :call-seq:
   #   on_qsymbols_add: (QSymbols qsymbols, TStringContent element) -> QSymbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3000
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3005
   def on_qsymbols_add(qsymbols, element); end
 
   # :call-seq:
   #   on_qsymbols_beg: (String value) -> QSymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3010
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3015
   def on_qsymbols_beg(value); end
 
   # :call-seq:
   #   on_qsymbols_new: () -> QSymbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3029
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3034
   def on_qsymbols_new; end
 
   # :call-seq:
   #   on_qwords_add: (QWords qwords, TStringContent element) -> QWords
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3041
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3046
   def on_qwords_add(qwords, element); end
 
   # :call-seq:
   #   on_qwords_beg: (String value) -> QWordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3051
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3056
   def on_qwords_beg(value); end
 
   # :call-seq:
   #   on_qwords_new: () -> QWords
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3070
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3075
   def on_qwords_new; end
 
   # :call-seq:
   #   on_rational: (String value) -> RationalLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3082
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3087
   def on_rational(value); end
 
   # :call-seq:
   #   on_rbrace: (String value) -> RBrace
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3097
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3102
   def on_rbrace(value); end
 
   # :call-seq:
   #   on_rbracket: (String value) -> RBracket
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3116
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3121
   def on_rbracket(value); end
 
   # :call-seq:
   #   on_redo: () -> Redo
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3135
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3140
   def on_redo; end
 
   # :call-seq:
@@ -10235,19 +10260,19 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringDVar | StringEmbExpr | TStringContent) part
   #   ) -> RegexpContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3146
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3151
   def on_regexp_add(regexp_content, part); end
 
   # :call-seq:
   #   on_regexp_beg: (String value) -> RegexpBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3156
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3161
   def on_regexp_beg(value); end
 
   # :call-seq:
   #   on_regexp_end: (String value) -> RegexpEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3175
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3180
   def on_regexp_end(value); end
 
   # :call-seq:
@@ -10256,13 +10281,13 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | RegexpEnd) ending
   #   ) -> RegexpLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3193
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3198
   def on_regexp_literal(regexp_content, ending); end
 
   # :call-seq:
   #   on_regexp_new: () -> RegexpContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3211
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3216
   def on_regexp_new; end
 
   # :call-seq:
@@ -10273,55 +10298,55 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Rescue) consequent
   #   ) -> Rescue
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3228
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3233
   def on_rescue(exceptions, variable, statements, consequent); end
 
   # :call-seq:
   #   on_rescue_mod: (untyped statement, untyped value) -> RescueMod
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3281
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3286
   def on_rescue_mod(statement, value); end
 
   # :call-seq:
   #   on_rest_param: ((nil | Ident) name) -> RestParam
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3293
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3298
   def on_rest_param(name); end
 
   # :call-seq:
   #   on_retry: () -> Retry
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3302
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3307
   def on_retry; end
 
   # :call-seq:
   #   on_return: (Args arguments) -> ReturnNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3310
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3315
   def on_return(arguments); end
 
   # :call-seq:
   #   on_return0: () -> ReturnNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3321
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3326
   def on_return0; end
 
   # :call-seq:
   #   on_rparen: (String value) -> RParen
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3329
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3334
   def on_rparen(value); end
 
   # :call-seq:
   #   on_sclass: (untyped target, BodyStmt bodystmt) -> SClass
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3348
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3353
   def on_sclass(target, bodystmt); end
 
   # :call-seq:
   #   on_semicolon: (String value) -> Semicolon
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3381
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3386
   def on_semicolon(value); end
 
   # stmts_add is a parser event that represents a single statement inside a
@@ -10329,13 +10354,13 @@ class SyntaxTree::Parser < ::Ripper
   # parent stmts node as well as an stmt which can be any expression in
   # Ruby.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3400
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3405
   def on_stmts_add(statements, statement); end
 
   # :call-seq:
   #   on_stmts_new: () -> Statements
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3413
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3418
   def on_stmts_new; end
 
   # :call-seq:
@@ -10344,7 +10369,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringEmbExpr | StringDVar | TStringContent) part
   #   ) -> StringContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3426
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3431
   def on_string_add(string, part); end
 
   # :call-seq:
@@ -10353,44 +10378,44 @@ class SyntaxTree::Parser < ::Ripper
   #     StringLiteral right
   #   ) -> StringConcat
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3443
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3448
   def on_string_concat(left, right); end
 
   # :call-seq:
   #   on_string_content: () -> StringContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3453
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3458
   def on_string_content; end
 
   # :call-seq:
   #   on_string_dvar: ((Backref | VarRef) variable) -> StringDVar
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3463
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3468
   def on_string_dvar(variable); end
 
   # :call-seq:
   #   on_string_embexpr: (Statements statements) -> StringEmbExpr
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3474
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3479
   def on_string_embexpr(statements); end
 
   # :call-seq:
   #   on_string_literal: (String string) -> Heredoc | StringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3504
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3509
   def on_string_literal(string); end
 
   # :call-seq:
   #   on_super: ((ArgParen | Args) arguments) -> Super
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3544
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3549
   def on_super(arguments); end
 
   # symbeg is a token that represents the beginning of a symbol literal. In
   # most cases it will contain just ":" as in the value, but if its a dynamic
   # symbol being defined it will contain ":'" or ":\"".
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3556
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3561
   def on_symbeg(value); end
 
   # :call-seq:
@@ -10398,7 +10423,7 @@ class SyntaxTree::Parser < ::Ripper
   #     (Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op) value
   #   ) -> SymbolContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3577
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3582
   def on_symbol(value); end
 
   # :call-seq:
@@ -10409,79 +10434,79 @@ class SyntaxTree::Parser < ::Ripper
   #     ) value
   #   ) -> SymbolLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3590
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3595
   def on_symbol_literal(value); end
 
   # :call-seq:
   #   on_symbols_add: (Symbols symbols, Word word) -> Symbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3606
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3611
   def on_symbols_add(symbols, word); end
 
   # :call-seq:
   #   on_symbols_beg: (String value) -> SymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3616
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3621
   def on_symbols_beg(value); end
 
   # :call-seq:
   #   on_symbols_new: () -> Symbols
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3635
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3640
   def on_symbols_new; end
 
   # :call-seq:
   #   on_tlambda: (String value) -> TLambda
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3647
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3652
   def on_tlambda(value); end
 
   # :call-seq:
   #   on_tlambeg: (String value) -> TLamBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3666
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3671
   def on_tlambeg(value); end
 
   # :call-seq:
   #   on_top_const_field: (Const constant) -> TopConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3685
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3690
   def on_top_const_field(constant); end
 
   # :call-seq:
   #   on_top_const_ref: (Const constant) -> TopConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3696
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3701
   def on_top_const_ref(constant); end
 
   # :call-seq:
   #   on_tstring_beg: (String value) -> TStringBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3707
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3712
   def on_tstring_beg(value); end
 
   # :call-seq:
   #   on_tstring_content: (String value) -> TStringContent
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3726
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3731
   def on_tstring_content(value); end
 
   # :call-seq:
   #   on_tstring_end: (String value) -> TStringEnd
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3741
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3746
   def on_tstring_end(value); end
 
   # :call-seq:
   #   on_unary: (:not operator, untyped statement) -> Not
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3761
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3766
   def on_unary(operator, statement); end
 
   # :call-seq:
   #   on_undef: (Array[DynaSymbol | SymbolLiteral] symbols) -> Undef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3804
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3809
   def on_undef(symbols); end
 
   # :call-seq:
@@ -10491,31 +10516,31 @@ class SyntaxTree::Parser < ::Ripper
   #     ((nil | Elsif | Else) consequent)
   #   ) -> UnlessNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3819
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3824
   def on_unless(predicate, statements, consequent); end
 
   # :call-seq:
   #   on_unless_mod: (untyped predicate, untyped statement) -> UnlessNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3848
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3853
   def on_unless_mod(predicate, statement); end
 
   # :call-seq:
   #   on_until: (untyped predicate, Statements statements) -> UntilNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3862
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3867
   def on_until(predicate, statements); end
 
   # :call-seq:
   #   on_until_mod: (untyped predicate, untyped statement) -> UntilNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3893
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3898
   def on_until_mod(predicate, statement); end
 
   # :call-seq:
   #   on_var_alias: (GVar left, (Backref | GVar) right) -> AliasNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3906
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3911
   def on_var_alias(left, right); end
 
   # :call-seq:
@@ -10523,25 +10548,25 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Const | CVar | GVar | Ident | IVar) value
   #   ) -> VarField
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3920
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3925
   def on_var_field(value); end
 
   # :call-seq:
   #   on_var_ref: ((Const | CVar | GVar | Ident | IVar | Kw) value) -> VarRef
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3935
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3940
   def on_var_ref(value); end
 
   # :call-seq:
   #   on_vcall: (Ident ident) -> VCall
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3941
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3946
   def on_vcall(ident); end
 
   # :call-seq:
   #   on_void_stmt: () -> VoidStmt
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3947
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3952
   def on_void_stmt; end
 
   # :call-seq:
@@ -10551,19 +10576,19 @@ class SyntaxTree::Parser < ::Ripper
   #     (nil | Else | When) consequent
   #   ) -> When
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3960
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3965
   def on_when(arguments, statements, consequent); end
 
   # :call-seq:
   #   on_while: (untyped predicate, Statements statements) -> WhileNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3992
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3997
   def on_while(predicate, statements); end
 
   # :call-seq:
   #   on_while_mod: (untyped predicate, untyped statement) -> WhileNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4023
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4028
   def on_while_mod(predicate, statement); end
 
   # :call-seq:
@@ -10572,31 +10597,31 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringEmbExpr | StringDVar | TStringContent) part
   #   ) -> Word
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4039
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4044
   def on_word_add(word, part); end
 
   # :call-seq:
   #   on_word_new: () -> Word
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4048
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4053
   def on_word_new; end
 
   # :call-seq:
   #   on_words_add: (Words words, Word word) -> Words
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4058
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4063
   def on_words_add(words, word); end
 
   # :call-seq:
   #   on_words_beg: (String value) -> WordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4068
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4073
   def on_words_beg(value); end
 
   # :call-seq:
   #   on_words_new: () -> Words
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4087
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4092
   def on_words_new; end
 
   # :call-seq:
@@ -10605,37 +10630,37 @@ class SyntaxTree::Parser < ::Ripper
   #     (StringEmbExpr | StringDVar | TStringContent) part
   #   ) -> XString
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4106
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4111
   def on_xstring_add(xstring, part); end
 
   # :call-seq:
   #   on_xstring_literal: (XString xstring) -> Heredoc | XStringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4130
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4135
   def on_xstring_literal(xstring); end
 
   # :call-seq:
   #   on_xstring_new: () -> XString
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4115
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4120
   def on_xstring_new; end
 
   # :call-seq:
   #   on_yield: ((Args | Paren) arguments) -> YieldNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4153
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4158
   def on_yield(arguments); end
 
   # :call-seq:
   #   on_yield0: () -> YieldNode
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4164
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4169
   def on_yield0; end
 
   # :call-seq:
   #   on_zsuper: () -> ZSuper
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#4172
+  # source://syntax_tree//lib/syntax_tree/parser.rb#4177
   def on_zsuper; end
 end
 
@@ -10728,7 +10753,7 @@ class SyntaxTree::Parser::PinVisitor < ::SyntaxTree::Visitor
   def visit_var_ref(node); end
 
   class << self
-    # source://syntax_tree//lib/syntax_tree/parser.rb#677
+    # source://syntax_tree//lib/syntax_tree/parser.rb#681
     def visit(node, tokens); end
   end
 end
@@ -10737,16 +10762,16 @@ end
 # attached to the AST. Because of this they only need to track their
 # associated location so they can be used for computing bounds.
 #
-# source://syntax_tree//lib/syntax_tree/parser.rb#3371
+# source://syntax_tree//lib/syntax_tree/parser.rb#3376
 class SyntaxTree::Parser::Semicolon
   # @return [Semicolon] a new instance of Semicolon
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3374
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3379
   def initialize(location); end
 
   # Returns the value of attribute location.
   #
-  # source://syntax_tree//lib/syntax_tree/parser.rb#3372
+  # source://syntax_tree//lib/syntax_tree/parser.rb#3377
   def location; end
 end
 
@@ -10858,6 +10883,8 @@ class SyntaxTree::Pattern
   # source://syntax_tree//lib/syntax_tree/pattern.rb#61
   def initialize(query); end
 
+  # @raise [CompilationError]
+  #
   # source://syntax_tree//lib/syntax_tree/pattern.rb#65
   def compile; end
 
@@ -10871,82 +10898,82 @@ class SyntaxTree::Pattern
   # Shortcut for combining two procs into one that returns true if both return
   # true.
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#80
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#81
   def combine_and(left, right); end
 
   # Shortcut for combining two procs into one that returns true if either
   # returns true.
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#86
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#87
   def combine_or(left, right); end
 
   # in [foo, bar, baz]
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#109
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#110
   def compile_aryptn(node); end
 
   # in foo | bar
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#134
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#135
   def compile_binary(node); end
 
   # in Ident
   # in String
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#142
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#143
   def compile_const(node); end
 
   # in SyntaxTree::Ident
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#159
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#160
   def compile_const_path_ref(node); end
 
   # in :""
   # in :"foo"
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#172
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#173
   def compile_dyna_symbol(node); end
 
   # Raise an error because the given node is not supported.
   #
   # @raise [CompilationError]
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#91
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#92
   def compile_error(node); end
 
   # in Ident[value: String]
   # in { value: String }
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#188
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#189
   def compile_hshptn(node); end
 
   # Compile any kind of node. Dispatch out to the individual compilation
   # methods based on the type of node.
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#260
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#261
   def compile_node(node); end
 
   # in /foo/
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#214
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#215
   def compile_regexp_literal(node); end
 
   # in ""
   # in "foo"
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#226
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#227
   def compile_string_literal(node); end
 
   # in :+
   # in :foo
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#238
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#239
   def compile_symbol_literal(node); end
 
   # in Foo
   # in nil
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#246
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#247
   def compile_var_ref(node); end
 
   # There are a couple of nodes (string literals, dynamic symbols, and regexp)
@@ -10955,7 +10982,7 @@ class SyntaxTree::Pattern
   # plain string content, so this method will extract out the plain string
   # content if it is the only element in the list.
   #
-  # source://syntax_tree//lib/syntax_tree/pattern.rb#100
+  # source://syntax_tree//lib/syntax_tree/pattern.rb#101
   def extract_string(node); end
 end
 
@@ -10973,42 +11000,42 @@ end
 # Period represents the use of the +.+ operator. It is usually found in method
 # calls.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8553
+# source://syntax_tree//lib/syntax_tree/node.rb#8568
 class SyntaxTree::Period < ::SyntaxTree::Node
   # @return [Period] a new instance of Period
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8560
+  # source://syntax_tree//lib/syntax_tree/node.rb#8575
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8595
+  # source://syntax_tree//lib/syntax_tree/node.rb#8610
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8566
+  # source://syntax_tree//lib/syntax_tree/node.rb#8581
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8570
+  # source://syntax_tree//lib/syntax_tree/node.rb#8585
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8558
+  # source://syntax_tree//lib/syntax_tree/node.rb#8573
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8574
+  # source://syntax_tree//lib/syntax_tree/node.rb#8589
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8585
+  # source://syntax_tree//lib/syntax_tree/node.rb#8600
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8587
+  # source://syntax_tree//lib/syntax_tree/node.rb#8602
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8591
+  # source://syntax_tree//lib/syntax_tree/node.rb#8606
   def format(q); end
 
   # [String] the period
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8555
+  # source://syntax_tree//lib/syntax_tree/node.rb#8570
   def value; end
 end
 
@@ -11018,42 +11045,42 @@ end
 #     in ^(statement)
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#1962
+# source://syntax_tree//lib/syntax_tree/node.rb#1977
 class SyntaxTree::PinnedBegin < ::SyntaxTree::Node
   # @return [PinnedBegin] a new instance of PinnedBegin
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1969
+  # source://syntax_tree//lib/syntax_tree/node.rb#1984
   def initialize(statement:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2014
+  # source://syntax_tree//lib/syntax_tree/node.rb#2029
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1975
+  # source://syntax_tree//lib/syntax_tree/node.rb#1990
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1979
+  # source://syntax_tree//lib/syntax_tree/node.rb#1994
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1967
+  # source://syntax_tree//lib/syntax_tree/node.rb#1982
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1983
+  # source://syntax_tree//lib/syntax_tree/node.rb#1998
   def copy(statement: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1994
+  # source://syntax_tree//lib/syntax_tree/node.rb#2009
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#1996
+  # source://syntax_tree//lib/syntax_tree/node.rb#2011
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#2000
+  # source://syntax_tree//lib/syntax_tree/node.rb#2015
   def format(q); end
 
   # [Node] the expression being pinned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#1964
+  # source://syntax_tree//lib/syntax_tree/node.rb#1979
   def statement; end
 end
 
@@ -11067,42 +11094,42 @@ end
 # This can be a plain local variable like the example above. It can also be a
 # a class variable, a global variable, or an instance variable.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11661
+# source://syntax_tree//lib/syntax_tree/node.rb#11680
 class SyntaxTree::PinnedVarRef < ::SyntaxTree::Node
   # @return [PinnedVarRef] a new instance of PinnedVarRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11668
+  # source://syntax_tree//lib/syntax_tree/node.rb#11687
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11706
+  # source://syntax_tree//lib/syntax_tree/node.rb#11725
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11674
+  # source://syntax_tree//lib/syntax_tree/node.rb#11693
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11678
+  # source://syntax_tree//lib/syntax_tree/node.rb#11697
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11666
+  # source://syntax_tree//lib/syntax_tree/node.rb#11685
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11682
+  # source://syntax_tree//lib/syntax_tree/node.rb#11701
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11693
+  # source://syntax_tree//lib/syntax_tree/node.rb#11712
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11695
+  # source://syntax_tree//lib/syntax_tree/node.rb#11714
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11699
+  # source://syntax_tree//lib/syntax_tree/node.rb#11718
   def format(q); end
 
   # [Const | CVar | GVar | Ident | IVar] the value of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11663
+  # source://syntax_tree//lib/syntax_tree/node.rb#11682
   def value; end
 end
 
@@ -11155,42 +11182,42 @@ end
 
 # Program represents the overall syntax tree.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8601
+# source://syntax_tree//lib/syntax_tree/node.rb#8616
 class SyntaxTree::Program < ::SyntaxTree::Node
   # @return [Program] a new instance of Program
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8608
+  # source://syntax_tree//lib/syntax_tree/node.rb#8623
   def initialize(statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8648
+  # source://syntax_tree//lib/syntax_tree/node.rb#8663
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8614
+  # source://syntax_tree//lib/syntax_tree/node.rb#8629
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8618
+  # source://syntax_tree//lib/syntax_tree/node.rb#8633
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8606
+  # source://syntax_tree//lib/syntax_tree/node.rb#8621
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8622
+  # source://syntax_tree//lib/syntax_tree/node.rb#8637
   def copy(statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8633
+  # source://syntax_tree//lib/syntax_tree/node.rb#8648
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8635
+  # source://syntax_tree//lib/syntax_tree/node.rb#8650
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8639
+  # source://syntax_tree//lib/syntax_tree/node.rb#8654
   def format(q); end
 
   # [Statements] the top-level expressions of the program
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8603
+  # source://syntax_tree//lib/syntax_tree/node.rb#8618
   def statements; end
 end
 
@@ -11198,47 +11225,47 @@ end
 #
 #     %i[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8657
+# source://syntax_tree//lib/syntax_tree/node.rb#8672
 class SyntaxTree::QSymbols < ::SyntaxTree::Node
   # @return [QSymbols] a new instance of QSymbols
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8667
+  # source://syntax_tree//lib/syntax_tree/node.rb#8682
   def initialize(beginning:, elements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8727
+  # source://syntax_tree//lib/syntax_tree/node.rb#8742
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8674
+  # source://syntax_tree//lib/syntax_tree/node.rb#8689
   def accept(visitor); end
 
   # [QSymbolsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8659
+  # source://syntax_tree//lib/syntax_tree/node.rb#8674
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8678
+  # source://syntax_tree//lib/syntax_tree/node.rb#8693
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8665
+  # source://syntax_tree//lib/syntax_tree/node.rb#8680
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8682
+  # source://syntax_tree//lib/syntax_tree/node.rb#8697
   def copy(beginning: T.unsafe(nil), elements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8694
+  # source://syntax_tree//lib/syntax_tree/node.rb#8709
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8696
+  # source://syntax_tree//lib/syntax_tree/node.rb#8711
   def deconstruct_keys(_keys); end
 
   # [Array[ TStringContent ]] the elements of the array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8662
+  # source://syntax_tree//lib/syntax_tree/node.rb#8677
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8705
+  # source://syntax_tree//lib/syntax_tree/node.rb#8720
   def format(q); end
 end
 
@@ -11250,34 +11277,34 @@ end
 # these kinds of arrays can start with a lot of different delimiter types
 # (e.g., %i| or %i<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8740
+# source://syntax_tree//lib/syntax_tree/node.rb#8755
 class SyntaxTree::QSymbolsBeg < ::SyntaxTree::Node
   # @return [QSymbolsBeg] a new instance of QSymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8744
+  # source://syntax_tree//lib/syntax_tree/node.rb#8759
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8770
+  # source://syntax_tree//lib/syntax_tree/node.rb#8785
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8749
+  # source://syntax_tree//lib/syntax_tree/node.rb#8764
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8753
+  # source://syntax_tree//lib/syntax_tree/node.rb#8768
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8757
+  # source://syntax_tree//lib/syntax_tree/node.rb#8772
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8764
+  # source://syntax_tree//lib/syntax_tree/node.rb#8779
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8766
+  # source://syntax_tree//lib/syntax_tree/node.rb#8781
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8742
+  # source://syntax_tree//lib/syntax_tree/node.rb#8757
   def value; end
 end
 
@@ -11285,47 +11312,47 @@ end
 #
 #     %w[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8779
+# source://syntax_tree//lib/syntax_tree/node.rb#8794
 class SyntaxTree::QWords < ::SyntaxTree::Node
   # @return [QWords] a new instance of QWords
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8789
+  # source://syntax_tree//lib/syntax_tree/node.rb#8804
   def initialize(beginning:, elements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8845
+  # source://syntax_tree//lib/syntax_tree/node.rb#8860
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8796
+  # source://syntax_tree//lib/syntax_tree/node.rb#8811
   def accept(visitor); end
 
   # [QWordsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8781
+  # source://syntax_tree//lib/syntax_tree/node.rb#8796
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8800
+  # source://syntax_tree//lib/syntax_tree/node.rb#8815
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8787
+  # source://syntax_tree//lib/syntax_tree/node.rb#8802
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8804
+  # source://syntax_tree//lib/syntax_tree/node.rb#8819
   def copy(beginning: T.unsafe(nil), elements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8812
+  # source://syntax_tree//lib/syntax_tree/node.rb#8827
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8814
+  # source://syntax_tree//lib/syntax_tree/node.rb#8829
   def deconstruct_keys(_keys); end
 
   # [Array[ TStringContent ]] the elements of the array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8784
+  # source://syntax_tree//lib/syntax_tree/node.rb#8799
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8823
+  # source://syntax_tree//lib/syntax_tree/node.rb#8838
   def format(q); end
 end
 
@@ -11337,41 +11364,41 @@ end
 # kinds of arrays can start with a lot of different delimiter types (e.g.,
 # %w| or %w<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8858
+# source://syntax_tree//lib/syntax_tree/node.rb#8873
 class SyntaxTree::QWordsBeg < ::SyntaxTree::Node
   # @return [QWordsBeg] a new instance of QWordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8862
+  # source://syntax_tree//lib/syntax_tree/node.rb#8877
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8888
+  # source://syntax_tree//lib/syntax_tree/node.rb#8903
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8867
+  # source://syntax_tree//lib/syntax_tree/node.rb#8882
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8871
+  # source://syntax_tree//lib/syntax_tree/node.rb#8886
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8875
+  # source://syntax_tree//lib/syntax_tree/node.rb#8890
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8882
+  # source://syntax_tree//lib/syntax_tree/node.rb#8897
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8884
+  # source://syntax_tree//lib/syntax_tree/node.rb#8899
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8860
+  # source://syntax_tree//lib/syntax_tree/node.rb#8875
   def value; end
 end
 
 # Responsible for providing information about quotes to be used for strings
 # and dynamic symbols.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4615
+# source://syntax_tree//lib/syntax_tree/node.rb#4630
 module SyntaxTree::Quotes
   class << self
     # If there is some part of this string that matches an escape sequence or
@@ -11382,25 +11409,25 @@ module SyntaxTree::Quotes
     #
     # @return [Boolean]
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#4624
+    # source://syntax_tree//lib/syntax_tree/node.rb#4639
     def locked?(node, quote); end
 
     # Find the matching closing quote for the given opening quote.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#4631
+    # source://syntax_tree//lib/syntax_tree/node.rb#4646
     def matching(quote); end
 
     # Escape and unescape single and double quotes as needed to be able to
     # enclose +content+ with +enclosing+.
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#4637
+    # source://syntax_tree//lib/syntax_tree/node.rb#4652
     def normalize(content, enclosing); end
   end
 end
 
 # The matching pairs of quotes that can be used with % literals.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4617
+# source://syntax_tree//lib/syntax_tree/node.rb#4632
 SyntaxTree::Quotes::PAIRS = T.let(T.unsafe(nil), Hash)
 
 # RAssign represents a single-line pattern match.
@@ -11408,152 +11435,152 @@ SyntaxTree::Quotes::PAIRS = T.let(T.unsafe(nil), Hash)
 #     value in pattern
 #     value => pattern
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#3201
+# source://syntax_tree//lib/syntax_tree/node.rb#3216
 class SyntaxTree::RAssign < ::SyntaxTree::Node
   # @return [RAssign] a new instance of RAssign
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3215
+  # source://syntax_tree//lib/syntax_tree/node.rb#3230
   def initialize(value:, operator:, pattern:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3277
+  # source://syntax_tree//lib/syntax_tree/node.rb#3292
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3223
+  # source://syntax_tree//lib/syntax_tree/node.rb#3238
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3227
+  # source://syntax_tree//lib/syntax_tree/node.rb#3242
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3213
+  # source://syntax_tree//lib/syntax_tree/node.rb#3228
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3231
+  # source://syntax_tree//lib/syntax_tree/node.rb#3246
   def copy(value: T.unsafe(nil), operator: T.unsafe(nil), pattern: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3244
+  # source://syntax_tree//lib/syntax_tree/node.rb#3259
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3246
+  # source://syntax_tree//lib/syntax_tree/node.rb#3261
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#3256
+  # source://syntax_tree//lib/syntax_tree/node.rb#3271
   def format(q); end
 
   # [Kw | Op] the operator being used to match against the pattern, which is
   # either => or in
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3207
+  # source://syntax_tree//lib/syntax_tree/node.rb#3222
   def operator; end
 
   # [Node] the pattern on the right-hand side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3210
+  # source://syntax_tree//lib/syntax_tree/node.rb#3225
   def pattern; end
 
   # [Node] the left-hand expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#3203
+  # source://syntax_tree//lib/syntax_tree/node.rb#3218
   def value; end
 end
 
 # RBrace represents the use of a right brace, i.e., +++.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8945
+# source://syntax_tree//lib/syntax_tree/node.rb#8960
 class SyntaxTree::RBrace < ::SyntaxTree::Node
   # @return [RBrace] a new instance of RBrace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8949
+  # source://syntax_tree//lib/syntax_tree/node.rb#8964
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8975
+  # source://syntax_tree//lib/syntax_tree/node.rb#8990
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8954
+  # source://syntax_tree//lib/syntax_tree/node.rb#8969
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8958
+  # source://syntax_tree//lib/syntax_tree/node.rb#8973
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8962
+  # source://syntax_tree//lib/syntax_tree/node.rb#8977
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8969
+  # source://syntax_tree//lib/syntax_tree/node.rb#8984
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8971
+  # source://syntax_tree//lib/syntax_tree/node.rb#8986
   def deconstruct_keys(_keys); end
 
   # [String] the right brace
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8947
+  # source://syntax_tree//lib/syntax_tree/node.rb#8962
   def value; end
 end
 
 # RBracket represents the use of a right bracket, i.e., +]+.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8981
+# source://syntax_tree//lib/syntax_tree/node.rb#8996
 class SyntaxTree::RBracket < ::SyntaxTree::Node
   # @return [RBracket] a new instance of RBracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8985
+  # source://syntax_tree//lib/syntax_tree/node.rb#9000
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9011
+  # source://syntax_tree//lib/syntax_tree/node.rb#9026
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8990
+  # source://syntax_tree//lib/syntax_tree/node.rb#9005
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8994
+  # source://syntax_tree//lib/syntax_tree/node.rb#9009
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8998
+  # source://syntax_tree//lib/syntax_tree/node.rb#9013
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9005
+  # source://syntax_tree//lib/syntax_tree/node.rb#9020
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9007
+  # source://syntax_tree//lib/syntax_tree/node.rb#9022
   def deconstruct_keys(_keys); end
 
   # [String] the right bracket
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8983
+  # source://syntax_tree//lib/syntax_tree/node.rb#8998
   def value; end
 end
 
 # RParen represents the use of a right parenthesis, i.e., +)+.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9751
+# source://syntax_tree//lib/syntax_tree/node.rb#9766
 class SyntaxTree::RParen < ::SyntaxTree::Node
   # @return [RParen] a new instance of RParen
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9755
+  # source://syntax_tree//lib/syntax_tree/node.rb#9770
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9781
+  # source://syntax_tree//lib/syntax_tree/node.rb#9796
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9760
+  # source://syntax_tree//lib/syntax_tree/node.rb#9775
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9764
+  # source://syntax_tree//lib/syntax_tree/node.rb#9779
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9768
+  # source://syntax_tree//lib/syntax_tree/node.rb#9783
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9775
+  # source://syntax_tree//lib/syntax_tree/node.rb#9790
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9777
+  # source://syntax_tree//lib/syntax_tree/node.rb#9792
   def deconstruct_keys(_keys); end
 
   # [String] the parenthesis
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9753
+  # source://syntax_tree//lib/syntax_tree/node.rb#9768
   def value; end
 end
 
@@ -11569,52 +11596,52 @@ end
 #
 # One of the sides of the expression may be nil, but not both.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#4540
+# source://syntax_tree//lib/syntax_tree/node.rb#4555
 class SyntaxTree::RangeNode < ::SyntaxTree::Node
   # @return [RangeNode] a new instance of RangeNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4553
+  # source://syntax_tree//lib/syntax_tree/node.rb#4568
   def initialize(left:, operator:, right:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4607
+  # source://syntax_tree//lib/syntax_tree/node.rb#4622
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4561
+  # source://syntax_tree//lib/syntax_tree/node.rb#4576
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4565
+  # source://syntax_tree//lib/syntax_tree/node.rb#4580
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4551
+  # source://syntax_tree//lib/syntax_tree/node.rb#4566
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4569
+  # source://syntax_tree//lib/syntax_tree/node.rb#4584
   def copy(left: T.unsafe(nil), operator: T.unsafe(nil), right: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4582
+  # source://syntax_tree//lib/syntax_tree/node.rb#4597
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4584
+  # source://syntax_tree//lib/syntax_tree/node.rb#4599
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#4594
+  # source://syntax_tree//lib/syntax_tree/node.rb#4609
   def format(q); end
 
   # [nil | Node] the left side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4542
+  # source://syntax_tree//lib/syntax_tree/node.rb#4557
   def left; end
 
   # [Op] the operator used for this range
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4545
+  # source://syntax_tree//lib/syntax_tree/node.rb#4560
   def operator; end
 
   # [nil | Node] the right side of the expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#4548
+  # source://syntax_tree//lib/syntax_tree/node.rb#4563
   def right; end
 end
 
@@ -11622,42 +11649,42 @@ end
 #
 #     1r
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#8897
+# source://syntax_tree//lib/syntax_tree/node.rb#8912
 class SyntaxTree::RationalLiteral < ::SyntaxTree::Node
   # @return [RationalLiteral] a new instance of RationalLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8904
+  # source://syntax_tree//lib/syntax_tree/node.rb#8919
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8939
+  # source://syntax_tree//lib/syntax_tree/node.rb#8954
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8910
+  # source://syntax_tree//lib/syntax_tree/node.rb#8925
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8914
+  # source://syntax_tree//lib/syntax_tree/node.rb#8929
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8902
+  # source://syntax_tree//lib/syntax_tree/node.rb#8917
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8918
+  # source://syntax_tree//lib/syntax_tree/node.rb#8933
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8929
+  # source://syntax_tree//lib/syntax_tree/node.rb#8944
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8931
+  # source://syntax_tree//lib/syntax_tree/node.rb#8946
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#8935
+  # source://syntax_tree//lib/syntax_tree/node.rb#8950
   def format(q); end
 
   # [String] the rational number literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#8899
+  # source://syntax_tree//lib/syntax_tree/node.rb#8914
   def value; end
 end
 
@@ -11665,37 +11692,37 @@ end
 #
 #     redo
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9020
+# source://syntax_tree//lib/syntax_tree/node.rb#9035
 class SyntaxTree::Redo < ::SyntaxTree::Node
   # @return [Redo] a new instance of Redo
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9024
+  # source://syntax_tree//lib/syntax_tree/node.rb#9039
   def initialize(location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9054
+  # source://syntax_tree//lib/syntax_tree/node.rb#9069
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9029
+  # source://syntax_tree//lib/syntax_tree/node.rb#9044
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9033
+  # source://syntax_tree//lib/syntax_tree/node.rb#9048
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9022
+  # source://syntax_tree//lib/syntax_tree/node.rb#9037
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9037
+  # source://syntax_tree//lib/syntax_tree/node.rb#9052
   def copy(location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9044
+  # source://syntax_tree//lib/syntax_tree/node.rb#9059
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9046
+  # source://syntax_tree//lib/syntax_tree/node.rb#9061
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9050
+  # source://syntax_tree//lib/syntax_tree/node.rb#9065
   def format(q); end
 end
 
@@ -11708,34 +11735,34 @@ end
 #
 #     %r{.+}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9116
+# source://syntax_tree//lib/syntax_tree/node.rb#9131
 class SyntaxTree::RegexpBeg < ::SyntaxTree::Node
   # @return [RegexpBeg] a new instance of RegexpBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9120
+  # source://syntax_tree//lib/syntax_tree/node.rb#9135
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9146
+  # source://syntax_tree//lib/syntax_tree/node.rb#9161
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9125
+  # source://syntax_tree//lib/syntax_tree/node.rb#9140
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9129
+  # source://syntax_tree//lib/syntax_tree/node.rb#9144
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9133
+  # source://syntax_tree//lib/syntax_tree/node.rb#9148
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9140
+  # source://syntax_tree//lib/syntax_tree/node.rb#9155
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9142
+  # source://syntax_tree//lib/syntax_tree/node.rb#9157
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9118
+  # source://syntax_tree//lib/syntax_tree/node.rb#9133
   def value; end
 end
 
@@ -11746,40 +11773,40 @@ end
 # In the example above, a RegexpContent node represents everything contained
 # within the forward slashes.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9065
+# source://syntax_tree//lib/syntax_tree/node.rb#9080
 class SyntaxTree::RegexpContent < ::SyntaxTree::Node
   # @return [RegexpContent] a new instance of RegexpContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9073
+  # source://syntax_tree//lib/syntax_tree/node.rb#9088
   def initialize(beginning:, parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9101
+  # source://syntax_tree//lib/syntax_tree/node.rb#9116
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9079
+  # source://syntax_tree//lib/syntax_tree/node.rb#9094
   def accept(visitor); end
 
   # [String] the opening of the regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9067
+  # source://syntax_tree//lib/syntax_tree/node.rb#9082
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9083
+  # source://syntax_tree//lib/syntax_tree/node.rb#9098
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9087
+  # source://syntax_tree//lib/syntax_tree/node.rb#9102
   def copy(beginning: T.unsafe(nil), parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9095
+  # source://syntax_tree//lib/syntax_tree/node.rb#9110
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9097
+  # source://syntax_tree//lib/syntax_tree/node.rb#9112
   def deconstruct_keys(_keys); end
 
   # [Array[ StringDVar | StringEmbExpr | TStringContent ]] the parts of the
   # regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9071
+  # source://syntax_tree//lib/syntax_tree/node.rb#9086
   def parts; end
 end
 
@@ -11793,34 +11820,34 @@ end
 #
 #     %r{.+}m
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9161
+# source://syntax_tree//lib/syntax_tree/node.rb#9176
 class SyntaxTree::RegexpEnd < ::SyntaxTree::Node
   # @return [RegexpEnd] a new instance of RegexpEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9165
+  # source://syntax_tree//lib/syntax_tree/node.rb#9180
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9191
+  # source://syntax_tree//lib/syntax_tree/node.rb#9206
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9170
+  # source://syntax_tree//lib/syntax_tree/node.rb#9185
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9174
+  # source://syntax_tree//lib/syntax_tree/node.rb#9189
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9178
+  # source://syntax_tree//lib/syntax_tree/node.rb#9193
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9185
+  # source://syntax_tree//lib/syntax_tree/node.rb#9200
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9187
+  # source://syntax_tree//lib/syntax_tree/node.rb#9202
   def deconstruct_keys(_keys); end
 
   # [String] the end of the regular expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9163
+  # source://syntax_tree//lib/syntax_tree/node.rb#9178
   def value; end
 end
 
@@ -11828,56 +11855,56 @@ end
 #
 #     /.+/
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9200
+# source://syntax_tree//lib/syntax_tree/node.rb#9215
 class SyntaxTree::RegexpLiteral < ::SyntaxTree::Node
   # @return [RegexpLiteral] a new instance of RegexpLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9214
+  # source://syntax_tree//lib/syntax_tree/node.rb#9229
   def initialize(beginning:, ending:, parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9296
+  # source://syntax_tree//lib/syntax_tree/node.rb#9311
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9222
+  # source://syntax_tree//lib/syntax_tree/node.rb#9237
   def accept(visitor); end
 
   # [String] the beginning of the regular expression literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9202
+  # source://syntax_tree//lib/syntax_tree/node.rb#9217
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9226
+  # source://syntax_tree//lib/syntax_tree/node.rb#9241
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9212
+  # source://syntax_tree//lib/syntax_tree/node.rb#9227
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9230
+  # source://syntax_tree//lib/syntax_tree/node.rb#9245
   def copy(beginning: T.unsafe(nil), ending: T.unsafe(nil), parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9243
+  # source://syntax_tree//lib/syntax_tree/node.rb#9258
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9245
+  # source://syntax_tree//lib/syntax_tree/node.rb#9260
   def deconstruct_keys(_keys); end
 
   # [String] the ending of the regular expression literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9205
+  # source://syntax_tree//lib/syntax_tree/node.rb#9220
   def ending; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9256
+  # source://syntax_tree//lib/syntax_tree/node.rb#9271
   def format(q); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9302
+  # source://syntax_tree//lib/syntax_tree/node.rb#9317
   def options; end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # regular expression literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9209
+  # source://syntax_tree//lib/syntax_tree/node.rb#9224
   def parts; end
 
   private
@@ -11889,12 +11916,12 @@ class SyntaxTree::RegexpLiteral < ::SyntaxTree::Node
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9318
+  # source://syntax_tree//lib/syntax_tree/node.rb#9333
   def ambiguous?(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9308
+  # source://syntax_tree//lib/syntax_tree/node.rb#9323
   def include?(pattern); end
 end
 
@@ -11904,60 +11931,60 @@ end
 #     rescue
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9408
+# source://syntax_tree//lib/syntax_tree/node.rb#9423
 class SyntaxTree::Rescue < ::SyntaxTree::Node
   # @return [Rescue] a new instance of Rescue
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9424
+  # source://syntax_tree//lib/syntax_tree/node.rb#9439
   def initialize(keyword:, exception:, statements:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9520
+  # source://syntax_tree//lib/syntax_tree/node.rb#9535
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9455
+  # source://syntax_tree//lib/syntax_tree/node.rb#9470
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9433
+  # source://syntax_tree//lib/syntax_tree/node.rb#9448
   def bind_end(end_char, end_column); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9459
+  # source://syntax_tree//lib/syntax_tree/node.rb#9474
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9422
+  # source://syntax_tree//lib/syntax_tree/node.rb#9437
   def comments; end
 
   # [nil | Rescue] the optional next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9419
+  # source://syntax_tree//lib/syntax_tree/node.rb#9434
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9463
+  # source://syntax_tree//lib/syntax_tree/node.rb#9478
   def copy(keyword: T.unsafe(nil), exception: T.unsafe(nil), statements: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9483
+  # source://syntax_tree//lib/syntax_tree/node.rb#9498
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9485
+  # source://syntax_tree//lib/syntax_tree/node.rb#9500
   def deconstruct_keys(_keys); end
 
   # [nil | RescueEx] the exceptions being rescued
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9413
+  # source://syntax_tree//lib/syntax_tree/node.rb#9428
   def exception; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9496
+  # source://syntax_tree//lib/syntax_tree/node.rb#9511
   def format(q); end
 
   # [Kw] the rescue keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9410
+  # source://syntax_tree//lib/syntax_tree/node.rb#9425
   def keyword; end
 
   # [Statements] the expressions to evaluate when an error is rescued
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9416
+  # source://syntax_tree//lib/syntax_tree/node.rb#9431
   def statements; end
 end
 
@@ -11967,48 +11994,48 @@ end
 #     rescue Exception => exception
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9333
+# source://syntax_tree//lib/syntax_tree/node.rb#9348
 class SyntaxTree::RescueEx < ::SyntaxTree::Node
   # @return [RescueEx] a new instance of RescueEx
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9344
+  # source://syntax_tree//lib/syntax_tree/node.rb#9359
   def initialize(exceptions:, variable:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9396
+  # source://syntax_tree//lib/syntax_tree/node.rb#9411
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9351
+  # source://syntax_tree//lib/syntax_tree/node.rb#9366
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9355
+  # source://syntax_tree//lib/syntax_tree/node.rb#9370
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9342
+  # source://syntax_tree//lib/syntax_tree/node.rb#9357
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9359
+  # source://syntax_tree//lib/syntax_tree/node.rb#9374
   def copy(exceptions: T.unsafe(nil), variable: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9371
+  # source://syntax_tree//lib/syntax_tree/node.rb#9386
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9373
+  # source://syntax_tree//lib/syntax_tree/node.rb#9388
   def deconstruct_keys(_keys); end
 
   # [nil | Node] the list of exceptions being rescued
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9335
+  # source://syntax_tree//lib/syntax_tree/node.rb#9350
   def exceptions; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9382
+  # source://syntax_tree//lib/syntax_tree/node.rb#9397
   def format(q); end
 
   # [nil | Field | VarField] the expression being used to capture the raised
   # exception
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9339
+  # source://syntax_tree//lib/syntax_tree/node.rb#9354
   def variable; end
 end
 
@@ -12016,47 +12043,47 @@ end
 #
 #     expression rescue value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9531
+# source://syntax_tree//lib/syntax_tree/node.rb#9546
 class SyntaxTree::RescueMod < ::SyntaxTree::Node
   # @return [RescueMod] a new instance of RescueMod
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9541
+  # source://syntax_tree//lib/syntax_tree/node.rb#9556
   def initialize(statement:, value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9597
+  # source://syntax_tree//lib/syntax_tree/node.rb#9612
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9548
+  # source://syntax_tree//lib/syntax_tree/node.rb#9563
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9552
+  # source://syntax_tree//lib/syntax_tree/node.rb#9567
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9539
+  # source://syntax_tree//lib/syntax_tree/node.rb#9554
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9556
+  # source://syntax_tree//lib/syntax_tree/node.rb#9571
   def copy(statement: T.unsafe(nil), value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9568
+  # source://syntax_tree//lib/syntax_tree/node.rb#9583
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9570
+  # source://syntax_tree//lib/syntax_tree/node.rb#9585
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9579
+  # source://syntax_tree//lib/syntax_tree/node.rb#9594
   def format(q); end
 
   # [Node] the expression to execute
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9533
+  # source://syntax_tree//lib/syntax_tree/node.rb#9548
   def statement; end
 
   # [Node] the value to use if the executed expression raises an error
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9536
+  # source://syntax_tree//lib/syntax_tree/node.rb#9551
   def value; end
 end
 
@@ -12065,42 +12092,42 @@ end
 #
 #     def method(*rest) end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9608
+# source://syntax_tree//lib/syntax_tree/node.rb#9623
 class SyntaxTree::RestParam < ::SyntaxTree::Node
   # @return [RestParam] a new instance of RestParam
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9615
+  # source://syntax_tree//lib/syntax_tree/node.rb#9630
   def initialize(name:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9651
+  # source://syntax_tree//lib/syntax_tree/node.rb#9666
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9621
+  # source://syntax_tree//lib/syntax_tree/node.rb#9636
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9625
+  # source://syntax_tree//lib/syntax_tree/node.rb#9640
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9613
+  # source://syntax_tree//lib/syntax_tree/node.rb#9628
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9629
+  # source://syntax_tree//lib/syntax_tree/node.rb#9644
   def copy(name: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9640
+  # source://syntax_tree//lib/syntax_tree/node.rb#9655
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9642
+  # source://syntax_tree//lib/syntax_tree/node.rb#9657
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9646
+  # source://syntax_tree//lib/syntax_tree/node.rb#9661
   def format(q); end
 
   # [nil | Ident] the name of the parameter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9610
+  # source://syntax_tree//lib/syntax_tree/node.rb#9625
   def name; end
 end
 
@@ -12108,37 +12135,37 @@ end
 #
 #     retry
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9660
+# source://syntax_tree//lib/syntax_tree/node.rb#9675
 class SyntaxTree::Retry < ::SyntaxTree::Node
   # @return [Retry] a new instance of Retry
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9664
+  # source://syntax_tree//lib/syntax_tree/node.rb#9679
   def initialize(location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9694
+  # source://syntax_tree//lib/syntax_tree/node.rb#9709
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9669
+  # source://syntax_tree//lib/syntax_tree/node.rb#9684
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9673
+  # source://syntax_tree//lib/syntax_tree/node.rb#9688
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9662
+  # source://syntax_tree//lib/syntax_tree/node.rb#9677
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9677
+  # source://syntax_tree//lib/syntax_tree/node.rb#9692
   def copy(location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9684
+  # source://syntax_tree//lib/syntax_tree/node.rb#9699
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9686
+  # source://syntax_tree//lib/syntax_tree/node.rb#9701
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9690
+  # source://syntax_tree//lib/syntax_tree/node.rb#9705
   def format(q); end
 end
 
@@ -12146,42 +12173,42 @@ end
 #
 #     return value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9703
+# source://syntax_tree//lib/syntax_tree/node.rb#9718
 class SyntaxTree::ReturnNode < ::SyntaxTree::Node
   # @return [ReturnNode] a new instance of ReturnNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9710
+  # source://syntax_tree//lib/syntax_tree/node.rb#9725
   def initialize(arguments:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9745
+  # source://syntax_tree//lib/syntax_tree/node.rb#9760
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9716
+  # source://syntax_tree//lib/syntax_tree/node.rb#9731
   def accept(visitor); end
 
   # [nil | Args] the arguments being passed to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9705
+  # source://syntax_tree//lib/syntax_tree/node.rb#9720
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9720
+  # source://syntax_tree//lib/syntax_tree/node.rb#9735
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9708
+  # source://syntax_tree//lib/syntax_tree/node.rb#9723
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9724
+  # source://syntax_tree//lib/syntax_tree/node.rb#9739
   def copy(arguments: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9735
+  # source://syntax_tree//lib/syntax_tree/node.rb#9750
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9737
+  # source://syntax_tree//lib/syntax_tree/node.rb#9752
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9741
+  # source://syntax_tree//lib/syntax_tree/node.rb#9756
   def format(q); end
 end
 
@@ -12192,47 +12219,47 @@ end
 #     class << self
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9793
+# source://syntax_tree//lib/syntax_tree/node.rb#9808
 class SyntaxTree::SClass < ::SyntaxTree::Node
   # @return [SClass] a new instance of SClass
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9803
+  # source://syntax_tree//lib/syntax_tree/node.rb#9818
   def initialize(target:, bodystmt:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9854
+  # source://syntax_tree//lib/syntax_tree/node.rb#9869
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9810
+  # source://syntax_tree//lib/syntax_tree/node.rb#9825
   def accept(visitor); end
 
   # [BodyStmt] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9798
+  # source://syntax_tree//lib/syntax_tree/node.rb#9813
   def bodystmt; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9814
+  # source://syntax_tree//lib/syntax_tree/node.rb#9829
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9801
+  # source://syntax_tree//lib/syntax_tree/node.rb#9816
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9818
+  # source://syntax_tree//lib/syntax_tree/node.rb#9833
   def copy(target: T.unsafe(nil), bodystmt: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9830
+  # source://syntax_tree//lib/syntax_tree/node.rb#9845
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9832
+  # source://syntax_tree//lib/syntax_tree/node.rb#9847
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9841
+  # source://syntax_tree//lib/syntax_tree/node.rb#9856
   def format(q); end
 
   # [Node] the target of the singleton class to enter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9795
+  # source://syntax_tree//lib/syntax_tree/node.rb#9810
   def target; end
 end
 
@@ -12263,53 +12290,53 @@ end
 # propagate that onto void_stmt nodes inside the stmts in order to make sure
 # all comments get printed appropriately.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#9867
+# source://syntax_tree//lib/syntax_tree/node.rb#9882
 class SyntaxTree::Statements < ::SyntaxTree::Node
   # @return [Statements] a new instance of Statements
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9874
+  # source://syntax_tree//lib/syntax_tree/node.rb#9889
   def initialize(body:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10000
+  # source://syntax_tree//lib/syntax_tree/node.rb#10015
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9927
+  # source://syntax_tree//lib/syntax_tree/node.rb#9942
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9880
+  # source://syntax_tree//lib/syntax_tree/node.rb#9895
   def bind(parser, start_char, start_column, end_char, end_column); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9909
+  # source://syntax_tree//lib/syntax_tree/node.rb#9924
   def bind_end(end_char, end_column); end
 
   # [Array[ Node ]] the list of expressions contained within this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9869
+  # source://syntax_tree//lib/syntax_tree/node.rb#9884
   def body; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9931
+  # source://syntax_tree//lib/syntax_tree/node.rb#9946
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9872
+  # source://syntax_tree//lib/syntax_tree/node.rb#9887
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9935
+  # source://syntax_tree//lib/syntax_tree/node.rb#9950
   def copy(body: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9946
+  # source://syntax_tree//lib/syntax_tree/node.rb#9961
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9948
+  # source://syntax_tree//lib/syntax_tree/node.rb#9963
   def deconstruct_keys(_keys); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#9921
+  # source://syntax_tree//lib/syntax_tree/node.rb#9936
   def empty?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#9952
+  # source://syntax_tree//lib/syntax_tree/node.rb#9967
   def format(q); end
 
   private
@@ -12318,7 +12345,7 @@ class SyntaxTree::Statements < ::SyntaxTree::Node
   # found while this statements list was being parsed and add them into the
   # body.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10009
+  # source://syntax_tree//lib/syntax_tree/node.rb#10024
   def attach_comments(parser, start_char, end_char); end
 end
 
@@ -12328,48 +12355,48 @@ end
 #     "first" \
 #       "second"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10124
+# source://syntax_tree//lib/syntax_tree/node.rb#10139
 class SyntaxTree::StringConcat < ::SyntaxTree::Node
   # @return [StringConcat] a new instance of StringConcat
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10135
+  # source://syntax_tree//lib/syntax_tree/node.rb#10150
   def initialize(left:, right:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10179
+  # source://syntax_tree//lib/syntax_tree/node.rb#10194
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10142
+  # source://syntax_tree//lib/syntax_tree/node.rb#10157
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10146
+  # source://syntax_tree//lib/syntax_tree/node.rb#10161
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10133
+  # source://syntax_tree//lib/syntax_tree/node.rb#10148
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10150
+  # source://syntax_tree//lib/syntax_tree/node.rb#10165
   def copy(left: T.unsafe(nil), right: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10162
+  # source://syntax_tree//lib/syntax_tree/node.rb#10177
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10164
+  # source://syntax_tree//lib/syntax_tree/node.rb#10179
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10168
+  # source://syntax_tree//lib/syntax_tree/node.rb#10183
   def format(q); end
 
   # [Heredoc | StringConcat | StringLiteral] the left side of the
   # concatenation
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10127
+  # source://syntax_tree//lib/syntax_tree/node.rb#10142
   def left; end
 
   # [StringLiteral] the right side of the concatenation
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10130
+  # source://syntax_tree//lib/syntax_tree/node.rb#10145
   def right; end
 end
 
@@ -12377,43 +12404,43 @@ end
 #
 #     "string"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10051
+# source://syntax_tree//lib/syntax_tree/node.rb#10066
 class SyntaxTree::StringContent < ::SyntaxTree::Node
   # @return [StringContent] a new instance of StringContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10059
+  # source://syntax_tree//lib/syntax_tree/node.rb#10074
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10086
+  # source://syntax_tree//lib/syntax_tree/node.rb#10101
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10065
+  # source://syntax_tree//lib/syntax_tree/node.rb#10080
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10069
+  # source://syntax_tree//lib/syntax_tree/node.rb#10084
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10057
+  # source://syntax_tree//lib/syntax_tree/node.rb#10072
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10073
+  # source://syntax_tree//lib/syntax_tree/node.rb#10088
   def copy(parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10080
+  # source://syntax_tree//lib/syntax_tree/node.rb#10095
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10082
+  # source://syntax_tree//lib/syntax_tree/node.rb#10097
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10090
+  # source://syntax_tree//lib/syntax_tree/node.rb#10105
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10054
+  # source://syntax_tree//lib/syntax_tree/node.rb#10069
   def parts; end
 end
 
@@ -12423,42 +12450,42 @@ end
 #
 #     "#@variable"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10190
+# source://syntax_tree//lib/syntax_tree/node.rb#10205
 class SyntaxTree::StringDVar < ::SyntaxTree::Node
   # @return [StringDVar] a new instance of StringDVar
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10197
+  # source://syntax_tree//lib/syntax_tree/node.rb#10212
   def initialize(variable:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10234
+  # source://syntax_tree//lib/syntax_tree/node.rb#10249
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10203
+  # source://syntax_tree//lib/syntax_tree/node.rb#10218
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10207
+  # source://syntax_tree//lib/syntax_tree/node.rb#10222
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10195
+  # source://syntax_tree//lib/syntax_tree/node.rb#10210
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10211
+  # source://syntax_tree//lib/syntax_tree/node.rb#10226
   def copy(variable: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10222
+  # source://syntax_tree//lib/syntax_tree/node.rb#10237
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10224
+  # source://syntax_tree//lib/syntax_tree/node.rb#10239
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10228
+  # source://syntax_tree//lib/syntax_tree/node.rb#10243
   def format(q); end
 
   # [Backref | VarRef] the variable being interpolated
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10192
+  # source://syntax_tree//lib/syntax_tree/node.rb#10207
   def variable; end
 end
 
@@ -12468,42 +12495,42 @@ end
 #
 #     "string #{expression}"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10245
+# source://syntax_tree//lib/syntax_tree/node.rb#10260
 class SyntaxTree::StringEmbExpr < ::SyntaxTree::Node
   # @return [StringEmbExpr] a new instance of StringEmbExpr
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10252
+  # source://syntax_tree//lib/syntax_tree/node.rb#10267
   def initialize(statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10309
+  # source://syntax_tree//lib/syntax_tree/node.rb#10324
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10258
+  # source://syntax_tree//lib/syntax_tree/node.rb#10273
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10262
+  # source://syntax_tree//lib/syntax_tree/node.rb#10277
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10250
+  # source://syntax_tree//lib/syntax_tree/node.rb#10265
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10266
+  # source://syntax_tree//lib/syntax_tree/node.rb#10281
   def copy(statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10277
+  # source://syntax_tree//lib/syntax_tree/node.rb#10292
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10279
+  # source://syntax_tree//lib/syntax_tree/node.rb#10294
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10283
+  # source://syntax_tree//lib/syntax_tree/node.rb#10298
   def format(q); end
 
   # [Statements] the expressions to be interpolated
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10247
+  # source://syntax_tree//lib/syntax_tree/node.rb#10262
   def statements; end
 end
 
@@ -12511,48 +12538,48 @@ end
 #
 #     "string"
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10318
+# source://syntax_tree//lib/syntax_tree/node.rb#10333
 class SyntaxTree::StringLiteral < ::SyntaxTree::Node
   # @return [StringLiteral] a new instance of StringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10329
+  # source://syntax_tree//lib/syntax_tree/node.rb#10344
   def initialize(parts:, quote:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10403
+  # source://syntax_tree//lib/syntax_tree/node.rb#10418
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10336
+  # source://syntax_tree//lib/syntax_tree/node.rb#10351
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10340
+  # source://syntax_tree//lib/syntax_tree/node.rb#10355
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10327
+  # source://syntax_tree//lib/syntax_tree/node.rb#10342
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10344
+  # source://syntax_tree//lib/syntax_tree/node.rb#10359
   def copy(parts: T.unsafe(nil), quote: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10356
+  # source://syntax_tree//lib/syntax_tree/node.rb#10371
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10358
+  # source://syntax_tree//lib/syntax_tree/node.rb#10373
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10362
+  # source://syntax_tree//lib/syntax_tree/node.rb#10377
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # string literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10321
+  # source://syntax_tree//lib/syntax_tree/node.rb#10336
   def parts; end
 
   # [nil | String] which quote was used by the string literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10324
+  # source://syntax_tree//lib/syntax_tree/node.rb#10339
   def quote; end
 end
 
@@ -12561,42 +12588,42 @@ end
 #
 #     super(value)
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10414
+# source://syntax_tree//lib/syntax_tree/node.rb#10429
 class SyntaxTree::Super < ::SyntaxTree::Node
   # @return [Super] a new instance of Super
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10421
+  # source://syntax_tree//lib/syntax_tree/node.rb#10436
   def initialize(arguments:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10465
+  # source://syntax_tree//lib/syntax_tree/node.rb#10480
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10427
+  # source://syntax_tree//lib/syntax_tree/node.rb#10442
   def accept(visitor); end
 
   # [ArgParen | Args] the arguments to the keyword
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10416
+  # source://syntax_tree//lib/syntax_tree/node.rb#10431
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10431
+  # source://syntax_tree//lib/syntax_tree/node.rb#10446
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10419
+  # source://syntax_tree//lib/syntax_tree/node.rb#10434
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10435
+  # source://syntax_tree//lib/syntax_tree/node.rb#10450
   def copy(arguments: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10446
+  # source://syntax_tree//lib/syntax_tree/node.rb#10461
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10448
+  # source://syntax_tree//lib/syntax_tree/node.rb#10463
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10452
+  # source://syntax_tree//lib/syntax_tree/node.rb#10467
   def format(q); end
 end
 
@@ -12617,34 +12644,34 @@ end
 # contain ":'" or ":\"". In the case of %s symbols, it will contain the start
 # of the symbol including the %s and the delimiter.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10486
+# source://syntax_tree//lib/syntax_tree/node.rb#10501
 class SyntaxTree::SymBeg < ::SyntaxTree::Node
   # @return [SymBeg] a new instance of SymBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10490
+  # source://syntax_tree//lib/syntax_tree/node.rb#10505
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10516
+  # source://syntax_tree//lib/syntax_tree/node.rb#10531
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10495
+  # source://syntax_tree//lib/syntax_tree/node.rb#10510
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10499
+  # source://syntax_tree//lib/syntax_tree/node.rb#10514
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10503
+  # source://syntax_tree//lib/syntax_tree/node.rb#10518
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10510
+  # source://syntax_tree//lib/syntax_tree/node.rb#10525
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10512
+  # source://syntax_tree//lib/syntax_tree/node.rb#10527
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10488
+  # source://syntax_tree//lib/syntax_tree/node.rb#10503
   def value; end
 end
 
@@ -12653,35 +12680,35 @@ end
 #
 #     :symbol
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10526
+# source://syntax_tree//lib/syntax_tree/node.rb#10541
 class SyntaxTree::SymbolContent < ::SyntaxTree::Node
   # @return [SymbolContent] a new instance of SymbolContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10531
+  # source://syntax_tree//lib/syntax_tree/node.rb#10546
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10557
+  # source://syntax_tree//lib/syntax_tree/node.rb#10572
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10536
+  # source://syntax_tree//lib/syntax_tree/node.rb#10551
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10540
+  # source://syntax_tree//lib/syntax_tree/node.rb#10555
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10544
+  # source://syntax_tree//lib/syntax_tree/node.rb#10559
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10551
+  # source://syntax_tree//lib/syntax_tree/node.rb#10566
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10553
+  # source://syntax_tree//lib/syntax_tree/node.rb#10568
   def deconstruct_keys(_keys); end
 
   # [Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op] the value of the
   # symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10529
+  # source://syntax_tree//lib/syntax_tree/node.rb#10544
   def value; end
 end
 
@@ -12690,43 +12717,43 @@ end
 #
 #     :symbol
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10567
+# source://syntax_tree//lib/syntax_tree/node.rb#10582
 class SyntaxTree::SymbolLiteral < ::SyntaxTree::Node
   # @return [SymbolLiteral] a new instance of SymbolLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10575
+  # source://syntax_tree//lib/syntax_tree/node.rb#10590
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10612
+  # source://syntax_tree//lib/syntax_tree/node.rb#10627
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10581
+  # source://syntax_tree//lib/syntax_tree/node.rb#10596
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10585
+  # source://syntax_tree//lib/syntax_tree/node.rb#10600
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10573
+  # source://syntax_tree//lib/syntax_tree/node.rb#10588
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10589
+  # source://syntax_tree//lib/syntax_tree/node.rb#10604
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10600
+  # source://syntax_tree//lib/syntax_tree/node.rb#10615
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10602
+  # source://syntax_tree//lib/syntax_tree/node.rb#10617
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10606
+  # source://syntax_tree//lib/syntax_tree/node.rb#10621
   def format(q); end
 
   # [Backtick | Const | CVar | GVar | Ident | IVar | Kw | Op | TStringContent]
   # the value of the symbol
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10570
+  # source://syntax_tree//lib/syntax_tree/node.rb#10585
   def value; end
 end
 
@@ -12734,47 +12761,47 @@ end
 #
 #     %I[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10621
+# source://syntax_tree//lib/syntax_tree/node.rb#10636
 class SyntaxTree::Symbols < ::SyntaxTree::Node
   # @return [Symbols] a new instance of Symbols
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10631
+  # source://syntax_tree//lib/syntax_tree/node.rb#10646
   def initialize(beginning:, elements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10687
+  # source://syntax_tree//lib/syntax_tree/node.rb#10702
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10638
+  # source://syntax_tree//lib/syntax_tree/node.rb#10653
   def accept(visitor); end
 
   # [SymbolsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10623
+  # source://syntax_tree//lib/syntax_tree/node.rb#10638
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10642
+  # source://syntax_tree//lib/syntax_tree/node.rb#10657
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10629
+  # source://syntax_tree//lib/syntax_tree/node.rb#10644
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10646
+  # source://syntax_tree//lib/syntax_tree/node.rb#10661
   def copy(beginning: T.unsafe(nil), elements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10654
+  # source://syntax_tree//lib/syntax_tree/node.rb#10669
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10656
+  # source://syntax_tree//lib/syntax_tree/node.rb#10671
   def deconstruct_keys(_keys); end
 
   # [Array[ Word ]] the words in the symbol array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10626
+  # source://syntax_tree//lib/syntax_tree/node.rb#10641
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10665
+  # source://syntax_tree//lib/syntax_tree/node.rb#10680
   def format(q); end
 end
 
@@ -12787,34 +12814,34 @@ end
 # kinds of arrays can start with a lot of different delimiter types
 # (e.g., %I| or %I<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10701
+# source://syntax_tree//lib/syntax_tree/node.rb#10716
 class SyntaxTree::SymbolsBeg < ::SyntaxTree::Node
   # @return [SymbolsBeg] a new instance of SymbolsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10705
+  # source://syntax_tree//lib/syntax_tree/node.rb#10720
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10731
+  # source://syntax_tree//lib/syntax_tree/node.rb#10746
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10710
+  # source://syntax_tree//lib/syntax_tree/node.rb#10725
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10714
+  # source://syntax_tree//lib/syntax_tree/node.rb#10729
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10718
+  # source://syntax_tree//lib/syntax_tree/node.rb#10733
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10725
+  # source://syntax_tree//lib/syntax_tree/node.rb#10740
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10727
+  # source://syntax_tree//lib/syntax_tree/node.rb#10742
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the symbol literal array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10703
+  # source://syntax_tree//lib/syntax_tree/node.rb#10718
   def value; end
 end
 
@@ -12825,34 +12852,34 @@ end
 #
 # In the example above the TLamBeg represents the +{+ operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10782
+# source://syntax_tree//lib/syntax_tree/node.rb#10797
 class SyntaxTree::TLamBeg < ::SyntaxTree::Node
   # @return [TLamBeg] a new instance of TLamBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10786
+  # source://syntax_tree//lib/syntax_tree/node.rb#10801
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10812
+  # source://syntax_tree//lib/syntax_tree/node.rb#10827
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10791
+  # source://syntax_tree//lib/syntax_tree/node.rb#10806
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10795
+  # source://syntax_tree//lib/syntax_tree/node.rb#10810
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10799
+  # source://syntax_tree//lib/syntax_tree/node.rb#10814
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10806
+  # source://syntax_tree//lib/syntax_tree/node.rb#10821
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10808
+  # source://syntax_tree//lib/syntax_tree/node.rb#10823
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the body of the lambda literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10784
+  # source://syntax_tree//lib/syntax_tree/node.rb#10799
   def value; end
 end
 
@@ -12862,34 +12889,34 @@ end
 #
 # In the example above the TLambda represents the +->+ operator.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10741
+# source://syntax_tree//lib/syntax_tree/node.rb#10756
 class SyntaxTree::TLambda < ::SyntaxTree::Node
   # @return [TLambda] a new instance of TLambda
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10745
+  # source://syntax_tree//lib/syntax_tree/node.rb#10760
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10771
+  # source://syntax_tree//lib/syntax_tree/node.rb#10786
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10750
+  # source://syntax_tree//lib/syntax_tree/node.rb#10765
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10754
+  # source://syntax_tree//lib/syntax_tree/node.rb#10769
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10758
+  # source://syntax_tree//lib/syntax_tree/node.rb#10773
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10765
+  # source://syntax_tree//lib/syntax_tree/node.rb#10780
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10767
+  # source://syntax_tree//lib/syntax_tree/node.rb#10782
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the lambda literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10743
+  # source://syntax_tree//lib/syntax_tree/node.rb#10758
   def value; end
 end
 
@@ -12903,34 +12930,34 @@ end
 #
 #     %q{string}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10934
+# source://syntax_tree//lib/syntax_tree/node.rb#10949
 class SyntaxTree::TStringBeg < ::SyntaxTree::Node
   # @return [TStringBeg] a new instance of TStringBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10938
+  # source://syntax_tree//lib/syntax_tree/node.rb#10953
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10964
+  # source://syntax_tree//lib/syntax_tree/node.rb#10979
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10943
+  # source://syntax_tree//lib/syntax_tree/node.rb#10958
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10947
+  # source://syntax_tree//lib/syntax_tree/node.rb#10962
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10951
+  # source://syntax_tree//lib/syntax_tree/node.rb#10966
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10958
+  # source://syntax_tree//lib/syntax_tree/node.rb#10973
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10960
+  # source://syntax_tree//lib/syntax_tree/node.rb#10975
   def deconstruct_keys(_keys); end
 
   # [String] the beginning of the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10936
+  # source://syntax_tree//lib/syntax_tree/node.rb#10951
   def value; end
 end
 
@@ -12943,47 +12970,47 @@ end
 # In the example above, TStringContent represents the +string+ token contained
 # within the string.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10977
+# source://syntax_tree//lib/syntax_tree/node.rb#10992
 class SyntaxTree::TStringContent < ::SyntaxTree::Node
   # @return [TStringContent] a new instance of TStringContent
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10984
+  # source://syntax_tree//lib/syntax_tree/node.rb#10999
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11023
+  # source://syntax_tree//lib/syntax_tree/node.rb#11038
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10994
+  # source://syntax_tree//lib/syntax_tree/node.rb#11009
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10998
+  # source://syntax_tree//lib/syntax_tree/node.rb#11013
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10982
+  # source://syntax_tree//lib/syntax_tree/node.rb#10997
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11002
+  # source://syntax_tree//lib/syntax_tree/node.rb#11017
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11013
+  # source://syntax_tree//lib/syntax_tree/node.rb#11028
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11015
+  # source://syntax_tree//lib/syntax_tree/node.rb#11030
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11019
+  # source://syntax_tree//lib/syntax_tree/node.rb#11034
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10990
+  # source://syntax_tree//lib/syntax_tree/node.rb#11005
   def match?(pattern); end
 
   # [String] the content of the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10979
+  # source://syntax_tree//lib/syntax_tree/node.rb#10994
   def value; end
 end
 
@@ -12997,34 +13024,34 @@ end
 #
 #     %q{string}
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11038
+# source://syntax_tree//lib/syntax_tree/node.rb#11053
 class SyntaxTree::TStringEnd < ::SyntaxTree::Node
   # @return [TStringEnd] a new instance of TStringEnd
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11042
+  # source://syntax_tree//lib/syntax_tree/node.rb#11057
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11068
+  # source://syntax_tree//lib/syntax_tree/node.rb#11083
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11047
+  # source://syntax_tree//lib/syntax_tree/node.rb#11062
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11051
+  # source://syntax_tree//lib/syntax_tree/node.rb#11066
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11055
+  # source://syntax_tree//lib/syntax_tree/node.rb#11070
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11062
+  # source://syntax_tree//lib/syntax_tree/node.rb#11077
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11064
+  # source://syntax_tree//lib/syntax_tree/node.rb#11079
   def deconstruct_keys(_keys); end
 
   # [String] the end of the string
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11040
+  # source://syntax_tree//lib/syntax_tree/node.rb#11055
   def value; end
 end
 
@@ -13034,10 +13061,10 @@ end
 # statement, and that statement must not be on the denied list of potential
 # statements.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#6254
+# source://syntax_tree//lib/syntax_tree/node.rb#6269
 module SyntaxTree::Ternaryable
   class << self
-    # source://syntax_tree//lib/syntax_tree/node.rb#6256
+    # source://syntax_tree//lib/syntax_tree/node.rb#6271
     def call(q, node); end
 
     private
@@ -13048,7 +13075,7 @@ module SyntaxTree::Ternaryable
     #
     # @return [Boolean]
     #
-    # source://syntax_tree//lib/syntax_tree/node.rb#6294
+    # source://syntax_tree//lib/syntax_tree/node.rb#6309
     def ternaryable?(statement); end
   end
 end
@@ -13059,42 +13086,42 @@ end
 #
 #     ::Constant = value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10823
+# source://syntax_tree//lib/syntax_tree/node.rb#10838
 class SyntaxTree::TopConstField < ::SyntaxTree::Node
   # @return [TopConstField] a new instance of TopConstField
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10830
+  # source://syntax_tree//lib/syntax_tree/node.rb#10845
   def initialize(constant:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10866
+  # source://syntax_tree//lib/syntax_tree/node.rb#10881
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10836
+  # source://syntax_tree//lib/syntax_tree/node.rb#10851
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10840
+  # source://syntax_tree//lib/syntax_tree/node.rb#10855
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10828
+  # source://syntax_tree//lib/syntax_tree/node.rb#10843
   def comments; end
 
   # [Const] the constant being assigned
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10825
+  # source://syntax_tree//lib/syntax_tree/node.rb#10840
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10844
+  # source://syntax_tree//lib/syntax_tree/node.rb#10859
   def copy(constant: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10855
+  # source://syntax_tree//lib/syntax_tree/node.rb#10870
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10857
+  # source://syntax_tree//lib/syntax_tree/node.rb#10872
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10861
+  # source://syntax_tree//lib/syntax_tree/node.rb#10876
   def format(q); end
 end
 
@@ -13103,42 +13130,42 @@ end
 #
 #     ::Constant
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#10876
+# source://syntax_tree//lib/syntax_tree/node.rb#10891
 class SyntaxTree::TopConstRef < ::SyntaxTree::Node
   # @return [TopConstRef] a new instance of TopConstRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10883
+  # source://syntax_tree//lib/syntax_tree/node.rb#10898
   def initialize(constant:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10919
+  # source://syntax_tree//lib/syntax_tree/node.rb#10934
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10889
+  # source://syntax_tree//lib/syntax_tree/node.rb#10904
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10893
+  # source://syntax_tree//lib/syntax_tree/node.rb#10908
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10881
+  # source://syntax_tree//lib/syntax_tree/node.rb#10896
   def comments; end
 
   # [Const] the constant being referenced
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#10878
+  # source://syntax_tree//lib/syntax_tree/node.rb#10893
   def constant; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10897
+  # source://syntax_tree//lib/syntax_tree/node.rb#10912
   def copy(constant: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10908
+  # source://syntax_tree//lib/syntax_tree/node.rb#10923
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10910
+  # source://syntax_tree//lib/syntax_tree/node.rb#10925
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#10914
+  # source://syntax_tree//lib/syntax_tree/node.rb#10929
   def format(q); end
 end
 
@@ -13169,47 +13196,47 @@ end
 #
 #     !value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11161
+# source://syntax_tree//lib/syntax_tree/node.rb#11176
 class SyntaxTree::Unary < ::SyntaxTree::Node
   # @return [Unary] a new instance of Unary
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11171
+  # source://syntax_tree//lib/syntax_tree/node.rb#11186
   def initialize(operator:, statement:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11214
+  # source://syntax_tree//lib/syntax_tree/node.rb#11229
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11178
+  # source://syntax_tree//lib/syntax_tree/node.rb#11193
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11182
+  # source://syntax_tree//lib/syntax_tree/node.rb#11197
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11169
+  # source://syntax_tree//lib/syntax_tree/node.rb#11184
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11186
+  # source://syntax_tree//lib/syntax_tree/node.rb#11201
   def copy(operator: T.unsafe(nil), statement: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11198
+  # source://syntax_tree//lib/syntax_tree/node.rb#11213
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11200
+  # source://syntax_tree//lib/syntax_tree/node.rb#11215
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11209
+  # source://syntax_tree//lib/syntax_tree/node.rb#11224
   def format(q); end
 
   # [String] the operator being used
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11163
+  # source://syntax_tree//lib/syntax_tree/node.rb#11178
   def operator; end
 
   # [Node] the statement on which to operate
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11166
+  # source://syntax_tree//lib/syntax_tree/node.rb#11181
   def statement; end
 end
 
@@ -13217,42 +13244,42 @@ end
 #
 #     undef method
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11224
+# source://syntax_tree//lib/syntax_tree/node.rb#11239
 class SyntaxTree::Undef < ::SyntaxTree::Node
   # @return [Undef] a new instance of Undef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11255
+  # source://syntax_tree//lib/syntax_tree/node.rb#11270
   def initialize(symbols:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11298
+  # source://syntax_tree//lib/syntax_tree/node.rb#11313
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11261
+  # source://syntax_tree//lib/syntax_tree/node.rb#11276
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11265
+  # source://syntax_tree//lib/syntax_tree/node.rb#11280
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11253
+  # source://syntax_tree//lib/syntax_tree/node.rb#11268
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11269
+  # source://syntax_tree//lib/syntax_tree/node.rb#11284
   def copy(symbols: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11280
+  # source://syntax_tree//lib/syntax_tree/node.rb#11295
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11282
+  # source://syntax_tree//lib/syntax_tree/node.rb#11297
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11286
+  # source://syntax_tree//lib/syntax_tree/node.rb#11301
   def format(q); end
 
   # [Array[ DynaSymbol | SymbolLiteral ]] the symbols to undefine
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11250
+  # source://syntax_tree//lib/syntax_tree/node.rb#11265
   def symbols; end
 end
 
@@ -13260,22 +13287,22 @@ end
 # or SymbolLiteral objects. For SymbolLiteral objects we descend directly
 # into the value in order to have it come out as bare words.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11228
+# source://syntax_tree//lib/syntax_tree/node.rb#11243
 class SyntaxTree::Undef::UndefArgumentFormatter
   # @return [UndefArgumentFormatter] a new instance of UndefArgumentFormatter
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11232
+  # source://syntax_tree//lib/syntax_tree/node.rb#11247
   def initialize(node); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11236
+  # source://syntax_tree//lib/syntax_tree/node.rb#11251
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11244
+  # source://syntax_tree//lib/syntax_tree/node.rb#11259
   def format(q); end
 
   # [DynaSymbol | SymbolLiteral] the symbol to undefine
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11230
+  # source://syntax_tree//lib/syntax_tree/node.rb#11245
   def node; end
 end
 
@@ -13284,59 +13311,59 @@ end
 #     unless predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11308
+# source://syntax_tree//lib/syntax_tree/node.rb#11323
 class SyntaxTree::UnlessNode < ::SyntaxTree::Node
   # @return [UnlessNode] a new instance of UnlessNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11321
+  # source://syntax_tree//lib/syntax_tree/node.rb#11336
   def initialize(predicate:, statements:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11366
+  # source://syntax_tree//lib/syntax_tree/node.rb#11381
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11329
+  # source://syntax_tree//lib/syntax_tree/node.rb#11344
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11333
+  # source://syntax_tree//lib/syntax_tree/node.rb#11348
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11319
+  # source://syntax_tree//lib/syntax_tree/node.rb#11334
   def comments; end
 
   # [nil | Elsif | Else] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11316
+  # source://syntax_tree//lib/syntax_tree/node.rb#11331
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11337
+  # source://syntax_tree//lib/syntax_tree/node.rb#11352
   def copy(predicate: T.unsafe(nil), statements: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11350
+  # source://syntax_tree//lib/syntax_tree/node.rb#11365
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11352
+  # source://syntax_tree//lib/syntax_tree/node.rb#11367
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11362
+  # source://syntax_tree//lib/syntax_tree/node.rb#11377
   def format(q); end
 
   # Checks if the node was originally found in the modifier form.
   #
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11372
+  # source://syntax_tree//lib/syntax_tree/node.rb#11387
   def modifier?; end
 
   # [Node] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11310
+  # source://syntax_tree//lib/syntax_tree/node.rb#11325
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11313
+  # source://syntax_tree//lib/syntax_tree/node.rb#11328
   def statements; end
 end
 
@@ -13345,52 +13372,52 @@ end
 #     until predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11454
+# source://syntax_tree//lib/syntax_tree/node.rb#11469
 class SyntaxTree::UntilNode < ::SyntaxTree::Node
   # @return [UntilNode] a new instance of UntilNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11464
+  # source://syntax_tree//lib/syntax_tree/node.rb#11479
   def initialize(predicate:, statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11506
+  # source://syntax_tree//lib/syntax_tree/node.rb#11521
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11471
+  # source://syntax_tree//lib/syntax_tree/node.rb#11486
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11475
+  # source://syntax_tree//lib/syntax_tree/node.rb#11490
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11462
+  # source://syntax_tree//lib/syntax_tree/node.rb#11477
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11479
+  # source://syntax_tree//lib/syntax_tree/node.rb#11494
   def copy(predicate: T.unsafe(nil), statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11491
+  # source://syntax_tree//lib/syntax_tree/node.rb#11506
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11493
+  # source://syntax_tree//lib/syntax_tree/node.rb#11508
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11502
+  # source://syntax_tree//lib/syntax_tree/node.rb#11517
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11511
+  # source://syntax_tree//lib/syntax_tree/node.rb#11526
   def modifier?; end
 
   # [Node] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11456
+  # source://syntax_tree//lib/syntax_tree/node.rb#11471
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11459
+  # source://syntax_tree//lib/syntax_tree/node.rb#11474
   def statements; end
 end
 
@@ -13399,50 +13426,50 @@ end
 #
 #     variable
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11716
+# source://syntax_tree//lib/syntax_tree/node.rb#11735
 class SyntaxTree::VCall < ::SyntaxTree::Node
   # @return [VCall] a new instance of VCall
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11723
+  # source://syntax_tree//lib/syntax_tree/node.rb#11742
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11758
+  # source://syntax_tree//lib/syntax_tree/node.rb#11777
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11729
+  # source://syntax_tree//lib/syntax_tree/node.rb#11748
   def accept(visitor); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11762
+  # source://syntax_tree//lib/syntax_tree/node.rb#11781
   def access_control?; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11766
+  # source://syntax_tree//lib/syntax_tree/node.rb#11785
   def arity; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11733
+  # source://syntax_tree//lib/syntax_tree/node.rb#11752
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11721
+  # source://syntax_tree//lib/syntax_tree/node.rb#11740
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11737
+  # source://syntax_tree//lib/syntax_tree/node.rb#11756
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11748
+  # source://syntax_tree//lib/syntax_tree/node.rb#11767
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11750
+  # source://syntax_tree//lib/syntax_tree/node.rb#11769
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11754
+  # source://syntax_tree//lib/syntax_tree/node.rb#11773
   def format(q); end
 
   # [Ident] the value of this expression
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11718
+  # source://syntax_tree//lib/syntax_tree/node.rb#11737
   def value; end
 end
 
@@ -13456,42 +13483,42 @@ SyntaxTree::VERSION = T.let(T.unsafe(nil), String)
 #
 # In the example above, the VarField node represents the +variable+ token.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11522
+# source://syntax_tree//lib/syntax_tree/node.rb#11537
 class SyntaxTree::VarField < ::SyntaxTree::Node
   # @return [VarField] a new instance of VarField
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11529
+  # source://syntax_tree//lib/syntax_tree/node.rb#11544
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11568
+  # source://syntax_tree//lib/syntax_tree/node.rb#11583
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11535
+  # source://syntax_tree//lib/syntax_tree/node.rb#11550
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11539
+  # source://syntax_tree//lib/syntax_tree/node.rb#11554
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11527
+  # source://syntax_tree//lib/syntax_tree/node.rb#11542
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11543
+  # source://syntax_tree//lib/syntax_tree/node.rb#11558
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11554
+  # source://syntax_tree//lib/syntax_tree/node.rb#11569
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11556
+  # source://syntax_tree//lib/syntax_tree/node.rb#11571
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11560
+  # source://syntax_tree//lib/syntax_tree/node.rb#11575
   def format(q); end
 
   # [nil | :nil | Const | CVar | GVar | Ident | IVar] the target of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11524
+  # source://syntax_tree//lib/syntax_tree/node.rb#11539
   def value; end
 end
 
@@ -13504,37 +13531,37 @@ end
 # keyword (like +self+, +nil+, +true+, or +false+), or a numbered block
 # variable.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11581
+# source://syntax_tree//lib/syntax_tree/node.rb#11596
 class SyntaxTree::VarRef < ::SyntaxTree::Node
   # @return [VarRef] a new instance of VarRef
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11588
+  # source://syntax_tree//lib/syntax_tree/node.rb#11603
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11623
+  # source://syntax_tree//lib/syntax_tree/node.rb#11638
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11594
+  # source://syntax_tree//lib/syntax_tree/node.rb#11609
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11598
+  # source://syntax_tree//lib/syntax_tree/node.rb#11613
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11586
+  # source://syntax_tree//lib/syntax_tree/node.rb#11601
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11602
+  # source://syntax_tree//lib/syntax_tree/node.rb#11617
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11613
+  # source://syntax_tree//lib/syntax_tree/node.rb#11628
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11615
+  # source://syntax_tree//lib/syntax_tree/node.rb#11630
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11619
+  # source://syntax_tree//lib/syntax_tree/node.rb#11634
   def format(q); end
 
   # Oh man I hate this so much. Basically, ripper doesn't provide enough
@@ -13545,12 +13572,12 @@ class SyntaxTree::VarRef < ::SyntaxTree::Node
   # To be clear, this method should just not exist. It's not good. It's a
   # place of shame. But it's necessary for now, so I'm keeping it.
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11634
+  # source://syntax_tree//lib/syntax_tree/node.rb#11649
   def pin(parent, pin); end
 
   # [Const | CVar | GVar | Ident | IVar | Kw] the value of this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11583
+  # source://syntax_tree//lib/syntax_tree/node.rb#11598
   def value; end
 end
 
@@ -14315,37 +14342,37 @@ end
 #
 #     ;;
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11775
+# source://syntax_tree//lib/syntax_tree/node.rb#11794
 class SyntaxTree::VoidStmt < ::SyntaxTree::Node
   # @return [VoidStmt] a new instance of VoidStmt
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11779
+  # source://syntax_tree//lib/syntax_tree/node.rb#11798
   def initialize(location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11808
+  # source://syntax_tree//lib/syntax_tree/node.rb#11827
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11784
+  # source://syntax_tree//lib/syntax_tree/node.rb#11803
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11788
+  # source://syntax_tree//lib/syntax_tree/node.rb#11807
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11777
+  # source://syntax_tree//lib/syntax_tree/node.rb#11796
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11792
+  # source://syntax_tree//lib/syntax_tree/node.rb#11811
   def copy(location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11799
+  # source://syntax_tree//lib/syntax_tree/node.rb#11818
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11801
+  # source://syntax_tree//lib/syntax_tree/node.rb#11820
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11805
+  # source://syntax_tree//lib/syntax_tree/node.rb#11824
   def format(q); end
 end
 
@@ -14355,68 +14382,68 @@ end
 #     when predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11819
+# source://syntax_tree//lib/syntax_tree/node.rb#11838
 class SyntaxTree::When < ::SyntaxTree::Node
   # @return [When] a new instance of When
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11832
+  # source://syntax_tree//lib/syntax_tree/node.rb#11851
   def initialize(arguments:, statements:, consequent:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11924
+  # source://syntax_tree//lib/syntax_tree/node.rb#11943
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11840
+  # source://syntax_tree//lib/syntax_tree/node.rb#11859
   def accept(visitor); end
 
   # [Args] the arguments to the when clause
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11821
+  # source://syntax_tree//lib/syntax_tree/node.rb#11840
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11844
+  # source://syntax_tree//lib/syntax_tree/node.rb#11863
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11830
+  # source://syntax_tree//lib/syntax_tree/node.rb#11849
   def comments; end
 
   # [nil | Else | When] the next clause in the chain
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11827
+  # source://syntax_tree//lib/syntax_tree/node.rb#11846
   def consequent; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11848
+  # source://syntax_tree//lib/syntax_tree/node.rb#11867
   def copy(arguments: T.unsafe(nil), statements: T.unsafe(nil), consequent: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11861
+  # source://syntax_tree//lib/syntax_tree/node.rb#11880
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11863
+  # source://syntax_tree//lib/syntax_tree/node.rb#11882
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11889
+  # source://syntax_tree//lib/syntax_tree/node.rb#11908
   def format(q); end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11824
+  # source://syntax_tree//lib/syntax_tree/node.rb#11843
   def statements; end
 end
 
 # We're going to keep a single instance of this separator around so we don't
 # have to allocate a new one every time we format a when clause.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11887
+# source://syntax_tree//lib/syntax_tree/node.rb#11906
 SyntaxTree::When::SEPARATOR = T.let(T.unsafe(nil), SyntaxTree::When::Separator)
 
 # We have a special separator here for when clauses which causes them to
 # fill as much of the line as possible as opposed to everything breaking
 # into its own line as soon as you hit the print limit.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11876
+# source://syntax_tree//lib/syntax_tree/node.rb#11895
 class SyntaxTree::When::Separator
-  # source://syntax_tree//lib/syntax_tree/node.rb#11877
+  # source://syntax_tree//lib/syntax_tree/node.rb#11896
   def call(q); end
 end
 
@@ -14425,52 +14452,52 @@ end
 #     while predicate
 #     end
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#11935
+# source://syntax_tree//lib/syntax_tree/node.rb#11954
 class SyntaxTree::WhileNode < ::SyntaxTree::Node
   # @return [WhileNode] a new instance of WhileNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11945
+  # source://syntax_tree//lib/syntax_tree/node.rb#11964
   def initialize(predicate:, statements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11987
+  # source://syntax_tree//lib/syntax_tree/node.rb#12006
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11952
+  # source://syntax_tree//lib/syntax_tree/node.rb#11971
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11956
+  # source://syntax_tree//lib/syntax_tree/node.rb#11975
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11943
+  # source://syntax_tree//lib/syntax_tree/node.rb#11962
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11960
+  # source://syntax_tree//lib/syntax_tree/node.rb#11979
   def copy(predicate: T.unsafe(nil), statements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11972
+  # source://syntax_tree//lib/syntax_tree/node.rb#11991
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11974
+  # source://syntax_tree//lib/syntax_tree/node.rb#11993
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#11983
+  # source://syntax_tree//lib/syntax_tree/node.rb#12002
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11992
+  # source://syntax_tree//lib/syntax_tree/node.rb#12011
   def modifier?; end
 
   # [Node] the expression to be checked
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11937
+  # source://syntax_tree//lib/syntax_tree/node.rb#11956
   def predicate; end
 
   # [Statements] the expressions to be executed
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#11940
+  # source://syntax_tree//lib/syntax_tree/node.rb#11959
   def statements; end
 end
 
@@ -14678,48 +14705,48 @@ end
 # In the example above, there would be two Word nodes within a parent Words
 # node.
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12004
+# source://syntax_tree//lib/syntax_tree/node.rb#12023
 class SyntaxTree::Word < ::SyntaxTree::Node
   # @return [Word] a new instance of Word
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12012
+  # source://syntax_tree//lib/syntax_tree/node.rb#12031
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12051
+  # source://syntax_tree//lib/syntax_tree/node.rb#12070
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12022
+  # source://syntax_tree//lib/syntax_tree/node.rb#12041
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12026
+  # source://syntax_tree//lib/syntax_tree/node.rb#12045
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12010
+  # source://syntax_tree//lib/syntax_tree/node.rb#12029
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12030
+  # source://syntax_tree//lib/syntax_tree/node.rb#12049
   def copy(parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12041
+  # source://syntax_tree//lib/syntax_tree/node.rb#12060
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12043
+  # source://syntax_tree//lib/syntax_tree/node.rb#12062
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12047
+  # source://syntax_tree//lib/syntax_tree/node.rb#12066
   def format(q); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12018
+  # source://syntax_tree//lib/syntax_tree/node.rb#12037
   def match?(pattern); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # word
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12007
+  # source://syntax_tree//lib/syntax_tree/node.rb#12026
   def parts; end
 end
 
@@ -14727,47 +14754,47 @@ end
 #
 #     %W[one two three]
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12060
+# source://syntax_tree//lib/syntax_tree/node.rb#12079
 class SyntaxTree::Words < ::SyntaxTree::Node
   # @return [Words] a new instance of Words
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12070
+  # source://syntax_tree//lib/syntax_tree/node.rb#12089
   def initialize(beginning:, elements:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12126
+  # source://syntax_tree//lib/syntax_tree/node.rb#12145
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12077
+  # source://syntax_tree//lib/syntax_tree/node.rb#12096
   def accept(visitor); end
 
   # [WordsBeg] the token that opens this array literal
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12062
+  # source://syntax_tree//lib/syntax_tree/node.rb#12081
   def beginning; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12081
+  # source://syntax_tree//lib/syntax_tree/node.rb#12100
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12068
+  # source://syntax_tree//lib/syntax_tree/node.rb#12087
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12085
+  # source://syntax_tree//lib/syntax_tree/node.rb#12104
   def copy(beginning: T.unsafe(nil), elements: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12093
+  # source://syntax_tree//lib/syntax_tree/node.rb#12112
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12095
+  # source://syntax_tree//lib/syntax_tree/node.rb#12114
   def deconstruct_keys(_keys); end
 
   # [Array[ Word ]] the elements of this array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12065
+  # source://syntax_tree//lib/syntax_tree/node.rb#12084
   def elements; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12104
+  # source://syntax_tree//lib/syntax_tree/node.rb#12123
   def format(q); end
 end
 
@@ -14780,34 +14807,34 @@ end
 # Note that these kinds of arrays can start with a lot of different delimiter
 # types (e.g., %W| or %W<).
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12140
+# source://syntax_tree//lib/syntax_tree/node.rb#12159
 class SyntaxTree::WordsBeg < ::SyntaxTree::Node
   # @return [WordsBeg] a new instance of WordsBeg
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12144
+  # source://syntax_tree//lib/syntax_tree/node.rb#12163
   def initialize(value:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12170
+  # source://syntax_tree//lib/syntax_tree/node.rb#12189
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12149
+  # source://syntax_tree//lib/syntax_tree/node.rb#12168
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12153
+  # source://syntax_tree//lib/syntax_tree/node.rb#12172
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12157
+  # source://syntax_tree//lib/syntax_tree/node.rb#12176
   def copy(value: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12164
+  # source://syntax_tree//lib/syntax_tree/node.rb#12183
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12166
+  # source://syntax_tree//lib/syntax_tree/node.rb#12185
   def deconstruct_keys(_keys); end
 
   # [String] the start of the word literal array
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12142
+  # source://syntax_tree//lib/syntax_tree/node.rb#12161
   def value; end
 end
 
@@ -14815,35 +14842,35 @@ end
 #
 #     `ls`
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12179
+# source://syntax_tree//lib/syntax_tree/node.rb#12198
 class SyntaxTree::XString < ::SyntaxTree::Node
   # @return [XString] a new instance of XString
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12184
+  # source://syntax_tree//lib/syntax_tree/node.rb#12203
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12210
+  # source://syntax_tree//lib/syntax_tree/node.rb#12229
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12189
+  # source://syntax_tree//lib/syntax_tree/node.rb#12208
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12193
+  # source://syntax_tree//lib/syntax_tree/node.rb#12212
   def child_nodes; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12197
+  # source://syntax_tree//lib/syntax_tree/node.rb#12216
   def copy(parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12204
+  # source://syntax_tree//lib/syntax_tree/node.rb#12223
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12206
+  # source://syntax_tree//lib/syntax_tree/node.rb#12225
   def deconstruct_keys(_keys); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # xstring
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12182
+  # source://syntax_tree//lib/syntax_tree/node.rb#12201
   def parts; end
 end
 
@@ -14851,43 +14878,43 @@ end
 #
 #     `ls`
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12219
+# source://syntax_tree//lib/syntax_tree/node.rb#12238
 class SyntaxTree::XStringLiteral < ::SyntaxTree::Node
   # @return [XStringLiteral] a new instance of XStringLiteral
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12227
+  # source://syntax_tree//lib/syntax_tree/node.rb#12246
   def initialize(parts:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12264
+  # source://syntax_tree//lib/syntax_tree/node.rb#12283
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12233
+  # source://syntax_tree//lib/syntax_tree/node.rb#12252
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12237
+  # source://syntax_tree//lib/syntax_tree/node.rb#12256
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12225
+  # source://syntax_tree//lib/syntax_tree/node.rb#12244
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12241
+  # source://syntax_tree//lib/syntax_tree/node.rb#12260
   def copy(parts: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12252
+  # source://syntax_tree//lib/syntax_tree/node.rb#12271
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12254
+  # source://syntax_tree//lib/syntax_tree/node.rb#12273
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12258
+  # source://syntax_tree//lib/syntax_tree/node.rb#12277
   def format(q); end
 
   # [Array[ StringEmbExpr | StringDVar | TStringContent ]] the parts of the
   # xstring
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12222
+  # source://syntax_tree//lib/syntax_tree/node.rb#12241
   def parts; end
 end
 
@@ -16749,6 +16776,55 @@ class SyntaxTree::YARV::ConcatStrings < ::SyntaxTree::YARV::Instruction
   def to_a(_iseq); end
 end
 
+# ### Summary
+#
+# `concattoarray` pops a single value off the stack and attempts to concat
+# it to the Array on top of the stack. If the value is not an Array, it
+# will be coerced into one.
+#
+# ### Usage
+#
+# ~~~ruby
+# [1, *2]
+# ~~~
+#
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#772
+class SyntaxTree::YARV::ConcatToArray < ::SyntaxTree::YARV::Instruction
+  # @return [ConcatToArray] a new instance of ConcatToArray
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#775
+  def initialize(object); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#791
+  def ==(other); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#807
+  def call(vm); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#787
+  def deconstruct_keys(_keys); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#779
+  def disasm(fmt); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#795
+  def length; end
+
+  # Returns the value of attribute object.
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#773
+  def object; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#799
+  def pops; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#803
+  def pushes; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#783
+  def to_a(_iseq); end
+end
+
 # This class represents a control flow graph of a YARV instruction sequence.
 # It constructs a graph of basic blocks that hold subsets of the list of
 # instructions from the instruction sequence.
@@ -17129,66 +17205,66 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#775
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#828
 class SyntaxTree::YARV::DefineClass < ::SyntaxTree::YARV::Instruction
   # @return [DefineClass] a new instance of DefineClass
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#784
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#837
   def initialize(name, class_iseq, flags); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#806
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#859
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#823
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#876
   def call(vm); end
 
   # Returns the value of attribute class_iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#782
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#835
   def class_iseq; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#802
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#855
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#790
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#843
   def disasm(fmt); end
 
   # Returns the value of attribute flags.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#782
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#835
   def flags; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#811
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#864
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#782
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#835
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#815
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#868
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#819
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#872
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#798
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#851
   def to_a(_iseq); end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#780
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#833
 SyntaxTree::YARV::DefineClass::FLAG_HAS_SUPERCLASS = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#779
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#832
 SyntaxTree::YARV::DefineClass::FLAG_SCOPED = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#776
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#829
 SyntaxTree::YARV::DefineClass::TYPE_CLASS = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#778
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#831
 SyntaxTree::YARV::DefineClass::TYPE_MODULE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#777
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#830
 SyntaxTree::YARV::DefineClass::TYPE_SINGLETON_CLASS = T.let(T.unsafe(nil), Integer)
 
 # ### Summary
@@ -17204,39 +17280,39 @@ SyntaxTree::YARV::DefineClass::TYPE_SINGLETON_CLASS = T.let(T.unsafe(nil), Integ
 # def value = "value"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1068
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1121
 class SyntaxTree::YARV::DefineMethod < ::SyntaxTree::YARV::Instruction
   # @return [DefineMethod] a new instance of DefineMethod
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1071
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1124
   def initialize(method_name, method_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1092
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1145
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1101
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1154
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1088
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1141
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1076
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1129
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1097
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1150
   def length; end
 
   # Returns the value of attribute method_iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1069
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1122
   def method_iseq; end
 
   # Returns the value of attribute method_name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1069
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1122
   def method_name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1084
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1137
   def to_a(_iseq); end
 end
 
@@ -17254,42 +17330,42 @@ end
 # def self.value = "value"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1137
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1190
 class SyntaxTree::YARV::DefineSMethod < ::SyntaxTree::YARV::Instruction
   # @return [DefineSMethod] a new instance of DefineSMethod
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1140
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1193
   def initialize(method_name, method_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1161
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1214
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1174
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1227
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1157
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1210
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1145
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1198
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1166
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1219
   def length; end
 
   # Returns the value of attribute method_iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1138
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1191
   def method_iseq; end
 
   # Returns the value of attribute method_name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1138
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1191
   def method_name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1170
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1223
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1153
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1206
   def to_a(_iseq); end
 end
 
@@ -17304,102 +17380,102 @@ end
 # defined?(x)
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#859
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#912
 class SyntaxTree::YARV::Defined < ::SyntaxTree::YARV::Instruction
   # @return [Defined] a new instance of Defined
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#880
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#933
   def initialize(type, name, message); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#939
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#992
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#956
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1009
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#935
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#988
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#886
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#939
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#944
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#997
   def length; end
 
   # Returns the value of attribute message.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#878
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#931
   def message; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#878
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#931
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#948
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1001
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#952
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1005
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#931
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#984
   def to_a(_iseq); end
 
   # Returns the value of attribute type.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#878
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#931
   def type; end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#872
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#925
 SyntaxTree::YARV::Defined::TYPE_ASGN = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#865
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#918
 SyntaxTree::YARV::Defined::TYPE_CONST = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#876
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#929
 SyntaxTree::YARV::Defined::TYPE_CONST_FROM = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#864
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#917
 SyntaxTree::YARV::Defined::TYPE_CVAR = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#873
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#926
 SyntaxTree::YARV::Defined::TYPE_EXPR = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#871
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#924
 SyntaxTree::YARV::Defined::TYPE_FALSE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#875
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#928
 SyntaxTree::YARV::Defined::TYPE_FUNC = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#863
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#916
 SyntaxTree::YARV::Defined::TYPE_GVAR = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#861
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#914
 SyntaxTree::YARV::Defined::TYPE_IVAR = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#862
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#915
 SyntaxTree::YARV::Defined::TYPE_LVAR = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#866
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#919
 SyntaxTree::YARV::Defined::TYPE_METHOD = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#860
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#913
 SyntaxTree::YARV::Defined::TYPE_NIL = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#874
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#927
 SyntaxTree::YARV::Defined::TYPE_REF = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#869
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#922
 SyntaxTree::YARV::Defined::TYPE_SELF = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#870
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#923
 SyntaxTree::YARV::Defined::TYPE_TRUE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#867
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#920
 SyntaxTree::YARV::Defined::TYPE_YIELD = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#868
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#921
 SyntaxTree::YARV::Defined::TYPE_ZSUPER = T.let(T.unsafe(nil), Integer)
 
 # ### Summary
@@ -17416,47 +17492,47 @@ SyntaxTree::YARV::Defined::TYPE_ZSUPER = T.let(T.unsafe(nil), Integer)
 # defined?(@value)
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1011
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1064
 class SyntaxTree::YARV::DefinedIVar < ::SyntaxTree::YARV::Instruction
   # @return [DefinedIVar] a new instance of DefinedIVar
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1014
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1067
   def initialize(name, cache, message); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1035
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1088
   def ==(other); end
 
   # Returns the value of attribute cache.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1012
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1065
   def cache; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1048
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1101
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1031
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1084
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1020
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1073
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1040
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1093
   def length; end
 
   # Returns the value of attribute message.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1012
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1065
   def message; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1012
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1065
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1044
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1097
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1027
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1080
   def to_a(_iseq); end
 end
 
@@ -17587,32 +17663,32 @@ end
 # $global = 5
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1206
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1259
 class SyntaxTree::YARV::Dup < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1219
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1272
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1231
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1284
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1215
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1268
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1207
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1260
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1223
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1276
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1227
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1280
   def pushes; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1235
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1288
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1211
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1264
   def to_a(_iseq); end
 end
 
@@ -17626,37 +17702,37 @@ end
 # [true]
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1250
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1303
 class SyntaxTree::YARV::DupArray < ::SyntaxTree::YARV::Instruction
   # @return [DupArray] a new instance of DupArray
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1253
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1306
   def initialize(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1269
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1322
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1281
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1334
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1265
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1318
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1257
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1310
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1273
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1326
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1251
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1304
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1277
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1330
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1261
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1314
   def to_a(_iseq); end
 end
 
@@ -17670,37 +17746,37 @@ end
 # { a: 1 }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1296
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1349
 class SyntaxTree::YARV::DupHash < ::SyntaxTree::YARV::Instruction
   # @return [DupHash] a new instance of DupHash
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1299
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1352
   def initialize(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1315
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1368
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1327
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1380
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1311
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1364
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1303
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1356
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1319
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1372
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1297
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1350
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1323
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1376
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1307
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1360
   def to_a(_iseq); end
 end
 
@@ -17714,37 +17790,37 @@ end
 # Object::X ||= true
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1342
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1395
 class SyntaxTree::YARV::DupN < ::SyntaxTree::YARV::Instruction
   # @return [DupN] a new instance of DupN
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1345
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1398
   def initialize(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1361
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1414
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1373
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1426
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1357
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1410
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1349
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1402
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1365
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1418
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1343
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1396
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1369
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1422
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1353
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1406
   def to_a(_iseq); end
 end
 
@@ -17760,45 +17836,45 @@ end
 # x, = [true, false, nil]
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1392
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1445
 class SyntaxTree::YARV::ExpandArray < ::SyntaxTree::YARV::Instruction
   # @return [ExpandArray] a new instance of ExpandArray
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1395
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1448
   def initialize(number, flags); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1412
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1465
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1429
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1482
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1408
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1461
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1400
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1453
   def disasm(fmt); end
 
   # Returns the value of attribute flags.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1393
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1446
   def flags; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1417
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1470
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1393
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1446
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1421
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1474
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1425
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1478
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1404
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1457
   def to_a(_iseq); end
 end
 
@@ -17819,42 +17895,42 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1486
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1539
 class SyntaxTree::YARV::GetBlockParam < ::SyntaxTree::YARV::Instruction
   # @return [GetBlockParam] a new instance of GetBlockParam
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1489
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1542
   def initialize(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1508
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1561
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1521
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1574
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1504
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1557
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1494
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1547
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1487
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1540
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1513
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1566
   def length; end
 
   # Returns the value of attribute level.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1487
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1540
   def level; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1517
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1570
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1498
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1551
   def to_a(iseq); end
 end
 
@@ -17873,42 +17949,42 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1541
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1594
 class SyntaxTree::YARV::GetBlockParamProxy < ::SyntaxTree::YARV::Instruction
   # @return [GetBlockParamProxy] a new instance of GetBlockParamProxy
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1544
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1597
   def initialize(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1566
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1619
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1579
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1632
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1562
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1615
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1549
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1602
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1542
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1595
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1571
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1624
   def length; end
 
   # Returns the value of attribute level.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1542
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1595
   def level; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1575
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1628
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1556
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1609
   def to_a(iseq); end
 end
 
@@ -17924,42 +18000,42 @@ end
 # @@class_variable
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1596
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1649
 class SyntaxTree::YARV::GetClassVariable < ::SyntaxTree::YARV::Instruction
   # @return [GetClassVariable] a new instance of GetClassVariable
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1599
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1652
   def initialize(name, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1619
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1672
   def ==(other); end
 
   # Returns the value of attribute cache.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1597
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1650
   def cache; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1632
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1685
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1615
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1668
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1604
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1657
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1624
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1677
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1597
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1650
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1628
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1681
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1611
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1664
   def to_a(_iseq); end
 end
 
@@ -17975,42 +18051,42 @@ end
 # Constant
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1651
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1704
 class SyntaxTree::YARV::GetConstant < ::SyntaxTree::YARV::Instruction
   # @return [GetConstant] a new instance of GetConstant
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1654
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1707
   def initialize(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1670
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1723
   def ==(other); end
 
   # @raise [NameError]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1686
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1739
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1666
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1719
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1658
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1711
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1674
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1727
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1652
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1705
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1678
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1731
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1682
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1735
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1662
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1715
   def to_a(_iseq); end
 end
 
@@ -18024,37 +18100,37 @@ end
 # $$
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1717
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1770
 class SyntaxTree::YARV::GetGlobal < ::SyntaxTree::YARV::Instruction
   # @return [GetGlobal] a new instance of GetGlobal
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1720
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1773
   def initialize(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1736
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1789
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1748
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1801
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1732
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1785
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1724
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1777
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1740
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1793
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1718
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1771
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1744
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1797
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1728
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1781
   def to_a(_iseq); end
 end
 
@@ -18074,42 +18150,42 @@ end
 # ~~~ruby
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1772
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1825
 class SyntaxTree::YARV::GetInstanceVariable < ::SyntaxTree::YARV::Instruction
   # @return [GetInstanceVariable] a new instance of GetInstanceVariable
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1775
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1828
   def initialize(name, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1795
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1848
   def ==(other); end
 
   # Returns the value of attribute cache.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1773
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1826
   def cache; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1808
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1861
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1791
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1844
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1780
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1833
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1800
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1853
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1773
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1826
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1804
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1857
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1787
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1840
   def to_a(_iseq); end
 end
 
@@ -18127,42 +18203,42 @@ end
 # tap { tap { value } }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1828
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1881
 class SyntaxTree::YARV::GetLocal < ::SyntaxTree::YARV::Instruction
   # @return [GetLocal] a new instance of GetLocal
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1831
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1884
   def initialize(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1850
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1903
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1862
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1915
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1846
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1899
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1836
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1889
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1829
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1882
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1854
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1907
   def length; end
 
   # Returns the value of attribute level.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1829
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1882
   def level; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1858
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1911
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1840
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1893
   def to_a(iseq); end
 end
 
@@ -18179,59 +18255,9 @@ end
 # value
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1880
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1933
 class SyntaxTree::YARV::GetLocalWC0 < ::SyntaxTree::YARV::Instruction
   # @return [GetLocalWC0] a new instance of GetLocalWC0
-  #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1883
-  def initialize(index); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1899
-  def ==(other); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1915
-  def call(vm); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1911
-  def canonical; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1895
-  def deconstruct_keys(_keys); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1887
-  def disasm(fmt); end
-
-  # Returns the value of attribute index.
-  #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1881
-  def index; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1903
-  def length; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1907
-  def pushes; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1891
-  def to_a(iseq); end
-end
-
-# ### Summary
-#
-# `getlocal_WC_1` is a specialized version of the `getlocal` instruction. It
-# fetches the value of a local variable from the parent frame determined by
-# the index given as its only argument.
-#
-# ### Usage
-#
-# ~~~ruby
-# value = 5
-# self.then { value }
-# ~~~
-#
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1933
-class SyntaxTree::YARV::GetLocalWC1 < ::SyntaxTree::YARV::Instruction
-  # @return [GetLocalWC1] a new instance of GetLocalWC1
   #
   # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1936
   def initialize(index); end
@@ -18268,6 +18294,56 @@ end
 
 # ### Summary
 #
+# `getlocal_WC_1` is a specialized version of the `getlocal` instruction. It
+# fetches the value of a local variable from the parent frame determined by
+# the index given as its only argument.
+#
+# ### Usage
+#
+# ~~~ruby
+# value = 5
+# self.then { value }
+# ~~~
+#
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1986
+class SyntaxTree::YARV::GetLocalWC1 < ::SyntaxTree::YARV::Instruction
+  # @return [GetLocalWC1] a new instance of GetLocalWC1
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1989
+  def initialize(index); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2005
+  def ==(other); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2021
+  def call(vm); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2017
+  def canonical; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2001
+  def deconstruct_keys(_keys); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1993
+  def disasm(fmt); end
+
+  # Returns the value of attribute index.
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1987
+  def index; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2009
+  def length; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2013
+  def pushes; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1997
+  def to_a(iseq); end
+end
+
+# ### Summary
+#
 # `getspecial` pushes the value of a special local variable onto the stack.
 #
 # ### Usage
@@ -18276,58 +18352,58 @@ end
 # 1 if (a == 1) .. (b == 2)
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1983
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2036
 class SyntaxTree::YARV::GetSpecial < ::SyntaxTree::YARV::Instruction
   # @return [GetSpecial] a new instance of GetSpecial
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1990
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2043
   def initialize(key, type); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2007
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2060
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2019
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2072
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2003
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2056
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1995
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2048
   def disasm(fmt); end
 
   # Returns the value of attribute key.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1988
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2041
   def key; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2011
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2064
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2015
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2068
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1999
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2052
   def to_a(_iseq); end
 
   # Returns the value of attribute type.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1988
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2041
   def type; end
 end
 
 # $~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1985
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2038
 SyntaxTree::YARV::GetSpecial::SVAR_BACKREF = T.let(T.unsafe(nil), Integer)
 
 # flipflop
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1986
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2039
 SyntaxTree::YARV::GetSpecial::SVAR_FLIPFLOP_START = T.let(T.unsafe(nil), Integer)
 
 # $_
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#1984
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2037
 SyntaxTree::YARV::GetSpecial::SVAR_LASTLINE = T.let(T.unsafe(nil), Integer)
 
 # This is a base class for all YARV instructions. It provides a few
@@ -18400,10 +18476,10 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#168
   def initialize(name, file, line, type, parent_iseq = T.unsafe(nil), options = T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#652
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#656
   def adjuststack(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#656
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#660
   def anytostring; end
 
   # Returns the value of attribute argument_options.
@@ -18423,34 +18499,34 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#142
   def argument_size=(_arg0); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#472
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#476
   def block_child_iseq(line); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#660
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#664
   def branchif(label); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#664
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#668
   def branchnil(label); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#668
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#672
   def branchunless(label); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#565
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#569
   def catch_break(iseq, begin_label, end_label, exit_label, restore_sp); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#575
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#579
   def catch_ensure(iseq, begin_label, end_label, exit_label, restore_sp); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#585
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#589
   def catch_next(begin_label, end_label, exit_label, restore_sp); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#595
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#599
   def catch_redo(begin_label, end_label, exit_label, restore_sp); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#605
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#609
   def catch_rescue(iseq, begin_label, end_label, exit_label, restore_sp); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#615
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#619
   def catch_retry(begin_label, end_label, exit_label, restore_sp); end
 
   # The catch table for this instruction sequence.
@@ -18458,72 +18534,75 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#146
   def catch_table; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#672
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#676
   def checkkeyword(keyword_bits_index, keyword_index); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#676
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#680
   def checkmatch(type); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#680
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#684
   def checktype(type); end
 
   # Child instruction sequence methods
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#468
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#472
   def child_iseq(name, line, type); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#478
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#482
   def class_child_iseq(name, line); end
 
   # This method converts our linked list of instructions into a final array
   # and performs any other compilation steps necessary.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#305
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#309
   def compile!; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#684
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#688
   def concatarray; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#688
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#692
   def concatstrings(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#692
-  def defineclass(name, class_iseq, flags); end
-
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#696
-  def defined(type, name, message); end
+  def concattoarray(object); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#700
+  def defineclass(name, class_iseq, flags); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#704
+  def defined(type, name, message); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#708
   def definedivar(name, cache, message); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#709
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#717
   def definemethod(name, method_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#713
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#721
   def definesmethod(name, method_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#292
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#296
   def disasm; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#717
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#725
   def dup; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#721
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#729
   def duparray(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#725
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#733
   def duphash(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#729
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#737
   def dupn(number); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#232
   def eval; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#648
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#652
   def event(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#733
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#741
   def expandarray(length, flags); end
 
   # The source location of the instruction sequence.
@@ -18531,28 +18610,28 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#132
   def file; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#737
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#745
   def getblockparam(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#741
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#749
   def getblockparamproxy(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#745
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#753
   def getclassvariable(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#753
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#761
   def getconstant(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#757
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#765
   def getglobal(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#761
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#769
   def getinstancevariable(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#769
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#777
   def getlocal(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#788
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#796
   def getspecial(key, type); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#207
@@ -18572,27 +18651,27 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#149
   def insns; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#299
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#303
   def inspect; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#792
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#800
   def intern; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#796
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#804
   def invokeblock(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#800
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#808
   def invokesuper(calldata, block_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#804
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#812
   def jump(label); end
 
   # Instruction push methods
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#629
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#633
   def label; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#808
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#816
   def leave; end
 
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#219
@@ -18613,10 +18692,10 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#199
   def local_variable(name, level = T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#482
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#486
   def method_child_iseq(name, line); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#486
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#490
   def module_child_iseq(name, line); end
 
   # The name of the instruction sequence.
@@ -18624,43 +18703,43 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#129
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#812
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#820
   def newarray(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#816
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#824
   def newarraykwsplat(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#820
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#828
   def newhash(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#824
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#832
   def newrange(exclude_end); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#828
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#836
   def nop; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#832
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#840
   def objtostring(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#836
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#844
   def once(iseq, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#840
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#848
   def opt_aref_with(object, calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#844
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#852
   def opt_aset_with(object, calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#848
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#856
   def opt_case_dispatch(case_dispatch_hash, else_label); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#852
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#860
   def opt_getconstant_path(names); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#888
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#896
   def opt_getinlinecache(label, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#892
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#900
   def opt_setinlinecache(cache); end
 
   # These are various compilation options provided.
@@ -18673,61 +18752,67 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#138
   def parent_iseq; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#896
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#904
   def pop; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#633
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#637
   def push(value); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#900
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#908
+  def pushtoarraykwsplat; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#912
+  def putchilledstring(object); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#916
   def putnil; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#904
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#920
   def putobject(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#922
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#938
   def putself; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#926
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#942
   def putspecialobject(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#930
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#946
   def putstring(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#934
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#950
   def send(calldata, block_iseq = T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#938
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#954
   def setblockparam(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#942
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#958
   def setclassvariable(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#950
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#966
   def setconstant(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#954
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#970
   def setglobal(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#958
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#974
   def setinstancevariable(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#966
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#982
   def setlocal(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#985
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1001
   def setn(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#989
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1005
   def setspecial(key); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#490
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#494
   def singleton_class_child_iseq(line); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#341
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#345
   def specialize_instructions!; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#993
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1009
   def splatarray(flag); end
 
   # An object that will track the current size of the stack and the
@@ -18741,28 +18826,28 @@ class SyntaxTree::YARV::InstructionSequence
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#159
   def storage_index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#997
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1013
   def swap; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1001
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1017
   def throw(type); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#236
   def to_a; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#280
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#284
   def to_cfg; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#284
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#288
   def to_dfg; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#288
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#292
   def to_son; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1005
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1021
   def topn(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1009
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1025
   def toregexp(options, length); end
 
   # The type of the instruction sequence.
@@ -18774,7 +18859,7 @@ class SyntaxTree::YARV::InstructionSequence
     # This method will create a new instruction sequence from a serialized
     # RubyVM::InstructionSequence object.
     #
-    # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1015
+    # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#1031
     def from(source, options = T.unsafe(nil), parent_iseq = T.unsafe(nil)); end
 
     # This provides a handle to the rb_iseq_load function, which allows you
@@ -18786,74 +18871,74 @@ class SyntaxTree::YARV::InstructionSequence
   end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#510
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#514
 class SyntaxTree::YARV::InstructionSequence::CatchBreak < ::SyntaxTree::YARV::InstructionSequence::CatchEntry
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#511
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#515
   def to_a; end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#523
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#527
 class SyntaxTree::YARV::InstructionSequence::CatchEnsure < ::SyntaxTree::YARV::InstructionSequence::CatchEntry
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#524
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#528
   def to_a; end
 end
 
 # Catch table methods
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#498
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#502
 class SyntaxTree::YARV::InstructionSequence::CatchEntry
   # @return [CatchEntry] a new instance of CatchEntry
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#501
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#505
   def initialize(iseq, begin_label, end_label, exit_label, restore_sp); end
 
   # Returns the value of attribute begin_label.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#499
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#503
   def begin_label; end
 
   # Returns the value of attribute end_label.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#499
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#503
   def end_label; end
 
   # Returns the value of attribute exit_label.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#499
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#503
   def exit_label; end
 
   # Returns the value of attribute iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#499
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#503
   def iseq; end
 
   # Returns the value of attribute restore_sp.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#499
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#503
   def restore_sp; end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#535
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#539
 class SyntaxTree::YARV::InstructionSequence::CatchNext < ::SyntaxTree::YARV::InstructionSequence::CatchEntry
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#536
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#540
   def to_a; end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#541
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#545
 class SyntaxTree::YARV::InstructionSequence::CatchRedo < ::SyntaxTree::YARV::InstructionSequence::CatchEntry
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#542
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#546
   def to_a; end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#547
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#551
 class SyntaxTree::YARV::InstructionSequence::CatchRescue < ::SyntaxTree::YARV::InstructionSequence::CatchEntry
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#548
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#552
   def to_a; end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#559
+# source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#563
 class SyntaxTree::YARV::InstructionSequence::CatchRetry < ::SyntaxTree::YARV::InstructionSequence::CatchEntry
-  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#560
+  # source://syntax_tree//lib/syntax_tree/yarv/instruction_sequence.rb#564
   def to_a; end
 end
 
@@ -19000,27 +19085,27 @@ end
 # :"#{"foo"}"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2042
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2095
 class SyntaxTree::YARV::Intern < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2055
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2108
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2067
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2120
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2051
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2104
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2043
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2096
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2059
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2112
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2063
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2116
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2047
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2100
   def to_a(_iseq); end
 end
 
@@ -19038,40 +19123,40 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2086
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2139
 class SyntaxTree::YARV::InvokeBlock < ::SyntaxTree::YARV::Instruction
   # @return [InvokeBlock] a new instance of InvokeBlock
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2089
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2142
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2105
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2158
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2121
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2174
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2087
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2140
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2101
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2154
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2093
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2146
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2109
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2162
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2113
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2166
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2117
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2170
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2097
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2150
   def to_a(_iseq); end
 end
 
@@ -19089,42 +19174,42 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2140
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2193
 class SyntaxTree::YARV::InvokeSuper < ::SyntaxTree::YARV::Instruction
   # @return [InvokeSuper] a new instance of InvokeSuper
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2143
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2196
   def initialize(calldata, block_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2164
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2217
   def ==(other); end
 
   # Returns the value of attribute block_iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2141
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2194
   def block_iseq; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2178
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2231
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2141
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2194
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2160
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2213
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2148
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2201
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2169
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2222
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2174
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2227
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2156
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2209
   def to_a(_iseq); end
 end
 
@@ -19143,37 +19228,37 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2217
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2270
 class SyntaxTree::YARV::Jump < ::SyntaxTree::YARV::Instruction
   # @return [Jump] a new instance of Jump
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2220
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2273
   def initialize(label); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2236
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2289
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2248
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2301
   def branch_targets; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2244
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2297
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2232
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2285
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2224
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2277
   def disasm(fmt); end
 
   # Returns the value of attribute label.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2218
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2271
   def label; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2240
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2293
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2228
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2281
   def to_a(_iseq); end
 end
 
@@ -19187,32 +19272,32 @@ end
 # ;;
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2263
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2316
 class SyntaxTree::YARV::Leave < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2276
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2329
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2290
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2343
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2272
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2325
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2264
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2317
   def disasm(fmt); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2294
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2347
   def leaves?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2280
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2333
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2284
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2337
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2268
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2321
   def to_a(_iseq); end
 end
 
@@ -19662,40 +19747,40 @@ end
 # ["string"]
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2311
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2364
 class SyntaxTree::YARV::NewArray < ::SyntaxTree::YARV::Instruction
   # @return [NewArray] a new instance of NewArray
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2314
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2367
   def initialize(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2330
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2383
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2346
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2399
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2326
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2379
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2318
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2371
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2334
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2387
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2312
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2365
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2338
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2391
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2342
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2395
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2322
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2375
   def to_a(_iseq); end
 end
 
@@ -19711,40 +19796,40 @@ end
 # ["string", **{ foo: "bar" }]
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2363
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2416
 class SyntaxTree::YARV::NewArrayKwSplat < ::SyntaxTree::YARV::Instruction
   # @return [NewArrayKwSplat] a new instance of NewArrayKwSplat
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2366
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2419
   def initialize(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2382
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2435
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2398
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2451
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2378
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2431
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2370
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2423
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2386
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2439
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2364
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2417
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2390
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2443
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2394
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2447
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2374
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2427
   def to_a(_iseq); end
 end
 
@@ -19762,40 +19847,40 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2417
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2470
 class SyntaxTree::YARV::NewHash < ::SyntaxTree::YARV::Instruction
   # @return [NewHash] a new instance of NewHash
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2420
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2473
   def initialize(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2436
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2489
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2452
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2505
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2432
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2485
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2424
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2477
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2440
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2493
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2418
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2471
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2444
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2497
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2448
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2501
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2428
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2481
   def to_a(_iseq); end
 end
 
@@ -19814,40 +19899,40 @@ end
 # p (x..y), (x...y)
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2472
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2525
 class SyntaxTree::YARV::NewRange < ::SyntaxTree::YARV::Instruction
   # @return [NewRange] a new instance of NewRange
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2475
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2528
   def initialize(exclude_end); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2491
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2544
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2507
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2560
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2487
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2540
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2479
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2532
   def disasm(fmt); end
 
   # Returns the value of attribute exclude_end.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2473
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2526
   def exclude_end; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2495
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2548
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2499
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2552
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2503
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2556
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2483
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2536
   def to_a(_iseq); end
 end
 
@@ -19862,26 +19947,26 @@ end
 # raise rescue true
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2523
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2576
 class SyntaxTree::YARV::Nop < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2536
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2589
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2540
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2593
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2532
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2585
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2524
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2577
   def disasm(fmt); end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2543
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2596
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2528
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2581
   def to_a(_iseq); end
 end
 
@@ -19899,40 +19984,40 @@ end
 # "#{5}"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2562
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2615
 class SyntaxTree::YARV::ObjToString < ::SyntaxTree::YARV::Instruction
   # @return [ObjToString] a new instance of ObjToString
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2565
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2618
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2581
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2634
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2597
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2650
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2563
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2616
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2577
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2630
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2569
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2622
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2585
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2638
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2589
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2642
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2593
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2646
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2573
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2626
   def to_a(_iseq); end
 end
 
@@ -19949,42 +20034,42 @@ end
 # END { puts "END" }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2615
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2668
 class SyntaxTree::YARV::Once < ::SyntaxTree::YARV::Instruction
   # @return [Once] a new instance of Once
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2618
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2671
   def initialize(iseq, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2636
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2689
   def ==(other); end
 
   # Returns the value of attribute cache.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2616
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2669
   def cache; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2648
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2701
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2632
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2685
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2623
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2676
   def disasm(fmt); end
 
   # Returns the value of attribute iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2616
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2669
   def iseq; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2640
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2693
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2644
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2697
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2628
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2681
   def to_a(_iseq); end
 end
 
@@ -20001,43 +20086,43 @@ end
 # 2 & 3
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2668
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2721
 class SyntaxTree::YARV::OptAnd < ::SyntaxTree::YARV::Instruction
   # @return [OptAnd] a new instance of OptAnd
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2671
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2724
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2687
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2740
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2707
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2760
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2669
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2722
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2703
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2756
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2683
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2736
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2675
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2728
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2691
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2744
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2695
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2748
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2699
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2752
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2679
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2732
   def to_a(_iseq); end
 end
 
@@ -20053,43 +20138,43 @@ end
 # 7[2]
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2724
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2777
 class SyntaxTree::YARV::OptAref < ::SyntaxTree::YARV::Instruction
   # @return [OptAref] a new instance of OptAref
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2727
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2780
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2743
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2796
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2763
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2816
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2725
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2778
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2759
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2812
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2739
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2792
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2731
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2784
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2747
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2800
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2751
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2804
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2755
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2808
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2735
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2788
   def to_a(_iseq); end
 end
 
@@ -20106,45 +20191,45 @@ end
 # { 'test' => true }['test']
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2781
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2834
 class SyntaxTree::YARV::OptArefWith < ::SyntaxTree::YARV::Instruction
   # @return [OptArefWith] a new instance of OptArefWith
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2784
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2837
   def initialize(object, calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2804
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2857
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2821
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2874
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2782
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2835
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2800
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2853
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2789
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2842
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2809
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2862
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2782
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2835
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2813
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2866
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2817
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2870
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2796
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2849
   def to_a(_iseq); end
 end
 
@@ -20161,43 +20246,43 @@ end
 # {}[:key] = value
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2839
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2892
 class SyntaxTree::YARV::OptAset < ::SyntaxTree::YARV::Instruction
   # @return [OptAset] a new instance of OptAset
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2842
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2895
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2858
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2911
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2878
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2931
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2840
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2893
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2874
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2927
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2854
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2907
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2846
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2899
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2862
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2915
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2866
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2919
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2870
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2923
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2850
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2903
   def to_a(_iseq); end
 end
 
@@ -20213,45 +20298,45 @@ end
 # {}["key"] = value
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2895
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2948
 class SyntaxTree::YARV::OptAsetWith < ::SyntaxTree::YARV::Instruction
   # @return [OptAsetWith] a new instance of OptAsetWith
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2898
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2951
   def initialize(object, calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2918
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2971
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2935
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2988
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2896
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2949
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2914
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2967
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2903
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2956
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2923
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2976
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2896
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2949
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2927
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2980
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2931
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2984
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2910
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2963
   def to_a(_iseq); end
 end
 
@@ -20278,50 +20363,50 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2964
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3017
 class SyntaxTree::YARV::OptCaseDispatch < ::SyntaxTree::YARV::Instruction
   # @return [OptCaseDispatch] a new instance of OptCaseDispatch
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2967
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3020
   def initialize(case_dispatch_hash, else_label); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2991
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3044
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3009
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3062
   def branch_targets; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3005
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3058
   def call(vm); end
 
   # Returns the value of attribute case_dispatch_hash.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2965
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3018
   def case_dispatch_hash; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2987
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3040
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2972
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3025
   def disasm(fmt); end
 
   # Returns the value of attribute else_label.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2965
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3018
   def else_label; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3013
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3066
   def falls_through?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2997
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3050
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3001
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3054
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#2979
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3032
   def to_a(_iseq); end
 end
 
@@ -20338,43 +20423,43 @@ end
 # 2 / 3
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3031
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3084
 class SyntaxTree::YARV::OptDiv < ::SyntaxTree::YARV::Instruction
   # @return [OptDiv] a new instance of OptDiv
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3034
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3087
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3050
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3103
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3070
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3123
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3032
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3085
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3066
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3119
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3046
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3099
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3038
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3091
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3054
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3107
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3058
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3111
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3062
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3115
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3042
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3095
   def to_a(_iseq); end
 end
 
@@ -20390,43 +20475,43 @@ end
 # "".empty?
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3087
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3140
 class SyntaxTree::YARV::OptEmptyP < ::SyntaxTree::YARV::Instruction
   # @return [OptEmptyP] a new instance of OptEmptyP
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3090
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3143
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3106
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3159
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3126
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3179
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3088
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3141
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3122
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3175
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3102
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3155
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3094
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3147
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3110
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3163
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3114
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3167
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3118
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3171
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3098
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3151
   def to_a(_iseq); end
 end
 
@@ -20443,43 +20528,43 @@ end
 # 2 == 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3144
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3197
 class SyntaxTree::YARV::OptEq < ::SyntaxTree::YARV::Instruction
   # @return [OptEq] a new instance of OptEq
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3147
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3200
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3163
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3216
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3183
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3236
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3145
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3198
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3179
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3232
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3159
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3212
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3151
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3204
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3167
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3220
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3171
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3224
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3175
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3228
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3155
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3208
   def to_a(_iseq); end
 end
 
@@ -20496,43 +20581,43 @@ end
 # 4 >= 3
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3201
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3254
 class SyntaxTree::YARV::OptGE < ::SyntaxTree::YARV::Instruction
   # @return [OptGE] a new instance of OptGE
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3204
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3257
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3220
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3273
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3240
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3293
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3202
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3255
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3236
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3289
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3216
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3269
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3208
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3261
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3224
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3277
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3228
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3281
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3232
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3285
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3212
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3265
   def to_a(_iseq); end
 end
 
@@ -20549,43 +20634,43 @@ end
 # 4 > 3
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3314
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3367
 class SyntaxTree::YARV::OptGT < ::SyntaxTree::YARV::Instruction
   # @return [OptGT] a new instance of OptGT
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3317
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3370
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3333
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3386
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3353
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3406
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3315
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3368
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3349
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3402
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3329
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3382
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3321
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3374
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3337
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3390
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3341
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3394
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3345
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3398
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3325
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3378
   def to_a(_iseq); end
 end
 
@@ -20601,37 +20686,37 @@ end
 # ::Object
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3257
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3310
 class SyntaxTree::YARV::OptGetConstantPath < ::SyntaxTree::YARV::Instruction
   # @return [OptGetConstantPath] a new instance of OptGetConstantPath
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3260
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3313
   def initialize(names); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3277
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3330
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3289
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3342
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3273
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3326
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3264
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3317
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3281
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3334
   def length; end
 
   # Returns the value of attribute names.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3258
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3311
   def names; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3285
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3338
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3269
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3322
   def to_a(_iseq); end
 end
 
@@ -20648,43 +20733,43 @@ end
 # 3 <= 4
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3371
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3424
 class SyntaxTree::YARV::OptLE < ::SyntaxTree::YARV::Instruction
   # @return [OptLE] a new instance of OptLE
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3374
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3427
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3390
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3443
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3410
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3463
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3372
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3425
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3406
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3459
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3386
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3439
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3378
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3431
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3394
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3447
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3398
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3451
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3402
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3455
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3382
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3435
   def to_a(_iseq); end
 end
 
@@ -20701,43 +20786,43 @@ end
 # 3 < 4
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3485
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3538
 class SyntaxTree::YARV::OptLT < ::SyntaxTree::YARV::Instruction
   # @return [OptLT] a new instance of OptLT
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3488
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3541
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3504
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3557
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3524
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3577
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3486
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3539
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3520
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3573
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3500
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3553
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3492
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3545
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3508
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3561
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3512
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3565
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3516
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3569
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3496
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3549
   def to_a(_iseq); end
 end
 
@@ -20754,43 +20839,43 @@ end
 # "" << 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3542
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3595
 class SyntaxTree::YARV::OptLTLT < ::SyntaxTree::YARV::Instruction
   # @return [OptLTLT] a new instance of OptLTLT
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3545
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3598
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3561
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3614
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3581
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3634
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3543
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3596
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3577
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3630
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3557
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3610
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3549
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3602
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3565
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3618
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3569
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3622
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3573
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3626
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3553
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3606
   def to_a(_iseq); end
 end
 
@@ -20807,43 +20892,43 @@ end
 # "".length
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3428
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3481
 class SyntaxTree::YARV::OptLength < ::SyntaxTree::YARV::Instruction
   # @return [OptLength] a new instance of OptLength
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3431
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3484
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3447
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3500
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3467
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3520
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3429
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3482
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3463
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3516
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3443
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3496
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3435
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3488
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3451
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3504
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3455
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3508
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3459
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3512
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3439
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3492
   def to_a(_iseq); end
 end
 
@@ -20861,43 +20946,43 @@ end
 # 3 - 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3600
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3653
 class SyntaxTree::YARV::OptMinus < ::SyntaxTree::YARV::Instruction
   # @return [OptMinus] a new instance of OptMinus
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3603
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3656
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3619
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3672
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3639
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3692
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3601
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3654
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3635
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3688
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3615
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3668
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3607
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3660
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3623
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3676
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3627
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3680
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3631
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3684
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3611
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3664
   def to_a(_iseq); end
 end
 
@@ -20914,43 +20999,43 @@ end
 # 4 % 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3657
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3710
 class SyntaxTree::YARV::OptMod < ::SyntaxTree::YARV::Instruction
   # @return [OptMod] a new instance of OptMod
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3660
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3713
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3676
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3729
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3696
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3749
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3658
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3711
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3692
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3745
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3672
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3725
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3664
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3717
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3680
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3733
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3684
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3737
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3688
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3741
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3668
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3721
   def to_a(_iseq); end
 end
 
@@ -20967,43 +21052,43 @@ end
 # 3 * 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3714
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3767
 class SyntaxTree::YARV::OptMult < ::SyntaxTree::YARV::Instruction
   # @return [OptMult] a new instance of OptMult
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3717
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3770
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3733
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3786
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3753
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3806
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3715
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3768
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3749
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3802
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3729
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3782
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3721
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3774
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3737
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3790
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3741
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3794
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3745
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3798
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3725
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3778
   def to_a(_iseq); end
 end
 
@@ -21022,45 +21107,45 @@ end
 # 2 != 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3773
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3826
 class SyntaxTree::YARV::OptNEq < ::SyntaxTree::YARV::Instruction
   # @return [OptNEq] a new instance of OptNEq
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3776
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3829
   def initialize(eq_calldata, neq_calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3796
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3849
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3813
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3866
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3792
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3845
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3781
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3834
   def disasm(fmt); end
 
   # Returns the value of attribute eq_calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3774
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3827
   def eq_calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3801
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3854
   def length; end
 
   # Returns the value of attribute neq_calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3774
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3827
   def neq_calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3805
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3858
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3809
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3862
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3788
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3841
   def to_a(_iseq); end
 end
 
@@ -21077,45 +21162,45 @@ end
 # [a, b, c].max
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3832
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3885
 class SyntaxTree::YARV::OptNewArraySend < ::SyntaxTree::YARV::Instruction
   # @return [OptNewArraySend] a new instance of OptNewArraySend
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3835
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3888
   def initialize(number, method); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3855
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3908
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3872
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3925
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3851
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3904
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3840
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3893
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3860
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3913
   def length; end
 
   # Returns the value of attribute method.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3833
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3886
   def method; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3833
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3886
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3864
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3917
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3868
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3921
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3847
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3900
   def to_a(_iseq); end
 end
 
@@ -21132,43 +21217,43 @@ end
 # "".nil?
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3890
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3943
 class SyntaxTree::YARV::OptNilP < ::SyntaxTree::YARV::Instruction
   # @return [OptNilP] a new instance of OptNilP
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3893
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3946
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3909
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3962
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3929
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3982
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3891
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3944
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3925
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3978
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3905
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3958
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3897
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3950
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3913
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3966
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3917
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3970
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3921
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3974
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3901
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3954
   def to_a(_iseq); end
 end
 
@@ -21183,43 +21268,43 @@ end
 # !true
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3945
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3998
 class SyntaxTree::YARV::OptNot < ::SyntaxTree::YARV::Instruction
   # @return [OptNot] a new instance of OptNot
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3948
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4001
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3964
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4017
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3984
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4037
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3946
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3999
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3980
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4033
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3960
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4013
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3952
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4005
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3968
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4021
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3972
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4025
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3976
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4029
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#3956
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4009
   def to_a(_iseq); end
 end
 
@@ -21236,43 +21321,43 @@ end
 # 2 | 3
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4002
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4055
 class SyntaxTree::YARV::OptOr < ::SyntaxTree::YARV::Instruction
   # @return [OptOr] a new instance of OptOr
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4005
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4058
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4021
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4074
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4041
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4094
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4003
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4056
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4037
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4090
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4017
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4070
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4009
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4062
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4025
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4078
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4029
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4082
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4033
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4086
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4013
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4066
   def to_a(_iseq); end
 end
 
@@ -21289,43 +21374,43 @@ end
 # 2 + 3
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4059
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4112
 class SyntaxTree::YARV::OptPlus < ::SyntaxTree::YARV::Instruction
   # @return [OptPlus] a new instance of OptPlus
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4062
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4115
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4078
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4131
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4098
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4151
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4060
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4113
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4094
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4147
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4074
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4127
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4066
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4119
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4082
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4135
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4086
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4139
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4090
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4143
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4070
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4123
   def to_a(_iseq); end
 end
 
@@ -21341,43 +21426,43 @@ end
 # /a/ =~ "a"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4115
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4168
 class SyntaxTree::YARV::OptRegExpMatch2 < ::SyntaxTree::YARV::Instruction
   # @return [OptRegExpMatch2] a new instance of OptRegExpMatch2
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4118
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4171
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4134
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4187
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4154
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4207
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4116
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4169
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4150
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4203
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4130
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4183
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4122
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4175
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4138
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4191
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4142
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4195
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4146
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4199
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4126
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4179
   def to_a(_iseq); end
 end
 
@@ -21393,43 +21478,43 @@ end
 # puts "Hello, world!"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4171
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4224
 class SyntaxTree::YARV::OptSendWithoutBlock < ::SyntaxTree::YARV::Instruction
   # @return [OptSendWithoutBlock] a new instance of OptSendWithoutBlock
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4174
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4227
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4190
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4243
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4210
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4263
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4172
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4225
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4206
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4259
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4186
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4239
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4178
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4231
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4194
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4247
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4198
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4251
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4202
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4255
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4182
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4235
   def to_a(_iseq); end
 end
 
@@ -21446,43 +21531,43 @@ end
 # "".size
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4228
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4281
 class SyntaxTree::YARV::OptSize < ::SyntaxTree::YARV::Instruction
   # @return [OptSize] a new instance of OptSize
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4231
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4284
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4247
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4300
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4267
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4320
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4229
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4282
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4263
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4316
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4243
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4296
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4235
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4288
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4251
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4304
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4255
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4308
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4259
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4312
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4239
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4292
   def to_a(_iseq); end
 end
 
@@ -21498,60 +21583,9 @@ end
 # "hello".freeze
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4284
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4337
 class SyntaxTree::YARV::OptStrFreeze < ::SyntaxTree::YARV::Instruction
   # @return [OptStrFreeze] a new instance of OptStrFreeze
-  #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4287
-  def initialize(object, calldata); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4307
-  def ==(other); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4320
-  def call(vm); end
-
-  # Returns the value of attribute calldata.
-  #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4285
-  def calldata; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4303
-  def deconstruct_keys(_keys); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4292
-  def disasm(fmt); end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4312
-  def length; end
-
-  # Returns the value of attribute object.
-  #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4285
-  def object; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4316
-  def pushes; end
-
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4299
-  def to_a(_iseq); end
-end
-
-# ### Summary
-#
-# `opt_str_uminus` pushes a frozen known string value with no interpolation
-# onto the stack. If the method gets overridden, this will fall back to a
-# send.
-#
-# ### Usage
-#
-# ~~~ruby
-# -"string"
-# ~~~
-#
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4337
-class SyntaxTree::YARV::OptStrUMinus < ::SyntaxTree::YARV::Instruction
-  # @return [OptStrUMinus] a new instance of OptStrUMinus
   #
   # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4340
   def initialize(object, calldata); end
@@ -21590,6 +21624,57 @@ end
 
 # ### Summary
 #
+# `opt_str_uminus` pushes a frozen known string value with no interpolation
+# onto the stack. If the method gets overridden, this will fall back to a
+# send.
+#
+# ### Usage
+#
+# ~~~ruby
+# -"string"
+# ~~~
+#
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4390
+class SyntaxTree::YARV::OptStrUMinus < ::SyntaxTree::YARV::Instruction
+  # @return [OptStrUMinus] a new instance of OptStrUMinus
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4393
+  def initialize(object, calldata); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4413
+  def ==(other); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4426
+  def call(vm); end
+
+  # Returns the value of attribute calldata.
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4391
+  def calldata; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4409
+  def deconstruct_keys(_keys); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4398
+  def disasm(fmt); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4418
+  def length; end
+
+  # Returns the value of attribute object.
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4391
+  def object; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4422
+  def pushes; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4405
+  def to_a(_iseq); end
+end
+
+# ### Summary
+#
 # `opt_succ` is a specialization of the `opt_send_without_block` instruction
 # when the method being called is `succ`. Fast paths exist when the receiver
 # is either a String or a Fixnum. It pops the receiver off the stack and
@@ -21601,43 +21686,43 @@ end
 # "".succ
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4391
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4444
 class SyntaxTree::YARV::OptSucc < ::SyntaxTree::YARV::Instruction
   # @return [OptSucc] a new instance of OptSucc
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4394
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4447
   def initialize(calldata); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4410
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4463
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4430
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4483
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4392
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4445
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4426
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4479
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4406
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4459
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4398
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4451
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4414
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4467
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4418
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4471
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4422
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4475
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4402
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4455
   def to_a(_iseq); end
 end
 
@@ -21651,29 +21736,113 @@ end
 # a ||= 2
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4445
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4498
 class SyntaxTree::YARV::Pop < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4458
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4511
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4466
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4519
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4454
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4507
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4446
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4499
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4462
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4515
   def pops; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4470
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4523
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4450
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4503
+  def to_a(_iseq); end
+end
+
+# ### Summary
+#
+# `pushtoarraykwsplat` is used to append a hash literal that is being
+# splatted onto an array.
+#
+# ### Usage
+#
+# ~~~ruby
+# ["string", **{ foo: "bar" }]
+# ~~~
+#
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4539
+class SyntaxTree::YARV::PushToArrayKwSplat < ::SyntaxTree::YARV::Instruction
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4552
+  def ==(other); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4568
+  def call(vm); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4548
+  def deconstruct_keys(_keys); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4540
+  def disasm(fmt); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4556
+  def length; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4560
+  def pops; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4564
+  def pushes; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4544
+  def to_a(_iseq); end
+end
+
+# ### Summary
+#
+# `putchilledstring` pushes an unfrozen string literal onto the stack that
+# acts like a frozen string. This is a migration path to frozen string
+# literals as the default in the future.
+#
+# ### Usage
+#
+# ~~~ruby
+# "foo"
+# ~~~
+#
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4873
+class SyntaxTree::YARV::PutChilledString < ::SyntaxTree::YARV::Instruction
+  # @return [PutChilledString] a new instance of PutChilledString
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4876
+  def initialize(object); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4892
+  def ==(other); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4904
+  def call(vm); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4888
+  def deconstruct_keys(_keys); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4880
+  def disasm(fmt); end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4896
+  def length; end
+
+  # Returns the value of attribute object.
+  #
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4874
+  def object; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4900
+  def pushes; end
+
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4884
   def to_a(_iseq); end
 end
 
@@ -21687,32 +21856,32 @@ end
 # nil
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4485
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4584
 class SyntaxTree::YARV::PutNil < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4498
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4597
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4510
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4609
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4506
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4605
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4494
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4593
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4486
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4585
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4502
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4601
   def pushes; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4514
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4613
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4490
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4589
   def to_a(_iseq); end
 end
 
@@ -21726,42 +21895,42 @@ end
 # 5
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4529
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4628
 class SyntaxTree::YARV::PutObject < ::SyntaxTree::YARV::Instruction
   # @return [PutObject] a new instance of PutObject
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4532
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4631
   def initialize(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4548
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4647
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4560
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4659
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4544
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4643
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4536
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4635
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4552
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4651
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4530
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4629
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4556
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4655
   def pushes; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4564
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4663
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4540
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4639
   def to_a(_iseq); end
 end
 
@@ -21777,32 +21946,32 @@ end
 # 0
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4581
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4680
 class SyntaxTree::YARV::PutObjectInt2Fix0 < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4594
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4693
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4606
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4705
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4602
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4701
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4590
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4689
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4582
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4681
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4598
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4697
   def pushes; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4610
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4709
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4586
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4685
   def to_a(_iseq); end
 end
 
@@ -21818,32 +21987,32 @@ end
 # 1
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4627
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4726
 class SyntaxTree::YARV::PutObjectInt2Fix1 < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4640
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4739
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4652
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4751
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4648
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4747
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4636
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4735
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4628
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4727
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4644
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4743
   def pushes; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4656
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4755
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4632
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4731
   def to_a(_iseq); end
 end
 
@@ -21857,29 +22026,29 @@ end
 # puts "Hello, world!"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4671
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4770
 class SyntaxTree::YARV::PutSelf < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4684
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4783
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4692
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4791
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4680
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4779
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4672
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4771
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4688
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4787
   def pushes; end
 
   # @return [Boolean]
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4696
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4795
   def side_effects?; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4676
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4775
   def to_a(_iseq); end
 end
 
@@ -21895,47 +22064,47 @@ end
 # alias foo bar
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4713
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4812
 class SyntaxTree::YARV::PutSpecialObject < ::SyntaxTree::YARV::Instruction
   # @return [PutSpecialObject] a new instance of PutSpecialObject
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4720
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4819
   def initialize(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4736
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4835
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4748
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4847
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4732
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4831
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4724
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4823
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4740
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4839
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4718
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4817
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4744
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4843
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4728
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4827
   def to_a(_iseq); end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4715
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4814
 SyntaxTree::YARV::PutSpecialObject::OBJECT_CBASE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4716
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4815
 SyntaxTree::YARV::PutSpecialObject::OBJECT_CONST_BASE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4714
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4813
 SyntaxTree::YARV::PutSpecialObject::OBJECT_VMCORE = T.let(T.unsafe(nil), Integer)
 
 # ### Summary
@@ -21948,37 +22117,37 @@ SyntaxTree::YARV::PutSpecialObject::OBJECT_VMCORE = T.let(T.unsafe(nil), Integer
 # "foo"
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4772
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4919
 class SyntaxTree::YARV::PutString < ::SyntaxTree::YARV::Instruction
   # @return [PutString] a new instance of PutString
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4775
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4922
   def initialize(object); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4791
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4938
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4803
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4950
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4787
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4934
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4779
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4926
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4795
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4942
   def length; end
 
   # Returns the value of attribute object.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4773
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4920
   def object; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4799
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4946
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4783
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4930
   def to_a(_iseq); end
 end
 
@@ -22269,45 +22438,45 @@ end
 # "hello".tap { |i| p i }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4821
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4968
 class SyntaxTree::YARV::Send < ::SyntaxTree::YARV::Instruction
   # @return [Send] a new instance of Send
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4824
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4971
   def initialize(calldata, block_iseq); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4845
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4992
   def ==(other); end
 
   # Returns the value of attribute block_iseq.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4822
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4969
   def block_iseq; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4863
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5010
   def call(vm); end
 
   # Returns the value of attribute calldata.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4822
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4969
   def calldata; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4841
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4988
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4829
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4976
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4850
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4997
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4854
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5001
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4859
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5006
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4837
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4984
   def to_a(_iseq); end
 end
 
@@ -22326,42 +22495,42 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4905
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5052
 class SyntaxTree::YARV::SetBlockParam < ::SyntaxTree::YARV::Instruction
   # @return [SetBlockParam] a new instance of SetBlockParam
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4908
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5055
   def initialize(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4927
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5074
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4940
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5087
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4923
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5070
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4913
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5060
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4906
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5053
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4932
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5079
   def length; end
 
   # Returns the value of attribute level.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4906
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5053
   def level; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4936
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5083
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4917
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5064
   def to_a(iseq); end
 end
 
@@ -22378,42 +22547,42 @@ end
 # @@class_variable = 1
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4958
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5105
 class SyntaxTree::YARV::SetClassVariable < ::SyntaxTree::YARV::Instruction
   # @return [SetClassVariable] a new instance of SetClassVariable
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4961
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5108
   def initialize(name, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4981
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5128
   def ==(other); end
 
   # Returns the value of attribute cache.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4959
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5106
   def cache; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4994
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5141
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4977
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5124
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4966
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5113
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4986
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5133
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4959
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5106
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4990
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5137
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#4973
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5120
   def to_a(_iseq); end
 end
 
@@ -22428,37 +22597,37 @@ end
 # Constant = 1
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5012
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5159
 class SyntaxTree::YARV::SetConstant < ::SyntaxTree::YARV::Instruction
   # @return [SetConstant] a new instance of SetConstant
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5015
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5162
   def initialize(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5031
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5178
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5043
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5190
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5027
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5174
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5019
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5166
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5035
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5182
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5013
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5160
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5039
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5186
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5023
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5170
   def to_a(_iseq); end
 end
 
@@ -22473,37 +22642,37 @@ end
 # $global = 5
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5060
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5207
 class SyntaxTree::YARV::SetGlobal < ::SyntaxTree::YARV::Instruction
   # @return [SetGlobal] a new instance of SetGlobal
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5063
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5210
   def initialize(name); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5079
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5226
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5091
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5238
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5075
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5222
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5067
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5214
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5083
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5230
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5061
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5208
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5087
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5234
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5071
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5218
   def to_a(_iseq); end
 end
 
@@ -22522,42 +22691,42 @@ end
 # ~~~ruby
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5114
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5261
 class SyntaxTree::YARV::SetInstanceVariable < ::SyntaxTree::YARV::Instruction
   # @return [SetInstanceVariable] a new instance of SetInstanceVariable
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5117
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5264
   def initialize(name, cache); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5137
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5284
   def ==(other); end
 
   # Returns the value of attribute cache.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5115
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5262
   def cache; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5150
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5297
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5133
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5280
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5122
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5269
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5142
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5289
   def length; end
 
   # Returns the value of attribute name.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5115
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5262
   def name; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5146
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5293
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5129
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5276
   def to_a(_iseq); end
 end
 
@@ -22575,42 +22744,42 @@ end
 # tap { tap { value = 10 } }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5170
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5317
 class SyntaxTree::YARV::SetLocal < ::SyntaxTree::YARV::Instruction
   # @return [SetLocal] a new instance of SetLocal
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5173
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5320
   def initialize(index, level); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5192
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5339
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5204
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5351
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5188
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5335
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5178
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5325
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5171
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5318
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5196
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5343
   def length; end
 
   # Returns the value of attribute level.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5171
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5318
   def level; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5200
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5347
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5182
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5329
   def to_a(iseq); end
 end
 
@@ -22627,40 +22796,40 @@ end
 # value = 5
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5222
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5369
 class SyntaxTree::YARV::SetLocalWC0 < ::SyntaxTree::YARV::Instruction
   # @return [SetLocalWC0] a new instance of SetLocalWC0
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5225
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5372
   def initialize(index); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5241
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5388
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5257
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5404
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5253
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5400
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5237
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5384
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5229
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5376
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5223
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5370
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5245
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5392
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5249
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5396
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5233
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5380
   def to_a(iseq); end
 end
 
@@ -22677,40 +22846,40 @@ end
 # self.then { value = 10 }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5275
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5422
 class SyntaxTree::YARV::SetLocalWC1 < ::SyntaxTree::YARV::Instruction
   # @return [SetLocalWC1] a new instance of SetLocalWC1
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5278
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5425
   def initialize(index); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5294
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5441
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5310
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5457
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5306
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5453
   def canonical; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5290
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5437
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5282
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5429
   def disasm(fmt); end
 
   # Returns the value of attribute index.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5276
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5423
   def index; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5298
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5445
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5302
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5449
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5286
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5433
   def to_a(iseq); end
 end
 
@@ -22725,40 +22894,40 @@ end
 # {}[:key] = 'val'
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5326
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5473
 class SyntaxTree::YARV::SetN < ::SyntaxTree::YARV::Instruction
   # @return [SetN] a new instance of SetN
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5329
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5476
   def initialize(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5345
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5492
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5361
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5508
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5341
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5488
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5333
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5480
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5349
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5496
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5327
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5474
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5353
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5500
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5357
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5504
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5337
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5484
   def to_a(_iseq); end
 end
 
@@ -22774,37 +22943,37 @@ end
 # baz if (foo == 1) .. (bar == 1)
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5378
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5525
 class SyntaxTree::YARV::SetSpecial < ::SyntaxTree::YARV::Instruction
   # @return [SetSpecial] a new instance of SetSpecial
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5381
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5528
   def initialize(key); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5397
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5544
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5409
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5556
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5393
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5540
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5385
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5532
   def disasm(fmt); end
 
   # Returns the value of attribute key.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5379
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5526
   def key; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5401
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5548
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5405
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5552
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5389
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5536
   def to_a(_iseq); end
 end
 
@@ -22820,40 +22989,40 @@ end
 # x = *(5)
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5433
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5580
 class SyntaxTree::YARV::SplatArray < ::SyntaxTree::YARV::Instruction
   # @return [SplatArray] a new instance of SplatArray
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5436
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5583
   def initialize(flag); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5452
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5599
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5468
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5615
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5448
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5595
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5440
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5587
   def disasm(fmt); end
 
   # Returns the value of attribute flag.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5434
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5581
   def flag; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5456
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5603
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5460
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5607
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5464
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5611
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5444
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5591
   def to_a(_iseq); end
 end
 
@@ -22871,27 +23040,27 @@ end
 # !!defined?([[]])
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5507
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5654
 class SyntaxTree::YARV::Swap < ::SyntaxTree::YARV::Instruction
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5520
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5667
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5532
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5679
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5516
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5663
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5508
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5655
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5524
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5671
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5528
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5675
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5512
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5659
   def to_a(_iseq); end
 end
 
@@ -22907,79 +23076,79 @@ end
 # [1, 2, 3].map { break 2 }
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5550
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5697
 class SyntaxTree::YARV::Throw < ::SyntaxTree::YARV::Instruction
   # @return [Throw] a new instance of Throw
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5566
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5713
   def initialize(type); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5582
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5729
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5598
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5745
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5578
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5725
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5570
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5717
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5586
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5733
   def length; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5590
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5737
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5594
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5741
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5574
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5721
   def to_a(_iseq); end
 
   # Returns the value of attribute type.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5564
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5711
   def type; end
 
   private
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5625
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5772
   def error_backtrace(vm); end
 end
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5553
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5700
 SyntaxTree::YARV::Throw::RUBY_TAG_BREAK = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5559
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5706
 SyntaxTree::YARV::Throw::RUBY_TAG_FATAL = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5554
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5701
 SyntaxTree::YARV::Throw::RUBY_TAG_NEXT = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5551
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5698
 SyntaxTree::YARV::Throw::RUBY_TAG_NONE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5557
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5704
 SyntaxTree::YARV::Throw::RUBY_TAG_RAISE = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5556
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5703
 SyntaxTree::YARV::Throw::RUBY_TAG_REDO = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5555
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5702
 SyntaxTree::YARV::Throw::RUBY_TAG_RETRY = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5552
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5699
 SyntaxTree::YARV::Throw::RUBY_TAG_RETURN = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5558
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5705
 SyntaxTree::YARV::Throw::RUBY_TAG_THROW = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5561
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5708
 SyntaxTree::YARV::Throw::VM_THROW_NO_ESCAPE_FLAG = T.let(T.unsafe(nil), Integer)
 
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5562
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5709
 SyntaxTree::YARV::Throw::VM_THROW_STATE_MASK = T.let(T.unsafe(nil), Integer)
 
 # ### Summary
@@ -22993,42 +23162,42 @@ SyntaxTree::YARV::Throw::VM_THROW_STATE_MASK = T.let(T.unsafe(nil), Integer)
 # /foo #{bar}/
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5700
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5847
 class SyntaxTree::YARV::ToRegExp < ::SyntaxTree::YARV::Instruction
   # @return [ToRegExp] a new instance of ToRegExp
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5703
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5850
   def initialize(options, length); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5720
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5867
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5733
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5880
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5716
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5863
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5708
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5855
   def disasm(fmt); end
 
   # Returns the value of attribute length.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5701
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5848
   def length; end
 
   # Returns the value of attribute options.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5701
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5848
   def options; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5725
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5872
   def pops; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5729
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5876
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5712
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5859
   def to_a(_iseq); end
 end
 
@@ -23046,37 +23215,37 @@ end
 # end
 # ~~~
 #
-# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5653
+# source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5800
 class SyntaxTree::YARV::TopN < ::SyntaxTree::YARV::Instruction
   # @return [TopN] a new instance of TopN
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5656
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5803
   def initialize(number); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5672
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5819
   def ==(other); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5684
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5831
   def call(vm); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5668
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5815
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5660
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5807
   def disasm(fmt); end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5676
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5823
   def length; end
 
   # Returns the value of attribute number.
   #
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5654
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5801
   def number; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5680
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5827
   def pushes; end
 
-  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5664
+  # source://syntax_tree//lib/syntax_tree/yarv/instructions.rb#5811
   def to_a(_iseq); end
 end
 
@@ -23463,42 +23632,42 @@ end
 #
 #     yield value
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12273
+# source://syntax_tree//lib/syntax_tree/node.rb#12292
 class SyntaxTree::YieldNode < ::SyntaxTree::Node
   # @return [YieldNode] a new instance of YieldNode
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12280
+  # source://syntax_tree//lib/syntax_tree/node.rb#12299
   def initialize(arguments:, location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12334
+  # source://syntax_tree//lib/syntax_tree/node.rb#12353
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12286
+  # source://syntax_tree//lib/syntax_tree/node.rb#12305
   def accept(visitor); end
 
   # [nil | Args | Paren] the arguments passed to the yield
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12275
+  # source://syntax_tree//lib/syntax_tree/node.rb#12294
   def arguments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12290
+  # source://syntax_tree//lib/syntax_tree/node.rb#12309
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12278
+  # source://syntax_tree//lib/syntax_tree/node.rb#12297
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12294
+  # source://syntax_tree//lib/syntax_tree/node.rb#12313
   def copy(arguments: T.unsafe(nil), location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12305
+  # source://syntax_tree//lib/syntax_tree/node.rb#12324
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12307
+  # source://syntax_tree//lib/syntax_tree/node.rb#12326
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12311
+  # source://syntax_tree//lib/syntax_tree/node.rb#12330
   def format(q); end
 end
 
@@ -23506,36 +23675,36 @@ end
 #
 #     super
 #
-# source://syntax_tree//lib/syntax_tree/node.rb#12343
+# source://syntax_tree//lib/syntax_tree/node.rb#12362
 class SyntaxTree::ZSuper < ::SyntaxTree::Node
   # @return [ZSuper] a new instance of ZSuper
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12347
+  # source://syntax_tree//lib/syntax_tree/node.rb#12366
   def initialize(location:); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12377
+  # source://syntax_tree//lib/syntax_tree/node.rb#12396
   def ===(other); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12352
+  # source://syntax_tree//lib/syntax_tree/node.rb#12371
   def accept(visitor); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12356
+  # source://syntax_tree//lib/syntax_tree/node.rb#12375
   def child_nodes; end
 
   # [Array[ Comment | EmbDoc ]] the comments attached to this node
   #
-  # source://syntax_tree//lib/syntax_tree/node.rb#12345
+  # source://syntax_tree//lib/syntax_tree/node.rb#12364
   def comments; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12360
+  # source://syntax_tree//lib/syntax_tree/node.rb#12379
   def copy(location: T.unsafe(nil)); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12367
+  # source://syntax_tree//lib/syntax_tree/node.rb#12386
   def deconstruct; end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12369
+  # source://syntax_tree//lib/syntax_tree/node.rb#12388
   def deconstruct_keys(_keys); end
 
-  # source://syntax_tree//lib/syntax_tree/node.rb#12373
+  # source://syntax_tree//lib/syntax_tree/node.rb#12392
   def format(q); end
 end
