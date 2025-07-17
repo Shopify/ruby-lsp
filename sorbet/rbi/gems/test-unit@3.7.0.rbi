@@ -1418,298 +1418,298 @@ class Test::Unit::AttributeMatcher
   def method_missing(name, *args); end
 end
 
-# source://test-unit//lib/test/unit/autorunner.rb#12
+# source://test-unit//lib/test/unit/autorunner.rb#13
 class Test::Unit::AutoRunner
   # @return [AutoRunner] a new instance of AutoRunner
   # @yield [_self]
   # @yieldparam _self [Test::Unit::AutoRunner] the object that the method was called on
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#152
+  # source://test-unit//lib/test/unit/autorunner.rb#153
   def initialize(standalone); end
 
   # Returns the value of attribute base.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def base; end
 
   # Sets the attribute base
   #
   # @param value the value to set the attribute base to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def base=(_arg0); end
 
   # Sets the attribute collector
   #
   # @param value the value to set the attribute collector to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#150
+  # source://test-unit//lib/test/unit/autorunner.rb#151
   def collector=(_arg0); end
 
   # Returns the value of attribute color_scheme.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#146
+  # source://test-unit//lib/test/unit/autorunner.rb#147
   def color_scheme; end
 
   # Sets the attribute color_scheme
   #
   # @param value the value to set the attribute color_scheme to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#146
+  # source://test-unit//lib/test/unit/autorunner.rb#147
   def color_scheme=(_arg0); end
 
   # Sets the attribute debug_on_failure
   #
   # @param value the value to set the attribute debug_on_failure to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#148
+  # source://test-unit//lib/test/unit/autorunner.rb#149
   def debug_on_failure=(_arg0); end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#185
+  # source://test-unit//lib/test/unit/autorunner.rb#186
   def debug_on_failure?; end
 
   # Returns the value of attribute default_test_paths.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#144
+  # source://test-unit//lib/test/unit/autorunner.rb#145
   def default_test_paths; end
 
   # Sets the attribute default_test_paths
   #
   # @param value the value to set the attribute default_test_paths to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#144
+  # source://test-unit//lib/test/unit/autorunner.rb#145
   def default_test_paths=(_arg0); end
 
   # Returns the value of attribute exclude.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def exclude; end
 
   # Sets the attribute exclude
   #
   # @param value the value to set the attribute exclude to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def exclude=(_arg0); end
 
   # Returns the value of attribute filters.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#143
+  # source://test-unit//lib/test/unit/autorunner.rb#144
   def filters; end
 
   # Sets the attribute filters
   #
   # @param value the value to set the attribute filters to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#143
+  # source://test-unit//lib/test/unit/autorunner.rb#144
   def filters=(_arg0); end
 
   # Sets the attribute gc_stress
   #
   # @param value the value to set the attribute gc_stress to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#149
+  # source://test-unit//lib/test/unit/autorunner.rb#150
   def gc_stress=(_arg0); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#460
+  # source://test-unit//lib/test/unit/autorunner.rb#463
   def keyword_display(keywords); end
 
   # Returns the value of attribute listeners.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#146
+  # source://test-unit//lib/test/unit/autorunner.rb#147
   def listeners; end
 
   # Sets the attribute listeners
   #
   # @param value the value to set the attribute listeners to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#146
+  # source://test-unit//lib/test/unit/autorunner.rb#147
   def listeners=(_arg0); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#500
+  # source://test-unit//lib/test/unit/autorunner.rb#503
   def load_config(file); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#522
+  # source://test-unit//lib/test/unit/autorunner.rb#525
   def load_plain_text_config(file); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#207
+  # source://test-unit//lib/test/unit/autorunner.rb#208
   def options; end
 
   # Returns the value of attribute pattern.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def pattern; end
 
   # Sets the attribute pattern
   #
   # @param value the value to set the attribute pattern to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def pattern=(_arg0); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#189
+  # source://test-unit//lib/test/unit/autorunner.rb#190
   def prepare; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#195
+  # source://test-unit//lib/test/unit/autorunner.rb#196
   def process_args(args = T.unsafe(nil)); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#478
+  # source://test-unit//lib/test/unit/autorunner.rb#481
   def run; end
 
   # Sets the attribute runner
   #
   # @param value the value to set the attribute runner to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#150
+  # source://test-unit//lib/test/unit/autorunner.rb#151
   def runner=(_arg0); end
 
   # Returns the value of attribute runner_options.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#142
+  # source://test-unit//lib/test/unit/autorunner.rb#143
   def runner_options; end
 
   # Sets the attribute stop_on_failure
   #
   # @param value the value to set the attribute stop_on_failure to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#147
+  # source://test-unit//lib/test/unit/autorunner.rb#148
   def stop_on_failure=(_arg0); end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#181
+  # source://test-unit//lib/test/unit/autorunner.rb#182
   def stop_on_failure?; end
 
   # Returns the value of attribute suite.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#142
+  # source://test-unit//lib/test/unit/autorunner.rb#143
   def suite; end
 
   # Returns the value of attribute to_run.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#143
+  # source://test-unit//lib/test/unit/autorunner.rb#144
   def to_run; end
 
   # Sets the attribute to_run
   #
   # @param value the value to set the attribute to_run to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#143
+  # source://test-unit//lib/test/unit/autorunner.rb#144
   def to_run=(_arg0); end
 
   # Returns the value of attribute workdir.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def workdir; end
 
   # Sets the attribute workdir
   #
   # @param value the value to set the attribute workdir to.
   #
-  # source://test-unit//lib/test/unit/autorunner.rb#145
+  # source://test-unit//lib/test/unit/autorunner.rb#146
   def workdir=(_arg0); end
 
   private
 
-  # source://test-unit//lib/test/unit/autorunner.rb#607
+  # source://test-unit//lib/test/unit/autorunner.rb#610
   def add_location_filter(path, line); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#598
+  # source://test-unit//lib/test/unit/autorunner.rb#601
   def add_test_path(path); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#557
+  # source://test-unit//lib/test/unit/autorunner.rb#560
   def change_work_directory(&block); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#542
+  # source://test-unit//lib/test/unit/autorunner.rb#545
   def default_collector; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#532
+  # source://test-unit//lib/test/unit/autorunner.rb#535
   def default_runner; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#546
+  # source://test-unit//lib/test/unit/autorunner.rb#549
   def global_config_file; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#552
+  # source://test-unit//lib/test/unit/autorunner.rb#555
   def load_global_config; end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#590
+  # source://test-unit//lib/test/unit/autorunner.rb#593
   def match_test_case_name(test, pattern); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#580
+  # source://test-unit//lib/test/unit/autorunner.rb#583
   def match_test_name(test, pattern); end
 
-  # source://test-unit//lib/test/unit/autorunner.rb#565
+  # source://test-unit//lib/test/unit/autorunner.rb#568
   def prepare_name(name); end
 
   class << self
-    # source://test-unit//lib/test/unit/autorunner.rb#44
+    # source://test-unit//lib/test/unit/autorunner.rb#45
     def collector(id); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#30
+    # source://test-unit//lib/test/unit/autorunner.rb#31
     def default_runner; end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#34
+    # source://test-unit//lib/test/unit/autorunner.rb#35
     def default_runner=(id); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#83
+    # source://test-unit//lib/test/unit/autorunner.rb#84
     def need_auto_run=(need); end
 
     # @return [Boolean]
     #
-    # source://test-unit//lib/test/unit/autorunner.rb#79
+    # source://test-unit//lib/test/unit/autorunner.rb#80
     def need_auto_run?; end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#57
+    # source://test-unit//lib/test/unit/autorunner.rb#58
     def prepare(hook = T.unsafe(nil), &block); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#38
+    # source://test-unit//lib/test/unit/autorunner.rb#39
     def register_collector(id, collector_builder = T.unsafe(nil), &block); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#48
+    # source://test-unit//lib/test/unit/autorunner.rb#49
     def register_color_scheme(id, scheme); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#19
+    # source://test-unit//lib/test/unit/autorunner.rb#20
     def register_runner(id, runner_builder = T.unsafe(nil), &block); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#62
+    # source://test-unit//lib/test/unit/autorunner.rb#63
     def run(force_standalone = T.unsafe(nil), default_dir = T.unsafe(nil), argv = T.unsafe(nil), &block); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#25
+    # source://test-unit//lib/test/unit/autorunner.rb#26
     def runner(id); end
 
-    # source://test-unit//lib/test/unit/autorunner.rb#52
+    # source://test-unit//lib/test/unit/autorunner.rb#53
     def setup_option(option_builder = T.unsafe(nil), &block); end
 
     # @return [Boolean]
     #
-    # source://test-unit//lib/test/unit/autorunner.rb#70
+    # source://test-unit//lib/test/unit/autorunner.rb#71
     def standalone?; end
   end
 end
 
-# source://test-unit//lib/test/unit/autorunner.rb#15
+# source://test-unit//lib/test/unit/autorunner.rb#16
 Test::Unit::AutoRunner::ADDITIONAL_OPTIONS = T.let(T.unsafe(nil), Array)
 
-# source://test-unit//lib/test/unit/autorunner.rb#14
+# source://test-unit//lib/test/unit/autorunner.rb#15
 Test::Unit::AutoRunner::COLLECTORS = T.let(T.unsafe(nil), Hash)
 
-# source://test-unit//lib/test/unit/autorunner.rb#623
+# source://test-unit//lib/test/unit/autorunner.rb#626
 class Test::Unit::AutoRunner::GCStressListener
-  # source://test-unit//lib/test/unit/autorunner.rb#624
+  # source://test-unit//lib/test/unit/autorunner.rb#627
   def attach_to_mediator(mediator); end
 end
 
-# source://test-unit//lib/test/unit/autorunner.rb#16
+# source://test-unit//lib/test/unit/autorunner.rb#17
 Test::Unit::AutoRunner::PREPARE_HOOKS = T.let(T.unsafe(nil), Array)
 
-# source://test-unit//lib/test/unit/autorunner.rb#13
+# source://test-unit//lib/test/unit/autorunner.rb#14
 Test::Unit::AutoRunner::RUNNERS = T.let(T.unsafe(nil), Hash)
 
-# source://test-unit//lib/test/unit/autorunner.rb#615
+# source://test-unit//lib/test/unit/autorunner.rb#618
 class Test::Unit::AutoRunner::StopOnFailureListener
-  # source://test-unit//lib/test/unit/autorunner.rb#616
+  # source://test-unit//lib/test/unit/autorunner.rb#619
   def attach_to_mediator(mediator); end
 end
 
@@ -3664,7 +3664,7 @@ class Test::Unit::TestCase
     # source://test-unit//lib/test/unit/testcase.rb#374
     def description(value, target = T.unsafe(nil)); end
 
-    # source://test-unit//lib/test/unit/testcase.rb#466
+    # source://test-unit//lib/test/unit/testcase.rb#474
     def find_locations(query); end
 
     # source://test-unit//lib/test/unit/testcase.rb#158
@@ -3720,12 +3720,19 @@ class Test::Unit::TestCase
     #   # ...
     #   end
     #   end
+    # @example Declares that test_do_something_with_ractor uses Ractor in one line
+    #
+    #   ractor def test_do_something_with_ractor
+    #   Ractor.new do
+    #   # ...
+    #   end
+    #   end
     # @param options [Hash] See {Attribute::ClassMethods#attribute}
     #   for details.
     # @return [void]
     # @since 3.4.6
     #
-    # source://test-unit//lib/test/unit/testcase.rb#405
+    # source://test-unit//lib/test/unit/testcase.rb#413
     def ractor(options = T.unsafe(nil)); end
 
     # Called after every test case runs. Can be used to tear
@@ -3844,7 +3851,7 @@ class Test::Unit::TestCase
     # @yield The block is evaluated under the newly created sub test
     #   case class context.
     #
-    # source://test-unit//lib/test/unit/testcase.rb#446
+    # source://test-unit//lib/test/unit/testcase.rb#454
     def sub_test_case(name, &block); end
 
     # Rolls up all of the test* methods in the fixture into
@@ -3889,7 +3896,7 @@ class Test::Unit::TestCase
     # @param query [Hash] a customizable set of options
     # @return [Boolean]
     #
-    # source://test-unit//lib/test/unit/testcase.rb#461
+    # source://test-unit//lib/test/unit/testcase.rb#469
     def test_defined?(query); end
 
     # Returns the current test order. This returns
@@ -3915,22 +3922,22 @@ class Test::Unit::TestCase
 
     # @private
     #
-    # source://test-unit//lib/test/unit/testcase.rb#507
+    # source://test-unit//lib/test/unit/testcase.rb#515
     def add_method_location(location); end
 
     # @private
     #
-    # source://test-unit//lib/test/unit/testcase.rb#502
+    # source://test-unit//lib/test/unit/testcase.rb#510
     def method_locations; end
 
     # @private
     #
-    # source://test-unit//lib/test/unit/testcase.rb#538
+    # source://test-unit//lib/test/unit/testcase.rb#546
     def sub_test_case_class(name); end
 
     # @private
     #
-    # source://test-unit//lib/test/unit/testcase.rb#514
+    # source://test-unit//lib/test/unit/testcase.rb#522
     def target_method_locations(path); end
   end
 end
@@ -3947,73 +3954,73 @@ Test::Unit::TestCase::FINISHED = T.let(T.unsafe(nil), String)
 # source://test-unit//lib/test/unit/testcase.rb#122
 Test::Unit::TestCase::FINISHED_OBJECT = T.let(T.unsafe(nil), String)
 
-# source://test-unit//lib/test/unit/testcase.rb#926
+# source://test-unit//lib/test/unit/testcase.rb#934
 class Test::Unit::TestCase::InternalData
   # @return [InternalData] a new instance of InternalData
   #
-  # source://test-unit//lib/test/unit/testcase.rb#930
+  # source://test-unit//lib/test/unit/testcase.rb#938
   def initialize; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#948
+  # source://test-unit//lib/test/unit/testcase.rb#956
   def assign_test_data(label, data); end
 
   # Returns the value of attribute elapsed_time.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#927
+  # source://test-unit//lib/test/unit/testcase.rb#935
   def elapsed_time; end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#953
+  # source://test-unit//lib/test/unit/testcase.rb#961
   def have_test_data?; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#969
+  # source://test-unit//lib/test/unit/testcase.rb#977
   def interrupted; end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#944
+  # source://test-unit//lib/test/unit/testcase.rb#952
   def interrupted?; end
 
   # @return [Boolean]
   #
-  # source://test-unit//lib/test/unit/testcase.rb#940
+  # source://test-unit//lib/test/unit/testcase.rb#948
   def passed?; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#965
+  # source://test-unit//lib/test/unit/testcase.rb#973
   def problem_occurred; end
 
   # Returns the value of attribute run_context.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#929
+  # source://test-unit//lib/test/unit/testcase.rb#937
   def run_context; end
 
   # Sets the attribute run_context
   #
   # @param value the value to set the attribute run_context to.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#929
+  # source://test-unit//lib/test/unit/testcase.rb#937
   def run_context=(_arg0); end
 
   # Returns the value of attribute start_time.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#927
+  # source://test-unit//lib/test/unit/testcase.rb#935
   def start_time; end
 
   # Returns the value of attribute test_data.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#928
+  # source://test-unit//lib/test/unit/testcase.rb#936
   def test_data; end
 
   # Returns the value of attribute test_data_label.
   #
-  # source://test-unit//lib/test/unit/testcase.rb#928
+  # source://test-unit//lib/test/unit/testcase.rb#936
   def test_data_label; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#961
+  # source://test-unit//lib/test/unit/testcase.rb#969
   def test_finished; end
 
-  # source://test-unit//lib/test/unit/testcase.rb#957
+  # source://test-unit//lib/test/unit/testcase.rb#965
   def test_started; end
 end
 
@@ -5249,3 +5256,6 @@ class Test::Unit::Util::ProcWrapper
   # source://test-unit//lib/test/unit/util/procwrapper.rb#42
   def to_proc; end
 end
+
+# source://test-unit//lib/test/unit/version.rb#3
+Test::Unit::VERSION = T.let(T.unsafe(nil), String)

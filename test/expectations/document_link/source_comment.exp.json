@@ -22,11 +22,11 @@
                 },
                 "end": {
                     "line": 4,
-                    "character": 24
+                    "character": 34
                 }
             },
-            "target": "file://RUBY_ROOT/erb.rb#1",
-            "tooltip": "Jump to RUBY_ROOT/erb.rb#1"
+            "target": "file://RUBY_ROOT/pathname.rb#1",
+            "tooltip": "Jump to RUBY_ROOT/pathname.rb#1"
         },
         {
             "range": {

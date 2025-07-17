@@ -59,7 +59,6 @@ module RubyIndexer
 
       assert_includes(paths, "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb")
       assert_includes(paths, "#{RbConfig::CONFIG["rubylibdir"]}/ipaddr.rb")
-      assert_includes(paths, "#{RbConfig::CONFIG["rubylibdir"]}/erb.rb")
     end
 
     def test_indexable_uris_includes_project_files
