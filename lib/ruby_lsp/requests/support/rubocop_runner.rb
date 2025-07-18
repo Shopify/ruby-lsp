@@ -81,7 +81,7 @@ module RubyLsp
           @offenses = [] #: Array[::RuboCop::Cop::Offense]
           @errors = [] #: Array[String]
           @warnings = [] #: Array[String]
-          @prism_result = nil #: Prism::ParseLexResult?
+          # @prism_result = nil #: Prism::ParseLexResult?
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
@@ -101,7 +101,11 @@ module RubyLsp
           @warnings = []
           @offenses = []
           @options[:stdin] = contents
-          @prism_result = prism_result
+
+          # Setting the Prism result before running the RuboCop runner makes it reuse the existing AST and avoids
+          # double-parsing. Unfortunately, this leads to a bunch of cops failing to execute properly under LSP mode.
+          # Uncomment this once reusing the Prism result is more stable
+          # @prism_result = prism_result
 
           super([path])
 
