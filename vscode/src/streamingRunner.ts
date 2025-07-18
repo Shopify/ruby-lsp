@@ -148,9 +148,7 @@ export class StreamingRunner implements vscode.Disposable {
     this.terminals.set(name, terminal);
 
     terminal.show();
-    const exec =
-      path.basename(cwd) === "ruby-lsp" && os.platform() !== "win32" ? "exe/ruby-lsp-test-exec" : "ruby-lsp-test-exec";
-    terminal.sendText(`${exec} ${command}`);
+    terminal.sendText(command);
   }
 
   // Spawns the test process and redirects any stdout or stderr output to the test run output
