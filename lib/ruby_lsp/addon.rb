@@ -57,11 +57,26 @@ module RubyLsp
 
         if include_project_addons
           project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
-
-          # Ignore add-ons from dependencies if the bundle is stored inside the project. We already found those with
-          # `Gem.find_files`
           bundle_path = Bundler.bundle_path.to_s
-          project_addons.reject! { |path| path.start_with?(bundle_path) }
+          gems_dir = Bundler.bundle_path.join("gems")
+
+          # Create an array of rejection glob patterns to ignore add-ons already discovered through Gem.find_files if
+          # they are also copied inside the workspace for whatever reason. We received reports of projects having gems
+          # installed in vendor/bundle despite BUNDLE_PATH pointing elsewhere. Without this mechanism, we will
+          # double-require the same add-on, potentially for different versions of the same gem, which leads to incorrect
+          # behavior
+          reject_glob_patterns = addon_files.map do |path|
+            relative_gem_path = Pathname.new(path).relative_path_from(gems_dir)
+            first_part, *parts = relative_gem_path.to_s.split(File::SEPARATOR)
+            first_part&.gsub!(/-([0-9.]+)$/, "*")
+            "**/#{first_part}/#{parts.join("/")}"
+          end
+
+          project_addons.reject! do |path|
+            path.start_with?(bundle_path) ||
+              reject_glob_patterns.any? { |pattern| File.fnmatch?(pattern, path, File::Constants::FNM_PATHNAME) }
+          end
+
           addon_files.concat(project_addons)
         end
 
