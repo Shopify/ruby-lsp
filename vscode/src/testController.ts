@@ -269,7 +269,7 @@ export class TestController {
       this.terminal = this.getTerminal();
     }
 
-    this.terminal.show();
+    this.terminal.show(true);
     this.terminal.sendText(command);
 
     this.telemetry.logUsage("ruby_lsp.code_lens", {
