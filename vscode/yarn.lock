@@ -960,13 +960,6 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.8.tgz#958b91c991b1867ced318bedea0e215ee050726e"
   integrity sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==
 
-"@types/glob@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-9.0.0.tgz#7b942fafe09c55671912b34f04e8e4676faf32b1"
-  integrity sha512-00UxlRaIUvYm4R4W9WYkN8/J+kV8fmOQ7okeH6YFtGWFMt3odD45tpG5yA5wnL7HE6lLgjaTW5n14ju2hl2NNA==
-  dependencies:
-    glob "*"
-
 "@types/json-schema@^7.0.15":
   version "7.0.15"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
@@ -2137,18 +2130,6 @@ glob-parent@^6.0.2:
   dependencies:
     is-glob "^4.0.3"
 
-glob@*, glob@^11.0.0, glob@^11.0.3:
-  version "11.0.3"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-11.0.3.tgz#9d8087e6d72ddb3c4707b1d2778f80ea3eaefcd6"
-  integrity sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==
-  dependencies:
-    foreground-child "^3.3.1"
-    jackspeak "^4.1.1"
-    minimatch "^10.0.3"
-    minipass "^7.1.2"
-    package-json-from-dist "^1.0.0"
-    path-scurry "^2.0.0"
-
 glob@^10.4.5:
   version "10.4.5"
   resolved "https://registry.yarnpkg.com/glob/-/glob-10.4.5.tgz#f4d9f0b90ffdbab09c9d77f5f29b4262517b0956"
@@ -2160,6 +2141,18 @@ glob@^10.4.5:
     minipass "^7.1.2"
     package-json-from-dist "^1.0.0"
     path-scurry "^1.11.1"
+
+glob@^11.0.0, glob@^11.0.3:
+  version "11.0.3"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-11.0.3.tgz#9d8087e6d72ddb3c4707b1d2778f80ea3eaefcd6"
+  integrity sha512-2Nim7dha1KVkaiF4q6Dj+ngPPMdfvLJEOpZk/jKiUAkqKebpGAWQXAq9z1xu9HKu5lWfqw/FASuccEjyznjPaA==
+  dependencies:
+    foreground-child "^3.3.1"
+    jackspeak "^4.1.1"
+    minimatch "^10.0.3"
+    minipass "^7.1.2"
+    package-json-from-dist "^1.0.0"
+    path-scurry "^2.0.0"
 
 globals@^14.0.0:
   version "14.0.0"
