@@ -293,11 +293,13 @@ module RubyIndexer
       entries.concat(@entries_tree.search(name))
 
       # Filter only constants since methods may have names that look like constants
-      entries.each do |definitions|
+      entries.select! do |definitions|
         definitions.select! do |entry|
           entry.is_a?(Entry::Constant) || entry.is_a?(Entry::ConstantAlias) ||
             entry.is_a?(Entry::Namespace) || entry.is_a?(Entry::UnresolvedConstantAlias)
         end
+
+        definitions.any?
       end
 
       entries.uniq!
