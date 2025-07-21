@@ -814,7 +814,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@eslint/js": "^9.31.0",
-    "@types/glob": "^8.1.0",
+    "@types/glob": "^9.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
     "@types/sinon": "^17.0.4",
