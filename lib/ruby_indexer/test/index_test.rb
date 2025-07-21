@@ -1993,6 +1993,9 @@ module RubyIndexer
 
       candidates = @index.constant_completion_candidates("Q", [])
       refute_includes(candidates.flat_map { |entries| entries.map(&:name) }, "Qux")
+
+      candidates = @index.constant_completion_candidates("Qux", [])
+      assert_equal(0, candidates.length)
     end
 
     def test_constant_completion_candidates_for_empty_name
