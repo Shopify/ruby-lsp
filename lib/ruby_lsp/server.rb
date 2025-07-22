@@ -126,8 +126,12 @@ module RubyLsp
       if message[:id]
         # If a document is deleted before we are able to process all of its enqueued requests, we will try to read it
         # from disk and it raise this error. This is expected, so we don't include the `data` attribute to avoid
-        # reporting these to our telemetry
-        if e.is_a?(Store::NonExistingDocumentError)
+        # reporting these to our telemetry.
+        #
+        # Similarly, if we receive a location for an invalid position in the
+        # document, we don't report it to telemetry
+        case e
+        when Store::NonExistingDocumentError, Document::InvalidLocationError
           send_message(Error.new(
             id: message[:id],
             code: Constant::ErrorCodes::INVALID_PARAMS,
