@@ -1567,6 +1567,38 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_invalid_location_errors_are_not_reported_to_telemetry
+    uri = URI::Generic.from_path(path: "/foo.rb")
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    @server.push_message({
+      id: 1,
+      method: "textDocument/definition",
+      params: {
+        textDocument: {
+          uri: uri,
+        },
+        position: { line: 10, character: 6 },
+      },
+    })
+
+    error = find_message(RubyLsp::Error)
+    attributes = error.to_hash[:error]
+    assert_nil(attributes[:data])
+    assert_match("Document::InvalidLocationError", attributes[:message])
+  end
+
   private
 
   def wait_for_indexing
