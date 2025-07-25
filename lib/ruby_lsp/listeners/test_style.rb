@@ -145,7 +145,7 @@ module RubyLsp
       MINITEST_REPORTER_PATH = File.expand_path("../test_reporters/minitest_reporter.rb", __dir__) #: String
       TEST_UNIT_REPORTER_PATH = File.expand_path("../test_reporters/test_unit_reporter.rb", __dir__) #: String
       BASE_COMMAND = begin
-        Bundler.with_original_env { Bundler.default_lockfile }
+        Bundler.with_unbundled_env { Bundler.default_lockfile }
         "bundle exec ruby"
       rescue Bundler::GemfileNotFound
         "ruby"
