@@ -745,6 +745,30 @@ module RubyLsp
       end
     end
 
+    def test_spec_using_describe_with_additional_descriptions
+      source = <<~RUBY
+        describe(Foo, :extra_1, :extra_2) do
+          describe("#some_method") do
+            it("does something") do
+              assert(true)
+            end
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["Foo::extra_1::extra_2"], items.map { |i| i[:id] })
+        assert_equal(
+          ["Foo::extra_1::extra_2::#some_method"],
+          items.dig(0, :children).map { |i| i[:id] },
+        )
+        assert_equal(
+          ["Foo::extra_1::extra_2::#some_method#test_0002_does something"],
+          items.dig(0, :children).dig(0, :children).map { |i| i[:id] },
+        )
+      end
+    end
+
     private
 
     def create_test_discovery_addon
