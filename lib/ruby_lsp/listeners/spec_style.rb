@@ -117,10 +117,7 @@ module RubyLsp
 
       #: (Prism::CallNode) -> void
       def handle_example(node)
-        # Minitest formats the descriptions into test method names by using the count of examples with the description
-        # We are not guaranteed to discover examples in the exact order using static analysis, so we use the line number
-        # instead. Note that anonymous examples mixed with meta-programming will not be handled correctly
-        description = extract_description(node) || "anonymous"
+        description = extract_it_description(node)
         line = node.location.start_line - 1
         parent = latest_group
         return unless parent.is_a?(Requests::Support::TestItem)
@@ -141,16 +138,37 @@ module RubyLsp
 
       #: (Prism::CallNode) -> String?
       def extract_description(node)
-        first_argument = node.arguments&.arguments&.first
-        return unless first_argument
+        arguments = node.arguments&.arguments
+        return unless arguments
 
-        case first_argument
+        parts = arguments.map { |arg| extract_argument_content(arg) }
+        return if parts.empty?
+
+        parts.join("::")
+      end
+
+      #: (Prism::CallNode) -> String
+      def extract_it_description(node)
+        # Minitest formats the descriptions into test method names by using the count of examples with the description
+        # We are not guaranteed to discover examples in the exact order using static analysis, so we use the line number
+        # instead. Note that anonymous examples mixed with meta-programming will not be handled correctly
+        first_argument = node.arguments&.arguments&.first
+        return "anonymous" unless first_argument
+
+        extract_argument_content(first_argument) || "anonymous"
+      end
+
+      #: (Prism::Node) -> String?
+      def extract_argument_content(arg)
+        case arg
         when Prism::StringNode
-          first_argument.content
+          arg.content
+        when Prism::SymbolNode
+          arg.value
         when Prism::ConstantReadNode, Prism::ConstantPathNode
-          constant_name(first_argument)
+          constant_name(arg)
         else
-          first_argument.slice
+          arg.slice
         end
       end
 
