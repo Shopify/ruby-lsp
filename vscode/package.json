@@ -390,6 +390,7 @@
                 "rvm",
                 "shadowenv",
                 "mise",
+                "nix-develop",
                 "custom"
               ],
               "default": "auto"

@@ -11,6 +11,7 @@ import { VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
+import { NixDevelop } from "./ruby/nixDevelop";
 import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
 import { Custom } from "./ruby/custom";
@@ -44,6 +45,7 @@ export enum ManagerIdentifier {
   Shadowenv = "shadowenv",
   Mise = "mise",
   RubyInstaller = "rubyInstaller",
+  NixDevelop = "nix-develop",
   None = "none",
   Custom = "custom",
 }
@@ -316,6 +318,11 @@ export class Ruby implements RubyInterface {
       case ManagerIdentifier.RubyInstaller:
         await this.runActivation(
           new RubyInstaller(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
+        );
+        break;
+      case ManagerIdentifier.NixDevelop:
+        await this.runActivation(
+          new NixDevelop(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
       case ManagerIdentifier.Custom:
