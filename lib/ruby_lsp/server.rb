@@ -1388,6 +1388,9 @@ module RubyLsp
       rescue Bundler::LockfileError => e
         send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: e.message))
         return
+      rescue Errno::EPERM
+        # If the user doesn't have permission to perform read operations, we can't compose the bundle
+        return
       rescue Bundler::GemfileNotFound, Errno::ENOENT
         # We still compose the bundle if there's no Gemfile or if the lockfile got deleted
       end
