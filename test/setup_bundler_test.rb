@@ -935,6 +935,27 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_handles_http_error_during_bundle_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle install")
+
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:bundle_check).raises(Bundler::HTTPError)
+          compose.setup!
+
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
   def test_is_resilient_to_pipe_being_closed_by_client_during_compose
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
