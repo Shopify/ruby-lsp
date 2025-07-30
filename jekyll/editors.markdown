@@ -194,7 +194,8 @@ See [this issue][mason-abi] for further information.
 
 ### Built-In vim.lsp
 
-**Note**: Ensure that you are using Neovim 0.11 or newer.
+{ .note }
+Ensure that you are using NeoVim 0.11 or newer.
 
 You can also configure the Ruby LSP without the nvim-lspconfig plugin.
 Create an `lsp` directory inside your config directory and create a file `ruby-lsp.lua` inside it
