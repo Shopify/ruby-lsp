@@ -1214,6 +1214,36 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_compose_bundle_does_not_fail_if_user_does_not_have_permission_to_read_lockfile
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        @server.process_message({
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+          },
+        })
+
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "stringio"
+        GEMFILE
+
+        system("chmod 0000", Bundler.default_lockfile.to_s)
+
+        capture_subprocess_io do
+          @server.send(:compose_bundle, { id: 2, method: "rubyLsp/composeBundle" })&.join
+        end
+
+        result = find_message(RubyLsp::Result, id: 2)
+        assert(result.response[:success])
+      end
+    end
+  end
+
   def test_does_not_index_on_did_change_watched_files_if_document_is_managed_by_client
     path = File.join(Dir.pwd, "lib", "foo.rb")
     source = <<~RUBY
