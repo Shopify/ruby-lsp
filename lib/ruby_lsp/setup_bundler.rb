@@ -234,7 +234,7 @@ module RubyLsp
         # If no error occurred, then clear previous errors
         @error_path.delete if @error_path.exist?
         $stderr.puts("Ruby LSP> Composed bundle installation complete")
-      rescue Errno::EPIPE, Bundler::Fetcher::NetworkDownError
+      rescue Errno::EPIPE, Bundler::HTTPError
         # There are cases where we expect certain errors to happen occasionally, and we don't want to write them to
         # a file, which would report to telemetry on the next launch.
         #
