@@ -769,6 +769,29 @@ module RubyLsp
       end
     end
 
+    def test_can_discover_tests_even_if_parent_class_was_not_indexed
+      source = <<~RUBY
+        class MyTest < Minitest::Test
+          def test_something; end
+        end
+      RUBY
+
+      with_server(source) do |server, uri|
+        server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
+          textDocument: { uri: uri },
+        })
+
+        items = get_response(server)
+
+        assert_equal(
+          ["MyTest"],
+          items.map { |i| i[:id] },
+        )
+        assert_equal(["MyTest#test_something"], items[0][:children].map { |i| i[:id] })
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
     private
 
     def create_test_discovery_addon
