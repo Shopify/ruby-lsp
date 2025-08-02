@@ -68,25 +68,33 @@ In VS Code, you can open the document symbols view by pressing `Ctrl + Shift + O
 
 Navigates between Active Record callbacks, validations, and associations using the `Document Symbol` feature.
 
-![Document Symbol for Active Record Callbacks, Validations, and Associations](images/ruby-lsp-rails-document-symbol-ar-model.gif)
+<video src="images/ruby-lsp-rails-document-symbol-ar-model.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows navigating Active Record callbacks, validations, and associations via document symbols.
+</video>
 
 ### Active Support Test Cases
 
 Navigates between Active Support test cases using the `Document Symbol` feature.
 
-![Document Symbol for tests](images/ruby-lsp-rails-test-document-symbol.gif)
+<video src="images/ruby-lsp-rails-test-document-symbol.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows navigating Active Support test cases via document symbols.
+</video>
 
 ### **Go to Controller Action Route**
 
 Navigates to the route definition of a controller action using the `Code Lens` feature.
 
-![Go to Controller Action Route](images/ruby-lsp-rails-controller-action-to-route.gif)
+<video src="images/ruby-lsp-rails-controller-action-to-route.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates navigating from a controller action to its route definition using code lens.
+</video>
 
 ### **Go to Controller Action View**
 
 Navigates to the view file(s) of a controller action using the `Code Lens` feature.
 
-![Go to Controller Action View](images/ruby-lsp-rails-controller-action-to-view.gif)
+<video src="images/ruby-lsp-rails-controller-action-to-view.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates navigating from a controller action to its view files using code lens.
+</video>
 
 ### **Go to Definition**
 
@@ -104,24 +112,32 @@ In the following demos, we will use the `Cmd + Click` method to trigger go to de
 
 Navigates to the definitions of Active Record callbacks and validations.
 
-![Go to Active Record Callback and Validation Definitions](images/ruby-lsp-rails-go-to-ar-dsl-definitions.gif)
+<video src="images/ruby-lsp-rails-go-to-ar-dsl-definitions.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows jumping to an Active Record callback definition.
+</video>
 
 ### Go to Active Record Associations
 
 Navigates to the definitions of Active Record associations.
 
-![Go to Active Record Associations](images/ruby-lsp-rails-go-to-ar-associations.gif)
+<video src="images/ruby-lsp-rails-go-to-ar-associations.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows navigating to Active Record association definitions.
+</video>
 
 ### Go to Route Helper Definitions
 
-![Go to Route Helper Definitions](images/ruby-lsp-rails-go-to-route-definitions.gif)
+<video src="images/ruby-lsp-rails-go-to-route-definitions.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates navigating to route helper definitions.
+</video>
 
 ### **Ruby File Operations**
 
 The Ruby LSP extension provides a `Ruby file operations` icon in the Explorer view that can be used to trigger
 the `Rails generate` and `Rails destroy` commands.
 
-![Ruby file operations](images/ruby-lsp-rails-file-operations-icon.gif)
+<video src="images/ruby-lsp-rails-file-operations-icon.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows using the Ruby file operations icon for Rails generate/destroy commands.
+</video>
 
 ### Commands
 
@@ -129,11 +145,15 @@ These commands are also available in the Command Palette.
 
 #### Rails Generate
 
-![Rails Generate](images/ruby-lsp-rails-generate-command.gif)
+<video src="images/ruby-lsp-rails-generate-command.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows running a Rails generate command from VS Code.
+</video>
 
 #### Rails Destroy
 
-![Rails Destroy](images/ruby-lsp-rails-destroy-command.gif)
+<video src="images/ruby-lsp-rails-destroy-command.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows running a Rails destroy command from VS Code.
+</video>
 
 ### **Run and Debug**
 
@@ -141,15 +161,21 @@ The Rails add-on provides 3 ways to run and debug `ActiveSupport` tests using th
 
 ### Run Tests With Test Explorer
 
-![Run Tests With Test Explorer](images/ruby-lsp-rails-run.gif)
+<video src="images/ruby-lsp-rails-run.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows running tests with Test Explorer.
+</video>
 
 ### Run Tests In The Terminal
 
-![Run Tests In The Terminal](images/ruby-lsp-rails-run-in-terminal.gif)
+<video src="images/ruby-lsp-rails-run-in-terminal.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows running tests in the terminal via code lens.
+</video>
 
 ### Debug Tests With VS Code
 
-![Debug Tests With VS Code](images/ruby-lsp-rails-debug.gif)
+<video src="images/ruby-lsp-rails-debug.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows debugging tests with VS Code.
+</video>
 
 ## Settings
 
