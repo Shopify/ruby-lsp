@@ -31,6 +31,32 @@ Ensure Mise is up-to-date: https://mise.jdx.dev/faq.html#mise-is-failing-or-not-
 
 Ensure RVM is up-to-date: https://rvm.io/rvm/upgrading
 
+## Nix Flakes
+
+To use the Ruby LSP with Nix flakes, set the version manager to `nix-develop`.
+
+```jsonc
+{
+  "rubyLsp.rubyVersionManager": {
+    "identifier": "nix-develop"
+  }
+}
+```
+
+By default, this will use `nix develop --command ruby` to activate the environment. If you need to specify a path to a
+flake, you can do so with the `rubyLsp.customRubyCommand` setting.
+
+```jsonc
+{
+  "rubyLsp.rubyVersionManager": {
+    "identifier": "nix-develop"
+  },
+  "rubyLsp.customRubyCommand": "/path/to/dir/containing/flake"
+}
+```
+
+This will result in the activation command `nix develop /path/to/dir/containing/flake --command ruby`.
+
 ## Custom activation
 
 If you're using a different version manager that's not supported by this extension or if you're manually inserting the Ruby
