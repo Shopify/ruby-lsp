@@ -10,7 +10,11 @@ class GoToRelevantFileTest < Minitest::Test
     test_file_path = "/workspace/test/requests/go_to_relevant_file_test.rb"
     expected = ["/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"]
 
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_file_path, "/workspace").perform
+    file_index = RubyIndexer::FileIndex.new
+    file_index.insert("/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb")
+    file_index.insert("/workspace/test/requests/go_to_relevant_file_test.rb")
+
+    result = RubyLsp::Requests::GoToRelevantFile.new(test_file_path, "/workspace", file_index).perform
     assert_equal(expected, result)
   end
 
@@ -22,7 +26,11 @@ class GoToRelevantFileTest < Minitest::Test
     impl_path = "/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"
     expected = ["/workspace/test/requests/go_to_relevant_file_test.rb"]
 
-    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
+    file_index = RubyIndexer::FileIndex.new
+    file_index.insert("/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb")
+    file_index.insert("/workspace/test/requests/go_to_relevant_file_test.rb")
+
+    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace", file_index).perform
     assert_equal(expected, result)
   end
 
