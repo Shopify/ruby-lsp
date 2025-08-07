@@ -24,7 +24,7 @@ class SetupBundlerTest < Minitest::Test
     refute_path_exists(".ruby-lsp/Gemfile")
   end
 
-  def test_creates_custom_bundle
+  def test_creates_composed_bundle
     stub_bundle_with_env(bundle_env(Dir.pwd, ".ruby-lsp/Gemfile"))
     Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
     run_script
@@ -40,7 +40,7 @@ class SetupBundlerTest < Minitest::Test
     FileUtils.rm_r(".ruby-lsp") if Dir.exist?(".ruby-lsp")
   end
 
-  def test_creates_custom_bundle_for_a_rails_app
+  def test_creates_composed_bundle_for_a_rails_app
     stub_bundle_with_env(bundle_env(Dir.pwd, ".ruby-lsp/Gemfile"))
     FileUtils.mkdir("config")
     FileUtils.cp("test/fixtures/rails_application.rb", "config/application.rb")
@@ -59,7 +59,7 @@ class SetupBundlerTest < Minitest::Test
     FileUtils.rm_r("config") if Dir.exist?("config")
   end
 
-  def test_changing_lockfile_causes_custom_bundle_to_be_rebuilt
+  def test_changing_lockfile_causes_composed_bundle_to_be_rebuilt
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
@@ -72,7 +72,7 @@ class SetupBundlerTest < Minitest::Test
             # Run bundle install to generate the lockfile
             system("bundle install")
 
-            # Run the script once to generate a custom bundle
+            # Run the script once to generate a composed bundle
             run_script(dir)
           end
         end
@@ -92,11 +92,11 @@ class SetupBundlerTest < Minitest::Test
           end
         end
 
-        # At this point, the custom bundle includes the `ruby-lsp` in its lockfile, but that will be overwritten when we
-        # copy the top level lockfile. If custom bundle dependencies are eagerly evaluated, then we would think the
-        # ruby-lsp is a part of the custom lockfile and would try to run `bundle update ruby-lsp`, which would fail. If
-        # we evaluate lazily, then we only find dependencies after the lockfile was copied, and then run bundle install
-        # instead, which re-locks and adds the ruby-lsp
+        # At this point, the composed bundle includes the `ruby-lsp` in its lockfile, but that will be overwritten when
+        # we copy the top level lockfile. If composed bundle dependencies are eagerly evaluated, then we would think the
+        # ruby-lsp is a part of the composed lockfile and would try to run `bundle update ruby-lsp`, which would fail.
+        # If we evaluate lazily, then we only find dependencies after the lockfile was copied, and then run bundle
+        # install instead, which re-locks and adds the ruby-lsp
         Bundler.with_unbundled_env do
           stub_bundle_with_env(bundle_env(dir, ".ruby-lsp/Gemfile"))
           run_script(dir)
@@ -118,7 +118,7 @@ class SetupBundlerTest < Minitest::Test
             # Run bundle install to generate the lockfile
             system("bundle install")
 
-            # Run the script once to generate a custom bundle
+            # Run the script once to generate a composed bundle
             run_script(dir)
           end
         end
@@ -155,7 +155,7 @@ class SetupBundlerTest < Minitest::Test
             # Run bundle install to generate the lockfile
             system("bundle install")
 
-            # Run the script once to generate a custom bundle
+            # Run the script once to generate a composed bundle
             run_script(dir)
           end
         end
@@ -186,7 +186,7 @@ class SetupBundlerTest < Minitest::Test
     Bundler.settings.set_global(:path, original)
   end
 
-  def test_creates_custom_bundle_if_no_gemfile
+  def test_creates_composed_bundle_if_no_gemfile
     # Create a temporary directory with no Gemfile or Gemfile.lock
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -263,7 +263,7 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
-  def test_creates_custom_bundle_with_specified_branch
+  def test_creates_composed_bundle_with_specified_branch
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         bundle_gemfile = Pathname.new(".ruby-lsp").expand_path(Dir.pwd) + "Gemfile"
@@ -295,7 +295,7 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
-  def test_custom_bundle_uses_alternative_gemfiles
+  def test_composed_bundle_uses_alternative_gemfiles
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
@@ -320,11 +320,32 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_composed_bundle_points_to_gemfile_in_enclosing_dir
+    Dir.mktmpdir do |dir|
+      FileUtils.touch(File.join(dir, "Gemfile"))
+      FileUtils.touch(File.join(dir, "Gemfile.lock"))
+
+      project_dir = File.join(dir, "proj")
+      Dir.mkdir(project_dir)
+
+      Dir.chdir(project_dir) do
+        Bundler.with_unbundled_env do
+          stub_bundle_with_env(bundle_env(project_dir, ".ruby-lsp/Gemfile"))
+          Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
+          run_script(project_dir)
+        end
+
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match("eval_gemfile(File.expand_path(\"../../Gemfile\", __dir__))", File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end
+
   def test_ensures_lockfile_remotes_are_relative_to_default_gemfile
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        # The structure used in Rails uncovered a bug in our custom bundle logic. Rails is an empty gem with a bunch of
-        # nested gems. The lockfile includes remotes that use relative paths and we need to adjust those when we copy
+        # The structure used in Rails uncovered a bug in our composed bundle logic. Rails is an empty gem with a bunch
+        # of nested gems. The lockfile includes remotes that use relative paths and we need to adjust those when we copy
         # the lockfile
 
         File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
@@ -534,7 +555,7 @@ class SetupBundlerTest < Minitest::Test
         # Write the lockfile hash based on the valid file
         File.write(File.join(custom_dir, "main_lockfile_hash"), Digest::SHA256.hexdigest(lockfile_contents))
 
-        # Write the custom bundle's lockfile using a fake version that doesn't exist to force bundle install to fail
+        # Write the composed bundle's lockfile using a fake version that doesn't exist to force bundle install to fail
         File.write(File.join(custom_dir, "Gemfile"), <<~GEMFILE)
           source "https://rubygems.org"
           gem "stringio"
@@ -560,7 +581,7 @@ class SetupBundlerTest < Minitest::Test
           run_script(dir)
         end
 
-        # Verify that the script recovered and re-generated the custom bundle from scratch
+        # Verify that the script recovered and re-generated the composed bundle from scratch
         assert_path_exists(".ruby-lsp/Gemfile")
         assert_path_exists(".ruby-lsp/Gemfile.lock")
         refute_match("999.1.555", File.read(".ruby-lsp/Gemfile.lock"))
@@ -672,8 +693,11 @@ class SetupBundlerTest < Minitest::Test
 
             mock_install = mock("install")
             mock_install.expects(:run)
-            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
-            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            Bundler::CLI::Install.expects(:new).with({ "no-cache" => true }).returns(mock_install)
+
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:bundle_check).raises(StandardError, "missing gems")
+            compose.setup!
           end
         end
       end
@@ -707,6 +731,8 @@ class SetupBundlerTest < Minitest::Test
               { conservative: true },
               ["ruby-lsp", "debug", "prism"],
             ).returns(mock_update)
+
+            FileUtils.touch(File.join(dir, ".ruby-lsp", "needs_update"))
             RubyLsp::SetupBundler.new(dir, launcher: true).setup!
           end
         end
@@ -729,7 +755,9 @@ class SetupBundlerTest < Minitest::Test
           end
 
           stdout, stderr = capture_subprocess_io do
-            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:bundle_check).raises(StandardError, "missing gems")
+            compose.setup!
           end
 
           assert_match(/Bundle complete! [\d]+ Gemfile dependencies, [\d]+ gems now installed/, stderr)
@@ -786,6 +814,170 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_is_resilient_to_gemfile_changes_in_the_middle_of_setup
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "rdoc"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            # Run bundle install to generate the lockfile
+            system("bundle install")
+
+            # This section simulates the bundle being modified during the composed bundle setup. We initialize the
+            # composed bundle first to eagerly calculate the gemfile and lockfile hashes. Then we modify the Gemfile
+            # afterwards and trigger the setup.
+            #
+            # This type of scenario may happen if someone switches branches in the middle of running bundle install. By
+            # the time we finish, the bundle may be in a different state and we need to recover from that
+            composed_bundle = RubyLsp::SetupBundler.new(dir, launcher: true)
+
+            File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+              source "https://rubygems.org"
+              gem "rdoc"
+              gem "irb"
+            GEMFILE
+            system("bundle install")
+
+            composed_bundle.setup!
+          end
+
+          assert_match("irb", File.read(".ruby-lsp/Gemfile.lock"))
+        end
+      end
+    end
+  end
+
+  def test_only_returns_environment_if_bundle_was_composed_ahead_of_time
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        FileUtils.mkdir(".ruby-lsp")
+        FileUtils.touch(File.join(".ruby-lsp", "bundle_is_composed"))
+
+        require "bundler/cli/update"
+        require "bundler/cli/install"
+        Bundler::CLI::Update.expects(:new).never
+        Bundler::CLI::Install.expects(:new).never
+
+        assert_output("", "Ruby LSP> Composed bundle was set up ahead of time. Skipping...\n") do
+          refute_empty(RubyLsp::SetupBundler.new(dir, launcher: true).setup!)
+        end
+      end
+    end
+  end
+
+  def test_ignores_bundle_bin
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            system("bundle", "config", "set", "--local", "bin", "bin")
+            system("bundle", "install")
+
+            assert_path_exists(File.join(dir, "bin"))
+
+            env = RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            refute_includes(env.keys, "BUNDLE_BIN")
+          end
+        end
+      end
+    end
+  end
+
+  def test_ignores_bundle_package
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            system("bundle", "install")
+            system("bundle", "package")
+
+            env = RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            refute_includes(env.keys, "BUNDLE_CACHE_ALL")
+            refute_includes(env.keys, "BUNDLE_CACHE_ALL_PLATFORMS")
+          end
+        end
+      end
+    end
+  end
+
+  def test_handles_network_down_error_during_bundle_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle install")
+
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:bundle_check).raises(Bundler::Fetcher::NetworkDownError)
+          compose.setup!
+
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
+  def test_handles_http_error_during_bundle_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle install")
+
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:bundle_check).raises(Bundler::HTTPError)
+          compose.setup!
+
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
+  def test_is_resilient_to_pipe_being_closed_by_client_during_compose
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:run_bundle_install_directly).raises(Errno::EPIPE)
+            compose.setup!
+            refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def with_default_external_encoding(encoding, &block)
@@ -815,7 +1007,7 @@ class SetupBundlerTest < Minitest::Test
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
   def run_script(path = Dir.pwd, expected_path: nil, **options)
-    env = T.let({}, T::Hash[String, String])
+    env = {} #: Hash[String, String]
 
     stdout, _stderr = capture_subprocess_io do
       env = RubyLsp::SetupBundler.new(path, **options).setup!
@@ -849,7 +1041,7 @@ class SetupBundlerTest < Minitest::Test
     end
 
     env = settings.all.to_h do |e|
-      key = Bundler::Settings.key_for(e)
+      key = settings.key_for(e)
       value = Array(settings[e]).join(":").tr(" ", ":")
 
       [key, value]

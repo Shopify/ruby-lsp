@@ -18,10 +18,18 @@ class ReferencesTest < Minitest::Test
     source = File.read(fixture_path)
     path = File.expand_path(fixture_path)
     global_state = RubyLsp::GlobalState.new
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, path), source)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
 
-    store = RubyLsp::Store.new
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))
+    store = RubyLsp::Store.new(global_state)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
+
+    # In addition to glob files from the workspace, we also want to test references collection from the store
+    store.set(uri: URI::Generic.from_path(path: path), source: source, version: 1, language_id: :ruby)
 
     RubyLsp::Requests::References.new(
       global_state,

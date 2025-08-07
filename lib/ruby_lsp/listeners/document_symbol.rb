@@ -4,18 +4,11 @@
 module RubyLsp
   module Listeners
     class DocumentSymbol
-      extend T::Sig
       include Requests::Support::Common
 
-      ATTR_ACCESSORS = T.let([:attr_reader, :attr_writer, :attr_accessor].freeze, T::Array[Symbol])
+      ATTR_ACCESSORS = [:attr_reader, :attr_writer, :attr_accessor].freeze #: Array[Symbol]
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::DocumentSymbol,
-          uri: URI::Generic,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: (ResponseBuilders::DocumentSymbol response_builder, URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(response_builder, uri, dispatcher)
         @response_builder = response_builder
         @uri = uri
@@ -41,6 +34,10 @@ module RubyLsp
           :on_module_node_enter,
           :on_module_node_leave,
           :on_instance_variable_write_node_enter,
+          :on_instance_variable_target_node_enter,
+          :on_instance_variable_operator_write_node_enter,
+          :on_instance_variable_or_write_node_enter,
+          :on_instance_variable_and_write_node_enter,
           :on_class_variable_write_node_enter,
           :on_singleton_class_node_enter,
           :on_singleton_class_node_leave,
@@ -48,7 +45,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         @response_builder << create_document_symbol(
           name: node.constant_path.location.slice,
@@ -58,12 +55,12 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_leave(node)
         @response_builder.pop
       end
 
-      sig { params(node: Prism::SingletonClassNode).void }
+      #: (Prism::SingletonClassNode node) -> void
       def on_singleton_class_node_enter(node)
         expression = node.expression
 
@@ -75,12 +72,12 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::SingletonClassNode).void }
+      #: (Prism::SingletonClassNode node) -> void
       def on_singleton_class_node_leave(node)
         @response_builder.pop
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         node_name = node.name
         if ATTR_ACCESSORS.include?(node_name)
@@ -94,7 +91,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_leave(node)
         return unless rake?
 
@@ -103,7 +100,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::ConstantPathWriteNode).void }
+      #: (Prism::ConstantPathWriteNode node) -> void
       def on_constant_path_write_node_enter(node)
         create_document_symbol(
           name: node.target.location.slice,
@@ -113,7 +110,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantWriteNode).void }
+      #: (Prism::ConstantWriteNode node) -> void
       def on_constant_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -123,7 +120,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantPathAndWriteNode).void }
+      #: (Prism::ConstantPathAndWriteNode node) -> void
       def on_constant_path_and_write_node_enter(node)
         create_document_symbol(
           name: node.target.location.slice,
@@ -133,7 +130,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantPathOrWriteNode).void }
+      #: (Prism::ConstantPathOrWriteNode node) -> void
       def on_constant_path_or_write_node_enter(node)
         create_document_symbol(
           name: node.target.location.slice,
@@ -143,7 +140,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
+      #: (Prism::ConstantPathOperatorWriteNode node) -> void
       def on_constant_path_operator_write_node_enter(node)
         create_document_symbol(
           name: node.target.location.slice,
@@ -153,7 +150,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantOrWriteNode).void }
+      #: (Prism::ConstantOrWriteNode node) -> void
       def on_constant_or_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -163,7 +160,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantAndWriteNode).void }
+      #: (Prism::ConstantAndWriteNode node) -> void
       def on_constant_and_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -173,7 +170,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantOperatorWriteNode).void }
+      #: (Prism::ConstantOperatorWriteNode node) -> void
       def on_constant_operator_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -183,7 +180,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantTargetNode).void }
+      #: (Prism::ConstantTargetNode node) -> void
       def on_constant_target_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -193,7 +190,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ConstantPathTargetNode).void }
+      #: (Prism::ConstantPathTargetNode node) -> void
       def on_constant_path_target_node_enter(node)
         create_document_symbol(
           name: node.slice,
@@ -203,12 +200,12 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_leave(node)
         @response_builder.pop
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         @response_builder << create_document_symbol(
           name: node.constant_path.location.slice,
@@ -218,7 +215,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         receiver = node.receiver
         previous_symbol = @response_builder.last
@@ -244,22 +241,12 @@ module RubyLsp
         @response_builder << symbol
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_leave(node)
         @response_builder.pop
       end
 
-      sig { params(node: Prism::InstanceVariableWriteNode).void }
-      def on_instance_variable_write_node_enter(node)
-        create_document_symbol(
-          name: node.name.to_s,
-          kind: Constant::SymbolKind::VARIABLE,
-          range_location: node.name_loc,
-          selection_range_location: node.name_loc,
-        )
-      end
-
-      sig { params(node: Prism::ClassVariableWriteNode).void }
+      #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         create_document_symbol(
           name: node.name.to_s,
@@ -269,7 +256,57 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::AliasMethodNode).void }
+      #: (Prism::InstanceVariableWriteNode node) -> void
+      def on_instance_variable_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::FIELD,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      #: (Prism::InstanceVariableTargetNode node) -> void
+      def on_instance_variable_target_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::FIELD,
+          range_location: node.location,
+          selection_range_location: node.location,
+        )
+      end
+
+      #: (Prism::InstanceVariableOperatorWriteNode node) -> void
+      def on_instance_variable_operator_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::FIELD,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      #: (Prism::InstanceVariableOrWriteNode node) -> void
+      def on_instance_variable_or_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::FIELD,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      #: (Prism::InstanceVariableAndWriteNode node) -> void
+      def on_instance_variable_and_write_node_enter(node)
+        create_document_symbol(
+          name: node.name.to_s,
+          kind: Constant::SymbolKind::FIELD,
+          range_location: node.name_loc,
+          selection_range_location: node.name_loc,
+        )
+      end
+
+      #: (Prism::AliasMethodNode node) -> void
       def on_alias_method_node_enter(node)
         new_name_node = node.new_name
         return unless new_name_node.is_a?(Prism::SymbolNode)
@@ -281,22 +318,15 @@ module RubyLsp
           name: name,
           kind: Constant::SymbolKind::METHOD,
           range_location: new_name_node.location,
-          selection_range_location: T.must(new_name_node.value_loc),
+          selection_range_location: new_name_node.value_loc, #: as !nil
         )
       end
 
       private
 
-      sig do
-        params(
-          name: String,
-          kind: Integer,
-          range_location: Prism::Location,
-          selection_range_location: Prism::Location,
-        ).returns(Interface::DocumentSymbol)
-      end
+      #: (name: String, kind: Integer, range_location: Prism::Location, selection_range_location: Prism::Location) -> Interface::DocumentSymbol
       def create_document_symbol(name:, kind:, range_location:, selection_range_location:)
-        name = "<blank>" if name.empty?
+        name = "<blank>" if name.strip.empty?
         symbol = Interface::DocumentSymbol.new(
           name: name,
           kind: kind,
@@ -310,7 +340,7 @@ module RubyLsp
         symbol
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def handle_attr_accessor(node)
         receiver = node.receiver
         return if receiver && !receiver.is_a?(Prism::SelfNode)
@@ -327,7 +357,7 @@ module RubyLsp
               name: name,
               kind: Constant::SymbolKind::FIELD,
               range_location: argument.location,
-              selection_range_location: T.must(argument.value_loc),
+              selection_range_location: argument.value_loc, #: as !nil
             )
           elsif argument.is_a?(Prism::StringNode)
             name = argument.content
@@ -343,7 +373,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def handle_alias_method(node)
         receiver = node.receiver
         return if receiver && !receiver.is_a?(Prism::SelfNode)
@@ -361,7 +391,7 @@ module RubyLsp
             name: name,
             kind: Constant::SymbolKind::METHOD,
             range_location: new_name_argument.location,
-            selection_range_location: T.must(new_name_argument.value_loc),
+            selection_range_location: new_name_argument.value_loc, #: as !nil
           )
         elsif new_name_argument.is_a?(Prism::StringNode)
           name = new_name_argument.content
@@ -376,7 +406,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def handle_rake_namespace(node)
         return unless rake?
         return if node.receiver
@@ -402,7 +432,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def handle_rake_task(node)
         return unless rake?
         return if node.receiver
@@ -437,7 +467,7 @@ module RubyLsp
         )
       end
 
-      sig { returns(T::Boolean) }
+      #: -> bool
       def rake?
         if (path = @uri.to_standardized_path)
           path.match?(/(Rakefile|\.rake)$/)

@@ -6,6 +6,9 @@ nav_order: 50
 
 # Contributing
 
+{: .note }
+> If you plan to invest significant effort into a large pull request with multiple decisions that may impact the long term maintenance of the Ruby LSP, please open a [discussion](https://github.com/Shopify/ruby-lsp/discussions/new/choose) first to align on the direction.
+
 The [ruby-lsp repository](https://github.com/Shopify/ruby-lsp) contains three sub-projects:
 
 - the **language server** (`ruby-lsp`), which exists at the top level of the repository. Most features are implemented here since everything implemented in the server is available to all editors
@@ -36,8 +39,8 @@ When adding or changing an existing feature, first identify which request is res
 server implements that request and start thinking about the implementation.
 
 {: .note }
-When using VS Code, open the `lsp.code-workspace` file instead of just opening the regular folder. It contains
-configurations for working with the sub projects side by side effectively
+When using VS Code, open the `ruby-lsp.code-workspace` file instead of just opening the regular folder. It contains
+configurations for working with the sub projects side by side effectively.
 
 ### Debugging
 
@@ -190,7 +193,7 @@ The VS Code extension currently has the following main parts:
 ### Testing changes
 
 {: .note }
-Open the `lsp.code-workspace` file instead of just opening the regular folder.  It contains
+Open the `ruby-lsp.code-workspace` file instead of just opening the regular folder. It contains
 contains the configuration needed for using 'Run and debug' as described below.
 
 We try to ensure thorough testing as much as possible. However, some tests are difficult to write, in particular those

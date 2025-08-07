@@ -8,7 +8,13 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::SemanticHighlighting, "semantic_highlighting"
 
   def run_expectations(source)
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
+    @global_state.apply_options({ capabilities: { general: { positionEncodings: ["utf-8"] } } })
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
     range = @__params&.any? ? @__params.first : nil
 
     if range
@@ -18,17 +24,15 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     end
 
     dispatcher = Prism::Dispatcher.new
-    global_state = RubyLsp::GlobalState.new
-    global_state.apply_options({})
     listener = RubyLsp::Requests::SemanticHighlighting.new(
-      global_state,
+      @global_state,
       dispatcher,
       document,
       nil,
       range: processed_range,
     )
 
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
@@ -100,7 +104,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, dispatcher)
+        klass.new(response_builder, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

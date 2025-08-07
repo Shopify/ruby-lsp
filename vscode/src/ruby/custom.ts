@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
@@ -10,9 +9,7 @@ import { VersionManager, ActivationResult } from "./versionManager";
 // GEM_HOME and GEM_PATH as needed to find the correct Ruby runtime.
 export class Custom extends VersionManager {
   async activate(): Promise<ActivationResult> {
-    const parsedResult = await this.runEnvActivationScript(
-      `${this.customCommand()} && ruby`,
-    );
+    const parsedResult = await this.runEnvActivationScript(`${this.customCommand()} && ruby`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -24,8 +21,7 @@ export class Custom extends VersionManager {
 
   customCommand() {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const customCommand: string | undefined =
-      configuration.get("customRubyCommand");
+    const customCommand: string | undefined = configuration.get("customRubyCommand");
 
     if (customCommand === undefined) {
       throw new Error(

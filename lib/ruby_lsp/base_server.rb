@@ -2,38 +2,30 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # @abstract
   class BaseServer
-    extend T::Sig
-    extend T::Helpers
-
-    abstract!
-
-    sig { params(options: T.untyped).void }
+    #: (**untyped options) -> void
     def initialize(**options)
-      @test_mode = T.let(options[:test_mode], T.nilable(T::Boolean))
-      @setup_error = T.let(options[:setup_error], T.nilable(StandardError))
-      @install_error = T.let(options[:install_error], T.nilable(StandardError))
-      @writer = T.let(Transport::Stdio::Writer.new, Transport::Stdio::Writer)
-      @reader = T.let(Transport::Stdio::Reader.new, Transport::Stdio::Reader)
-      @incoming_queue = T.let(Thread::Queue.new, Thread::Queue)
-      @outgoing_queue = T.let(Thread::Queue.new, Thread::Queue)
-      @cancelled_requests = T.let([], T::Array[Integer])
-      @mutex = T.let(Mutex.new, Mutex)
-      @worker = T.let(new_worker, Thread)
-      @current_request_id = T.let(1, Integer)
-      @store = T.let(Store.new, Store)
-      @outgoing_dispatcher = T.let(
-        Thread.new do
-          unless @test_mode
-            while (message = @outgoing_queue.pop)
-              @mutex.synchronize { @writer.write(message.to_hash) }
-            end
+      @reader = MessageReader.new(options[:reader] || $stdin) #: MessageReader
+      @writer = MessageWriter.new(options[:writer] || $stdout) #: MessageWriter
+      @test_mode = options[:test_mode] #: bool?
+      @setup_error = options[:setup_error] #: StandardError?
+      @install_error = options[:install_error] #: StandardError?
+      @incoming_queue = Thread::Queue.new #: Thread::Queue
+      @outgoing_queue = Thread::Queue.new #: Thread::Queue
+      @cancelled_requests = [] #: Array[Integer]
+      @worker = new_worker #: Thread
+      @current_request_id = 1 #: Integer
+      @global_state = GlobalState.new #: GlobalState
+      @store = Store.new(@global_state) #: Store
+      @outgoing_dispatcher = Thread.new do
+        unless @test_mode
+          while (message = @outgoing_queue.pop)
+            @global_state.synchronize { @writer.write(message.to_hash) }
           end
-        end,
-        Thread,
-      )
+        end
+      end #: Thread
 
-      @global_state = T.let(GlobalState.new, GlobalState)
       Thread.main.priority = 1
 
       # We read the initialize request in `exe/ruby-lsp` to be able to determine the workspace URI where Bundler should
@@ -42,16 +34,16 @@ module RubyLsp
       process_message(initialize_request) if initialize_request
     end
 
-    sig { void }
+    #: -> void
     def start
-      @reader.read do |message|
+      @reader.each_message do |message|
         method = message[:method]
 
         # We must parse the document under a mutex lock or else we might switch threads and accept text edits in the
         # source. Altering the source reference during parsing will put the parser in an invalid internal state, since
         # it started parsing with one source but then it changed in the middle. We don't want to do this for text
         # synchronization notifications
-        @mutex.synchronize do
+        @global_state.synchronize do
           uri = message.dig(:params, :textDocument, :uri)
 
           if uri
@@ -91,30 +83,47 @@ module RubyLsp
         # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
         # else is pushed into the incoming queue
         case method
-        when "initialize", "initialized", "textDocument/didOpen", "textDocument/didClose", "textDocument/didChange"
+        when "initialize", "initialized", "rubyLsp/diagnoseState"
           process_message(message)
         when "shutdown"
-          send_log_message("Shutting down Ruby LSP...")
-
-          shutdown
-
-          @mutex.synchronize do
+          @global_state.synchronize do
+            send_log_message("Shutting down Ruby LSP...")
+            shutdown
             run_shutdown
             @writer.write(Result.new(id: message[:id], response: nil).to_hash)
           end
         when "exit"
-          @mutex.synchronize do
-            status = @incoming_queue.closed? ? 0 : 1
-            send_log_message("Shutdown complete with status #{status}")
-            exit(status)
-          end
+          exit(@incoming_queue.closed? ? 0 : 1)
         else
           @incoming_queue << message
         end
       end
     end
 
-    sig { void }
+    # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
+    #: -> untyped
+    def pop_response
+      @outgoing_queue.pop
+    end
+
+    # This method is only intended to be used in tests! Pushes a message to the incoming queue directly
+    #: (Hash[Symbol, untyped] message) -> void
+    def push_message(message)
+      @incoming_queue << message
+    end
+
+    # @abstract
+    #: (Hash[Symbol, untyped] message) -> void
+    def process_message(message)
+      raise AbstractMethodInvokedError
+    end
+
+    #: -> bool?
+    def test_mode?
+      @test_mode
+    end
+
+    #: -> void
     def run_shutdown
       @incoming_queue.clear
       @outgoing_queue.clear
@@ -122,37 +131,33 @@ module RubyLsp
       @outgoing_queue.close
       @cancelled_requests.clear
 
-      @worker.join
-      @outgoing_dispatcher.join
+      @worker.terminate
+      @outgoing_dispatcher.terminate
       @store.clear
     end
 
-    # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
-    sig { returns(T.untyped) }
-    def pop_response
-      @outgoing_queue.pop
+    private
+
+    # @abstract
+    #: -> void
+    def shutdown
+      raise AbstractMethodInvokedError
     end
 
-    sig { abstract.params(message: T::Hash[Symbol, T.untyped]).void }
-    def process_message(message); end
-
-    sig { abstract.void }
-    def shutdown; end
-
-    sig { params(id: Integer, message: String, type: Integer).void }
+    #: (Integer id, String message, ?type: Integer) -> void
     def fail_request_and_notify(id, message, type: Constant::MessageType::INFO)
       send_message(Error.new(id: id, code: Constant::ErrorCodes::REQUEST_FAILED, message: message))
       send_message(Notification.window_show_message(message, type: type))
     end
 
-    sig { returns(Thread) }
+    #: -> Thread
     def new_worker
       Thread.new do
-        while (message = T.let(@incoming_queue.pop, T.nilable(T::Hash[Symbol, T.untyped])))
+        while (message = @incoming_queue.pop)
           id = message[:id]
 
           # Check if the request was cancelled before trying to process it
-          @mutex.synchronize do
+          @global_state.synchronize do
             if id && @cancelled_requests.include?(id)
               send_message(Result.new(id: id, response: nil))
               @cancelled_requests.delete(id)
@@ -165,7 +170,7 @@ module RubyLsp
       end
     end
 
-    sig { params(message: T.any(Result, Error, Notification, Request)).void }
+    #: ((Result | Error | Notification | Request) message) -> void
     def send_message(message)
       # When we're shutting down the server, there's a small race condition between closing the thread queues and
       # finishing remaining requests. We may close the queue in the middle of processing a request, which will then fail
@@ -176,12 +181,12 @@ module RubyLsp
       @current_request_id += 1 if message.is_a?(Request)
     end
 
-    sig { params(id: Integer).void }
+    #: (Integer id) -> void
     def send_empty_response(id)
       send_message(Result.new(id: id, response: nil))
     end
 
-    sig { params(message: String, type: Integer).void }
+    #: (String message, ?type: Integer) -> void
     def send_log_message(message, type: Constant::MessageType::LOG)
       send_message(Notification.window_log_message(message, type: Constant::MessageType::LOG))
     end

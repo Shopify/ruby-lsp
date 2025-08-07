@@ -200,7 +200,7 @@ module RubyIndexer
 
       assert_entry("Foo", Entry::Class, "/fake/path/foo.rb:0-0:1-3")
 
-      @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
+      @index.delete(URI::Generic.from_path(path: "/fake/path/foo.rb"))
       refute_entry("Foo")
 
       assert_no_indexed_entries
@@ -223,10 +223,12 @@ module RubyIndexer
         class Bar; end
       RUBY
 
-      foo_entry = @index["Foo"].first
+      foo_entry = @index["Foo"] #: as !nil
+        .first #: as !nil
       assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments)
 
-      bar_entry = @index["Bar"].first
+      bar_entry = @index["Bar"] #: as !nil
+        .first #: as !nil
       assert_equal("This Bar comment has 1 line padding", bar_entry.comments)
     end
 
@@ -236,7 +238,7 @@ module RubyIndexer
         class Foo
         end
       RUBY
-      assert(@index["Foo"].first)
+      assert(@index["Foo"]&.first)
     end
 
     def test_comments_can_be_attached_to_a_namespaced_class
@@ -249,10 +251,12 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = @index["Foo"].first
+      foo_entry = @index["Foo"] #: as !nil
+        .first #: as !nil
       assert_equal("This is a Foo comment\nThis is another Foo comment", foo_entry.comments)
 
-      bar_entry = @index["Foo::Bar"].first
+      bar_entry = @index["Foo::Bar"] #: as !nil
+        .first #: as !nil
       assert_equal("This is a Bar comment", bar_entry.comments)
     end
 
@@ -265,11 +269,9 @@ module RubyIndexer
         class Foo; end
       RUBY
 
-      first_foo_entry = @index["Foo"][0]
-      assert_equal("This is a Foo comment", first_foo_entry.comments)
-
-      second_foo_entry = @index["Foo"][1]
-      assert_equal("This is another Foo comment", second_foo_entry.comments)
+      first_foo_entry, second_foo_entry = @index["Foo"] #: as !nil
+      assert_equal("This is a Foo comment", first_foo_entry&.comments)
+      assert_equal("This is another Foo comment", second_foo_entry&.comments)
     end
 
     def test_comments_removes_the_leading_pound_and_space
@@ -281,10 +283,12 @@ module RubyIndexer
         class Bar; end
       RUBY
 
-      first_foo_entry = @index["Foo"][0]
+      first_foo_entry = @index["Foo"] #: as !nil
+        .first #: as !nil
       assert_equal("This is a Foo comment", first_foo_entry.comments)
 
-      second_foo_entry = @index["Bar"][0]
+      second_foo_entry = @index["Bar"] #: as !nil
+        .first #: as !nil
       assert_equal("This is a Bar comment", second_foo_entry.comments)
     end
 
@@ -301,14 +305,17 @@ module RubyIndexer
         end
       RUBY
 
-      b_const = @index["A::B"].first
-      assert_equal(Entry::Visibility::PRIVATE, b_const.visibility)
+      b_const = @index["A::B"] #: as !nil
+        .first
+      assert_predicate(b_const, :private?)
 
-      c_const = @index["A::C"].first
-      assert_equal(Entry::Visibility::PRIVATE, c_const.visibility)
+      c_const = @index["A::C"] #: as !nil
+        .first
+      assert_predicate(c_const, :private?)
 
-      d_const = @index["A::D"].first
-      assert_equal(Entry::Visibility::PUBLIC, d_const.visibility)
+      d_const = @index["A::D"] #: as !nil
+        .first
+      assert_predicate(d_const, :public?)
     end
 
     def test_keeping_track_of_super_classes
@@ -331,16 +338,20 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"].first)
+      foo = @index["Foo"] #: as !nil
+        .first #: as Entry::Class
       assert_equal("Bar", foo.parent_class)
 
-      baz = T.must(@index["Baz"].first)
+      baz = @index["Baz"] #: as !nil
+        .first #: as Entry::Class
       assert_equal("::Object", baz.parent_class)
 
-      qux = T.must(@index["Something::Qux"].first)
+      qux = @index["Something::Qux"] #: as !nil
+        .first #: as Entry::Class
       assert_equal("::Baz", qux.parent_class)
 
-      final_thing = T.must(@index["FinalThing"].first)
+      final_thing = @index["FinalThing"] #: as !nil
+        .first #: as Entry::Class
       assert_equal("Something::Baz", final_thing.parent_class)
     end
 
@@ -380,13 +391,16 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"][0])
+      foo = @index["Foo"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux"][0])
+      qux = @index["Foo::Qux"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      constant_path_references = @index["ConstantPathReferences"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -426,13 +440,16 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"][0])
+      foo = @index["Foo"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux"][0])
+      qux = @index["Foo::Qux"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences"][0])
+      constant_path_references = @index["ConstantPathReferences"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -472,13 +489,16 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo::<Class:Foo>"][0])
+      foo = @index["Foo::<Class:Foo>"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = T.must(@index["Foo::Qux::<Class:Qux>"][0])
+      qux = @index["Foo::Qux::<Class:Qux>"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = T.must(@index["ConstantPathReferences::<Class:ConstantPathReferences>"][0])
+      constant_path_references = @index["ConstantPathReferences::<Class:ConstantPathReferences>"] #: as !nil
+        .first #: as Entry::Class
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
 
@@ -492,7 +512,8 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo::<Class:Foo>"].first)
+      foo = @index["Foo::<Class:Foo>"] #: as !nil
+        .first #: as Entry::SingletonClass
       assert_equal(4, foo.location.start_line)
       assert_equal("Some extra comments", foo.comments)
     end
@@ -506,7 +527,8 @@ module RubyIndexer
         end
       RUBY
 
-      singleton = T.must(@index["Foo::<Class:bar>"].first)
+      singleton = @index["Foo::<Class:bar>"] #: as !nil
+        .first #: as Entry::SingletonClass
 
       # Even though this is not correct, we consider any dynamic singleton class block as a regular singleton class.
       # That pattern cannot be properly analyzed statically and assuming that it's always a regular singleton simplifies
@@ -539,7 +561,8 @@ module RubyIndexer
         end
       RUBY
 
-      foo = T.must(@index["Foo"].first)
+      foo = @index["Foo"] #: as !nil
+        .first #: as Entry::Class
       refute_equal(foo.location, foo.name_location)
 
       name_location = foo.name_location
@@ -548,7 +571,8 @@ module RubyIndexer
       assert_equal(6, name_location.start_column)
       assert_equal(9, name_location.end_column)
 
-      bar = T.must(@index["Bar"].first)
+      bar = @index["Bar"] #: as !nil
+        .first #: as Entry::Module
       refute_equal(bar.location, bar.name_location)
 
       name_location = bar.name_location
@@ -618,12 +642,15 @@ module RubyIndexer
     end
 
     def test_lazy_comment_fetching_uses_correct_line_breaks_for_rendering
-      path = "lib/ruby_lsp/node_context.rb"
-      indexable = IndexablePath.new("#{Dir.pwd}/lib", path)
+      uri = URI::Generic.from_path(
+        load_path_entry: "#{Dir.pwd}/lib",
+        path: "#{Dir.pwd}/lib/ruby_lsp/node_context.rb",
+      )
 
-      @index.index_single(indexable, collect_comments: false)
+      @index.index_file(uri, collect_comments: false)
 
-      entry = @index["RubyLsp::NodeContext"].first
+      entry = @index["RubyLsp::NodeContext"] #: as !nil
+        .first #: as !nil
 
       assert_equal(<<~COMMENTS.chomp, entry.comments)
         This class allows listeners to access contextual information about a node in the AST, such as its parent,
@@ -632,15 +659,112 @@ module RubyIndexer
     end
 
     def test_lazy_comment_fetching_does_not_fail_if_file_gets_deleted
-      indexable = IndexablePath.new("#{Dir.pwd}/lib", "lib/ruby_lsp/does_not_exist.rb")
+      uri = URI::Generic.from_path(
+        load_path_entry: "#{Dir.pwd}/lib",
+        path: "#{Dir.pwd}/lib/ruby_lsp/does_not_exist.rb",
+      )
 
-      @index.index_single(indexable, <<~RUBY, collect_comments: false)
+      @index.index_single(uri, <<~RUBY, collect_comments: false)
         class Foo
         end
       RUBY
 
-      entry = @index["Foo"].first
+      entry = @index["Foo"]&.first #: as !nil
       assert_empty(entry.comments)
+    end
+
+    def test_singleton_inside_compact_namespace
+      index(<<~RUBY)
+        module Foo::Bar
+          class << self
+            def baz; end
+          end
+        end
+      RUBY
+
+      # Verify we didn't index the incorrect name
+      assert_nil(@index["Foo::Bar::<Class:Foo::Bar>"])
+
+      # Verify we indexed the correct name
+      assert_entry("Foo::Bar::<Class:Bar>", Entry::SingletonClass, "/fake/path/foo.rb:1-2:3-5")
+
+      method = @index["baz"]&.first #: as Entry::Method
+      assert_equal("Foo::Bar::<Class:Bar>", method.owner&.name)
+    end
+
+    def test_lazy_comments_with_spaces_are_properly_attributed
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source =  <<~RUBY
+        require "whatever"
+
+        # These comments belong to the declaration below
+        # They have to be associated with it
+
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"]&.first #: as !nil
+
+      begin
+        assert_equal(<<~COMMENTS.chomp, entry.comments)
+          These comments belong to the declaration below
+          They have to be associated with it
+        COMMENTS
+      ensure
+        FileUtils.rm(path)
+      end
+    end
+
+    def test_lazy_comments_with_no_spaces_are_properly_attributed
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source = <<~RUBY
+        require "whatever"
+
+        # These comments belong to the declaration below
+        # They have to be associated with it
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"]&.first #: as !nil
+
+      begin
+        assert_equal(<<~COMMENTS.chomp, entry.comments)
+          These comments belong to the declaration below
+          They have to be associated with it
+        COMMENTS
+      ensure
+        FileUtils.rm(path)
+      end
+    end
+
+    def test_lazy_comments_with_two_extra_spaces_are_properly_ignored
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source = <<~RUBY
+        require "whatever"
+
+        # These comments don't belong to the declaration below
+        # They will not be associated with it
+
+
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"]&.first #: as !nil
+
+      begin
+        assert_empty(entry.comments)
+      ensure
+        FileUtils.rm(path)
+      end
     end
   end
 end

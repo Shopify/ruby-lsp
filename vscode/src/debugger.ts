@@ -19,20 +19,11 @@ class TerminalLogger {
   }
 }
 
-export class Debugger
-  implements
-    vscode.DebugAdapterDescriptorFactory,
-    vscode.DebugConfigurationProvider
-{
+export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.DebugConfigurationProvider {
   private debugProcess?: ChildProcessWithoutNullStreams;
-  // eslint-disable-next-line no-process-env
-  private readonly console = process.env.CI
-    ? new TerminalLogger()
-    : vscode.debug.activeDebugConsole;
+  private readonly console = process.env.CI ? new TerminalLogger() : vscode.debug.activeDebugConsole;
 
-  private readonly workspaceResolver: (
-    uri: vscode.Uri | undefined,
-  ) => Workspace | undefined;
+  private readonly workspaceResolver: (uri: vscode.Uri | undefined) => Workspace | undefined;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -59,9 +50,7 @@ export class Debugger
     } else {
       return new Promise((_resolve, reject) =>
         reject(
-          new Error(
-            `Unknown request type: ${session.configuration.request}. Please review your launch configurations`,
-          ),
+          new Error(`Unknown request type: ${session.configuration.request}. Please review your launch configurations`),
         ),
       );
     }
@@ -102,20 +91,16 @@ export class Debugger
     debugConfiguration: vscode.DebugConfiguration,
     _token?: vscode.CancellationToken,
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
-    const workspace = this.workspaceResolver(folder?.uri);
+    const uri = folder?.uri;
+    const workspace = this.workspaceResolver(uri);
 
     if (!workspace) {
-      throw new Error(
-        `Couldn't find a workspace for URI: ${folder?.uri} or editor: ${vscode.window.activeTextEditor}`,
-      );
+      throw new Error(`Couldn't find a workspace for URI: ${uri?.toString()}`);
     }
 
     if (debugConfiguration.env) {
       // If the user has their own debug launch configurations, we still need to inject the Ruby environment
-      debugConfiguration.env = Object.assign(
-        debugConfiguration.env,
-        workspace.ruby.env,
-      );
+      debugConfiguration.env = Object.assign(workspace.ruby.env, debugConfiguration.env);
     } else {
       debugConfiguration.env = workspace.ruby.env;
     }
@@ -127,20 +112,20 @@ export class Debugger
       name: workspace.workspaceFolder.name,
     };
 
+    // In newer versions of the server, the composed bundle environment is merged directly into the Ruby object and no
+    // adjustments have to be made here
+    if (debugConfiguration.env.BUNDLE_GEMFILE) {
+      return debugConfiguration;
+    }
+
     const customBundleUri = vscode.Uri.joinPath(workspaceUri, ".ruby-lsp");
 
     return vscode.workspace.fs.readDirectory(customBundleUri).then(
       (value) => {
         if (value.some((entry) => entry[0] === "Gemfile")) {
-          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
-            customBundleUri,
-            "Gemfile",
-          ).fsPath;
+          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(customBundleUri, "Gemfile").fsPath;
         } else if (value.some((entry) => entry[0] === "gems.rb")) {
-          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(
-            customBundleUri,
-            "gems.rb",
-          ).fsPath;
+          debugConfiguration.env.BUNDLE_GEMFILE = vscode.Uri.joinPath(customBundleUri, "gems.rb").fsPath;
         }
 
         return debugConfiguration;
@@ -186,9 +171,7 @@ export class Debugger
     return sockets;
   }
 
-  private async attachDebuggee(
-    session: vscode.DebugSession,
-  ): Promise<vscode.DebugAdapterDescriptor> {
+  private async attachDebuggee(session: vscode.DebugSession): Promise<vscode.DebugAdapterDescriptor> {
     const debugPort = session.configuration.debugPort;
 
     if (debugPort) {
@@ -237,8 +220,7 @@ export class Debugger
     const configuration = session.configuration;
     const workspaceFolder = configuration.targetFolder;
     const cwd = workspaceFolder.path;
-    const port =
-      os.platform() === "win32" ? await this.availablePort() : undefined;
+    const port = os.platform() === "win32" ? await this.availablePort() : undefined;
 
     return new Promise((resolve, reject) => {
       const args = ["exec", "rdbg"];
@@ -250,9 +232,8 @@ export class Debugger
 
       args.push("--open", "--command", "--", configuration.program);
 
-      LOG_CHANNEL.info(`Spawning debugger in directory ${cwd}`);
-      LOG_CHANNEL.info(`   Command bundle ${args.join(" ")}`);
-      LOG_CHANNEL.info(`   Environment ${JSON.stringify(configuration.env)}`);
+      this.logDebuggerMessage(`Spawning debugger in directory ${cwd}`);
+      this.logDebuggerMessage(`   Command bundle ${args.join(" ")}`);
 
       this.debugProcess = spawn("bundle", args, {
         shell: true,
@@ -260,10 +241,9 @@ export class Debugger
         cwd,
       });
 
-      this.debugProcess.stderr.on("data", (data) => {
+      this.debugProcess.stderr.on("data", (data: Buffer) => {
         const message = data.toString();
-        // Print whatever data we get in stderr in the debug console since it might be relevant for the user
-        this.console.append(message);
+        this.logDebuggerMessage(message);
 
         if (!initialized) {
           initialMessage += message;
@@ -271,13 +251,10 @@ export class Debugger
 
         // When stderr includes a complete wait for debugger connection message, then we're done initializing and can
         // resolve the promise. If we try to resolve earlier, VS Code will simply fail to connect
-        if (
-          initialMessage.includes("DEBUGGER: wait for debugger connection...")
-        ) {
+        if (initialMessage.includes("DEBUGGER: wait for debugger connection...")) {
           initialized = true;
 
-          const regex =
-            /DEBUGGER: Debugger can attach via UNIX domain socket \((.*)\)/;
+          const regex = /DEBUGGER: Debugger can attach via UNIX domain socket \((.*)\)/;
           const sockPath = RegExp(regex).exec(initialMessage);
 
           if (port) {
@@ -290,14 +267,14 @@ export class Debugger
         }
       });
 
-      // Anything printed by debug to stdout we want to show in the debug console
-      this.debugProcess.stdout.on("data", (data) => {
-        this.console.append(data.toString());
+      // Anything printed by debug to stdout we want to show in the Ruby LSP output channel
+      this.debugProcess.stdout.on("data", (data: Buffer) => {
+        this.logDebuggerMessage(data.toString());
       });
 
-      // If any errors occur in the server, we have to show that in the debug console and reject the promise
+      // If any errors occur in the server, we have to show that in the Ruby LSP output channel and reject the promise
       this.debugProcess.on("error", (error) => {
-        this.console.append(error.message);
+        this.logDebuggerMessage(error.message);
         reject(error);
       });
 
@@ -306,8 +283,11 @@ export class Debugger
       // actually an error
       this.debugProcess.on("close", (code) => {
         if (code) {
-          const message = `Debugger exited with status ${code}. Check the output channel for more information.`;
-          this.console.append(message);
+          const message =
+            `Debugger exited with status ${code}.\n` +
+            `Please make sure \`bundle ${args.join(" ")}\` runs without errors in the terminal.\n` +
+            "Check the Ruby LSP output channel for more information.\n";
+          this.logDebuggerMessage(message);
           reject(new Error(message));
         }
       });
@@ -326,13 +306,22 @@ export class Debugger
       // the port that was assigned
       server.listen(0, () => {
         const address = server.address();
-        const port =
-          typeof address === "string" ? Number(address) : address?.port;
+        const port = typeof address === "string" ? Number(address) : address?.port;
 
         server.close(() => {
           resolve(port);
         });
       });
     });
+  }
+
+  private logDebuggerMessage(message: string) {
+    // Log to Output panel: Messages here automatically get newlines appended.
+    // Trim trailing newlines to prevent unwanted blank lines in the output
+    LOG_CHANNEL.info(`[debugger]: ${message.trimEnd()}`);
+
+    // Log to Debug Console: Unlike Output panel, this needs explicit newlines
+    // so we preserve the original message format including any newlines
+    this.console.append(message);
   }
 }

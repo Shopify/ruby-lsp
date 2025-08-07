@@ -3,81 +3,99 @@
 
 module RubyLsp
   class GlobalState
-    extend T::Sig
-
-    sig { returns(String) }
+    #: String
     attr_reader :test_library
 
-    sig { returns(String) }
+    #: String
     attr_accessor :formatter
 
-    sig { returns(T::Boolean) }
+    #: bool
     attr_reader :has_type_checker
 
-    sig { returns(RubyIndexer::Index) }
+    #: RubyIndexer::Index
     attr_reader :index
 
-    sig { returns(Encoding) }
+    #: Encoding
     attr_reader :encoding
 
-    sig { returns(T::Boolean) }
-    attr_reader :experimental_features, :top_level_bundle
+    #: bool
+    attr_reader :top_level_bundle
 
-    sig { returns(TypeInferrer) }
+    #: TypeInferrer
     attr_reader :type_inferrer
 
-    sig { returns(ClientCapabilities) }
+    #: ClientCapabilities
     attr_reader :client_capabilities
 
-    sig { void }
-    def initialize
-      @workspace_uri = T.let(URI::Generic.from_path(path: Dir.pwd), URI::Generic)
-      @encoding = T.let(Encoding::UTF_8, Encoding)
+    #: URI::Generic
+    attr_reader :workspace_uri
 
-      @formatter = T.let("auto", String)
-      @linters = T.let([], T::Array[String])
-      @test_library = T.let("minitest", String)
-      @has_type_checker = T.let(true, T::Boolean)
-      @index = T.let(RubyIndexer::Index.new, RubyIndexer::Index)
-      @supported_formatters = T.let({}, T::Hash[String, Requests::Support::Formatter])
-      @experimental_features = T.let(false, T::Boolean)
-      @type_inferrer = T.let(TypeInferrer.new(@index), TypeInferrer)
-      @addon_settings = T.let({}, T::Hash[String, T.untyped])
-      @top_level_bundle = T.let(
-        begin
-          Bundler.with_original_env { Bundler.default_gemfile }
-          true
-        rescue Bundler::GemfileNotFound, Bundler::GitError
-          false
-        end,
-        T::Boolean,
-      )
-      @client_capabilities = T.let(ClientCapabilities.new, ClientCapabilities)
-      @enabled_feature_flags = T.let({}, T::Hash[Symbol, T::Boolean])
+    #: String?
+    attr_reader :telemetry_machine_id
+
+    #: -> void
+    def initialize
+      @workspace_uri = URI::Generic.from_path(path: Dir.pwd) #: URI::Generic
+      @encoding = Encoding::UTF_8 #: Encoding
+
+      @formatter = "auto" #: String
+      @linters = [] #: Array[String]
+      @test_library = "minitest" #: String
+      @has_type_checker = true #: bool
+      @index = RubyIndexer::Index.new #: RubyIndexer::Index
+      @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
+      @type_inferrer = TypeInferrer.new(@index) #: TypeInferrer
+      @addon_settings = {} #: Hash[String, untyped]
+      @top_level_bundle = begin
+        Bundler.with_original_env { Bundler.default_gemfile }
+        true
+      rescue Bundler::GemfileNotFound, Bundler::GitError
+        false
+      end #: bool
+      @client_capabilities = ClientCapabilities.new #: ClientCapabilities
+      @enabled_feature_flags = {} #: Hash[Symbol, bool]
+      @mutex = Mutex.new #: Mutex
+      @telemetry_machine_id = nil #: String?
+      @feature_configuration = {
+        inlayHint: RequestConfig.new({
+          enableAll: false,
+          implicitRescue: false,
+          implicitHashValue: false,
+        }),
+        codeLens: RequestConfig.new({
+          enableAll: false,
+          enableTestCodeLens: true,
+        }),
+      } #: Hash[Symbol, RequestConfig]
     end
 
-    sig { params(addon_name: String).returns(T.nilable(T::Hash[Symbol, T.untyped])) }
+    #: [T] { -> T } -> T
+    def synchronize(&block)
+      @mutex.synchronize(&block)
+    end
+
+    #: (String addon_name) -> Hash[Symbol, untyped]?
     def settings_for_addon(addon_name)
       @addon_settings[addon_name]
     end
 
-    sig { params(identifier: String, instance: Requests::Support::Formatter).void }
+    #: (String identifier, Requests::Support::Formatter instance) -> void
     def register_formatter(identifier, instance)
       @supported_formatters[identifier] = instance
     end
 
-    sig { returns(T.nilable(Requests::Support::Formatter)) }
+    #: -> Requests::Support::Formatter?
     def active_formatter
       @supported_formatters[@formatter]
     end
 
-    sig { returns(T::Array[Requests::Support::Formatter]) }
+    #: -> Array[Requests::Support::Formatter]
     def active_linters
       @linters.filter_map { |name| @supported_formatters[name] }
     end
 
     # Applies the options provided by the editor and returns an array of notifications to send back to the client
-    sig { params(options: T::Hash[Symbol, T.untyped]).returns(T::Array[Notification]) }
+    #: (Hash[Symbol, untyped] options) -> Array[Notification]
     def apply_options(options)
       notifications = []
       direct_dependencies = gather_direct_dependencies
@@ -86,12 +104,20 @@ module RubyLsp
       @workspace_uri = URI(workspace_uri) if workspace_uri
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
+      rubocop_has_addon = defined?(::RuboCop::Version::STRING) &&
+        Gem::Requirement.new(">= 1.70.0").satisfied_by?(Gem::Version.new(::RuboCop::Version::STRING))
 
       if specified_formatter
         @formatter = specified_formatter
 
         if specified_formatter != "auto"
           notifications << Notification.window_log_message("Using formatter specified by user: #{@formatter}")
+        end
+
+        # If the user had originally configured to use `rubocop`, but their version doesn't provide the add-on yet,
+        # fallback to the internal integration
+        if specified_formatter == "rubocop" && !rubocop_has_addon
+          @formatter = "rubocop_internal"
         end
       end
 
@@ -101,6 +127,23 @@ module RubyLsp
       end
 
       specified_linters = options.dig(:initializationOptions, :linters)
+
+      if specified_formatter == "rubocop" || specified_linters&.include?("rubocop")
+        notifications << Notification.window_log_message(<<~MESSAGE, type: Constant::MessageType::WARNING)
+          Formatter is configured to be `rubocop`. As of RuboCop v1.70.0, this identifier activates the add-on
+          implemented in the rubocop gem itself instead of the internal integration provided by the Ruby LSP.
+
+          If you wish to use the internal integration, please configure the formatter as `rubocop_internal`.
+        MESSAGE
+      end
+
+      # If the user had originally configured to use `rubocop`, but their version doesn't provide the add-on yet,
+      # fall back to the internal integration
+      if specified_linters&.include?("rubocop") && !rubocop_has_addon
+        specified_linters.delete("rubocop")
+        specified_linters << "rubocop_internal"
+      end
+
       @linters = specified_linters || detect_linters(direct_dependencies, all_dependencies)
 
       notifications << if specified_linters
@@ -131,7 +174,6 @@ module RubyLsp
       end
       @index.configuration.encoding = @encoding
 
-      @experimental_features = options.dig(:initializationOptions, :experimentalFeaturesEnabled) || false
       @client_capabilities.apply_client_capabilities(options[:capabilities]) if options[:capabilities]
 
       addon_settings = options.dig(:initializationOptions, :addonSettings)
@@ -143,20 +185,31 @@ module RubyLsp
       enabled_flags = options.dig(:initializationOptions, :enabledFeatureFlags)
       @enabled_feature_flags = enabled_flags if enabled_flags
 
+      @telemetry_machine_id = options.dig(:initializationOptions, :telemetryMachineId)
+
+      options.dig(:initializationOptions, :featuresConfiguration)&.each do |feature_name, config|
+        @feature_configuration[feature_name]&.merge!(config)
+      end
+
       notifications
     end
 
-    sig { params(flag: Symbol).returns(T.nilable(T::Boolean)) }
+    #: (Symbol) -> RequestConfig?
+    def feature_configuration(feature_name)
+      @feature_configuration[feature_name]
+    end
+
+    #: (Symbol flag) -> bool?
     def enabled_feature?(flag)
-      @enabled_feature_flags[flag]
+      @enabled_feature_flags[:all] || @enabled_feature_flags[flag]
     end
 
-    sig { returns(String) }
+    #: -> String
     def workspace_path
-      T.must(@workspace_uri.to_standardized_path)
+      @workspace_uri.to_standardized_path #: as !nil
     end
 
-    sig { returns(String) }
+    #: -> String
     def encoding_name
       case @encoding
       when Encoding::UTF_8
@@ -168,41 +221,41 @@ module RubyLsp
       end
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def supports_watching_files
       @client_capabilities.supports_watching_files
     end
 
     private
 
-    sig { params(direct_dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(String) }
+    #: (Array[String] direct_dependencies, Array[String] all_dependencies) -> String
     def detect_formatter(direct_dependencies, all_dependencies)
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-      return "rubocop" if direct_dependencies.any?(/^rubocop/)
+      return "rubocop_internal" if direct_dependencies.any?(/^rubocop/)
 
       syntax_tree_is_direct_dependency = direct_dependencies.include?("syntax_tree")
       return "syntax_tree" if syntax_tree_is_direct_dependency
 
       rubocop_is_transitive_dependency = all_dependencies.include?("rubocop")
-      return "rubocop" if dot_rubocop_yml_present && rubocop_is_transitive_dependency
+      return "rubocop_internal" if dot_rubocop_yml_present && rubocop_is_transitive_dependency
 
       "none"
     end
 
     # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
     # single linter. To have multiple linters running, the user must configure them manually
-    sig { params(dependencies: T::Array[String], all_dependencies: T::Array[String]).returns(T::Array[String]) }
+    #: (Array[String] dependencies, Array[String] all_dependencies) -> Array[String]
     def detect_linters(dependencies, all_dependencies)
       linters = []
 
       if dependencies.any?(/^rubocop/) || (all_dependencies.include?("rubocop") && dot_rubocop_yml_present)
-        linters << "rubocop"
+        linters << "rubocop_internal"
       end
 
       linters
     end
 
-    sig { params(dependencies: T::Array[String]).returns(String) }
+    #: (Array[String] dependencies) -> String
     def detect_test_library(dependencies)
       if dependencies.any?(/^rspec/)
         "rspec"
@@ -222,7 +275,7 @@ module RubyLsp
       end
     end
 
-    sig { params(dependencies: T::Array[String]).returns(T::Boolean) }
+    #: (Array[String] dependencies) -> bool
     def detect_typechecker(dependencies)
       return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
 
@@ -231,17 +284,17 @@ module RubyLsp
       false
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def bin_rails_present
       File.exist?(File.join(workspace_path, "bin/rails"))
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def dot_rubocop_yml_present
       File.exist?(File.join(workspace_path, ".rubocop.yml"))
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def gather_direct_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
 
@@ -251,14 +304,14 @@ module RubyLsp
       []
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def gemspec_dependencies
       (Bundler.locked_gems&.sources || [])
         .grep(Bundler::Source::Gemspec)
         .flat_map { _1.gemspec&.dependencies&.map(&:name) }
     end
 
-    sig { returns(T::Array[String]) }
+    #: -> Array[String]
     def gather_direct_and_indirect_dependencies
       Bundler.with_original_env { Bundler.default_gemfile }
       Bundler.locked_gems&.specs&.map(&:name) || []

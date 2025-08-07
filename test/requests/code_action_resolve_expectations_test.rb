@@ -7,15 +7,23 @@ require_relative "support/expectations_test_runner"
 class CodeActionResolveExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActionResolve, "code_action_resolve"
 
-  def setup
-    @global_state = RubyLsp::GlobalState.new
-  end
-
   def run_expectations(source)
     params = @__params&.any? ? @__params : default_args
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake.rb"))
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
 
     RubyLsp::Requests::CodeActionResolve.new(document, @global_state, params).perform
+  rescue RubyLsp::Requests::CodeActionResolve::CodeActionError
+    # By default, we don't specify a code action for fixtures without an expectation file since the actions are very
+    # specific and won't work for every case. If a fixture errors with one of our defined error classes without any
+    # specified refactor, that's fine. Otherwise, we re-raise
+    raise if params[:title]
+
+    pass
   end
 
   def assert_expectations(source, expected)

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "sorbet-runtime"
 require "ruby_lsp/internal"
 
 # Based on https://github.com/ruby/prism/blob/main/rakelib/lex.rake
@@ -84,8 +83,7 @@ task "index:topgems": ["download:topgems"] do
 
     errors = Dir[File.join(directory, "**", "*.rb")].filter_map do |filepath|
       print(".")
-      code = File.read(filepath)
-      index.index_single(RubyIndexer::IndexablePath.new(nil, filepath), code)
+      index.index_file(URI::Generic.from_path(path: filepath))
       nil
     rescue => e
       errors << { message: e.message, file: filepath }

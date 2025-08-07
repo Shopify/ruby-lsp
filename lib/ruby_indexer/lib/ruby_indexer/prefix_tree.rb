@@ -32,22 +32,21 @@ module RubyIndexer
   # `Value` type.
   #
   # See https://en.wikipedia.org/wiki/Trie for more information
+  #: [Value]
   class PrefixTree
-    extend T::Sig
-    extend T::Generic
-
-    Value = type_member
-
-    sig { void }
+    #: -> void
     def initialize
-      @root = T.let(Node.new("", ""), Node[Value])
+      @root = Node.new(
+        "",
+        "", #: as untyped
+      ) #: Node[Value]
     end
 
     # Search the PrefixTree based on a given `prefix`. If `foo` is an entry in the tree, then searching for `fo` will
     # return it as a result. The result is always an array of the type of value attribute to the generic `Value` type.
     # Notice that if the `Value` is an array, this method will return an array of arrays, where each entry is the array
     # of values for a given match
-    sig { params(prefix: String).returns(T::Array[Value]) }
+    #: (String prefix) -> Array[Value]
     def search(prefix)
       node = find_node(prefix)
       return [] unless node
@@ -56,7 +55,7 @@ module RubyIndexer
     end
 
     # Inserts a `value` using the given `key`
-    sig { params(key: String, value: Value).void }
+    #: (String key, Value value) -> void
     def insert(key, value)
       node = @root
 
@@ -73,13 +72,13 @@ module RubyIndexer
 
     # Deletes the entry identified by `key` from the tree. Notice that a partial match will still delete all entries
     # that match it. For example, if the tree contains `foo` and we ask to delete `fo`, then `foo` will be deleted
-    sig { params(key: String).void }
+    #: (String key) -> void
     def delete(key)
       node = find_node(key)
       return unless node
 
       # Remove the node from the tree and then go up the parents to remove any of them with empty children
-      parent = T.let(T.must(node.parent), T.nilable(Node[Value]))
+      parent = node.parent #: Node[Value]?
 
       while parent
         parent.children.delete(node.key)
@@ -93,7 +92,7 @@ module RubyIndexer
     private
 
     # Find a node that matches the given `key`
-    sig { params(key: String).returns(T.nilable(Node[Value])) }
+    #: (String key) -> Node[Value]?
     def find_node(key)
       node = @root
 
@@ -107,28 +106,24 @@ module RubyIndexer
       node
     end
 
+    #: [Value]
     class Node
-      extend T::Sig
-      extend T::Generic
-
-      Value = type_member
-
-      sig { returns(T::Hash[String, Node[Value]]) }
+      #: Hash[String, Node[Value]]
       attr_reader :children
 
-      sig { returns(String) }
+      #: String
       attr_reader :key
 
-      sig { returns(Value) }
+      #: Value
       attr_accessor :value
 
-      sig { returns(T::Boolean) }
+      #: bool
       attr_accessor :leaf
 
-      sig { returns(T.nilable(Node[Value])) }
+      #: Node[Value]?
       attr_reader :parent
 
-      sig { params(key: String, value: Value, parent: T.nilable(Node[Value])).void }
+      #: (String key, Value value, ?Node[Value]? parent) -> void
       def initialize(key, value, parent = nil)
         @key = key
         @value = value
@@ -137,13 +132,14 @@ module RubyIndexer
         @leaf = false
       end
 
-      sig { returns(T::Array[Value]) }
+      #: -> Array[Value]
       def collect
         result = []
-        result << @value if @leaf
+        stack = [self]
 
-        @children.each_value do |node|
-          result.concat(node.collect)
+        while (node = stack.pop)
+          result << node.value if node.leaf
+          stack.concat(node.children.values)
         end
 
         result

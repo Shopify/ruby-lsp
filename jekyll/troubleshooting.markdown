@@ -29,16 +29,8 @@ As an example, the activation script for `zsh` using `rbenv` as a version manage
 ```
 
 After activating the Ruby version, we then proceed to boot the server gem (`ruby-lsp`). To avoid having users include
-the `ruby-lsp` in their `Gemfile`, we currently create a custom bundle under the `.ruby-lsp` directory inside your
-project. That directory contains another `Gemfile`, that includes the `ruby-lsp` gem in addition to your project's
-dependencies. This approach allows us to automatically detect which formatter your project uses and which gems we need
-to index for features such as go to definition.
-
-{: .note }
-We are working with the RubyGems/Bundler team to have this type of mechanism properly supported from within
-Bundler itself, which is currently being experimented with in a plugin called `bundler-compose`. Once
-> `bundler-compose`is production ready, the entire custom bundle created under the `.ruby-lsp` directory will go away
-> and we'll rely on Bundler to compose the LOAD_PATH including the `ruby-lsp` gem.
+the `ruby-lsp` in their `Gemfile`, we create a [composed
+bundle](composed-bundle) under the `.ruby-lsp` directory inside your project.
 
 ## Common issues
 
@@ -88,7 +80,9 @@ More context about this issue on https://github.com/Shopify/vscode-ruby-lsp/issu
 
 ### Bundler issues
 
-If the extension successfully activated the Ruby environment, it may still fail when trying to compose the custom bundle
+Firstly, ensure you are using the latest release of Bundler (run `bundle update --bundler`).
+
+If the extension successfully activated the Ruby environment, it may still fail when trying to compose the composed bundle
 to run the server gem. This could be a regular Bundler issue, like not being able to satisfy dependencies due to a
 conflicting version requirement, or it could be a configuration issue.
 
@@ -124,8 +118,16 @@ requests, which means the dialogue will never go away.
 
 This is always the result of a bug in the server. It should always fail gracefully without getting into a corrupt state
 that prevents it from responding to new requests coming from the editor. If you encounter this, please submit a bug
-report [here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) including the
+report [here](https://github.com/Shopify/ruby-lsp/issues/new/choose) including the
 steps that led to the server getting stuck.
+
+### Missing Features
+
+If you find that some features are working (such as formatting), but others aren't (such as go to definition),
+and are working on a codebase that uses Sorbet, then this may indicate the
+[Sorbet LSP isn't running](https://sorbet.org/docs/lsp#instructions-for-specific-language-clients).
+To avoid duplicate/conflicting behavior, Ruby LSP disables some features when a Sorbet codebase is detected, with the
+intention that Sorbet can provide better accuracy.
 
 ### Gem installation locations and permissions
 
@@ -154,8 +156,8 @@ One scenario where this is useful is if the user doesn't have permissions for th
 `gem install` fails. For example, when using the system Ruby on certain Linux distributions.
 
 {: .note }
-Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
-Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
+> Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
+> Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
 > (and potentially other version managers) override `GEM_HOME` to include the version patch resulting in
 > `~/.gem/ruby/3.3.1`. When you install a gem using `gem install --user-install`, RubyGems ignores the `GEM_HOME`
 > override and installs the gem inside `~/.gem/ruby/3.3.0`. This results in executables not being found because `chruby`
@@ -170,7 +172,7 @@ Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part
 
 ### Developing on containers
 
-See the [documentation](https://github.com/Shopify/ruby-lsp/tree/main/vscode#developing-on-containers).
+See the [documentation](vscode-extension#developing-on-containers).
 
 ## Diagnosing the problem
 
@@ -182,24 +184,28 @@ manner. Please include the steps taken to diagnose in your bug report.
 
 Check the [status center](https://github.com/Shopify/ruby-lsp/blob/main/vscode/extras/ruby_lsp_status_center.png).
 Does the server status say it's running? If it is running, but you are missing certain features, please check our
-[features documentation](https://shopify.github.io/ruby-lsp/#general-features) to ensure we already added support for it.
+[features documentation](index#general-features) to ensure we already added support for it.
 
 If the feature is listed as fully supported, but not working for you, report [an
-issue](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&projects=&template=bug_template.yml) so that we can
+issue](https://github.com/Shopify/ruby-lsp/issues/new/choose) so that we can
 assist.
 
 ### Check the VS Code output tab
 
 Many of the activation steps taken are logged in the `Ruby LSP` channel of VS Code's `Output` tab. Check the logs to see
-if any entries hint at what the issue might be. Did the extension select your preferred shell?
+if any entries hint at what the issue might be.
+
+Did the extension select your preferred shell?
 
 Did it select your preferred version manager? You can define which version manager to use with the
 `"rubyLsp.rubyVersionManager"` setting.
 
+No output in the `Ruby LSP` channel? Check the `Extension Host` channel for any errors related to extension startup.
+
 ### Enable logging
 
 You can enable logging to the VS Code output tab,
-[as described in the CONTRIBUTING](https://github.com/Shopify/ruby-lsp/blob/main/CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
+[as described in the Contributing](contributing#tracing-lsp-requests-and-responses) docs.
 
 ### Environment activation failed
 
@@ -245,5 +251,5 @@ In the meantime, you can [configure Ruby LSP to ignore a particular gem or file 
 ## After troubleshooting
 
 If after troubleshooting the Ruby LSP is still not initializing properly, please report an issue
-[here](https://github.com/Shopify/ruby-lsp/issues/new?labels=bug&template=bug_template.yml) so that we can assist
+[here](https://github.com/Shopify/ruby-lsp/issues/new/choose) so that we can assist
 in fixing the problem. Remember to include the steps taken when trying to diagnose the issue.

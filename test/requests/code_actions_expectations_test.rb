@@ -8,9 +8,14 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::CodeActions, "code_actions"
 
   def run_expectations(source)
-    params = @__params&.any? ? @__params : default_args
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI("file:///fake"))
-    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::CodeAction]))
+    params = @__params&.any? ? @__params : default_args(source)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///fake"),
+      global_state: @global_state,
+    )
+    result = nil #: Array[LanguageServer::Protocol::Interface::CodeAction]?
 
     stdout, _ = capture_io do
       result = RubyLsp::Requests::CodeActions.new(
@@ -31,10 +36,13 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
 
   private
 
-  def default_args
+  def default_args(source)
+    end_line = source.lines.count > 1 ? 1 : 0
+    end_character = source.empty? ? 0 : 1
     {
       range: {
-        start: { line: 0, character: 0 }, end: { line: 1, character: 1 },
+        start: { line: 0, character: 0 },
+        end: { line: end_line, character: end_character },
       },
       context: {
         diagnostics: [],
@@ -47,7 +55,7 @@ class CodeActionsExpectationsTest < ExpectationsTestRunner
       .select { |action| action["kind"] == "quickfix" }
       .map { |action| code_action_for_diagnostic(action) }
     refactors = expectation
-      .select { |action| action["kind"].start_with?("refactor") }
+      .select { |action| action["kind"].start_with?("refactor") || action["kind"] == "" }
       .map { |action| code_action_for_refactor(action) }
     result = [*quickfixes, *refactors]
 

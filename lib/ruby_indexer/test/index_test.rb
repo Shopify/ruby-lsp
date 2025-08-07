@@ -6,39 +6,39 @@ require_relative "test_case"
 module RubyIndexer
   class IndexTest < TestCase
     def test_deleting_one_entry_for_a_class
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
-      @index.index_single(IndexablePath.new(nil, "/fake/path/other_foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/other_foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
 
-      entries = @index["Foo"]
+      entries = @index["Foo"] #: as !nil
       assert_equal(2, entries.length)
 
-      @index.delete(IndexablePath.new(nil, "/fake/path/other_foo.rb"))
-      entries = @index["Foo"]
+      @index.delete(URI::Generic.from_path(path: "/fake/path/other_foo.rb"))
+      entries = @index["Foo"] #: as !nil
       assert_equal(1, entries.length)
     end
 
     def test_deleting_all_entries_for_a_class
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Foo
         end
       RUBY
 
-      entries = @index["Foo"]
+      entries = @index["Foo"] #: as !nil
       assert_equal(1, entries.length)
 
-      @index.delete(IndexablePath.new(nil, "/fake/path/foo.rb"))
+      @index.delete(URI::Generic.from_path(path: "/fake/path/foo.rb"))
       entries = @index["Foo"]
       assert_nil(entries)
     end
 
     def test_index_resolve
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -52,27 +52,27 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.resolve("Something", ["Foo", "Baz"])
+      entries = @index.resolve("Something", ["Foo", "Baz"]) #: as !nil
       refute_empty(entries)
-      assert_equal("Foo::Baz::Something", entries.first.name)
+      assert_equal("Foo::Baz::Something", entries.first&.name)
 
-      entries = @index.resolve("Bar", ["Foo"])
+      entries = @index.resolve("Bar", ["Foo"]) #: as !nil
       refute_empty(entries)
-      assert_equal("Foo::Bar", entries.first.name)
+      assert_equal("Foo::Bar", entries.first&.name)
 
-      entries = @index.resolve("Bar", ["Foo", "Baz"])
+      entries = @index.resolve("Bar", ["Foo", "Baz"]) #: as !nil
       refute_empty(entries)
-      assert_equal("Foo::Bar", entries.first.name)
+      assert_equal("Foo::Bar", entries.first&.name)
 
-      entries = @index.resolve("Foo::Bar", ["Foo", "Baz"])
+      entries = @index.resolve("Foo::Bar", ["Foo", "Baz"]) #: as !nil
       refute_empty(entries)
-      assert_equal("Foo::Bar", entries.first.name)
+      assert_equal("Foo::Bar", entries.first&.name)
 
       assert_nil(@index.resolve("DoesNotExist", ["Foo"]))
     end
 
     def test_accessing_with_colon_colon_prefix
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -86,13 +86,13 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index["::Foo::Baz::Something"]
+      entries = @index["::Foo::Baz::Something"] #: as !nil
       refute_empty(entries)
-      assert_equal("Foo::Baz::Something", entries.first.name)
+      assert_equal("Foo::Baz::Something", entries.first&.name)
     end
 
     def test_fuzzy_search
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Zws; end
 
         module Qtl
@@ -120,31 +120,35 @@ module RubyIndexer
     end
 
     def test_index_single_ignores_directories
-      FileUtils.mkdir("lib/this_is_a_dir.rb")
-      @index.index_single(IndexablePath.new(nil, "lib/this_is_a_dir.rb"))
-    ensure
-      FileUtils.rm_r("lib/this_is_a_dir.rb")
+      path = "#{Dir.pwd}/lib/this_is_a_dir.rb"
+      FileUtils.mkdir(path)
+
+      begin
+        @index.index_file(URI::Generic.from_path(path: path))
+      ensure
+        FileUtils.rm_r(path)
+      end
     end
 
     def test_searching_for_require_paths
-      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb", load_path_entry: "/fake"), <<~RUBY)
         class Foo
         end
       RUBY
-      @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/other_foo.rb", load_path_entry: "/fake"), <<~RUBY)
         class Foo
         end
       RUBY
 
-      assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path").map(&:require_path))
+      assert_equal(["path/other_foo", "path/foo"], @index.search_require_paths("path").map(&:require_path))
     end
 
     def test_searching_for_entries_based_on_prefix
-      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb", load_path_entry: "/fake"), <<~RUBY)
         class Foo::Bizw
         end
       RUBY
-      @index.index_single(IndexablePath.new("/fake", "/fake/path/other_foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/other_foo.rb", load_path_entry: "/fake"), <<~RUBY)
         class Foo::Bizw
         end
 
@@ -153,14 +157,14 @@ module RubyIndexer
       RUBY
 
       results = @index.prefix_search("Foo", []).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
+      assert_equal([["Foo::Bizt"], ["Foo::Bizw", "Foo::Bizw"]], results)
 
       results = @index.prefix_search("Biz", ["Foo"]).map { |entries| entries.map(&:name) }
-      assert_equal([["Foo::Bizw", "Foo::Bizw"], ["Foo::Bizt"]], results)
+      assert_equal([["Foo::Bizt"], ["Foo::Bizw", "Foo::Bizw"]], results)
     end
 
     def test_resolve_normalizes_top_level_names
-      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb", load_path_entry: "/fake"), <<~RUBY)
         class Bar; end
 
         module Foo
@@ -168,19 +172,19 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.resolve("::Foo::Bar", [])
+      entries = @index.resolve("::Foo::Bar", []) #: as !nil
       refute_nil(entries)
 
-      assert_equal("Foo::Bar", entries.first.name)
+      assert_equal("Foo::Bar", entries.first&.name)
 
-      entries = @index.resolve("::Bar", ["Foo"])
+      entries = @index.resolve("::Bar", ["Foo"]) #: as !nil
       refute_nil(entries)
 
-      assert_equal("Bar", entries.first.name)
+      assert_equal("Bar", entries.first&.name)
     end
 
     def test_resolving_aliases_to_non_existing_constants_with_conflicting_names
-      @index.index_single(IndexablePath.new("/fake", "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb", load_path_entry: "/fake"), <<~RUBY)
         class Bar
         end
 
@@ -191,7 +195,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve("BAZ", ["Foo", "Bar"]).first
+      entry = @index.resolve("BAZ", ["Foo", "Bar"])&.first
       refute_nil(entry)
 
       assert_instance_of(Entry::UnresolvedConstantAlias, entry)
@@ -229,9 +233,10 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("baz", "Foo::Bar"))
-      assert_equal("baz", entries.first.name)
-      assert_equal("Foo::Bar", T.must(entries.first.owner).name)
+      entries = @index.resolve_method("baz", "Foo::Bar") #: as !nil
+      assert_equal("baz", entries.first&.name)
+      owner = entries.first&.owner #: as !nil
+      assert_equal("Foo::Bar", owner.name)
     end
 
     def test_resolve_method_with_class_name_conflict
@@ -244,9 +249,10 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("Array", "Foo"))
-      assert_equal("Array", entries.first.name)
-      assert_equal("Foo", T.must(entries.first.owner).name)
+      entries = @index.resolve_method("Array", "Foo") #: as !nil
+      assert_equal("Array", entries.first&.name)
+      owner = entries.first&.owner #: as !nil
+      assert_equal("Foo", owner.name)
     end
 
     def test_resolve_method_attribute
@@ -256,9 +262,10 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("bar", "Foo"))
-      assert_equal("bar", entries.first.name)
-      assert_equal("Foo", T.must(entries.first.owner).name)
+      entries = @index.resolve_method("bar", "Foo") #: as !nil
+      assert_equal("bar", entries.first&.name)
+      owner = entries.first&.owner #: as !nil
+      assert_equal("Foo", owner.name)
     end
 
     def test_resolve_method_with_two_definitions
@@ -274,15 +281,17 @@ module RubyIndexer
         end
       RUBY
 
-      first_entry, second_entry = T.must(@index.resolve_method("bar", "Foo"))
+      first_entry, second_entry = @index.resolve_method("bar", "Foo") #: as !nil
 
-      assert_equal("bar", first_entry.name)
-      assert_equal("Foo", T.must(first_entry.owner).name)
-      assert_includes(first_entry.comments, "Hello from first `bar`")
+      assert_equal("bar", first_entry&.name)
+      owner = first_entry&.owner #: as !nil
+      assert_equal("Foo", owner.name)
+      assert_includes(first_entry&.comments, "Hello from first `bar`")
 
-      assert_equal("bar", second_entry.name)
-      assert_equal("Foo", T.must(second_entry.owner).name)
-      assert_includes(second_entry.comments, "Hello from second `bar`")
+      assert_equal("bar", second_entry&.name)
+      owner = second_entry&.owner #: as !nil
+      assert_equal("Foo", owner.name)
+      assert_includes(second_entry&.comments, "Hello from second `bar`")
     end
 
     def test_resolve_method_inherited_only
@@ -296,9 +305,8 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve_method("baz", "Foo", inherited_only: true).first)
-
-      assert_equal("Bar", T.must(entry.owner).name)
+      entry = @index.resolve_method("baz", "Foo", inherited_only: true)&.first #: as !nil
+      assert_equal("Bar", entry.owner&.name)
     end
 
     def test_resolve_method_inherited_only_for_prepended_module
@@ -334,7 +342,7 @@ module RubyIndexer
       entries = @index.prefix_search("qz")
       refute_empty(entries)
 
-      entry = T.must(T.must(entries.first).first)
+      entry = entries.first&.first #: as !nil
       assert_equal("qzx", entry.name)
     end
 
@@ -343,18 +351,18 @@ module RubyIndexer
         raise "Prism fixtures not found. Run `git submodule update --init` to fetch them."
       end
 
-      fixtures = Dir.glob("test/fixtures/prism/test/prism/fixtures/**/*.txt")
+      fixtures = Dir.glob("#{Dir.pwd}/test/fixtures/prism/test/prism/fixtures/**/*.txt")
 
       fixtures.each do |fixture|
-        indexable_path = IndexablePath.new("", fixture)
-        @index.index_single(indexable_path)
+        uri = URI::Generic.from_path(path: fixture)
+        @index.index_file(uri)
       end
 
       refute_empty(@index)
     end
 
     def test_index_single_does_not_fail_for_non_existing_file
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"))
+      @index.index_file(URI::Generic.from_path(path: "/fake/path/foo.rb"))
       entries_after_indexing = @index.names
       assert_equal(@default_indexed_entries.keys, entries_after_indexing)
     end
@@ -720,6 +728,30 @@ module RubyIndexer
       assert_equal(["A", "ALIAS"], @index.linearized_ancestors_of("A"))
     end
 
+    def test_linearizing_ancestors_for_classes_with_overridden_parents
+      index(<<~RUBY)
+        # Find the re-open of a class first, without specifying a parent
+        class Child
+        end
+
+        # Now, find the actual definition of the class, which includes a parent
+        class Parent; end
+        class Child < Parent
+        end
+      RUBY
+
+      assert_equal(
+        [
+          "Child",
+          "Parent",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Child"),
+      )
+    end
+
     def test_resolving_an_inherited_method
       index(<<~RUBY)
         module Foo
@@ -735,13 +767,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve_method("baz", "Wow")&.first)
+      entry = @index.resolve_method("baz", "Wow")&.first #: as !nil
       assert_equal("baz", entry.name)
-      assert_equal("Foo", T.must(entry.owner).name)
+      assert_equal("Foo", entry.owner&.name)
 
-      entry = T.must(@index.resolve_method("qux", "Wow")&.first)
+      entry = @index.resolve_method("qux", "Wow")&.first #: as !nil
       assert_equal("qux", entry.name)
-      assert_equal("Bar", T.must(entry.owner).name)
+      assert_equal("Bar", entry.owner&.name)
     end
 
     def test_resolving_an_inherited_method_lands_on_first_match
@@ -761,12 +793,12 @@ module RubyIndexer
         end
       RUBY
 
-      entries = T.must(@index.resolve_method("qux", "Wow"))
+      entries = @index.resolve_method("qux", "Wow") #: as !nil
       assert_equal(1, entries.length)
 
-      entry = T.must(entries.first)
+      entry = entries.first #: as !nil
       assert_equal("qux", entry.name)
-      assert_equal("Foo", T.must(entry.owner).name)
+      assert_equal("Foo", entry.owner&.name)
     end
 
     def test_handle_change_clears_ancestor_cache_if_tree_changed
@@ -782,8 +814,8 @@ module RubyIndexer
             end
           RUBY
 
-          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
-          @index.index_single(indexable_path)
+          uri = URI::Generic.from_path(path: File.join(dir, "foo.rb"))
+          @index.index_file(uri)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -796,7 +828,8 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(indexable_path)
+          path = uri.full_path #: as !nil
+          @index.handle_change(uri, File.read(path))
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -816,8 +849,8 @@ module RubyIndexer
             end
           RUBY
 
-          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
-          @index.index_single(indexable_path)
+          uri = URI::Generic.from_path(path: File.join(dir, "foo.rb"))
+          @index.index_file(uri)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -833,7 +866,8 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(indexable_path)
+          path = uri.full_path #: as !nil
+          @index.handle_change(uri, File.read(path))
           refute_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -852,8 +886,8 @@ module RubyIndexer
             end
           RUBY
 
-          indexable_path = IndexablePath.new(nil, File.join(dir, "foo.rb"))
-          @index.index_single(indexable_path)
+          uri = URI::Generic.from_path(path: File.join(dir, "foo.rb"))
+          @index.index_file(uri)
 
           assert_equal(["Bar", "Foo", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
 
@@ -866,7 +900,8 @@ module RubyIndexer
             end
           RUBY
 
-          @index.handle_change(indexable_path)
+          path = uri.full_path #: as !nil
+          @index.handle_change(uri, File.read(path))
           assert_empty(@index.instance_variable_get(:@ancestors))
           assert_equal(["Bar", "Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Bar"))
         end
@@ -900,7 +935,7 @@ module RubyIndexer
         CONST = 4
       RUBY
 
-      entry = T.must(@index.resolve("CONST", ["Namespace", "Bar"])&.first)
+      entry = @index.resolve("CONST", ["Namespace", "Bar"])&.first #: as !nil
       assert_equal(14, entry.location.start_line)
     end
 
@@ -921,10 +956,10 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve("Foo::CONST::TARGET", [])&.first)
+      entry = @index.resolve("Foo::CONST::TARGET", [])&.first #: as !nil
       assert_equal(2, entry.location.start_line)
 
-      entry = T.must(@index.resolve("Namespace::Bar::CONST::TARGET", [])&.first)
+      entry = @index.resolve("Namespace::Bar::CONST::TARGET", [])&.first #: as !nil
       assert_equal(2, entry.location.start_line)
     end
 
@@ -942,10 +977,10 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve("CONST", ["Namespace", "Child"])&.first)
+      entry = @index.resolve("CONST", ["Namespace", "Child"])&.first #: as !nil
       assert_equal(2, entry.location.start_line)
 
-      entry = T.must(@index.resolve("Namespace::Child::CONST", [])&.first)
+      entry = @index.resolve("Namespace::Child::CONST", [])&.first #: as !nil
       assert_equal(5, entry.location.start_line)
     end
 
@@ -971,13 +1006,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve("CONST", ["Foo"])&.first)
+      entry = @index.resolve("CONST", ["Foo"])&.first #: as !nil
       assert_equal(6, entry.location.start_line)
 
-      entry = T.must(@index.resolve("Foo::CONST", [])&.first)
+      entry = @index.resolve("Foo::CONST", [])&.first #: as !nil
       assert_equal(6, entry.location.start_line)
 
-      entry = T.must(@index.resolve("Bar::CONST", [])&.first)
+      entry = @index.resolve("Bar::CONST", [])&.first #: as !nil
       assert_equal(15, entry.location.start_line)
     end
 
@@ -1001,7 +1036,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve("CONST", ["First", "Second"])&.first)
+      entry = @index.resolve("CONST", ["First", "Second"])&.first #: as !nil
       assert_equal(6, entry.location.start_line)
     end
 
@@ -1013,11 +1048,11 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
+      foo_entry = @index.resolve("FOO", ["Namespace"])&.first #: as !nil
       assert_equal(2, foo_entry.location.start_line)
       assert_instance_of(Entry::ConstantAlias, foo_entry)
 
-      bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
+      bar_entry = @index.resolve("BAR", ["Namespace"])&.first #: as !nil
       assert_equal(3, bar_entry.location.start_line)
       assert_instance_of(Entry::ConstantAlias, bar_entry)
     end
@@ -1031,15 +1066,15 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("FOO", ["Namespace"])&.first)
+      foo_entry = @index.resolve("FOO", ["Namespace"])&.first #: as !nil
       assert_equal(2, foo_entry.location.start_line)
       assert_instance_of(Entry::ConstantAlias, foo_entry)
 
-      bar_entry = T.must(@index.resolve("BAR", ["Namespace"])&.first)
+      bar_entry = @index.resolve("BAR", ["Namespace"])&.first #: as !nil
       assert_equal(3, bar_entry.location.start_line)
       assert_instance_of(Entry::ConstantAlias, bar_entry)
 
-      baz_entry = T.must(@index.resolve("BAZ", ["Namespace"])&.first)
+      baz_entry = @index.resolve("BAZ", ["Namespace"])&.first #: as !nil
       assert_equal(4, baz_entry.location.start_line)
       assert_instance_of(Entry::ConstantAlias, baz_entry)
     end
@@ -1061,7 +1096,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.resolve("Other::ALIAS::CONST", ["Third"])&.first)
+      entry = @index.resolve("Other::ALIAS::CONST", ["Third"])&.first #: as !nil
       assert_kind_of(Entry::Constant, entry)
       assert_equal("Original::Something::CONST", entry.name)
     end
@@ -1076,7 +1111,7 @@ module RubyIndexer
         FOO::CONST
       RUBY
 
-      entry = T.must(@index.resolve("FOO::CONST", [])&.first)
+      entry = @index.resolve("FOO::CONST", [])&.first #: as !nil
       assert_kind_of(Entry::Constant, entry)
       assert_equal("Foo::CONST", entry.name)
     end
@@ -1087,7 +1122,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("Foo::Bar", [])&.first)
+      foo_entry = @index.resolve("Foo::Bar", [])&.first #: as !nil
       assert_equal(1, foo_entry.location.start_line)
       assert_instance_of(Entry::Class, foo_entry)
     end
@@ -1113,7 +1148,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("A::B::Foo::CONST", ["A", "B"])&.first)
+      foo_entry = @index.resolve("A::B::Foo::CONST", ["A", "B"])&.first #: as !nil
       assert_equal(2, foo_entry.location.start_line)
     end
 
@@ -1131,7 +1166,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("Entry::CONST", ["Namespace", "Index"])&.first)
+      foo_entry = @index.resolve("Entry::CONST", ["Namespace", "Index"])&.first #: as !nil
       assert_equal(3, foo_entry.location.start_line)
     end
 
@@ -1150,7 +1185,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
+      foo_entry = @index.resolve("CONST", ["Namespace", "Index"])&.first #: as !nil
       assert_equal(6, foo_entry.location.start_line)
     end
 
@@ -1167,7 +1202,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("CONST", ["Namespace", "Index"])&.first)
+      foo_entry = @index.resolve("CONST", ["Namespace", "Index"])&.first #: as !nil
       assert_equal(1, foo_entry.location.start_line)
     end
 
@@ -1186,9 +1221,9 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.instance_variable_completion_candidates("@", "Bar")&.first)
+      entry = @index.instance_variable_completion_candidates("@", "Bar").first #: as !nil
       assert_equal("@bar", entry.name)
-      assert_equal("Bar", T.must(entry.owner).name)
+      assert_equal("Bar", entry.owner&.name)
     end
 
     def test_resolving_a_qualified_reference
@@ -1209,7 +1244,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = T.must(@index.resolve("Third::CONST", ["Foo"])&.first)
+      foo_entry = @index.resolve("Third::CONST", ["Foo"])&.first #: as !nil
       assert_equal(9, foo_entry.location.start_line)
     end
 
@@ -1222,9 +1257,9 @@ module RubyIndexer
         class Object; end
       RUBY
 
-      entries = @index["Object"]
+      entries = @index["Object"] #: as !nil
       assert_equal(2, entries.length)
-      reopened_entry = entries.last
+      reopened_entry = entries.last #: as Entry::Class
       assert_equal("::BasicObject", reopened_entry.parent_class)
       assert_equal(["Object", "Kernel", "BasicObject"], @index.linearized_ancestors_of("Object"))
     end
@@ -1234,9 +1269,9 @@ module RubyIndexer
         class BasicObject; end
       RUBY
 
-      entries = @index["BasicObject"]
+      entries = @index["BasicObject"] #: as !nil
       assert_equal(2, entries.length)
-      reopened_entry = entries.last
+      reopened_entry = entries.last #: as Entry::Class
       assert_nil(reopened_entry.parent_class)
       assert_equal(["BasicObject"], @index.linearized_ancestors_of("BasicObject"))
     end
@@ -1300,7 +1335,7 @@ module RubyIndexer
     end
 
     def test_resolving_method_inside_singleton_context
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             class << self
@@ -1314,14 +1349,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve_method("found_me!", "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>")&.first
+      entry = @index.resolve_method("found_me!", "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>")&.first #: as !nil
       refute_nil(entry)
-
-      assert_equal("found_me!", T.must(entry).name)
+      assert_equal("found_me!", entry.name)
     end
 
     def test_resolving_constants_in_singleton_contexts
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             CONST = 3
@@ -1340,13 +1374,13 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve("CONST", ["Foo", "Bar", "<Class:Bar>", "Baz", "<Class:Baz>"])&.first
+      entry = @index.resolve("CONST", ["Foo", "Bar", "<Class:Bar>", "Baz", "<Class:Baz>"])&.first #: as !nil
       refute_nil(entry)
-      assert_equal(9, T.must(entry).location.start_line)
+      assert_equal(9, entry.location.start_line)
     end
 
     def test_resolving_instance_variables_in_singleton_contexts
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             @a = 123
@@ -1362,21 +1396,21 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve_instance_variable("@a", "Foo::Bar::<Class:Bar>")&.first
+      entry = @index.resolve_instance_variable("@a", "Foo::Bar::<Class:Bar>")&.first #: as !nil
       refute_nil(entry)
-      assert_equal("@a", T.must(entry).name)
+      assert_equal("@a", entry.name)
 
-      entry = @index.resolve_instance_variable("@b", "Foo::Bar::<Class:Bar>")&.first
+      entry = @index.resolve_instance_variable("@b", "Foo::Bar::<Class:Bar>")&.first #: as !nil
       refute_nil(entry)
-      assert_equal("@b", T.must(entry).name)
+      assert_equal("@b", entry.name)
 
-      entry = @index.resolve_instance_variable("@c", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>")&.first
+      entry = @index.resolve_instance_variable("@c", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>")&.first #: as !nil
       refute_nil(entry)
-      assert_equal("@c", T.must(entry).name)
+      assert_equal("@c", entry.name)
     end
 
     def test_instance_variable_completion_in_singleton_contexts
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         module Foo
           class Bar
             @a = 123
@@ -1418,7 +1452,7 @@ module RubyIndexer
 
       results = @index.fuzzy_search("Zwq")
       assert_equal(1, results.length)
-      assert_equal("Zwq", results.first.name)
+      assert_equal("Zwq", results.first&.name)
     end
 
     def test_resolving_method_aliases
@@ -1440,39 +1474,39 @@ module RubyIndexer
       RUBY
 
       # baz
-      methods = @index.resolve_method("baz", "Bar")
+      methods = @index.resolve_method("baz", "Bar") #: as !nil
       refute_nil(methods)
 
-      entry = T.must(methods.first)
+      entry = methods.first #: as Entry::MethodAlias
       assert_kind_of(Entry::MethodAlias, entry)
       assert_equal("bar", entry.target.name)
-      assert_equal("Foo", T.must(entry.target.owner).name)
+      assert_equal("Foo", entry.target.owner&.name)
 
       # qux
-      methods = @index.resolve_method("qux", "Bar")
+      methods = @index.resolve_method("qux", "Bar") #: as !nil
       refute_nil(methods)
 
-      entry = T.must(methods.first)
+      entry = methods.first #: as Entry::MethodAlias
       assert_kind_of(Entry::MethodAlias, entry)
       assert_equal("hello", entry.target.name)
-      assert_equal("Bar", T.must(entry.target.owner).name)
+      assert_equal("Bar", entry.target.owner&.name)
 
       # double
-      methods = @index.resolve_method("double", "Bar")
+      methods = @index.resolve_method("double", "Bar") #: as !nil
       refute_nil(methods)
 
-      entry = T.must(methods.first)
+      entry = methods.first #: as Entry::MethodAlias
       assert_kind_of(Entry::MethodAlias, entry)
 
-      target = entry.target
+      target = entry.target #: as Entry::MethodAlias
       assert_equal("double_alias", target.name)
       assert_kind_of(Entry::MethodAlias, target)
-      assert_equal("Foo", T.must(target.owner).name)
+      assert_equal("Foo", target.owner&.name)
 
       final_target = target.target
       assert_equal("bar", final_target.name)
       assert_kind_of(Entry::Method, final_target)
-      assert_equal("Foo", T.must(final_target.owner).name)
+      assert_equal("Foo", final_target.owner&.name)
     end
 
     def test_resolving_circular_method_aliases
@@ -1486,7 +1520,7 @@ module RubyIndexer
       methods = @index.resolve_method("bar", "Foo")
       assert_nil(methods)
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"]&.first
       assert_kind_of(Entry::UnresolvedMethodAlias, entry)
     end
 
@@ -1501,7 +1535,7 @@ module RubyIndexer
       methods = @index.resolve_method("bar", "Foo")
       assert_nil(methods)
 
-      entry = T.must(@index["bar"].first)
+      entry = @index["bar"]&.first
       assert_kind_of(Entry::UnresolvedMethodAlias, entry)
     end
 
@@ -1517,18 +1551,18 @@ module RubyIndexer
         end
       RUBY
 
-      methods = @index.resolve_method("decorated_name", "Foo")
+      methods = @index.resolve_method("decorated_name", "Foo") #: as !nil
       refute_nil(methods)
 
-      entry = T.must(methods.first)
+      entry = methods.first #: as Entry::MethodAlias
       assert_kind_of(Entry::MethodAlias, entry)
 
       target = entry.target
       assert_equal("name", target.name)
       assert_kind_of(Entry::Accessor, target)
-      assert_equal("Foo", T.must(target.owner).name)
+      assert_equal("Foo", target.owner&.name)
 
-      other_decorated_name = T.must(@index["decorated_name"].find { |e| e.is_a?(Entry::UnresolvedMethodAlias) })
+      other_decorated_name = @index["decorated_name"]&.find { |e| e.is_a?(Entry::UnresolvedMethodAlias) }
       assert_kind_of(Entry::UnresolvedMethodAlias, other_decorated_name)
     end
 
@@ -1553,8 +1587,25 @@ module RubyIndexer
         end
       RUBY
 
-      entry = T.must(@index.first_unqualified_const("Bar")&.first)
+      entry = @index.first_unqualified_const("Bar")&.first #: as !nil
       assert_equal("Foo::Bar", entry.name)
+    end
+
+    def test_first_unqualified_const_prefers_exact_matches
+      index(<<~RUBY)
+        module Foo
+          class ParseResultType
+          end
+        end
+
+        module Namespace
+          class Type
+          end
+        end
+      RUBY
+
+      entry = @index.first_unqualified_const("Type")&.first #: as !nil
+      assert_equal("Namespace::Type", entry.name)
     end
 
     def test_completion_does_not_duplicate_overridden_methods
@@ -1570,7 +1621,7 @@ module RubyIndexer
 
       entries = @index.method_completion_candidates("bar", "Baz")
       assert_equal(["bar"], entries.map(&:name))
-      assert_equal("Baz", T.must(entries.first.owner).name)
+      assert_equal("Baz", entries.first&.owner&.name)
     end
 
     def test_completion_does_not_duplicate_methods_overridden_by_aliases
@@ -1586,7 +1637,7 @@ module RubyIndexer
 
       entries = @index.method_completion_candidates("bar", "Baz")
       assert_equal(["bar"], entries.map(&:name))
-      assert_equal("Baz", T.must(entries.first.owner).name)
+      assert_equal("Baz", entries.first&.owner&.name)
     end
 
     def test_decorated_parameters
@@ -1597,11 +1648,10 @@ module RubyIndexer
         end
       RUBY
 
-      methods = @index.resolve_method("bar", "Foo")
+      methods = @index.resolve_method("bar", "Foo") #: as !nil
       refute_nil(methods)
 
-      entry = T.must(methods.first)
-
+      entry = methods.first #: as Entry::Method
       assert_equal("(a, b = <default>, c: <default>)", entry.decorated_parameters)
     end
 
@@ -1613,16 +1663,15 @@ module RubyIndexer
         end
       RUBY
 
-      methods = @index.resolve_method("bar", "Foo")
+      methods = @index.resolve_method("bar", "Foo") #: as !nil
       refute_nil(methods)
 
-      entry = T.must(methods.first)
-
+      entry = methods.first #: as Entry::Method
       assert_equal("()", entry.decorated_parameters)
     end
 
     def test_linearizing_singleton_ancestors_of_singleton_when_class_has_parent
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Foo; end
 
         class Bar < Foo
@@ -1672,8 +1721,40 @@ module RubyIndexer
       )
     end
 
+    def test_extend_self
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
+        module Foo
+          def bar
+          end
+
+          extend self
+
+          def baz
+          end
+        end
+      RUBY
+
+      ["bar", "baz"].product(["Foo", "Foo::<Class:Foo>"]).each do |method, receiver|
+        entry = @index.resolve_method(method, receiver)&.first #: as !nil
+        refute_nil(entry)
+        assert_equal(method, entry.name)
+      end
+
+      assert_equal(
+        [
+          "Foo::<Class:Foo>",
+          "Foo",
+          "Module",
+          "Object",
+          "Kernel",
+          "BasicObject",
+        ],
+        @index.linearized_ancestors_of("Foo::<Class:Foo>"),
+      )
+    end
+
     def test_linearizing_singleton_ancestors
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         module First
         end
 
@@ -1714,7 +1795,7 @@ module RubyIndexer
     end
 
     def test_linearizing_singleton_ancestors_when_class_has_parent
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Foo; end
 
         class Bar < Foo
@@ -1744,7 +1825,7 @@ module RubyIndexer
     end
 
     def test_linearizing_a_module_singleton_class
-      @index.index_single(IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         module A; end
       RUBY
 
@@ -1835,7 +1916,7 @@ module RubyIndexer
         end
       RUBY
 
-      method = @index.resolve_method("==", "Foo").first
+      method = @index.resolve_method("==", "Foo")&.first #: as Entry::Method
       assert_kind_of(Entry::Method, method)
       assert_equal("==", method.name)
 
@@ -1853,13 +1934,13 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.entries_for("/fake/path/foo.rb", Entry)
+      entries = @index.entries_for("file:///fake/path/foo.rb", Entry) #: as !nil
       assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
 
-      entries = @index.entries_for("/fake/path/foo.rb", RubyIndexer::Entry::Namespace)
+      entries = @index.entries_for("file:///fake/path/foo.rb", RubyIndexer::Entry::Namespace) #: as !nil
       assert_equal(["Foo", "Bar", "Bar::<Class:Bar>"], entries.map(&:name))
 
-      entries = @index.entries_for("/fake/path/foo.rb")
+      entries = @index.entries_for("file:///fake/path/foo.rb") #: as !nil
       assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
     end
 
@@ -1892,14 +1973,29 @@ module RubyIndexer
       result = @index.constant_completion_candidates("X", ["Namespace", "Baz"])
 
       result.each do |entries|
-        name = entries.first.name
+        name = entries.first&.name
         assert(entries.all? { |e| e.name == name })
       end
 
-      assert_equal(["Namespace::XQRK", "Bar::XQRK", "XQRK"], result.map { |entries| entries.first.name })
+      assert_equal(["Namespace::XQRK", "Bar::XQRK", "XQRK"], result.map { |entries| entries.first&.name })
 
       result = @index.constant_completion_candidates("::X", ["Namespace", "Baz"])
-      assert_equal(["XQRK"], result.map { |entries| entries.first.name })
+      assert_equal(["XQRK"], result.map { |entries| entries.first&.name })
+    end
+
+    def test_constant_completion_does_not_confuse_uppercase_methods
+      index(<<~RUBY)
+        class Foo
+          def Qux
+          end
+        end
+      RUBY
+
+      candidates = @index.constant_completion_candidates("Q", [])
+      refute_includes(candidates.flat_map { |entries| entries.map(&:name) }, "Qux")
+
+      candidates = @index.constant_completion_candidates("Qux", [])
+      assert_equal(0, candidates.length)
     end
 
     def test_constant_completion_candidates_for_empty_name
@@ -1914,7 +2010,7 @@ module RubyIndexer
       RUBY
 
       result = @index.constant_completion_candidates("Baz::", [])
-      assert_includes(result.map { |entries| entries.first.name }, "Foo::Bar")
+      assert_includes(result.map { |entries| entries.first&.name }, "Foo::Bar")
     end
 
     def test_follow_alias_namespace
@@ -1972,7 +2068,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve("Namespace::Foo::CONST", ["First", "Namespace", "Foo", "InnerNamespace"])&.first
+      entry = @index.resolve("Namespace::Foo::CONST", ["First", "Namespace", "Foo", "InnerNamespace"])&.first #: as !nil
       assert_equal("Parent::CONST", entry.name)
       assert_instance_of(Entry::Constant, entry)
     end
@@ -2022,6 +2118,119 @@ module RubyIndexer
           ["First", "Namespace", "Foo", "InnerNamespace"],
         ),
       )
+    end
+
+    def test_prevents_multiple_calls_to_index_all
+      @index.index_all
+
+      assert_raises(Index::IndexNotEmptyError) do
+        @index.index_all
+      end
+    end
+
+    def test_index_can_handle_entries_from_untitled_scheme
+      uri = URI("untitled:Untitled-1")
+
+      index(<<~RUBY, uri: uri)
+        class Foo
+        end
+      RUBY
+
+      entry = @index["Foo"]&.first #: as !nil
+      refute_nil(entry, "Expected indexer to be able to handle unsaved URIs")
+      assert_equal("untitled:Untitled-1", entry.uri.to_s)
+      assert_equal("Untitled-1", entry.file_name)
+      assert_nil(entry.file_path)
+
+      @index.handle_change(uri, <<~RUBY)
+        # I added this comment!
+        class Foo
+        end
+      RUBY
+
+      entry = @index["Foo"]&.first #: as !nil
+      refute_nil(entry, "Expected indexer to be able to handle unsaved URIs")
+      assert_equal("I added this comment!", entry.comments)
+    end
+
+    def test_instance_variable_completion_returns_class_variables_too
+      index(<<~RUBY)
+        class Parent
+          @@abc = 123
+        end
+
+        class Child < Parent
+          @@adf = 123
+
+          def self.do
+          end
+        end
+      RUBY
+
+      adf, abc = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+
+      refute_nil(abc)
+      refute_nil(adf)
+
+      assert_equal("@@abc", abc&.name)
+      assert_equal("@@adf", adf&.name)
+    end
+
+    def test_class_variable_completion_from_singleton_context
+      index(<<~RUBY)
+        class Foo
+          @@hello = 123
+
+          def self.do
+          end
+        end
+      RUBY
+
+      candidates = @index.class_variable_completion_candidates("@@", "Foo::<Class:Foo>")
+      refute_empty(candidates)
+
+      assert_equal("@@hello", candidates.first&.name)
+    end
+
+    def test_resolve_class_variable_in_singleton_context
+      index(<<~RUBY)
+        class Foo
+          @@hello = 123
+        end
+      RUBY
+
+      candidates = @index.resolve_class_variable("@@hello", "Foo::<Class:Foo>") #: as !nil
+      refute_empty(candidates)
+
+      assert_equal("@@hello", candidates.first&.name)
+    end
+
+    def test_actual_nesting
+      assert_equal(["Foo"], Index.actual_nesting([], "Foo"))
+      assert_equal(["TopLevel", "Foo"], Index.actual_nesting(["First", "::TopLevel"], "Foo"))
+      assert_equal(["TopLevel", "Another", "Foo"], Index.actual_nesting(["::TopLevel", "Another"], "Foo"))
+      assert_equal(["TopLevel"], Index.actual_nesting(["First", "::TopLevel"], nil))
+    end
+
+    def test_constant_name
+      node = Prism.parse("class var::Foo; end").value.statements.body.first.constant_path
+      assert_nil(Index.constant_name(node))
+
+      node = Prism.parse("class ; end").value.statements.body.first.constant_path
+      assert_nil(Index.constant_name(node))
+
+      node = Prism.parse("class method_call; end").value.statements.body.first.constant_path
+      assert_nil(Index.constant_name(node))
+
+      node = Prism.parse("class Foo; end").value.statements.body.first.constant_path
+      assert_equal("Foo", Index.constant_name(node))
+
+      node = Prism.parse(<<~RUBY).value.statements.body.first.constant_path
+        class class Foo
+        end
+        end
+      RUBY
+      assert_nil(Index.constant_name(node))
     end
   end
 end

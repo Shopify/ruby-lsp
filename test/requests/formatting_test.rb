@@ -15,12 +15,14 @@ class FormattingTest < Minitest::Test
       "syntax_tree",
       RubyLsp::Requests::Support::SyntaxTreeFormatter.new,
     )
-    @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    source = +<<~RUBY
       class Foo
       def foo
       end
       end
     RUBY
+    @uri = URI::Generic.from_path(path: __FILE__)
+    @document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: @uri, global_state: @global_state)
   end
 
   def test_formats_with_rubocop
@@ -47,7 +49,7 @@ class FormattingTest < Minitest::Test
   def test_does_not_format_with_formatter_is_none
     original_formatter = @global_state.formatter
     @global_state.formatter = "none"
-    document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: @uri, global_state: @global_state)
     assert_nil(RubyLsp::Requests::Formatting.new(@global_state, document).perform)
   ensure
     @global_state.formatter = original_formatter
@@ -60,7 +62,7 @@ class FormattingTest < Minitest::Test
     TXT
 
     with_syntax_tree_config_file(config_contents) do
-      @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+      @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
         class Foo
         def foo
         {one: "#{"a" * 50}", two: "#{"b" * 50}"}
@@ -86,7 +88,7 @@ class FormattingTest < Minitest::Test
   def test_syntax_tree_formatting_ignores_syntax_invalid_documents
     require "ruby_lsp/requests/formatting"
     @global_state.formatter = "syntax_tree"
-    document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: @uri, global_state: @global_state)
     assert_nil(RubyLsp::Requests::Formatting.new(@global_state, document).perform)
   end
 
@@ -96,7 +98,7 @@ class FormattingTest < Minitest::Test
     TXT
 
     with_syntax_tree_config_file(config_contents) do
-      @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+      @document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
         class Foo
         def foo
         end
@@ -107,12 +109,12 @@ class FormattingTest < Minitest::Test
   end
 
   def test_rubocop_formatting_ignores_syntax_invalid_documents
-    document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    document = RubyLsp::RubyDocument.new(source: "def foo", version: 1, uri: @uri, global_state: @global_state)
     assert_nil(RubyLsp::Requests::Formatting.new(@global_state, document).perform)
   end
 
   def test_returns_nil_if_document_is_already_formatted
-    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: URI::Generic.from_path(path: __FILE__))
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       # typed: strict
       # frozen_string_literal: true
 
@@ -149,7 +151,7 @@ class FormattingTest < Minitest::Test
       end
     end
 
-    @global_state.register_formatter("my-custom-formatter", T.unsafe(formatter_class).new)
+    @global_state.register_formatter("my-custom-formatter", formatter_class.new)
     assert_includes(formatted_document("my-custom-formatter"), "# formatter by my-custom-formatter")
   end
 

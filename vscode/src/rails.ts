@@ -14,10 +14,7 @@ export class Rails {
   }
 
   // Runs `bin/rails generate` with the given generator (e.g.: `controller`, `model`, etc.) and the desired arguments
-  async generate(
-    generatorWithArguments: string,
-    selectedWorkspace: Workspace | undefined,
-  ) {
+  async generate(generatorWithArguments: string, selectedWorkspace: Workspace | undefined) {
     const workspace = selectedWorkspace ?? (await this.showWorkspacePick());
 
     if (!workspace) {
@@ -51,10 +48,7 @@ export class Rails {
   }
 
   // Invokes `bin/rails destroy` to undo the changes made by a `generate` command
-  async destroy(
-    generatorWithArguments: string,
-    selectedWorkspace: Workspace | undefined,
-  ) {
+  async destroy(generatorWithArguments: string, selectedWorkspace: Workspace | undefined) {
     const workspace = selectedWorkspace ?? (await this.showWorkspacePick());
 
     if (!workspace) {
@@ -93,10 +87,7 @@ export class Rails {
     );
   }
 
-  private async revealFormattedFiles(
-    workspace: Workspace,
-    createdFiles: string[],
-  ) {
+  private async revealFormattedFiles(workspace: Workspace, createdFiles: string[]) {
     for (const file of createdFiles) {
       const uri = vscode.Uri.joinPath(workspace.workspaceFolder.uri, file);
 

@@ -403,14 +403,108 @@ module RubyLsp
       assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_receiver_type_class_variables_in_class_body
+      node_context = index_and_locate(<<~RUBY, { line: 1, character: 2 })
+        class Foo
+          @@hello1
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_class_variables_in_singleton_method
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Foo
+          def self.bar
+            @@hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_class_variables_in_singleton_block_body
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Foo
+          class << self
+            @@hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_class_variables_in_singleton_block_method
+      node_context = index_and_locate(<<~RUBY, { line: 3, character: 6 })
+        class Foo
+          class << self
+            def bar
+              @@hello1
+            end
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_class_variables_in_instance_method
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        class Foo
+          def bar
+            @@hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_top_level_class_variables
+      node_context = index_and_locate(<<~RUBY, { line: 0, character: 0 })
+        @@foo
+      RUBY
+
+      assert_equal("Object", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_object_instantiation_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 1, character: 8 })
+        class Foo; end
+        Foo.new.bar
+      RUBY
+
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_object_instantiation_receiver_is_ignored_if_new_is_overridden
+      node_context = index_and_locate(<<~RUBY, { line: 8, character: 8 })
+        module Bar
+          def new; end
+        end
+
+        class Foo
+          extend Bar
+        end
+
+        Foo.new.bar
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
     private
 
     def index_and_locate(source, position)
-      @index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), source)
+      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), source)
       document = RubyLsp::RubyDocument.new(
         source: source,
         version: 1,
         uri: URI::Generic.build(scheme: "file", path: "/fake/path/foo.rb"),
+        global_state: RubyLsp::GlobalState.new,
       )
       document.locate_node(position)
     end

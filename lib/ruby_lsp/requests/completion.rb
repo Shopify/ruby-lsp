@@ -8,12 +8,8 @@ module RubyLsp
     # The [completion](https://microsoft.github.io/language-server-protocol/specification#textDocument_completion)
     # suggests possible completions according to what the developer is typing.
     class Completion < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::CompletionOptions) }
+        #: -> Interface::CompletionOptions
         def provider
           Interface::CompletionOptions.new(
             resolve_provider: true,
@@ -25,26 +21,19 @@ module RubyLsp
         end
       end
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          global_state: GlobalState,
-          params: T::Hash[Symbol, T.untyped],
-          sorbet_level: RubyDocument::SorbetLevel,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, GlobalState global_state, Hash[Symbol, untyped] params, SorbetLevel sorbet_level, Prism::Dispatcher dispatcher) -> void
       def initialize(document, global_state, params, sorbet_level, dispatcher)
         super()
-        @target = T.let(nil, T.nilable(Prism::Node))
+        @target = nil #: Prism::Node?
         @dispatcher = dispatcher
         # Completion always receives the position immediately after the character that was just typed. Here we adjust it
         # back by 1, so that we find the right node
-        char_position = document.create_scanner.find_char_position(params[:position]) - 1
+        char_position, _ = document.find_index_by_position(params[:position])
+        char_position -= 1
         delegate_request_if_needed!(global_state, document, char_position)
 
         node_context = RubyDocument.locate(
-          document.parse_result.value,
+          document.ast,
           char_position,
           node_types: [
             Prism::CallNode,
@@ -62,13 +51,17 @@ module RubyLsp
             Prism::InstanceVariableOrWriteNode,
             Prism::InstanceVariableTargetNode,
             Prism::InstanceVariableWriteNode,
+            Prism::ClassVariableAndWriteNode,
+            Prism::ClassVariableOperatorWriteNode,
+            Prism::ClassVariableOrWriteNode,
+            Prism::ClassVariableReadNode,
+            Prism::ClassVariableTargetNode,
+            Prism::ClassVariableWriteNode,
           ],
           code_units_cache: document.code_units_cache,
         )
-        @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-        )
+        @response_builder = ResponseBuilders::CollectionResponseBuilder
+          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
 
         Listeners::Completion.new(
           @response_builder,
@@ -95,7 +88,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T::Array[Interface::CompletionItem]) }
+      # @override
+      #: -> Array[Interface::CompletionItem]
       def perform
         return [] unless @target
 

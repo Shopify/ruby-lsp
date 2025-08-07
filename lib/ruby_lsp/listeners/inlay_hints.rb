@@ -4,26 +4,21 @@
 module RubyLsp
   module Listeners
     class InlayHints
-      extend T::Sig
       include Requests::Support::Common
 
-      RESCUE_STRING_LENGTH = T.let("rescue".length, Integer)
+      RESCUE_STRING_LENGTH = "rescue".length #: Integer
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint],
-          hints_configuration: RequestConfig,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
-      def initialize(response_builder, hints_configuration, dispatcher)
+      #: (GlobalState, ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint], Prism::Dispatcher) -> void
+      def initialize(global_state, response_builder, dispatcher)
         @response_builder = response_builder
-        @hints_configuration = hints_configuration
+        @hints_configuration = ( # rubocop:disable Style/RedundantParentheses
+          global_state.feature_configuration(:inlayHint) #: as !nil
+        ) #: RequestConfig
 
         dispatcher.register(self, :on_rescue_node_enter, :on_implicit_node_enter)
       end
 
-      sig { params(node: Prism::RescueNode).void }
+      #: (Prism::RescueNode node) -> void
       def on_rescue_node_enter(node)
         return unless @hints_configuration.enabled?(:implicitRescue)
         return unless node.exceptions.empty?
@@ -38,7 +33,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::ImplicitNode).void }
+      #: (Prism::ImplicitNode node) -> void
       def on_implicit_node_enter(node)
         return unless @hints_configuration.enabled?(:implicitHashValue)
 

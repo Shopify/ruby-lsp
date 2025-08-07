@@ -13,7 +13,7 @@ defaults:
 
 aux_links:
   "Ruby DX Slack":
-    - "https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q"
+    - "https://shopify.github.io/ruby-lsp/invite"
   "Report an Issue":
     - "https://github.com/Shopify/ruby-lsp/issues/new/choose"
 nav_external_links:
@@ -27,6 +27,7 @@ theme: just-the-docs
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-redirect-from
 destination: ../docs
 
 # Copied from just-the-docs's _config.yml

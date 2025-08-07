@@ -9,7 +9,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
 
   def assert_expectations(source, expected)
     source = substitute_syntax_tree_version(source)
-    actual = T.cast(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::DocumentLink])
+    actual = run_expectations(source) #: as Array[LanguageServer::Protocol::Interface::DocumentLink]
     assert_equal(map_expectations(json_expectations(expected)), JSON.parse(actual.to_json))
   end
 
@@ -22,13 +22,51 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     uri = URI("file://#{@_path}")
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
     parse_result = document.parse_result
     listener = RubyLsp::Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
-    dispatcher.dispatch(parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
+  end
+
+  def test_magic_source_links_on_unsaved_files
+    source = <<~RUBY
+      # source://erb/#1
+      def bar
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/documentLink",
+        params: { textDocument: { uri: uri } },
+      )
+
+      server.pop_response
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_magic_source_links_with_invalid_uris
+    source = <<~RUBY
+      # source://some_file /#123
+      def bar
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/documentLink",
+        params: { textDocument: { uri: uri } },
+      )
+
+      server.pop_response
+      assert_empty(server.pop_response.response)
+    end
   end
 
   private

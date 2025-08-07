@@ -4,31 +4,22 @@
 module RubyLsp
   module Listeners
     class SignatureHelp
-      extend T::Sig
       include Requests::Support::Common
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::SignatureHelp,
-          global_state: GlobalState,
-          node_context: NodeContext,
-          dispatcher: Prism::Dispatcher,
-          sorbet_level: RubyDocument::SorbetLevel,
-        ).void
-      end
+      #: (ResponseBuilders::SignatureHelp response_builder, GlobalState global_state, NodeContext node_context, Prism::Dispatcher dispatcher, SorbetLevel sorbet_level) -> void
       def initialize(response_builder, global_state, node_context, dispatcher, sorbet_level)
         @sorbet_level = sorbet_level
         @response_builder = response_builder
         @global_state = global_state
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
+        @index = global_state.index #: RubyIndexer::Index
+        @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @node_context = node_context
         dispatcher.register(self, :on_call_node_enter)
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
-        return if sorbet_level_true_or_higher?(@sorbet_level)
+        return if @sorbet_level.true_or_higher?
 
         message = node.message
         return unless message
@@ -67,9 +58,7 @@ module RubyLsp
 
       private
 
-      sig do
-        params(node: Prism::CallNode, signatures: T::Array[RubyIndexer::Entry::Signature]).returns([Integer, Integer])
-      end
+      #: (Prism::CallNode node, Array[RubyIndexer::Entry::Signature] signatures) -> [Integer, Integer]
       def determine_active_signature_and_parameter(node, signatures)
         arguments_node = node.arguments
         arguments = arguments_node&.arguments || []
@@ -80,7 +69,11 @@ module RubyLsp
           signature.matches?(arguments)
         end || 0
 
-        parameter_length = [T.must(signatures[active_sig_index]).parameters.length - 1, 0].max
+        parameter_length = [
+          signatures[active_sig_index] #: as !nil
+            .parameters.length - 1,
+          0,
+        ].max
         active_parameter = (arguments.length - 1).clamp(0, parameter_length)
 
         # If there are arguments, then we need to check if there's a trailing comma after the end of the last argument
@@ -93,15 +86,7 @@ module RubyLsp
         [active_sig_index, active_parameter]
       end
 
-      sig do
-        params(
-          signatures: T::Array[RubyIndexer::Entry::Signature],
-          method_name: String,
-          methods: T::Array[RubyIndexer::Entry],
-          title: String,
-          extra_links: T.nilable(String),
-        ).returns(T::Array[Interface::SignatureInformation])
-      end
+      #: (Array[RubyIndexer::Entry::Signature] signatures, String method_name, Array[RubyIndexer::Entry] methods, String title, String? extra_links) -> Array[Interface::SignatureInformation]
       def generate_signatures(signatures, method_name, methods, title, extra_links)
         signatures.map do |signature|
           Interface::SignatureInformation.new(

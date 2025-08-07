@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "rubocop"
-require "sorbet-runtime"
 
 module RuboCop
   module Cop
@@ -29,7 +28,7 @@ module RuboCop
       class UseLanguageServerAliases < RuboCop::Cop::Base
         extend RuboCop::Cop::AutoCorrector
 
-        ALIASED_CONSTANTS = T.let([:Interface, :Transport, :Constant].freeze, T::Array[Symbol])
+        ALIASED_CONSTANTS = [:Interface, :Transport, :Constant].freeze #: Array[Symbol]
 
         MSG = "Use constant alias `%{constant}`."
 

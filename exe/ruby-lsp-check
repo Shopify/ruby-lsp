@@ -3,12 +3,8 @@
 
 # This executable checks if all automatic LSP requests run successfully on every Ruby file under the current directory
 
-require "ruby_lsp/load_sorbet"
-
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 require "ruby_lsp/internal"
-
-T::Utils.run_all_sig_blocks
 
 files = Dir.glob("#{Dir.pwd}/**/*.rb")
 
@@ -44,14 +40,14 @@ puts "\n"
 puts "Verifying that indexing executes successfully. This may take a while..."
 
 index = RubyIndexer::Index.new
-indexables = index.configuration.indexables
+uris = index.configuration.indexable_uris
 
-indexables.each_with_index do |indexable, i|
-  index.index_single(indexable)
+uris.each_with_index do |uri, i|
+  index.index_file(uri)
 rescue => e
-  errors[indexable.full_path] = e
+  errors[uri.full_path] = e
 ensure
-  print("\033[M\033[0KIndexed #{i + 1}/#{indexables.length}") unless ENV["CI"]
+  print("\033[M\033[0KIndexed #{i + 1}/#{uris.length}") unless ENV["CI"]
 end
 puts "\n"
 

@@ -63,14 +63,14 @@ module RubyLsp
     def test_applying_auto_formatter_invokes_detection
       state = GlobalState.new
       state.apply_options({ initializationOptions: { formatter: "auto" } })
-      assert_equal("rubocop", state.formatter)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     def test_applying_auto_formatter_with_rubocop_extension
       state = GlobalState.new
       stub_direct_dependencies("rubocop-rails" => "1.2.3")
       state.apply_options({ initializationOptions: { formatter: "auto" } })
-      assert_equal("rubocop", state.formatter)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     def test_applying_auto_formatter_with_rubocop_as_transitive_dependency
@@ -82,7 +82,7 @@ module RubyLsp
 
       state.apply_options({ initializationOptions: { formatter: "auto" } })
 
-      assert_equal("rubocop", state.formatter)
+      assert_equal("rubocop_internal", state.formatter)
     end
 
     def test_applying_auto_formatter_with_rubocop_as_transitive_dependency_without_config
@@ -150,12 +150,13 @@ module RubyLsp
     end
 
     def test_linter_specification
+      ::RuboCop::Version.const_set(:STRING, "1.68.0")
       state = GlobalState.new
       state.apply_options({
         initializationOptions: { linters: ["rubocop", "brakeman"] },
       })
 
-      assert_equal(["rubocop", "brakeman"], state.instance_variable_get(:@linters))
+      assert_equal(["brakeman", "rubocop_internal"], state.instance_variable_get(:@linters))
     end
 
     def test_linter_auto_detection
@@ -163,7 +164,7 @@ module RubyLsp
       state = GlobalState.new
       state.apply_options({})
 
-      assert_equal(["rubocop"], state.instance_variable_get(:@linters))
+      assert_equal(["rubocop_internal"], state.instance_variable_get(:@linters))
     end
 
     def test_specifying_empty_linters
@@ -185,18 +186,7 @@ module RubyLsp
 
       state.apply_options({})
 
-      assert_includes(state.instance_variable_get(:@linters), "rubocop")
-    end
-
-    def test_apply_options_sets_experimental_features
-      state = GlobalState.new
-      refute_predicate(state, :experimental_features)
-
-      state.apply_options({
-        initializationOptions: { experimentalFeaturesEnabled: true },
-      })
-
-      assert_predicate(state, :experimental_features)
+      assert_includes(state.instance_variable_get(:@linters), "rubocop_internal")
     end
 
     def test_type_checker_is_detected_based_on_transitive_sorbet_static
@@ -244,6 +234,145 @@ module RubyLsp
       assert(state.enabled_feature?(:semantic_highlighting))
       refute(state.enabled_feature?(:code_lens))
       assert_nil(state.enabled_feature?(:unknown_flag))
+    end
+
+    def test_enabled_feature_always_returns_true_if_all_are_enabled
+      state = GlobalState.new
+
+      state.apply_options({
+        initializationOptions: {
+          enabledFeatureFlags: {
+            all: true,
+          },
+        },
+      })
+
+      assert(state.enabled_feature?(:whatever))
+    end
+
+    def test_notifies_the_user_when_using_rubocop_addon_through_linters
+      ::RuboCop::Version.const_set(:STRING, "1.70.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { linters: ["rubocop"] } })
+
+      log = notifications.find do |n|
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal(["rubocop"], state.instance_variable_get(:@linters))
+    end
+
+    def test_notifies_the_user_when_using_rubocop_addon_through_formatter
+      ::RuboCop::Version.const_set(:STRING, "1.70.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { formatter: "rubocop" } })
+
+      log = notifications.find do |n|
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal("rubocop", state.formatter)
+    end
+
+    def test_falls_back_to_internal_integration_for_linters_if_rubocop_has_no_addon
+      ::RuboCop::Version.const_set(:STRING, "1.68.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { linters: ["rubocop"] } })
+
+      log = notifications.find do |n|
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal(["rubocop_internal"], state.instance_variable_get(:@linters))
+    end
+
+    def test_falls_back_to_internal_integration_for_formatters_if_rubocop_has_no_addon
+      ::RuboCop::Version.const_set(:STRING, "1.68.0")
+
+      state = GlobalState.new
+      notifications = state.apply_options({ initializationOptions: { formatter: "rubocop" } })
+
+      log = notifications.find do |n|
+        params = n.params #: as untyped
+        n.method == "window/logMessage" && params.message.include?("RuboCop v1.70.0")
+      end
+      refute_nil(log)
+      assert_equal("rubocop_internal", state.formatter)
+    end
+
+    def test_saves_telemetry_machine_id
+      state = GlobalState.new
+      assert_nil(state.telemetry_machine_id)
+
+      state.apply_options({ initializationOptions: { telemetryMachineId: "test_machine_id" } })
+      assert_equal("test_machine_id", state.telemetry_machine_id)
+    end
+
+    def test_default_feature_configuration
+      state = GlobalState.new
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      refute(inlay_hint_config.enabled?(:implicitRescue))
+      refute(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
+    def test_feature_configuration_with_provided_configuration
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              implicitRescue: true,
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      assert(inlay_hint_config.enabled?(:implicitRescue))
+      assert(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
+    def test_feature_configuration_with_partially_provided_configuration
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              implicitHashValue: true,
+            },
+          },
+        },
+      })
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      refute(inlay_hint_config.enabled?(:implicitRescue))
+      assert(inlay_hint_config.enabled?(:implicitHashValue))
+    end
+
+    def test_initialize_features_with_enable_all_configuration
+      state = GlobalState.new
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            inlayHint: {
+              enableAll: true,
+
+            },
+          },
+        },
+      })
+
+      inlay_hint_config = state.feature_configuration(:inlayHint) #: as !nil
+      assert(inlay_hint_config.enabled?(:implicitRescue))
+      assert(inlay_hint_config.enabled?(:implicitHashValue))
     end
 
     private

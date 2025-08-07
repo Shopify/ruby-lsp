@@ -7,32 +7,25 @@ module RubyLsp
     # request uses RuboCop to fix auto-correctable offenses in the document. This requires enabling format on save and
     # registering the ruby-lsp as the Ruby formatter.
     class Formatting < Request
-      extend T::Sig
-
       class Error < StandardError; end
 
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::DocumentFormattingRegistrationOptions) }
+        #: -> TrueClass
         def provider
-          Interface::DocumentFormattingRegistrationOptions.new(
-            document_selector: [
-              Interface::DocumentFilter.new(language: "ruby"),
-            ],
-          )
+          true
         end
       end
 
-      sig { params(global_state: GlobalState, document: RubyDocument).void }
+      #: (GlobalState global_state, RubyDocument document) -> void
       def initialize(global_state, document)
         super()
         @document = document
-        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
-        @uri = T.let(document.uri, URI::Generic)
+        @active_formatter = global_state.active_formatter #: Support::Formatter?
+        @uri = document.uri #: URI::Generic
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[Interface::TextEdit], Object))) }
+      # @override
+      #: -> (Array[Interface::TextEdit] & Object)?
       def perform
         return unless @active_formatter
         return if @document.syntax_error?

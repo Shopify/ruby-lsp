@@ -8,18 +8,24 @@ class FormattingExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Formatting, "formatting"
 
   def run_expectations(source)
-    global_state = RubyLsp::GlobalState.new
-    global_state.formatter = "rubocop"
-    global_state.register_formatter(
-      "rubocop",
+    @global_state.formatter = "rubocop_internal"
+    @global_state.register_formatter(
+      "rubocop_internal",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
-    RubyLsp::Requests::Formatting.new(global_state, document).perform&.first&.new_text
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: File.expand_path(__FILE__)),
+      global_state: @global_state,
+    )
+    RubyLsp::Requests::Formatting.new(@global_state, document).perform&.first&.new_text
+  rescue RubyLsp::Requests::Support::InternalRuboCopError
+    skip("Fixture requires a fix from Rubocop")
   end
 
   def assert_expectations(source, expected)
-    result = T.let(nil, T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit]))
+    result = nil #: Array[LanguageServer::Protocol::Interface::TextEdit]?
 
     stdout, _ = capture_io do
       result = run_expectations(source)

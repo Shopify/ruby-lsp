@@ -2,44 +2,43 @@
 # frozen_string_literal: true
 
 module RubyIndexer
+  # @abstract
   class Enhancement
-    extend T::Sig
-    extend T::Helpers
+    @enhancements = [] #: Array[Class[Enhancement]]
 
-    abstract!
+    class << self
+      #: (Class[Enhancement] child) -> void
+      def inherited(child)
+        @enhancements << child
+        super
+      end
 
-    sig { params(index: Index).void }
-    def initialize(index)
-      @index = index
+      #: (DeclarationListener listener) -> Array[Enhancement]
+      def all(listener)
+        @enhancements.map { |enhancement| enhancement.new(listener) }
+      end
+
+      # Only available for testing purposes
+      #: -> void
+      def clear
+        @enhancements.clear
+      end
+    end
+
+    #: (DeclarationListener listener) -> void
+    def initialize(listener)
+      @listener = listener
     end
 
     # The `on_extend` indexing enhancement is invoked whenever an extend is encountered in the code. It can be used to
     # register for an included callback, similar to what `ActiveSupport::Concern` does in order to auto-extend the
     # `ClassMethods` modules
-    sig do
-      overridable.params(
-        owner: T.nilable(Entry::Namespace),
-        node: Prism::CallNode,
-        file_path: String,
-        code_units_cache: T.any(
-          T.proc.params(arg0: Integer).returns(Integer),
-          Prism::CodeUnitsCache,
-        ),
-      ).void
-    end
-    def on_call_node_enter(owner, node, file_path, code_units_cache); end
+    # @overridable
+    #: (Prism::CallNode node) -> void
+    def on_call_node_enter(node); end # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
 
-    sig do
-      overridable.params(
-        owner: T.nilable(Entry::Namespace),
-        node: Prism::CallNode,
-        file_path: String,
-        code_units_cache: T.any(
-          T.proc.params(arg0: Integer).returns(Integer),
-          Prism::CodeUnitsCache,
-        ),
-      ).void
-    end
-    def on_call_node_leave(owner, node, file_path, code_units_cache); end
+    # @overridable
+    #: (Prism::CallNode node) -> void
+    def on_call_node_leave(node); end # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
   end
 end

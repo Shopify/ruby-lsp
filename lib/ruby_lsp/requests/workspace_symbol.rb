@@ -7,24 +7,25 @@ module RubyLsp
     # request allows fuzzy searching declarations in the entire project. On VS Code, use CTRL/CMD + T to search for
     # symbols.
     class WorkspaceSymbol < Request
-      extend T::Sig
       include Support::Common
 
-      sig { params(global_state: GlobalState, query: T.nilable(String)).void }
+      #: (GlobalState global_state, String? query) -> void
       def initialize(global_state, query)
         super()
         @global_state = global_state
         @query = query
-        @index = T.let(global_state.index, RubyIndexer::Index)
+        @index = global_state.index #: RubyIndexer::Index
       end
 
-      sig { override.returns(T::Array[Interface::WorkspaceSymbol]) }
+      # @override
+      #: -> Array[Interface::WorkspaceSymbol]
       def perform
         @index.fuzzy_search(@query).filter_map do |entry|
-          file_path = entry.file_path
+          uri = entry.uri
+          file_path = uri.full_path
 
           # We only show symbols declared in the workspace
-          in_dependencies = !not_in_dependencies?(file_path)
+          in_dependencies = file_path && !not_in_dependencies?(file_path)
           next if in_dependencies
 
           # We should never show private symbols when searching the entire workspace
@@ -43,7 +44,7 @@ module RubyLsp
             container_name: container.join("::"),
             kind: kind,
             location: Interface::Location.new(
-              uri: URI::Generic.from_path(path: file_path).to_s,
+              uri: uri.to_s,
               range:  Interface::Range.new(
                 start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
                 end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),

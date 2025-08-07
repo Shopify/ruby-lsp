@@ -4,7 +4,8 @@
 require "yaml"
 require "did_you_mean"
 
-require "ruby_indexer/lib/ruby_indexer/indexable_path"
+require "ruby_indexer/lib/ruby_indexer/uri"
+require "ruby_indexer/lib/ruby_indexer/visibility_scope"
 require "ruby_indexer/lib/ruby_indexer/declaration_listener"
 require "ruby_indexer/lib/ruby_indexer/reference_finder"
 require "ruby_indexer/lib/ruby_indexer/enhancement"

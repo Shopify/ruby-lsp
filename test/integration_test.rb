@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require "test_helper"
-require "open3"
 
 class IntegrationTest < Minitest::Test
   def setup
@@ -27,59 +26,166 @@ class IntegrationTest < Minitest::Test
     end
   end
 
-  def test_adds_bundler_version_as_part_of_exec_command
-    in_temp_dir do |dir|
-      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
-        source "https://rubygems.org"
-        gem "ruby-lsp", path: "#{Bundler.root}"
-      GEMFILE
+  def test_activation_script_succeeds_even_on_binary_encoding
+    ENV["LC_ALL"] = "C"
+    ENV["LANG"] = "C"
+    ENV["PS1"] = "\xE2\x96\xB7".b
 
-      Bundler.with_unbundled_env do
-        capture_subprocess_io do
-          system("bundle install")
+    _stdout, stderr, status = Open3.capture3(
+      "ruby",
+      "-EUTF-8:UTF-8",
+      File.join(__dir__, "..", "vscode", "activation.rb"),
+    )
 
-          Object.any_instance.expects(:exec).with do |env, command|
-            env.key?("BUNDLE_GEMFILE") &&
-              env.key?("BUNDLER_VERSION") &&
-              /bundle _[\d\.]+_ exec ruby-lsp/.match?(command)
-          end.once.raises(StandardError.new("stop"))
+    assert_equal(0, status.exitstatus, stderr)
 
-          # We raise intentionally to avoid continuing running the executable
-          assert_raises(StandardError) do
-            load(Gem.bin_path("ruby-lsp", "ruby-lsp"))
-          end
-        end
-      end
+    match = /RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr) #: as !nil
+    activation_string = match[1] #: as !nil
+    version, gem_path, yjit, *fields = activation_string.split("RUBY_LSP_FS")
+
+    assert_equal(RUBY_VERSION, version)
+    refute_nil(gem_path)
+    assert(yjit)
+
+    assert_includes(fields, "PS1RUBY_LSP_VS#{ENV["PS1"]}")
+
+    fields.each do |field|
+      key, value = field.split("RUBY_LSP_VS")
+      refute_equal(key.encoding, Encoding::BINARY) if key
+      refute_equal(value.encoding, Encoding::BINARY) if value
     end
   end
 
-  def test_avoids_bundler_version_if_local_bin_is_in_path
-    in_temp_dir do |dir|
-      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
-        source "https://rubygems.org"
-        gem "ruby-lsp", path: "#{Bundler.root}"
-      GEMFILE
+  def test_chruby_activation_script
+    _stdout, stderr, status = Open3.capture3(
+      "ruby",
+      "-EUTF-8:UTF-8",
+      File.join(__dir__, "..", "vscode", "chruby_activation.rb"),
+      RUBY_VERSION,
+    )
 
-      FileUtils.mkdir(File.join(dir, "bin"))
-      FileUtils.touch(File.join(dir, "bin", "bundle"))
+    assert_equal(0, status.exitstatus, stderr)
+
+    default_gems, gem_home, yjit, version = stderr.split("RUBY_LSP_ACTIVATION_SEPARATOR")
+
+    assert_equal(RUBY_VERSION, version)
+    # These may be switched in CI due to Bundler settings, so we use simpler assertions
+    assert(yjit)
+    assert(gem_home)
+    assert(default_gems)
+  end
+
+  def test_activation_script_succeeds_on_invalid_unicode
+    ENV["LC_ALL"] = "C"
+    ENV["LANG"] = "C"
+    ENV["INVALID_UTF8"] = "\xE2\x80".b
+
+    _stdout, stderr, status = Open3.capture3(
+      "ruby",
+      "-EUTF-8:UTF-8",
+      File.join(__dir__, "..", "vscode", "activation.rb"),
+    )
+
+    assert_equal(0, status.exitstatus, stderr)
+
+    match = /RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr) #: as !nil
+    activation_string = match[1] #: as !nil
+    version, gem_path, yjit, *fields = activation_string.split("RUBY_LSP_FS")
+
+    assert_equal(RUBY_VERSION, version)
+    refute_nil(gem_path)
+    assert(yjit)
+
+    fields.each do |field|
+      key, value = field.split("RUBY_LSP_VS")
+      refute_equal(key.encoding, Encoding::BINARY) if key
+      refute_equal(value.encoding, Encoding::BINARY) if value
+    end
+  end
+
+  def test_uses_same_bundler_version_as_main_app
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            stringio (3.1.7)
+
+        PLATFORMS
+          arm64-darwin-23
+          ruby
+
+        DEPENDENCIES
+          stringio
+
+        BUNDLED WITH
+          2.5.7
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
       Bundler.with_unbundled_env do
         capture_subprocess_io do
           system("bundle install")
-
-          Object.any_instance.expects(:exec).with do |env, command|
-            env.key?("BUNDLE_GEMFILE") &&
-              !env.key?("BUNDLER_VERSION") &&
-              "bundle exec ruby-lsp" == command
-          end.once.raises(StandardError.new("stop"))
-
-          ENV["PATH"] = "./bin#{File::PATH_SEPARATOR}#{ENV["PATH"]}"
-          # We raise intentionally to avoid continuing running the executable
-          assert_raises(StandardError) do
-            load(Gem.bin_path("ruby-lsp", "ruby-lsp"))
-          end
         end
       end
+
+      Bundler.with_unbundled_env do
+        launch(dir, "ruby-lsp")
+      end
+
+      assert_match(/BUNDLED WITH\n\s*2.5.7/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
+    end
+  end
+
+  def test_does_not_use_custom_binstubs_if_they_are_in_the_path
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            stringio (3.1.7)
+
+        PLATFORMS
+          arm64-darwin-23
+          ruby
+
+        DEPENDENCIES
+          stringio
+
+        BUNDLED WITH
+          2.5.7
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+      Bundler.with_unbundled_env do
+        capture_subprocess_io do
+          system("bundle install")
+        end
+      end
+
+      bin_path = File.join(dir, "bin")
+      FileUtils.mkdir(bin_path)
+      File.write(File.join(bin_path, "bundle"), <<~RUBY)
+        #!/usr/bin/env ruby
+        raise "This should not be called"
+      RUBY
+      FileUtils.chmod(0o755, File.join(bin_path, "bundle"))
+
+      Bundler.with_unbundled_env do
+        launch(dir, "ruby-lsp", { "PATH" => "#{bin_path}#{File::PATH_SEPARATOR}#{ENV["PATH"]}" })
+      end
+
+      assert_match(/BUNDLED WITH\n\s*2.5.7/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
@@ -145,12 +251,111 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_composed_bundle_includes_debug
+    in_temp_dir do |dir|
+      Bundler.with_unbundled_env do
+        launch(dir)
+
+        _stdout, stderr = capture_subprocess_io do
+          system(
+            { "BUNDLE_GEMFILE" => File.join(dir, ".ruby-lsp", "Gemfile") },
+            "bundle exec ruby -e 'require \"debug\"'",
+          )
+        end
+        refute_match(/cannot load such file/, stderr)
+      end
+    end
+  end
+
+  def test_launch_mode_with_bundle_package
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "stringio"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        capture_subprocess_io do
+          system("bundle", "install")
+          system("bundle", "package")
+        end
+
+        cached_gems = Dir.glob("#{dir}/vendor/cache/*.gem")
+        refute_empty(cached_gems)
+
+        launch(dir)
+        assert_empty(Dir.glob("#{dir}/vendor/cache/*.gem") - cached_gems)
+      end
+    end
+  end
+
+  def test_launch_mode_retries_if_setup_failed_after_successful_install
+    # RubyGems asks for confirmation when uninstalling a gem, so we need to be able to write the `y` to stdin
+    uninstall_rails = ->() {
+      stdin, _stdout, _stderr, wait_thread = Open3.popen3("gem", "uninstall", "rails")
+      stdin.write("y\n")
+      wait_thread.join
+    }
+
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "rails"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        # Generate a lockfile first
+        capture_subprocess_io { system("bundle", "install") }
+        # Uninstall the gem so that composing the bundle has to install it
+        uninstall_rails.call
+
+        # Preemptively create the bundle_env file and acquire an exclusive lock on it, so that composing the bundle will
+        # have to pause immediately after bundle installing, but before invoking Bundler.setup
+        bundle_env_path = File.join(dir, ".ruby-lsp", "bundle_env")
+        FileUtils.mkdir_p(File.dirname(bundle_env_path))
+        FileUtils.touch(bundle_env_path)
+
+        thread = Thread.new do
+          File.open(bundle_env_path) do |f|
+            f.flock(File::LOCK_EX)
+
+            # Give the bundle compose enough time to finish and get stuck on the lock
+            sleep(2)
+            # Uninstall Rails after successfully bundle installing and before invoking Bundler.setup, which will cause
+            # it to fail with `Bundler::GemNotFound`. This triggers our retry mechanism
+            uninstall_rails.call
+          end
+        end
+
+        launch(dir)
+        thread.join
+      end
+    end
+  end
+
+  def test_launching_an_older_server_version
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "ruby-lsp", "0.23.0"
+      RUBY
+
+      Bundler.with_unbundled_env do
+        capture_subprocess_io do
+          system("bundle", "install")
+        end
+
+        launch(dir)
+      end
+    end
+  end
+
   private
 
-  def launch(workspace_path)
+  def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})
     specification = Gem::Specification.find_by_name("ruby-lsp")
     paths = [specification.full_gem_path]
-    paths.concat(specification.dependencies.map { |dep| dep.to_spec.full_gem_path })
+    paths.concat(specification.dependencies.filter_map { |dep| dep.to_spec&.full_gem_path })
 
     load_path = $LOAD_PATH.filter_map do |path|
       next unless paths.any? { |gem_path| path.start_with?(gem_path) } || !path.start_with?(Bundler.bundle_path.to_s)
@@ -158,11 +363,13 @@ class IntegrationTest < Minitest::Test
       ["-I", File.expand_path(path)]
     end.uniq.flatten
 
-    stdin, stdout, stderr, wait_thr = T.unsafe(Open3).popen3(
-      Gem.ruby,
-      *load_path,
-      File.join(@root, "exe", "ruby-lsp-launcher"),
-    )
+    stdin, stdout, stderr, wait_thr = Open3 #: as untyped
+      .popen3(
+        extra_env,
+        Gem.ruby,
+        *load_path,
+        File.join(@root, "exe", exec),
+      )
     stdin.sync = true
     stdin.binmode
     stdout.sync = true
@@ -179,6 +386,13 @@ class IntegrationTest < Minitest::Test
         workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace_path).to_s }],
       },
     })
+
+    # First message is the log of initializing Ruby LSP
+    read_message(stdout)
+    # Verify that initialization didn't fail
+    initialize_response = read_message(stdout)
+    refute(initialize_response[:error], initialize_response.dig(:error, :message))
+
     send_message(stdin, { id: 2, method: "shutdown" })
     send_message(stdin, { method: "exit" })
 
@@ -187,7 +401,7 @@ class IntegrationTest < Minitest::Test
 
     # If the child process failed, it is really difficult to diagnose what's happening unless we read what was printed
     # to stderr
-    unless T.unsafe(wait_thr.value).success?
+    unless wait_thr.value.success?
       require "timeout"
 
       Timeout.timeout(5) do
@@ -204,6 +418,12 @@ class IntegrationTest < Minitest::Test
     json_message = message.to_json
     stdin.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
     stdin.flush
+  end
+
+  def read_message(stdout)
+    headers = stdout.gets("\r\n\r\n")
+    length = headers[/Content-Length: (\d+)/i, 1].to_i
+    JSON.parse(stdout.read(length), symbolize_names: true)
   end
 
   def in_temp_dir

@@ -1,11 +1,12 @@
 inherit_gem:
   rubocop-shopify: rubocop.yml
 
+plugins:
+  - rubocop-rake
+  - rubocop-minitest
+
 require:
   - rubocop-sorbet
-  - rubocop-md
-  - rubocop-minitest
-  - rubocop-rake
   - ./lib/rubocop/cop/ruby_lsp/use_language_server_aliases
   - ./lib/rubocop/cop/ruby_lsp/use_register_with_handler_method
 
@@ -21,6 +22,12 @@ AllCops:
     - "test/fixtures/**/*"
     - "test/expectations/**/*"
     - "jekyll/**/*"
+
+Layout/LeadingCommentSpace:
+  AllowRBSInlineAnnotation: true
+
+Layout/LineLength:
+  AllowedPatterns: ['\A\s*#:']
 
 Minitest/AssertPredicate:
   Enabled: true
@@ -42,8 +49,8 @@ Sorbet/TrueSigil:
     - "test/**/*.rb"
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
-    - "lib/ruby_lsp/load_sorbet.rb"
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
+    - "lib/ruby_lsp/test_reporters/test_unit_reporter.rb"
   Exclude:
     - "**/*.rake"
     - "lib/**/*.rb"
@@ -58,8 +65,9 @@ Sorbet/StrictSigil:
     - "lib/ruby_indexer/test/**/*.rb"
     - "lib/ruby-lsp.rb"
     - "lib/ruby_indexer/lib/ruby_indexer/prefix_tree.rb"
-    - "lib/ruby_lsp/load_sorbet.rb"
     - "lib/ruby_lsp/scripts/compose_bundle.rb"
+    - "lib/ruby_lsp/test_helper.rb"
+    - "lib/ruby_lsp/test_reporters/test_unit_reporter.rb"
 
 Layout/ClassStructure:
   Enabled: true

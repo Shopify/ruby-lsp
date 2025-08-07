@@ -14,28 +14,27 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       index = server.global_state.index
 
-      index.index_single(
-        RubyIndexer::IndexablePath.new(
-          "#{Dir.pwd}/lib",
-          File.expand_path(
+      index.index_file(
+        URI::Generic.from_path(
+          load_path_entry: "#{Dir.pwd}/lib",
+          path: File.expand_path(
             "../../test/fixtures/class_reference_target.rb",
             __dir__,
           ),
         ),
       )
-      index.index_single(
-        RubyIndexer::IndexablePath.new(
-          nil,
-          File.expand_path(
+      index.index_file(
+        URI::Generic.from_path(
+          path: File.expand_path(
             "../../test/fixtures/constant_reference_target.rb",
             __dir__,
           ),
         ),
       )
-      index.index_single(
-        RubyIndexer::IndexablePath.new(
-          "#{Dir.pwd}/lib",
-          File.expand_path(
+      index.index_file(
+        URI::Generic.from_path(
+          load_path_entry: "#{Dir.pwd}/lib",
+          path: File.expand_path(
             "../../lib/ruby_lsp/server.rb",
             __dir__,
           ),
@@ -56,14 +55,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         response.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
       when Array
         response.each do |location|
-          attributes = T.let(location.attributes, T.untyped)
+          attributes = location.attributes #: untyped
 
           case location
           when RubyLsp::Interface::LocationLink
-            fake_path = T.let(attributes[:targetUri].split("/").last(2).join("/"), String)
+            fake_path = attributes[:targetUri].split("/").last(2).join("/") #: String
             location.instance_variable_set(:@attributes, attributes.merge("targetUri" => "file:///#{fake_path}"))
           else
-            fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
+            fake_path = attributes[:uri].split("/").last(2).join("/") #: String
             location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
           end
         end
@@ -76,12 +75,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   def test_jumping_to_default_gems
     with_server("Pathname") do |server, uri|
       index = server.global_state.index
-      index.index_single(
-        RubyIndexer::IndexablePath.new(
-          nil,
-          "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb",
-        ),
-      )
+      index.index_file(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -165,15 +159,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     with_server("require \"bundler\"") do |server, uri|
       index = server.global_state.index
 
-      bundler_uri = URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb")
-      index.index_single(
-        RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], T.must(bundler_uri.to_standardized_path)),
+      bundler_uri = URI::Generic.from_path(
+        path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb",
+        load_path_entry: RbConfig::CONFIG["rubylibdir"],
       )
+      index.index_file(bundler_uri)
 
       Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
-        index.index_single(
-          RubyIndexer::IndexablePath.new(RbConfig::CONFIG["rubylibdir"], path),
-        )
+        index.index_file(URI::Generic.from_path(load_path_entry: RbConfig::CONFIG["rubylibdir"], path: path))
       end
 
       server.process_message(
@@ -237,10 +230,10 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       create_definition_addon
 
       with_server(source, stub_no_typechecker: true) do |server, uri|
-        server.global_state.index.index_single(
-          RubyIndexer::IndexablePath.new(
-            "#{Dir.pwd}/lib",
-            File.expand_path(
+        server.global_state.index.index_file(
+          URI::Generic.from_path(
+            load_path_entry: "#{Dir.pwd}/lib",
+            path: File.expand_path(
               "../../test/fixtures/class_reference_target.rb",
               __dir__,
             ),
@@ -319,7 +312,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         },
       })
       index = server.global_state.index
-      index.index_single(RubyIndexer::IndexablePath.new(nil, T.must(second_uri.to_standardized_path)), second_source)
+      path = second_uri.to_standardized_path #: as !nil
+      index.index_single(URI::Generic.from_path(path: path), second_source)
 
       server.process_message(
         id: 1,
@@ -388,12 +382,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source) do |server, uri|
       server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(nil, "/fake/path/bar.rb"), <<~RUBY
+        URI::Generic.from_path(path: "/fake/path/bar.rb"), <<~RUBY
           class Foo::Bar; end
         RUBY
       )
       server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(nil, "/fake/path/baz.rb"), <<~RUBY
+        URI::Generic.from_path(path: "/fake/path/baz.rb"), <<~RUBY
           class Foo::Bar; end
         RUBY
       )
@@ -593,7 +587,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
     with_server(source, URI("/fake.erb")) do |server, uri|
       server.global_state.index.index_single(
-        RubyIndexer::IndexablePath.new(nil, "/fake/path/foo.rb"), <<~RUBY
+        URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY
           class Bar
             def foo; end
 
@@ -748,6 +742,111 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
         assert_empty(server.pop_response.response)
       end
+    end
+  end
+
+  def test_definition_for_class_variables
+    source = <<~RUBY
+      class Foo
+        def foo
+          @@a ||= 1
+        end
+
+        def bar
+          @@a += 5
+        end
+
+        def baz
+          @@a
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 10 } },
+      )
+      response = server.pop_response.response
+      assert_equal(2, response.size)
+      assert_equal(2, response[0].range.start.line)
+      assert_equal(6, response[1].range.start.line)
+    end
+  end
+
+  def test_definition_for_inherited_class_variables
+    source = <<~RUBY
+      module Foo
+        def set_variable
+          @@bar = 1
+        end
+      end
+
+      class Parent
+        def set_variable
+          @@bar = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @@bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 16 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(2, response[0].range.start.line)
+      assert_equal(8, response[1].range.start.line)
+    end
+  end
+
+  def test_definition_for_class_variables_in_different_context
+    source = <<~RUBY
+      class Foo
+        @@a = 1
+
+        class << self
+          @@a = 2
+
+          def foo
+            @@a = 3
+          end
+        end
+
+        def bar
+          @@a = 4
+        end
+
+        def self.baz
+          @@a = 5
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 1 } },
+      )
+      response = server.pop_response.response
+
+      assert_equal(1, response[0].range.start.line)
+      assert_equal(4, response[1].range.start.line)
+      assert_equal(7, response[2].range.start.line)
+      assert_equal(12, response[3].range.start.line)
+      assert_equal(16, response[4].range.start.line)
     end
   end
 
@@ -1077,7 +1176,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       # typed: strict
       class Foo
         def initialize
-          @something = T.let(123, Integer)
+          @something = 123 #: Integer
         end
 
         def baz
@@ -1093,6 +1192,83 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
       )
 
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_call_node_precision
+    source = <<~RUBY
+      class Foo
+        def message
+          "hello!"
+        end
+      end
+
+      class Bar
+        def with_foo(foo)
+          @foo_message = foo.message
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      # On the `foo` receiver, we should not show any results
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 19, line: 8 } },
+      )
+      assert_empty(server.pop_response.response)
+
+      # On `message`, we should
+      server.process_message(
+        id: 2,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 23, line: 8 } },
+      )
+      refute_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_does_proper_dependency_checking_for_unsaved_files_for_methods
+    source = <<~RUBY
+      # typed: true
+      class Foo
+        def bar
+        end
+      end
+
+      Foo.new.bar
+    RUBY
+
+    with_server(source, URI("untitled:Untitled-1")) do |server, uri|
+      # On the `foo` receiver, we should not show any results
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 8, line: 6 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_does_proper_dependency_checking_for_unsaved_files_for_constants
+    source = <<~RUBY
+      class Foo
+        def bar
+        end
+      end
+
+      Foo
+    RUBY
+
+    with_server(source, URI("untitled:Untitled-1")) do |server, uri|
+      # On the `foo` receiver, we should not show any results
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 8, line: 0 } },
+      )
       assert_empty(server.pop_response.response)
     end
   end
@@ -1124,7 +1300,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
+        klass.new(response_builder, uri, nesting, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

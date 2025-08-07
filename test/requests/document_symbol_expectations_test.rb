@@ -7,21 +7,70 @@ require_relative "support/expectations_test_runner"
 class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::DocumentSymbol, "document_symbol"
 
+  def test_instance_variable_with_shorthand_assignment
+    source = <<~RUBY
+      @foo = 1
+      @bar += 2
+      @baz -= 3
+      @qux ||= 4
+      @quux &&= 5
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.ast)
+    response = listener.perform
+
+    assert_equal(5, response.size)
+
+    assert_equal("@foo", response[0]&.name)
+    assert_equal("@bar", response[1]&.name)
+    assert_equal("@baz", response[2]&.name)
+    assert_equal("@qux", response[3]&.name)
+    assert_equal("@quux", response[4]&.name)
+  end
+
+  def test_instance_variable_with_destructuring_assignment
+    source = <<~RUBY
+      @a, @b = [1, 2]
+      @c, @d, @e = [3, 4, 5]
+    RUBY
+    uri = URI("file:///fake.rb")
+
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
+
+    dispatcher = Prism::Dispatcher.new
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    dispatcher.dispatch(document.ast)
+    response = listener.perform
+
+    assert_equal(5, response.size)
+
+    assert_equal("@a", response[0]&.name)
+    assert_equal("@b", response[1]&.name)
+    assert_equal("@c", response[2]&.name)
+    assert_equal("@d", response[3]&.name)
+    assert_equal("@e", response[4]&.name)
+  end
+
   def test_labels_blank_names
     source = <<~RUBY
       def
     RUBY
     uri = URI("file:///fake.rb")
 
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(1, response.size)
-    assert_equal("<blank>", T.must(response.first).name)
+    assert_equal("<blank>", response.first&.name)
   end
 
   def test_document_symbol_addons
@@ -40,6 +89,10 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           method: "textDocument/documentSymbol",
           params: { textDocument: { uri: uri } },
         })
+
+        # Pop the re-indexing notification
+        server.pop_response
+
         result = server.pop_response
         assert_instance_of(RubyLsp::Result, result)
 
@@ -58,11 +111,11 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     uri = URI("file://#{@_path}")
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri)
+    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
@@ -92,8 +145,9 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
 
           def on_call_node_enter(node)
+            range = self #: as untyped # rubocop:disable Style/RedundantSelf
+              .range_from_node(node)
             parent = @response_builder.last
-            T.bind(self, RubyLsp::Requests::Support::Common)
             message_value = node.message
             arguments = node.arguments&.arguments
             return unless message_value == "test" && arguments&.any?
@@ -101,13 +155,13 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
             parent.children << RubyLsp::Interface::DocumentSymbol.new(
               name: arguments.first.content,
               kind: LanguageServer::Protocol::Constant::SymbolKind::METHOD,
-              selection_range: range_from_node(node),
-              range: range_from_node(node),
+              selection_range: range,
+              range: range,
             )
           end
         end
 
-        T.unsafe(klass).new(response_builder, dispatcher)
+        klass.new(response_builder, dispatcher)
       end
     end
   end

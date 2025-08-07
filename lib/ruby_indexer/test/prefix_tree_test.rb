@@ -22,19 +22,19 @@ module RubyIndexer
     end
 
     def test_multiple_items
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       ["foo", "bar", "baz"].each { |item| tree.insert(item, item) }
 
-      assert_equal(["foo", "bar", "baz"], tree.search(""))
-      assert_equal(["bar", "baz"], tree.search("b"))
+      assert_equal(["baz", "bar", "foo"], tree.search(""))
+      assert_equal(["baz", "bar"], tree.search("b"))
       assert_equal(["foo"], tree.search("fo"))
-      assert_equal(["bar", "baz"], tree.search("ba"))
+      assert_equal(["baz", "bar"], tree.search("ba"))
       assert_equal(["baz"], tree.search("baz"))
       assert_empty(tree.search("qux"))
     end
 
     def test_multiple_prefixes
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       ["fo", "foo"].each { |item| tree.insert(item, item) }
 
       assert_equal(["fo", "foo"], tree.search(""))
@@ -45,7 +45,7 @@ module RubyIndexer
     end
 
     def test_multiple_prefixes_with_shuffled_order
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       [
         "foo/bar/base",
         "foo/bar/on",
@@ -80,26 +80,26 @@ module RubyIndexer
 
       assert_equal(
         [
-          "foo/bar/support/selection",
-          "foo/bar/support/semantic",
-          "foo/bar/support/syntax",
-          "foo/bar/support/source",
+          "foo/bar/support/formatting",
+          "foo/bar/support/prefix",
+          "foo/bar/support/highlight",
+          "foo/bar/support/diagnostic",
+          "foo/bar/support/rails",
           "foo/bar/support/runner",
           "foo/bar/support/runner2",
-          "foo/bar/support/rails",
-          "foo/bar/support/diagnostic",
-          "foo/bar/support/highlight",
-          "foo/bar/support/prefix",
-          "foo/bar/support/formatting",
+          "foo/bar/support/source",
+          "foo/bar/support/syntax",
+          "foo/bar/support/semantic",
+          "foo/bar/support/selection",
         ],
         tree.search("foo/bar/support"),
       )
     end
 
     def test_deletion
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       ["foo/bar", "foo/baz"].each { |item| tree.insert(item, item) }
-      assert_equal(["foo/bar", "foo/baz"], tree.search("foo"))
+      assert_equal(["foo/baz", "foo/bar"], tree.search("foo"))
 
       tree.delete("foo/bar")
       assert_empty(tree.search("foo/bar"))
@@ -107,7 +107,7 @@ module RubyIndexer
     end
 
     def test_delete_does_not_impact_other_keys_with_the_same_value
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       tree.insert("key1", "value")
       tree.insert("key2", "value")
       assert_equal(["value", "value"], tree.search("key"))
@@ -118,7 +118,7 @@ module RubyIndexer
     end
 
     def test_deleted_node_is_removed_from_the_tree
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       tree.insert("foo/bar", "foo/bar")
       assert_equal(["foo/bar"], tree.search("foo"))
 
@@ -128,7 +128,7 @@ module RubyIndexer
     end
 
     def test_deleting_non_terminal_nodes
-      tree = PrefixTree[String].new
+      tree = PrefixTree.new #: PrefixTree[String]
       tree.insert("abc", "value1")
       tree.insert("abcdef", "value2")
 
@@ -138,7 +138,7 @@ module RubyIndexer
     end
 
     def test_overriding_values
-      tree = PrefixTree[Integer].new
+      tree = PrefixTree.new #: PrefixTree[Integer]
 
       tree.insert("foo/bar", 123)
       assert_equal([123], tree.search("foo/bar"))

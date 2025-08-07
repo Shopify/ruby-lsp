@@ -2,55 +2,34 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  #: [ParseResultType = Prism::ParseLexResult]
   class RubyDocument < Document
-    extend T::Sig
-    extend T::Generic
-
-    ParseResultType = type_member { { fixed: Prism::ParseResult } }
-
-    class SorbetLevel < T::Enum
-      enums do
-        None = new("none")
-        Ignore = new("ignore")
-        False = new("false")
-        True = new("true")
-        Strict = new("strict")
-      end
-    end
+    METHODS_THAT_CHANGE_DECLARATIONS = [
+      :private_constant,
+      :attr_reader,
+      :attr_writer,
+      :attr_accessor,
+      :alias_method,
+      :include,
+      :prepend,
+      :extend,
+      :public,
+      :protected,
+      :private,
+      :module_function,
+      :private_class_method,
+    ].freeze
 
     class << self
-      extend T::Sig
-
-      sig do
-        params(
-          node: Prism::Node,
-          char_position: Integer,
-          code_units_cache: T.any(
-            T.proc.params(arg0: Integer).returns(Integer),
-            Prism::CodeUnitsCache,
-          ),
-          node_types: T::Array[T.class_of(Prism::Node)],
-        ).returns(NodeContext)
-      end
+      #: (Prism::Node node, Integer char_position, code_units_cache: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache), ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
       def locate(node, char_position, code_units_cache:, node_types: [])
-        queue = T.let(node.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
+        queue = node.child_nodes.compact #: Array[Prism::Node?]
         closest = node
-        parent = T.let(nil, T.nilable(Prism::Node))
-        nesting_nodes = T.let(
-          [],
-          T::Array[T.any(
-            Prism::ClassNode,
-            Prism::ModuleNode,
-            Prism::SingletonClassNode,
-            Prism::DefNode,
-            Prism::BlockNode,
-            Prism::LambdaNode,
-            Prism::ProgramNode,
-          )],
-        )
+        parent = nil #: Prism::Node?
+        nesting_nodes = [] #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)]
 
         nesting_nodes << node if node.is_a?(Prism::ProgramNode)
-        call_node = T.let(nil, T.nilable(Prism::CallNode))
+        call_node = nil #: Prism::CallNode?
 
         until queue.empty?
           candidate = queue.shift
@@ -61,7 +40,7 @@ module RubyLsp
           # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
           # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
           # sibling
-          T.unsafe(queue).unshift(*candidate.child_nodes)
+          queue.unshift(*candidate.child_nodes)
 
           # Skip if the current node doesn't cover the desired position
           loc = candidate.location
@@ -134,75 +113,50 @@ module RubyLsp
       end
     end
 
-    sig do
-      returns(T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
-    end
+    #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, encoding: Encoding).void }
-    def initialize(source:, version:, uri:, encoding: Encoding::UTF_8)
+    #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
+    def initialize(source:, version:, uri:, global_state:)
       super
-      @code_units_cache = T.let(@parse_result.code_units_cache(@encoding), T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
+      @code_units_cache = @parse_result
+        .code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def parse!
       return false unless @needs_parsing
 
       @needs_parsing = false
-      @parse_result = Prism.parse(@source)
+      @parse_result = Prism.parse_lex(@source)
       @code_units_cache = @parse_result.code_units_cache(@encoding)
       true
     end
 
-    sig { override.returns(T::Boolean) }
+    #: -> Prism::ProgramNode
+    def ast
+      @parse_result.value.first
+    end
+
+    # @override
+    #: -> bool
     def syntax_error?
       @parse_result.failure?
     end
 
-    sig { override.returns(LanguageId) }
+    # @override
+    #: -> Symbol
     def language_id
-      LanguageId::Ruby
+      :ruby
     end
 
-    sig { returns(SorbetLevel) }
-    def sorbet_level
-      sigil = parse_result.magic_comments.find do |comment|
-        comment.key == "typed"
-      end&.value
-
-      case sigil
-      when "ignore"
-        SorbetLevel::Ignore
-      when "false"
-        SorbetLevel::False
-      when "true"
-        SorbetLevel::True
-      when "strict", "strong"
-        SorbetLevel::Strict
-      else
-        SorbetLevel::None
-      end
-    end
-
-    sig do
-      params(
-        range: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(T.nilable(Prism::Node))
-    end
+    #: (Hash[Symbol, untyped] range, ?node_types: Array[singleton(Prism::Node)]) -> Prism::Node?
     def locate_first_within_range(range, node_types: [])
-      scanner = create_scanner
-      start_position = scanner.find_char_position(range[:start])
-      end_position = scanner.find_char_position(range[:end])
+      start_position, end_position = find_index_by_position(range[:start], range[:end])
+
       desired_range = (start_position...end_position)
-      queue = T.let(@parse_result.value.child_nodes.compact, T::Array[T.nilable(Prism::Node)])
+      queue = ast.child_nodes.compact #: Array[Prism::Node?]
 
       until queue.empty?
         candidate = queue.shift
@@ -213,7 +167,7 @@ module RubyLsp
         # Add the next child_nodes to the queue to be processed. The order here is important! We want to move in the
         # same order as the visiting mechanism, which means searching the child nodes before moving on to the next
         # sibling
-        T.unsafe(queue).unshift(*candidate.child_nodes)
+        queue.unshift(*candidate.child_nodes)
 
         # Skip if the current node doesn't cover the desired position
         loc = candidate.location
@@ -225,19 +179,73 @@ module RubyLsp
       end
     end
 
-    sig do
-      params(
-        position: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(NodeContext)
-    end
+    #: (Hash[Symbol, untyped] position, ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
     def locate_node(position, node_types: [])
+      char_position, _ = find_index_by_position(position)
+
       RubyDocument.locate(
-        @parse_result.value,
-        create_scanner.find_char_position(position),
+        ast,
+        char_position,
         code_units_cache: @code_units_cache,
         node_types: node_types,
       )
+    end
+
+    #: -> bool
+    def should_index?
+      # This method controls when we should index documents. If there's no recent edit and the document has just been
+      # opened, we need to index it
+      return true unless @last_edit
+
+      last_edit_may_change_declarations?
+    end
+
+    private
+
+    #: -> bool
+    def last_edit_may_change_declarations?
+      case @last_edit
+      when Delete
+        # Not optimized yet. It's not trivial to identify that a declaration has been removed since the source is no
+        # longer there and we don't remember the deleted text
+        true
+      when Insert, Replace
+        position_may_impact_declarations?(@last_edit.range[:start])
+      else
+        false
+      end
+    end
+
+    #: (Hash[Symbol, Integer] position) -> bool
+    def position_may_impact_declarations?(position)
+      node_context = locate_node(position)
+      node_at_edit = node_context.node
+
+      # Adjust to the parent when editing the constant of a class/module declaration
+      if node_at_edit.is_a?(Prism::ConstantReadNode) || node_at_edit.is_a?(Prism::ConstantPathNode)
+        node_at_edit = node_context.parent
+      end
+
+      case node_at_edit
+      when Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode,
+          Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
+          Prism::ConstantPathAndWriteNode, Prism::ConstantOrWriteNode, Prism::ConstantWriteNode,
+          Prism::ConstantAndWriteNode, Prism::ConstantOperatorWriteNode, Prism::GlobalVariableAndWriteNode,
+          Prism::GlobalVariableOperatorWriteNode, Prism::GlobalVariableOrWriteNode, Prism::GlobalVariableTargetNode,
+          Prism::GlobalVariableWriteNode, Prism::InstanceVariableWriteNode, Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableTargetNode, Prism::AliasMethodNode
+        true
+      when Prism::MultiWriteNode
+        [*node_at_edit.lefts, *node_at_edit.rest, *node_at_edit.rights].any? do |node|
+          node.is_a?(Prism::ConstantTargetNode) || node.is_a?(Prism::ConstantPathTargetNode)
+        end
+      when Prism::CallNode
+        receiver = node_at_edit.receiver
+        (!receiver || receiver.is_a?(Prism::SelfNode)) && METHODS_THAT_CHANGE_DECLARATIONS.include?(node_at_edit.name)
+      else
+        false
+      end
     end
   end
 end

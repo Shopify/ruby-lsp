@@ -30,8 +30,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server, uri|
@@ -61,8 +62,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require("#{prefix}")
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server, uri|
@@ -92,8 +94,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server, uri|
@@ -123,8 +126,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server, uri|
@@ -614,9 +618,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["qux1", "qux2"], result.map(&:label))
-        assert_equal(["qux1", "qux2"], result.map(&:filter_text))
-        assert_equal(["qux1", "qux2"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux2", "qux1"], result.map(&:label))
+        assert_equal(["qux2", "qux1"], result.map(&:filter_text))
+        assert_equal(["qux2", "qux1"], result.map { |completion| completion.text_edit.new_text })
         assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
       end
     end
@@ -642,9 +646,9 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["bar", "baz"], result.map(&:label))
-        assert_equal(["bar", "baz"], result.map(&:filter_text))
-        assert_equal(["bar", "baz"], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["baz", "bar"], result.map(&:label))
+        assert_equal(["baz", "bar"], result.map(&:filter_text))
+        assert_equal(["baz", "bar"], result.map { |completion| completion.text_edit.new_text })
         assert_equal([9, 9], result.map { |completion| completion.text_edit.range.start.character })
       end
     end
@@ -683,12 +687,17 @@ class CompletionTest < Minitest::Test
 
         def bar
           q
+          self.q
         end
       end
+
+      foo = Foo.new
+      foo.q
     RUBY
 
     with_server(source) do |server, uri|
       with_file_structure(server) do
+        # Test implicit self receiver: "q"
         server.process_message(id: 1, method: "textDocument/completion", params: {
           textDocument: { uri: uri },
           position: { line: 4, character: 5 },
@@ -697,7 +706,29 @@ class CompletionTest < Minitest::Test
         result = server.pop_response.response
         assert_equal(["qux", "qux="], result.map(&:label))
         assert_equal(["qux", "qux="], result.map(&:filter_text))
-        assert_equal(["qux", "qux="], result.map { |completion| completion.text_edit.new_text })
+        assert_equal(["qux", "self.qux = "], result.map { |completion| completion.text_edit.new_text })
+
+        # Test explicit self receiver: "self.q"
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 5, character: 10 },
+        })
+
+        result = server.pop_response.response
+        assert_equal(["qux", "qux="], result.map(&:label))
+        assert_equal(["qux", "qux="], result.map(&:filter_text))
+        assert_equal(["qux", "qux = "], result.map { |completion| completion.text_edit.new_text })
+
+        # Test external receiver; "foo.q"
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 10, character: 5 },
+        })
+
+        result = server.pop_response.response
+        assert_equal(["qux", "qux="], result.map(&:label))
+        assert_equal(["qux", "qux="], result.map(&:filter_text))
+        assert_equal(["qux", "qux = "], result.map { |completion| completion.text_edit.new_text })
       end
     end
   end
@@ -783,7 +814,7 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["module", "method1", "method2"], result.map(&:label))
+        assert_equal(["module", "method2", "method1"], result.map(&:label))
       end
     end
   end
@@ -793,8 +824,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require_relative "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server|
@@ -834,8 +866,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       require_relative("#{prefix}")
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server|
@@ -878,8 +911,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require_relative "#{prefix}"
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server|
@@ -918,8 +952,9 @@ class CompletionTest < Minitest::Test
     source = <<~RUBY
       Kernel.require_relative "b"
     RUBY
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server|
@@ -961,8 +996,9 @@ class CompletionTest < Minitest::Test
       require_relative "#{prefix}"
     RUBY
 
-    end_char = T.must(source.rindex('"'))
-    start_position = { line: 0, character: T.must(source.index('"')) + 1 }
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
     end_position = { line: 0, character: end_char }
 
     with_server(source) do |server|
@@ -1044,7 +1080,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["$qar", "$qaz", "$qux", "$quux", "$qorge", "$qoo"], result.map(&:label))
+      assert_equal(["$qoo", "$qorge", "$quux", "$qux", "$qaz", "$qar"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1052,7 +1088,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["$LOADED_FEATURES", "$LOAD_PATH"], result.map(&:label))
+      assert_equal(["$LOAD_PATH", "$LOADED_FEATURES"], result.map(&:label))
       assert_equal(["global_variables.rbs", "global_variables.rbs"], result.map { _1.label_details.description })
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
@@ -1084,6 +1120,162 @@ class CompletionTest < Minitest::Test
 
       result = server.pop_response.response
       assert_equal(["$qar"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_class_variables
+    source = <<~RUBY
+      class Foo
+        def set_variables
+          @@foo = 1
+          @@foobar = 2
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @@ = 123
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@foo", "@@foobar"], result.map(&:label))
+      assert_equal(["fake.rb", "fake.rb"], result.map { _1.label_details.description })
+    end
+  end
+
+  def test_completion_for_class_variables_node
+    source = <<~RUBY
+      class Foo
+        def set_variables
+          @@foo = 1
+          @@foobar = 2
+        end
+
+        def bar
+          @@
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 6 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@foo", "@@foobar"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_inherited_class_variables
+    source = <<~RUBY
+      module Foo
+        def set_variable
+          @@bar = 9
+        end
+      end
+
+      class Parent
+        def set_variable
+          @@baz = 5
+        end
+      end
+
+      class Child < Parent
+        include Foo
+
+        def do_something
+          @
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 16, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@baz", "@@bar"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_class_variables_show_only_unique_entries
+    source = <<~RUBY
+      class Foo
+        def set_variables
+          @@foo = 1
+          @@foo = 2
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @@ = 123
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 7, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@foo"], result.map(&:label))
+    end
+  end
+
+  def test_completion_for_class_variables_in_different_context
+    source = <<~RUBY
+      class Foo
+        @@a = 1
+
+        class << self
+          @@b = 2
+
+          def foo
+            @@c = 3
+          end
+        end
+
+        def bar
+          @
+        end
+
+        def baz
+          @@ = 4
+        end
+
+        def self.foobar
+          @@d = 5
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_equal(["@@d", "@@c", "@@b", "@@a"], result.map(&:label))
     end
   end
 
@@ -1154,7 +1346,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@a", "@b"], result.map(&:label))
+      assert_equal(["@b", "@a"], result.map(&:label))
     end
   end
 
@@ -1207,7 +1399,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["baz", "bar"], result.map(&:label))
+      assert_equal(["bar", "baz"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1215,7 +1407,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["begin", "break", "baz", "bar"], result.map(&:label))
+      assert_equal(["begin", "break", "bar", "baz"], result.map(&:label))
     end
   end
 
@@ -1251,7 +1443,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@a", "@b", "@c"], result.map(&:label))
+      assert_equal(["@c", "@b", "@a"], result.map(&:label))
 
       server.process_message(id: 1, method: "textDocument/completion", params: {
         textDocument: { uri: uri },
@@ -1259,7 +1451,7 @@ class CompletionTest < Minitest::Test
       })
 
       result = server.pop_response.response
-      assert_equal(["@a", "@b", "@c"], result.map(&:label))
+      assert_equal(["@c", "@b", "@a"], result.map(&:label))
     end
   end
 
@@ -1284,7 +1476,7 @@ class CompletionTest < Minitest::Test
         position: { line: 8, character: 5 },
       })
       result = server.pop_response.response
-      assert_equal(["begin", "break", "bar", "baz"], result.map(&:label))
+      assert_equal(["begin", "break", "baz", "bar"], result.map(&:label))
     end
   end
 
@@ -1569,6 +1761,25 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_require_relative_returns_empty_result_for_unsaved_files
+    prefix = "support/"
+    source = <<~RUBY
+      require_relative "#{prefix}"
+    RUBY
+    end_char = source.rindex('"') #: as !nil
+
+    with_server(source, URI("untitled:Untitled-1")) do |server, uri|
+      with_file_structure(server) do
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        assert_empty(server.pop_response.response)
+      end
+    end
+  end
+
   private
 
   def with_file_structure(server, &block)
@@ -1596,14 +1807,11 @@ class CompletionTest < Minitest::Test
       ])
 
       index = server.global_state.index
-      indexables = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
-        RubyIndexer::IndexablePath.new(tmpdir, path)
+      uris = Dir.glob(File.join(tmpdir, "**", "*.rb")).map! do |path|
+        URI::Generic.from_path(load_path_entry: tmpdir, path: path)
       end
 
-      indexables.each do |indexable|
-        index.index_single(indexable)
-      end
-
+      uris.each { |uri| index.index_file(uri) }
       block.call(tmpdir)
     ensure
       $LOAD_PATH.delete(tmpdir)
@@ -1637,10 +1845,13 @@ class CompletionTest < Minitest::Test
           end
 
           def on_constant_read_node_enter(node)
+            range = self #: as untyped # rubocop:disable Style/RedundantSelf
+              .range_from_node(node)
+
             @response_builder << RubyLsp::Interface::CompletionItem.new(
               label: "MyCompletion",
               text_edit: RubyLsp::Interface::TextEdit.new(
-                range: T.bind(self, RubyLsp::Requests::Support::Common).range_from_node(node),
+                range: range,
                 new_text: "MyCompletion",
               ),
               kind: RubyLsp::Constant::CompletionItemKind::CONSTANT,
@@ -1648,7 +1859,7 @@ class CompletionTest < Minitest::Test
           end
         end
 
-        T.unsafe(klass).new(response_builder, nesting, dispatcher, uri)
+        klass.new(response_builder, nesting, dispatcher, uri)
       end
 
       def activate(global_state, outgoing_queue); end

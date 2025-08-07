@@ -5,14 +5,12 @@ module RubyLsp
   # A minimalistic type checker to try to resolve types that can be inferred without requiring a type system or
   # annotations
   class TypeInferrer
-    extend T::Sig
-
-    sig { params(index: RubyIndexer::Index).void }
+    #: (RubyIndexer::Index index) -> void
     def initialize(index)
       @index = index
     end
 
-    sig { params(node_context: NodeContext).returns(T.nilable(Type)) }
+    #: (NodeContext node_context) -> Type?
     def infer_receiver_type(node_context)
       node = node_context.node
 
@@ -23,12 +21,15 @@ module RubyLsp
         Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode,
         Prism::SuperNode, Prism::ForwardingSuperNode
         self_receiver_handling(node_context)
+      when Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode, Prism::ClassVariableOperatorWriteNode,
+        Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode, Prism::ClassVariableTargetNode
+        infer_receiver_for_class_variables(node_context)
       end
     end
 
     private
 
-    sig { params(node: Prism::CallNode, node_context: NodeContext).returns(T.nilable(Type)) }
+    #: (Prism::CallNode node, NodeContext node_context) -> Type?
     def infer_receiver_for_call_node(node, node_context)
       receiver = node.receiver
 
@@ -77,7 +78,7 @@ module RubyLsp
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
         # class/module
-        receiver_name = constant_name(receiver)
+        receiver_name = RubyIndexer::Index.constant_name(receiver)
         return unless receiver_name
 
         resolved_receiver = @index.resolve(receiver_name, node_context.nesting)
@@ -88,30 +89,46 @@ module RubyLsp
         return Type.new("#{last}::<Class:#{last}>") if parts.empty?
 
         Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
+      when Prism::CallNode
+        raw_receiver = receiver.message
+
+        if raw_receiver == "new"
+          # When invoking `new`, we recursively infer the type of the receiver to get the class type its being invoked
+          # on and then return the attached version of that type, since it's being instantiated.
+          type = infer_receiver_for_call_node(receiver, node_context)
+
+          return unless type
+
+          # If the method `new` was overridden, then we cannot assume that it will return a new instance of the class
+          new_method = @index.resolve_method("new", type.name)&.first
+          return if new_method && new_method.owner&.name != "Class"
+
+          type.attached
+        elsif raw_receiver
+          guess_type(raw_receiver, node_context.nesting)
+        end
       else
-
-        raw_receiver = if receiver.is_a?(Prism::CallNode)
-          receiver.message
-        else
-          receiver.slice
-        end
-
-        if raw_receiver
-          guessed_name = raw_receiver
-            .delete_prefix("@")
-            .delete_prefix("@@")
-            .split("_")
-            .map(&:capitalize)
-            .join
-
-          entries = @index.resolve(guessed_name, node_context.nesting) || @index.first_unqualified_const(guessed_name)
-          name = entries&.first&.name
-          GuessedType.new(name) if name
-        end
+        guess_type(receiver.slice, node_context.nesting)
       end
     end
 
-    sig { params(node_context: NodeContext).returns(Type) }
+    #: (String raw_receiver, Array[String] nesting) -> GuessedType?
+    def guess_type(raw_receiver, nesting)
+      guessed_name = raw_receiver
+        .delete_prefix("@")
+        .delete_prefix("@@")
+        .split("_")
+        .map(&:capitalize)
+        .join
+
+      entries = @index.resolve(guessed_name, nesting) || @index.first_unqualified_const(guessed_name)
+      name = entries&.first&.name
+      return unless name
+
+      GuessedType.new(name)
+    end
+
+    #: (NodeContext node_context) -> Type
     def self_receiver_handling(node_context)
       nesting = node_context.nesting
       # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
@@ -128,31 +145,42 @@ module RubyLsp
       Type.new("#{parts.join("::")}::<Class:#{parts.last}>")
     end
 
-    sig do
-      params(
-        node: T.any(
-          Prism::ConstantPathNode,
-          Prism::ConstantReadNode,
-        ),
-      ).returns(T.nilable(String))
-    end
-    def constant_name(node)
-      node.full_name
-    rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
-           Prism::ConstantPathNode::MissingNodesInConstantPathError
-      nil
+    #: (NodeContext node_context) -> Type?
+    def infer_receiver_for_class_variables(node_context)
+      nesting_parts = node_context.nesting.dup
+
+      return Type.new("Object") if nesting_parts.empty?
+
+      nesting_parts.reverse_each do |part|
+        break unless part.include?("<Class:")
+
+        nesting_parts.pop
+      end
+
+      receiver_name = nesting_parts.join("::")
+      resolved_receiver = @index.resolve(receiver_name, node_context.nesting)&.first
+      return unless resolved_receiver&.name
+
+      Type.new(resolved_receiver.name)
     end
 
     # A known type
     class Type
-      extend T::Sig
-
-      sig { returns(String) }
+      #: String
       attr_reader :name
 
-      sig { params(name: String).void }
+      #: (String name) -> void
       def initialize(name)
         @name = name
+      end
+
+      # Returns the attached version of this type by removing the `<Class:...>` part from its name
+      #: -> Type
+      def attached
+        Type.new(
+          @name.split("::")[..-2] #: as !nil
+          .join("::"),
+        )
       end
     end
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import path from "path";
 import os from "os";
 
@@ -14,37 +13,35 @@ export interface ActivationResult {
   gemPath: string[];
 }
 
+// Changes to either one of these values have to be synchronized with a corresponding update in `activation.rb`
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
+export const VALUE_SEPARATOR = "RUBY_LSP_VS";
+export const FIELD_SEPARATOR = "RUBY_LSP_FS";
 
 export abstract class VersionManager {
-  public activationScript = [
-    `STDERR.print("${ACTIVATION_SEPARATOR}" + `,
-    "{ env: ENV.to_h, yjit: !!defined?(RubyVM::YJIT), version: RUBY_VERSION, gemPath: Gem.path }.to_json + ",
-    `"${ACTIVATION_SEPARATOR}")`,
-  ].join("");
-
   protected readonly outputChannel: WorkspaceChannel;
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
-
+  protected readonly manuallySelectRuby: () => Promise<void>;
+  protected readonly context: vscode.ExtensionContext;
   private readonly customBundleGemfile?: string;
 
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
+    context: vscode.ExtensionContext,
+    manuallySelectRuby: () => Promise<void>,
   ) {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
-    const customBundleGemfile: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
+    this.context = context;
+    this.manuallySelectRuby = manuallySelectRuby;
+    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
 
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
         ? customBundleGemfile
-        : path.resolve(
-            path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile),
-          );
+        : path.resolve(path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile));
     }
 
     this.bundleUri = this.customBundleGemfile
@@ -56,28 +53,21 @@ export abstract class VersionManager {
   // language server
   abstract activate(): Promise<ActivationResult>;
 
-  protected async runEnvActivationScript(activatedRuby: string) {
-    const result = await this.runScript(
-      `${activatedRuby} -W0 -rjson -e '${this.activationScript}'`,
-    );
+  protected async runEnvActivationScript(activatedRuby: string): Promise<ActivationResult> {
+    const activationUri = vscode.Uri.joinPath(this.context.extensionUri, "activation.rb");
 
-    const activationContent = new RegExp(
-      `${ACTIVATION_SEPARATOR}(.*)${ACTIVATION_SEPARATOR}`,
-    ).exec(result.stderr);
+    const result = await this.runScript(`${activatedRuby} -EUTF-8:UTF-8 '${activationUri.fsPath}'`);
 
-    return this.parseWithErrorHandling(activationContent![1]);
-  }
+    const activationContent = new RegExp(`${ACTIVATION_SEPARATOR}([^]*)${ACTIVATION_SEPARATOR}`).exec(result.stderr);
 
-  protected parseWithErrorHandling(json: string) {
-    try {
-      return JSON.parse(json);
-    } catch (error: any) {
-      this.outputChannel.error(
-        `Tried parsing invalid JSON environment: ${json}`,
-      );
+    const [version, gemPath, yjit, ...envEntries] = activationContent![1].split(FIELD_SEPARATOR);
 
-      throw error;
-    }
+    return {
+      version,
+      gemPath: gemPath.split(","),
+      yjit: yjit === "true",
+      env: Object.fromEntries(envEntries.map((entry) => entry.split(VALUE_SEPARATOR))),
+    };
   }
 
   // Runs the given command in the directory for the Bundle, using the user's preferred shell and inheriting the current
@@ -92,17 +82,13 @@ export abstract class VersionManager {
       shell = vscode.env.shell;
     }
 
-    this.outputChannel.info(
-      `Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`,
-    );
-    this.outputChannel.debug(
-      `Environment used for command: ${JSON.stringify(process.env)}`,
-    );
+    this.outputChannel.info(`Running command: \`${command}\` in ${this.bundleUri.fsPath} using shell: ${shell}`);
 
     return asyncExec(command, {
       cwd: this.bundleUri.fsPath,
       shell,
       env: process.env,
+      encoding: "utf-8",
     });
   }
 
@@ -113,11 +99,9 @@ export abstract class VersionManager {
       try {
         const fullUri = vscode.Uri.joinPath(uri, execName);
         await vscode.workspace.fs.stat(fullUri);
-        this.outputChannel.info(
-          `Found ${execName} executable at ${uri.fsPath}`,
-        );
+        this.outputChannel.info(`Found ${execName} executable at ${uri.fsPath}`);
         return fullUri.fsPath;
-      } catch (error: any) {
+      } catch (_error: any) {
         // continue searching
       }
     }

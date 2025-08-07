@@ -59,46 +59,38 @@ class CodeActionsFormattingTest < Minitest::Test
     )
   end
 
-  sig do
-    params(
-      diagnostic_code: String,
-      code_action_title: String,
-      source: String,
-      expected: String,
-    ).returns(T.untyped)
-  end
+  #: (String diagnostic_code, String code_action_title, String source, String expected) -> untyped
   def assert_corrects_to_expected(diagnostic_code, code_action_title, source, expected)
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: { linters: ["rubocop_internal"] },
+    })
+    global_state.register_formatter(
+      "rubocop_internal",
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
+    )
+
     document = RubyLsp::RubyDocument.new(
       source: source.dup,
       version: 1,
       uri: URI::Generic.from_path(path: __FILE__),
-      encoding: Encoding::UTF_16LE,
-    )
-
-    global_state = RubyLsp::GlobalState.new
-    global_state.apply_options({
-      initializationOptions: { linters: ["rubocop"] },
-    })
-    global_state.register_formatter(
-      "rubocop",
-      RubyLsp::Requests::Support::RuboCopFormatter.new,
+      global_state: global_state,
     )
 
     diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform
     # The source of the returned attributes may be RuboCop or Prism. Prism diagnostics don't have a code.
-    rubocop_diagnostics = T.must(diagnostics).select { _1.attributes[:source] == "RuboCop" }
-    diagnostic = T.must(T.must(rubocop_diagnostics).find { |d| d.attributes[:code] && (d.code == diagnostic_code) })
+    rubocop_diagnostics = diagnostics&.select { _1.attributes[:source] == "RuboCop" }
+    diagnostic = rubocop_diagnostics&.find { |d| d.attributes[:code] && (d.code == diagnostic_code) } #: as !nil
     range = diagnostic.range.to_hash.transform_values(&:to_hash)
     result = RubyLsp::Requests::CodeActions.new(document, range, {
-      diagnostics: [JSON.parse(T.must(diagnostic).to_json, symbolize_names: true)],
+      diagnostics: [JSON.parse(diagnostic.to_json, symbolize_names: true)],
     }).perform
 
     # CodeActions#run returns Array<CodeAction, Hash>. We're interested in the
     # hashes here, so cast to untyped and only look at those.
-    untyped_result = T.let(result, T.untyped)
+    untyped_result = result #: untyped
     selected_action = untyped_result.find do |ca|
-      code_action = T.let(ca, T.untyped)
-      code_action.respond_to?(:[]) && code_action[:title] == code_action_title
+      ca.respond_to?(:[]) && ca[:title] == code_action_title
     end
 
     # transform edits from lsp to the format RubyLsp::Document wants them
@@ -119,7 +111,7 @@ class CodeActionsFormattingTest < Minitest::Test
     assert_equal(document.source, expected)
   end
 
-  sig { params(name: String).returns([String, String]) }
+  #: (String name) -> [String, String]
   def load_expectation(name)
     source = File.read(File.join(TEST_FIXTURES_DIR, "#{name}.rb"))
     expected = File.read(File.join(TEST_EXP_DIR, "#{name}.exp.rb"))

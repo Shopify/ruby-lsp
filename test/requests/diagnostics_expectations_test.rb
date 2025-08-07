@@ -8,32 +8,37 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Diagnostics, "diagnostics"
 
   def run_expectations(source)
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: __FILE__))
-    result = T.let(nil, T.nilable(T::Array[RubyLsp::Interface::Diagnostic]))
-    global_state = RubyLsp::GlobalState.new
-    global_state.apply_options({
-      initializationOptions: { linters: ["rubocop"] },
+    result = nil #: Array[RubyLsp::Interface::Diagnostic]?
+    @global_state.apply_options({
+      initializationOptions: { linters: ["rubocop_internal"] },
     })
-    global_state.register_formatter(
-      "rubocop",
+    @global_state.register_formatter(
+      "rubocop_internal",
       RubyLsp::Requests::Support::RuboCopFormatter.new,
     )
 
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: File.expand_path(__FILE__)),
+      global_state: @global_state,
+    )
+
     stdout, _ = capture_io do
-      result = T.cast(
-        RubyLsp::Requests::Diagnostics.new(global_state, document).perform,
-        T::Array[RubyLsp::Interface::Diagnostic],
-      )
+      result = RubyLsp::Requests::Diagnostics.new(@global_state, document)
+        .perform #: as Array[RubyLsp::Interface::Diagnostic]
     end
 
     assert_empty(stdout)
 
     # On Windows, RuboCop will complain that the file is missing a carriage return at the end. We need to ignore these
-    T.must(result).reject { |diagnostic| diagnostic.source == "RuboCop" && diagnostic.code == "Layout/EndOfLine" }
+    result&.reject { |diagnostic| diagnostic.source == "RuboCop" && diagnostic.code == "Layout/EndOfLine" }
+  rescue RubyLsp::Requests::Support::InternalRuboCopError
+    skip("Fixture requires a fix from Rubocop")
   end
 
   def assert_expectations(source, expected)
-    actual = T.let(run_expectations(source), T::Array[LanguageServer::Protocol::Interface::Diagnostic])
+    actual = run_expectations(source) #: Array[LanguageServer::Protocol::Interface::Diagnostic]
 
     # Sanitize the URI keys so that it matches file:///fake and not a real path in the user machine
     actual.each do |diagnostic|

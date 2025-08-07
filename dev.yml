@@ -3,11 +3,12 @@ name: ruby-lsp
 type: ruby
 
 up:
+  - submodules
   - ruby
   - bundler
   - node:
       yarn: true
-      version: 20.9.0
+      version: 22.15.1
       packages:
         - vscode
 
@@ -17,7 +18,7 @@ commands:
   typecheck:
     aliases: ["tc"]
     run: "bundle exec srb tc"
-  ci:
+  run_ci:
     run: "bundle exec srb tc &&
       bin/rubocop &&
       bin/test &&

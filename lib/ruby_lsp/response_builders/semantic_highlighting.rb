@@ -3,71 +3,57 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = Interface::SemanticTokens]
     class SemanticHighlighting < ResponseBuilder
       class UndefinedTokenType < StandardError; end
 
-      extend T::Sig
+      TOKEN_TYPES = {
+        namespace: 0,
+        type: 1,
+        class: 2,
+        enum: 3,
+        interface: 4,
+        struct: 5,
+        typeParameter: 6,
+        parameter: 7,
+        variable: 8,
+        property: 9,
+        enumMember: 10,
+        event: 11,
+        function: 12,
+        method: 13,
+        macro: 14,
+        keyword: 15,
+        modifier: 16,
+        comment: 17,
+        string: 18,
+        number: 19,
+        regexp: 20,
+        operator: 21,
+        decorator: 22,
+      }.freeze #: Hash[Symbol, Integer]
 
-      TOKEN_TYPES = T.let(
-        {
-          namespace: 0,
-          type: 1,
-          class: 2,
-          enum: 3,
-          interface: 4,
-          struct: 5,
-          typeParameter: 6,
-          parameter: 7,
-          variable: 8,
-          property: 9,
-          enumMember: 10,
-          event: 11,
-          function: 12,
-          method: 13,
-          macro: 14,
-          keyword: 15,
-          modifier: 16,
-          comment: 17,
-          string: 18,
-          number: 19,
-          regexp: 20,
-          operator: 21,
-          decorator: 22,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
+      TOKEN_MODIFIERS = {
+        declaration: 0,
+        definition: 1,
+        readonly: 2,
+        static: 3,
+        deprecated: 4,
+        abstract: 5,
+        async: 6,
+        modification: 7,
+        documentation: 8,
+        default_library: 9,
+      }.freeze #: Hash[Symbol, Integer]
 
-      TOKEN_MODIFIERS = T.let(
-        {
-          declaration: 0,
-          definition: 1,
-          readonly: 2,
-          static: 3,
-          deprecated: 4,
-          abstract: 5,
-          async: 6,
-          modification: 7,
-          documentation: 8,
-          default_library: 9,
-        }.freeze,
-        T::Hash[Symbol, Integer],
-      )
-
-      ResponseType = type_member { { fixed: Interface::SemanticTokens } }
-
-      sig do
-        params(code_units_cache: T.any(
-          T.proc.params(arg0: Integer).returns(Integer),
-          Prism::CodeUnitsCache,
-        )).void
-      end
+      #: ((^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache) -> void
       def initialize(code_units_cache)
         super()
         @code_units_cache = code_units_cache
-        @stack = T.let([], T::Array[SemanticToken])
+        @stack = [] #: Array[SemanticToken]
       end
 
-      sig { params(location: Prism::Location, type: Symbol, modifiers: T::Array[Symbol]).void }
+      #: (Prism::Location location, Symbol type, ?Array[Symbol] modifiers) -> void
       def add_token(location, type, modifiers = [])
         end_code_unit = location.cached_end_code_units_offset(@code_units_cache)
         length = end_code_unit - location.cached_start_code_units_offset(@code_units_cache)
@@ -77,13 +63,13 @@ module RubyLsp
             start_line: location.start_line,
             start_code_unit_column: location.cached_start_code_units_column(@code_units_cache),
             length: length,
-            type: T.must(TOKEN_TYPES[type]),
+            type: TOKEN_TYPES[type], #: as !nil
             modifier: modifiers_indices,
           ),
         )
       end
 
-      sig { params(location: Prism::Location).returns(T::Boolean) }
+      #: (Prism::Location location) -> bool
       def last_token_matches?(location)
         token = @stack.last
         return false unless token
@@ -92,43 +78,34 @@ module RubyLsp
           token.start_code_unit_column == location.cached_start_code_units_column(@code_units_cache)
       end
 
-      sig { returns(T.nilable(SemanticToken)) }
+      #: -> SemanticToken?
       def last
         @stack.last
       end
 
-      sig { override.returns(T::Array[SemanticToken]) }
+      # @override
+      #: -> Array[SemanticToken]
       def response
         @stack
       end
 
       class SemanticToken
-        extend T::Sig
-
-        sig { returns(Integer) }
+        #: Integer
         attr_reader :start_line
 
-        sig { returns(Integer) }
+        #: Integer
         attr_reader :start_code_unit_column
 
-        sig { returns(Integer) }
+        #: Integer
         attr_reader :length
 
-        sig { returns(Integer) }
+        #: Integer
         attr_reader :type
 
-        sig { returns(T::Array[Integer]) }
+        #: Array[Integer]
         attr_reader :modifier
 
-        sig do
-          params(
-            start_line: Integer,
-            start_code_unit_column: Integer,
-            length: Integer,
-            type: Integer,
-            modifier: T::Array[Integer],
-          ).void
-        end
+        #: (start_line: Integer, start_code_unit_column: Integer, length: Integer, type: Integer, modifier: Array[Integer]) -> void
         def initialize(start_line:, start_code_unit_column:, length:, type:, modifier:)
           @start_line = start_line
           @start_code_unit_column = start_code_unit_column
@@ -137,7 +114,7 @@ module RubyLsp
           @modifier = modifier
         end
 
-        sig { params(type_symbol: Symbol).void }
+        #: (Symbol type_symbol) -> void
         def replace_type(type_symbol)
           type_int = TOKEN_TYPES[type_symbol]
           raise UndefinedTokenType, "Undefined token type: #{type_symbol}" unless type_int
@@ -145,7 +122,7 @@ module RubyLsp
           @type = type_int
         end
 
-        sig { params(modifier_symbols: T::Array[Symbol]).void }
+        #: (Array[Symbol] modifier_symbols) -> void
         def replace_modifier(modifier_symbols)
           @modifier = modifier_symbols.filter_map do |modifier_symbol|
             modifier_index = TOKEN_MODIFIERS[modifier_symbol]
@@ -157,19 +134,13 @@ module RubyLsp
       end
 
       class SemanticTokenEncoder
-        extend T::Sig
-
-        sig { void }
+        #: -> void
         def initialize
-          @current_row = T.let(0, Integer)
-          @current_column = T.let(0, Integer)
+          @current_row = 0 #: Integer
+          @current_column = 0 #: Integer
         end
 
-        sig do
-          params(
-            tokens: T::Array[SemanticToken],
-          ).returns(T::Array[Integer])
-        end
+        #: (Array[SemanticToken] tokens) -> Array[Integer]
         def encode(tokens)
           sorted_tokens = tokens.sort_by.with_index do |token, index|
             # Enumerable#sort_by is not deterministic when the compared values are equal.
@@ -194,7 +165,7 @@ module RubyLsp
 
         # For more information on how each number is calculated, read:
         # https://microsoft.github.io/language-server-protocol/specifications/specification-current/#textDocument_semanticTokens
-        sig { params(token: SemanticToken).returns(T::Array[Integer]) }
+        #: (SemanticToken token) -> Array[Integer]
         def compute_delta(token)
           row = token.start_line - 1
           column = token.start_code_unit_column
@@ -216,7 +187,7 @@ module RubyLsp
         # For example, [:default_library] will be encoded as
         # 0b1000000000, as :default_library is the 10th bit according
         # to the token modifiers index map.
-        sig { params(modifiers: T::Array[Integer]).returns(Integer) }
+        #: (Array[Integer] modifiers) -> Integer
         def encode_modifiers(modifiers)
           modifiers.inject(0) do |encoded_modifiers, modifier|
             encoded_modifiers | (1 << modifier)

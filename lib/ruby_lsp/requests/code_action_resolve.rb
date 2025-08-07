@@ -7,23 +7,17 @@ module RubyLsp
     # request is used to to resolve the edit field for a given code action, if it is not already provided in the
     # textDocument/codeAction response. We can use it for scenarios that require more computation such as refactoring.
     class CodeActionResolve < Request
-      extend T::Sig
       include Support::Common
 
       NEW_VARIABLE_NAME = "new_variable"
       NEW_METHOD_NAME = "new_method"
 
       class CodeActionError < StandardError; end
+      class EmptySelectionError < CodeActionError; end
+      class InvalidTargetRangeError < CodeActionError; end
+      class UnknownCodeActionError < CodeActionError; end
 
-      class Error < ::T::Enum
-        enums do
-          EmptySelection = new
-          InvalidTargetRange = new
-          UnknownCodeAction = new
-        end
-      end
-
-      sig { params(document: RubyDocument, global_state: GlobalState, code_action: T::Hash[Symbol, T.untyped]).void }
+      #: (RubyDocument document, GlobalState global_state, Hash[Symbol, untyped] code_action) -> void
       def initialize(document, global_state, code_action)
         super()
         @document = document
@@ -31,9 +25,10 @@ module RubyLsp
         @code_action = code_action
       end
 
-      sig { override.returns(T.any(Interface::CodeAction, Error)) }
+      # @override
+      #: -> (Interface::CodeAction)
       def perform
-        return Error::EmptySelection if @document.source.empty?
+        raise EmptySelectionError, "Invalid selection for refactor" if @document.source.empty?
 
         case @code_action[:title]
         when CodeActions::EXTRACT_TO_VARIABLE_TITLE
@@ -42,27 +37,35 @@ module RubyLsp
           refactor_method
         when CodeActions::TOGGLE_BLOCK_STYLE_TITLE
           switch_block_style
+        when CodeActions::CREATE_ATTRIBUTE_READER,
+             CodeActions::CREATE_ATTRIBUTE_WRITER,
+             CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+          create_attribute_accessor
         else
-          Error::UnknownCodeAction
+          raise UnknownCodeActionError, "Unknown code action: #{@code_action[:title]}"
         end
       end
 
       private
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction)
       def switch_block_style
         source_range = @code_action.dig(:data, :range)
-        return Error::EmptySelection if source_range[:start] == source_range[:end]
+        raise EmptySelectionError, "Invalid selection for refactor" if source_range[:start] == source_range[:end]
 
         target = @document.locate_first_within_range(
           @code_action.dig(:data, :range),
           node_types: [Prism::CallNode],
         )
 
-        return Error::InvalidTargetRange unless target.is_a?(Prism::CallNode)
+        unless target.is_a?(Prism::CallNode)
+          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+        end
 
         node = target.block
-        return Error::InvalidTargetRange unless node.is_a?(Prism::BlockNode)
+        unless node.is_a?(Prism::BlockNode)
+          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+        end
 
         indentation = " " * target.location.start_column unless node.opening_loc.slice == "do"
 
@@ -87,19 +90,17 @@ module RubyLsp
         )
       end
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction)
       def refactor_variable
         source_range = @code_action.dig(:data, :range)
-        return Error::EmptySelection if source_range[:start] == source_range[:end]
+        raise EmptySelectionError, "Invalid selection for refactor" if source_range[:start] == source_range[:end]
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(source_range[:start])
-        end_index = scanner.find_char_position(source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
+        extracted_source = @document.source[start_index...end_index] #: as !nil
 
         # Find the closest statements node, so that we place the refactor in a valid position
         node_context = RubyDocument
-          .locate(@document.parse_result.value,
+          .locate(@document.ast,
             start_index,
             node_types: [
               Prism::StatementsNode,
@@ -109,16 +110,20 @@ module RubyLsp
 
         closest_statements = node_context.node
         parent_statements = node_context.parent
-        return Error::InvalidTargetRange if closest_statements.nil? || closest_statements.child_nodes.compact.empty?
+        if closest_statements.nil? || closest_statements.child_nodes.compact.empty?
+          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+        end
 
         # Find the node with the end line closest to the requested position, so that we can place the refactor
         # immediately after that closest node
-        closest_node = T.must(closest_statements.child_nodes.compact.min_by do |node|
+        closest_node = closest_statements.child_nodes.compact.min_by do |node|
           distance = source_range.dig(:start, :line) - (node.location.end_line - 1)
           distance <= 0 ? Float::INFINITY : distance
-        end)
+        end #: as !nil
 
-        return Error::InvalidTargetRange if closest_node.is_a?(Prism::MissingNode)
+        if closest_node.is_a?(Prism::MissingNode)
+          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+        end
 
         closest_node_loc = closest_node.location
         # If the parent expression is a single line block, then we have to extract it inside of the one-line block
@@ -149,9 +154,12 @@ module RubyLsp
           lines = @document.source.lines
 
           indentation_line = lines[indentation_line_number]
-          return Error::InvalidTargetRange unless indentation_line
+          unless indentation_line
+            raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          end
 
-          indentation = T.must(indentation_line[/\A */]).size
+          indentation = indentation_line[/\A */] #: as !nil
+            .size
 
           target_range = {
             start: { line: target_line, character: indentation },
@@ -159,7 +167,9 @@ module RubyLsp
           }
 
           line = lines[target_line]
-          return Error::InvalidTargetRange unless line
+          unless line
+            raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          end
 
           variable_source = if line.strip.empty?
             "\n#{" " * indentation}#{NEW_VARIABLE_NAME} = #{extracted_source}"
@@ -187,29 +197,31 @@ module RubyLsp
         )
       end
 
-      sig { returns(T.any(Interface::CodeAction, Error)) }
+      #: -> (Interface::CodeAction)
       def refactor_method
         source_range = @code_action.dig(:data, :range)
-        return Error::EmptySelection if source_range[:start] == source_range[:end]
+        raise EmptySelectionError, "Invalid selection for refactor" if source_range[:start] == source_range[:end]
 
-        scanner = @document.create_scanner
-        start_index = scanner.find_char_position(source_range[:start])
-        end_index = scanner.find_char_position(source_range[:end])
-        extracted_source = T.must(@document.source[start_index...end_index])
+        start_index, end_index = @document.find_index_by_position(source_range[:start], source_range[:end])
+        extracted_source = @document.source[start_index...end_index] #: as !nil
 
         # Find the closest method declaration node, so that we place the refactor in a valid position
         node_context = RubyDocument.locate(
-          @document.parse_result.value,
+          @document.ast,
           start_index,
           node_types: [Prism::DefNode],
           code_units_cache: @document.code_units_cache,
         )
         closest_node = node_context.node
-        return Error::InvalidTargetRange unless closest_node
+        unless closest_node
+          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+        end
 
         target_range = if closest_node.is_a?(Prism::DefNode)
           end_keyword_loc = closest_node.end_keyword_loc
-          return Error::InvalidTargetRange unless end_keyword_loc
+          unless end_keyword_loc
+            raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          end
 
           end_line = end_keyword_loc.end_line - 1
           character = end_keyword_loc.end_column
@@ -261,7 +273,7 @@ module RubyLsp
         )
       end
 
-      sig { params(range: T::Hash[Symbol, T.untyped], new_text: String).returns(Interface::TextEdit) }
+      #: (Hash[Symbol, untyped] range, String new_text) -> Interface::TextEdit
       def create_text_edit(range, new_text)
         Interface::TextEdit.new(
           range: Interface::Range.new(
@@ -272,7 +284,7 @@ module RubyLsp
         )
       end
 
-      sig { params(node: Prism::BlockNode, indentation: T.nilable(String)).returns(String) }
+      #: (Prism::BlockNode node, String? indentation) -> String
       def recursively_switch_nested_block_styles(node, indentation)
         parameters = node.parameters
         body = node.body
@@ -301,7 +313,7 @@ module RubyLsp
         source
       end
 
-      sig { params(body: Prism::Node, indentation: T.nilable(String)).returns(String) }
+      #: (Prism::Node body, String? indentation) -> String
       def switch_block_body(body, indentation)
         # Check if there are any nested blocks inside of the current block
         body_loc = body.location
@@ -328,6 +340,82 @@ module RubyLsp
         end
 
         indentation ? body_content.gsub(";", "\n") : "#{body_content.gsub("\n", ";")} "
+      end
+
+      #: -> (Interface::CodeAction)
+      def create_attribute_accessor
+        source_range = @code_action.dig(:data, :range)
+
+        node = if source_range[:start] != source_range[:end]
+          @document.locate_first_within_range(
+            @code_action.dig(:data, :range),
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+          )
+        end
+
+        if node.nil?
+          node_context = @document.locate_node(
+            source_range[:start],
+            node_types: CodeActions::INSTANCE_VARIABLE_NODES,
+          )
+          node = node_context.node
+
+          unless CodeActions::INSTANCE_VARIABLE_NODES.include?(node.class)
+            raise EmptySelectionError, "Invalid selection for refactor"
+          end
+        end
+
+        node = node #: as Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode
+
+        node_context = @document.locate_node(
+          {
+            line: node.location.start_line,
+            character: node.location.start_character_column,
+          },
+          node_types: [
+            Prism::ClassNode,
+            Prism::ModuleNode,
+            Prism::SingletonClassNode,
+          ],
+        )
+        closest_node = node_context.node
+        if closest_node.nil?
+          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+        end
+
+        attribute_name = node.name[1..]
+        indentation = " " * (closest_node.location.start_column + 2)
+        attribute_accessor_source = case @code_action[:title]
+        when CodeActions::CREATE_ATTRIBUTE_READER
+          "#{indentation}attr_reader :#{attribute_name}\n\n"
+        when CodeActions::CREATE_ATTRIBUTE_WRITER
+          "#{indentation}attr_writer :#{attribute_name}\n\n"
+        when CodeActions::CREATE_ATTRIBUTE_ACCESSOR
+          "#{indentation}attr_accessor :#{attribute_name}\n\n"
+        end #: as !nil
+
+        target_start_line = closest_node.location.start_line
+        target_range = {
+          start: { line: target_start_line, character: 0 },
+          end: { line: target_start_line, character: 0 },
+        }
+
+        Interface::CodeAction.new(
+          title: @code_action[:title],
+          edit: Interface::WorkspaceEdit.new(
+            document_changes: [
+              Interface::TextDocumentEdit.new(
+                text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                  uri: @code_action.dig(:data, :uri),
+                  version: nil,
+                ),
+                edits: [
+                  create_text_edit(target_range, attribute_accessor_source),
+                ],
+              ),
+            ],
+          ),
+        )
       end
     end
   end

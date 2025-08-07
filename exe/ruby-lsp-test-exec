@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# This executable will be removed thanks to the changes in https://github.com/Shopify/ruby-lsp/pull/3661.
+# Remove this a few months after extension updates have rolled out
+exec(*ARGV)

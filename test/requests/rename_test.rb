@@ -35,14 +35,19 @@ class RenameTest < Minitest::Test
       },
     })
     path = File.expand_path(fixture_path)
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, path), source)
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, "/fake.rb"), <<~RUBY)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
+    global_state.index.index_single(URI::Generic.from_path(path: "/fake.rb"), <<~RUBY)
       class Conflicting
       end
     RUBY
 
-    store = RubyLsp::Store.new
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))
+    store = RubyLsp::Store.new(global_state)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
 
     assert_raises(RubyLsp::Requests::Rename::InvalidNameError) do
       RubyLsp::Requests::Rename.new(
@@ -52,6 +57,52 @@ class RenameTest < Minitest::Test
         { position: { line: 3, character: 7 }, newName: "Conflicting" },
       ).perform
     end
+  end
+
+  def test_renaming_an_unsaved_symbol
+    fixture_path = "test/fixtures/rename_me.rb"
+    source = File.read(fixture_path)
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      capabilities: {
+        workspace: {
+          workspaceEdit: {
+            resourceOperations: ["rename"],
+          },
+        },
+      },
+    })
+
+    store = RubyLsp::Store.new(global_state)
+
+    path = File.expand_path(fixture_path)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
+
+    untitled_uri = URI("untitled:Untitled-1")
+    untitled_source = <<~RUBY
+      class RenameMe
+      end
+    RUBY
+    global_state.index.index_single(untitled_uri, untitled_source)
+    store.set(uri: untitled_uri, source: untitled_source, version: 1, language_id: :ruby)
+
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
+    )
+
+    response = RubyLsp::Requests::Rename.new(
+      global_state,
+      store,
+      document,
+      { position: { line: 3, character: 7 }, newName: "NewMe" },
+    ).perform #: as !nil
+
+    untitled_change = response.document_changes[1]
+    assert_equal("untitled:Untitled-1", untitled_change.text_document.uri)
+    assert_equal("NewMe", untitled_change.edits[0].new_text)
   end
 
   private
@@ -69,18 +120,21 @@ class RenameTest < Minitest::Test
       },
     })
     path = File.expand_path(fixture_path)
-    global_state.index.index_single(RubyIndexer::IndexablePath.new(nil, path), source)
+    global_state.index.index_single(URI::Generic.from_path(path: path), source)
 
-    store = RubyLsp::Store.new
-    document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: URI::Generic.from_path(path: path))
-    workspace_edit = T.must(
-      RubyLsp::Requests::Rename.new(
-        global_state,
-        store,
-        document,
-        { position: position, newName: new_name },
-      ).perform,
+    store = RubyLsp::Store.new(global_state)
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: path),
+      global_state: global_state,
     )
+    workspace_edit = RubyLsp::Requests::Rename.new(
+      global_state,
+      store,
+      document,
+      { position: position, newName: new_name },
+    ).perform #: as !nil
 
     file_renames = workspace_edit.document_changes.filter_map do |text_edit_or_rename|
       next text_edit_or_rename unless text_edit_or_rename.is_a?(RubyLsp::Interface::TextDocumentEdit)

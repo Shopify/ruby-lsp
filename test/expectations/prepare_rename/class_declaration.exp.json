@@ -1,0 +1,12 @@
+{
+  "params": {
+    "textDocument": {
+        "uri": "file:///fake"
+    },
+    "position": {
+        "line": 1,
+        "character": 8
+    }
+  },
+  "result": null
+}

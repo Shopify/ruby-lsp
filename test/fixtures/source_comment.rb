@@ -2,7 +2,7 @@
 def foo
 end
 
-# source://erb//erb.rb#1
+# source://pathname//pathname.rb#1
 def bar
 end
 

@@ -1,12 +1,7 @@
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient";
 
-import {
-  Command,
-  STATUS_EMITTER,
-  WorkspaceInterface,
-  SUPPORTED_LANGUAGE_IDS,
-} from "./common";
+import { Command, STATUS_EMITTER, WorkspaceInterface, SUPPORTED_LANGUAGE_IDS } from "./common";
 
 const STOPPED_SERVER_OPTIONS = [
   { label: "Ruby LSP: Start", description: Command.Start },
@@ -16,6 +11,10 @@ const STOPPED_SERVER_OPTIONS = [
 const STARTED_SERVER_OPTIONS = [
   { label: "Ruby LSP: Stop", description: Command.Stop },
   { label: "Ruby LSP: Restart", description: Command.Restart },
+  {
+    label: "Ruby LSP: Open server changelog in browser",
+    description: Command.ShowServerChangelog,
+  },
 ];
 
 export abstract class StatusItem {
@@ -90,7 +89,7 @@ export class ServerStatus extends StatusItem {
     switch (workspace.lspClient.state) {
       case State.Running: {
         this.item.text = workspace.lspClient.serverVersion
-          ? `Ruby LSP v${workspace.lspClient.serverVersion}: Running`
+          ? `Ruby LSP server v${workspace.lspClient.serverVersion}: Running`
           : "Ruby LSP: Running";
 
         if (workspace.lspClient.degraded) {
@@ -119,29 +118,6 @@ export class ServerStatus extends StatusItem {
   }
 }
 
-export class ExperimentalFeaturesStatus extends StatusItem {
-  constructor() {
-    super("experimentalFeatures");
-
-    const experimentalFeaturesEnabled =
-      vscode.workspace
-        .getConfiguration("rubyLsp")
-        .get("enableExperimentalFeatures") === true;
-    const message = experimentalFeaturesEnabled
-      ? "Experimental features enabled"
-      : "Experimental features disabled";
-
-    this.item.name = "Ruby LSP Experimental Features";
-    this.item.text = message;
-    this.item.command = {
-      title: experimentalFeaturesEnabled ? "Disable" : "Enable",
-      command: Command.ToggleExperimentalFeatures,
-    };
-  }
-
-  refresh(_workspace: WorkspaceInterface): void {}
-}
-
 export class FeaturesStatus extends StatusItem {
   constructor() {
     super("features");
@@ -155,15 +131,10 @@ export class FeaturesStatus extends StatusItem {
 
   refresh(_workspace: WorkspaceInterface): void {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const features: Record<string, boolean> =
-      configuration.get("enabledFeatures")!;
-    const enabledFeatures = Object.keys(features).filter(
-      (key) => features[key],
-    );
+    const features: Record<string, boolean> = configuration.get("enabledFeatures")!;
+    const enabledFeatures = Object.keys(features).filter((key) => features[key]);
 
-    this.item.text = `${enabledFeatures.length}/${
-      Object.keys(features).length
-    } features enabled`;
+    this.item.text = `${enabledFeatures.length}/${Object.keys(features).length} features enabled`;
   }
 }
 
@@ -184,8 +155,7 @@ export class FormatterStatus extends StatusItem {
       if (workspace.lspClient.formatter) {
         this.item.text = `Formatter: ${workspace.lspClient.formatter}`;
       } else {
-        this.item.text =
-          "Formatter: requires server to be v0.12.4 or higher to display this field";
+        this.item.text = "Formatter: requires server to be v0.12.4 or higher to display this field";
       }
     }
   }
@@ -195,8 +165,8 @@ export class AddonsStatus extends StatusItem {
   constructor() {
     super("addons");
 
-    this.item.name = "Ruby LSP Addons";
-    this.item.text = "Fetching addon information";
+    this.item.name = "Ruby LSP Add-ons";
+    this.item.text = "Fetching add-on information";
   }
 
   refresh(workspace: WorkspaceInterface): void {
@@ -204,8 +174,7 @@ export class AddonsStatus extends StatusItem {
       return;
     }
     if (workspace.lspClient.addons === undefined) {
-      this.item.text =
-        "Addons: requires server to be v0.17.4 or higher to display this field";
+      this.item.text = "Addons: requires server to be v0.17.4 or higher to display this field";
     } else if (workspace.lspClient.addons.length === 0) {
       this.item.text = "Addons: none";
     } else {
@@ -225,7 +194,6 @@ export class StatusItems {
     this.items = [
       new RubyVersionStatus(),
       new ServerStatus(),
-      new ExperimentalFeaturesStatus(),
       new FeaturesStatus(),
       new FormatterStatus(),
       new AddonsStatus(),

@@ -9,26 +9,16 @@ module RubyLsp
     #
     # Currently only supports supertypes due to a limitation of the index.
     class PrepareTypeHierarchy < Request
-      extend T::Sig
-
       include Support::Common
 
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::TypeHierarchyOptions) }
+        #: -> Interface::TypeHierarchyOptions
         def provider
           Interface::TypeHierarchyOptions.new
         end
       end
 
-      sig do
-        params(
-          document: T.any(RubyDocument, ERBDocument),
-          index: RubyIndexer::Index,
-          position: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: ((RubyDocument | ERBDocument) document, RubyIndexer::Index index, Hash[Symbol, untyped] position) -> void
       def initialize(document, index, position)
         super()
 
@@ -37,7 +27,8 @@ module RubyLsp
         @position = position
       end
 
-      sig { override.returns(T.nilable(T::Array[Interface::TypeHierarchyItem])) }
+      # @override
+      #: -> Array[Interface::TypeHierarchyItem]?
       def perform
         context = @document.locate_node(
           @position,
@@ -58,15 +49,14 @@ module RubyLsp
 
         # While the spec allows for multiple entries, VSCode seems to only support one
         # We'll just return the first one for now
-        first_entry = T.must(entries.first)
-
+        first_entry = entries.first #: as !nil
         range = range_from_location(first_entry.location)
 
         [
           Interface::TypeHierarchyItem.new(
             name: first_entry.name,
             kind: kind_for_entry(first_entry),
-            uri: URI::Generic.from_path(path: first_entry.file_path).to_s,
+            uri: first_entry.uri.to_s,
             range: range,
             selection_range: range,
           ),

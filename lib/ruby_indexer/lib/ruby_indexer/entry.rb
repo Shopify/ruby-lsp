@@ -3,71 +3,66 @@
 
 module RubyIndexer
   class Entry
-    class Visibility < T::Enum
-      enums do
-        PUBLIC = new(:public)
-        PROTECTED = new(:protected)
-        PRIVATE = new(:private)
-      end
-    end
-
-    extend T::Sig
-
-    sig { returns(String) }
+    #: String
     attr_reader :name
 
-    sig { returns(String) }
-    attr_reader :file_path
+    #: URI::Generic
+    attr_reader :uri
 
-    sig { returns(RubyIndexer::Location) }
+    #: RubyIndexer::Location
     attr_reader :location
 
     alias_method :name_location, :location
 
-    sig { returns(Visibility) }
+    #: Symbol
     attr_accessor :visibility
 
-    sig do
-      params(
-        name: String,
-        file_path: String,
-        location: Location,
-        comments: T.nilable(String),
-      ).void
-    end
-    def initialize(name, file_path, location, comments)
+    #: (String name, URI::Generic uri, Location location, String? comments) -> void
+    def initialize(name, uri, location, comments)
       @name = name
-      @file_path = file_path
+      @uri = uri
       @comments = comments
-      @visibility = T.let(Visibility::PUBLIC, Visibility)
+      @visibility = :public #: Symbol
       @location = location
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def public?
-      visibility == Visibility::PUBLIC
+      @visibility == :public
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def protected?
-      visibility == Visibility::PROTECTED
+      @visibility == :protected
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def private?
-      visibility == Visibility::PRIVATE
+      @visibility == :private
     end
 
-    sig { returns(String) }
+    #: -> String
     def file_name
-      File.basename(@file_path)
+      if @uri.scheme == "untitled"
+        @uri.opaque #: as !nil
+      else
+        File.basename(
+          file_path, #: as !nil
+        )
+      end
     end
 
-    sig { returns(String) }
+    #: -> String?
+    def file_path
+      @uri.full_path
+    end
+
+    #: -> String
     def comments
       @comments ||= begin
         # Parse only the comments based on the file path, which is much faster than parsing the entire file
-        parsed_comments = Prism.parse_file_comments(@file_path)
+        path = file_path
+        parsed_comments = path ? Prism.parse_file_comments(path) : []
 
         # Group comments based on whether they belong to a single block of comments
         grouped = parsed_comments.slice_when do |left, right|
@@ -77,7 +72,7 @@ module RubyIndexer
         # Find the group that is either immediately or two lines above the current entry
         correct_group = grouped.find do |group|
           comment_end_line = group.last.location.start_line
-          (comment_end_line - 1..comment_end_line).cover?(@location.start_line - 1)
+          (comment_end_line..comment_end_line + 1).cover?(@location.start_line - 1)
         end
 
         # If we found something, we join the comments together. Otherwise, the entry has no documentation and we don't
@@ -103,16 +98,12 @@ module RubyIndexer
       end
     end
 
+    # @abstract
     class ModuleOperation
-      extend T::Sig
-      extend T::Helpers
-
-      abstract!
-
-      sig { returns(String) }
+      #: String
       attr_reader :module_name
 
-      sig { params(module_name: String).void }
+      #: (String module_name) -> void
       def initialize(module_name)
         @module_name = module_name
       end
@@ -121,39 +112,27 @@ module RubyIndexer
     class Include < ModuleOperation; end
     class Prepend < ModuleOperation; end
 
+    # @abstract
     class Namespace < Entry
-      extend T::Sig
-      extend T::Helpers
-
-      abstract!
-
-      sig { returns(T::Array[String]) }
+      #: Array[String]
       attr_reader :nesting
 
       # Returns the location of the constant name, excluding the parent class or the body
-      sig { returns(Location) }
+      #: Location
       attr_reader :name_location
 
-      sig do
-        params(
-          nesting: T::Array[String],
-          file_path: String,
-          location: Location,
-          name_location: Location,
-          comments: T.nilable(String),
-        ).void
-      end
-      def initialize(nesting, file_path, location, name_location, comments)
-        @name = T.let(nesting.join("::"), String)
+      #: (Array[String] nesting, URI::Generic uri, Location location, Location name_location, String? comments) -> void
+      def initialize(nesting, uri, location, name_location, comments)
+        @name = nesting.join("::") #: String
         # The original nesting where this namespace was discovered
         @nesting = nesting
 
-        super(@name, file_path, location, comments)
+        super(@name, uri, location, comments)
 
         @name_location = name_location
       end
 
-      sig { returns(T::Array[String]) }
+      #: -> Array[String]
       def mixin_operation_module_names
         mixin_operations.map(&:module_name)
       end
@@ -161,12 +140,12 @@ module RubyIndexer
       # Stores all explicit prepend, include and extend operations in the exact order they were discovered in the source
       # code. Maintaining the order is essential to linearize ancestors the right way when a module is both included
       # and prepended
-      sig { returns(T::Array[ModuleOperation]) }
+      #: -> Array[ModuleOperation]
       def mixin_operations
-        @mixin_operations ||= T.let([], T.nilable(T::Array[ModuleOperation]))
+        @mixin_operations ||= [] #: Array[ModuleOperation]?
       end
 
-      sig { returns(Integer) }
+      #: -> Integer
       def ancestor_hash
         mixin_operation_module_names.hash
       end
@@ -176,44 +155,26 @@ module RubyIndexer
     end
 
     class Class < Namespace
-      extend T::Sig
-
       # The unresolved name of the parent class. This may return `nil`, which indicates the lack of an explicit parent
       # and therefore ::Object is the correct parent class
-      sig { returns(T.nilable(String)) }
+      #: String?
       attr_reader :parent_class
 
-      sig do
-        params(
-          nesting: T::Array[String],
-          file_path: String,
-          location: Location,
-          name_location:  Location,
-          comments: T.nilable(String),
-          parent_class: T.nilable(String),
-        ).void
-      end
-      def initialize(nesting, file_path, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
-        super(nesting, file_path, location, name_location, comments)
+      #: (Array[String] nesting, URI::Generic uri, Location location, Location name_location, String? comments, String? parent_class) -> void
+      def initialize(nesting, uri, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
+        super(nesting, uri, location, name_location, comments)
         @parent_class = parent_class
       end
 
-      sig { override.returns(Integer) }
+      # @override
+      #: -> Integer
       def ancestor_hash
         [mixin_operation_module_names, @parent_class].hash
       end
     end
 
     class SingletonClass < Class
-      extend T::Sig
-
-      sig do
-        params(
-          location: Location,
-          name_location: Location,
-          comments: T.nilable(String),
-        ).void
-      end
+      #: (Location location, Location name_location, String? comments) -> void
       def update_singleton_information(location, name_location, comments)
         @location = location
         @name_location = name_location
@@ -224,20 +185,16 @@ module RubyIndexer
     class Constant < Entry
     end
 
+    # @abstract
     class Parameter
-      extend T::Helpers
-      extend T::Sig
-
-      abstract!
-
       # Name includes just the name of the parameter, excluding symbols like splats
-      sig { returns(Symbol) }
+      #: Symbol
       attr_reader :name
 
       # Decorated name is the parameter name including the splat or block prefix, e.g.: `*foo`, `**foo` or `&block`
       alias_method :decorated_name, :name
 
-      sig { params(name: Symbol).void }
+      #: (name: Symbol) -> void
       def initialize(name:)
         @name = name
       end
@@ -249,7 +206,8 @@ module RubyIndexer
 
     # An optional method parameter, e.g. `def foo(a = 123)`
     class OptionalParameter < Parameter
-      sig { override.returns(Symbol) }
+      # @override
+      #: -> Symbol
       def decorated_name
         :"#{@name} = <default>"
       end
@@ -257,7 +215,8 @@ module RubyIndexer
 
     # An required keyword method parameter, e.g. `def foo(a:)`
     class KeywordParameter < Parameter
-      sig { override.returns(Symbol) }
+      # @override
+      #: -> Symbol
       def decorated_name
         :"#{@name}:"
       end
@@ -265,7 +224,8 @@ module RubyIndexer
 
     # An optional keyword method parameter, e.g. `def foo(a: 123)`
     class OptionalKeywordParameter < Parameter
-      sig { override.returns(Symbol) }
+      # @override
+      #: -> Symbol
       def decorated_name
         :"#{@name}: <default>"
       end
@@ -273,9 +233,10 @@ module RubyIndexer
 
     # A rest method parameter, e.g. `def foo(*a)`
     class RestParameter < Parameter
-      DEFAULT_NAME = T.let(:"<anonymous splat>", Symbol)
+      DEFAULT_NAME = :"<anonymous splat>" #: Symbol
 
-      sig { override.returns(Symbol) }
+      # @override
+      #: -> Symbol
       def decorated_name
         :"*#{@name}"
       end
@@ -283,9 +244,10 @@ module RubyIndexer
 
     # A keyword rest method parameter, e.g. `def foo(**a)`
     class KeywordRestParameter < Parameter
-      DEFAULT_NAME = T.let(:"<anonymous keyword splat>", Symbol)
+      DEFAULT_NAME = :"<anonymous keyword splat>" #: Symbol
 
-      sig { override.returns(Symbol) }
+      # @override
+      #: -> Symbol
       def decorated_name
         :"**#{@name}"
       end
@@ -293,17 +255,17 @@ module RubyIndexer
 
     # A block method parameter, e.g. `def foo(&block)`
     class BlockParameter < Parameter
-      DEFAULT_NAME = T.let(:"<anonymous block>", Symbol)
+      DEFAULT_NAME = :"<anonymous block>" #: Symbol
 
       class << self
-        extend T::Sig
-        sig { returns(BlockParameter) }
+        #: -> BlockParameter
         def anonymous
           new(name: DEFAULT_NAME)
         end
       end
 
-      sig { override.returns(Symbol) }
+      # @override
+      #: -> Symbol
       def decorated_name
         :"&#{@name}"
       end
@@ -311,44 +273,32 @@ module RubyIndexer
 
     # A forwarding method parameter, e.g. `def foo(...)`
     class ForwardingParameter < Parameter
-      extend T::Sig
-
-      sig { void }
+      #: -> void
       def initialize
         # You can't name a forwarding parameter, it's always called `...`
         super(name: :"...")
       end
     end
 
+    # @abstract
     class Member < Entry
-      extend T::Sig
-      extend T::Helpers
-
-      abstract!
-
-      sig { returns(T.nilable(Entry::Namespace)) }
+      #: Entry::Namespace?
       attr_reader :owner
 
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: Location,
-          comments: T.nilable(String),
-          visibility: Visibility,
-          owner: T.nilable(Entry::Namespace),
-        ).void
-      end
-      def initialize(name, file_path, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      #: (String name, URI::Generic uri, Location location, String? comments, Symbol visibility, Entry::Namespace? owner) -> void
+      def initialize(name, uri, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, uri, location, comments)
         @visibility = visibility
         @owner = owner
       end
 
-      sig { abstract.returns(T::Array[Entry::Signature]) }
-      def signatures; end
+      # @abstract
+      #: -> Array[Signature]
+      def signatures
+        raise AbstractMethodInvokedError
+      end
 
-      sig { returns(String) }
+      #: -> String
       def decorated_parameters
         first_signature = signatures.first
         return "()" unless first_signature
@@ -356,7 +306,7 @@ module RubyIndexer
         "(#{first_signature.format})"
       end
 
-      sig { returns(String) }
+      #: -> String
       def formatted_signatures
         overloads_count = signatures.size
         case overloads_count
@@ -371,45 +321,29 @@ module RubyIndexer
     end
 
     class Accessor < Member
-      extend T::Sig
-
-      sig { override.returns(T::Array[Signature]) }
+      # @override
+      #: -> Array[Signature]
       def signatures
-        @signatures ||= T.let(
-          begin
-            params = []
-            params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-            [Entry::Signature.new(params)]
-          end,
-          T.nilable(T::Array[Signature]),
-        )
+        @signatures ||= begin
+          params = []
+          params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
+          [Entry::Signature.new(params)]
+        end #: Array[Signature]?
       end
     end
 
     class Method < Member
-      extend T::Sig
-
-      sig { override.returns(T::Array[Signature]) }
+      # @override
+      #: Array[Signature]
       attr_reader :signatures
 
       # Returns the location of the method name, excluding parameters or the body
-      sig { returns(Location) }
+      #: Location
       attr_reader :name_location
 
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: Location,
-          name_location: Location,
-          comments: T.nilable(String),
-          signatures: T::Array[Signature],
-          visibility: Visibility,
-          owner: T.nilable(Entry::Namespace),
-        ).void
-      end
-      def initialize(name, file_path, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments, visibility, owner)
+      #: (String name, URI::Generic uri, Location location, Location name_location, String? comments, Array[Signature] signatures, Symbol visibility, Entry::Namespace? owner) -> void
+      def initialize(name, uri, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
+        super(name, uri, location, comments, visibility, owner)
         @signatures = signatures
         @name_location = name_location
       end
@@ -426,26 +360,15 @@ module RubyIndexer
     # target in [rdoc-ref:Index#resolve]. If the right hand side contains a constant that doesn't exist, then it's not
     # possible to resolve the alias and it will remain an UnresolvedAlias until the right hand side constant exists
     class UnresolvedConstantAlias < Entry
-      extend T::Sig
-
-      sig { returns(String) }
+      #: String
       attr_reader :target
 
-      sig { returns(T::Array[String]) }
+      #: Array[String]
       attr_reader :nesting
 
-      sig do
-        params(
-          target: String,
-          nesting: T::Array[String],
-          name: String,
-          file_path: String,
-          location: Location,
-          comments: T.nilable(String),
-        ).void
-      end
-      def initialize(target, nesting, name, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(name, file_path, location, comments)
+      #: (String target, Array[String] nesting, String name, URI::Generic uri, Location location, String? comments) -> void
+      def initialize(target, nesting, name, uri, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(name, uri, location, comments)
 
         @target = target
         @nesting = nesting
@@ -454,16 +377,14 @@ module RubyIndexer
 
     # Alias represents a resolved alias, which points to an existing constant target
     class ConstantAlias < Entry
-      extend T::Sig
-
-      sig { returns(String) }
+      #: String
       attr_reader :target
 
-      sig { params(target: String, unresolved_alias: UnresolvedConstantAlias).void }
+      #: (String target, UnresolvedConstantAlias unresolved_alias) -> void
       def initialize(target, unresolved_alias)
         super(
           unresolved_alias.name,
-          unresolved_alias.file_path,
+          unresolved_alias.uri,
           unresolved_alias.location,
           unresolved_alias.comments,
         )
@@ -476,22 +397,26 @@ module RubyIndexer
     # Represents a global variable e.g.: $DEBUG
     class GlobalVariable < Entry; end
 
-    # Represents an instance variable e.g.: @a = 1
-    class InstanceVariable < Entry
-      sig { returns(T.nilable(Entry::Namespace)) }
+    # Represents a class variable e.g.: @@a = 1
+    class ClassVariable < Entry
+      #: Entry::Namespace?
       attr_reader :owner
 
-      sig do
-        params(
-          name: String,
-          file_path: String,
-          location: Location,
-          comments: T.nilable(String),
-          owner: T.nilable(Entry::Namespace),
-        ).void
+      #: (String name, URI::Generic uri, Location location, String? comments, Entry::Namespace? owner) -> void
+      def initialize(name, uri, location, comments, owner)
+        super(name, uri, location, comments)
+        @owner = owner
       end
-      def initialize(name, file_path, location, comments, owner)
-        super(name, file_path, location, comments)
+    end
+
+    # Represents an instance variable e.g.: @a = 1
+    class InstanceVariable < Entry
+      #: Entry::Namespace?
+      attr_reader :owner
+
+      #: (String name, URI::Generic uri, Location location, String? comments, Entry::Namespace? owner) -> void
+      def initialize(name, uri, location, comments, owner)
+        super(name, uri, location, comments)
         @owner = owner
       end
     end
@@ -500,26 +425,15 @@ module RubyIndexer
     # example, if we have `alias a b`, we create an unresolved alias for `a` because we aren't sure immediate what `b`
     # is referring to
     class UnresolvedMethodAlias < Entry
-      extend T::Sig
-
-      sig { returns(String) }
+      #: String
       attr_reader :new_name, :old_name
 
-      sig { returns(T.nilable(Entry::Namespace)) }
+      #: Entry::Namespace?
       attr_reader :owner
 
-      sig do
-        params(
-          new_name: String,
-          old_name: String,
-          owner: T.nilable(Entry::Namespace),
-          file_path: String,
-          location: Location,
-          comments: T.nilable(String),
-        ).void
-      end
-      def initialize(new_name, old_name, owner, file_path, location, comments) # rubocop:disable Metrics/ParameterLists
-        super(new_name, file_path, location, comments)
+      #: (String new_name, String old_name, Entry::Namespace? owner, URI::Generic uri, Location location, String? comments) -> void
+      def initialize(new_name, old_name, owner, uri, location, comments) # rubocop:disable Metrics/ParameterLists
+        super(new_name, uri, location, comments)
 
         @new_name = new_name
         @old_name = old_name
@@ -529,17 +443,13 @@ module RubyIndexer
 
     # A method alias is a resolved alias entry that points to the exact method target it refers to
     class MethodAlias < Entry
-      extend T::Sig
-
-      sig { returns(T.any(Member, MethodAlias)) }
+      #: (Member | MethodAlias)
       attr_reader :target
 
-      sig { returns(T.nilable(Entry::Namespace)) }
+      #: Entry::Namespace?
       attr_reader :owner
 
-      sig do
-        params(target: T.any(Member, MethodAlias), unresolved_alias: UnresolvedMethodAlias).void
-      end
+      #: ((Member | MethodAlias) target, UnresolvedMethodAlias unresolved_alias) -> void
       def initialize(target, unresolved_alias)
         full_comments = +"Alias for #{target.name}\n"
         full_comments << "#{unresolved_alias.comments}\n"
@@ -547,26 +457,26 @@ module RubyIndexer
 
         super(
           unresolved_alias.new_name,
-          unresolved_alias.file_path,
+          unresolved_alias.uri,
           unresolved_alias.location,
           full_comments,
         )
 
         @target = target
-        @owner = T.let(unresolved_alias.owner, T.nilable(Entry::Namespace))
+        @owner = unresolved_alias.owner #: Entry::Namespace?
       end
 
-      sig { returns(String) }
+      #: -> String
       def decorated_parameters
         @target.decorated_parameters
       end
 
-      sig { returns(String) }
+      #: -> String
       def formatted_signatures
         @target.formatted_signatures
       end
 
-      sig { returns(T::Array[Signature]) }
+      #: -> Array[Signature]
       def signatures
         @target.signatures
       end
@@ -576,18 +486,16 @@ module RubyIndexer
     # However RBS can represent the concept of method overloading, with different return types based on the arguments
     # passed, so we need to store all the signatures.
     class Signature
-      extend T::Sig
-
-      sig { returns(T::Array[Parameter]) }
+      #: Array[Parameter]
       attr_reader :parameters
 
-      sig { params(parameters: T::Array[Parameter]).void }
+      #: (Array[Parameter] parameters) -> void
       def initialize(parameters)
         @parameters = parameters
       end
 
       # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`
-      sig { returns(String) }
+      #: -> String
       def format
         @parameters.map(&:decorated_name).join(", ")
       end
@@ -607,13 +515,13 @@ module RubyIndexer
       # foo(1)
       # foo(1, 2)
       # ```
-      sig { params(arguments: T::Array[Prism::Node]).returns(T::Boolean) }
+      #: (Array[Prism::Node] arguments) -> bool
       def matches?(arguments)
         min_pos = 0
-        max_pos = T.let(0, T.any(Integer, Float))
+        max_pos = 0 #: (Integer | Float)
         names = []
-        has_forward = T.let(false, T::Boolean)
-        has_keyword_rest = T.let(false, T::Boolean)
+        has_forward = false #: bool
+        has_keyword_rest = false #: bool
 
         @parameters.each do |param|
           case param
@@ -635,7 +543,8 @@ module RubyIndexer
         end
 
         keyword_hash_nodes, positional_args = arguments.partition { |arg| arg.is_a?(Prism::KeywordHashNode) }
-        keyword_args = T.cast(keyword_hash_nodes.first, T.nilable(Prism::KeywordHashNode))&.elements
+        keyword_args = keyword_hash_nodes.first #: as Prism::KeywordHashNode?
+          &.elements
         forwarding_arguments, positionals = positional_args.partition do |arg|
           arg.is_a?(Prism::ForwardingArgumentsNode)
         end
@@ -658,15 +567,7 @@ module RubyIndexer
           )
       end
 
-      sig do
-        params(
-          positional_args: T::Array[Prism::Node],
-          forwarding_arguments: T::Array[Prism::Node],
-          keyword_args: T.nilable(T::Array[Prism::Node]),
-          min_pos: Integer,
-          max_pos: T.any(Integer, Float),
-        ).returns(T::Boolean)
-      end
+      #: (Array[Prism::Node] positional_args, Array[Prism::Node] forwarding_arguments, Array[Prism::Node]? keyword_args, Integer min_pos, (Integer | Float) max_pos) -> bool
       def positional_arguments_match?(positional_args, forwarding_arguments, keyword_args, min_pos, max_pos)
         # If the method accepts at least one positional argument and a splat has been passed
         (min_pos > 0 && positional_args.any? { |arg| arg.is_a?(Prism::SplatNode) }) ||
@@ -679,7 +580,7 @@ module RubyIndexer
           (min_pos == 0 && positional_args.empty?)
       end
 
-      sig { params(args: T.nilable(T::Array[Prism::Node]), names: T::Array[Symbol]).returns(T::Boolean) }
+      #: (Array[Prism::Node]? args, Array[Symbol] names) -> bool
       def keyword_arguments_match?(args, names)
         return true unless args
         return true if args.any? { |arg| arg.is_a?(Prism::AssocSplatNode) }
