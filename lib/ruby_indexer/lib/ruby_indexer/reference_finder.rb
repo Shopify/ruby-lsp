@@ -285,9 +285,9 @@ module RubyIndexer
       return unless @target.is_a?(MethodTarget)
 
       if (name = node.name.to_s) == @target.method_name
-        @references << Reference.new(name, T.must(node.message_loc), declaration: false)
+        @references << Reference.new(name, node.message_loc, declaration: false)
       elsif attr_method_references?(node)
-        @references << Reference.new(@target.method_name, T.must(node.message_loc), declaration: true)
+        @references << Reference.new(@target.method_name, node.message_loc, declaration: true)
       end
     end
 
@@ -309,6 +309,8 @@ module RubyIndexer
 
     #: (Prism::CallNode node) -> Array[String]
     def unescaped_argument_names(node)
+      return [] if node.arguments.nil?
+
       node.arguments.arguments.select { |arg| arg.respond_to?(:unescaped) }.map(&:unescaped)
     end
 
@@ -324,7 +326,7 @@ module RubyIndexer
 
     #: (Array[String] argument_names) -> bool
     def attr_accessor_references?(argument_names)
-      argument_names.any? { |arg| "#{arg}=" == @target.method_name || arg == @target.method_name }
+      argument_names.any? { |arg| ["#{arg}=", arg].include?(@target.method_name) }
     end
 
     #: (String name, Prism::Location location) -> void
