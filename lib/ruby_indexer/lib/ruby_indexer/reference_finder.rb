@@ -293,7 +293,7 @@ module RubyIndexer
 
     private
 
-    sig { params(node: Prism::CallNode).returns(T::Boolean) }
+    #: (Prism::CallNode node) -> bool
     def attr_method_references?(node)
       case node.name
       when :attr_reader
@@ -307,41 +307,26 @@ module RubyIndexer
       end
     end
 
-    sig { params(node: Prism::CallNode).returns(T::Array[String]) }
+    #: (Prism::CallNode node) -> Array[String]
     def unescaped_argument_names(node)
       node.arguments.arguments.select { |arg| arg.respond_to?(:unescaped) }.map(&:unescaped)
     end
 
-    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    #: (Array[String] argument_names) -> bool
     def attr_reader_references?(argument_names)
       argument_names.include?(@target.method_name)
     end
 
-    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    #: (Array[String] argument_names) -> bool
     def attr_writer_references?(argument_names)
       argument_names.any? { |arg| "#{arg}=" == @target.method_name }
     end
 
-    sig { params(argument_names: T::Array[String]).returns(T::Boolean) }
+    #: (Array[String] argument_names) -> bool
     def attr_accessor_references?(argument_names)
       argument_names.any? { |arg| "#{arg}=" == @target.method_name || arg == @target.method_name }
     end
 
-    sig { params(name: String).returns(T::Array[String]) }
-    def actual_nesting(name)
-      nesting = @stack + [name]
-      corrected_nesting = []
-
-      nesting.reverse_each do |name|
-        corrected_nesting.prepend(name.delete_prefix("::"))
-
-        break if name.start_with?("::")
-      end
-
-      corrected_nesting
-    end
-
-    sig { params(name: String, location: Prism::Location).void }
     #: (String name, Prism::Location location) -> void
     def collect_constant_references(name, location)
       return unless @target.is_a?(ConstTarget)
