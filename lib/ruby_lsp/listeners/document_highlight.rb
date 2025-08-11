@@ -93,7 +93,7 @@ module RubyLsp
             [target, node_value(target)]
           when Prism::ModuleNode, Prism::ClassNode, Prism::SingletonClassNode, Prism::DefNode, Prism::CaseNode,
             Prism::WhileNode, Prism::UntilNode, Prism::ForNode, Prism::IfNode, Prism::UnlessNode, Prism::BlockNode,
-            Prism::LambdaNode, Prism::WhenNode
+            Prism::LambdaNode
             [target, nil]
           end
 
