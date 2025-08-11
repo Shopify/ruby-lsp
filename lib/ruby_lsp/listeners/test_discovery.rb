@@ -61,11 +61,26 @@ module RubyLsp
 
       #: (Prism::ClassNode node, String fully_qualified_name) -> Array[String]
       def calc_attached_ancestors(node, fully_qualified_name)
-        @index.linearized_ancestors_of(fully_qualified_name)
-      rescue RubyIndexer::Index::NonExistingNamespaceError
-        # When there are dynamic parts in the constant path, we will not have indexed the namespace. We can still
-        # provide test functionality if the class inherits directly from Test::Unit::TestCase or Minitest::Test
-        [node.superclass&.slice].compact
+        superclass = node.superclass
+
+        begin
+          ancestors = @index.linearized_ancestors_of(fully_qualified_name)
+          # If the project has no bundle and a test class inherits from `Minitest::Test`, the linearized ancestors will
+          # not include the parent class because we never indexed it in the first place. Here we add the superclass
+          # directly, so that we can support running tests in projects without a bundle
+          return ancestors if ancestors.length > 1
+
+          # If all we found is the class itself, then manually include the parent class
+          if ancestors.first == fully_qualified_name && superclass
+            return [*ancestors, superclass.slice]
+          end
+
+          ancestors
+        rescue RubyIndexer::Index::NonExistingNamespaceError
+          # When there are dynamic parts in the constant path, we will not have indexed the namespace. We can still
+          # provide test functionality if the class inherits directly from Test::Unit::TestCase or Minitest::Test
+          [superclass&.slice].compact
+        end
       end
 
       #: (Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode node) -> String
