@@ -1,24 +1,62 @@
 {
   "result": [
     {
-      "startLine": 0,
-      "endLine": 7,
-      "kind": "region"
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 6
+        }
+      },
+      "kind": 2
     },
     {
-      "startLine": 2,
-      "endLine": 3,
-      "kind": "region"
+      "range": {
+        "start": {
+          "line": 3,
+          "character": 2
+        },
+        "end": {
+          "line": 3,
+          "character": 6
+        }
+      },
+      "kind": 2
     },
     {
-      "startLine": 4,
-      "endLine": 5,
-      "kind": "region"
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 6
+        }
+      },
+      "kind": 2
     },
     {
-      "startLine": 6,
-      "endLine": 7,
-      "kind": "region"
+      "range": {
+        "start": {
+          "line": 7,
+          "character": 2
+        },
+        "end": {
+          "line": 7,
+          "character": 6
+        }
+      },
+      "kind": 2
+    }
+  ],
+  "params": [
+    {
+      "line": 0,
+      "character": 10
     }
   ]
 }
