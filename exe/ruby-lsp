@@ -64,9 +64,9 @@ if ENV["BUNDLE_GEMFILE"].nil?
   # which gives us the opportunity to control which specs are activated and enter degraded mode if any gems failed to
   # install rather than failing to boot the server completely
   if options[:launcher]
-    command = +"#{Gem.ruby} #{File.expand_path("ruby-lsp-launcher", __dir__)}"
-    command << " --debug" if options[:debug]
-    exit exec(command)
+    flags = []
+    flags << "--debug" if options[:debug]
+    exit exec(Gem.ruby, File.expand_path("ruby-lsp-launcher", __dir__), *flags)
   end
 
   require_relative "../lib/ruby_lsp/setup_bundler"
@@ -88,12 +88,16 @@ if ENV["BUNDLE_GEMFILE"].nil?
   exit exec(env, "#{base_command} exec ruby-lsp #{original_args.join(" ")}".strip)
 end
 
+$stdin.sync = true
+$stdout.sync = true
+$stderr.sync = true
+$stdin.binmode
+$stdout.binmode
+$stderr.binmode
+
 $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 
-require "ruby_lsp/load_sorbet"
 require "ruby_lsp/internal"
-
-T::Utils.run_all_sig_blocks
 
 if options[:debug]
   if ["x64-mingw-ucrt", "x64-mingw32"].include?(RUBY_PLATFORM)
@@ -147,8 +151,10 @@ if options[:doctor]
   return
 end
 
+server = RubyLsp::Server.new
+
 # Ensure all output goes out stderr by default to allow puts/p/pp to work
 # without specifying output device.
 $> = $stderr
 
-RubyLsp::Server.new.start
+server.start

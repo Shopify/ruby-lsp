@@ -35,14 +35,8 @@ export class ChatAgent implements vscode.Disposable {
   private readonly agent: vscode.ChatParticipant;
   private readonly showWorkspacePick: () => Promise<Workspace | undefined>;
 
-  constructor(
-    context: vscode.ExtensionContext,
-    showWorkspacePick: () => Promise<Workspace | undefined>,
-  ) {
-    this.agent = vscode.chat.createChatParticipant(
-      CHAT_AGENT_ID,
-      this.handler.bind(this),
-    );
+  constructor(context: vscode.ExtensionContext, showWorkspacePick: () => Promise<Workspace | undefined>) {
+    this.agent = vscode.chat.createChatParticipant(CHAT_AGENT_ID, this.handler.bind(this));
     this.agent.iconPath = vscode.Uri.joinPath(context.extensionUri, "icon.png");
     this.showWorkspacePick = showWorkspacePick;
   }
@@ -62,9 +56,7 @@ export class ChatAgent implements vscode.Disposable {
       return this.runDesignCommand(request, context, stream, token);
     }
 
-    stream.markdown(
-      "Please indicate which command you would like to use for our chat.",
-    );
+    stream.markdown("Please indicate which command you would like to use for our chat.");
     return { metadata: { command: "" } };
   }
 
@@ -79,9 +71,7 @@ export class ChatAgent implements vscode.Disposable {
     const messages = [
       vscode.LanguageModelChatMessage.User(`User prompt: ${request.prompt}`),
       vscode.LanguageModelChatMessage.User(DESIGN_PROMPT),
-      vscode.LanguageModelChatMessage.User(
-        `Previous interactions with the user: ${previousInteractions}`,
-      ),
+      vscode.LanguageModelChatMessage.User(`Previous interactions with the user: ${previousInteractions}`),
     ];
     const workspace = await this.showWorkspacePick();
 
@@ -91,11 +81,7 @@ export class ChatAgent implements vscode.Disposable {
       const schema = await this.schema(workspace);
 
       if (schema) {
-        messages.push(
-          vscode.LanguageModelChatMessage.User(
-            `Existing application schema: ${schema}`,
-          ),
-        );
+        messages.push(vscode.LanguageModelChatMessage.User(`Existing application schema: ${schema}`));
       }
     }
 
@@ -153,7 +139,7 @@ export class ChatAgent implements vscode.Disposable {
         vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/schema.rb"),
       );
       return content.toString();
-    } catch (error) {
+    } catch (_error) {
       // db/schema.rb doesn't exist
     }
 
@@ -162,7 +148,7 @@ export class ChatAgent implements vscode.Disposable {
         vscode.Uri.joinPath(workspace.workspaceFolder.uri, "db/structure.sql"),
       );
       return content.toString();
-    } catch (error) {
+    } catch (_error) {
       // db/structure.sql doesn't exist
     }
 
@@ -171,32 +157,19 @@ export class ChatAgent implements vscode.Disposable {
 
   // Returns `true` if the current or any previous interactions with the chat match the given `command`. Useful for
   // ensuring that the user can continue chatting without having to re-type the desired command multiple times
-  private withinConversation(
-    command: string,
-    request: vscode.ChatRequest,
-    context: vscode.ChatContext,
-  ) {
+  private withinConversation(command: string, request: vscode.ChatRequest, context: vscode.ChatContext) {
     return (
       request.command === command ||
       (!request.command &&
-        context.history.some(
-          (entry) =>
-            entry instanceof vscode.ChatRequestTurn &&
-            entry.command === command,
-        ))
+        context.history.some((entry) => entry instanceof vscode.ChatRequestTurn && entry.command === command))
     );
   }
 
   // Default error handling
   private handleError(err: any, stream: vscode.ChatResponseStream) {
     if (err instanceof vscode.LanguageModelError) {
-      if (
-        err.cause instanceof Error &&
-        err.cause.message.includes("off_topic")
-      ) {
-        stream.markdown(
-          "Sorry, I can only help you with Ruby related questions",
-        );
+      if (err.cause instanceof Error && err.cause.message.includes("off_topic")) {
+        stream.markdown("Sorry, I can only help you with Ruby related questions");
       }
     } else {
       throw err;

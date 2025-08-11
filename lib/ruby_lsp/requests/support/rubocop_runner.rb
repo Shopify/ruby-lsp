@@ -32,15 +32,13 @@ module RubyLsp
   module Requests
     module Support
       class InternalRuboCopError < StandardError
-        extend T::Sig
-
         MESSAGE = <<~EOS
           An internal error occurred %s.
           Updating to a newer version of RuboCop may solve this.
           For more details, run RuboCop on the command line.
         EOS
 
-        sig { params(rubocop_error: T.any(::RuboCop::ErrorWithAnalyzedFileLocation, StandardError)).void }
+        #: ((::RuboCop::ErrorWithAnalyzedFileLocation | StandardError) rubocop_error) -> void
         def initialize(rubocop_error)
           message = case rubocop_error
           when ::RuboCop::ErrorWithAnalyzedFileLocation
@@ -54,24 +52,19 @@ module RubyLsp
 
       # :nodoc:
       class RuboCopRunner < ::RuboCop::Runner
-        extend T::Sig
-
         class ConfigurationError < StandardError; end
 
-        DEFAULT_ARGS = T.let(
-          [
-            "--stderr", # Print any output to stderr so that our stdout does not get polluted
-            "--force-exclusion",
-            "--format",
-            "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
-          ],
-          T::Array[String],
-        )
+        DEFAULT_ARGS = [
+          "--stderr", # Print any output to stderr so that our stdout does not get polluted
+          "--force-exclusion",
+          "--format",
+          "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
+        ] #: Array[String]
 
-        sig { returns(T::Array[::RuboCop::Cop::Offense]) }
+        #: Array[::RuboCop::Cop::Offense]
         attr_reader :offenses
 
-        sig { returns(::RuboCop::Config) }
+        #: ::RuboCop::Config
         attr_reader :config_for_working_directory
 
         begin
@@ -82,31 +75,37 @@ module RubyLsp
         end
         DEFAULT_ARGS.freeze
 
-        sig { params(args: String).void }
+        #: (*String args) -> void
         def initialize(*args)
-          @options = T.let({}, T::Hash[Symbol, T.untyped])
-          @offenses = T.let([], T::Array[::RuboCop::Cop::Offense])
-          @errors = T.let([], T::Array[String])
-          @warnings = T.let([], T::Array[String])
+          @options = {} #: Hash[Symbol, untyped]
+          @offenses = [] #: Array[::RuboCop::Cop::Offense]
+          @errors = [] #: Array[String]
+          @warnings = [] #: Array[String]
+          # @prism_result = nil #: Prism::ParseLexResult?
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
 
           config_store = ::RuboCop::ConfigStore.new
           config_store.options_config = rubocop_options[:config] if rubocop_options[:config]
-          @config_for_working_directory = T.let(config_store.for_pwd, ::RuboCop::Config)
+          @config_for_working_directory = config_store.for_pwd #: ::RuboCop::Config
 
           super(rubocop_options, config_store)
         end
 
-        sig { params(path: String, contents: String).void }
-        def run(path, contents)
+        #: (String, String, Prism::ParseLexResult) -> void
+        def run(path, contents, prism_result)
           # Clear Runner state between runs since we get a single instance of this class
           # on every use site.
           @errors = []
           @warnings = []
           @offenses = []
           @options[:stdin] = contents
+
+          # Setting the Prism result before running the RuboCop runner makes it reuse the existing AST and avoids
+          # double-parsing. Unfortunately, this leads to a bunch of cops failing to execute properly under LSP mode.
+          # Uncomment this once reusing the Prism result is more stable
+          # @prism_result = prism_result
 
           super([path])
 
@@ -118,36 +117,35 @@ module RubyLsp
         rescue ::RuboCop::ValidationError => error
           raise ConfigurationError, error.message
         rescue StandardError => error
-          raise InternalRuboCopError, error
+          # Maintain the original backtrace so that debugging cops that are breaking is easier, but re-raise as a
+          # different error class
+          internal_error = InternalRuboCopError.new(error)
+          internal_error.set_backtrace(error.backtrace)
+          raise internal_error
         end
 
-        sig { returns(String) }
+        #: -> String
         def formatted_source
           @options[:stdin]
         end
 
         class << self
-          extend T::Sig
-
-          sig { params(cop_name: String).returns(T.nilable(T.class_of(::RuboCop::Cop::Base))) }
+          #: (String cop_name) -> singleton(::RuboCop::Cop::Base)?
           def find_cop_by_name(cop_name)
             cop_registry[cop_name]&.first
           end
 
           private
 
-          sig { returns(T::Hash[String, [T.class_of(::RuboCop::Cop::Base)]]) }
+          #: -> Hash[String, [singleton(::RuboCop::Cop::Base)]]
           def cop_registry
-            @cop_registry ||= T.let(
-              ::RuboCop::Cop::Registry.global.to_h,
-              T.nilable(T::Hash[String, [T.class_of(::RuboCop::Cop::Base)]]),
-            )
+            @cop_registry ||= ::RuboCop::Cop::Registry.global.to_h #: Hash[String, [singleton(::RuboCop::Cop::Base)]]?
           end
         end
 
         private
 
-        sig { params(_file: String, offenses: T::Array[::RuboCop::Cop::Offense]).void }
+        #: (String _file, Array[::RuboCop::Cop::Offense] offenses) -> void
         def file_finished(_file, offenses)
           @offenses = offenses
         end

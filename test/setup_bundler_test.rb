@@ -320,6 +320,27 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_composed_bundle_points_to_gemfile_in_enclosing_dir
+    Dir.mktmpdir do |dir|
+      FileUtils.touch(File.join(dir, "Gemfile"))
+      FileUtils.touch(File.join(dir, "Gemfile.lock"))
+
+      project_dir = File.join(dir, "proj")
+      Dir.mkdir(project_dir)
+
+      Dir.chdir(project_dir) do
+        Bundler.with_unbundled_env do
+          stub_bundle_with_env(bundle_env(project_dir, ".ruby-lsp/Gemfile"))
+          Bundler::LockfileParser.any_instance.expects(:dependencies).returns({}).at_least_once
+          run_script(project_dir)
+        end
+
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match("eval_gemfile(File.expand_path(\"../../Gemfile\", __dir__))", File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end
+
   def test_ensures_lockfile_remotes_are_relative_to_default_gemfile
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -672,8 +693,11 @@ class SetupBundlerTest < Minitest::Test
 
             mock_install = mock("install")
             mock_install.expects(:run)
-            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
-            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            Bundler::CLI::Install.expects(:new).with({ "no-cache" => true }).returns(mock_install)
+
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:bundle_check).raises(StandardError, "missing gems")
+            compose.setup!
           end
         end
       end
@@ -707,6 +731,8 @@ class SetupBundlerTest < Minitest::Test
               { conservative: true },
               ["ruby-lsp", "debug", "prism"],
             ).returns(mock_update)
+
+            FileUtils.touch(File.join(dir, ".ruby-lsp", "needs_update"))
             RubyLsp::SetupBundler.new(dir, launcher: true).setup!
           end
         end
@@ -729,7 +755,9 @@ class SetupBundlerTest < Minitest::Test
           end
 
           stdout, stderr = capture_subprocess_io do
-            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:bundle_check).raises(StandardError, "missing gems")
+            compose.setup!
           end
 
           assert_match(/Bundle complete! [\d]+ Gemfile dependencies, [\d]+ gems now installed/, stderr)
@@ -823,37 +851,129 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
-  def test_update_does_not_fail_if_gems_are_uninstalled
+  def test_only_returns_environment_if_bundle_was_composed_ahead_of_time
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        FileUtils.mkdir(".ruby-lsp")
+        FileUtils.touch(File.join(".ruby-lsp", "bundle_is_composed"))
+
+        require "bundler/cli/update"
+        require "bundler/cli/install"
+        Bundler::CLI::Update.expects(:new).never
+        Bundler::CLI::Install.expects(:new).never
+
+        assert_output("", "Ruby LSP> Composed bundle was set up ahead of time. Skipping...\n") do
+          refute_empty(RubyLsp::SetupBundler.new(dir, launcher: true).setup!)
+        end
+      end
+    end
+  end
+
+  def test_ignores_bundle_bin
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
           source "https://rubygems.org"
-          gem "rdoc"
+          gem "irb"
         GEMFILE
 
         capture_subprocess_io do
           Bundler.with_unbundled_env do
-            system("bundle install")
-            run_script(dir)
+            system("bundle", "config", "set", "--local", "bin", "bin")
+            system("bundle", "install")
 
-            mock_update = mock("update")
-            mock_update.expects(:run).raises(Bundler::GemNotFound.new("rdoc"))
-            require "bundler/cli/update"
-            Bundler::CLI::Update.expects(:new).with(
-              { conservative: true },
-              ["ruby-lsp", "debug", "prism"],
-            ).returns(mock_update)
+            assert_path_exists(File.join(dir, "bin"))
 
-            mock_install = mock("install")
-            mock_install.expects(:run)
-            require "bundler/cli/install"
-            Bundler::CLI::Install.expects(:new).with({}).returns(mock_install)
-
-            RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            env = RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            refute_includes(env.keys, "BUNDLE_BIN")
           end
         end
+      end
+    end
+  end
 
-        refute_path_exists(File.join(".ruby-lsp", "install_error"))
+  def test_ignores_bundle_package
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        capture_subprocess_io do
+          Bundler.with_unbundled_env do
+            system("bundle", "install")
+            system("bundle", "package")
+
+            env = RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+            refute_includes(env.keys, "BUNDLE_CACHE_ALL")
+            refute_includes(env.keys, "BUNDLE_CACHE_ALL_PLATFORMS")
+          end
+        end
+      end
+    end
+  end
+
+  def test_handles_network_down_error_during_bundle_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle install")
+
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:bundle_check).raises(Bundler::Fetcher::NetworkDownError)
+          compose.setup!
+
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
+  def test_handles_http_error_during_bundle_install
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          system("bundle install")
+
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:bundle_check).raises(Bundler::HTTPError)
+          compose.setup!
+
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
+  def test_is_resilient_to_pipe_being_closed_by_client_during_compose
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+          source "https://rubygems.org"
+          gem "irb"
+        GEMFILE
+
+        Bundler.with_unbundled_env do
+          capture_subprocess_io do
+            system("bundle install")
+
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:run_bundle_install_directly).raises(Errno::EPIPE)
+            compose.setup!
+            refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+          end
+        end
       end
     end
   end
@@ -887,7 +1007,7 @@ class SetupBundlerTest < Minitest::Test
   # This method runs the script and then immediately unloads it. This allows us to make assertions against the effects
   # of running the script multiple times
   def run_script(path = Dir.pwd, expected_path: nil, **options)
-    env = T.let({}, T::Hash[String, String])
+    env = {} #: Hash[String, String]
 
     stdout, _stderr = capture_subprocess_io do
       env = RubyLsp::SetupBundler.new(path, **options).setup!
@@ -921,7 +1041,7 @@ class SetupBundlerTest < Minitest::Test
     end
 
     env = settings.all.to_h do |e|
-      key = Bundler::Settings.key_for(e)
+      key = settings.key_for(e)
       value = Array(settings[e]).join(":").tr(" ", ":")
 
       [key, value]

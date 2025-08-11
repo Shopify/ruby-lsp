@@ -4,97 +4,70 @@
 module RubyLsp
   module Listeners
     class DocumentHighlight
-      extend T::Sig
       include Requests::Support::Common
 
-      GLOBAL_VARIABLE_NODES = T.let(
-        [
-          Prism::GlobalVariableAndWriteNode,
-          Prism::GlobalVariableOperatorWriteNode,
-          Prism::GlobalVariableOrWriteNode,
-          Prism::GlobalVariableReadNode,
-          Prism::GlobalVariableTargetNode,
-          Prism::GlobalVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      GLOBAL_VARIABLE_NODES = [
+        Prism::GlobalVariableAndWriteNode,
+        Prism::GlobalVariableOperatorWriteNode,
+        Prism::GlobalVariableOrWriteNode,
+        Prism::GlobalVariableReadNode,
+        Prism::GlobalVariableTargetNode,
+        Prism::GlobalVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      INSTANCE_VARIABLE_NODES = T.let(
-        [
-          Prism::InstanceVariableAndWriteNode,
-          Prism::InstanceVariableOperatorWriteNode,
-          Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableReadNode,
-          Prism::InstanceVariableTargetNode,
-          Prism::InstanceVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      INSTANCE_VARIABLE_NODES = [
+        Prism::InstanceVariableAndWriteNode,
+        Prism::InstanceVariableOperatorWriteNode,
+        Prism::InstanceVariableOrWriteNode,
+        Prism::InstanceVariableReadNode,
+        Prism::InstanceVariableTargetNode,
+        Prism::InstanceVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      CONSTANT_NODES = T.let(
-        [
-          Prism::ConstantAndWriteNode,
-          Prism::ConstantOperatorWriteNode,
-          Prism::ConstantOrWriteNode,
-          Prism::ConstantReadNode,
-          Prism::ConstantTargetNode,
-          Prism::ConstantWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      CONSTANT_NODES = [
+        Prism::ConstantAndWriteNode,
+        Prism::ConstantOperatorWriteNode,
+        Prism::ConstantOrWriteNode,
+        Prism::ConstantReadNode,
+        Prism::ConstantTargetNode,
+        Prism::ConstantWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      CONSTANT_PATH_NODES = T.let(
-        [
-          Prism::ConstantPathAndWriteNode,
-          Prism::ConstantPathNode,
-          Prism::ConstantPathOperatorWriteNode,
-          Prism::ConstantPathOrWriteNode,
-          Prism::ConstantPathTargetNode,
-          Prism::ConstantPathWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      CONSTANT_PATH_NODES = [
+        Prism::ConstantPathAndWriteNode,
+        Prism::ConstantPathNode,
+        Prism::ConstantPathOperatorWriteNode,
+        Prism::ConstantPathOrWriteNode,
+        Prism::ConstantPathTargetNode,
+        Prism::ConstantPathWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      CLASS_VARIABLE_NODES = T.let(
-        [
-          Prism::ClassVariableAndWriteNode,
-          Prism::ClassVariableOperatorWriteNode,
-          Prism::ClassVariableOrWriteNode,
-          Prism::ClassVariableReadNode,
-          Prism::ClassVariableTargetNode,
-          Prism::ClassVariableWriteNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      CLASS_VARIABLE_NODES = [
+        Prism::ClassVariableAndWriteNode,
+        Prism::ClassVariableOperatorWriteNode,
+        Prism::ClassVariableOrWriteNode,
+        Prism::ClassVariableReadNode,
+        Prism::ClassVariableTargetNode,
+        Prism::ClassVariableWriteNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      LOCAL_NODES = T.let(
-        [
-          Prism::LocalVariableAndWriteNode,
-          Prism::LocalVariableOperatorWriteNode,
-          Prism::LocalVariableOrWriteNode,
-          Prism::LocalVariableReadNode,
-          Prism::LocalVariableTargetNode,
-          Prism::LocalVariableWriteNode,
-          Prism::BlockParameterNode,
-          Prism::RequiredParameterNode,
-          Prism::RequiredKeywordParameterNode,
-          Prism::OptionalKeywordParameterNode,
-          Prism::RestParameterNode,
-          Prism::OptionalParameterNode,
-          Prism::KeywordRestParameterNode,
-        ],
-        T::Array[T.class_of(Prism::Node)],
-      )
+      LOCAL_NODES = [
+        Prism::LocalVariableAndWriteNode,
+        Prism::LocalVariableOperatorWriteNode,
+        Prism::LocalVariableOrWriteNode,
+        Prism::LocalVariableReadNode,
+        Prism::LocalVariableTargetNode,
+        Prism::LocalVariableWriteNode,
+        Prism::BlockParameterNode,
+        Prism::RequiredParameterNode,
+        Prism::RequiredKeywordParameterNode,
+        Prism::OptionalKeywordParameterNode,
+        Prism::RestParameterNode,
+        Prism::OptionalParameterNode,
+        Prism::KeywordRestParameterNode,
+      ] #: Array[singleton(Prism::Node)]
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight],
-          target: T.nilable(Prism::Node),
-          parent: T.nilable(Prism::Node),
-          dispatcher: Prism::Dispatcher,
-          position: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight] response_builder, Prism::Node? target, Prism::Node? parent, Prism::Dispatcher dispatcher, Hash[Symbol, untyped] position) -> void
       def initialize(response_builder, target, parent, dispatcher, position)
         @response_builder = response_builder
 
@@ -121,11 +94,11 @@ module RubyLsp
           when Prism::ModuleNode, Prism::ClassNode, Prism::SingletonClassNode, Prism::DefNode, Prism::CaseNode,
             Prism::WhileNode, Prism::UntilNode, Prism::ForNode, Prism::IfNode, Prism::UnlessNode, Prism::BlockNode,
             Prism::LambdaNode
-            target
+            [target, nil]
           end
 
-        @target = T.let(highlight_target, T.nilable(Prism::Node))
-        @target_value = T.let(highlight_target_value, T.nilable(String))
+        @target = highlight_target #: Prism::Node?
+        @target_value = highlight_target_value #: String?
         @target_position = position
 
         if @target
@@ -191,7 +164,7 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         return unless matches?(node, [Prism::CallNode, Prism::DefNode])
 
@@ -202,7 +175,7 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::READ, loc)
       end
 
-      sig { params(node: Prism::DefNode).void }
+      #: (Prism::DefNode node) -> void
       def on_def_node_enter(node)
         add_matching_end_highlights(node.def_keyword_loc, node.end_keyword_loc) if @target.is_a?(Prism::DefNode)
 
@@ -211,63 +184,63 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      #: (Prism::GlobalVariableTargetNode node) -> void
       def on_global_variable_target_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      #: (Prism::InstanceVariableTargetNode node) -> void
       def on_instance_variable_target_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::ConstantPathTargetNode).void }
+      #: (Prism::ConstantPathTargetNode node) -> void
       def on_constant_path_target_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::ConstantTargetNode).void }
+      #: (Prism::ConstantTargetNode node) -> void
       def on_constant_target_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::ClassVariableTargetNode).void }
+      #: (Prism::ClassVariableTargetNode node) -> void
       def on_class_variable_target_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::LocalVariableTargetNode).void }
+      #: (Prism::LocalVariableTargetNode node) -> void
       def on_local_variable_target_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::BlockParameterNode).void }
+      #: (Prism::BlockParameterNode node) -> void
       def on_block_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::RequiredParameterNode).void }
+      #: (Prism::RequiredParameterNode node) -> void
       def on_required_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.location)
       end
 
-      sig { params(node: Prism::ClassNode).void }
+      #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node)
         add_matching_end_highlights(node.class_keyword_loc, node.end_keyword_loc) if @target.is_a?(Prism::ClassNode)
 
@@ -276,7 +249,7 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.constant_path.location)
       end
 
-      sig { params(node: Prism::ModuleNode).void }
+      #: (Prism::ModuleNode node) -> void
       def on_module_node_enter(node)
         add_matching_end_highlights(node.module_keyword_loc, node.end_keyword_loc) if @target.is_a?(Prism::ModuleNode)
 
@@ -285,98 +258,98 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.constant_path.location)
       end
 
-      sig { params(node: Prism::LocalVariableReadNode).void }
+      #: (Prism::LocalVariableReadNode node) -> void
       def on_local_variable_read_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
-      sig { params(node: Prism::ConstantPathNode).void }
+      #: (Prism::ConstantPathNode node) -> void
       def on_constant_path_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.name_loc)
       end
 
-      sig { params(node: Prism::ConstantReadNode).void }
+      #: (Prism::ConstantReadNode node) -> void
       def on_constant_read_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
-      sig { params(node: Prism::InstanceVariableReadNode).void }
+      #: (Prism::InstanceVariableReadNode node) -> void
       def on_instance_variable_read_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
-      sig { params(node: Prism::ClassVariableReadNode).void }
+      #: (Prism::ClassVariableReadNode node) -> void
       def on_class_variable_read_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
-      sig { params(node: Prism::GlobalVariableReadNode).void }
+      #: (Prism::GlobalVariableReadNode node) -> void
       def on_global_variable_read_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::READ, node.location)
       end
 
-      sig { params(node: Prism::ConstantPathWriteNode).void }
+      #: (Prism::ConstantPathWriteNode node) -> void
       def on_constant_path_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
-      sig { params(node: Prism::ConstantPathOrWriteNode).void }
+      #: (Prism::ConstantPathOrWriteNode node) -> void
       def on_constant_path_or_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
-      sig { params(node: Prism::ConstantPathAndWriteNode).void }
+      #: (Prism::ConstantPathAndWriteNode node) -> void
       def on_constant_path_and_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
-      sig { params(node: Prism::ConstantPathOperatorWriteNode).void }
+      #: (Prism::ConstantPathOperatorWriteNode node) -> void
       def on_constant_path_operator_write_node_enter(node)
         return unless matches?(node, CONSTANT_PATH_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.target.location)
       end
 
-      sig { params(node: Prism::LocalVariableWriteNode).void }
+      #: (Prism::LocalVariableWriteNode node) -> void
       def on_local_variable_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::RequiredKeywordParameterNode).void }
+      #: (Prism::RequiredKeywordParameterNode node) -> void
       def on_required_keyword_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::OptionalKeywordParameterNode).void }
+      #: (Prism::OptionalKeywordParameterNode node) -> void
       def on_optional_keyword_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::RestParameterNode).void }
+      #: (Prism::RestParameterNode node) -> void
       def on_rest_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
@@ -384,14 +357,14 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, name_loc) if name_loc
       end
 
-      sig { params(node: Prism::OptionalParameterNode).void }
+      #: (Prism::OptionalParameterNode node) -> void
       def on_optional_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::KeywordRestParameterNode).void }
+      #: (Prism::KeywordRestParameterNode node) -> void
       def on_keyword_rest_parameter_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
@@ -399,182 +372,182 @@ module RubyLsp
         add_highlight(Constant::DocumentHighlightKind::WRITE, name_loc) if name_loc
       end
 
-      sig { params(node: Prism::LocalVariableAndWriteNode).void }
+      #: (Prism::LocalVariableAndWriteNode node) -> void
       def on_local_variable_and_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::LocalVariableOperatorWriteNode).void }
+      #: (Prism::LocalVariableOperatorWriteNode node) -> void
       def on_local_variable_operator_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::LocalVariableOrWriteNode).void }
+      #: (Prism::LocalVariableOrWriteNode node) -> void
       def on_local_variable_or_write_node_enter(node)
         return unless matches?(node, LOCAL_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableWriteNode).void }
+      #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      #: (Prism::ClassVariableOrWriteNode node) -> void
       def on_class_variable_or_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      #: (Prism::ClassVariableOperatorWriteNode node) -> void
       def on_class_variable_operator_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      #: (Prism::ClassVariableAndWriteNode node) -> void
       def on_class_variable_and_write_node_enter(node)
         return unless matches?(node, CLASS_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ConstantWriteNode).void }
+      #: (Prism::ConstantWriteNode node) -> void
       def on_constant_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ConstantOrWriteNode).void }
+      #: (Prism::ConstantOrWriteNode node) -> void
       def on_constant_or_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ConstantOperatorWriteNode).void }
+      #: (Prism::ConstantOperatorWriteNode node) -> void
       def on_constant_operator_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      #: (Prism::InstanceVariableWriteNode node) -> void
       def on_instance_variable_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      #: (Prism::InstanceVariableOrWriteNode node) -> void
       def on_instance_variable_or_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      #: (Prism::InstanceVariableAndWriteNode node) -> void
       def on_instance_variable_and_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      #: (Prism::InstanceVariableOperatorWriteNode node) -> void
       def on_instance_variable_operator_write_node_enter(node)
         return unless matches?(node, INSTANCE_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::ConstantAndWriteNode).void }
+      #: (Prism::ConstantAndWriteNode node) -> void
       def on_constant_and_write_node_enter(node)
         return unless matches?(node, CONSTANT_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      #: (Prism::GlobalVariableWriteNode node) -> void
       def on_global_variable_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      #: (Prism::GlobalVariableOrWriteNode node) -> void
       def on_global_variable_or_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      #: (Prism::GlobalVariableAndWriteNode node) -> void
       def on_global_variable_and_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      #: (Prism::GlobalVariableOperatorWriteNode node) -> void
       def on_global_variable_operator_write_node_enter(node)
         return unless matches?(node, GLOBAL_VARIABLE_NODES)
 
         add_highlight(Constant::DocumentHighlightKind::WRITE, node.name_loc)
       end
 
-      sig { params(node: Prism::SingletonClassNode).void }
+      #: (Prism::SingletonClassNode node) -> void
       def on_singleton_class_node_enter(node)
         return unless @target.is_a?(Prism::SingletonClassNode)
 
         add_matching_end_highlights(node.class_keyword_loc, node.end_keyword_loc)
       end
 
-      sig { params(node: Prism::CaseNode).void }
+      #: (Prism::CaseNode node) -> void
       def on_case_node_enter(node)
         return unless @target.is_a?(Prism::CaseNode)
 
         add_matching_end_highlights(node.case_keyword_loc, node.end_keyword_loc)
       end
 
-      sig { params(node: Prism::WhileNode).void }
+      #: (Prism::WhileNode node) -> void
       def on_while_node_enter(node)
         return unless @target.is_a?(Prism::WhileNode)
 
         add_matching_end_highlights(node.keyword_loc, node.closing_loc)
       end
 
-      sig { params(node: Prism::UntilNode).void }
+      #: (Prism::UntilNode node) -> void
       def on_until_node_enter(node)
         return unless @target.is_a?(Prism::UntilNode)
 
         add_matching_end_highlights(node.keyword_loc, node.closing_loc)
       end
 
-      sig { params(node: Prism::ForNode).void }
+      #: (Prism::ForNode node) -> void
       def on_for_node_enter(node)
         return unless @target.is_a?(Prism::ForNode)
 
         add_matching_end_highlights(node.for_keyword_loc, node.end_keyword_loc)
       end
 
-      sig { params(node: Prism::IfNode).void }
+      #: (Prism::IfNode node) -> void
       def on_if_node_enter(node)
         return unless @target.is_a?(Prism::IfNode)
 
         add_matching_end_highlights(node.if_keyword_loc, node.end_keyword_loc)
       end
 
-      sig { params(node: Prism::UnlessNode).void }
+      #: (Prism::UnlessNode node) -> void
       def on_unless_node_enter(node)
         return unless @target.is_a?(Prism::UnlessNode)
 
@@ -597,17 +570,17 @@ module RubyLsp
 
       private
 
-      sig { params(node: Prism::Node, classes: T::Array[T.class_of(Prism::Node)]).returns(T.nilable(T::Boolean)) }
+      #: (Prism::Node node, Array[singleton(Prism::Node)] classes) -> bool?
       def matches?(node, classes)
         classes.any? { |klass| @target.is_a?(klass) } && @target_value == node_value(node)
       end
 
-      sig { params(kind: Integer, location: Prism::Location).void }
+      #: (Integer kind, Prism::Location location) -> void
       def add_highlight(kind, location)
         @response_builder << Interface::DocumentHighlight.new(range: range_from_location(location), kind: kind)
       end
 
-      sig { params(node: T.nilable(Prism::Node)).returns(T.nilable(String)) }
+      #: (Prism::Node? node) -> String?
       def node_value(node)
         case node
         when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::BlockArgumentNode, Prism::ConstantTargetNode,
@@ -635,16 +608,17 @@ module RubyLsp
         end
       end
 
-      sig { params(keyword_loc: T.nilable(Prism::Location), end_loc: T.nilable(Prism::Location)).void }
+      #: (Prism::Location? keyword_loc, Prism::Location? end_loc) -> void
       def add_matching_end_highlights(keyword_loc, end_loc)
-        return unless keyword_loc && end_loc && end_loc.length.positive?
+        return unless keyword_loc && end_loc
+        return unless end_loc.length.positive?
         return unless covers_target_position?(keyword_loc) || covers_target_position?(end_loc)
 
         add_highlight(Constant::DocumentHighlightKind::TEXT, keyword_loc)
         add_highlight(Constant::DocumentHighlightKind::TEXT, end_loc)
       end
 
-      sig { params(location: Prism::Location).returns(T::Boolean) }
+      #: (Prism::Location location) -> bool
       def covers_target_position?(location)
         start_line = location.start_line - 1
         end_line = location.end_line - 1

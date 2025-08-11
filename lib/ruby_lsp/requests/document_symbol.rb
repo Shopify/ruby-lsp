@@ -13,21 +13,17 @@ module RubyLsp
     # In VS Code, symbol search known as 'Go To Symbol in Editor' and can be accessed with Ctrl/Cmd-Shift-O,
     # or by opening the command palette and inserting an `@` symbol.
     class DocumentSymbol < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::DocumentSymbolOptions) }
+        #: -> Interface::DocumentSymbolOptions
         def provider
           Interface::DocumentSymbolOptions.new
         end
       end
 
-      sig { params(uri: URI::Generic, dispatcher: Prism::Dispatcher).void }
+      #: (URI::Generic uri, Prism::Dispatcher dispatcher) -> void
       def initialize(uri, dispatcher)
         super()
-        @response_builder = T.let(ResponseBuilders::DocumentSymbol.new, ResponseBuilders::DocumentSymbol)
+        @response_builder = ResponseBuilders::DocumentSymbol.new #: ResponseBuilders::DocumentSymbol
         Listeners::DocumentSymbol.new(@response_builder, uri, dispatcher)
 
         Addon.addons.each do |addon|
@@ -35,7 +31,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T::Array[Interface::DocumentSymbol]) }
+      # @override
+      #: -> Array[Interface::DocumentSymbol]
       def perform
         @response_builder.response
       end

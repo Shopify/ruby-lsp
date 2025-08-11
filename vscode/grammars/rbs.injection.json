@@ -1,0 +1,55 @@
+{
+  "scopeName": "rbs-comment.injection",
+  "injectionSelector": "L:source.ruby",
+  "patterns": [
+    {
+      "include": "#rbs-signature"
+    }
+  ],
+  "repository": {
+    "rbs-signature": {
+      "begin": "(?<![\"'/][^\"'/]*)(#(?::|\\|))",
+      "beginCaptures": {
+        "1": {
+          "name": "comment.line.signature.rbs"
+        }
+      },
+      "end": "$",
+      "name": "meta.type.signature.rbs",
+      "patterns": [
+        {
+          "match": "\\b(void|nil|untyped|top|bot|self|instance|class|interface|singleton|bool|boolish|any)\\b",
+          "name": "support.type.builtin.rbs"
+        },
+        {
+          "match": "\\b[A-Z][A-Za-z0-9_]*\\b",
+          "name": "variable.other.constant.rbs"
+        },
+        {
+          "match": "[\\[\\]]",
+          "name": "punctuation.section.type_parameters.rbs"
+        },
+        {
+          "match": "\\b[a-z][A-Za-z0-9_]*(?=:)",
+          "name": "constant.other.symbol.hashkey.parameter.function.rbs"
+        },
+        {
+          "match": "\\b[a-z][A-Za-z0-9_]*\\b",
+          "name": "variable.parameter.function.rbs"
+        },
+        {
+          "match": "->",
+          "name": "punctuation.section.signature.return.rbs"
+        },
+        {
+          "match": "[\\(\\)\\{\\},\\|\\*&:?]",
+          "name": "punctuation.section.signature.rbs"
+        },
+        {
+          "match": "#.*$",
+          "name": "comment.line.number-sign.rbs"
+        }
+      ]
+    }
+  }
+}

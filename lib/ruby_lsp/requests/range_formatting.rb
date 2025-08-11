@@ -6,18 +6,17 @@ module RubyLsp
     # The [range formatting](https://microsoft.github.io/language-server-protocol/specification#textDocument_rangeFormatting)
     # is used to format a selection or to format on paste.
     class RangeFormatting < Request
-      extend T::Sig
-
-      sig { params(global_state: GlobalState, document: RubyDocument, params: T::Hash[Symbol, T.untyped]).void }
+      #: (GlobalState global_state, RubyDocument document, Hash[Symbol, untyped] params) -> void
       def initialize(global_state, document, params)
         super()
         @document = document
-        @uri = T.let(document.uri, URI::Generic)
+        @uri = document.uri #: URI::Generic
         @params = params
-        @active_formatter = T.let(global_state.active_formatter, T.nilable(Support::Formatter))
+        @active_formatter = global_state.active_formatter #: Support::Formatter?
       end
 
-      sig { override.returns(T.nilable(T::Array[Interface::TextEdit])) }
+      # @override
+      #: -> Array[Interface::TextEdit]?
       def perform
         return unless @active_formatter
         return if @document.syntax_error?

@@ -5,16 +5,18 @@ import { CodeLens, State } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
 import Client from "./client";
-import {
-  asyncExec,
-  LOG_CHANNEL,
-  WorkspaceInterface,
-  STATUS_EMITTER,
-  debounce,
-} from "./common";
+import { asyncExec, LOG_CHANNEL, WorkspaceInterface, STATUS_EMITTER, debounce } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 
 const WATCHED_FILES = ["Gemfile.lock", "gems.locked"];
+
+interface GitExtension {
+  exports: {
+    getAPI: (version: number) => {
+      openRepository: (uri: vscode.Uri) => Promise<{ rootUri: vscode.Uri } | undefined>;
+    };
+  };
+}
 
 export class Workspace implements WorkspaceInterface {
   public lspClient?: Client;
@@ -28,6 +30,11 @@ export class Workspace implements WorkspaceInterface {
   private readonly virtualDocuments = new Map<string, string>();
   private readonly restartDocumentShas = new Map<string, string>();
   private needsRestart = false;
+
+  // Holds all subscriptions that are related to this workspace and that should be disposed of if the workspace is
+  // deactivated. Notice that we do not dispose of the workspace when restarting the LSP client, we only dispose of the
+  // client itself
+  private subscriptions: vscode.Disposable[] = [];
   #inhibitRestart = false;
   #error = false;
 
@@ -46,17 +53,9 @@ export class Workspace implements WorkspaceInterface {
   ) {
     this.context = context;
     this.workspaceFolder = workspaceFolder;
-    this.outputChannel = new WorkspaceChannel(
-      workspaceFolder.name,
-      LOG_CHANNEL,
-    );
+    this.outputChannel = new WorkspaceChannel(workspaceFolder.name, LOG_CHANNEL);
     this.telemetry = telemetry;
-    this.ruby = new Ruby(
-      context,
-      workspaceFolder,
-      this.outputChannel,
-      telemetry,
-    );
+    this.ruby = new Ruby(context, workspaceFolder, this.outputChannel, telemetry);
     this.createTestItems = createTestItems;
     this.isMainWorkspace = isMainWorkspace;
     this.virtualDocuments = virtualDocuments;
@@ -65,7 +64,7 @@ export class Workspace implements WorkspaceInterface {
   // Activate this workspace. This method is intended to be invoked only once, unlikely `start` which may be invoked
   // multiple times due to restarts
   async activate() {
-    const gitExtension = vscode.extensions.getExtension("vscode.git");
+    const gitExtension: GitExtension | undefined = vscode.extensions.getExtension("vscode.git");
     let rootGitUri = this.workspaceFolder.uri;
 
     // If the git extension is available, use that to find the root of the git repository
@@ -78,10 +77,7 @@ export class Workspace implements WorkspaceInterface {
       }
     }
 
-    this.registerCreateDeleteWatcher(
-      rootGitUri,
-      ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}",
-    );
+    this.registerCreateDeleteWatcher(rootGitUri, ".git/{rebase-merge,rebase-apply,BISECT_START,CHERRY_PICK_HEAD}");
 
     this.registerRestarts();
 
@@ -113,11 +109,9 @@ export class Workspace implements WorkspaceInterface {
       // readonly, so it means VS Code does not have write permissions to the workspace URI and creating the custom
       // bundle would fail. We throw here just to catch it immediately below and show the error to the user
       if (stat.permissions) {
-        throw new Error(
-          `Directory ${this.workspaceFolder.uri.fsPath} is readonly.`,
-        );
+        throw new Error(`Directory ${this.workspaceFolder.uri.fsPath} is readonly.`);
       }
-    } catch (error: any) {
+    } catch (_error: any) {
       this.error = true;
 
       await vscode.window.showErrorMessage(
@@ -144,8 +138,7 @@ export class Workspace implements WorkspaceInterface {
     // The `start` method can be invoked through commands - even if there's an LSP client already running. We need to
     // ensure that the existing client for this workspace has been stopped and disposed of before we create a new one
     if (this.lspClient) {
-      await this.lspClient.stop();
-      await this.lspClient.dispose();
+      await this.stop();
     }
 
     this.lspClient = new Client(
@@ -178,9 +171,7 @@ export class Workspace implements WorkspaceInterface {
       // server can now handle shutdown requests
       if (this.needsRestart) {
         this.needsRestart = false;
-        await this.debouncedRestart(
-          "a restart was requested while the server was still booting",
-        );
+        await this.debouncedRestart("a restart was requested while the server was still booting");
       }
     } catch (error: any) {
       this.error = true;
@@ -189,7 +180,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   async stop() {
-    await this.lspClient?.stop();
+    await this.lspClient?.dispose();
   }
 
   async restart() {
@@ -205,6 +196,8 @@ export class Workspace implements WorkspaceInterface {
         return this.start();
       }
 
+      let canRestart = false;
+
       switch (this.lspClient.state) {
         // If the server is still starting, then it may not be ready to handle a shutdown request yet. Trying to send
         // one could lead to a hanging process. Instead we set a flag and only restart once the server finished booting
@@ -214,14 +207,21 @@ export class Workspace implements WorkspaceInterface {
           break;
         // If the server is running, we want to stop it, dispose of the client and start a new one
         case State.Running:
-          await this.stop();
-          await this.lspClient.dispose();
-          this.lspClient = undefined;
-          await this.start();
+          // If the server doesn't support checking the validity of the composed bundle or if composing the bundle was
+          // successful, then we can restart
+          canRestart =
+            !this.lspClient.initializeResult?.capabilities.experimental.compose_bundle ||
+            (await this.composingBundleSucceeds());
+
+          if (canRestart) {
+            await this.stop();
+            this.lspClient = undefined;
+            await this.start();
+          }
           break;
         // If the server is already stopped, then we need to dispose it and start a new one
         case State.Stopped:
-          await this.lspClient.dispose();
+          await this.stop();
           this.lspClient = undefined;
           await this.start();
           break;
@@ -233,6 +233,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   async dispose() {
+    this.subscriptions.forEach((subscription) => subscription.dispose());
     await this.lspClient?.dispose();
   }
 
@@ -241,27 +242,17 @@ export class Workspace implements WorkspaceInterface {
   async installOrUpdateServer(manualInvocation: boolean): Promise<void> {
     // If there's a user configured custom bundle to run the LSP, then we do not perform auto-updates and let the user
     // manage that custom bundle themselves
-    const customBundle: string = vscode.workspace
-      .getConfiguration("rubyLsp")
-      .get("bundleGemfile")!;
+    const customBundle: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
 
     if (customBundle.length > 0) {
       return;
     }
 
     const oneDayInMs = 24 * 60 * 60 * 1000;
-    const lastUpdatedAt: number | undefined = this.context.workspaceState.get(
-      "rubyLsp.lastGemUpdate",
-    );
+    const lastUpdatedAt: number | undefined = this.context.workspaceState.get("rubyLsp.lastGemUpdate");
 
     // Theses are the Ruby LSP's own dependencies, listed in `ruby-lsp.gemspec`
-    const dependencies = [
-      "ruby-lsp",
-      "language_server-protocol",
-      "prism",
-      "rbs",
-      "sorbet-runtime",
-    ];
+    const dependencies = ["ruby-lsp", "language_server-protocol", "prism", "rbs"];
 
     const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {
       cwd: this.workspaceFolder.uri.fsPath,
@@ -277,48 +268,35 @@ export class Workspace implements WorkspaceInterface {
         env: this.ruby.env,
       });
 
-      await this.context.workspaceState.update(
-        "rubyLsp.lastGemUpdate",
-        Date.now(),
-      );
+      await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
       return;
     }
 
     // In addition to updating the global installation of the ruby-lsp gem, if the user manually requested an update, we
     // should delete the `.ruby-lsp` to ensure that we'll lock a new version of the server that will actually be booted
     if (manualInvocation) {
+      const composedBundleUri = vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp");
+
       try {
-        await vscode.workspace.fs.delete(
-          vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp"),
-          { recursive: true },
-        );
-      } catch (error) {
-        this.outputChannel.info(
-          `Tried deleting ${vscode.Uri.joinPath(this.workspaceFolder.uri, ".ruby-lsp")}, but it doesn't exist`,
-        );
+        await vscode.workspace.fs.delete(composedBundleUri, {
+          recursive: true,
+        });
+      } catch (_error) {
+        this.outputChannel.info(`Tried deleting ${composedBundleUri.fsPath}, but it doesn't exist`);
       }
     }
 
     // If we haven't updated the gem in the last 24 hours or if the user manually asked for an update, update it
-    if (
-      manualInvocation ||
-      lastUpdatedAt === undefined ||
-      Date.now() - lastUpdatedAt > oneDayInMs
-    ) {
+    if (manualInvocation || lastUpdatedAt === undefined || Date.now() - lastUpdatedAt > oneDayInMs) {
       try {
         await asyncExec("gem update ruby-lsp", {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
-        await this.context.workspaceState.update(
-          "rubyLsp.lastGemUpdate",
-          Date.now(),
-        );
-      } catch (error) {
+        await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+      } catch (error: any) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
-        this.outputChannel.error(
-          `Failed to update global ruby-lsp gem: ${error}`,
-        );
+        this.outputChannel.error(`Failed to update global ruby-lsp gem: ${error}`);
       }
     }
   }
@@ -363,7 +341,7 @@ export class Workspace implements WorkspaceInterface {
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
-    this.context.subscriptions.push(
+    this.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration(async (event) => {
         if (event.affectsConfiguration("rubyLsp")) {
           await this.debouncedRestart("configuration changed");
@@ -373,9 +351,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   private createRestartWatcher(pattern: string) {
-    const watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(this.workspaceFolder, pattern),
-    );
+    const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(this.workspaceFolder, pattern));
 
     // Handler for only triggering restart if the contents of the file have been modified. If the file was just touched,
     // but the contents are the same, we don't want to restart
@@ -394,7 +370,7 @@ export class Workspace implements WorkspaceInterface {
       await this.debouncedRestart(`${uri.fsPath} changed, matching ${pattern}`);
     };
 
-    this.context.subscriptions.push(
+    this.subscriptions.push(
       watcher,
       watcher.onDidChange(debouncedRestartWithHashCheck),
       // Interestingly, we are seeing create events being fired even when the file already exists. If a create event is
@@ -406,9 +382,7 @@ export class Workspace implements WorkspaceInterface {
   }
 
   private registerCreateDeleteWatcher(base: vscode.Uri, glob: string) {
-    const workspaceWatcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(base, glob),
-    );
+    const workspaceWatcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(base, glob));
 
     const start = () => {
       this.#inhibitRestart = true;
@@ -419,7 +393,7 @@ export class Workspace implements WorkspaceInterface {
       await this.debouncedRestart(`${uri.fsPath} changed, matching ${glob}`);
     };
 
-    this.context.subscriptions.push(
+    this.subscriptions.push(
       workspaceWatcher,
       // When one of the 'inhibit restart' files are created, we set this flag to prevent restarting during that action
       workspaceWatcher.onDidCreate(start),
@@ -433,12 +407,25 @@ export class Workspace implements WorkspaceInterface {
 
     try {
       fileContents = await vscode.workspace.fs.readFile(uri);
-    } catch (error: any) {
+    } catch (_error: any) {
       return undefined;
     }
 
     const hash = createHash("sha256");
     hash.update(fileContents.toString());
     return hash.digest("hex");
+  }
+
+  private async composingBundleSucceeds(): Promise<boolean> {
+    if (!this.lspClient) {
+      return false;
+    }
+
+    try {
+      const response: { success: boolean } = await this.lspClient.sendRequest("rubyLsp/composeBundle");
+      return response.success;
+    } catch (_error: any) {
+      return false;
+    }
   }
 }

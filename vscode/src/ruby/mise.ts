@@ -1,4 +1,3 @@
-/* eslint-disable no-process-env */
 import os from "os";
 
 import * as vscode from "vscode";
@@ -13,9 +12,7 @@ export class Mise extends VersionManager {
     const miseUri = await this.findMiseUri();
 
     // The exec command in Mise is called `x`
-    const parsedResult = await this.runEnvActivationScript(
-      `${miseUri.fsPath} x -- ruby`,
-    );
+    const parsedResult = await this.runEnvActivationScript(`${miseUri.fsPath} x -- ruby`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -27,9 +24,7 @@ export class Mise extends VersionManager {
 
   async findMiseUri(): Promise<vscode.Uri> {
     const config = vscode.workspace.getConfiguration("rubyLsp");
-    const misePath = config.get<string | undefined>(
-      "rubyVersionManager.miseExecutablePath",
-    );
+    const misePath = config.get<string | undefined>("rubyVersionManager.miseExecutablePath");
 
     if (misePath) {
       const configuredPath = vscode.Uri.file(misePath);
@@ -37,10 +32,8 @@ export class Mise extends VersionManager {
       try {
         await vscode.workspace.fs.stat(configuredPath);
         return configuredPath;
-      } catch (error: any) {
-        throw new Error(
-          `Mise executable configured as ${configuredPath}, but that file doesn't exist`,
-        );
+      } catch (_error: any) {
+        throw new Error(`Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
       }
     }
 
@@ -48,27 +41,18 @@ export class Mise extends VersionManager {
     //
     // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
     // 2. Homebrew M series
+    // 3. Installation from `apt install mise`
     const possiblePaths = [
-      vscode.Uri.joinPath(
-        vscode.Uri.file(os.homedir()),
-        ".local",
-        "bin",
-        "mise",
-      ),
-      vscode.Uri.joinPath(
-        vscode.Uri.file("/"),
-        "opt",
-        "homebrew",
-        "bin",
-        "mise",
-      ),
+      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
     ];
 
     for (const possiblePath of possiblePaths) {
       try {
         await vscode.workspace.fs.stat(possiblePath);
         return possiblePath;
-      } catch (error: any) {
+      } catch (_error: any) {
         // Continue looking
       }
     }

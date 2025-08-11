@@ -3,16 +3,14 @@
 
 module RubyIndexer
   class RBSIndexer
-    extend T::Sig
+    HAS_UNTYPED_FUNCTION = !!defined?(RBS::Types::UntypedFunction) #: bool
 
-    HAS_UNTYPED_FUNCTION = T.let(!!defined?(RBS::Types::UntypedFunction), T::Boolean)
-
-    sig { params(index: Index).void }
+    #: (Index index) -> void
     def initialize(index)
       @index = index
     end
 
-    sig { void }
+    #: -> void
     def index_ruby_core
       loader = RBS::EnvironmentLoader.new
       RBS::Environment.from_loader(loader).resolve_type_names
@@ -22,12 +20,7 @@ module RubyIndexer
       end
     end
 
-    sig do
-      params(
-        pathname: Pathname,
-        declarations: T::Array[RBS::AST::Declarations::Base],
-      ).void
-    end
+    #: (Pathname pathname, Array[RBS::AST::Declarations::Base] declarations) -> void
     def process_signature(pathname, declarations)
       declarations.each do |declaration|
         process_declaration(declaration, pathname)
@@ -36,7 +29,7 @@ module RubyIndexer
 
     private
 
-    sig { params(declaration: RBS::AST::Declarations::Base, pathname: Pathname).void }
+    #: (RBS::AST::Declarations::Base declaration, Pathname pathname) -> void
     def process_declaration(declaration, pathname)
       case declaration
       when RBS::AST::Declarations::Class, RBS::AST::Declarations::Module
@@ -51,9 +44,7 @@ module RubyIndexer
       end
     end
 
-    sig do
-      params(declaration: T.any(RBS::AST::Declarations::Class, RBS::AST::Declarations::Module), pathname: Pathname).void
-    end
+    #: ((RBS::AST::Declarations::Class | RBS::AST::Declarations::Module) declaration, Pathname pathname) -> void
     def handle_class_or_module_declaration(declaration, pathname)
       nesting = [declaration.name.name.to_s]
       uri = URI::Generic.from_path(path: pathname.to_s)
@@ -83,7 +74,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(rbs_location: RBS::Location).returns(RubyIndexer::Location) }
+    #: (RBS::Location rbs_location) -> RubyIndexer::Location
     def to_ruby_indexer_location(rbs_location)
       RubyIndexer::Location.new(
         rbs_location.start_line,
@@ -93,12 +84,7 @@ module RubyIndexer
       )
     end
 
-    sig do
-      params(
-        declaration: T.any(RBS::AST::Declarations::Class, RBS::AST::Declarations::Module),
-        entry: Entry::Namespace,
-      ).void
-    end
+    #: ((RBS::AST::Declarations::Class | RBS::AST::Declarations::Module) declaration, Entry::Namespace entry) -> void
     def add_declaration_mixins_to_entry(declaration, entry)
       declaration.each_mixin do |mixin|
         name = mixin.name.name.to_s
@@ -114,21 +100,12 @@ module RubyIndexer
       end
     end
 
-    sig { params(member: RBS::AST::Members::MethodDefinition, owner: Entry::Namespace).void }
+    #: (RBS::AST::Members::MethodDefinition member, Entry::Namespace owner) -> void
     def handle_method(member, owner)
       name = member.name.name
-      uri = URI::Generic.from_path(path: member.location.buffer.name)
+      uri = URI::Generic.from_path(path: member.location.buffer.name.to_s)
       location = to_ruby_indexer_location(member.location)
       comments = comments_to_string(member)
-
-      visibility = case member.visibility
-      when :private
-        Entry::Visibility::PRIVATE
-      when :protected
-        Entry::Visibility::PROTECTED
-      else
-        Entry::Visibility::PUBLIC
-      end
 
       real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
       signatures = signatures(member)
@@ -139,12 +116,12 @@ module RubyIndexer
         location,
         comments,
         signatures,
-        visibility,
+        member.visibility || :public,
         real_owner,
       ))
     end
 
-    sig { params(member: RBS::AST::Members::MethodDefinition).returns(T::Array[Entry::Signature]) }
+    #: (RBS::AST::Members::MethodDefinition member) -> Array[Entry::Signature]
     def signatures(member)
       member.overloads.map do |overload|
         parameters = process_overload(overload)
@@ -152,7 +129,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(overload: RBS::AST::Members::MethodDefinition::Overload).returns(T::Array[Entry::Parameter]) }
+    #: (RBS::AST::Members::MethodDefinition::Overload overload) -> Array[Entry::Parameter]
     def process_overload(overload)
       function = overload.method_type.type
 
@@ -173,7 +150,7 @@ module RubyIndexer
       end
     end
 
-    sig { params(function: RBS::Types::Function).returns(T::Array[Entry::Parameter]) }
+    #: (RBS::Types::Function function) -> Array[Entry::Parameter]
     def parse_arguments(function)
       parameters = []
       parameters.concat(process_required_and_optional_positionals(function))
@@ -185,7 +162,7 @@ module RubyIndexer
       parameters
     end
 
-    sig { params(function: RBS::Types::Function).returns(T::Array[Entry::RequiredParameter]) }
+    #: (RBS::Types::Function function) -> Array[Entry::RequiredParameter]
     def process_required_and_optional_positionals(function)
       argument_offset = 0
 
@@ -209,14 +186,14 @@ module RubyIndexer
       required + optional
     end
 
-    sig { params(function: RBS::Types::Function).returns(T::Array[Entry::OptionalParameter]) }
+    #: (RBS::Types::Function function) -> Array[Entry::OptionalParameter]
     def process_trailing_positionals(function)
       function.trailing_positionals.map do |param|
         Entry::OptionalParameter.new(name: param.name)
       end
     end
 
-    sig { params(function: RBS::Types::Function).returns(Entry::RestParameter) }
+    #: (RBS::Types::Function function) -> Entry::RestParameter
     def process_rest_positionals(function)
       rest = function.rest_positionals
 
@@ -225,21 +202,21 @@ module RubyIndexer
       Entry::RestParameter.new(name: rest_name)
     end
 
-    sig { params(function: RBS::Types::Function).returns(T::Array[Entry::KeywordParameter]) }
+    #: (RBS::Types::Function function) -> Array[Entry::KeywordParameter]
     def process_required_keywords(function)
       function.required_keywords.map do |name, _param|
         Entry::KeywordParameter.new(name: name)
       end
     end
 
-    sig { params(function: RBS::Types::Function).returns(T::Array[Entry::OptionalKeywordParameter]) }
+    #: (RBS::Types::Function function) -> Array[Entry::OptionalKeywordParameter]
     def process_optional_keywords(function)
       function.optional_keywords.map do |name, _param|
         Entry::OptionalKeywordParameter.new(name: name)
       end
     end
 
-    sig { params(function: RBS::Types::Function).returns(Entry::KeywordRestParameter) }
+    #: (RBS::Types::Function function) -> Entry::KeywordRestParameter
     def process_rest_keywords(function)
       param = function.rest_keywords
 
@@ -262,7 +239,7 @@ module RubyIndexer
     # Complex::I = ... # Complex::I is a top-level constant
     #
     # And we need to handle their nesting differently.
-    sig { params(declaration: RBS::AST::Declarations::Constant, nesting: T::Array[String], uri: URI::Generic).void }
+    #: (RBS::AST::Declarations::Constant declaration, Array[String] nesting, URI::Generic uri) -> void
     def handle_constant(declaration, nesting, uri)
       fully_qualified_name = [*nesting, declaration.name.name.to_s].join("::")
       @index.add(Entry::Constant.new(
@@ -273,7 +250,7 @@ module RubyIndexer
       ))
     end
 
-    sig { params(declaration: RBS::AST::Declarations::Global, pathname: Pathname).void }
+    #: (RBS::AST::Declarations::Global declaration, Pathname pathname) -> void
     def handle_global_variable(declaration, pathname)
       name = declaration.name.to_s
       uri = URI::Generic.from_path(path: pathname.to_s)
@@ -288,9 +265,9 @@ module RubyIndexer
       ))
     end
 
-    sig { params(member: RBS::AST::Members::Alias, owner_entry: Entry::Namespace).void }
+    #: (RBS::AST::Members::Alias member, Entry::Namespace owner_entry) -> void
     def handle_signature_alias(member, owner_entry)
-      uri = URI::Generic.from_path(path: member.location.buffer.name)
+      uri = URI::Generic.from_path(path: member.location.buffer.name.to_s)
       comments = comments_to_string(member)
 
       entry = Entry::UnresolvedMethodAlias.new(
@@ -305,16 +282,7 @@ module RubyIndexer
       @index.add(entry)
     end
 
-    sig do
-      params(declaration: T.any(
-        RBS::AST::Declarations::Class,
-        RBS::AST::Declarations::Module,
-        RBS::AST::Declarations::Constant,
-        RBS::AST::Declarations::Global,
-        RBS::AST::Members::MethodDefinition,
-        RBS::AST::Members::Alias,
-      )).returns(T.nilable(String))
-    end
+    #: ((RBS::AST::Declarations::Class | RBS::AST::Declarations::Module | RBS::AST::Declarations::Constant | RBS::AST::Declarations::Global | RBS::AST::Members::MethodDefinition | RBS::AST::Members::Alias) declaration) -> String?
     def comments_to_string(declaration)
       declaration.comment&.string
     end

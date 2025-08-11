@@ -6,15 +6,18 @@
 yarp_require_paths = Gem.loaded_specs["yarp"]&.full_require_paths
 $LOAD_PATH.delete_if { |path| yarp_require_paths.include?(path) } if yarp_require_paths
 
-require "sorbet-runtime"
-
 # Set Bundler's UI level to silent as soon as possible to prevent any prints to STDOUT
 require "bundler"
 Bundler.ui.level = :silent
 
 require "json"
 require "uri"
-require "cgi"
+require "cgi/escape"
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.5")
+  # Just requiring `cgi/escape` leaves CGI.unescape broken on older rubies
+  # Some background on why this is necessary: https://bugs.ruby-lang.org/issues/21258
+  require "cgi/util"
+end
 require "set"
 require "strscan"
 require "prism"
@@ -22,6 +25,10 @@ require "prism/visitor"
 require "language_server-protocol"
 require "rbs"
 require "fileutils"
+require "open3"
+require "securerandom"
+require "shellwords"
+require "set"
 
 require "ruby-lsp"
 require "ruby_lsp/base_server"
@@ -48,6 +55,7 @@ require "ruby_lsp/response_builders/document_symbol"
 require "ruby_lsp/response_builders/hover"
 require "ruby_lsp/response_builders/semantic_highlighting"
 require "ruby_lsp/response_builders/signature_help"
+require "ruby_lsp/response_builders/test_collection"
 
 # Request support
 require "ruby_lsp/requests/support/selection_range"
@@ -58,6 +66,7 @@ require "ruby_lsp/requests/support/formatter"
 require "ruby_lsp/requests/support/rubocop_runner"
 require "ruby_lsp/requests/support/rubocop_formatter"
 require "ruby_lsp/requests/support/syntax_tree_formatter"
+require "ruby_lsp/requests/support/test_item"
 
 # Requests
 require "ruby_lsp/requests/request"
@@ -68,11 +77,13 @@ require "ruby_lsp/requests/completion_resolve"
 require "ruby_lsp/requests/completion"
 require "ruby_lsp/requests/definition"
 require "ruby_lsp/requests/diagnostics"
+require "ruby_lsp/requests/discover_tests"
 require "ruby_lsp/requests/document_highlight"
 require "ruby_lsp/requests/document_link"
 require "ruby_lsp/requests/document_symbol"
 require "ruby_lsp/requests/folding_ranges"
 require "ruby_lsp/requests/formatting"
+require "ruby_lsp/requests/go_to_relevant_file"
 require "ruby_lsp/requests/hover"
 require "ruby_lsp/requests/inlay_hints"
 require "ruby_lsp/requests/on_type_formatting"

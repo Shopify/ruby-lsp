@@ -150,3 +150,18 @@ The Rails add-on provides 3 ways to run and debug `ActiveSupport` tests using th
 ### Debug Tests With VS Code
 
 ![Debug Tests With VS Code](images/ruby-lsp-rails-debug.gif)
+
+## Settings
+
+The following setting configures aspects of the Rails add-on. Values shown are the defaults.
+
+```jsonc
+// Settings for all add-ons
+"rubyLsp.addonSettings": {
+   // Settings for the Rails add-on
+   "Ruby LSP Rails": {
+      // Enable prompt for pending migrations
+     "enablePendingMigrationsPrompt": true
+   }
+ }
+```

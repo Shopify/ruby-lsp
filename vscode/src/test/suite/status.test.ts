@@ -20,8 +20,14 @@ suite("StatusItems", () => {
   let ruby: Ruby;
   let status: StatusItem;
   let workspace: WorkspaceInterface;
+  let sandbox: sinon.SinonSandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.createSandbox();
+  });
 
   afterEach(() => {
+    sandbox.restore();
     status.dispose();
   });
 
@@ -51,10 +57,7 @@ suite("StatusItems", () => {
       assert.strictEqual(status.item.text, "Using Ruby 3.2.0 with shadowenv");
       assert.strictEqual(status.item.name, "Ruby Version");
       assert.strictEqual(status.item.command?.title, "Configure");
-      assert.strictEqual(
-        status.item.command.command,
-        Command.SelectVersionManager,
-      );
+      assert.strictEqual(status.item.command.command, Command.SelectVersionManager);
     });
 
     test("Refresh updates version string", () => {
@@ -89,21 +92,15 @@ suite("StatusItems", () => {
       workspace.lspClient!.state = State.Starting;
       status.refresh(workspace);
       assert.strictEqual(status.item.text, "Ruby LSP: Starting");
-      assert.strictEqual(
-        status.item.severity,
-        vscode.LanguageStatusSeverity.Information,
-      );
+      assert.strictEqual(status.item.severity, vscode.LanguageStatusSeverity.Information);
       assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
     test("Refresh when server is running", () => {
       workspace.lspClient!.state = State.Running;
       status.refresh(workspace);
-      assert.strictEqual(status.item.text, "Ruby LSP v1.0.0: Running");
-      assert.strictEqual(
-        status.item.severity,
-        vscode.LanguageStatusSeverity.Information,
-      );
+      assert.strictEqual(status.item.text, "Ruby LSP server v1.0.0: Running");
+      assert.strictEqual(status.item.severity, vscode.LanguageStatusSeverity.Information);
       assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
@@ -111,10 +108,7 @@ suite("StatusItems", () => {
       workspace.lspClient!.state = State.Stopped;
       status.refresh(workspace);
       assert.strictEqual(status.item.text, "Ruby LSP: Stopped");
-      assert.strictEqual(
-        status.item.severity,
-        vscode.LanguageStatusSeverity.Information,
-      );
+      assert.strictEqual(status.item.severity, vscode.LanguageStatusSeverity.Information);
       assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
@@ -122,24 +116,15 @@ suite("StatusItems", () => {
       workspace.error = true;
       status.refresh(workspace);
       assert.strictEqual(status.item.text, "Ruby LSP: Error");
-      assert.strictEqual(
-        status.item.severity,
-        vscode.LanguageStatusSeverity.Error,
-      );
+      assert.strictEqual(status.item.severity, vscode.LanguageStatusSeverity.Error);
       assert.strictEqual(status.item.name, "Ruby LSP Server Status");
     });
 
     test("Refresh when server is in degraded mode", () => {
       workspace.lspClient!.degraded = true;
       status.refresh(workspace);
-      assert.strictEqual(
-        status.item.text,
-        "Ruby LSP v1.0.0: Running (degraded)",
-      );
-      assert.strictEqual(
-        status.item.severity,
-        vscode.LanguageStatusSeverity.Warning,
-      );
+      assert.strictEqual(status.item.text, "Ruby LSP server v1.0.0: Running (degraded)");
+      assert.strictEqual(status.item.severity, vscode.LanguageStatusSeverity.Warning);
     });
   });
 
@@ -184,18 +169,14 @@ suite("StatusItems", () => {
         typeHierarchy: true,
       };
       const numberOfFeatures = Object.keys(features).length;
-      const stub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+      sandbox.stub(vscode.workspace, "getConfiguration").returns({
         get: () => features,
       } as unknown as vscode.WorkspaceConfiguration);
 
-      assert.strictEqual(
-        status.item.text,
-        `${numberOfFeatures}/${numberOfFeatures} features enabled`,
-      );
+      assert.strictEqual(status.item.text, `${numberOfFeatures}/${numberOfFeatures} features enabled`);
       assert.strictEqual(status.item.name, "Ruby LSP Features");
       assert.strictEqual(status.item.command?.title, "Manage");
       assert.strictEqual(status.item.command.command, Command.ToggleFeatures);
-      stub.restore();
     });
 
     test("Refresh updates number of features", () => {
@@ -219,17 +200,12 @@ suite("StatusItems", () => {
         signatureHelp: true,
       };
       const numberOfFeatures = Object.keys(features).length;
-      const stub = sinon.stub(vscode.workspace, "getConfiguration").returns({
+      sandbox.stub(vscode.workspace, "getConfiguration").returns({
         get: () => features,
       } as unknown as vscode.WorkspaceConfiguration);
 
       status.refresh(workspace);
-      assert.strictEqual(
-        status.item.text,
-        `${numberOfFeatures - 1}/${numberOfFeatures} features enabled`,
-      );
-
-      stub.restore();
+      assert.strictEqual(status.item.text, `${numberOfFeatures - 1}/${numberOfFeatures} features enabled`);
     });
   });
 
@@ -283,10 +259,7 @@ suite("StatusItems", () => {
       workspace.lspClient!.addons = undefined;
       status.refresh(workspace);
 
-      assert.strictEqual(
-        status.item.text,
-        "Addons: requires server to be v0.17.4 or higher to display this field",
-      );
+      assert.strictEqual(status.item.text, "Addons: requires server to be v0.17.4 or higher to display this field");
       assert.strictEqual(status.item.name, "Ruby LSP Add-ons");
     });
 

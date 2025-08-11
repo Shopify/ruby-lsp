@@ -84,7 +84,7 @@ class RenameTest < Minitest::Test
       end
     RUBY
     global_state.index.index_single(untitled_uri, untitled_source)
-    store.set(uri: untitled_uri, source: untitled_source, version: 1, language_id: RubyLsp::Document::LanguageId::Ruby)
+    store.set(uri: untitled_uri, source: untitled_source, version: 1, language_id: :ruby)
 
     document = RubyLsp::RubyDocument.new(
       source: source,
@@ -93,14 +93,12 @@ class RenameTest < Minitest::Test
       global_state: global_state,
     )
 
-    response = T.must(
-      RubyLsp::Requests::Rename.new(
-        global_state,
-        store,
-        document,
-        { position: { line: 3, character: 7 }, newName: "NewMe" },
-      ).perform,
-    )
+    response = RubyLsp::Requests::Rename.new(
+      global_state,
+      store,
+      document,
+      { position: { line: 3, character: 7 }, newName: "NewMe" },
+    ).perform #: as !nil
 
     untitled_change = response.document_changes[1]
     assert_equal("untitled:Untitled-1", untitled_change.text_document.uri)
@@ -131,14 +129,12 @@ class RenameTest < Minitest::Test
       uri: URI::Generic.from_path(path: path),
       global_state: global_state,
     )
-    workspace_edit = T.must(
-      RubyLsp::Requests::Rename.new(
-        global_state,
-        store,
-        document,
-        { position: position, newName: new_name },
-      ).perform,
-    )
+    workspace_edit = RubyLsp::Requests::Rename.new(
+      global_state,
+      store,
+      document,
+      { position: position, newName: new_name },
+    ).perform #: as !nil
 
     file_renames = workspace_edit.document_changes.filter_map do |text_edit_or_rename|
       next text_edit_or_rename unless text_edit_or_rename.is_a?(RubyLsp::Interface::TextDocumentEdit)

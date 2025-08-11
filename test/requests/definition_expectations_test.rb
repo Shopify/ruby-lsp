@@ -55,14 +55,14 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         response.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
       when Array
         response.each do |location|
-          attributes = T.let(location.attributes, T.untyped)
+          attributes = location.attributes #: untyped
 
           case location
           when RubyLsp::Interface::LocationLink
-            fake_path = T.let(attributes[:targetUri].split("/").last(2).join("/"), String)
+            fake_path = attributes[:targetUri].split("/").last(2).join("/") #: String
             location.instance_variable_set(:@attributes, attributes.merge("targetUri" => "file:///#{fake_path}"))
           else
-            fake_path = T.let(attributes[:uri].split("/").last(2).join("/"), String)
+            fake_path = attributes[:uri].split("/").last(2).join("/") #: String
             location.instance_variable_set(:@attributes, attributes.merge("uri" => "file:///#{fake_path}"))
           end
         end
@@ -312,7 +312,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         },
       })
       index = server.global_state.index
-      index.index_single(URI::Generic.from_path(path: T.must(second_uri.to_standardized_path)), second_source)
+      path = second_uri.to_standardized_path #: as !nil
+      index.index_single(URI::Generic.from_path(path: path), second_source)
 
       server.process_message(
         id: 1,
@@ -1175,7 +1176,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       # typed: strict
       class Foo
         def initialize
-          @something = T.let(123, Integer)
+          @something = 123 #: Integer
         end
 
         def baz
@@ -1299,7 +1300,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, uri, nesting, dispatcher)
+        klass.new(response_builder, uri, nesting, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

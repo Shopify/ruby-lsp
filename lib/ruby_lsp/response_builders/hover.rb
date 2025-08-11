@@ -3,27 +3,20 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = String]
     class Hover < ResponseBuilder
-      extend T::Sig
-      extend T::Generic
-
-      ResponseType = type_member { { fixed: String } }
-
-      sig { void }
+      #: -> void
       def initialize
         super
 
-        @response = T.let(
-          {
-            title: +"",
-            links: +"",
-            documentation: +"",
-          },
-          T::Hash[Symbol, String],
-        )
+        @response = {
+          title: +"",
+          links: +"",
+          documentation: +"",
+        } #: Hash[Symbol, String]
       end
 
-      sig { params(content: String, category: Symbol).void }
+      #: (String content, category: Symbol) -> void
       def push(content, category:)
         hover_content = @response[category]
         if hover_content
@@ -31,14 +24,15 @@ module RubyLsp
         end
       end
 
-      sig { returns(T::Boolean) }
+      #: -> bool
       def empty?
         @response.values.all?(&:empty?)
       end
 
-      sig { override.returns(ResponseType) }
+      # @override
+      #: -> ResponseType
       def response
-        result = T.must(@response[:title])
+        result = @response[:title] #: as !nil
         result << "\n" << @response[:links] if @response[:links]
         result << "\n" << @response[:documentation] if @response[:documentation]
 

@@ -4,7 +4,6 @@
 module RubyLsp
   module Listeners
     class Completion
-      extend T::Sig
       include Requests::Support::Common
 
       KEYWORDS = [
@@ -51,17 +50,7 @@ module RubyLsp
         "__LINE__",
       ].freeze
 
-      sig do
-        params(
-          response_builder: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem],
-          global_state: GlobalState,
-          node_context: NodeContext,
-          sorbet_level: RubyDocument::SorbetLevel,
-          dispatcher: Prism::Dispatcher,
-          uri: URI::Generic,
-          trigger_character: T.nilable(String),
-        ).void
-      end
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, String? trigger_character) -> void
       def initialize( # rubocop:disable Metrics/ParameterLists
         response_builder,
         global_state,
@@ -73,8 +62,8 @@ module RubyLsp
       )
         @response_builder = response_builder
         @global_state = global_state
-        @index = T.let(global_state.index, RubyIndexer::Index)
-        @type_inferrer = T.let(global_state.type_inferrer, TypeInferrer)
+        @index = global_state.index #: RubyIndexer::Index
+        @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @node_context = node_context
         @sorbet_level = sorbet_level
         @uri = uri
@@ -107,19 +96,20 @@ module RubyLsp
       end
 
       # Handle completion on regular constant references (e.g. `Bar`)
-      sig { params(node: Prism::ConstantReadNode).void }
+      #: (Prism::ConstantReadNode node) -> void
       def on_constant_read_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
+        return unless @sorbet_level.ignore?
 
-        name = constant_name(node)
+        name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
 
         range = range_from_location(node.location)
         candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         candidates.each do |entries|
-          complete_name = T.must(entries.first).name
+          complete_name = entries.first #: as !nil
+            .name
           @response_builder << build_entry_completion(
             complete_name,
             name,
@@ -131,11 +121,11 @@ module RubyLsp
       end
 
       # Handle completion on namespaced constant references (e.g. `Foo::Bar`)
-      sig { params(node: Prism::ConstantPathNode).void }
+      #: (Prism::ConstantPathNode node) -> void
       def on_constant_path_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        return if @sorbet_level != RubyDocument::SorbetLevel::Ignore
+        return unless @sorbet_level.ignore?
 
         name = begin
           node.full_name
@@ -149,11 +139,11 @@ module RubyLsp
         constant_path_completion(name, range_from_location(node.location))
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def on_call_node_enter(node)
         # The only scenario where Sorbet doesn't provide constant completion is on ignored files. Even if the file has
         # no sigil, Sorbet will still provide completion for constants
-        if @sorbet_level == RubyDocument::SorbetLevel::Ignore
+        if @sorbet_level.ignore?
           receiver = node.receiver
 
           # When writing `Foo::`, the AST assigns a method call node (because you can use that syntax to invoke
@@ -162,11 +152,11 @@ module RubyLsp
           if (receiver.is_a?(Prism::ConstantReadNode) || receiver.is_a?(Prism::ConstantPathNode)) &&
               node.call_operator == "::"
 
-            name = constant_name(receiver)
+            name = RubyIndexer::Index.constant_name(receiver)
 
             if name
               start_loc = node.location
-              end_loc = T.must(node.call_operator_loc)
+              end_loc = node.call_operator_loc #: as !nil
 
               constant_path_completion(
                 "#{name}::",
@@ -193,99 +183,99 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::GlobalVariableAndWriteNode).void }
+      #: (Prism::GlobalVariableAndWriteNode node) -> void
       def on_global_variable_and_write_node_enter(node)
         handle_global_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableOperatorWriteNode).void }
+      #: (Prism::GlobalVariableOperatorWriteNode node) -> void
       def on_global_variable_operator_write_node_enter(node)
         handle_global_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableOrWriteNode).void }
+      #: (Prism::GlobalVariableOrWriteNode node) -> void
       def on_global_variable_or_write_node_enter(node)
         handle_global_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::GlobalVariableReadNode).void }
+      #: (Prism::GlobalVariableReadNode node) -> void
       def on_global_variable_read_node_enter(node)
         handle_global_variable_completion(node.name.to_s, node.location)
       end
 
-      sig { params(node: Prism::GlobalVariableTargetNode).void }
+      #: (Prism::GlobalVariableTargetNode node) -> void
       def on_global_variable_target_node_enter(node)
         handle_global_variable_completion(node.name.to_s, node.location)
       end
 
-      sig { params(node: Prism::GlobalVariableWriteNode).void }
+      #: (Prism::GlobalVariableWriteNode node) -> void
       def on_global_variable_write_node_enter(node)
         handle_global_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableReadNode).void }
+      #: (Prism::InstanceVariableReadNode node) -> void
       def on_instance_variable_read_node_enter(node)
         handle_instance_variable_completion(node.name.to_s, node.location)
       end
 
-      sig { params(node: Prism::InstanceVariableWriteNode).void }
+      #: (Prism::InstanceVariableWriteNode node) -> void
       def on_instance_variable_write_node_enter(node)
         handle_instance_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableAndWriteNode).void }
+      #: (Prism::InstanceVariableAndWriteNode node) -> void
       def on_instance_variable_and_write_node_enter(node)
         handle_instance_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableOperatorWriteNode).void }
+      #: (Prism::InstanceVariableOperatorWriteNode node) -> void
       def on_instance_variable_operator_write_node_enter(node)
         handle_instance_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableOrWriteNode).void }
+      #: (Prism::InstanceVariableOrWriteNode node) -> void
       def on_instance_variable_or_write_node_enter(node)
         handle_instance_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::InstanceVariableTargetNode).void }
+      #: (Prism::InstanceVariableTargetNode node) -> void
       def on_instance_variable_target_node_enter(node)
         handle_instance_variable_completion(node.name.to_s, node.location)
       end
 
-      sig { params(node: Prism::ClassVariableAndWriteNode).void }
+      #: (Prism::ClassVariableAndWriteNode node) -> void
       def on_class_variable_and_write_node_enter(node)
         handle_class_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableOperatorWriteNode).void }
+      #: (Prism::ClassVariableOperatorWriteNode node) -> void
       def on_class_variable_operator_write_node_enter(node)
         handle_class_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableOrWriteNode).void }
+      #: (Prism::ClassVariableOrWriteNode node) -> void
       def on_class_variable_or_write_node_enter(node)
         handle_class_variable_completion(node.name.to_s, node.name_loc)
       end
 
-      sig { params(node: Prism::ClassVariableTargetNode).void }
+      #: (Prism::ClassVariableTargetNode node) -> void
       def on_class_variable_target_node_enter(node)
         handle_class_variable_completion(node.name.to_s, node.location)
       end
 
-      sig { params(node: Prism::ClassVariableReadNode).void }
+      #: (Prism::ClassVariableReadNode node) -> void
       def on_class_variable_read_node_enter(node)
         handle_class_variable_completion(node.name.to_s, node.location)
       end
 
-      sig { params(node: Prism::ClassVariableWriteNode).void }
+      #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
         handle_class_variable_completion(node.name.to_s, node.name_loc)
       end
 
       private
 
-      sig { params(name: String, range: Interface::Range).void }
+      #: (String name, Interface::Range range) -> void
       def constant_path_completion(name, range)
         top_level_reference = if name.start_with?("::")
           name = name.delete_prefix("::")
@@ -307,7 +297,9 @@ module RubyLsp
         namespace_entries = @index.resolve(aliased_namespace, nesting)
         return unless namespace_entries
 
-        real_namespace = @index.follow_aliased_namespace(T.must(namespace_entries.first).name)
+        namespace_name = namespace_entries.first #: as !nil
+          .name
+        real_namespace = @index.follow_aliased_namespace(namespace_name)
 
         candidates = @index.constant_completion_candidates(
           "#{real_namespace}::#{incomplete_name}",
@@ -316,7 +308,7 @@ module RubyLsp
         candidates.each do |entries|
           # The only time we may have a private constant reference from outside of the namespace is if we're dealing
           # with ConstantPath and the entry name doesn't start with the current nesting
-          first_entry = T.must(entries.first)
+          first_entry = entries.first #: as !nil
           next if first_entry.private? && !first_entry.name.start_with?("#{nesting}::")
 
           entry_name = first_entry.name
@@ -335,12 +327,12 @@ module RubyLsp
             name,
             range,
             entries,
-            top_level_reference || top_level?(T.must(entries.first).name),
+            top_level_reference || top_level?(first_entry.name),
           )
         end
       end
 
-      sig { params(name: String, location: Prism::Location).void }
+      #: (String name, Prism::Location location) -> void
       def handle_global_variable_completion(name, location)
         candidates = @index.prefix_search(name)
 
@@ -363,7 +355,7 @@ module RubyLsp
         end
       end
 
-      sig { params(name: String, location: Prism::Location).void }
+      #: (String name, Prism::Location location) -> void
       def handle_class_variable_completion(name, location)
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -394,11 +386,11 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(name: String, location: Prism::Location).void }
+      #: (String name, Prism::Location location) -> void
       def handle_instance_variable_completion(name, location)
         # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
         # to provide all features for them
-        return if @sorbet_level == RubyDocument::SorbetLevel::Strict
+        return if @sorbet_level.strict?
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -428,7 +420,7 @@ module RubyLsp
         # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def complete_require(node)
         arguments_node = node.arguments
         return unless arguments_node
@@ -440,21 +432,27 @@ module RubyLsp
         matched_uris = @index.search_require_paths(path_node_to_complete.content)
 
         matched_uris.map!(&:require_path).sort!.each do |path|
-          @response_builder << build_completion(T.must(path), path_node_to_complete)
+          @response_builder << build_completion(
+            path, #: as !nil
+            path_node_to_complete,
+          )
         end
       end
 
-      sig { params(node: Prism::CallNode).void }
+      #: (Prism::CallNode node) -> void
       def complete_require_relative(node)
         arguments_node = node.arguments
         return unless arguments_node
 
         path_node_to_complete = arguments_node.arguments.first
-
         return unless path_node_to_complete.is_a?(Prism::StringNode)
 
-        origin_dir = Pathname.new(@uri.to_standardized_path).dirname
+        # If the file is unsaved (e.g.: untitled:Untitled-1), we can't provide relative completion as we don't know
+        # where the user intends to save it
+        full_path = @uri.to_standardized_path
+        return unless full_path
 
+        origin_dir = Pathname.new(full_path).dirname
         content = path_node_to_complete.content
         # if the path is not a directory, glob all possible next characters
         # for example ../somethi| (where | is the cursor position)
@@ -471,19 +469,22 @@ module RubyLsp
             path_node_to_complete,
           )
         end
+      rescue Errno::EPERM
+        # If the user writes a relative require pointing to a path that the editor has no permissions to read, then glob
+        # might fail with EPERM
       end
 
-      sig { params(node: Prism::CallNode, name: String).void }
+      #: (Prism::CallNode node, String name) -> void
       def complete_methods(node, name)
         # If the node has a receiver, then we don't need to provide local nor keyword completions. Sorbet can provide
         # local and keyword completion for any file with a Sorbet level of true or higher
-        if !sorbet_level_true_or_higher?(@sorbet_level) && !node.receiver
+        if !@sorbet_level.true_or_higher? && !node.receiver
           add_local_completions(node, name)
           add_keyword_completions(node, name)
         end
 
         # Sorbet can provide completion for methods invoked on self on typed true or higher files
-        return if sorbet_level_true_or_higher?(@sorbet_level) && self_receiver?(node)
+        return if @sorbet_level.true_or_higher? && self_receiver?(node)
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
@@ -494,7 +495,9 @@ module RubyLsp
         method_name = @trigger_character == "." ? nil : name
 
         range = if method_name
-          range_from_location(T.must(node.message_loc))
+          range_from_location(
+            node.message_loc, #: as !nil
+          )
         else
           loc = node.call_operator_loc
 
@@ -512,10 +515,18 @@ module RubyLsp
         external_references = @node_context.fully_qualified_name != type.name
 
         @index.method_completion_candidates(method_name, type.name).each do |entry|
-          next if entry.visibility != RubyIndexer::Entry::Visibility::PUBLIC && external_references
+          next if entry.visibility != :public && external_references
 
           entry_name = entry.name
           owner_name = entry.owner&.name
+          new_text = entry_name
+
+          if entry_name.end_with?("=")
+            method_name = entry_name.delete_suffix("=")
+
+            # For writer methods, format as assignment and prefix "self." when no receiver is specified
+            new_text = node.receiver.nil? ? "self.#{method_name} = " : "#{method_name} = "
+          end
 
           label_details = Interface::CompletionItemLabelDetails.new(
             description: entry.file_name,
@@ -525,7 +536,7 @@ module RubyLsp
             label: entry_name,
             filter_text: entry_name,
             label_details: label_details,
-            text_edit: Interface::TextEdit.new(range: range, new_text: entry_name),
+            text_edit: Interface::TextEdit.new(range: range, new_text: new_text),
             kind: Constant::CompletionItemKind::METHOD,
             data: {
               owner_name: owner_name,
@@ -537,9 +548,11 @@ module RubyLsp
         # We have not indexed this namespace, so we can't provide any completions
       end
 
-      sig { params(node: Prism::CallNode, name: String).void }
+      #: (Prism::CallNode node, String name) -> void
       def add_local_completions(node, name)
-        range = range_from_location(T.must(node.message_loc))
+        range = range_from_location(
+          node.message_loc, #: as !nil
+        )
 
         @node_context.locals_for_scope.each do |local|
           local_name = local.to_s
@@ -557,9 +570,11 @@ module RubyLsp
         end
       end
 
-      sig { params(node: Prism::CallNode, name: String).void }
+      #: (Prism::CallNode node, String name) -> void
       def add_keyword_completions(node, name)
-        range = range_from_location(T.must(node.message_loc))
+        range = range_from_location(
+          node.message_loc, #: as !nil
+        )
 
         KEYWORDS.each do |keyword|
           next unless keyword.start_with?(name)
@@ -575,7 +590,7 @@ module RubyLsp
         end
       end
 
-      sig { params(label: String, node: Prism::StringNode).returns(Interface::CompletionItem) }
+      #: (String label, Prism::StringNode node) -> Interface::CompletionItem
       def build_completion(label, node)
         # We should use the content location as we only replace the content and not the delimiters of the string
         loc = node.content_loc
@@ -590,17 +605,9 @@ module RubyLsp
         )
       end
 
-      sig do
-        params(
-          real_name: String,
-          incomplete_name: String,
-          range: Interface::Range,
-          entries: T::Array[RubyIndexer::Entry],
-          top_level: T::Boolean,
-        ).returns(Interface::CompletionItem)
-      end
+      #: (String real_name, String incomplete_name, Interface::Range range, Array[RubyIndexer::Entry] entries, bool top_level) -> Interface::CompletionItem
       def build_entry_completion(real_name, incomplete_name, range, entries, top_level)
-        first_entry = T.must(entries.first)
+        first_entry = entries.first #: as !nil
         kind = case first_entry
         when RubyIndexer::Entry::Class
           Constant::CompletionItemKind::CLASS
@@ -687,11 +694,12 @@ module RubyLsp
       #   B
       # end
       # ```
-      sig { params(entry_name: String).returns(T::Boolean) }
+      #: (String entry_name) -> bool
       def top_level?(entry_name)
         nesting = @node_context.nesting
         nesting.length.downto(0) do |i|
-          prefix = T.must(nesting[0...i]).join("::")
+          prefix = nesting[0...i] #: as !nil
+            .join("::")
           full_name = prefix.empty? ? entry_name : "#{prefix}::#{entry_name}"
           next if full_name == entry_name
 

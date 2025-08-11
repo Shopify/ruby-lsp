@@ -9,41 +9,38 @@ module RubyLsp
   module Requests
     module Support
       class RuboCopFormatter
-        extend T::Sig
         include Formatter
 
-        sig { void }
+        #: -> void
         def initialize
-          @diagnostic_runner = T.let(RuboCopRunner.new, RuboCopRunner)
+          @diagnostic_runner = RuboCopRunner.new #: RuboCopRunner
           # -a is for "--auto-correct" (or "--autocorrect" on newer versions of RuboCop)
-          @format_runner = T.let(RuboCopRunner.new("-a"), RuboCopRunner)
+          @format_runner = RuboCopRunner.new("-a") #: RuboCopRunner
         end
 
-        sig { override.params(uri: URI::Generic, document: RubyDocument).returns(T.nilable(String)) }
+        # @override
+        #: (URI::Generic uri, RubyDocument document) -> String?
         def run_formatting(uri, document)
-          filename = T.must(uri.to_standardized_path || uri.opaque)
+          filename = uri.to_standardized_path || uri.opaque #: as !nil
 
           # Invoke RuboCop with just this file in `paths`
-          @format_runner.run(filename, document.source)
+          @format_runner.run(filename, document.source, document.parse_result)
           @format_runner.formatted_source
         end
 
         # RuboCop does not support range formatting
-        sig { override.params(uri: URI::Generic, source: String, base_indentation: Integer).returns(T.nilable(String)) }
+        # @override
+        #: (URI::Generic uri, String source, Integer base_indentation) -> String?
         def run_range_formatting(uri, source, base_indentation)
           nil
         end
 
-        sig do
-          override.params(
-            uri: URI::Generic,
-            document: RubyDocument,
-          ).returns(T.nilable(T::Array[Interface::Diagnostic]))
-        end
+        # @override
+        #: (URI::Generic uri, RubyDocument document) -> Array[Interface::Diagnostic]?
         def run_diagnostic(uri, document)
-          filename = T.must(uri.to_standardized_path || uri.opaque)
+          filename = uri.to_standardized_path || uri.opaque #: as !nil
           # Invoke RuboCop with just this file in `paths`
-          @diagnostic_runner.run(filename, document.source)
+          @diagnostic_runner.run(filename, document.source, document.parse_result)
 
           @diagnostic_runner.offenses.map do |offense|
             Support::RuboCopDiagnostic.new(

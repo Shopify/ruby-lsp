@@ -15,10 +15,7 @@ class FakeChannel {
 suite("Workspace channel", () => {
   test("prepends name as a prefix", () => {
     const fakeChannel = new FakeChannel();
-    const channel = new WorkspaceChannel(
-      "test",
-      fakeChannel as unknown as vscode.LogOutputChannel,
-    );
+    const channel = new WorkspaceChannel("test", fakeChannel as unknown as vscode.LogOutputChannel);
 
     channel.info("hello!");
     assert.strictEqual(fakeChannel.messages.length, 1);

@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { RubyLsp } from "./rubyLsp";
 import { LOG_CHANNEL } from "./common";
+import { RBS } from "./rbs";
 
 let extension: RubyLsp;
 
@@ -25,7 +26,16 @@ export async function activate(context: vscode.ExtensionContext) {
     return;
   }
 
-  await migrateExperimentalFeaturesSetting();
+  const rbs = new RBS();
+
+  context.subscriptions.push(
+    rbs,
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("rubyLsp.sigOpacityLevel")) {
+        rbs.reload();
+      }
+    }),
+  );
 
   const logger = await createLogger(context);
   context.subscriptions.push(logger);
@@ -36,21 +46,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 export async function deactivate(): Promise<void> {
   await extension.deactivate();
-}
-
-// Remove after ~2 months. This code migrates the old experimental features setting to the new feature flag rollout
-// setting
-async function migrateExperimentalFeaturesSetting() {
-  const config = vscode.workspace.getConfiguration("rubyLsp");
-  const experimentalFeatures = config.get("enableExperimentalFeatures");
-
-  if (experimentalFeatures) {
-    // Remove the old setting
-    await config.update("enableExperimentalFeatures", undefined, true);
-
-    // Add the new one
-    await config.update("featureFlags", { all: true }, true);
-  }
 }
 
 async function createLogger(context: vscode.ExtensionContext) {
@@ -84,19 +79,13 @@ async function createLogger(context: vscode.ExtensionContext) {
         while (!sender && counter < 5) {
           await vscode.commands.executeCommand("getTelemetrySenderObject");
 
-          sender =
-            await vscode.commands.executeCommand<vscode.TelemetrySender | null>(
-              "getTelemetrySenderObject",
-            );
+          sender = await vscode.commands.executeCommand<vscode.TelemetrySender | null>("getTelemetrySenderObject");
 
           counter++;
         }
-      } catch (error: any) {
+      } catch (_error: any) {
         sender = {
-          sendEventData: (
-            _eventName: string,
-            _data?: Record<string, any>,
-          ) => {},
+          sendEventData: (_eventName: string, _data?: Record<string, any>) => {},
           sendErrorData: (_error: Error, _data?: Record<string, any>) => {},
         };
       }
@@ -116,6 +105,7 @@ async function createLogger(context: vscode.ExtensionContext) {
     additionalCommonProperties: {
       extensionVersion: context.extension.packageJSON.version,
       environment: os.platform(),
+      machineId: vscode.env.machineId,
     },
   });
 }

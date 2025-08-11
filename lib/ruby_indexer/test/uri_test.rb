@@ -12,12 +12,12 @@ module RubyIndexer
 
     def test_from_path_on_windows
       uri = URI::Generic.from_path(path: "C:/some/windows/path/to/file.rb")
-      assert_equal("/C:/some/windows/path/to/file.rb", uri.path)
+      assert_equal("/C%3A/some/windows/path/to/file.rb", uri.path)
     end
 
     def test_from_path_on_windows_with_lowercase_drive
       uri = URI::Generic.from_path(path: "c:/some/windows/path/to/file.rb")
-      assert_equal("/c:/some/windows/path/to/file.rb", uri.path)
+      assert_equal("/c%3A/some/windows/path/to/file.rb", uri.path)
     end
 
     def test_to_standardized_path_on_unix
@@ -67,6 +67,19 @@ module RubyIndexer
 
       uri.add_require_path_from_load_entry("/some/unix/path")
       assert_equal("to/file", uri.require_path)
+    end
+
+    def test_from_path_escapes_colon_characters
+      uri = URI::Generic.from_path(path: "c:/some/windows/path with/spaces/file.rb")
+      assert_equal("c:/some/windows/path with/spaces/file.rb", uri.to_standardized_path)
+      assert_equal("file:///c%3A/some/windows/path%20with/spaces/file.rb", uri.to_s)
+    end
+
+    def test_from_path_with_unicode_characters
+      path = "/path/with/unicode/文件.rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+      assert_equal("file:///path/with/unicode/%E6%96%87%E4%BB%B6.rb", uri.to_s)
     end
   end
 end

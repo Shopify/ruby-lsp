@@ -3,17 +3,16 @@
 
 module RubyLsp
   class Server < BaseServer
-    extend T::Sig
-
     # Only for testing
-    sig { returns(GlobalState) }
+    #: GlobalState
     attr_reader :global_state
 
-    sig { override.params(message: T::Hash[Symbol, T.untyped]).void }
+    # @override
+    #: (Hash[Symbol, untyped] message) -> void
     def process_message(message)
       case message[:method]
       when "initialize"
-        send_log_message("Initializing Ruby LSP v#{VERSION}...")
+        send_log_message("Initializing Ruby LSP v#{VERSION} https://github.com/Shopify/ruby-lsp/releases/tag/v#{VERSION}....")
         run_initialize(message)
       when "initialized"
         send_log_message("Finished initializing Ruby LSP!") unless @test_mode
@@ -33,6 +32,8 @@ module RubyLsp
         text_document_document_link(message)
       when "textDocument/codeLens"
         text_document_code_lens(message)
+      when "codeLens/resolve"
+        code_lens_resolve(message)
       when "textDocument/semanticTokens/full"
         text_document_semantic_tokens_full(message)
       when "textDocument/semanticTokens/full/delta"
@@ -93,19 +94,26 @@ module RubyLsp
             id: message[:id],
             response:
               Addon.addons.map do |addon|
-                version_method = addon.method(:version)
-
-                # If the add-on doesn't define a `version` method, we'd be calling the abstract method defined by
-                # Sorbet, which would raise an error.
-                # Therefore, we only call the method if it's defined by the add-on itself
-                if version_method.owner != Addon
-                  version = addon.version
+                version = begin
+                  addon.version
+                rescue AbstractMethodInvokedError
+                  nil
                 end
 
                 { name: addon.name, version: version, errored: addon.error? }
               end,
           ),
         )
+      when "rubyLsp/composeBundle"
+        compose_bundle(message)
+      when "rubyLsp/diagnoseState"
+        diagnose_state(message)
+      when "rubyLsp/discoverTests"
+        discover_tests(message)
+      when "rubyLsp/resolveTestCommands"
+        resolve_test_commands(message)
+      when "experimental/goToRelevantFile"
+        experimental_go_to_relevant_file(message)
       when "$/cancelRequest"
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
@@ -113,29 +121,21 @@ module RubyLsp
       end
     rescue DelegateRequestError
       send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))
-    rescue StandardError, LoadError => e
+    rescue StandardError, LoadError, SystemExit => e
       # If an error occurred in a request, we have to return an error response or else the editor will hang
       if message[:id]
         # If a document is deleted before we are able to process all of its enqueued requests, we will try to read it
         # from disk and it raise this error. This is expected, so we don't include the `data` attribute to avoid
-        # reporting these to our telemetry
+        # reporting these to our telemetry.
+        #
+        # Similarly, if we receive a location for an invalid position in the
+        # document, we don't report it to telemetry
         case e
-        when Store::NonExistingDocumentError
+        when Store::NonExistingDocumentError, Document::InvalidLocationError
           send_message(Error.new(
             id: message[:id],
             code: Constant::ErrorCodes::INVALID_PARAMS,
             message: e.full_message,
-          ))
-        when Document::LocationNotFoundError
-          send_message(Error.new(
-            id: message[:id],
-            code: Constant::ErrorCodes::REQUEST_FAILED,
-            message: <<~MESSAGE,
-              Request #{message[:method]} failed to find the target position.
-              The file might have been modified while the server was in the middle of searching for the target.
-              If you experience this regularly, please report any findings and extra information on
-              https://github.com/Shopify/ruby-lsp/issues/2446
-            MESSAGE
           ))
         else
           send_message(Error.new(
@@ -155,7 +155,7 @@ module RubyLsp
     end
 
     # Process responses to requests that were sent to the client
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def process_response(message)
       case message.dig(:result, :method)
       when "window/showMessageRequest"
@@ -163,7 +163,7 @@ module RubyLsp
       end
     end
 
-    sig { params(include_project_addons: T::Boolean).void }
+    #: (?include_project_addons: bool) -> void
     def load_addons(include_project_addons: true)
       # If invoking Bundler.setup failed, then the load path will not be configured properly and trying to load add-ons
       # with Gem.find_files will find every single version installed of an add-on, leading to requiring several
@@ -171,6 +171,7 @@ module RubyLsp
       return if @setup_error
 
       errors = Addon.load_addons(@global_state, @outgoing_queue, include_project_addons: include_project_addons)
+      return if test_mode?
 
       if errors.any?
         send_log_message(
@@ -183,27 +184,19 @@ module RubyLsp
 
       if errored_addons.any?
         send_message(
-          Notification.new(
-            method: "window/showMessage",
-            params: Interface::ShowMessageParams.new(
-              type: Constant::MessageType::WARNING,
-              message: "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
-            ),
+          Notification.window_show_message(
+            "Error loading add-ons:\n\n#{errored_addons.map(&:formatted_errors).join("\n\n")}",
+            type: Constant::MessageType::WARNING,
           ),
         )
 
-        unless @test_mode
-          send_log_message(
-            errored_addons.map(&:errors_details).join("\n\n"),
-            type: Constant::MessageType::WARNING,
-          )
-        end
+        send_log_message(errored_addons.map(&:errors_details).join("\n\n"), type: Constant::MessageType::WARNING)
       end
     end
 
     private
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def run_initialize(message)
       options = message[:params]
       global_state_notifications = @global_state.apply_options(options)
@@ -212,9 +205,6 @@ module RubyLsp
       @store.client_name = client_name if client_name
 
       configured_features = options.dig(:initializationOptions, :enabledFeatures)
-
-      configured_hints = options.dig(:initializationOptions, :featuresConfiguration, :inlayHint)
-      T.must(@store.features_configuration.dig(:inlayHint)).configuration.merge!(configured_hints) if configured_hints
 
       enabled_features = case configured_features
       when Array
@@ -232,7 +222,9 @@ module RubyLsp
 
       bundle_env_path = File.join(".ruby-lsp", "bundle_env")
       bundle_env = if File.exist?(bundle_env_path)
-        env = File.readlines(bundle_env_path).to_h { |line| T.cast(line.chomp.split("=", 2), [String, String]) }
+        env = File.readlines(bundle_env_path).to_h do |line|
+          line.chomp.split("=", 2) #: as [String, String]
+        end
         FileUtils.rm(bundle_env_path)
         env
       end
@@ -283,6 +275,9 @@ module RubyLsp
           document_range_formatting_provider: true,
           experimental: {
             addon_detection: true,
+            compose_bundle: true,
+            go_to_relevant_file: true,
+            full_test_discovery: true,
           },
         ),
         serverInfo: {
@@ -298,10 +293,19 @@ module RubyLsp
 
       # Not every client supports dynamic registration or file watching
       if @global_state.client_capabilities.supports_watching_files
-        send_message(Request.register_watched_files(@current_request_id, "**/*.rb"))
         send_message(Request.register_watched_files(
           @current_request_id,
-          Interface::RelativePattern.new(base_uri: @global_state.workspace_uri.to_s, pattern: ".rubocop.yml"),
+          "**/*.rb",
+          registration_id: "workspace-watcher",
+        ))
+
+        send_message(Request.register_watched_files(
+          @current_request_id,
+          Interface::RelativePattern.new(
+            base_uri: @global_state.workspace_uri.to_s,
+            pattern: "{.rubocop.yml,.rubocop}",
+          ),
+          registration_id: "rubocop-watcher",
         ))
       end
 
@@ -330,7 +334,7 @@ module RubyLsp
       end
     end
 
-    sig { void }
+    #: -> void
     def run_initialized
       load_addons
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
@@ -338,7 +342,7 @@ module RubyLsp
       unless @setup_error
         if defined?(Requests::Support::RuboCopFormatter)
           begin
-            @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+            @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
           rescue ::RuboCop::Error => e
             # The user may have provided unknown config switches in .rubocop or
             # is trying to load a non-existent config file.
@@ -355,69 +359,64 @@ module RubyLsp
 
       perform_initial_indexing
       check_formatter_is_available
+      update_server if @global_state.enabled_feature?(:launcher)
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_open(message)
-      @global_state.synchronize do
-        text_document = message.dig(:params, :textDocument)
-        language_id = case text_document[:languageId]
-        when "erb", "eruby"
-          Document::LanguageId::ERB
-        when "rbs"
-          Document::LanguageId::RBS
-        else
-          Document::LanguageId::Ruby
-        end
+      text_document = message.dig(:params, :textDocument)
+      language_id = case text_document[:languageId]
+      when "erb", "eruby"
+        :erb
+      when "rbs"
+        :rbs
+      else
+        :ruby
+      end
 
-        document = @store.set(
-          uri: text_document[:uri],
-          source: text_document[:text],
-          version: text_document[:version],
-          language_id: language_id,
-        )
+      document = @store.set(
+        uri: text_document[:uri],
+        source: text_document[:text],
+        version: text_document[:version],
+        language_id: language_id,
+      )
 
-        if document.past_expensive_limit? && text_document[:uri].scheme == "file"
-          log_message = <<~MESSAGE
-            The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
-            diagnostics will be disabled.
-          MESSAGE
+      if document.past_expensive_limit? && text_document[:uri].scheme == "file"
+        log_message = <<~MESSAGE
+          The file #{text_document[:uri].path} is too long. For performance reasons, semantic highlighting and
+          diagnostics will be disabled.
+        MESSAGE
 
-          send_message(
-            Notification.new(
-              method: "window/logMessage",
-              params: Interface::LogMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: log_message,
-              ),
+        send_message(
+          Notification.new(
+            method: "window/logMessage",
+            params: Interface::LogMessageParams.new(
+              type: Constant::MessageType::WARNING,
+              message: log_message,
             ),
-          )
-        end
+          ),
+        )
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_close(message)
-      @global_state.synchronize do
-        uri = message.dig(:params, :textDocument, :uri)
-        @store.delete(uri)
+      uri = message.dig(:params, :textDocument, :uri)
+      @store.delete(uri)
 
-        # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
-        send_message(Notification.publish_diagnostics(uri.to_s, []))
-      end
+      # Clear diagnostics for the closed file, so that they no longer appear in the problems tab
+      send_message(Notification.publish_diagnostics(uri.to_s, []))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_did_change(message)
       params = message[:params]
       text_document = params[:textDocument]
 
-      @global_state.synchronize do
-        @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
-      end
+      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_selection_range(message)
       uri = message.dig(:params, :textDocument, :uri)
       ranges = @store.cache_fetch(uri, "textDocument/selectionRange") do |document|
@@ -443,7 +442,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def run_combined_requests(message)
       uri = URI(message.dig(:params, :textDocument, :uri))
       document = @store.get(uri)
@@ -467,23 +466,32 @@ module RubyLsp
       folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
       document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
       document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
-      code_lens = Requests::CodeLens.new(@global_state, uri, dispatcher)
-      inlay_hint = Requests::InlayHints.new(document, T.must(@store.features_configuration.dig(:inlayHint)), dispatcher)
+      inlay_hint = Requests::InlayHints.new(
+        @global_state,
+        document,
+        dispatcher,
+      )
 
-      if document.is_a?(RubyDocument) && document.last_edit_may_change_declarations?
+      # The code lens listener requires the index to be populated, so the DeclarationListener must be inserted first in
+      # the dispatcher's state
+      code_lens = nil #: Requests::CodeLens?
+
+      if document.is_a?(RubyDocument) && document.should_index?
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
         # updated on save
         @global_state.synchronize do
-          send_log_message("Detected that last edit may have modified declarations. Re-indexing #{uri}")
+          send_log_message("Determined that document should be indexed: #{uri}")
 
           @global_state.index.handle_change(uri) do |index|
             index.delete(uri, skip_require_paths_tree: true)
             RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
-            dispatcher.dispatch(parse_result.value)
+            code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
+            dispatcher.dispatch(document.ast)
           end
         end
       else
-        dispatcher.dispatch(parse_result.value)
+        code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
+        dispatcher.dispatch(document.ast)
       end
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
@@ -491,7 +499,11 @@ module RubyLsp
       document.cache_set("textDocument/foldingRange", folding_range.perform)
       document.cache_set("textDocument/documentSymbol", document_symbol.perform)
       document.cache_set("textDocument/documentLink", document_link.perform)
-      document.cache_set("textDocument/codeLens", code_lens.perform)
+      document.cache_set(
+        "textDocument/codeLens",
+        code_lens #: as !nil
+          .perform,
+      )
       document.cache_set("textDocument/inlayHint", inlay_hint.perform)
 
       send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
@@ -502,7 +514,7 @@ module RubyLsp
     alias_method :text_document_code_lens, :run_combined_requests
     alias_method :text_document_folding_range, :run_combined_requests
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_semantic_tokens_full(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
@@ -518,12 +530,12 @@ module RubyLsp
 
       dispatcher = Prism::Dispatcher.new
       semantic_highlighting = Requests::SemanticHighlighting.new(@global_state, dispatcher, document, nil)
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
 
       send_message(Result.new(id: message[:id], response: semantic_highlighting.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_semantic_tokens_delta(message)
       document = @store.get(message.dig(:params, :textDocument, :uri))
 
@@ -544,11 +556,11 @@ module RubyLsp
         document,
         message.dig(:params, :previousResultId),
       )
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_semantic_tokens_range(message)
       params = message[:params]
       range = params[:range]
@@ -573,11 +585,11 @@ module RubyLsp
         nil,
         range: range.dig(:start, :line)..range.dig(:end, :line),
       )
-      dispatcher.visit(document.parse_result.value)
+      dispatcher.visit(document.ast)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_range_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       if @global_state.formatter == "none"
@@ -605,7 +617,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_formatting(message)
       # If formatter is set to `auto` but no supported formatting gem is found, don't attempt to format
       if @global_state.formatter == "none"
@@ -646,10 +658,14 @@ module RubyLsp
         "Formatting error: #{error.message}",
         type: Constant::MessageType::ERROR,
       ))
+      send_message(Notification.window_log_message(
+        "Formatting failed with\r\n: #{error.full_message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_document_highlight(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -661,11 +677,11 @@ module RubyLsp
       end
 
       request = Requests::DocumentHighlight.new(@global_state, document, params[:position], dispatcher)
-      dispatcher.dispatch(document.parse_result.value)
+      dispatcher.dispatch(document.ast)
       send_message(Result.new(id: message[:id], response: request.perform))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_on_type_formatting(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -688,7 +704,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_hover(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -713,7 +729,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_rename(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -733,7 +749,7 @@ module RubyLsp
       send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::REQUEST_FAILED, message: e.message))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_prepare_rename(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -751,7 +767,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_references(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -769,15 +785,19 @@ module RubyLsp
       )
     end
 
-    sig { params(document: Document[T.untyped]).returns(RubyDocument::SorbetLevel) }
+    #: (Document[untyped] document) -> SorbetLevel
     def sorbet_level(document)
-      return RubyDocument::SorbetLevel::Ignore unless @global_state.has_type_checker
-      return RubyDocument::SorbetLevel::Ignore unless document.is_a?(RubyDocument)
+      return SorbetLevel.ignore unless document.is_a?(RubyDocument)
+      return SorbetLevel.ignore unless @global_state.has_type_checker
 
-      document.sorbet_level
+      sigil = document.parse_result.magic_comments.find do |comment|
+        comment.key == "typed"
+      end&.value
+
+      SorbetLevel.new(sigil)
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_inlay_hint(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -795,7 +815,6 @@ module RubyLsp
         return
       end
 
-      hints_configurations = T.must(@store.features_configuration.dig(:inlayHint))
       dispatcher = Prism::Dispatcher.new
 
       unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
@@ -803,15 +822,15 @@ module RubyLsp
         return
       end
 
-      request = Requests::InlayHints.new(document, hints_configurations, dispatcher)
-      dispatcher.visit(document.parse_result.value)
+      request = Requests::InlayHints.new(@global_state, document, dispatcher)
+      dispatcher.visit(document.ast)
       result = request.perform
       document.cache_set("textDocument/inlayHint", result)
 
       send_message(Result.new(id: message[:id], response: result.select { |hint| range.cover?(hint.position[:line]) }))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_code_action(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -833,7 +852,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def code_action_resolve(message)
       params = message[:params]
       uri = URI(params.dig(:data, :uri))
@@ -845,20 +864,12 @@ module RubyLsp
       end
 
       result = Requests::CodeActionResolve.new(document, @global_state, params).perform
-
-      case result
-      when Requests::CodeActionResolve::Error::EmptySelection
-        fail_request_and_notify(message[:id], "Invalid selection for extract variable refactor")
-      when Requests::CodeActionResolve::Error::InvalidTargetRange
-        fail_request_and_notify(message[:id], "Couldn't find an appropriate location to place extracted refactor")
-      when Requests::CodeActionResolve::Error::UnknownCodeAction
-        fail_request_and_notify(message[:id], "Unknown code action")
-      else
-        send_message(Result.new(id: message[:id], response: result))
-      end
+      send_message(Result.new(id: message[:id], response: result))
+    rescue Requests::CodeActionResolve::CodeActionError => e
+      fail_request_and_notify(message[:id], e.message)
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_diagnostic(message)
       # Do not compute diagnostics for files outside of the workspace. For example, if someone is looking at a gem's
       # source code, we don't want to show diagnostics for it
@@ -895,10 +906,14 @@ module RubyLsp
         "Error running diagnostics: #{error.message}",
         type: Constant::MessageType::ERROR,
       ))
+      send_message(Notification.window_log_message(
+        "Diagnostics failed with\r\n: #{error.full_message}",
+        type: Constant::MessageType::ERROR,
+      ))
       send_empty_response(message[:id])
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_completion(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -923,7 +938,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_completion_item_resolve(message)
       # When responding to a delegated completion request, it means we're handling a completion item that isn't related
       # to Ruby (probably related to an ERB host language like HTML). We need to return the original completion item
@@ -942,7 +957,7 @@ module RubyLsp
       ))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_signature_help(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -968,7 +983,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_definition(message)
       params = message[:params]
       dispatcher = Prism::Dispatcher.new
@@ -993,9 +1008,29 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def workspace_did_change_watched_files(message)
+      # If indexing is not complete yet, delay processing did change watched file notifications. We need initial
+      # indexing to be in place so that we can handle file changes appropriately without risking duplicates. We also
+      # have to sleep before re-inserting the notification in the queue otherwise the worker can get stuck in its own
+      # loop of pushing and popping the same notification
+      unless @global_state.index.initial_indexing_completed
+        Thread.new do
+          sleep(2)
+          # We have to ensure that the queue is not closed yet, since nothing stops the user from saving a file and then
+          # immediately telling the LSP to shutdown
+          @incoming_queue << message unless @incoming_queue.closed?
+        end
+
+        return
+      end
+
       changes = message.dig(:params, :changes)
+      # We allow add-ons to register for watching files and we have no restrictions for what they register for. If the
+      # same pattern is registered more than once, the LSP will receive duplicate change notifications. Receiving them
+      # is fine, but we shouldn't process the same file changes more than once
+      changes.uniq!
+
       index = @global_state.index
       changes.each do |change|
         # File change events include folders, but we're only interested in files
@@ -1015,43 +1050,61 @@ module RubyLsp
         end
       end
 
-      Addon.file_watcher_addons.each { |addon| T.unsafe(addon).workspace_did_change_watched_files(changes) }
-    end
-
-    sig { params(index: RubyIndexer::Index, file_path: String, change_type: Integer).void }
-    def handle_ruby_file_change(index, file_path, change_type)
-      load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-      uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
-
-      content = File.read(file_path)
-
-      case change_type
-      when Constant::FileChangeType::CREATED
-        index.index_single(uri, content)
-      when Constant::FileChangeType::CHANGED
-        index.handle_change(uri, content)
-      when Constant::FileChangeType::DELETED
-        index.delete(uri)
+      Addon.file_watcher_addons.each do |addon|
+        addon #: as untyped
+          .workspace_did_change_watched_files(changes)
+      rescue => e
+        send_log_message(
+          "Error in #{addon.name} add-on while processing watched file notifications: #{e.full_message}",
+          type: Constant::MessageType::ERROR,
+        )
       end
     end
 
-    sig { params(uri: URI::Generic).void }
+    #: (RubyIndexer::Index index, String file_path, Integer change_type) -> void
+    def handle_ruby_file_change(index, file_path, change_type)
+      @global_state.synchronize do
+        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
+        uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
+
+        case change_type
+        when Constant::FileChangeType::CREATED
+          content = File.read(file_path)
+          # If we receive a late created notification for a file that has already been claimed by the client, we want to
+          # handle change for that URI so that the require path tree is updated
+          @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
+        when Constant::FileChangeType::CHANGED
+          content = File.read(file_path)
+          # We only handle changes on file watched notifications if the client is not the one managing this URI.
+          # Otherwise, these changes are handled when running the combined requests
+          index.handle_change(uri, content) unless @store.key?(uri)
+        when Constant::FileChangeType::DELETED
+          index.delete(uri)
+        end
+      rescue Errno::ENOENT
+        # If a file is created and then delete immediately afterwards, we will process the created notification before
+        # we receive the deleted one, but the file no longer exists. This may happen when running a test suite that
+        # creates and deletes files automatically.
+      end
+    end
+
+    #: (URI::Generic uri) -> void
     def handle_rubocop_config_change(uri)
       return unless defined?(Requests::Support::RuboCopFormatter)
 
-      send_log_message("Reloading RuboCop since #{uri} changed")
-      @global_state.register_formatter("rubocop", Requests::Support::RuboCopFormatter.new)
+      # Register a new runner to reload configurations
+      @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
 
-      # Clear all existing diagnostics since the config changed. This has to happen under a mutex because the `state`
-      # hash cannot be mutated during iteration or that will throw an error
-      @global_state.synchronize do
-        @store.each do |uri, _document|
-          send_message(Notification.publish_diagnostics(uri.to_s, []))
-        end
+      # Clear all document caches for pull diagnostics
+      @store.each { |_uri, document| document.clear_cache("textDocument/diagnostic") }
+
+      # Request a pull diagnostic refresh from the editor
+      if @global_state.client_capabilities.supports_diagnostic_refresh
+        send_message(Request.new(id: @current_request_id, method: "workspace/diagnostic/refresh", params: nil))
       end
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def workspace_symbol(message)
       send_message(
         Result.new(
@@ -1064,7 +1117,7 @@ module RubyLsp
       )
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_show_syntax_tree(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -1083,7 +1136,26 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
+    def experimental_go_to_relevant_file(message)
+      path = message.dig(:params, :textDocument, :uri).to_standardized_path
+      unless path.nil? || path.start_with?(@global_state.workspace_path)
+        send_empty_response(message[:id])
+        return
+      end
+
+      unless path
+        send_empty_response(message[:id])
+        return
+      end
+
+      response = {
+        locations: Requests::GoToRelevantFile.new(path, @global_state.workspace_path).perform,
+      }
+      send_message(Result.new(id: message[:id], response: response))
+    end
+
+    #: (Hash[Symbol, untyped] message) -> void
     def text_document_prepare_type_hierarchy(message)
       params = message[:params]
       document = @store.get(params.dig(:textDocument, :uri))
@@ -1102,7 +1174,7 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def type_hierarchy_supertypes(message)
       response = Requests::TypeHierarchySupertypes.new(
         @global_state.index,
@@ -1111,16 +1183,21 @@ module RubyLsp
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def type_hierarchy_subtypes(message)
       # TODO: implement subtypes
       # The current index representation doesn't allow us to find the children of an entry.
       send_message(Result.new(id: message[:id], response: nil))
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def workspace_dependencies(message)
-      response = if @global_state.top_level_bundle
+      unless @global_state.top_level_bundle
+        send_message(Result.new(id: message[:id], response: []))
+        return
+      end
+
+      response = begin
         Bundler.with_original_env do
           definition = Bundler.definition
           dep_keys = definition.locked_deps.keys.to_set
@@ -1134,19 +1211,20 @@ module RubyLsp
             }
           end
         end
-      else
+      rescue Bundler::GemNotFound, Bundler::GemfileNotFound
         []
       end
 
       send_message(Result.new(id: message[:id], response: response))
     end
 
-    sig { override.void }
+    # @override
+    #: -> void
     def shutdown
       Addon.unload_addons
     end
 
-    sig { void }
+    #: -> void
     def perform_initial_indexing
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
@@ -1172,13 +1250,29 @@ module RubyLsp
         # allocations and garbage collections are faster
         GC.compact unless @test_mode
 
+        @global_state.synchronize do
+          # If we linearize ancestors while the index is not fully populated, we may end up caching incorrect results
+          # that were missing namespaces. After indexing is complete, we need to clear the ancestors cache and start
+          # again
+          @global_state.index.clear_ancestors
+
+          # The results for code lens depend on ancestor linearization, so we need to clear any previously computed
+          # responses
+          @store.each { |_uri, document| document.clear_cache("textDocument/codeLens") }
+        end
+
         # Always end the progress notification even if indexing failed or else it never goes away and the user has no
         # way of dismissing it
         end_progress("indexing-progress")
+
+        # Request a code lens refresh if we populated them before all test parent classes were indexed
+        if @global_state.client_capabilities.supports_code_lens_refresh
+          send_message(Request.new(id: @current_request_id, method: "workspace/codeLens/refresh", params: nil))
+        end
       end
     end
 
-    sig { params(id: String, title: String, percentage: Integer).void }
+    #: (String id, String title, ?percentage: Integer) -> void
     def begin_progress(id, title, percentage: 0)
       return unless @global_state.client_capabilities.supports_progress
 
@@ -1191,14 +1285,14 @@ module RubyLsp
       send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
     end
 
-    sig { params(id: String, percentage: Integer).void }
+    #: (String id, Integer percentage) -> void
     def progress(id, percentage)
       return unless @global_state.client_capabilities.supports_progress
 
       send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
     end
 
-    sig { params(id: String).void }
+    #: (String id) -> void
     def end_progress(id)
       return unless @global_state.client_capabilities.supports_progress
 
@@ -1208,26 +1302,25 @@ module RubyLsp
       # notification
     end
 
-    sig { void }
+    #: -> void
     def check_formatter_is_available
       return if @setup_error
-      # Warn of an unavailable `formatter` setting, e.g. `rubocop` on a project which doesn't have RuboCop.
-      # Syntax Tree will always be available via Ruby LSP so we don't need to check for it.
-      return unless @global_state.formatter == "rubocop"
+      # Warn of an unavailable `formatter` setting, e.g. `rubocop_internal` on a project which doesn't have RuboCop.
+      return unless @global_state.formatter == "rubocop_internal"
 
       unless defined?(RubyLsp::Requests::Support::RuboCopRunner)
         @global_state.formatter = "none"
 
         send_message(
           Notification.window_show_message(
-            "Ruby LSP formatter is set to `rubocop` but RuboCop was not found in the Gemfile or gemspec.",
+            "Ruby LSP formatter is set to `rubocop_internal` but RuboCop was not found in the Gemfile or gemspec.",
             type: Constant::MessageType::ERROR,
           ),
         )
       end
     end
 
-    sig { params(indexing_options: T.nilable(T::Hash[Symbol, T.untyped])).void }
+    #: (Hash[Symbol, untyped]? indexing_options) -> void
     def process_indexing_configuration(indexing_options)
       # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
       index_path = File.join(@global_state.workspace_path, ".index.yml")
@@ -1268,7 +1361,7 @@ module RubyLsp
       configuration.apply_config(indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase })
     end
 
-    sig { params(message: T::Hash[Symbol, T.untyped]).void }
+    #: (Hash[Symbol, untyped] message) -> void
     def window_show_message_request(message)
       result = message[:result]
       return unless result
@@ -1278,6 +1371,155 @@ module RubyLsp
       return unless addon
 
       addon.handle_window_show_message_response(result[:title])
+    end
+
+    # NOTE: all servers methods are void because they can produce several messages for the client. The only reason this
+    # method returns the created thread is to that we can join it in tests and avoid flakiness. The implementation is
+    # not supposed to rely on the return of this method
+    #: (Hash[Symbol, untyped] message) -> Thread?
+    def compose_bundle(message)
+      already_composed_path = File.join(@global_state.workspace_path, ".ruby-lsp", "bundle_is_composed")
+      id = message[:id]
+
+      begin
+        Bundler.with_original_env do
+          Bundler::LockfileParser.new(Bundler.default_lockfile.read)
+        end
+      rescue Bundler::LockfileError => e
+        send_message(Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: e.message))
+        return
+      rescue Bundler::GemfileNotFound, Errno::ENOENT
+        # We still compose the bundle if there's no Gemfile or if the lockfile got deleted
+      end
+
+      # We compose the bundle in a thread so that the LSP continues to work while we're checking for its validity. Once
+      # we return the response back to the editor, then the restart is triggered
+      launch_bundle_compose("Recomposing the bundle ahead of restart") do |stderr, status|
+        if status&.exitstatus == 0
+          # Create a signal for the restart that it can skip composing the bundle and launch directly
+          FileUtils.touch(already_composed_path)
+          send_message(Result.new(id: id, response: { success: true }))
+        else
+          # This special error code makes the extension avoid restarting in case we already know that the composed
+          # bundle is not valid
+          send_message(
+            Error.new(id: id, code: BUNDLE_COMPOSE_FAILED_CODE, message: "Failed to compose bundle\n#{stderr}"),
+          )
+        end
+      end
+    end
+
+    #: -> void
+    def update_server
+      return unless File.exist?(File.join(@global_state.workspace_path, ".ruby-lsp", "needs_update"))
+
+      launch_bundle_compose("Trying to update server") do |stderr, status|
+        if status&.exitstatus == 0
+          send_log_message("Successfully updated the server")
+        else
+          send_log_message("Failed to update server\n#{stderr}", type: Constant::MessageType::ERROR)
+        end
+      end
+    end
+
+    #: (String) { (IO, Process::Status?) -> void } -> Thread
+    def launch_bundle_compose(log, &block)
+      Thread.new do
+        send_log_message(log)
+
+        _stdout, stderr, status = Bundler.with_unbundled_env do
+          Open3.capture3(
+            Gem.ruby,
+            "-I",
+            File.dirname(
+              __dir__, #: as !nil
+            ),
+            File.expand_path("../../exe/ruby-lsp-launcher", __dir__),
+            @global_state.workspace_uri.to_s,
+            chdir: @global_state.workspace_path,
+          )
+        end
+
+        block.call(stderr, status)
+      end
+    end
+
+    # Returns internal state information for debugging purposes
+    #: (Hash[Symbol, untyped] message) -> void
+    def diagnose_state(message)
+      documents = {}
+      @store.each { |uri, document| documents[uri] = document.source }
+
+      send_message(
+        Result.new(
+          id: message[:id],
+          response: {
+            workerAlive: @worker.alive?,
+            backtrace: @worker.backtrace,
+            documents: documents,
+            incomingQueueSize: @incoming_queue.length,
+          },
+        ),
+      )
+    end
+
+    # Discovers all available test groups and examples in a given file taking into consideration the merged response of
+    # all add-ons
+    #: (Hash[Symbol, untyped] message) -> void
+    def discover_tests(message)
+      document = @store.get(message.dig(:params, :textDocument, :uri))
+
+      unless document.is_a?(RubyDocument)
+        send_empty_response(message[:id])
+        return
+      end
+
+      cached_response = document.cache_get("rubyLsp/discoverTests")
+      if cached_response != Document::EMPTY_CACHE
+        send_message(Result.new(id: message[:id], response: cached_response.map(&:to_hash)))
+        return
+      end
+
+      items = Requests::DiscoverTests.new(@global_state, document, Prism::Dispatcher.new).perform
+      document.cache_set("rubyLsp/discoverTests", items)
+
+      send_message(Result.new(id: message[:id], response: items.map(&:to_hash)))
+    end
+
+    #: (Hash[Symbol, untyped] message) -> void
+    def resolve_test_commands(message)
+      items = message.dig(:params, :items)
+      commands = Listeners::TestStyle.resolve_test_commands(items)
+
+      Addon.addons.each do |addon|
+        commands.concat(addon.resolve_test_commands(items))
+      end
+
+      send_message(Result.new(
+        id: message[:id],
+        response: { commands: commands },
+      ))
+    end
+
+    #: (Hash[Symbol, untyped] message) -> void
+    def code_lens_resolve(message)
+      code_lens = message[:params]
+      args = code_lens.dig(:data, :arguments)
+
+      case code_lens.dig(:data, :kind)
+      when "run_test"
+        code_lens[:command] = Interface::Command.new(title: "▶ Run", command: "rubyLsp.runTest", arguments: args)
+      when "run_test_in_terminal"
+        code_lens[:command] =
+          Interface::Command.new(title: "▶ Run in terminal", command: "rubyLsp.runTestInTerminal", arguments: args)
+      when "debug_test"
+        code_lens[:command] = Interface::Command.new(title: "⚙ Debug", command: "rubyLsp.debugTest", arguments: args)
+      end
+
+      send_message(Result.new(
+        id: message[:id],
+        response: code_lens,
+      ))
     end
   end
 end

@@ -7,27 +7,22 @@ module RubyLsp
     # [prepare_rename](https://microsoft.github.io/language-server-protocol/specification#textDocument_prepareRename)
     # # request checks the validity of a rename operation at a given location.
     class PrepareRename < Request
-      extend T::Sig
       include Support::Common
 
-      sig do
-        params(
-          document: RubyDocument,
-          position: T::Hash[Symbol, T.untyped],
-        ).void
-      end
+      #: (RubyDocument document, Hash[Symbol, untyped] position) -> void
       def initialize(document, position)
         super()
         @document = document
-        @position = T.let(position, T::Hash[Symbol, Integer])
+        @position = position #: Hash[Symbol, Integer]
       end
 
-      sig { override.returns(T.nilable(Interface::Range)) }
+      # @override
+      #: -> Interface::Range?
       def perform
         char_position, _ = @document.find_index_by_position(@position)
 
         node_context = RubyDocument.locate(
-          @document.parse_result.value,
+          @document.ast,
           char_position,
           node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
           code_units_cache: @document.code_units_cache,

@@ -13,9 +13,15 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: true })
-    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    @global_state.apply_options({
+      initializationOptions: {
+        featuresConfiguration: {
+          inlayHint: { implicitRescue: true, implicitHashValue: true },
+        },
+      },
+    })
+    request = RubyLsp::Requests::InlayHints.new(@global_state, document, dispatcher)
+    dispatcher.dispatch(document.ast)
     range = params.first
     ruby_range = range.dig(:start, :line)..range.dig(:end, :line)
 
@@ -35,9 +41,15 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     RUBY
 
     dispatcher = Prism::Dispatcher.new
-    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: true, implicitHashValue: false })
-    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    @global_state.apply_options({
+      initializationOptions: {
+        featuresConfiguration: {
+          inlayHint: { implicitRescue: true, implicitHashValue: false },
+        },
+      },
+    })
+    request = RubyLsp::Requests::InlayHints.new(@global_state, document, dispatcher)
+    dispatcher.dispatch(document.ast)
     assert_empty(request.perform)
   end
 
@@ -50,9 +62,15 @@ class InlayHintsExpectationsTest < ExpectationsTestRunner
     RUBY
 
     dispatcher = Prism::Dispatcher.new
-    hints_configuration = RubyLsp::RequestConfig.new({ implicitRescue: false, implicitHashValue: true })
-    request = RubyLsp::Requests::InlayHints.new(document, hints_configuration, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    @global_state.apply_options({
+      initializationOptions: {
+        featuresConfiguration: {
+          inlayHint: { implicitRescue: false, implicitHashValue: true },
+        },
+      },
+    })
+    request = RubyLsp::Requests::InlayHints.new(@global_state, document, dispatcher)
+    dispatcher.dispatch(document.ast)
     assert_empty(request.perform)
   end
 end

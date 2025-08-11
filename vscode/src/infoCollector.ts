@@ -8,33 +8,25 @@ export async function collectRubyLspInfo(workspace: Workspace | undefined) {
     return;
   }
 
-  const lspInfo = await gatherLspInfo(workspace);
-  const panel = vscode.window.createWebviewPanel(
-    "rubyLspInfo",
-    "Ruby LSP Information",
-    vscode.ViewColumn.One,
-    { enableScripts: true },
-  );
+  const lspInfo = gatherLspInfo(workspace);
+  const panel = vscode.window.createWebviewPanel("rubyLspInfo", "Ruby LSP Information", vscode.ViewColumn.One, {
+    enableScripts: true,
+  });
 
   panel.webview.html = generateRubyLspInfoReport(lspInfo);
 }
 
-async function gatherLspInfo(
-  workspace: Workspace,
-): Promise<Record<string, string | string[] | Record<string, unknown>>> {
+function gatherLspInfo(workspace: Workspace): Record<string, string | string[] | Record<string, unknown>> {
   const vscodeVersion = vscode.version;
   const rubyLspExtension = vscode.extensions.getExtension("Shopify.ruby-lsp")!;
   const rubyLspExtensionVersion = rubyLspExtension.packageJSON.version;
   const rubyLspVersion = workspace.lspClient?.serverVersion ?? "Unknown";
   const rubyLspAddons =
-    workspace.lspClient?.addons?.map((addon) => addon.name) ?? [];
-  const extensions = await getPublicExtensions();
+    workspace.lspClient?.addons?.map((addon) => `${addon.name} (${addon.version ?? "unknown"})`) ?? [];
+  const extensions = getPublicExtensions();
 
   // Fetch rubyLsp settings
-  const workspaceSettings = vscode.workspace.getConfiguration(
-    "rubyLsp",
-    workspace.workspaceFolder,
-  );
+  const workspaceSettings = vscode.workspace.getConfiguration("rubyLsp", workspace.workspaceFolder);
   const userSettings = vscode.workspace.getConfiguration("rubyLsp");
 
   // Get only the workspace-specific settings
@@ -46,7 +38,6 @@ async function gatherLspInfo(
   }
 
   return {
-    /* eslint-disable @typescript-eslint/naming-convention */
     "VS Code Version": vscodeVersion,
     "Ruby LSP Extension Version": rubyLspExtensionVersion,
     "Ruby LSP Server Version": rubyLspVersion,
@@ -58,11 +49,10 @@ async function gatherLspInfo(
       Workspace: workspaceSpecificSettings,
       User: userSettings,
     },
-    /* eslint-enable @typescript-eslint/naming-convention */
   };
 }
 
-async function getPublicExtensions(): Promise<string[]> {
+function getPublicExtensions(): string[] {
   return vscode.extensions.all
     .filter((ext) => {
       // Filter out built-in extensions
@@ -71,10 +61,7 @@ async function getPublicExtensions(): Promise<string[]> {
       }
 
       // Assume if an extension doesn't have a license, it's private and should not be listed
-      if (
-        ext.packageJSON.license === "UNLICENSED" ||
-        !ext.packageJSON.license
-      ) {
+      if (ext.packageJSON.license === "UNLICENSED" || !ext.packageJSON.license) {
         return false;
       }
 
@@ -83,25 +70,21 @@ async function getPublicExtensions(): Promise<string[]> {
     .map((ext) => `${ext.packageJSON.name} (${ext.packageJSON.version})`);
 }
 
-function generateRubyLspInfoReport(
-  info: Record<string, string | string[] | Record<string, unknown>>,
-): string {
+function generateRubyLspInfoReport(info: Record<string, string | string[] | Record<string, unknown>>): string {
   let markdown = "\n### Ruby LSP Information\n\n";
 
   for (const [key, value] of Object.entries(info)) {
     markdown += `#### ${key}\n\n`;
     if (Array.isArray(value)) {
       if (key === "Installed Extensions") {
-        markdown +=
-          "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
+        markdown += "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
         markdown += `${value.map((val) => `- ${val}`).join("\n")}\n`;
         markdown += "&lt;/details&gt;\n";
       } else {
         markdown += `${value.map((val) => `- ${val}`).join("\n")}\n`;
       }
     } else if (typeof value === "object" && value !== null) {
-      markdown +=
-        "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
+      markdown += "&lt;details&gt;\n&lt;summary&gt;Click to expand&lt;/summary&gt;\n\n";
       for (const [subKey, subValue] of Object.entries(value)) {
         markdown += `##### ${subKey}\n\n`;
         markdown += `\`\`\`json\n${JSON.stringify(subValue, null, 2)}\n\`\`\`\n\n`;

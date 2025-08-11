@@ -11,7 +11,7 @@ parent: Ruby LSP
 > The Ruby LSP add-on system is currently experimental and subject to changes in the API
 
 Need help writing add-ons? Consider joining the `#ruby-lsp-addons` channel in the [Ruby DX Slack
-workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+workspace](invite).
 
 ## Motivation and goals
 
@@ -302,33 +302,7 @@ class MyIndexingEnhancement < RubyIndexer::Enhancement
 end
 ```
 
-Finally, we need to register our enhancement in the index once during the add-on's activation.
-
-```ruby
-module RubyLsp
-  module MyLibrary
-    class Addon < ::RubyLsp::Addon
-      def activate(global_state, message_queue)
-        # Register the enhancement as part of the indexing process
-        global_state.index.register_enhancement(MyIndexingEnhancement.new(global_state.index))
-      end
-
-      def deactivate
-      end
-
-      def name
-        "MyLibrary"
-      end
-
-      def version
-        "0.1.0"
-      end
-    end
-  end
-end
-```
-
-Done! With this the Ruby LSP should automatically handle calls to `my_dsl_that_creates_methods` and create an accurate
+With this the Ruby LSP should automatically handle calls to `my_dsl_that_creates_methods` and create an accurate
 representation of the declarations that will be available in the runtime.
 
 ### Registering formatters

@@ -7,11 +7,9 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#typeHierarchy_supertypes)
     # displays the list of ancestors (supertypes) for the selected type.
     class TypeHierarchySupertypes < Request
-      extend T::Sig
-
       include Support::Common
 
-      sig { params(index: RubyIndexer::Index, item: T::Hash[Symbol, T.untyped]).void }
+      #: (RubyIndexer::Index index, Hash[Symbol, untyped] item) -> void
       def initialize(index, item)
         super()
 
@@ -19,12 +17,13 @@ module RubyLsp
         @item = item
       end
 
-      sig { override.returns(T.nilable(T::Array[Interface::TypeHierarchyItem])) }
+      # @override
+      #: -> Array[Interface::TypeHierarchyItem]?
       def perform
         name = @item[:name]
         entries = @index[name]
 
-        parents = T.let(Set.new, T::Set[RubyIndexer::Entry::Namespace])
+        parents = Set.new #: Set[RubyIndexer::Entry::Namespace]
         return unless entries&.any?
 
         entries.each do |entry|
@@ -60,7 +59,7 @@ module RubyLsp
 
       private
 
-      sig { params(entry: RubyIndexer::Entry).returns(Interface::TypeHierarchyItem) }
+      #: (RubyIndexer::Entry entry) -> Interface::TypeHierarchyItem
       def hierarchy_item(entry)
         Interface::TypeHierarchyItem.new(
           name: entry.name,

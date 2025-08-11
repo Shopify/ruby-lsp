@@ -125,16 +125,28 @@ class ERBDocumentTest < Minitest::Test
     # Locate the `Post` class
     node_context = document.locate_node({ line: 0, character: 3 })
     assert_instance_of(Prism::ConstantReadNode, node_context.node)
-    assert_equal("Post", T.cast(node_context.node, Prism::ConstantReadNode).location.slice)
+    assert_equal(
+      "Post",
+      node_context.node #: as Prism::ConstantReadNode
+        .location.slice,
+    )
 
     # Locate the `each` call from block
     node_context = document.locate_node({ line: 0, character: 17 })
     assert_instance_of(Prism::BlockNode, node_context.node)
-    assert_equal(:each, T.must(node_context.call_node).name)
+    assert_equal(
+      :each,
+      node_context.call_node #: as !nil
+        .name,
+    )
 
     # Locate the `title` invocation
     node_context = document.locate_node({ line: 1, character: 15 })
-    assert_equal("title", T.cast(node_context.node, Prism::CallNode).message)
+    assert_equal(
+      "title",
+      node_context.node #: as Prism::CallNode
+        .message,
+    )
   end
 
   def test_cache_set_and_get

@@ -11,6 +11,7 @@ binstub
 binstubs
 Bizt
 Bizw
+boolish
 bufnr
 bytesize
 byteslice
@@ -26,12 +27,15 @@ dont
 eglot
 Eglot
 eruby
+EUTF
+exitstatus
 EXTGLOB
 fakehome
 FIXEDENCODING
 Floo
 fnmatch
 fooo
+hashkey
 hostedtoolcache
 importmap
 indexables
@@ -40,8 +44,11 @@ ipairs
 Ispec
 Itest
 ivar
+jaccard
+Jaccard
 Jaro
 Kaigi
+KEEPALIVE
 klass
 kwargs
 libexec
@@ -68,6 +75,7 @@ quickfixes
 quux
 quxx
 rdbg
+rbundler
 readlines
 realpath
 reparsing
@@ -81,6 +89,7 @@ rubyfmt
 rubylibdir
 rubylibprefix
 setqflist
+setsockopt
 shadowenv
 Shadowenv
 shellwords
@@ -96,11 +105,15 @@ subexpression
 supertypes
 Supertypes
 suppo
+testresult
+testrunner
+testrunnermediator
 truffleruby
 unaliased
 unindexed
 unparser
 unresolve
+vcall
 Vinicius
 vscodemachineid
 vsctm

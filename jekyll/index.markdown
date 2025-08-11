@@ -15,7 +15,7 @@ for Ruby, used to improve rich features in editors. It is a part of a wider goal
 experience to Ruby developers using modern standards for cross-editor features, documentation and debugging.
 
 Want to discuss Ruby developer experience? Consider joining the public
-[Ruby DX Slack workspace](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q).
+[Ruby DX Slack workspace](invite).
 
 ## Table of Contents
 
@@ -53,7 +53,7 @@ Want to discuss Ruby developer experience? Consider joining the public
     - [Rails generator integrations](#rails-generator-integrations)
     - [Debug client](#debug-client)
     - [Version manager integrations](#version-manager-integrations)
-    - [Test explorer](#test-explorer)
+    - [Test explorer](test_explorer)
 - [Experimental Features](#experimental-features)
     - [Ancestors Hierarchy Request](#ancestors-hierarchy-request)
     - [Copilot chat participant](#copilot-chat-participant)
@@ -69,7 +69,7 @@ If using VS Code, all you have to do is install the [Ruby LSP
 extension](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp) to get the extra features in the
 editor. Do not install the `ruby-lsp` gem manually.
 
-For more information on using and configuring the extension, see the extension's [README.md](https://github.com/Shopify/ruby-lsp/blob/main/vscode/README.md).
+For more information on using and configuring the extension, see the [extension page](vscode-extension).
 
 ### With other editors
 
@@ -106,8 +106,9 @@ Additionally, some tools may include a Ruby LSP add-on directly, like
 
 - [Standard Ruby (from v1.39.1)](https://github.com/standardrb/standard/wiki/IDE:-vscode#using-ruby-lsp)
 
-Other community driven add-ons can be found in [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) by
-searching for the `ruby-lsp` prefix.
+Other community driven add-ons can be found:
+- by searching [rubygems](https://rubygems.org/search?query=name%3A+ruby-lsp) for the `ruby-lsp` prefix
+- in the community driven list of [awesome-ruby-lsp](https://github.com/johansenja/awesome-ruby-lsp)
 
 For instructions on how to create add-ons, see the [add-ons documentation](add-ons).
 
@@ -446,6 +447,8 @@ Rename allows developers to rename all occurrences of the entity under the curso
 renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
 
+Rename is currently only supported for constants, module names and class names.
+
 ![Rename demo](images/rename.gif)
 
 ### Find references
@@ -513,23 +516,10 @@ For example, some users may source their version managers in `~/.zshrc` while ot
 If experiencing issues, keep in mind that shell configurations could be interfering, check
 [troubleshooting](troubleshooting) and, if none of the listed solutions work, please [report an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
-### Test explorer
-
-The Ruby LSP populates VS Code's test explorer view with the test for the current file. See [code lens](#code-lens) for
-another demo.
-
-{: .note }
-The Ruby LSP intentionally does not index every single test in codebases to display in the test explorer. In large
-codebases, trying to do so leads to performance issues, excessive memory usage and difficulties in navigation (due to
-the amount of tests). We may reconsider this in the future, but it will require ensuring that it meets our performance
-requirements
-
-![Test explorer demo](images/test_explorer.png)
-
 ## Experimental Features
 
 Ruby LSP also provides experimental features that are not enabled by default. If you have feedback about these features,
-you can let us know in the [DX Slack](https://join.slack.com/t/ruby-dx/shared_invite/zt-2c8zjlir6-uUDJl8oIwcen_FS_aA~b6Q) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
+you can let us know in the [DX Slack](invite) or by [creating an issue](https://github.com/Shopify/ruby-lsp/issues/new/choose).
 
 ### Ancestors Hierarchy Request
 
@@ -569,7 +559,7 @@ default gems, except for
 - Gems that only appear under the `:development` group
 - All Ruby files under `test/**/*.rb`
 
-This behavior can be overridden and tuned. Learn how to configure it [for VS Code](https://github.com/Shopify/ruby-lsp/tree/main/vscode#indexing-configuration).
+This behavior can be overridden and tuned. Learn how to configure it [for VS Code](vscode-extension#indexing-configuration).
 
 Note that indexing-dependent behavior, such as definition, hover, completion or workspace symbol will be impacted by
 the configuration changes.

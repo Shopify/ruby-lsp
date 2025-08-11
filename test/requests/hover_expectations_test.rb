@@ -273,17 +273,16 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_hovering_over_gemfile_dependency
+  def test_hovering_over_gemfile_dependency_name
     source = <<~RUBY
       gem 'rake'
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 0 } },
       )
 
       response = server.pop_response.response
@@ -295,13 +294,30 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_over_gemfile_dependency_triggers_only_for_first_arg
+    source = <<~RUBY
+      gem 'rake', '~> 1.0'
+    RUBY
+
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 13, line: 0 } },
+      )
+
+      response = server.pop_response.response
+
+      assert_nil(response)
+    end
+  end
+
   def test_hovering_over_gemfile_dependency_with_missing_argument
     source = <<~RUBY
       gem()
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -317,8 +333,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       gem(method_call)
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, URI("file:///Gemfile"), stub_no_typechecker: true) do |server, uri|
+    with_server(source, URI("file:///Gemfile")) do |server, uri|
       server.process_message(
         id: 1,
         method: "textDocument/hover",
@@ -847,7 +862,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
       class Child
         def initialize
           # Hello
-          @something = T.let(123, Integer)
+          @something = 123 #: Integer
         end
 
         def bar
@@ -914,23 +929,44 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_for_keywords
-    source = <<~RUBY
-      def foo
-        yield
+    test_cases = {
+      "yield" => {
+        source: <<~RUBY,
+          def foo
+            yield
+          end
+        RUBY
+        position: { line: 1, character: 2 },
+      },
+      "break" => {
+        source: <<~RUBY,
+          while true
+            break
+          end
+        RUBY
+        position: { line: 1, character: 2 },
+      },
+    }
+
+    test_cases.each do |keyword, config|
+      with_server(config[:source]) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/hover",
+          params: {
+            textDocument: { uri: uri },
+            position: config[:position],
+          },
+        )
+
+        contents = server.pop_response.response.contents.value
+        assert_match("```ruby\n#{keyword}\n```", contents)
+        assert_match(
+          RubyLsp::KEYWORD_DOCS[keyword] || "No documentation found for #{keyword}",
+          contents,
+        )
+        assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/#{keyword}.md)", contents)
       end
-    RUBY
-
-    with_server(source) do |server, uri|
-      server.process_message(
-        id: 1,
-        method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { character: 2, line: 1 } },
-      )
-
-      contents = server.pop_response.response.contents.value
-      assert_match("```ruby\nyield\n```", contents)
-      assert_match(T.must(RubyLsp::KEYWORD_DOCS["yield"]), contents)
-      assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
     end
   end
 
@@ -965,6 +1001,46 @@ class HoverExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 23, line: 8 } },
       )
       refute_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hovering_constants_shows_complete_name
+    source = <<~RUBY
+      # typed: ignore
+      module Foo
+        CONST = 123
+
+        module Bar
+          class Baz; end
+
+          Baz
+        end
+      end
+
+      QUX = 42
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+      assert_match("```ruby\nFoo::Bar::Baz\n```", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 2 } },
+      )
+      assert_match("```ruby\nFoo::CONST\n```", server.pop_response.response.contents.value)
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 11 } },
+      )
+      assert_match("```ruby\nQUX\n```", server.pop_response.response.contents.value)
     end
   end
 

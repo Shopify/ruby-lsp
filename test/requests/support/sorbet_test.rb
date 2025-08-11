@@ -4,8 +4,6 @@
 require "test_helper"
 
 class SorbetTest < Minitest::Test
-  extend T::Sig
-
   def test_abstract!
     assert(annotation?("abstract!"))
     assert(annotation?("abstract!()"))
@@ -488,26 +486,21 @@ class SorbetTest < Minitest::Test
 
   private
 
-  sig { params(source: String).returns(T::Boolean) }
+  #: (String source) -> bool
   def annotation?(source)
     node = parse(source)
 
     RubyLsp::Requests::Support::Sorbet.annotation?(node)
   end
 
-  sig do
-    params(source: String)
-      .returns(Prism::CallNode)
-  end
+  #: (String source) -> Prism::CallNode
   def parse(source)
-    program = T.let(Prism.parse(source).value, Prism::Node)
+    program = Prism.parse(source).value #: Prism::Node
 
     select_relevant_node([program])
   end
 
-  sig do
-    params(nodes: T::Array[Prism::Node]).returns(Prism::CallNode)
-  end
+  #: (Array[Prism::Node] nodes) -> Prism::CallNode
   def select_relevant_node(nodes)
     nodes.each do |node|
       return node if node.is_a?(Prism::CallNode)

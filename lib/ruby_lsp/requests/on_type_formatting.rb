@@ -6,53 +6,40 @@ module RubyLsp
     # The [on type formatting](https://microsoft.github.io/language-server-protocol/specification#textDocument_onTypeFormatting)
     # request formats code as the user is typing. For example, automatically adding `end` to class definitions.
     class OnTypeFormatting < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::DocumentOnTypeFormattingRegistrationOptions) }
+        #: -> Interface::DocumentOnTypeFormattingRegistrationOptions
         def provider
           Interface::DocumentOnTypeFormattingRegistrationOptions.new(
-            document_selector: [Interface::DocumentFilter.new(language: "ruby")],
+            document_selector: nil,
             first_trigger_character: "{",
             more_trigger_character: ["\n", "|", "d"],
           )
         end
       end
 
-      END_REGEXES = T.let(
-        [
-          /\b(if|unless|for|while|until)\b($|\s|\()/,
-          /\b(class|module|def|case)\b($|\s)/,
-          /.*\s\bdo\b($|\s)/,
-        ],
-        T::Array[Regexp],
-      )
+      END_REGEXES = [
+        /\b(if|unless|for|while|until)\b($|\s|\()/,
+        /\b(class|module|def|case)\b($|\s)/,
+        /.*\s\bdo\b($|\s)/,
+      ] #: Array[Regexp]
 
-      sig do
-        params(
-          document: RubyDocument,
-          position: T::Hash[Symbol, T.untyped],
-          trigger_character: String,
-          client_name: String,
-        ).void
-      end
+      #: (RubyDocument document, Hash[Symbol, untyped] position, String trigger_character, String client_name) -> void
       def initialize(document, position, trigger_character, client_name)
         super()
         @document = document
-        @lines = T.let(@document.source.lines, T::Array[String])
+        @lines = @document.source.lines #: Array[String]
         line = @lines[[position[:line] - 1, 0].max]
 
-        @indentation = T.let(line ? find_indentation(line) : 0, Integer)
-        @previous_line = T.let(line ? line.strip.chomp : "", String)
+        @indentation = line ? find_indentation(line) : 0 #: Integer
+        @previous_line = line ? line.strip.chomp : "" #: String
         @position = position
-        @edits = T.let([], T::Array[Interface::TextEdit])
+        @edits = [] #: Array[Interface::TextEdit]
         @trigger_character = trigger_character
         @client_name = client_name
       end
 
-      sig { override.returns(T.all(T::Array[Interface::TextEdit], Object)) }
+      # @override
+      #: -> (Array[Interface::TextEdit] & Object)
       def perform
         case @trigger_character
         when "{"
@@ -60,8 +47,13 @@ module RubyLsp
         when "|"
           handle_pipe if @document.syntax_error?
         when "\n"
-          if (comment_match = @previous_line.match(/^#(\s*)/))
-            handle_comment_line(T.must(comment_match[1]))
+          # If the previous line is a simple comment, we'll add a comment continuation
+          # But if it's a RBS signature starting with `#:`, we'll ignore it
+          # so users can immediately continue typing the method definition
+          if (comment_match = @previous_line.match(/^#(?!:)(\s*)/))
+            handle_comment_line(
+              comment_match[1], #: as !nil
+            )
           elsif @document.syntax_error?
             match = /(<<((-|~)?))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
             heredoc_delimiter = match && match.named_captures["delimiter"]
@@ -81,12 +73,12 @@ module RubyLsp
 
       private
 
-      sig { void }
+      #: -> void
       def handle_pipe
         current_line = @lines[@position[:line]]
         return unless /((?<=do)|(?<={))\s+\|/.match?(current_line)
 
-        line = T.must(current_line)
+        line = current_line #: as !nil
 
         # If the user inserts the closing pipe manually to the end of the block argument, we need to avoid adding
         # an additional one and remove the previous one.  This also helps to remove the user who accidentally
@@ -112,7 +104,7 @@ module RubyLsp
         move_cursor_to(@position[:line], @position[:character])
       end
 
-      sig { void }
+      #: -> void
       def handle_curly_brace
         return unless /".*#\{/.match?(@previous_line)
 
@@ -120,7 +112,7 @@ module RubyLsp
         move_cursor_to(@position[:line], @position[:character])
       end
 
-      sig { void }
+      #: -> void
       def handle_statement_end
         # If a keyword occurs in a line which appears be a comment or a string, we will not try to format it, since
         # it could be a coincidental match. This approach is not perfect, but it should cover most cases.
@@ -142,7 +134,7 @@ module RubyLsp
         end
       end
 
-      sig { params(delimiter: String).void }
+      #: (String delimiter) -> void
       def handle_heredoc_end(delimiter)
         indents = " " * @indentation
         add_edit_with_text("\n")
@@ -150,12 +142,12 @@ module RubyLsp
         move_cursor_to(@position[:line], @indentation + 2)
       end
 
-      sig { params(spaces: String).void }
+      #: (String spaces) -> void
       def handle_comment_line(spaces)
         add_edit_with_text("##{spaces}")
       end
 
-      sig { params(text: String, position: T::Hash[Symbol, T.untyped]).void }
+      #: (String text, ?Hash[Symbol, untyped] position) -> void
       def add_edit_with_text(text, position = @position)
         pos = Interface::Position.new(
           line: position[:line],
@@ -168,9 +160,9 @@ module RubyLsp
         )
       end
 
-      sig { params(line: Integer, character: Integer).void }
+      #: (Integer line, Integer character) -> void
       def move_cursor_to(line, character)
-        return unless @client_name.start_with?("Visual Studio Code")
+        return unless /Visual Studio Code|Cursor|VSCodium|Windsurf/.match?(@client_name)
 
         position = Interface::Position.new(
           line: line,
@@ -189,7 +181,7 @@ module RubyLsp
         )
       end
 
-      sig { params(line: String).returns(Integer) }
+      #: (String line) -> Integer
       def find_indentation(line)
         count = 0
 
@@ -202,7 +194,7 @@ module RubyLsp
         count
       end
 
-      sig { void }
+      #: -> void
       def auto_indent_after_end_keyword
         current_line = @lines[@position[:line]]
         return unless current_line && current_line.strip == "end"

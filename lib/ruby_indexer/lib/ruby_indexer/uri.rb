@@ -1,35 +1,33 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "uri"
+
 module URI
   class Generic
-    extend T::Sig
-
     # Avoid a deprecation warning with Ruby 3.4 where the default parser was changed to RFC3986.
     # This condition must remain even after support for 3.4 has been dropped for users that have
     # `uri` in their lockfile, decoupling it from the ruby version.
-    PARSER = T.let(const_defined?(:RFC2396_PARSER) ? RFC2396_PARSER : DEFAULT_PARSER, RFC2396_Parser)
+
+    # NOTE: We also define this in the shim
+    PARSER = const_defined?(:RFC2396_PARSER) ? RFC2396_PARSER : DEFAULT_PARSER
 
     class << self
-      extend T::Sig
-
-      sig do
-        params(
-          path: String,
-          fragment: T.nilable(String),
-          scheme: String,
-          load_path_entry: T.nilable(String),
-        ).returns(URI::Generic)
-      end
+      #: (path: String, ?fragment: String?, ?scheme: String, ?load_path_entry: String?) -> URI::Generic
       def from_path(path:, fragment: nil, scheme: "file", load_path_entry: nil)
+        # This unsafe regex is the same one used in the URI::RFC2396_REGEXP class with the exception of the fact that we
+        # do not include colon as a safe character. VS Code URIs always escape colons and we need to ensure we do the
+        # same to avoid inconsistencies in our URIs, which are used to identify resources
+        unsafe_regex = %r{[^\-_.!~*'()a-zA-Z\d;/?@&=+$,\[\]]}
+
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
-          PARSER.escape("/#{path}")
+          PARSER.escape("/#{path}", unsafe_regex)
         elsif path.start_with?("//?/")
           # Some paths on Windows start with "//?/". This is a special prefix that allows for long file paths
-          PARSER.escape(path.delete_prefix("//?"))
+          PARSER.escape(path.delete_prefix("//?"), unsafe_regex)
         else
-          PARSER.escape(path)
+          PARSER.escape(path, unsafe_regex)
         end
 
         uri = build(scheme: scheme, path: escaped_path, fragment: fragment)
@@ -42,10 +40,10 @@ module URI
       end
     end
 
-    sig { returns(T.nilable(String)) }
+    #: String?
     attr_accessor :require_path
 
-    sig { params(load_path_entry: String).void }
+    #: (String load_path_entry) -> void
     def add_require_path_from_load_entry(load_path_entry)
       path = to_standardized_path
       return unless path
@@ -53,7 +51,7 @@ module URI
       self.require_path = path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb")
     end
 
-    sig { returns(T.nilable(String)) }
+    #: -> String?
     def to_standardized_path
       parsed_path = path
       return unless parsed_path

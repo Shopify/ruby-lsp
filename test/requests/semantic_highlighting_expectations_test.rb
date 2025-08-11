@@ -32,7 +32,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
       range: processed_range,
     )
 
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
@@ -104,7 +104,7 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
           end
         end
 
-        T.unsafe(klass).new(response_builder, dispatcher)
+        klass.new(response_builder, dispatcher)
       end
 
       def activate(global_state, outgoing_queue); end

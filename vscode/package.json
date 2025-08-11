@@ -2,7 +2,7 @@
   "name": "ruby-lsp",
   "displayName": "Ruby LSP",
   "description": "VS Code plugin for connecting with the Ruby LSP",
-  "version": "0.8.17",
+  "version": "0.9.31",
   "publisher": "Shopify",
   "repository": {
     "type": "git",
@@ -21,10 +21,8 @@
     "Chat"
   ],
   "activationEvents": [
-    "onLanguage:ruby",
     "workspaceContains:Gemfile.lock",
-    "workspaceContains:gems.locked",
-    "onView:dependencies"
+    "workspaceContains:gems.locked"
   ],
   "extensionDependencies": [
     "vscode.git"
@@ -54,6 +52,19 @@
           "group": "9_cutcopypaste"
         }
       ],
+      "editor/title": [
+        {
+          "command": "rubyLsp.goToRelevantFile",
+          "when": "rubyLsp.activated",
+          "group": "navigation"
+        },
+        {
+          "command": "rubyLsp.profileCurrentFile",
+          "when": "editorTextFocus && resourceLangId == ruby",
+          "group": "navigation",
+          "icon": "$(record)"
+        }
+      ],
       "view/title": [
         {
           "command": "rubyLsp.fileOperation",
@@ -64,6 +75,11 @@
       "explorer/context": [
         {
           "command": "rubyLsp.fileOperation",
+          "when": "rubyLsp.activated",
+          "group": "2_workspace"
+        },
+        {
+          "command": "rubyLsp.goToRelevantFile",
           "when": "rubyLsp.activated",
           "group": "2_workspace"
         }
@@ -83,6 +99,11 @@
       {
         "command": "rubyLsp.stop",
         "title": "Stop",
+        "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.showServerChangelog",
+        "title": "Open server changelog in browser",
         "category": "Ruby LSP"
       },
       {
@@ -134,6 +155,11 @@
         "category": "Ruby LSP"
       },
       {
+        "command": "rubyLsp.diagnoseState",
+        "title": "Diagnose language server state",
+        "category": "Ruby LSP"
+      },
+      {
         "command": "rubyLsp.railsGenerate",
         "title": "Rails generate",
         "category": "Ruby LSP"
@@ -150,6 +176,12 @@
         "icon": "$(ruby)"
       },
       {
+        "command": "rubyLsp.goToRelevantFile",
+        "title": "Go to relevant file (test <> source code)",
+        "category": "Ruby LSP",
+        "icon": "$(arrow-swap)"
+      },
+      {
         "command": "rubyLsp.collectRubyLspInfo",
         "title": "Collect Ruby LSP information for issue reporting",
         "category": "Ruby LSP"
@@ -163,6 +195,12 @@
         "command": "rubyLsp.showOutput",
         "title": "Show output channel",
         "category": "Ruby LSP"
+      },
+      {
+        "command": "rubyLsp.profileCurrentFile",
+        "title": "Profile current file",
+        "category": "Ruby LSP",
+        "icon": "$(record)"
       }
     ],
     "configuration": {
@@ -304,6 +342,20 @@
                   "type": "boolean"
                 }
               }
+            },
+            "codeLens": {
+              "description": "Customize code lens features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "enableTestCodeLens": {
+                  "description": "Enable the run, run in terminal, debug code and other test related code lenses",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
             }
           }
         },
@@ -373,6 +425,7 @@
           "enum": [
             "auto",
             "rubocop",
+            "rubocop_internal",
             "syntax_tree",
             "standard",
             "rubyfmt",
@@ -381,6 +434,7 @@
           "enumDescriptions": [
             "Automatically detect formatter",
             "RuboCop",
+            "Ruby LSP RuboCop integration",
             "Syntax Tree",
             "Standard (supported by community addon)",
             "Rubyfmt (supported by community addon)",
@@ -393,7 +447,7 @@
           "type": "array",
           "examples": [
             [
-              "rubocop"
+              "rubocop_internal"
             ]
           ],
           "default": null
@@ -495,12 +549,21 @@
               "description": "Opt-in/out of the Tapioca add-on",
               "type": "boolean"
             },
+            "fullTestDiscovery": {
+              "description": "UNDER DEVEOPMENT. Opt-in/out of the full test discovery experience",
+              "type": "boolean"
+            },
             "launcher": {
               "description": "Opt-in/out of the new launcher mode",
               "type": "boolean"
             }
           },
           "default": {}
+        },
+        "rubyLsp.sigOpacityLevel": {
+          "description": "Controls the level of opacity for inline RBS comment signatures",
+          "type": "string",
+          "default": "1"
         }
       }
     },
@@ -618,6 +681,16 @@
           "source.js": "javascript",
           "source.ruby": "ruby"
         }
+      },
+      {
+        "path": "./grammars/rbs.injection.json",
+        "scopeName": "rbs-comment.injection",
+        "injectTo": [
+          "source.ruby"
+        ],
+        "embeddedLanguages": {
+          "meta.type.signature.rbs": "rbs"
+        }
       }
     ],
     "languages": [
@@ -688,6 +761,10 @@
           ".rhtm"
         ],
         "configuration": "./languages/erb.json"
+      },
+      {
+        "id": "rbs",
+        "configuration": "./languages/rbs.json"
       }
     ],
     "configurationDefaults": {
@@ -725,8 +802,8 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile",
-    "format": "eslint '**/*.ts' --fix && prettier '**/*.{json,md,yaml,yml}' --write",
-    "lint": "eslint '**/*.ts' --max-warnings=0 && prettier '**/*.{json,md,yaml,yml}' --check",
+    "format": "eslint . --fix && prettier '**/*.{ts,json,md,yaml,yml}' --write",
+    "lint": "eslint . && prettier '**/*.{ts,json,md,yaml,yml}' --check",
     "test": "node ./out/test/runTest.js"
   },
   "resolutions": {
@@ -735,34 +812,29 @@
     "ws": ">= 7.4.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.18.0",
-    "@shopify/eslint-plugin": "^46.0.0",
-    "@shopify/prettier-config": "^1.1.2",
-    "@types/glob": "^8.1.0",
+    "@babel/core": "^7.28.0",
+    "@eslint/js": "^9.33.0",
     "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
-    "@types/sinon": "^17.0.3",
+    "@types/node": "24.x",
+    "@types/sinon": "^17.0.4",
     "@types/vscode": "^1.91.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "@vscode/test-electron": "^2.4.1",
-    "@vscode/vsce": "^3.2.1",
-    "esbuild": "^0.24.2",
-    "eslint": "^8.57.0",
-    "eslint-import-resolver-typescript": "^3.7.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "glob": "^11.0.1",
-    "mocha": "^11.0.1",
-    "ovsx": "^0.10.1",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.3",
-    "sinon": "^19.0.2",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.0",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.30.1",
+    "eslint-plugin-prettier": "^5.5.4",
+    "glob": "^11.0.3",
+    "mocha": "^11.7.1",
+    "ovsx": "^0.10.5",
+    "prettier": "^3.6.2",
+    "sinon": "^21.0.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.2.0"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1"
+    "vscode-languageclient": "^9.0.1",
+    "vscode-jsonrpc": "^8.2.1"
   }
 }

@@ -3,54 +3,48 @@
 
 module RubyLsp
   module ResponseBuilders
+    #: [ResponseType = Array[Interface::DocumentSymbol]]
     class DocumentSymbol < ResponseBuilder
-      extend T::Sig
-
-      ResponseType = type_member { { fixed: T::Array[Interface::DocumentSymbol] } }
-
       class SymbolHierarchyRoot
-        extend T::Sig
-
-        sig { returns(T::Array[Interface::DocumentSymbol]) }
+        #: Array[Interface::DocumentSymbol]
         attr_reader :children
 
-        sig { void }
+        #: -> void
         def initialize
-          @children = T.let([], T::Array[Interface::DocumentSymbol])
+          @children = [] #: Array[Interface::DocumentSymbol]
         end
       end
 
-      sig { void }
+      #: -> void
       def initialize
         super
-        @stack = T.let(
-          [SymbolHierarchyRoot.new],
-          T::Array[T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)],
-        )
+        @stack = [SymbolHierarchyRoot.new] #: Array[(SymbolHierarchyRoot | Interface::DocumentSymbol)]
       end
 
-      sig { params(symbol: Interface::DocumentSymbol).void }
+      #: (Interface::DocumentSymbol symbol) -> void
       def push(symbol)
         @stack << symbol
       end
 
       alias_method(:<<, :push)
 
-      sig { returns(T.nilable(Interface::DocumentSymbol)) }
+      #: -> Interface::DocumentSymbol?
       def pop
         if @stack.size > 1
-          T.cast(@stack.pop, Interface::DocumentSymbol)
+          @stack.pop #: as Interface::DocumentSymbol
         end
       end
 
-      sig { returns(T.any(SymbolHierarchyRoot, Interface::DocumentSymbol)) }
+      #: -> (SymbolHierarchyRoot | Interface::DocumentSymbol)
       def last
-        T.must(@stack.last)
+        @stack.last #: as !nil
       end
 
-      sig { override.returns(T::Array[Interface::DocumentSymbol]) }
+      # @override
+      #: -> Array[Interface::DocumentSymbol]
       def response
-        T.must(@stack.first).children
+        @stack.first #: as !nil
+          .children
       end
     end
   end

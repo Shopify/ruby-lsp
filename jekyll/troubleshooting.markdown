@@ -30,7 +30,7 @@ As an example, the activation script for `zsh` using `rbenv` as a version manage
 
 After activating the Ruby version, we then proceed to boot the server gem (`ruby-lsp`). To avoid having users include
 the `ruby-lsp` in their `Gemfile`, we create a [composed
-bundle](https://shopify.github.io/ruby-lsp/composed-bundle.html) under the `.ruby-lsp` directory inside your project.
+bundle](composed-bundle) under the `.ruby-lsp` directory inside your project.
 
 ## Common issues
 
@@ -156,8 +156,8 @@ One scenario where this is useful is if the user doesn't have permissions for th
 `gem install` fails. For example, when using the system Ruby on certain Linux distributions.
 
 {: .note }
-Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
-Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
+> Using non-default gem installation paths may lead to other integration issues with version managers. For example, for
+> Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part of the version). However, `chruby`
 > (and potentially other version managers) override `GEM_HOME` to include the version patch resulting in
 > `~/.gem/ruby/3.3.1`. When you install a gem using `gem install --user-install`, RubyGems ignores the `GEM_HOME`
 > override and installs the gem inside `~/.gem/ruby/3.3.0`. This results in executables not being found because `chruby`
@@ -172,7 +172,7 @@ Ruby 3.3.1 the default `GEM_HOME` is `~/.gem/ruby/3.3.0` (without the patch part
 
 ### Developing on containers
 
-See the [documentation](https://github.com/Shopify/ruby-lsp/tree/main/vscode#developing-on-containers).
+See the [documentation](vscode-extension#developing-on-containers).
 
 ## Diagnosing the problem
 
@@ -184,7 +184,7 @@ manner. Please include the steps taken to diagnose in your bug report.
 
 Check the [status center](https://github.com/Shopify/ruby-lsp/blob/main/vscode/extras/ruby_lsp_status_center.png).
 Does the server status say it's running? If it is running, but you are missing certain features, please check our
-[features documentation](https://shopify.github.io/ruby-lsp/#general-features) to ensure we already added support for it.
+[features documentation](index#general-features) to ensure we already added support for it.
 
 If the feature is listed as fully supported, but not working for you, report [an
 issue](https://github.com/Shopify/ruby-lsp/issues/new/choose) so that we can
@@ -193,15 +193,19 @@ assist.
 ### Check the VS Code output tab
 
 Many of the activation steps taken are logged in the `Ruby LSP` channel of VS Code's `Output` tab. Check the logs to see
-if any entries hint at what the issue might be. Did the extension select your preferred shell?
+if any entries hint at what the issue might be.
+
+Did the extension select your preferred shell?
 
 Did it select your preferred version manager? You can define which version manager to use with the
 `"rubyLsp.rubyVersionManager"` setting.
 
+No output in the `Ruby LSP` channel? Check the `Extension Host` channel for any errors related to extension startup.
+
 ### Enable logging
 
 You can enable logging to the VS Code output tab,
-[as described in the CONTRIBUTING](https://github.com/Shopify/ruby-lsp/blob/main/CONTRIBUTING.md#tracing-lsp-requests-and-responses) docs.
+[as described in the Contributing](contributing#tracing-lsp-requests-and-responses) docs.
 
 ### Environment activation failed
 

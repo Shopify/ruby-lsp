@@ -7,17 +7,16 @@ module RubyLsp
     # request](https://microsoft.github.io/language-server-protocol/specification#requestMessage) that displays the AST
     # for the current document or for the current selection in a new tab.
     class ShowSyntaxTree < Request
-      extend T::Sig
-
-      sig { params(document: RubyDocument, range: T.nilable(T::Hash[Symbol, T.untyped])).void }
+      #: (RubyDocument document, Hash[Symbol, untyped]? range) -> void
       def initialize(document, range)
         super()
         @document = document
         @range = range
-        @tree = T.let(document.parse_result.value, Prism::ProgramNode)
+        @tree = document.ast #: Prism::ProgramNode
       end
 
-      sig { override.returns(String) }
+      # @override
+      #: -> String
       def perform
         return ast_for_range if @range
 
@@ -28,9 +27,9 @@ module RubyLsp
 
       private
 
-      sig { returns(String) }
+      #: -> String
       def ast_for_range
-        range = T.must(@range)
+        range = @range #: as !nil
         start_char, end_char = @document.find_index_by_position(range[:start], range[:end])
 
         queue = @tree.statements.body.dup
@@ -47,7 +46,7 @@ module RubyLsp
           if (start_char..end_char).cover?(loc.start_offset..loc.end_offset)
             found_nodes << node
           else
-            T.unsafe(queue).unshift(*node.child_nodes)
+            queue.unshift(*node.child_nodes)
           end
         end
 

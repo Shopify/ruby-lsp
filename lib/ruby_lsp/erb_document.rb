@@ -2,36 +2,26 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  #: [ParseResultType = Prism::ParseLexResult]
   class ERBDocument < Document
-    extend T::Sig
-    extend T::Generic
-
-    ParseResultType = type_member { { fixed: Prism::ParseResult } }
-
-    sig { returns(String) }
+    #: String
     attr_reader :host_language_source
 
-    sig do
-      returns(T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
-    end
+    #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     attr_reader :code_units_cache
 
-    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
       # This has to be initialized before calling super because we call `parse` in the parent constructor, which
       # overrides this with the proper virtual host language source
-      @host_language_source = T.let("", String)
+      @host_language_source = "" #: String
       super
-      @code_units_cache = T.let(@parse_result.code_units_cache(@encoding), T.any(
-        T.proc.params(arg0: Integer).returns(Integer),
-        Prism::CodeUnitsCache,
-      ))
+      @code_units_cache =
+        @parse_result.code_units_cache(@encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def parse!
       return false unless @needs_parsing
 
@@ -41,60 +31,60 @@ module RubyLsp
       @host_language_source = scanner.host_language
       # Use partial script to avoid syntax errors in ERB files where keywords may be used without the full context in
       # which they will be evaluated
-      @parse_result = Prism.parse(scanner.ruby, partial_script: true)
+      @parse_result = Prism.parse_lex(scanner.ruby, partial_script: true)
       @code_units_cache = @parse_result.code_units_cache(@encoding)
       true
     end
 
-    sig { override.returns(T::Boolean) }
+    #: -> Prism::ProgramNode
+    def ast
+      @parse_result.value.first
+    end
+
+    # @override
+    #: -> bool
     def syntax_error?
       @parse_result.failure?
     end
 
-    sig { override.returns(LanguageId) }
+    # @override
+    #: -> Symbol
     def language_id
-      LanguageId::ERB
+      :erb
     end
 
-    sig do
-      params(
-        position: T::Hash[Symbol, T.untyped],
-        node_types: T::Array[T.class_of(Prism::Node)],
-      ).returns(NodeContext)
-    end
+    #: (Hash[Symbol, untyped] position, ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
     def locate_node(position, node_types: [])
       char_position, _ = find_index_by_position(position)
 
       RubyDocument.locate(
-        @parse_result.value,
+        ast,
         char_position,
         code_units_cache: @code_units_cache,
         node_types: node_types,
       )
     end
 
-    sig { params(char_position: Integer).returns(T.nilable(T::Boolean)) }
+    #: (Integer char_position) -> bool?
     def inside_host_language?(char_position)
       char = @host_language_source[char_position]
       char && char != " "
     end
 
     class ERBScanner
-      extend T::Sig
-
-      sig { returns(String) }
+      #: String
       attr_reader :ruby, :host_language
 
-      sig { params(source: String).void }
+      #: (String source) -> void
       def initialize(source)
         @source = source
-        @host_language = T.let(+"", String)
-        @ruby = T.let(+"", String)
-        @current_pos = T.let(0, Integer)
-        @inside_ruby = T.let(false, T::Boolean)
+        @host_language = +"" #: String
+        @ruby = +"" #: String
+        @current_pos = 0 #: Integer
+        @inside_ruby = false #: bool
       end
 
-      sig { void }
+      #: -> void
       def scan
         while @current_pos < @source.length
           scan_char
@@ -104,7 +94,7 @@ module RubyLsp
 
       private
 
-      sig { void }
+      #: -> void
       def scan_char
         char = @source[@current_pos]
 
@@ -123,7 +113,9 @@ module RubyLsp
               push_char(" ")
             end
           else
-            push_char(T.must(char))
+            push_char(
+              char, #: as !nil
+            )
           end
         when "-"
           if @inside_ruby && next_char == "%" &&
@@ -132,7 +124,9 @@ module RubyLsp
             push_char("   ")
             @inside_ruby = false
           else
-            push_char(T.must(char))
+            push_char(
+              char, #: as !nil
+            )
           end
         when "%"
           if @inside_ruby && next_char == ">"
@@ -140,7 +134,9 @@ module RubyLsp
             @current_pos += 1
             push_char("  ")
           else
-            push_char(T.must(char))
+            push_char(
+              char, #: as !nil
+            )
           end
         when "\r"
           @ruby << char
@@ -155,11 +151,13 @@ module RubyLsp
           @ruby << char
           @host_language << char
         else
-          push_char(T.must(char))
+          push_char(
+            char, #: as !nil
+          )
         end
       end
 
-      sig { params(char: String).void }
+      #: (String char) -> void
       def push_char(char)
         if @inside_ruby
           @ruby << char
@@ -170,7 +168,7 @@ module RubyLsp
         end
       end
 
-      sig { returns(String) }
+      #: -> String
       def next_char
         @source[@current_pos + 1] || ""
       end

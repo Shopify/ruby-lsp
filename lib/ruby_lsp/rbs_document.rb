@@ -2,19 +2,16 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  #: [ParseResultType = Array[RBS::AST::Declarations::Base]]
   class RBSDocument < Document
-    extend T::Sig
-    extend T::Generic
-
-    ParseResultType = type_member { { fixed: T::Array[RBS::AST::Declarations::Base] } }
-
-    sig { params(source: String, version: Integer, uri: URI::Generic, global_state: GlobalState).void }
+    #: (source: String, version: Integer, uri: URI::Generic, global_state: GlobalState) -> void
     def initialize(source:, version:, uri:, global_state:)
-      @syntax_error = T.let(false, T::Boolean)
+      @syntax_error = false #: bool
       super
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def parse!
       return false unless @needs_parsing
 
@@ -29,14 +26,16 @@ module RubyLsp
       true
     end
 
-    sig { override.returns(T::Boolean) }
+    # @override
+    #: -> bool
     def syntax_error?
       @syntax_error
     end
 
-    sig { override.returns(LanguageId) }
+    # @override
+    #: -> Symbol
     def language_id
-      LanguageId::RBS
+      :rbs
     end
   end
 end

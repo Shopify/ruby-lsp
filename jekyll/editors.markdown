@@ -104,6 +104,7 @@ new H2 header in this file containing the instructions. -->
 - [Zed](#zed)
 - [RubyMine](#rubymine)
 - [Kate](#kate)
+- [Helix](#helix)
 
 ## Emacs Eglot
 
@@ -122,8 +123,8 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 
 ### nvim-lspconfig
 
-The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/ruby_lsp.lua)
-plugin has support for Ruby LSP.
+The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/configs/ruby_lsp.lua) plugin has
+support for Ruby LSP.
 
 The Ruby LSP can be configured using the `init_options` key when setting up the LSP.
 
@@ -139,6 +140,18 @@ lspconfig.ruby_lsp.setup({
     linters = { 'standard' },
   },
 })
+```
+
+To configure an add-on, add the configuration `addonSettings` within `init_options`, for example:
+
+```lua
+  init_options = {
+    addonSettings = {
+      ["Ruby LSP Rails"] = {
+        enablePendingMigrationsPrompt = false,
+      },
+    },
+  },
 ```
 
 ### Mason
@@ -178,6 +191,43 @@ act a certain way when they were linked to Ruby. This causes issues when a share
 folder is used.
 
 See [this issue][mason-abi] for further information.
+
+### Built-In vim.lsp
+
+{ .note }
+Ensure that you are using NeoVim 0.11 or newer.
+
+You can also configure the Ruby LSP without the nvim-lspconfig plugin.
+Create an `lsp` directory inside your config directory and create a file `ruby-lsp.lua` inside it
+with the following content:
+
+```lua
+-- on Linux and macOS the default location is ~/.config/nvim/lsp/ruby-lsp.lua
+return {
+
+  filetypes = { "ruby" },
+
+  cmd = { "ruby-lsp" } -- or { "bundle", "exec", "ruby-lsp" },
+
+  root_markers = { "Gemfile", ".git" },
+  
+  init_options = {
+    formatter = 'standard',
+    linters = { 'standard' },
+    addonSettings = {
+      ["Ruby LSP Rails"] = {
+        enablePendingMigrationsPrompt = false,
+      },
+    },
+  },
+}
+```
+
+Then you need to enable it, e.g., inside `init.lua`:
+
+```lua
+vim.lsp.enable("ruby-lsp")
+```
 
 ### Additional setup (optional)
 
@@ -270,11 +320,9 @@ Restart LSP or Sublime Text and `ruby-lsp` will automatically activate when open
 
 ## Zed
 
-[Setting up Ruby LSP](https://github.com/zed-industries/zed/blob/main/docs/src/languages/ruby.md#setting-up-ruby-lsp)
+Zed has support for the Ruby LSP through the [Ruby extension](https://github.com/zed-extensions/ruby).
 
-[Zed has added support for Ruby LSP as a alternative language server](https://github.com/zed-industries/zed/pull/11768) in version v0.0.2 of the Ruby extension.
-
-See https://github.com/zed-industries/zed/issues/4834 for discussion of the limitations.
+Documentation can be found in [Setting up Ruby LSP](https://zed.dev/docs/languages/ruby#setting-up-ruby-lsp).
 
 ## RubyMine
 
@@ -300,9 +348,29 @@ To use it with Ruby LSP, you can override particular configuration items in the 
 }
 ```
 
+In the Kate settings, under the "LSP-Client" tab, the option "Incrementally synchronize documents with the LSP server" must be enabled.
+Otherwise, errors like [this](https://github.com/Shopify/ruby-lsp/issues/3148) can occur when editing a Ruby file.
+
 Kate will start an instance of the Ruby LSP server in the background for any Ruby project matching the `rootIndicationFileNames`.
 If starting Ruby LSP succeeds, the entries in the LSP-Client menu are activated.
 Otherwise the error output can be inspected in the Output window.
 
+## Helix
+
+To configure the Ruby LSP in Helix you first need to define it as a language server and then set it as the main language server for Ruby.
+This will also set ruby-lsp to be used as a formatter with its built-in rubocop integration.
+
+```toml
+# languages.toml
+
+[language-server.ruby-lsp]
+command = "ruby-lsp"
+config = { diagnostics = true, formatting = true }
+
+[[language]]
+name = "ruby"
+language-servers = ["ruby-lsp"]
+auto-format = true
+```
 
 [mason-abi]: https://github.com/williamboman/mason.nvim/issues/1292

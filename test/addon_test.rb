@@ -42,19 +42,23 @@ module RubyLsp
       Addon.load_addons(@global_state, @outgoing_queue)
       server = RubyLsp::Server.new
 
-      capture_subprocess_io do
-        server.process_message({ method: "initialized" })
-      end
+      begin
+        capture_subprocess_io do
+          server.process_message({ method: "initialized" })
+        end
 
-      addon_instance = T.must(Addon.addons.find { |addon| addon.is_a?(@addon) })
-      assert_predicate(addon_instance, :activated)
-    ensure
-      T.must(server).run_shutdown
+        addon_instance = Addon.addons.find { |addon| addon.is_a?(@addon) } #: as !nil
+        assert_predicate(addon_instance, :activated)
+      ensure
+        server.run_shutdown
+      end
     end
 
     def test_addons_are_automatically_tracked
       Addon.load_addons(@global_state, @outgoing_queue)
-      assert_equal(123, T.unsafe(Addon.addons.first).field)
+
+      addon = Addon.addons.find { |addon| addon.is_a?(@addon) } #: as untyped
+      assert_equal(123, addon.field)
     end
 
     def test_loading_addons_initializes_them
@@ -81,7 +85,7 @@ module RubyLsp
       end
 
       Addon.load_addons(@global_state, @outgoing_queue)
-      error_addon = T.must(Addon.addons.find(&:error?))
+      error_addon = Addon.addons.find(&:error?) #: as !nil
 
       assert_predicate(error_addon, :error?)
       assert_equal(<<~MESSAGE, error_addon.formatted_errors)
@@ -99,8 +103,8 @@ module RubyLsp
       end
 
       Addon.load_addons(@global_state, @outgoing_queue)
-      assert_equal(1, Addon.file_watcher_addons.length)
-      assert_instance_of(klass, Addon.file_watcher_addons.first)
+      addon = Addon.file_watcher_addons.find { |a| a.is_a?(klass) }
+      refute_nil(addon)
     end
 
     def test_get_an_addon_by_name
@@ -141,8 +145,8 @@ module RubyLsp
 
       Addon.load_addons(@global_state, @outgoing_queue)
 
-      addon = Addon.get("My Add-on", "0.1.0")
-      assert_equal({ something: false }, T.unsafe(addon).settings)
+      addon = Addon.get("My Add-on", "0.1.0") #: as untyped
+      assert_equal({ something: false }, addon.settings)
     end
 
     def test_depend_on_constraints
@@ -181,9 +185,78 @@ module RubyLsp
         })
         Addon.load_addons(@global_state, @outgoing_queue)
 
-        addon = Addon.get("Project Addon", "0.1.0")
+        addon = Addon.get("Project Addon", "0.1.0") #: as untyped
         assert_equal("Project Addon", addon.name)
-        assert_predicate(T.unsafe(addon), :hello)
+        assert_predicate(addon, :hello)
+      end
+    end
+
+    def test_loading_project_addons_ignores_bundle_path
+      Dir.mktmpdir do |dir|
+        addon_dir = File.join(dir, "vendor", "bundle", "ruby_lsp", "test_addon")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class ProjectAddon < RubyLsp::Addon
+            attr_reader :hello
+
+            def activate(global_state, outgoing_queue)
+              @hello = true
+            end
+
+            def name
+              "Project Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+        })
+
+        Bundler.stubs(:bundle_path).returns(Pathname.new(File.join(dir, "vendor", "bundle")))
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        assert_raises(Addon::AddonNotFoundError) do
+          Addon.get("Project Addon", "0.1.0")
+        end
+      end
+    end
+
+    def test_loading_project_addons_ignores_vendor_bundle
+      # Some users have gems installed under `vendor/bundle` despite not having their BUNDLE_PATH configured to be so.
+      # That leads to loading the same add-on multiple times if they have the same gem installed both in their
+      # BUNDLE_PATH and in `vendor/bundle`
+      Dir.mktmpdir do |dir|
+        addon_dir = File.join(dir, "vendor", "bundle", "rubocop-1.73.0", "lib", "ruby_lsp", "rubocop")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class OldRuboCopAddon < RubyLsp::Addon
+            def activate(global_state, outgoing_queue)
+            end
+
+            def name
+              "Old RuboCop Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+        })
+
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        assert_raises(Addon::AddonNotFoundError) do
+          Addon.get("Project Addon", "0.1.0")
+        end
       end
     end
   end

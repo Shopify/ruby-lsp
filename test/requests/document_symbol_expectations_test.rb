@@ -21,16 +21,16 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(5, response.size)
 
-    assert_equal("@foo", T.must(response[0]).name)
-    assert_equal("@bar", T.must(response[1]).name)
-    assert_equal("@baz", T.must(response[2]).name)
-    assert_equal("@qux", T.must(response[3]).name)
-    assert_equal("@quux", T.must(response[4]).name)
+    assert_equal("@foo", response[0]&.name)
+    assert_equal("@bar", response[1]&.name)
+    assert_equal("@baz", response[2]&.name)
+    assert_equal("@qux", response[3]&.name)
+    assert_equal("@quux", response[4]&.name)
   end
 
   def test_instance_variable_with_destructuring_assignment
@@ -44,16 +44,16 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(5, response.size)
 
-    assert_equal("@a", T.must(response[0]).name)
-    assert_equal("@b", T.must(response[1]).name)
-    assert_equal("@c", T.must(response[2]).name)
-    assert_equal("@d", T.must(response[3]).name)
-    assert_equal("@e", T.must(response[4]).name)
+    assert_equal("@a", response[0]&.name)
+    assert_equal("@b", response[1]&.name)
+    assert_equal("@c", response[2]&.name)
+    assert_equal("@d", response[3]&.name)
+    assert_equal("@e", response[4]&.name)
   end
 
   def test_labels_blank_names
@@ -66,11 +66,11 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     response = listener.perform
 
     assert_equal(1, response.size)
-    assert_equal("<blank>", T.must(response.first).name)
+    assert_equal("<blank>", response.first&.name)
   end
 
   def test_document_symbol_addons
@@ -115,7 +115,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
 
     dispatcher = Prism::Dispatcher.new
     listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
-    dispatcher.dispatch(document.parse_result.value)
+    dispatcher.dispatch(document.ast)
     listener.perform
   end
 
@@ -145,8 +145,9 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           end
 
           def on_call_node_enter(node)
+            range = self #: as untyped # rubocop:disable Style/RedundantSelf
+              .range_from_node(node)
             parent = @response_builder.last
-            T.bind(self, RubyLsp::Requests::Support::Common)
             message_value = node.message
             arguments = node.arguments&.arguments
             return unless message_value == "test" && arguments&.any?
@@ -154,13 +155,13 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
             parent.children << RubyLsp::Interface::DocumentSymbol.new(
               name: arguments.first.content,
               kind: LanguageServer::Protocol::Constant::SymbolKind::METHOD,
-              selection_range: range_from_node(node),
-              range: range_from_node(node),
+              selection_range: range,
+              range: range,
             )
           end
         end
 
-        T.unsafe(klass).new(response_builder, dispatcher)
+        klass.new(response_builder, dispatcher)
       end
     end
   end

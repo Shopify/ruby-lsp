@@ -8,6 +8,7 @@
 /**/tmp/
 /**/.dev/
 /docs
+/sorbet/cache
 
 vscode/out
 vscode/dist

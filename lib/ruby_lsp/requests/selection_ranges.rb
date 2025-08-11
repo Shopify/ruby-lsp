@@ -11,28 +11,28 @@ module RubyLsp
     #
     # Note that if using VSCode Neovim, you will need to be in Insert mode for this to work correctly.
     class SelectionRanges < Request
-      extend T::Sig
       include Support::Common
 
-      sig { params(document: T.any(RubyDocument, ERBDocument)).void }
+      #: ((RubyDocument | ERBDocument) document) -> void
       def initialize(document)
         super()
         @document = document
-        @ranges = T.let([], T::Array[Support::SelectionRange])
-        @stack = T.let([], T::Array[Support::SelectionRange])
+        @ranges = [] #: Array[Support::SelectionRange]
+        @stack = [] #: Array[Support::SelectionRange]
       end
 
-      sig { override.returns(T.all(T::Array[Support::SelectionRange], Object)) }
+      # @override
+      #: -> (Array[Support::SelectionRange] & Object)
       def perform
         # [node, parent]
-        queue = [[@document.parse_result.value, nil]]
+        queue = [[@document.ast, nil]]
 
         until queue.empty?
           node, parent = queue.shift
           next unless node
 
           range = Support::SelectionRange.new(range: range_from_location(node.location), parent: parent)
-          T.unsafe(queue).unshift(*node.child_nodes.map { |child| [child, range] })
+          queue.unshift(*node.child_nodes.map { |child| [child, range] })
           @ranges.unshift(range)
         end
 

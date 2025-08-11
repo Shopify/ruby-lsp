@@ -11,40 +11,50 @@ module RubyLsp
     # [code lens](https://microsoft.github.io/language-server-protocol/specification#textDocument_codeLens)
     # request informs the editor of runnable commands such as testing and debugging.
     class CodeLens < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::CodeLensOptions) }
+        #: -> Interface::CodeLensOptions
         def provider
-          Interface::CodeLensOptions.new(resolve_provider: false)
+          Interface::CodeLensOptions.new(resolve_provider: true)
         end
       end
 
-      sig do
-        params(
-          global_state: GlobalState,
-          uri: URI::Generic,
-          dispatcher: Prism::Dispatcher,
-        ).void
-      end
-      def initialize(global_state, uri, dispatcher)
-        @response_builder = T.let(
-          ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens].new,
-          ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens],
-        )
+      #: (GlobalState, RubyDocument | ERBDocument, Prism::Dispatcher) -> void
+      def initialize(global_state, document, dispatcher)
+        @response_builder = ResponseBuilders::CollectionResponseBuilder
+          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
         super()
-        Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
+
+        @document = document
+        @test_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
+        uri = document.uri
+        file_path = uri.full_path
+        code_lens_config = global_state.feature_configuration(:codeLens)
+        test_lenses_enabled = (!code_lens_config || code_lens_config.enabled?(:enableTestCodeLens)) &&
+          file_path && File.fnmatch?(TEST_PATH_PATTERN, file_path, File::FNM_PATHNAME | File::FNM_EXTGLOB)
+
+        if global_state.enabled_feature?(:fullTestDiscovery)
+          if test_lenses_enabled
+            Listeners::TestStyle.new(@test_builder, global_state, dispatcher, uri)
+            Listeners::SpecStyle.new(@test_builder, global_state, dispatcher, uri)
+          end
+        else
+          Listeners::CodeLens.new(@response_builder, global_state, uri, dispatcher)
+        end
 
         Addon.addons.each do |addon|
           addon.create_code_lens_listener(@response_builder, uri, dispatcher)
+
+          if global_state.enabled_feature?(:fullTestDiscovery) && test_lenses_enabled
+            addon.create_discover_tests_listener(@test_builder, dispatcher, uri)
+          end
         end
       end
 
-      sig { override.returns(T::Array[Interface::CodeLens]) }
+      # @override
+      #: -> Array[Interface::CodeLens]
       def perform
-        @response_builder.response
+        @document.cache_set("rubyLsp/discoverTests", @test_builder.response)
+        @response_builder.response + @test_builder.code_lens
       end
     end
   end

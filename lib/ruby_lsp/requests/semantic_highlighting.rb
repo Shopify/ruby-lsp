@@ -9,15 +9,11 @@ module RubyLsp
     # highlighting](https://microsoft.github.io/language-server-protocol/specification#textDocument_semanticTokens)
     # request informs the editor of the correct token types to provide consistent and accurate highlighting for themes.
     class SemanticHighlighting < Request
-      extend T::Sig
-
       class << self
-        extend T::Sig
-
-        sig { returns(Interface::SemanticTokensRegistrationOptions) }
+        #: -> Interface::SemanticTokensRegistrationOptions
         def provider
           Interface::SemanticTokensRegistrationOptions.new(
-            document_selector: [{ language: "ruby" }, { language: "erb" }],
+            document_selector: nil,
             legend: Interface::SemanticTokensLegend.new(
               token_types: ResponseBuilders::SemanticHighlighting::TOKEN_TYPES.keys,
               token_modifiers: ResponseBuilders::SemanticHighlighting::TOKEN_MODIFIERS.keys,
@@ -29,13 +25,7 @@ module RubyLsp
 
         # The compute_delta method receives the current semantic tokens and the previous semantic tokens and then tries
         # to compute the smallest possible semantic token edit that will turn previous into current
-        sig do
-          params(
-            current_tokens: T::Array[Integer],
-            previous_tokens: T::Array[Integer],
-            result_id: String,
-          ).returns(Interface::SemanticTokensDelta)
-        end
+        #: (Array[Integer] current_tokens, Array[Integer] previous_tokens, String result_id) -> Interface::SemanticTokensDelta
         def compute_delta(current_tokens, previous_tokens, result_id)
           # Find the index of the first token that is different between the two sets of tokens
           first_different_position = current_tokens.zip(previous_tokens).find_index { |new, old| new != old }
@@ -53,8 +43,8 @@ module RubyLsp
           # Filter the tokens based on the first different position. This must happen at this stage, before we try to
           # find the next position from the end or else we risk confusing sets of token that may have different lengths,
           # but end with the exact same token
-          old_tokens = T.must(previous_tokens[first_different_position...])
-          new_tokens = T.must(current_tokens[first_different_position...])
+          old_tokens = previous_tokens[first_different_position...] #: as !nil
+          new_tokens = current_tokens[first_different_position...] #: as !nil
 
           # Then search from the end to find the first token that doesn't match. Since the user is normally editing the
           # middle of the file, this will minimize the number of edits since the end of the token array has not changed
@@ -63,8 +53,8 @@ module RubyLsp
           end || 0
 
           # Filter the old and new tokens to only the section that will be replaced/inserted/deleted
-          old_tokens = T.must(old_tokens[...old_tokens.length - first_different_token_from_end])
-          new_tokens = T.must(new_tokens[...new_tokens.length - first_different_token_from_end])
+          old_tokens = old_tokens[...old_tokens.length - first_different_token_from_end] #: as !nil
+          new_tokens = new_tokens[...new_tokens.length - first_different_token_from_end] #: as !nil
 
           # And we send back a single edit, replacing an entire section for the new tokens
           Interface::SemanticTokensDelta.new(
@@ -73,7 +63,7 @@ module RubyLsp
           )
         end
 
-        sig { returns(Integer) }
+        #: -> Integer
         def next_result_id
           @mutex.synchronize do
             @result_id += 1
@@ -81,29 +71,19 @@ module RubyLsp
         end
       end
 
-      @result_id = T.let(0, Integer)
-      @mutex = T.let(Mutex.new, Mutex)
+      @result_id = 0 #: Integer
+      @mutex = Mutex.new #: Mutex
 
-      sig do
-        params(
-          global_state: GlobalState,
-          dispatcher: Prism::Dispatcher,
-          document: T.any(RubyDocument, ERBDocument),
-          previous_result_id: T.nilable(String),
-          range: T.nilable(T::Range[Integer]),
-        ).void
-      end
+      #: (GlobalState global_state, Prism::Dispatcher dispatcher, (RubyDocument | ERBDocument) document, String? previous_result_id, ?range: Range[Integer]?) -> void
       def initialize(global_state, dispatcher, document, previous_result_id, range: nil)
         super()
 
         @document = document
         @previous_result_id = previous_result_id
         @range = range
-        @result_id = T.let(SemanticHighlighting.next_result_id.to_s, String)
-        @response_builder = T.let(
-          ResponseBuilders::SemanticHighlighting.new(document.code_units_cache),
-          ResponseBuilders::SemanticHighlighting,
-        )
+        @result_id = SemanticHighlighting.next_result_id.to_s #: String
+        @response_builder = ResponseBuilders::SemanticHighlighting
+          .new(document.code_units_cache) #: ResponseBuilders::SemanticHighlighting
         Listeners::SemanticHighlighting.new(dispatcher, @response_builder)
 
         Addon.addons.each do |addon|
@@ -111,7 +91,8 @@ module RubyLsp
         end
       end
 
-      sig { override.returns(T.any(Interface::SemanticTokens, Interface::SemanticTokensDelta)) }
+      # @override
+      #: -> (Interface::SemanticTokens | Interface::SemanticTokensDelta)
       def perform
         previous_tokens = @document.semantic_tokens
         tokens = @response_builder.response

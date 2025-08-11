@@ -1,7 +1,6 @@
 # typed: strict
 # frozen_string_literal: true
 
-require "sorbet-runtime"
 require "bundler"
 require "bundler/cli"
 require "bundler/cli/install"
@@ -12,64 +11,85 @@ require "digest"
 require "time"
 require "uri"
 
-# This file is a script that will configure a composed bundle for the Ruby LSP. The composed bundle allows developers to use
-# the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to the
-# exact locked versions of dependencies.
+# This file is a script that will configure a composed bundle for the Ruby LSP. The composed bundle allows developers to
+# use the Ruby LSP without including the gem in their application's Gemfile while at the same time giving us access to
+# the exact locked versions of dependencies.
 
 Bundler.ui.level = :silent
 
 module RubyLsp
   class SetupBundler
-    extend T::Sig
-
     class BundleNotLocked < StandardError; end
     class BundleInstallFailure < StandardError; end
 
-    FOUR_HOURS = T.let(4 * 60 * 60, Integer)
+    module ThorPatch
+      #: -> IO
+      def stdout
+        $stderr
+      end
+    end
 
-    sig { params(project_path: String, options: T.untyped).void }
+    FOUR_HOURS = 4 * 60 * 60 #: Integer
+
+    #: (String project_path, **untyped options) -> void
     def initialize(project_path, **options)
       @project_path = project_path
-      @branch = T.let(options[:branch], T.nilable(String))
-      @launcher = T.let(options[:launcher], T.nilable(T::Boolean))
+      @branch = options[:branch] #: String?
+      @launcher = options[:launcher] #: bool?
       patch_thor_to_print_progress_to_stderr! if @launcher
 
       # Regular bundle paths
-      @gemfile = T.let(
-        begin
-          Bundler.default_gemfile
-        rescue Bundler::GemfileNotFound
-          nil
-        end,
-        T.nilable(Pathname),
-      )
-      @lockfile = T.let(@gemfile ? Bundler.default_lockfile : nil, T.nilable(Pathname))
+      @gemfile = begin
+        Bundler.default_gemfile
+      rescue Bundler::GemfileNotFound
+        nil
+      end #: Pathname?
+      @lockfile = @gemfile ? Bundler.default_lockfile : nil #: Pathname?
 
-      @gemfile_hash = T.let(@gemfile ? Digest::SHA256.hexdigest(@gemfile.read) : nil, T.nilable(String))
-      @lockfile_hash = T.let(@lockfile&.exist? ? Digest::SHA256.hexdigest(@lockfile.read) : nil, T.nilable(String))
+      @gemfile_hash = @gemfile ? Digest::SHA256.hexdigest(@gemfile.read) : nil #: String?
+      @lockfile_hash = @lockfile&.exist? ? Digest::SHA256.hexdigest(@lockfile.read) : nil #: String?
 
-      @gemfile_name = T.let(@gemfile&.basename&.to_s || "Gemfile", String)
+      @gemfile_name = @gemfile&.basename&.to_s || "Gemfile" #: String
 
       # Custom bundle paths
-      @custom_dir = T.let(Pathname.new(".ruby-lsp").expand_path(@project_path), Pathname)
-      @custom_gemfile = T.let(@custom_dir + @gemfile_name, Pathname)
-      @custom_lockfile = T.let(@custom_dir + (@lockfile&.basename || "Gemfile.lock"), Pathname)
-      @lockfile_hash_path = T.let(@custom_dir + "main_lockfile_hash", Pathname)
-      @last_updated_path = T.let(@custom_dir + "last_updated", Pathname)
-      @error_path = T.let(@custom_dir + "install_error", Pathname)
+      @custom_dir = Pathname.new(".ruby-lsp").expand_path(@project_path) #: Pathname
+      @custom_gemfile = @custom_dir + @gemfile_name #: Pathname
+      @custom_lockfile = @custom_dir + (@lockfile&.basename || "Gemfile.lock") #: Pathname
+      @lockfile_hash_path = @custom_dir + "main_lockfile_hash" #: Pathname
+      @last_updated_path = @custom_dir + "last_updated" #: Pathname
+      @error_path = @custom_dir + "install_error" #: Pathname
+      @already_composed_path = @custom_dir + "bundle_is_composed" #: Pathname
 
       dependencies, bundler_version = load_dependencies
-      @dependencies = T.let(dependencies, T::Hash[String, T.untyped])
-      @bundler_version = T.let(bundler_version, T.nilable(Gem::Version))
-      @rails_app = T.let(rails_app?, T::Boolean)
-      @retry = T.let(false, T::Boolean)
+      @dependencies = dependencies #: Hash[String, untyped]
+      @bundler_version = bundler_version #: Gem::Version?
+      @rails_app = rails_app? #: bool
+      @retry = false #: bool
+      @needs_update_path = @custom_dir + "needs_update" #: Pathname
     end
 
     # Sets up the composed bundle and returns the `BUNDLE_GEMFILE`, `BUNDLE_PATH` and `BUNDLE_APP_CONFIG` that should be
     # used for running the server
-    sig { returns(T::Hash[String, String]) }
+    #: -> Hash[String, String]
     def setup!
       raise BundleNotLocked if !@launcher && @gemfile&.exist? && !@lockfile&.exist?
+
+      # If the bundle was composed ahead of time using our custom `rubyLsp/composeBundle` request, then we can skip the
+      # entire process and just return the composed environment
+      if @already_composed_path.exist?
+        $stderr.puts("Ruby LSP> Composed bundle was set up ahead of time. Skipping...")
+        @already_composed_path.delete
+
+        env = bundler_settings_as_env
+        env["BUNDLE_GEMFILE"] = @custom_gemfile.exist? ? @custom_gemfile.to_s : @gemfile.to_s
+
+        if env["BUNDLE_PATH"]
+          env["BUNDLE_PATH"] = File.expand_path(env["BUNDLE_PATH"], @project_path)
+        end
+
+        env["BUNDLER_VERSION"] = @bundler_version.to_s if @bundler_version
+        return env
+      end
 
       # Automatically create and ignore the .ruby-lsp folder for users
       @custom_dir.mkpath unless @custom_dir.exist?
@@ -110,26 +130,23 @@ module RubyLsp
 
     private
 
-    sig { returns(T::Hash[String, T.untyped]) }
+    #: -> Hash[String, untyped]
     def composed_bundle_dependencies
-      @composed_bundle_dependencies ||= T.let(
-        begin
-          original_bundle_gemfile = ENV["BUNDLE_GEMFILE"]
+      @composed_bundle_dependencies ||= begin
+        original_bundle_gemfile = ENV["BUNDLE_GEMFILE"]
 
-          if @custom_lockfile.exist?
-            ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
-            Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
-          else
-            {}
-          end
-        ensure
-          ENV["BUNDLE_GEMFILE"] = original_bundle_gemfile
-        end,
-        T.nilable(T::Hash[String, T.untyped]),
-      )
+        if @custom_lockfile.exist?
+          ENV["BUNDLE_GEMFILE"] = @custom_gemfile.to_s
+          Bundler::LockfileParser.new(@custom_lockfile.read).dependencies
+        else
+          {}
+        end
+      ensure
+        ENV["BUNDLE_GEMFILE"] = original_bundle_gemfile
+      end #: Hash[String, untyped]?
     end
 
-    sig { void }
+    #: -> void
     def write_custom_gemfile
       parts = [
         "# This custom gemfile is automatically generated by the Ruby LSP.",
@@ -140,7 +157,8 @@ module RubyLsp
       # If there's a top level Gemfile, we want to evaluate from the composed bundle. We get the source from the top
       # level Gemfile, so if there isn't one we need to add a default source
       if @gemfile&.exist? && @lockfile&.exist?
-        parts << "eval_gemfile(File.expand_path(\"../#{@gemfile_name}\", __dir__))"
+        gemfile_path = @gemfile.relative_path_from(@custom_dir.realpath)
+        parts << "eval_gemfile(File.expand_path(\"#{gemfile_path}\", __dir__))"
       else
         parts.unshift('source "https://rubygems.org"')
       end
@@ -169,7 +187,7 @@ module RubyLsp
       @custom_gemfile.write(content) unless @custom_gemfile.exist? && @custom_gemfile.read == content
     end
 
-    sig { returns([T::Hash[String, T.untyped], T.nilable(Gem::Version)]) }
+    #: -> [Hash[String, untyped], Gem::Version?]
     def load_dependencies
       return [{}, nil] unless @lockfile&.exist?
 
@@ -189,7 +207,7 @@ module RubyLsp
       [dependencies, lockfile_parser.bundler_version]
     end
 
-    sig { params(bundle_gemfile: T.nilable(Pathname)).returns(T::Hash[String, String]) }
+    #: (?Pathname? bundle_gemfile) -> Hash[String, String]
     def run_bundle_install(bundle_gemfile = @gemfile)
       env = bundler_settings_as_env
       env["BUNDLE_GEMFILE"] = bundle_gemfile.to_s
@@ -216,6 +234,15 @@ module RubyLsp
         # If no error occurred, then clear previous errors
         @error_path.delete if @error_path.exist?
         $stderr.puts("Ruby LSP> Composed bundle installation complete")
+      rescue Errno::EPIPE, Bundler::HTTPError
+        # There are cases where we expect certain errors to happen occasionally, and we don't want to write them to
+        # a file, which would report to telemetry on the next launch.
+        #
+        # - The $stderr pipe might be closed by the client, for example when closing the editor during running bundle
+        # install. This situation may happen because, while running bundle install, the server is not yet ready to
+        # receive shutdown requests and we may continue doing work until the process is killed.
+        # - Bundler might also encounter a network error.
+        @error_path.delete if @error_path.exist?
       rescue => e
         # Write the error object to a file so that we can read it from the parent process
         @error_path.write(Marshal.dump(e))
@@ -223,8 +250,7 @@ module RubyLsp
 
       # If either the Gemfile or the lockfile have been modified during the process of setting up the bundle, retry
       # composing the bundle from scratch
-
-      if @gemfile && @lockfile
+      if @gemfile&.exist? && @lockfile&.exist?
         current_gemfile_hash = Digest::SHA256.hexdigest(@gemfile.read)
         current_lockfile_hash = Digest::SHA256.hexdigest(@lockfile.read)
 
@@ -241,21 +267,53 @@ module RubyLsp
       env
     end
 
-    sig { params(env: T::Hash[String, String], force_install: T::Boolean).returns(T::Hash[String, String]) }
+    #: (Hash[String, String] env, ?force_install: bool) -> Hash[String, String]
     def run_bundle_install_directly(env, force_install: false)
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
+      return update(env) if @needs_update_path.exist?
 
       # The ENV can only be merged after checking if an update is required because we depend on the original value of
       # ENV["BUNDLE_GEMFILE"], which gets overridden after the merge
-      should_update = should_bundle_update?
-      T.unsafe(ENV).merge!(env)
+      FileUtils.touch(@needs_update_path) if should_bundle_update?
+      ENV.merge!(env)
 
-      unless should_update && !force_install
-        Bundler::CLI::Install.new({}).run
-        correct_relative_remote_paths if @custom_lockfile.exist?
-        return env
+      $stderr.puts("Ruby LSP> Checking if the composed bundle is satisfied...")
+      missing_gems = bundle_check
+
+      unless missing_gems.empty?
+        $stderr.puts(<<~MESSAGE)
+          Ruby LSP> Running bundle install because the following gems are not installed:
+          #{missing_gems.map { |g| "#{g.name}: #{g.version}" }.join("\n")}
+        MESSAGE
+
+        bundle_install
       end
 
+      $stderr.puts("Ruby LSP> Bundle already satisfied")
+      env
+    rescue => e
+      $stderr.puts("Ruby LSP> Running bundle install because #{e.message}")
+      bundle_install
+      env
+    end
+
+    # Essentially the same as bundle check, but simplified
+    #: -> Array[Gem::Specification]
+    def bundle_check
+      definition = Bundler.definition
+      definition.validate_runtime!
+      definition.check!
+      definition.missing_specs
+    end
+
+    #: -> void
+    def bundle_install
+      Bundler::CLI::Install.new({ "no-cache" => true }).run
+      correct_relative_remote_paths if @custom_lockfile.exist?
+    end
+
+    #: (Hash[String, String]) -> Hash[String, String]
+    def update(env)
       # Try to auto upgrade the gems we depend on, unless they are in the Gemfile as that would result in undesired
       # source control changes
       gems = ["ruby-lsp", "debug", "prism"].reject { |dep| @dependencies[dep] }
@@ -263,14 +321,12 @@ module RubyLsp
 
       Bundler::CLI::Update.new({ conservative: true }, gems).run
       correct_relative_remote_paths if @custom_lockfile.exist?
+      @needs_update_path.delete
       @last_updated_path.write(Time.now.iso8601)
       env
-    rescue Bundler::GemNotFound, Bundler::GitError
-      # If a gem is not installed, skip the upgrade and try to install it with a single retry
-      @retry ? env : run_bundle_install_directly(env, force_install: true)
     end
 
-    sig { params(env: T::Hash[String, String]).returns(T::Hash[String, String]) }
+    #: (Hash[String, String] env) -> Hash[String, String]
     def run_bundle_install_through_command(env)
       # If `ruby-lsp` and `debug` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't try
       # to upgrade them or else we'll produce undesired source control changes. If the composed bundle was just created
@@ -327,7 +383,7 @@ module RubyLsp
     end
 
     # Gather all Bundler settings (global and local) and return them as a hash that can be used as the environment
-    sig { returns(T::Hash[String, String]) }
+    #: -> Hash[String, String]
     def bundler_settings_as_env
       local_config_path = File.join(@project_path, ".bundle")
 
@@ -339,18 +395,25 @@ module RubyLsp
         Bundler::Settings.new
       end
 
+      # List of Bundler settings that don't make sense for the composed bundle and are better controlled manually by the
+      # user
+      ignored_settings = ["bin", "cache_all", "cache_all_platforms"]
+
       # Map all settings to their environment variable names with `key_for` and their values. For example, the if the
       # setting name `e` is `path` with a value of `vendor/bundle`, then it will return `"BUNDLE_PATH" =>
       # "vendor/bundle"`
-      settings.all.to_h do |e|
-        key = Bundler::Settings.key_for(e)
+      settings
+        .all
+        .reject { |setting| ignored_settings.include?(setting) }
+        .to_h do |e|
+        key = settings.key_for(e)
         value = Array(settings[e]).join(":").tr(" ", ":")
 
         [key, value]
       end
     end
 
-    sig { void }
+    #: -> void
     def install_bundler_if_needed
       # Try to find the bundler version specified in the lockfile in installed gems. If not found, install it
       requirement = Gem::Requirement.new(@bundler_version.to_s)
@@ -359,7 +422,7 @@ module RubyLsp
       Gem.install("bundler", @bundler_version.to_s)
     end
 
-    sig { returns(T::Boolean) }
+    #: -> bool
     def should_bundle_update?
       # If `ruby-lsp`, `ruby-lsp-rails` and `debug` are in the Gemfile, then we shouldn't try to upgrade them or else it
       # will produce version control changes
@@ -382,16 +445,19 @@ module RubyLsp
 
     # When a lockfile has remote references based on relative file paths, we need to ensure that they are pointing to
     # the correct place since after copying the relative path is no longer valid
-    sig { void }
+    #: -> void
     def correct_relative_remote_paths
       content = @custom_lockfile.read
       content.gsub!(/remote: (.*)/) do |match|
-        path = T.must(Regexp.last_match)[1]
+        last_match = Regexp.last_match #: as !nil
+        path = last_match[1]
 
         # We should only apply the correction if the remote is a relative path. It might also be a URI, like
         # `https://rubygems.org` or an absolute path, in which case we shouldn't do anything
         if path && !URI(path).scheme
-          "remote: #{File.expand_path(path, T.must(@gemfile).dirname)}"
+          bundle_dir = @gemfile #: as !nil
+            .dirname
+          "remote: #{File.expand_path(path, bundle_dir)}"
         else
           match
         end
@@ -404,7 +470,7 @@ module RubyLsp
     end
 
     # Detects if the project is a Rails app by looking if the superclass of the main class is `Rails::Application`
-    sig { returns(T::Boolean) }
+    #: -> bool
     def rails_app?
       config = Pathname.new("config/application.rb").expand_path
       application_contents = config.read(external_encoding: Encoding::UTF_8) if config.exist?
@@ -413,19 +479,11 @@ module RubyLsp
       /class .* < (::)?Rails::Application/.match?(application_contents)
     end
 
-    sig { void }
+    #: -> void
     def patch_thor_to_print_progress_to_stderr!
       return unless defined?(Bundler::Thor::Shell::Basic)
 
-      Bundler::Thor::Shell::Basic.prepend(Module.new do
-        extend T::Sig
-
-        sig { returns(IO) }
-        def stdout
-          $stderr
-        end
-      end)
-
+      Bundler::Thor::Shell::Basic.prepend(ThorPatch)
       Bundler.ui.level = :info
     end
   end

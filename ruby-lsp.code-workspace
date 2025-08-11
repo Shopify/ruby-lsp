@@ -1,0 +1,36 @@
+{
+    "folders": [
+        {
+            "name": "server",
+            "path": "."
+        },
+        {
+            "path": "vscode",
+            "name": "extension"
+        },
+        {
+            "path": "jekyll",
+            "name": "jekyll"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "vscode": true,
+            "jekyll": true,
+            "**/out": true,
+        },
+        "search.exclude": {
+            "**/out": true,
+        },
+        // Set this value to `messages` to see names of LSP requests and responses,
+        // or to `verbose` to see the full JSON content of LSP requests and responses
+        "ruby lsp.trace.server": "off",
+        "rubyLsp.bypassTypechecker": true,
+        "rubyLsp.indexing": {
+            "excludedPatterns": [
+                "**/test/fixtures/**/*.rb"
+            ],
+        },
+        "typescript.tsc.autoDetect": "off"
+    }
+}
