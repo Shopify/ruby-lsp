@@ -93,7 +93,7 @@ module RubyLsp
             [target, node_value(target)]
           when Prism::ModuleNode, Prism::ClassNode, Prism::SingletonClassNode, Prism::DefNode, Prism::CaseNode,
             Prism::WhileNode, Prism::UntilNode, Prism::ForNode, Prism::IfNode, Prism::UnlessNode, Prism::BlockNode,
-            Prism::LambdaNode
+            Prism::LambdaNode, Prism::WhenNode
             [target, nil]
           end
 
@@ -554,14 +554,14 @@ module RubyLsp
         add_matching_end_highlights(node.keyword_loc, node.end_keyword_loc)
       end
 
-      sig { params(node: Prism::BlockNode).void }
+      #: (Prism::BlockNode node) -> void
       def on_block_node_enter(node)
         return unless @target.is_a?(Prism::BlockNode)
 
         add_matching_end_highlights(node.opening_loc, node.closing_loc)
       end
 
-      sig { params(node: Prism::LambdaNode).void }
+      #: (Prism::LambdaNode node) -> void
       def on_lambda_node_enter(node)
         return unless @target.is_a?(Prism::LambdaNode)
 
