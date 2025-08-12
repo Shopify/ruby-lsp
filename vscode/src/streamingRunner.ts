@@ -142,6 +142,7 @@ export class StreamingRunner implements vscode.Disposable {
       terminal = vscode.window.createTerminal({
         name,
         cwd,
+        env: { DISABLE_SPRING: "1" },
       });
     }
 
@@ -155,7 +156,7 @@ export class StreamingRunner implements vscode.Disposable {
   private spawnTestProcess(command: string, env: NodeJS.ProcessEnv, cwd: string, abortController: AbortController) {
     const promise = new Promise<void>((resolve, _reject) => {
       const testProcess = spawn(command, {
-        env,
+        env: { ...env, DISABLE_SPRING: "1" },
         stdio: ["pipe", "pipe", "pipe"],
         shell: true,
         signal: abortController.signal,
