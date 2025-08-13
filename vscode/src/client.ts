@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import os from "os";
 import { performance as Perf } from "perf_hooks";
 
@@ -85,6 +86,7 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
   const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
+  const serverPath: string = config.get("serverPath")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
@@ -119,13 +121,40 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
       options: executableOptions,
     };
   } else {
-    const workspacePath = workspaceFolder.uri.fsPath;
-    const command =
-      path.basename(workspacePath) === "ruby-lsp" && os.platform() !== "win32"
-        ? path.join(workspacePath, "exe", "ruby-lsp")
-        : "ruby-lsp";
-
     const args = [];
+    const workspacePath = workspaceFolder.uri.fsPath;
+    let command: string;
+
+    if (serverPath.length > 0 && branch.length > 0) {
+      throw new Error(
+        'Invalid configuration: "rubyLsp.serverPath" and "rubyLsp.branch" cannot both be set. Please unset one of them.',
+      );
+    }
+
+    if (serverPath.length > 0) {
+      const absoluteServerPath = path.isAbsolute(serverPath) ? serverPath : path.resolve(workspacePath, serverPath);
+      const exists = fs.existsSync(absoluteServerPath);
+
+      if (exists) {
+        args.push("--path", absoluteServerPath);
+        const stat = fs.statSync(absoluteServerPath);
+
+        if (stat.isDirectory()) {
+          command = os.platform() !== "win32" ? path.join(absoluteServerPath, "exe", "ruby-lsp") : "ruby-lsp";
+        } else {
+          command = absoluteServerPath;
+        }
+      } else {
+        throw new Error(
+          `The configured rubyLsp.serverPath "${serverPath}" does not exist at "${absoluteServerPath}". `,
+        );
+      }
+    } else {
+      command =
+        path.basename(workspacePath) === "ruby-lsp" && os.platform() !== "win32"
+          ? path.join(workspacePath, "exe", "ruby-lsp")
+          : "ruby-lsp";
+    }
 
     if (branch.length > 0) {
       args.push("--branch", branch);

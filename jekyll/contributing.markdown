@@ -58,6 +58,20 @@ with a debugger. Note that the debug mode applies only until the editor is close
 Caveat: since you are debugging the language server instance that is currently running in your own editor, features will
 not be available if the execution is currently suspended at a breakpoint.
 
+#### Configuring the server version
+
+When developing the Ruby LSP server, you may want to test your changes in your own Ruby projects to ensure they work correctly in real-world scenarios.
+
+The running server, even in debug mode, will default to the installed release version*. You can use the `rubyLsp.serverPath` configuration setting in the target workspace to start your local copy instead. Make sure to restart the language server after making changes to pick up your updates.
+
+```jsonc
+{
+  "rubyLsp.serverPath": "/path/to/your/ruby-lsp-clone"
+}
+```
+
+*Note: There are some exceptions to this. Most notably, when the ruby-lsp repository is opened in VS Code with the extension active, it will run the server contained within the repository.
+
 #### Understanding Prism ASTs
 
 The Ruby LSP uses Prism to parse and understand Ruby code. When working on a feature, it's very common to need to
