@@ -29,6 +29,13 @@ parser = OptionParser.new do |opts|
     options[:branch] = branch
   end
 
+  opts.on(
+    "--path [PATH]",
+    "Launch the Ruby LSP using a local PATH rather than the release version",
+  ) do |path|
+    options[:path] = path
+  end
+
   opts.on("--doctor", "Run troubleshooting steps") do
     options[:doctor] = true
   end
@@ -51,6 +58,11 @@ rescue OptionParser::InvalidOption => e
   warn(e)
   warn("")
   warn(parser.help)
+  exit(1)
+end
+
+if options[:branch] && options[:path]
+  warn('Invalid options: --branch and --path cannot both be set.')
   exit(1)
 end
 
