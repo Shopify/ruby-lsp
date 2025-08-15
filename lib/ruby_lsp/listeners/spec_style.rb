@@ -58,13 +58,11 @@ module RubyLsp
 
       #: (Prism::CallNode) -> void
       def on_call_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
-        return unless in_spec_context?
-
         case node.name
         when :describe
           handle_describe(node)
         when :it, :specify
-          handle_example(node)
+          handle_example(node) if in_spec_context?
         end
       end
 
@@ -208,12 +206,13 @@ module RubyLsp
         end
 
         # Specs only using describes
-        first_group = @spec_group_id_stack.find { |i| i.is_a?(DescribeGroup) }
-        return unless first_group
+        first_group_index = @spec_group_id_stack.index { |i| i.is_a?(DescribeGroup) }
+        return unless first_group_index
 
+        first_group = @spec_group_id_stack[first_group_index] #: as !nil
         item = @response_builder[first_group.id] #: as !nil
 
-        @spec_group_id_stack[1..] #: as !nil
+        @spec_group_id_stack[first_group_index + 1..] #: as !nil
           .each do |group|
           next unless group.is_a?(DescribeGroup)
 

@@ -792,6 +792,36 @@ module RubyLsp
       end
     end
 
+    def test_specs_defined_inside_modules
+      source = <<~RUBY
+        module MyNamespace
+          describe "this thing" do
+            it "does something" do
+            end
+          end
+
+          module OtherNamespace
+            describe "other test" do
+              it "does something else" do
+              end
+            end
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["this thing", "other test"], items.map { |i| i[:id] })
+        assert_equal(
+          ["this thing#test_0002_does something"],
+          items.dig(0, :children).map { |i| i[:id] },
+        )
+        assert_equal(
+          ["other test#test_0008_does something else"],
+          items.dig(1, :children).map { |i| i[:id] },
+        )
+      end
+    end
+
     private
 
     def create_test_discovery_addon
