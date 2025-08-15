@@ -35,7 +35,13 @@ module RubyLsp
     def initialize(project_path, **options)
       @project_path = project_path
       @branch = options[:branch] #: String?
+      @path = options[:path] #: String?
       @launcher = options[:launcher] #: bool?
+
+      if @branch && !@branch.empty? && @path && !@path.empty?
+        raise ArgumentError, "Branch and path options are mutually exclusive. Please specify only one."
+      end
+
       patch_thor_to_print_progress_to_stderr! if @launcher
 
       # Regular bundle paths
@@ -165,7 +171,13 @@ module RubyLsp
 
       unless @dependencies["ruby-lsp"]
         ruby_lsp_entry = +'gem "ruby-lsp", require: false, group: :development'
-        ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
+        if @branch && !@branch.empty?
+          ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\""
+        end
+        if @path && !@path.empty?
+          absolute_path = File.expand_path(@path, @project_path)
+          ruby_lsp_entry << ", path: \"#{absolute_path}\""
+        end
         parts << ruby_lsp_entry
       end
 
