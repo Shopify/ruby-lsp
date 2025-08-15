@@ -923,13 +923,15 @@ class SetupBundlerTest < Minitest::Test
         GEMFILE
 
         Bundler.with_unbundled_env do
-          system("bundle install")
+          capture_subprocess_io do
+            system("bundle install")
 
-          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
-          compose.expects(:bundle_check).raises(Bundler::Fetcher::NetworkDownError)
-          compose.setup!
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:bundle_check).raises(Bundler::Fetcher::NetworkDownError)
+            compose.setup!
 
-          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+            refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+          end
         end
       end
     end
@@ -944,13 +946,15 @@ class SetupBundlerTest < Minitest::Test
         GEMFILE
 
         Bundler.with_unbundled_env do
-          system("bundle install")
+          capture_subprocess_io do
+            system("bundle install")
 
-          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
-          compose.expects(:bundle_check).raises(Bundler::HTTPError)
-          compose.setup!
+            compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+            compose.expects(:bundle_check).raises(Bundler::HTTPError)
+            compose.setup!
 
-          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+            refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+          end
         end
       end
     end
