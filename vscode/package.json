@@ -468,9 +468,8 @@
           "default": ""
         },
         "rubyLsp.serverPath": {
-          "description": "Absolute or workspace-relative path to a local ruby-lsp repository or its ruby-lsp executable. Only supported if not using bundleGemfile",
-          "type": "string",
-          "default": ""
+          "description": "Absolute path to a local ruby-lsp repository. Only supported if not using bundleGemfile",
+          "type": "string"
         },
         "rubyLsp.pullDiagnosticsOn": {
           "description": "When to pull diagnostics from the server (on change, save or both). Selecting 'save' may significantly improve performance on large files",

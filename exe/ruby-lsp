@@ -30,10 +30,10 @@ parser = OptionParser.new do |opts|
   end
 
   opts.on(
-    "--path [PATH]",
+    "--lsp-path [PATH]",
     "Launch the Ruby LSP using a local PATH rather than the release version",
   ) do |path|
-    options[:path] = path
+    options[:lsp_path] = path
   end
 
   opts.on("--doctor", "Run troubleshooting steps") do
@@ -61,8 +61,13 @@ rescue OptionParser::InvalidOption => e
   exit(1)
 end
 
-if options[:branch] && options[:path]
-  warn('Invalid options: --branch and --path cannot both be set.')
+if options[:branch] && options[:lsp_path]
+  warn('Invalid options: --branch and --lsp-path cannot both be set.')
+  exit(1)
+end
+
+if options[:lsp_path] && !File.absolute_path?(options[:lsp_path])
+  warn('Invalid option: --lsp-path must be an absolute path.')
   exit(1)
 end
 

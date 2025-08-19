@@ -62,7 +62,7 @@ not be available if the execution is currently suspended at a breakpoint.
 
 When developing the Ruby LSP server, you may want to test your changes in your own Ruby projects to ensure they work correctly in real-world scenarios.
 
-The running server, even in debug mode, will default to the installed release version*. You can use the `rubyLsp.serverPath` configuration setting in the target workspace to start your local copy instead. Make sure to restart the language server after making changes to pick up your updates.
+The running server, even in debug mode, will default to the installed release version*. You can use the `rubyLsp.serverPath` configuration setting in the target workspace to start your local copy instead.
 
 ```jsonc
 {

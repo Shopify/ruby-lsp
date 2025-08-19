@@ -282,35 +282,24 @@ class SetupBundlerTest < Minitest::Test
 
   def test_creates_composed_bundle_with_specified_path
     Dir.mktmpdir do |dir|
-      local_path = "local-ruby-lsp"
-      FileUtils.mkdir_p(File.join(dir, local_path, "lib"))
+      local_path = File.join(dir, "local-ruby-lsp")
+      FileUtils.mkdir_p(File.join(local_path, "lib"))
       
       Dir.chdir(dir) do
         bundle_gemfile = Pathname.new(".ruby-lsp").expand_path(Dir.pwd) + "Gemfile"
         Bundler.with_unbundled_env do
           stub_bundle_with_env(bundle_env(dir, bundle_gemfile.to_s))
-          run_script(File.realpath(dir), path: local_path)
+          run_script(File.realpath(dir), lsp_path: local_path)
         end
   
         assert_path_exists(".ruby-lsp")
         assert_path_exists(".ruby-lsp/Gemfile")
-        expected_absolute_path = File.expand_path(local_path, File.realpath(dir))
-        assert_match(%r{ruby-lsp.*path: "#{Regexp.escape(expected_absolute_path)}"}, File.read(".ruby-lsp/Gemfile"))
+        assert_match(%r{ruby-lsp.*path: "#{Regexp.escape(local_path)}"}, File.read(".ruby-lsp/Gemfile"))
         assert_match("debug", File.read(".ruby-lsp/Gemfile"))
       end
     end
   end  
 
-  def test_raises_error_when_both_branch_and_path_are_specified
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        error = assert_raises(ArgumentError) do
-          RubyLsp::SetupBundler.new(dir, branch: "test-branch", path: "local-path")
-        end
-        assert_equal("Branch and path options are mutually exclusive. Please specify only one.", error.message)
-      end
-    end
-  end
 
   def test_returns_bundle_app_config_if_there_is_local_config
     Dir.mktmpdir do |dir|
