@@ -813,7 +813,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^9.34.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
     "@types/sinon": "^17.0.4",
@@ -829,7 +829,7 @@
     "prettier": "^3.6.2",
     "sinon": "^21.0.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1",
+    "typescript-eslint": "^8.40.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.2.0"
   },
