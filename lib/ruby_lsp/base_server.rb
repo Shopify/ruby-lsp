@@ -103,7 +103,7 @@ module RubyLsp
     # This method is only intended to be used in tests! Pops the latest response that would be sent to the client
     #: -> untyped
     def pop_response
-      @outgoing_queue.pop
+      @outgoing_queue.pop(timeout: 20) || raise("No message received from server")
     end
 
     # This method is only intended to be used in tests! Pushes a message to the incoming queue directly
