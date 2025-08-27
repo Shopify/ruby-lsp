@@ -194,7 +194,7 @@ See [this issue][mason-abi] for further information.
 
 ### Built-In vim.lsp
 
-{ .note }
+{: .note }
 Ensure that you are using NeoVim 0.11 or newer.
 
 You can also configure the Ruby LSP without the nvim-lspconfig plugin.
