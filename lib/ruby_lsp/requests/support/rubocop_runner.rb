@@ -61,6 +61,14 @@ module RubyLsp
           "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
         ] #: Array[String]
 
+        # Functionality was introduced in 1.75.0 but had issues with autocorrect
+        REUSE_PRISM_RESULT = begin
+          gem("rubocop", ">= 1.80.1")
+          true
+        rescue LoadError
+          false
+        end #: bool
+
         #: Array[::RuboCop::Cop::Offense]
         attr_reader :offenses
 
@@ -81,7 +89,7 @@ module RubyLsp
           @offenses = [] #: Array[::RuboCop::Cop::Offense]
           @errors = [] #: Array[String]
           @warnings = [] #: Array[String]
-          # @prism_result = nil #: Prism::ParseLexResult?
+          @prism_result = nil #: Prism::ParseLexResult?
 
           args += DEFAULT_ARGS
           rubocop_options = ::RuboCop::Options.new.parse(args).first
@@ -101,11 +109,7 @@ module RubyLsp
           @warnings = []
           @offenses = []
           @options[:stdin] = contents
-
-          # Setting the Prism result before running the RuboCop runner makes it reuse the existing AST and avoids
-          # double-parsing. Unfortunately, this leads to a bunch of cops failing to execute properly under LSP mode.
-          # Uncomment this once reusing the Prism result is more stable
-          # @prism_result = prism_result
+          @prism_result = prism_result if REUSE_PRISM_RESULT
 
           super([path])
 
