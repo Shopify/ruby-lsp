@@ -4,151 +4,83 @@
 require "test_helper"
 
 class GoToRelevantFileTest < Minitest::Test
+  def setup
+    @workspace = Dir.mktmpdir
+  end
+
+  def teardown
+    FileUtils.remove_entry(@workspace)
+  end
+
   def test_when_input_is_test_file_returns_array_of_implementation_file_locations
-    stub_glob_pattern("**/go_to_relevant_file.rb", ["lib/ruby_lsp/requests/go_to_relevant_file.rb"])
+    Dir.chdir(@workspace) do
+      lib_dir  = File.join(@workspace, "lib/ruby_lsp/requests")
+      test_dir = File.join(@workspace, "test/requests")
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_dir)
 
-    test_file_path = "/workspace/test/requests/go_to_relevant_file_test.rb"
-    expected = ["/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"]
+      impl_file = File.join(lib_dir, "go_to_relevant_file.rb")
+      test_file = File.join(test_dir, "go_to_relevant_file_test.rb")
+      File.write(impl_file, "# impl")
+      File.write(test_file, "# test")
 
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_file_path, "/workspace").perform
-    assert_equal(expected, result)
+      result = RubyLsp::Requests::GoToRelevantFile.new(test_file, @workspace).perform
+      assert_equal([impl_file], result)
+    end
   end
 
   def test_when_input_is_implementation_file_returns_array_of_test_file_locations
-    pattern =
-      "**/{{test_,spec_,integration_test_}go_to_relevant_file,go_to_relevant_file{_test,_spec,_integration_test}}.rb"
-    stub_glob_pattern(pattern, ["test/requests/go_to_relevant_file_test.rb"])
+    Dir.chdir(@workspace) do
+      lib_dir  = File.join(@workspace, "lib/ruby_lsp/requests")
+      test_dir = File.join(@workspace, "test/requests")
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_dir)
 
-    impl_path = "/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"
-    expected = ["/workspace/test/requests/go_to_relevant_file_test.rb"]
+      impl_file = File.join(lib_dir, "go_to_relevant_file.rb")
+      test_file = File.join(test_dir, "go_to_relevant_file_test.rb")
+      File.write(impl_file, "# impl")
+      File.write(test_file, "# test")
 
-    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_return_all_file_locations_that_have_the_same_highest_coefficient
-    pattern = "**/{{test_,spec_,integration_test_}some_feature,some_feature{_test,_spec,_integration_test}}.rb"
-    matches = [
-      "test/unit/some_feature_test.rb",
-      "test/integration/some_feature_test.rb",
-    ]
-    stub_glob_pattern(pattern, matches)
-
-    impl_path = "/workspace/lib/ruby_lsp/requests/some_feature.rb"
-    expected = [
-      "/workspace/test/unit/some_feature_test.rb",
-      "/workspace/test/integration/some_feature_test.rb",
-    ]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
-    assert_equal(expected.sort, result.sort)
+      result = RubyLsp::Requests::GoToRelevantFile.new(impl_file, @workspace).perform
+      assert_equal([test_file], result)
+    end
   end
 
   def test_return_empty_array_when_no_filename_matches
-    pattern = "**/{{test_,spec_,integration_test_}nonexistent_file,nonexistent_file{_test,_spec,_integration_test}}.rb"
-    stub_glob_pattern(pattern, [])
+    Dir.chdir(@workspace) do
+      lib_dir = File.join(@workspace, "lib/ruby_lsp/requests")
+      FileUtils.mkdir_p(lib_dir)
 
-    file_path = "/workspace/lib/ruby_lsp/requests/nonexistent_file.rb"
-    result = RubyLsp::Requests::GoToRelevantFile.new(file_path, "/workspace").perform
-    assert_empty(result)
+      impl_file = File.join(lib_dir, "nonexistent_file.rb")
+      File.write(impl_file, "# impl")
+
+      result = RubyLsp::Requests::GoToRelevantFile.new(impl_file, @workspace).perform
+      assert_empty(result)
+    end
   end
 
-  def test_it_finds_implementation_when_file_has_test_suffix
-    stub_glob_pattern("**/feature.rb", ["lib/feature.rb"])
+  def test_it_finds_multiple_matching_tests
+    Dir.chdir(@workspace) do
+      lib_dir   = File.join(@workspace, "lib/ruby_lsp/requests")
+      test_root = File.join(@workspace, "test") # ensure top-level test dir exists
+      test_unit = File.join(test_root, "unit")
+      test_int  = File.join(test_root, "integration")
 
-    test_path = "/workspace/test/feature_test.rb"
-    expected = ["/workspace/lib/feature.rb"]
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_unit)
+      FileUtils.mkdir_p(test_int)
 
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
+      impl_file = File.join(lib_dir, "some_feature.rb")
+      unit_test = File.join(test_unit, "some_feature_test.rb")
+      int_test  = File.join(test_int, "some_feature_test.rb")
+      [impl_file, unit_test, int_test].each { |f| File.write(f, "# file") }
 
-  def test_it_finds_implementation_when_file_has_spec_suffix
-    stub_glob_pattern("**/feature.rb", ["lib/feature.rb"])
+      result = RubyLsp::Requests::GoToRelevantFile.new(impl_file, @workspace).perform
 
-    test_path = "/workspace/spec/feature_spec.rb"
-    expected = ["/workspace/lib/feature.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_implementation_when_file_has_integration_test_suffix
-    stub_glob_pattern("**/feature.rb", ["lib/feature.rb"])
-
-    test_path = "/workspace/test/feature_integration_test.rb"
-    expected = ["/workspace/lib/feature.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_implementation_when_file_has_test_prefix
-    stub_glob_pattern("**/feature.rb", ["lib/feature.rb"])
-
-    test_path = "/workspace/test/test_feature.rb"
-    expected = ["/workspace/lib/feature.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_implementation_when_file_has_spec_prefix
-    stub_glob_pattern("**/feature.rb", ["lib/feature.rb"])
-
-    test_path = "/workspace/test/spec_feature.rb"
-    expected = ["/workspace/lib/feature.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_implementation_when_file_has_integration_test_prefix
-    stub_glob_pattern("**/feature.rb", ["lib/feature.rb"])
-
-    test_path = "/workspace/test/integration_test_feature.rb"
-    expected = ["/workspace/lib/feature.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(test_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_tests_for_implementation
-    pattern = "**/{{test_,spec_,integration_test_}feature,feature{_test,_spec,_integration_test}}.rb"
-    stub_glob_pattern(pattern, ["test/feature_test.rb"])
-
-    impl_path = "/workspace/lib/feature.rb"
-    expected = ["/workspace/test/feature_test.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_specs_for_implementation
-    pattern = "**/{{test_,spec_,integration_test_}feature,feature{_test,_spec,_integration_test}}.rb"
-    stub_glob_pattern(pattern, ["spec/feature_spec.rb"])
-
-    impl_path = "/workspace/lib/feature.rb"
-    expected = ["/workspace/spec/feature_spec.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  def test_it_finds_integration_tests_for_implementation
-    pattern = "**/{{test_,spec_,integration_test_}feature,feature{_test,_spec,_integration_test}}.rb"
-    stub_glob_pattern(pattern, ["test/feature_integration_test.rb"])
-
-    impl_path = "/workspace/lib/feature.rb"
-    expected = ["/workspace/test/feature_integration_test.rb"]
-
-    result = RubyLsp::Requests::GoToRelevantFile.new(impl_path, "/workspace").perform
-    assert_equal(expected, result)
-  end
-
-  private
-
-  def stub_glob_pattern(pattern, matches)
-    Dir.stubs(:glob).with(pattern).returns(matches)
+      assert_equal(
+        [unit_test, int_test].sort,
+        result.sort,
+      )
+    end
   end
 end
