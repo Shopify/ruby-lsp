@@ -5,6 +5,7 @@ require "test_helper"
 
 class GoToRelevantFileTest < Minitest::Test
   def test_when_input_is_test_file_returns_array_of_implementation_file_locations
+    stub_directory_structure("/workspace/test/requests", has_test_dir: false)
     stub_glob_pattern("**/go_to_relevant_file.rb", ["lib/ruby_lsp/requests/go_to_relevant_file.rb"])
 
     test_file_path = "/workspace/test/requests/go_to_relevant_file_test.rb"
@@ -15,8 +16,12 @@ class GoToRelevantFileTest < Minitest::Test
   end
 
   def test_when_input_is_implementation_file_returns_array_of_test_file_locations
-    pattern =
-      "**/{{test_,spec_,integration_test_}go_to_relevant_file,go_to_relevant_file{_test,_spec,_integration_test}}.rb"
+    stub_directory_structure("/workspace/lib/ruby_lsp/requests", has_test_dir: false)
+    stub_directory_structure("/workspace/lib/ruby_lsp", has_test_dir: false)
+    stub_directory_structure("/workspace/lib", has_test_dir: false)
+    stub_directory_structure("/workspace", has_test_dir: true)
+
+    pattern = "**/{{test_,spec_,integration_test_}go_to_relevant_file,go_to_relevant_file{_test,_spec,_integration_test}}.rb"
     stub_glob_pattern(pattern, ["test/requests/go_to_relevant_file_test.rb"])
 
     impl_path = "/workspace/lib/ruby_lsp/requests/go_to_relevant_file.rb"
@@ -149,6 +154,21 @@ class GoToRelevantFileTest < Minitest::Test
   private
 
   def stub_glob_pattern(pattern, matches)
-    Dir.stubs(:glob).with(pattern).returns(matches)
+    absolute_pattern = pattern.start_with?("/") ? pattern : "/workspace/#{pattern}"
+    absolute_matches = matches.map { |match| match.start_with?("/") ? match : "/workspace/#{match}" }
+    Dir.stubs(:glob).with(absolute_pattern).returns(absolute_matches)
+  end
+
+  def stub_directory_structure(dir_path, has_test_dir:)
+    File.stubs(:directory?).with(File.join(dir_path, "other_dir")).returns(true)
+
+    if has_test_dir
+      Dir.stubs(:entries).with(dir_path).returns([".", "..", "test", "lib", "other_dir"])
+      File.stubs(:directory?).with(File.join(dir_path, "test")).returns(true)
+      File.stubs(:directory?).with(File.join(dir_path, "lib")).returns(true)
+    else
+      Dir.stubs(:entries).with(dir_path).returns([".", "..", "some_file.rb", "other_dir"])
+      File.stubs(:directory?).with(File.join(dir_path, "some_file.rb")).returns(false)
+    end
   end
 end
