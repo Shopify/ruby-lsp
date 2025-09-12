@@ -35,6 +35,7 @@ module RubyLsp
     def initialize(project_path, **options)
       @project_path = project_path
       @branch = options[:branch] #: String?
+      @lsp_path = options[:lsp_path] #: String?
       @launcher = options[:launcher] #: bool?
       patch_thor_to_print_progress_to_stderr! if @launcher
 
@@ -166,6 +167,7 @@ module RubyLsp
       unless @dependencies["ruby-lsp"]
         ruby_lsp_entry = +'gem "ruby-lsp", require: false, group: :development'
         ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
+        ruby_lsp_entry << ", path: \"#{@lsp_path}\"" if @lsp_path
         parts << ruby_lsp_entry
       end
 
