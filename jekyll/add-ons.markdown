@@ -434,25 +434,10 @@ module RubyLsp
         # Clients are not required to implement this capability
         return unless global_state.supports_watching_files
 
-        message_queue << Request.new(
-          id: "ruby-lsp-my-gem-file-watcher",
-          method: "client/registerCapability",
-          params: Interface::RegistrationParams.new(
-            registrations: [
-              Interface::Registration.new(
-                id: "workspace/didChangeWatchedFilesMyGem",
-                method: "workspace/didChangeWatchedFiles",
-                register_options: Interface::DidChangeWatchedFilesRegistrationOptions.new(
-                  watchers: [
-                    Interface::FileSystemWatcher.new(
-                      glob_pattern: "**/.my-config.yml",
-                      kind: Constant::WatchKind::CREATE | Constant::WatchKind::CHANGE | Constant::WatchKind::DELETE,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        message_queue << Request.register_watched_files(
+          "ruby-lsp-my-gem-file-watcher",
+          "**/.my-config.yml",
+          registration_id: "my-config-watcher",
         )
       end
 
