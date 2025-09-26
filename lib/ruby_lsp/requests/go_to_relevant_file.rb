@@ -35,10 +35,59 @@ module RubyLsp
 
       #: -> Array[String]
       def find_relevant_paths
-        candidate_paths = Dir.glob(File.join("**", relevant_filename_pattern))
+        search_roots = determine_search_roots
+        candidate_paths = []
+
+        search_roots.each do |root|
+          glob_pattern = File.join(root, "**", relevant_filename_pattern)
+          candidate_paths.concat(Dir.glob(glob_pattern))
+        end
+
+        candidate_paths.map! { |path| path.delete_prefix(@workspace_path).delete_prefix("/") }
+
+        candidate_paths.uniq!
         return [] if candidate_paths.empty?
 
         find_most_similar_with_jaccard(candidate_paths).map { File.join(@workspace_path, _1) }
+      end
+
+      # Determine the search roots based on the closest test directories.
+      # This scopes the search to reduce the number of files that need to be checked.
+      #: -> Array[String]
+      def determine_search_roots
+        current_path = File.join(@workspace_path, @path)
+
+        current_dir = File.dirname(current_path)
+        while current_dir.start_with?(@workspace_path)
+          dir_basename = File.basename(current_dir)
+
+          # If current directory is a test directory, return its parent as search root
+          if TEST_KEYWORDS.any? { |keyword| dir_basename.include?(keyword) }
+            parent = File.dirname(current_dir)
+            return parent.start_with?(@workspace_path) ? [parent] : [@workspace_path]
+          end
+
+          # Search the test directories by walking up the directory tree
+          begin
+            entries = Dir.entries(current_dir).reject { |entry| entry.start_with?(".") }
+            test_dir_found = entries.any? do |entry|
+              full_path = File.join(current_dir, entry)
+              File.directory?(full_path) && TEST_KEYWORDS.any? { |keyword| entry == keyword }
+            end
+
+            return [current_dir] if test_dir_found
+          rescue Errno::EACCES, Errno::ENOENT
+            # Skip directories we can't read
+          end
+
+          # Move up one level
+          parent_dir = File.dirname(current_dir)
+          break if parent_dir == current_dir
+
+          current_dir = parent_dir
+        end
+
+        [@workspace_path]
       end
 
       #: -> String
