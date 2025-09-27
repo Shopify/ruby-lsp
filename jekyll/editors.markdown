@@ -210,7 +210,7 @@ return {
   cmd = { "ruby-lsp" } -- or { "bundle", "exec", "ruby-lsp" },
 
   root_markers = { "Gemfile", ".git" },
-  
+
   init_options = {
     formatter = 'standard',
     linters = { 'standard' },
@@ -305,11 +305,8 @@ To configure the Ruby LSP using [LSP for Sublime Text](https://github.com/sublim
     "command": [
       "ruby-lsp"
     ],
-    "selector": "source.ruby",
+    "selector": "source.ruby | text.html.rails",
     "initializationOptions": {
-      "enabledFeatures": {
-        "diagnostics": false
-      },
       "experimentalFeaturesEnabled": true
     }
   }
