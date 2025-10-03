@@ -35,10 +35,46 @@ module RubyLsp
 
       #: -> Array[String]
       def find_relevant_paths
-        candidate_paths = Dir.glob(File.join("**", relevant_filename_pattern))
+        pattern = File.join(search_root, "**", relevant_filename_pattern)
+        candidate_paths = Dir.glob(pattern)
+
         return [] if candidate_paths.empty?
 
-        find_most_similar_with_jaccard(candidate_paths).map { File.join(@workspace_path, _1) }
+        find_most_similar_with_jaccard(candidate_paths).map { |path| File.expand_path(path, @workspace_path) }
+      end
+
+      # Determine the search roots based on the closest test directories.
+      # This scopes the search to reduce the number of files that need to be checked.
+      #: -> String
+      def search_root
+        current_path = File.join(".", @path)
+        current_dir = File.dirname(current_path)
+        while current_dir != "."
+          dir_basename = File.basename(current_dir)
+
+          # If current directory is a test directory, return its parent as search root
+          if TEST_KEYWORDS.include?(dir_basename)
+            return File.dirname(current_dir)
+          end
+
+          # Search the test directories by walking up the directory tree
+          begin
+            contains_test_dir = Dir
+              .entries(current_dir)
+              .filter { |entry| TEST_KEYWORDS.include?(entry) }
+              .any? { |entry| File.directory?(File.join(current_dir, entry)) }
+
+            return current_dir if contains_test_dir
+          rescue Errno::EACCES, Errno::ENOENT
+            # Skip directories we can't read
+          end
+
+          # Move up one level
+          parent_dir = File.dirname(current_dir)
+          current_dir = parent_dir
+        end
+
+        "."
       end
 
       #: -> String
