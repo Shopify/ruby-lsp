@@ -84,11 +84,10 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
   const branch: string = config.get("branch")!;
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
-  const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
-    env: bypassTypechecker ? { ...env, RUBY_LSP_BYPASS_TYPECHECKER: "true" } : env,
+    env: env,
     shell: true,
   };
 
@@ -239,6 +238,7 @@ function collectClientOptions(
       addonSettings: configuration.get("addonSettings"),
       enabledFeatureFlags: enabledFeatureFlags(),
       telemetryMachineId: vscode.env.machineId,
+      bypassTypechecker: configuration.get("bypassTypechecker"),
     },
   };
 }

@@ -155,7 +155,8 @@ module RubyLsp
       @test_library = detect_test_library(direct_dependencies)
       notifications << Notification.window_log_message("Detected test library: #{@test_library}")
 
-      @has_type_checker = detect_typechecker(all_dependencies)
+      bypass_typechecker = options.dig(:initializationOptions, :bypassTypechecker) || ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
+      @has_type_checker = bypass_typechecker ? false : detect_typechecker(all_dependencies)
       if @has_type_checker
         notifications << Notification.window_log_message(
           "Ruby LSP detected this is a Sorbet project and will defer to the Sorbet LSP for some functionality",
@@ -277,8 +278,6 @@ module RubyLsp
 
     #: (Array[String] dependencies) -> bool
     def detect_typechecker(dependencies)
-      return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
-
       dependencies.any?(/^sorbet-static/)
     rescue Bundler::GemfileNotFound
       false
