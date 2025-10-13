@@ -1152,6 +1152,26 @@ module RubyIndexer
       assert_equal(2, foo_entry.location.start_line)
     end
 
+    def test_resolving_self_referential_constant_alias
+      index(<<~RUBY)
+        module A
+          module B
+            class C
+            end
+          end
+        end
+
+        module A
+          module D
+            B = B::C
+          end
+        end
+      RUBY
+
+      foo_entry = @index.resolve("A::D::B", []) #: as !nil
+      # assert_equal(2, foo_entry.location.start_line)
+    end
+
     def test_resolving_qualified_references
       index(<<~RUBY)
         module Namespace

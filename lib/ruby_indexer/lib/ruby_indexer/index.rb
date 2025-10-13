@@ -1025,7 +1025,7 @@ module RubyIndexer
 
     #: (String full_name, Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def direct_or_aliased_constant(full_name, seen_names)
-      entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
+      entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name, seen_names)]
 
       entries&.map do |e|
         e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
