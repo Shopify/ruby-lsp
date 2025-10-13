@@ -140,21 +140,28 @@ module RubyLsp
           end
         end
 
-        #: (RubyIndexer::Entry entry) -> Integer?
+        #: (RubyIndexer::Entry entry) -> Integer
         def kind_for_entry(entry)
           case entry
           when RubyIndexer::Entry::Class
             Constant::SymbolKind::CLASS
           when RubyIndexer::Entry::Module
             Constant::SymbolKind::NAMESPACE
-          when RubyIndexer::Entry::Constant
+          when RubyIndexer::Entry::Constant, RubyIndexer::Entry::ConstantAlias
             Constant::SymbolKind::CONSTANT
           when RubyIndexer::Entry::Method
             entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
           when RubyIndexer::Entry::Accessor
             Constant::SymbolKind::PROPERTY
-          when RubyIndexer::Entry::InstanceVariable
+          when RubyIndexer::Entry::InstanceVariable, RubyIndexer::Entry::ClassVariable
             Constant::SymbolKind::FIELD
+          when RubyIndexer::Entry::MethodAlias
+            Constant::SymbolKind::METHOD
+          else
+            # Kind shold be represented by one of
+            # [SymbolKind](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolKind) variants
+            # $stderr.puts("Unknonw symbol kind #{entry.inspect}. Kind should be represented by one of SymbolKind enum variants. Please report this as a bug")
+            Constant::SymbolKind::NULL
           end
         end
       end

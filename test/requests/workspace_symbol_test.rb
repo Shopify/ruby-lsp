@@ -108,6 +108,61 @@ class WorkspaceSymbolTest < Minitest::Test
     assert_equal(RubyLsp::Constant::SymbolKind::PROPERTY, result&.kind)
   end
 
+  def test_returns_resolved_method_alias
+    @index.index_single(URI::Generic.from_path(path: "/fake.rb"), <<~RUBY)
+      class Foo
+        def test
+        end
+        alias whatever test
+        alias_method :bar, :to_a
+        alias_method "baz", "to_a"
+      end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "whatever").perform.first
+    assert_equal("whatever", result&.name)
+    assert_equal(RubyLsp::Constant::SymbolKind::METHOD, result&.kind)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "bar").perform
+    assert_empty(result)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "bag").perform
+    assert_empty(result)
+  end
+
+  def test_returns_resolved_constant_alias
+    @index.index_single(URI::Generic.from_path(path: "/fake.rb"), <<~RUBY)
+      OK = 'OK'
+      class Foo
+        BOK = OK
+        BAD = AD
+      end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "OK").perform.first
+    assert_equal("OK", result&.name)
+    assert_equal(RubyLsp::Constant::SymbolKind::CONSTANT, result&.kind)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "Foo::OK").perform.first
+    assert_equal("Foo::BOK", result&.name)
+    assert_equal(RubyLsp::Constant::SymbolKind::CONSTANT, result&.kind)
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "BAD").perform
+    assert_empty(result)
+  end
+
+  def test_returns_class_variable
+    @index.index_single(URI::Generic.from_path(path: "/fake.rb"), <<~RUBY)
+      class Foo
+        @@test = '123'
+      end
+    RUBY
+
+    result = RubyLsp::Requests::WorkspaceSymbol.new(@global_state, "test").perform.first
+    assert_equal("@@test", result&.name)
+    assert_equal(RubyLsp::Constant::SymbolKind::FIELD, result&.kind)
+  end
+
   def test_returns_symbols_from_unsaved_files
     @index.index_single(URI("untitled:Untitled-1"), <<~RUBY)
       class Foo; end
