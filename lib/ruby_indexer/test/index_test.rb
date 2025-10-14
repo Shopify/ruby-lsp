@@ -1168,8 +1168,9 @@ module RubyIndexer
         end
       RUBY
 
-      foo_entry = @index.resolve("A::D::B", []) #: as !nil
-      # assert_equal(2, foo_entry.location.start_line)
+      b_entry = @index.resolve("A::D::B", [])&.first #: as !nil
+      assert_equal(10, b_entry.location.start_line)
+      assert_equal("B::C", b_entry.target)
     end
 
     def test_resolving_qualified_references
