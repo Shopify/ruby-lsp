@@ -424,7 +424,10 @@ module RubyIndexer
       (parts.length - 1).downto(0) do |i|
         current_name = parts[0..i] #: as !nil
           .join("::")
-        entry = @entries[current_name]&.first
+
+        entry = unless seen_names.include?(current_name)
+          @entries[current_name]&.first
+        end
 
         case entry
         when Entry::ConstantAlias
@@ -1023,11 +1026,19 @@ module RubyIndexer
       name_parts.join("::")
     end
 
+    # Tries to return direct entry from index then non seen canonicalized alias or nil
     #: (String full_name, Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def direct_or_aliased_constant(full_name, seen_names)
-      entries = @entries[full_name] || @entries[follow_aliased_namespace(full_name)]
+      if (entries = @entries[full_name])
+        return entries.map do |e|
+          e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
+        end #: as Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias])?
+      end
 
-      entries&.map do |e|
+      aliased = follow_aliased_namespace(full_name, seen_names)
+      return if full_name == aliased || seen_names.include?(aliased)
+
+      @entries[aliased]&.map do |e|
         e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
       end #: as Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias])?
     end
