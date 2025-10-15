@@ -1170,7 +1170,8 @@ module RubyIndexer
 
       b_entry = @index.resolve("A::D::B", [])&.first #: as !nil
       assert_equal(10, b_entry.location.start_line)
-      assert_equal("B::C", b_entry.target)
+      assert_equal("A::B::C", b_entry.target)
+      assert_instance_of(RubyIndexer::Entry::ConstantAlias, b_entry)
     end
 
     def test_resolving_qualified_references
