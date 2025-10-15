@@ -1030,13 +1030,17 @@ module RubyIndexer
     #: (String full_name, Array[String] seen_names) -> Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]?
     def direct_or_aliased_constant(full_name, seen_names)
       if (entries = @entries[full_name])
-        return entries.map { |e| e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e }
+        return entries.map do |e|
+          e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
+        end #: as Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias])?
       end
 
       aliased = follow_aliased_namespace(full_name, seen_names)
       return if full_name == aliased || seen_names.include?(aliased)
 
-      @entries[aliased]&.map { |e| e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e }
+      @entries[aliased]&.map do |e|
+        e.is_a?(Entry::UnresolvedConstantAlias) ? resolve_alias(e, seen_names) : e
+      end #: as Array[Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias])?
     end
 
     # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
