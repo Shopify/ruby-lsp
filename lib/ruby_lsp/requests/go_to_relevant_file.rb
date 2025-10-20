@@ -35,8 +35,11 @@ module RubyLsp
 
       #: -> Array[String]
       def find_relevant_paths
-        pattern = File.join(search_root, "**", relevant_filename_pattern)
-        candidate_paths = Dir.glob(pattern)
+        patterns = relevant_filename_patterns
+
+        candidate_paths = patterns.flat_map do |pattern|
+          Dir.glob(File.join(search_root, "**", pattern))
+        end
 
         return [] if candidate_paths.empty?
 
@@ -77,18 +80,33 @@ module RubyLsp
         "."
       end
 
-      #: -> String
-      def relevant_filename_pattern
-        input_basename = File.basename(@path, File.extname(@path))
+      #: -> Array[String]
+      def relevant_filename_patterns
+        extension = File.extname(@path)
+        input_basename = File.basename(@path, extension)
 
-        relevant_basename_pattern =
-          if input_basename.match?(TEST_PATTERN)
-            input_basename.gsub(TEST_PATTERN, "")
+        if input_basename.match?(TEST_PATTERN)
+          # Test file -> find implementation
+          base = input_basename.gsub(TEST_PATTERN, "")
+          parent_dir = File.basename(File.dirname(@path))
+
+          # If test file is in a directory matching the implementation name
+          # (e.g., go_to_relevant_file/test_go_to_relevant_file_a.rb)
+          # return patterns for both the base file name and the parent directory name
+          if base.include?(parent_dir) && base != parent_dir
+            ["#{base}#{extension}", "#{parent_dir}#{extension}"]
           else
-            "{{#{TEST_PREFIX_GLOB}}#{input_basename},#{input_basename}{#{TEST_SUFFIX_GLOB}}}"
+            ["#{base}#{extension}"]
           end
-
-        "#{relevant_basename_pattern}#{File.extname(@path)}"
+        else
+          # Implementation file -> find tests (including in matching directory)
+          [
+            "{#{TEST_PREFIX_GLOB}}#{input_basename}#{extension}",
+            "#{input_basename}{#{TEST_SUFFIX_GLOB}}#{extension}",
+            "#{input_basename}/{#{TEST_PREFIX_GLOB}}*#{extension}",
+            "#{input_basename}/*{#{TEST_SUFFIX_GLOB}}#{extension}",
+          ]
+        end
       end
 
       # Using the Jaccard algorithm to determine the similarity between the

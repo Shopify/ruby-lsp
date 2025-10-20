@@ -117,4 +117,51 @@ class GoToRelevantFileTest < Minitest::Test
       )
     end
   end
+
+  def test_finds_tests_in_matching_subdirectory
+    Dir.chdir(@workspace) do
+      lib_dir = File.join(@workspace, "lib")
+      test_root = File.join(@workspace, "test")
+      test_subdir = File.join(test_root, "user")
+
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_subdir)
+
+      impl_file = File.join(lib_dir, "user.rb")
+      test_file1 = File.join(test_subdir, "create_user_test.rb")
+      test_file2 = File.join(test_subdir, "test_update_user.rb")
+
+      FileUtils.touch(impl_file)
+      FileUtils.touch(test_file1)
+      FileUtils.touch(test_file2)
+
+      result = RubyLsp::Requests::GoToRelevantFile.new(impl_file, @workspace).perform
+
+      assert_equal(
+        [test_file1, test_file2].sort,
+        result.sort,
+      )
+    end
+  end
+
+  def test_finds_implementation_from_nested_test_file
+    Dir.chdir(@workspace) do
+      lib_dir = File.join(@workspace, "lib")
+      test_root = File.join(@workspace, "test")
+      test_subdir = File.join(test_root, "go_to_relevant_file")
+
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_subdir)
+
+      impl_file = File.join(lib_dir, "go_to_relevant_file.rb")
+      test_file = File.join(test_subdir, "go_to_relevant_file_a_test.rb")
+
+      FileUtils.touch(impl_file)
+      FileUtils.touch(test_file)
+
+      result = RubyLsp::Requests::GoToRelevantFile.new(test_file, @workspace).perform
+
+      assert_equal([impl_file], result)
+    end
+  end
 end
