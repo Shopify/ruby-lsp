@@ -48,7 +48,7 @@ module RubyLsp
 
       def fuzzy_search
         @index.fuzzy_search(@query) do |entry|
-          file_path = entry.uri.full_path
+          file_path = entry.uri.raw_path
 
           # We only show symbols declared in the workspace
           in_dependencies = file_path && !not_in_dependencies?(file_path)
