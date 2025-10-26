@@ -12,7 +12,8 @@ class IntegrationTest < Minitest::Test
     skip("CI only") unless ENV["CI"]
 
     in_isolation do
-      system("bundle exec ruby-lsp --doctor")
+      $stderr.puts "Running ruby-lsp --doctor in isolation"
+      system("bundle exec ruby-lsp --doctor", err: $stderr)
       assert_equal(0, $CHILD_STATUS)
     end
   end

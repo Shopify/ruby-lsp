@@ -17,6 +17,12 @@ module RubyIndexer
     #: Symbol
     attr_accessor :visibility
 
+    #: String?
+    attr_accessor :file_name
+
+    #: String?
+    attr_accessor :file_path
+
     #: (String name, URI::Generic uri, Location location, String? comments) -> void
     def initialize(name, uri, location, comments)
       @name = name
@@ -24,6 +30,22 @@ module RubyIndexer
       @comments = comments
       @visibility = :public #: Symbol
       @location = location
+      @file_path = @uri.full_path #: String?
+      @file_name = if @uri.scheme == "untitled"
+        @uri.opaque
+      else
+        File.basename(
+          @file_path, #: as !nil
+        )
+      end #: String?
+      @in_dependencies = if @file_path
+        ::RubyLsp::BUNDLE_PATH &&
+          @file_path.start_with?(
+            ::RubyLsp::BUNDLE_PATH, #: as !nil
+          ) || @file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+      else
+        false
+      end #: bool
     end
 
     #: -> bool
@@ -48,28 +70,7 @@ module RubyIndexer
 
     #: -> bool
     def in_dependencies?
-      @in_dependencies ||= file_path && (
-        ::RubyLsp::BUNDLE_PATH && file_path.start_with?(
-          ::RubyLsp::BUNDLE_PATH, #: as !nil
-        ) ||
-        file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
-      )
-    end
-
-    #: -> String
-    def file_name
-      @file_name ||= if @uri.scheme == "untitled"
-        @uri.opaque #: as !nil
-      else
-        File.basename(
-          file_path, #: as !nil
-        )
-      end
-    end
-
-    #: -> String?
-    def file_path
-      @file_path ||= @uri.full_path
+      @in_dependencies
     end
 
     #: -> String
@@ -389,7 +390,7 @@ module RubyIndexer
         @nesting = nesting
       end
 
-      #: -> Bool
+      #: -> bool
       def resolved?
         false
       end
@@ -414,6 +415,7 @@ module RubyIndexer
         @unresolved_alias = unresolved_alias
       end
 
+      #: -> String?
       def comments
         @comments ||= @unresolved_alias.comments
       end
@@ -465,7 +467,7 @@ module RubyIndexer
         @owner = owner
       end
 
-      #: -> Bool
+      #: -> bool
       def resolved?
         false
       end

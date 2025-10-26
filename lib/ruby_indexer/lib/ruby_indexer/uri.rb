@@ -52,11 +52,7 @@ module URI
         uri
       end
 
-      if Gem.win_platform?
-        alias_method :from_path, :from_win_path
-      else
-        alias_method :from_path, :from_unix_path
-      end
+      alias_method :from_path, Gem.win_platform? ? :from_win_path : :from_unix_path
     end
 
     #: String?
@@ -70,6 +66,7 @@ module URI
       self.require_path = path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb")
     end
 
+    #: -> String?
     # On Windows, when we're getting the file system path back from the URI, we need to remove the leading forward
     # slash
     def to_standardized_win_path
@@ -77,7 +74,7 @@ module URI
 
       return unless parsed_path
 
-      # we can bail out parsing if there is nothing to unscape
+      # we can bail out parsing if there is nothing to unescape
       return parsed_path unless parsed_path.match?(/%[0-9A-Fa-f]{2}/)
 
       unescaped_path = PARSER.unescape(parsed_path)
@@ -91,22 +88,16 @@ module URI
 
     #: -> String?
     def to_standardized_unix_path
-      unscapped_path = path
-      return unless unscapped_path
+      unescaped_path = path
+      return unless unescaped_path
 
-      # we can bail out parsing if there is nothing to unscape
-      return unscapped_path unless unscapped_path.match?(/%[0-9A-Fa-f]{2}/)
+      # we can bail out parsing if there is nothing to be unescaped
+      return unescaped_path unless unescaped_path.match?(/%[0-9A-Fa-f]{2}/)
 
-      PARSER.unescape(unscapped_path)
+      PARSER.unescape(unescaped_path)
     end
 
-
-    if Gem.win_platform?
-      alias_method :to_standardized_path, :to_standardized_win_path
-    else
-      alias_method :to_standardized_path, :to_standardized_unix_path
-    end
-
-    alias_method :full_path, :to_standardized_path
+    alias_method :to_standardized_path, Gem.win_platform? ? :to_standardized_win_path : :to_standardized_unix_path
+    alias_method :full_path, Gem.win_platform? ? :to_standardized_win_path : :to_standardized_unix_path
   end
 end

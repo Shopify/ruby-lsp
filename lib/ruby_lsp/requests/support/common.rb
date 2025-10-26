@@ -158,9 +158,9 @@ module RubyLsp
           when RubyIndexer::Entry::MethodAlias
             Constant::SymbolKind::METHOD
           else
-            # Kind shold be represented by one of
+            # Kind should be represented by one of
             # [SymbolKind](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolKind) variants
-            # $stderr.puts("Unknonw symbol kind #{entry.inspect}. Kind should be represented by one of SymbolKind enum variants. Please report this as a bug")
+            # $stderr.puts("Unknown symbol kind #{entry.inspect}. Kind should be represented by one of SymbolKind enum variants. Please report this as a bug")
             Constant::SymbolKind::NULL
           end
         end

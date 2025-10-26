@@ -215,9 +215,7 @@ module RubyIndexer
         [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
       end
       results.sort_by!(&:last)
-      results.flat_map do |entries, _similarity|
-        skip_unresolved_entries(entries)
-      end
+      results.flat_map(&:first)
     end
 
     #: (String? name, String receiver_name) -> Array[(Entry::Member | Entry::MethodAlias)]
@@ -734,7 +732,7 @@ module RubyIndexer
       entries&.grep(type)
     end
 
-    #: -> voide
+    #: -> void
     def process_unresolved_entries
       @entries.values.each do |entries|
         entries.each do |entry|
@@ -1081,35 +1079,6 @@ module RubyIndexer
       original_entries.delete(entry)
       original_entries << resolved_alias
       resolved_alias
-    end
-
-    # Attempts to resolve an entry if it is an unresolved constant or method alias.
-    # Returns the resolved entry, or nil if it cannot be resolved.
-    #: (Entry) -> Entry?
-    def resolve_entry(entry)
-      case entry
-      when Entry::UnresolvedConstantAlias
-        resolved_entry = resolve_alias(entry, [])
-        resolved_entry unless resolved_entry.is_a?(Entry::UnresolvedConstantAlias)
-      when Entry::UnresolvedMethodAlias
-        resolved_entry = resolve_method_alias(entry, entry.owner&.name || "", [])
-        resolved_entry unless resolved_entry.is_a?(Entry::UnresolvedMethodAlias)
-      else
-        entry
-      end
-    end
-
-    # Filters and resolves entries, skipping those that remain unresolved.
-    # Returns an array of successfully resolved entries.
-    #: (Array[Entry]) -> Array[Entry?]
-    def skip_unresolved_entries(entries)
-      entries.filter_map do |entry|
-        resolved_entry = resolve_entry(entry)
-
-        next unless resolved_entry
-
-        resolved_entry
-      end
     end
   end
 end
