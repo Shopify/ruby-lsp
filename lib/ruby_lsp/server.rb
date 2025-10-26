@@ -1251,6 +1251,9 @@ module RubyLsp
         GC.compact unless @test_mode
 
         @global_state.synchronize do
+          # There are unresolved constant and method aliases we should take care of
+          @global_state.index.process_unresolved_entries
+
           # If we linearize ancestors while the index is not fully populated, we may end up caching incorrect results
           # that were missing namespaces. After indexing is complete, we need to clear the ancestors cache and start
           # again

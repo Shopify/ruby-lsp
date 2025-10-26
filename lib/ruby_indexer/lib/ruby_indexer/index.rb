@@ -203,9 +203,7 @@ module RubyIndexer
 
           entries
         end
-        return entries.flat_map do |entries|
-          skip_unresolved_entries(entries)
-        end
+        return entries.flatten
       end
 
       normalized_query = query.gsub("::", "").downcase
@@ -388,6 +386,8 @@ module RubyIndexer
 
       require_path = uri.require_path
       @require_paths_tree.insert(require_path, uri) if require_path
+
+      process_unresolved_entries
 
       indexing_errors = listener.indexing_errors.uniq
       indexing_errors.each { |error| $stderr.puts(error) } if indexing_errors.any?
@@ -732,6 +732,20 @@ module RubyIndexer
       return entries unless type
 
       entries&.grep(type)
+    end
+
+    #: -> voide
+    def process_unresolved_entries
+      @entries.values.each do |entries|
+        entries.each do |entry|
+          case entry
+          when Entry::UnresolvedConstantAlias
+            resolve_alias(entry, [])
+          when Entry::UnresolvedMethodAlias
+            resolve_method_alias(entry, entry.owner&.name || "", [])
+          end
+        end
+      end
     end
 
     private

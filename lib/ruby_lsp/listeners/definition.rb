@@ -389,15 +389,13 @@ module RubyLsp
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
           # ignore
-          uri = entry.uri
-          full_path = uri.full_path
 
-          if !@sorbet_level.ignore? && (!full_path || not_in_dependencies?(full_path))
+          if !@sorbet_level.ignore? && !entry.in_dependencies?
             next
           end
 
           @response_builder << Interface::LocationLink.new(
-            target_uri: uri.to_s,
+            target_uri: entry.uri.to_s,
             target_range: range_from_location(entry.location),
             target_selection_range: range_from_location(entry.name_location),
           )

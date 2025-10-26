@@ -22,14 +22,14 @@ module RubyLsp
       def perform
         @index.fuzzy_search(@query).filter_map do |entry|
           uri = entry.uri
-          file_path = uri.full_path
-
           # We only show symbols declared in the workspace
-          in_dependencies = file_path && !not_in_dependencies?(file_path)
-          next if in_dependencies
+          next if entry.in_dependencies?
 
           # We should never show private symbols when searching the entire workspace
           next if entry.private?
+
+          # We should present only resolved entries
+          next unless entry.resolved?
 
           kind = kind_for_entry(entry)
           loc = entry.location

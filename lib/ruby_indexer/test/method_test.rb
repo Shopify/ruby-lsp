@@ -575,9 +575,13 @@ module RubyIndexer
       assert_equal("Foo", entry.owner&.name)
     end
 
-    def test_keeps_track_of_aliases
+    def test_keeps_track_of_aliases_and_comments
       index(<<~RUBY)
         class Foo
+          # A comment
+          def to_s
+          end
+          # Whatever Comment
           alias whatever to_s
           alias_method :foo, :to_a
           alias_method "bar", "to_a"
@@ -588,9 +592,10 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("whatever", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:1-8:1-16")
-      assert_entry("foo", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:2-15:2-19")
-      assert_entry("bar", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:3-15:3-20")
+      assert_entry("whatever", Entry::MethodAlias, "/fake/path/foo.rb:5-8:5-16")
+      assert_equal("Alias for to_s\nWhatever Comment\nA comment", @index["whatever"]&.first&.comments)
+      assert_entry("foo", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:6-15:6-19")
+      assert_entry("bar", Entry::UnresolvedMethodAlias, "/fake/path/foo.rb:7-15:7-20")
       # Foo plus 3 valid aliases
       assert_equal(4, @index.length - @default_indexed_entries.length)
     end

@@ -41,9 +41,24 @@ module RubyIndexer
       @visibility == :private
     end
 
+    #: -> bool
+    def resolved?
+      true
+    end
+
+    #: -> bool
+    def in_dependencies?
+      @in_dependencies ||= file_path && (
+        ::RubyLsp::BUNDLE_PATH && file_path.start_with?(
+          ::RubyLsp::BUNDLE_PATH, #: as !nil
+        ) ||
+        file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+      )
+    end
+
     #: -> String
     def file_name
-      if @uri.scheme == "untitled"
+      @file_name ||= if @uri.scheme == "untitled"
         @uri.opaque #: as !nil
       else
         File.basename(
@@ -54,7 +69,7 @@ module RubyIndexer
 
     #: -> String?
     def file_path
-      @uri.full_path
+      @file_path ||= @uri.full_path
     end
 
     #: -> String
@@ -373,6 +388,11 @@ module RubyIndexer
         @target = target
         @nesting = nesting
       end
+
+      #: -> Bool
+      def resolved?
+        false
+      end
     end
 
     # Alias represents a resolved alias, which points to an existing constant target
@@ -386,11 +406,16 @@ module RubyIndexer
           unresolved_alias.name,
           unresolved_alias.uri,
           unresolved_alias.location,
-          unresolved_alias.comments,
+          nil,
         )
 
         @visibility = unresolved_alias.visibility
         @target = target
+        @unresolved_alias = unresolved_alias
+      end
+
+      def comments
+        @comments ||= @unresolved_alias.comments
       end
     end
 
@@ -439,6 +464,11 @@ module RubyIndexer
         @old_name = old_name
         @owner = owner
       end
+
+      #: -> Bool
+      def resolved?
+        false
+      end
     end
 
     # A method alias is a resolved alias entry that points to the exact method target it refers to
@@ -451,19 +481,25 @@ module RubyIndexer
 
       #: ((Member | MethodAlias) target, UnresolvedMethodAlias unresolved_alias) -> void
       def initialize(target, unresolved_alias)
-        full_comments = +"Alias for #{target.name}\n"
-        full_comments << "#{unresolved_alias.comments}\n"
-        full_comments << target.comments
-
         super(
           unresolved_alias.new_name,
           unresolved_alias.uri,
           unresolved_alias.location,
-          full_comments,
+          nil,
         )
 
         @target = target
         @owner = unresolved_alias.owner #: Entry::Namespace?
+        @unresolved_alias = unresolved_alias
+      end
+
+      #: -> String
+      def comments
+        @comments ||= <<~COMMENTS.chomp
+          Alias for #{@target.name}
+          #{@unresolved_alias.comments}
+          #{@target.comments}
+        COMMENTS
       end
 
       #: -> String
