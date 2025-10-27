@@ -903,9 +903,11 @@ module RubyIndexer
       return entry if seen_names.include?(alias_name)
 
       seen_names << alias_name
-
       target = resolve(entry.target, entry.nesting, seen_names)
       return entry unless target
+
+      # Self referential alias can be unresolved we should bail out from resolving
+      return entry if target.first == entry
 
       target_name = target.first #: as !nil
         .name
