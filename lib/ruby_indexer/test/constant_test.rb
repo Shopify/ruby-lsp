@@ -291,6 +291,28 @@ module RubyIndexer
       assert_instance_of(Entry::Constant, constant)
     end
 
+    def test_self_referential_constant_alias
+      index(<<~RUBY)
+        module RealClass
+          CONSTANT = {}
+        end
+
+        module Foo
+          SomeClass = ::SomeClass
+          RealClass = ::RealClass
+
+          UNRESOLVED = SomeClass::CONSTANT
+          CONSTANT = RealClass::CONSTANT
+        end
+      RUBY
+
+      assert_entry("RealClass", Entry::Module, "/fake/path/foo.rb:0-0:2-3")
+      assert_no_entry("SomeClass")
+      assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:4-0:10-3")
+      assert_entry("RealClass::CONSTANT", Entry::Constant, "/fake/path/foo.rb:1-2:1-15")
+      assert_entry("Foo::UNRESOLVED", Entry::UnresolvedConstantAlias, "/fake/path/foo.rb:8-2:8-34")
+    end
+
     def test_indexing_or_and_operator_nodes
       index(<<~RUBY)
         A ||= 1
