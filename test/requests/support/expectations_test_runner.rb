@@ -92,7 +92,7 @@ class ExpectationsTestRunner < Minitest::Test
     # from test/fixtures/prism/test/prism/fixtures/unparser/corpus/semantic/and.txt
     # to test_fixtures_prism_test_prism_fixtures_unparser_corpus_semantic_and
     def uniq_name_from_path(path)
-      path.gsub("/", "_").gsub(".txt", "")
+      path.gsub(%r{(/|\.|-)}, "_").gsub(".txt", "")
     end
   end
 
