@@ -27,7 +27,7 @@ jobs:
           submodules: "recursive"
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ab177d40ee5483edb974554986f56b33477e21d0 # v1.265.0
+        uses: ruby/setup-ruby@4ff6f3611a42bc75eee1e5138240eb1613f48c8f # v1.266.0
         with:
           bundler-cache: true
 
@@ -54,7 +54,7 @@ jobs:
           submodules: "recursive"
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ab177d40ee5483edb974554986f56b33477e21d0 # v1.265.0
+        uses: ruby/setup-ruby@4ff6f3611a42bc75eee1e5138240eb1613f48c8f # v1.266.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -102,7 +102,7 @@ jobs:
 
       # We need some Ruby installed for the environment activation tests
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ab177d40ee5483edb974554986f56b33477e21d0 # v1.265.0
+        uses: ruby/setup-ruby@4ff6f3611a42bc75eee1e5138240eb1613f48c8f # v1.266.0
         with:
           bundler-cache: true
           cache-version: 3
@@ -145,7 +145,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@ab177d40ee5483edb974554986f56b33477e21d0 # v1.265.0
+        uses: ruby/setup-ruby@4ff6f3611a42bc75eee1e5138240eb1613f48c8f # v1.266.0
         with:
           bundler-cache: true
           working-directory: ./jekyll
