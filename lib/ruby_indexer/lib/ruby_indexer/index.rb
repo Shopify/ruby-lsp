@@ -368,14 +368,14 @@ module RubyIndexer
           break unless block.call(progress)
         end
 
-        index_file(uri, collect_comments: false)
+        index_file(uri, collect_comments: false, process_unresolved: false)
       end
 
       @initial_indexing_completed = true
     end
 
-    #: (URI::Generic uri, String source, ?collect_comments: bool) -> void
-    def index_single(uri, source, collect_comments: true)
+    #: (URI::Generic uri, String source, ?collect_comments: bool, ?process_unresolved: bool) -> void
+    def index_single(uri, source, collect_comments: true, process_unresolved: true)
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(source)
@@ -385,7 +385,7 @@ module RubyIndexer
       require_path = uri.require_path
       @require_paths_tree.insert(require_path, uri) if require_path
 
-      process_unresolved_entries
+      process_unresolved_entries if process_unresolved
 
       indexing_errors = listener.indexing_errors.uniq
       indexing_errors.each { |error| $stderr.puts(error) } if indexing_errors.any?
@@ -398,10 +398,10 @@ module RubyIndexer
     end
 
     # Indexes a File URI by reading the contents from disk
-    #: (URI::Generic uri, ?collect_comments: bool) -> void
-    def index_file(uri, collect_comments: true)
+    #: (URI::Generic uri, ?collect_comments: bool, ?process_unresolved: bool) -> void
+    def index_file(uri, collect_comments: true, process_unresolved: true)
       path = uri.full_path #: as !nil
-      index_single(uri, File.read(path), collect_comments: collect_comments)
+      index_single(uri, File.read(path), collect_comments: collect_comments, process_unresolved: process_unresolved)
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it
