@@ -303,7 +303,7 @@ module RubyLsp
           @current_request_id,
           Interface::RelativePattern.new(
             base_uri: @global_state.workspace_uri.to_s,
-            pattern: "{.rubocop.yml,.rubocop}",
+            pattern: "{.rubocop.yml,.rubocop,.rubocop_todo.yml}",
           ),
           registration_id: "rubocop-watcher",
         ))
@@ -1045,7 +1045,7 @@ module RubyLsp
 
         file_name = File.basename(file_path)
 
-        if file_name == ".rubocop.yml" || file_name == ".rubocop"
+        if file_name == ".rubocop.yml" || file_name == ".rubocop" || file_name == ".rubocop_todo.yml"
           handle_rubocop_config_change(uri)
         end
       end
