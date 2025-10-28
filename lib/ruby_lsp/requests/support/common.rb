@@ -49,15 +49,6 @@ module RubyLsp
           )
         end
 
-        #: (String file_path) -> bool?
-        def not_in_dependencies?(file_path)
-          BUNDLE_PATH &&
-            !file_path.start_with?(
-              BUNDLE_PATH, #: as !nil
-            ) &&
-            !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
-        end
-
         #: (Prism::CallNode node) -> bool
         def self_receiver?(node)
           receiver = node.receiver

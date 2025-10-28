@@ -316,8 +316,8 @@ module RubyLsp
 
         methods.each do |target_method|
           uri = target_method.uri
-          full_path = uri.full_path
-          next if @sorbet_level.true_or_higher? && (!full_path || not_in_dependencies?(full_path))
+
+          next if @sorbet_level.true_or_higher? && !target_method.in_dependencies?
 
           @response_builder << Interface::LocationLink.new(
             target_uri: uri.to_s,
@@ -390,9 +390,8 @@ module RubyLsp
           # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
           # ignore
           uri = entry.uri
-          full_path = uri.full_path
 
-          if !@sorbet_level.ignore? && (!full_path || not_in_dependencies?(full_path))
+          if !@sorbet_level.ignore? && !entry.in_dependencies?
             next
           end
 
