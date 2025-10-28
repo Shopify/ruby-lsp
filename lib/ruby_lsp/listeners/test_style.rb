@@ -33,13 +33,15 @@ module RubyLsp
 
             if tags.include?("test_dir")
               if children.empty?
-                full_files.concat(Dir.glob(
-                  "#{path}/**/{*_test,test_*,*_spec}.rb",
-                  File::Constants::FNM_EXTGLOB | File::Constants::FNM_PATHNAME,
-                ))
+                full_files.concat(
+                  Dir.glob(
+                    "#{path}/**/{*_test,test_*,*_spec}.rb",
+                    File::Constants::FNM_EXTGLOB | File::Constants::FNM_PATHNAME,
+                  ).map! { |p| Shellwords.escape(p) },
+                )
               end
             elsif tags.include?("test_file")
-              full_files << path if children.empty?
+              full_files << Shellwords.escape(path) if children.empty?
             elsif tags.include?("test_group")
               # If all of the children of the current test group are other groups, then there's no need to add it to the
               # aggregated examples
@@ -114,7 +116,7 @@ module RubyLsp
           end
 
           load_path = spec?(file_path) ? "-Ispec" : "-Itest"
-          "#{COMMAND} #{load_path} #{file_path} --name \"/#{regex}/\""
+          "#{COMMAND} #{load_path} #{Shellwords.escape(file_path)} --name \"/#{regex}/\""
         end
 
         #: (String, Hash[String, Hash[Symbol, untyped]]) -> Array[String]
@@ -125,7 +127,7 @@ module RubyLsp
               Shellwords.escape(TestDiscovery::DYNAMIC_REFERENCE_MARKER),
               ".*",
             )
-            command = +"#{COMMAND} -Itest #{file_path} --testcase \"/^#{group_regex}\\$/\""
+            command = +"#{COMMAND} -Itest #{Shellwords.escape(file_path)} --testcase \"/^#{group_regex}\\$/\""
 
             unless examples.empty?
               command << if examples.length == 1
