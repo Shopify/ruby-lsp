@@ -140,21 +140,25 @@ module RubyLsp
           end
         end
 
-        #: (RubyIndexer::Entry entry) -> Integer?
+        #: (RubyIndexer::Entry entry) -> Integer
         def kind_for_entry(entry)
           case entry
           when RubyIndexer::Entry::Class
             Constant::SymbolKind::CLASS
           when RubyIndexer::Entry::Module
             Constant::SymbolKind::NAMESPACE
-          when RubyIndexer::Entry::Constant
+          when RubyIndexer::Entry::Constant, RubyIndexer::Entry::UnresolvedConstantAlias, RubyIndexer::Entry::ConstantAlias
             Constant::SymbolKind::CONSTANT
-          when RubyIndexer::Entry::Method
+          when RubyIndexer::Entry::Method, RubyIndexer::Entry::UnresolvedMethodAlias, RubyIndexer::Entry::MethodAlias
             entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
           when RubyIndexer::Entry::Accessor
             Constant::SymbolKind::PROPERTY
-          when RubyIndexer::Entry::InstanceVariable
+          when RubyIndexer::Entry::InstanceVariable, RubyIndexer::Entry::ClassVariable
             Constant::SymbolKind::FIELD
+          when RubyIndexer::Entry::GlobalVariable
+            Constant::SymbolKind::VARIABLE
+          else
+            Constant::SymbolKind::NULL
           end
         end
       end
