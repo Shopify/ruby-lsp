@@ -753,6 +753,89 @@ module RubyLsp
         )
       end
     end
+
+    def test_resolve_properly_escapes_single_file_paths
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "file:///test/server(v2)_test.rb",
+                uri: "file:///test/server(v2)_test.rb",
+                label: "/test/server(v2)_test.rb",
+                tags: ["test_file", "framework:minitest"],
+                children: [],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          ["#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" /test/server\\(v2\\)_test.rb"],
+          result[:commands],
+        )
+      end
+    end
+
+    def test_resolve_properly_escapes_file_paths_within_directories
+      with_server do |server|
+        Dir.stubs(:glob).returns(["/other/test/fake(v2)_test.rb"])
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "file:///other/test",
+                uri: "file:///other/test",
+                label: "/other/test",
+                tags: ["test_dir", "framework:minitest"],
+                children: [],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          ["#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" /other/test/fake\\(v2\\)_test.rb"],
+          result[:commands],
+        )
+      end
+    end
+
+    def test_resolve_properly_escapes_file_paths_in_groups
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "ServerTest",
+                uri: "file:///test/server(v2)_test.rb",
+                label: "ServerTest",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:minitest", "test_group"],
+                children: [],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          ["#{COMMAND} -Itest /test/server\\(v2\\)_test.rb --name \"/^ServerTest(#|::)/\""],
+          result[:commands],
+        )
+      end
+    end
   end
 
   class ResolveTestCommandsTestUnitTest < Minitest::Test
@@ -1250,6 +1333,89 @@ module RubyLsp
             "#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" /test/unit/fake_test.rb " \
               "/test/unit/fake_test2.rb",
           ],
+          result[:commands],
+        )
+      end
+    end
+
+    def test_resolve_properly_escapes_single_file_paths
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "file:///test/server(v2)_test.rb",
+                uri: "file:///test/server(v2)_test.rb",
+                label: "/test/server(v2)_test.rb",
+                tags: ["test_file", "framework:test_unit"],
+                children: [],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          ["#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" /test/server\\(v2\\)_test.rb"],
+          result[:commands],
+        )
+      end
+    end
+
+    def test_resolve_properly_escapes_file_paths_within_directories
+      with_server do |server|
+        Dir.stubs(:glob).returns(["/other/test/fake(v2)_test.rb"])
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "file:///other/test",
+                uri: "file:///other/test",
+                label: "/other/test",
+                tags: ["test_dir", "framework:test_unit"],
+                children: [],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          ["#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" /other/test/fake\\(v2\\)_test.rb"],
+          result[:commands],
+        )
+      end
+    end
+
+    def test_resolve_properly_escapes_file_paths_in_groups
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "ServerTest",
+                uri: "file:///test/server(v2)_test.rb",
+                label: "ServerTest",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:test_unit", "test_group"],
+                children: [],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          ["#{COMMAND} -Itest /test/server\\(v2\\)_test.rb --testcase \"/^ServerTest\\$/\""],
           result[:commands],
         )
       end
