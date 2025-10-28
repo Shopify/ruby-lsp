@@ -31,6 +31,7 @@ module URI
         end
 
         uri = build(scheme: scheme, path: escaped_path, fragment: fragment)
+        uri.raw_path = path
 
         if load_path_entry
           uri.require_path = path.delete_prefix("#{load_path_entry}/").delete_suffix(".rb")
@@ -40,6 +41,8 @@ module URI
       end
     end
 
+    #: String
+    attr_accessor :raw_path
     #: String?
     attr_accessor :require_path
 
