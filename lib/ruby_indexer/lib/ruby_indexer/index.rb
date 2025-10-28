@@ -903,6 +903,7 @@ module RubyIndexer
       return entry if seen_names.include?(alias_name)
 
       seen_names << alias_name
+
       target = resolve(entry.target, entry.nesting, seen_names)
       return entry unless target
 
