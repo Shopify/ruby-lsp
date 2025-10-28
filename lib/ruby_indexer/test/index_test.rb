@@ -1175,6 +1175,23 @@ module RubyIndexer
       assert_equal("A::B::C", entry.target)
     end
 
+    def test_resolving_non_existing_self_referential_constant_alias
+      index(<<~RUBY)
+        module Foo
+          SomeClass = ::SomeClass
+          UNRESOLVED = SomeClass::CONSTANT
+        end
+      RUBY
+
+      entry = @index.resolve("Foo::UNRESOLVED", [])&.first #: as Entry::UnresolvedConstantAlias
+      assert_kind_of(Entry::UnresolvedConstantAlias, entry)
+      assert_equal(3, entry.location.start_line)
+      assert_equal("SomeClass::CONSTANT", entry.target)
+
+      entry = @index.resolve("SomeClass::CONSTANT", ["Foo"])
+      refute(entry)
+    end
+
     def test_resolving_qualified_references
       index(<<~RUBY)
         module Namespace

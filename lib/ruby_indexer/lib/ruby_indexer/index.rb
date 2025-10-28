@@ -907,6 +907,9 @@ module RubyIndexer
       target = resolve(entry.target, entry.nesting, seen_names)
       return entry unless target
 
+      # Self referential alias can be unresolved we should bail out from resolving
+      return entry if target.first == entry
+
       target_name = target.first #: as !nil
         .name
       resolved_alias = Entry::ConstantAlias.new(target_name, entry)
