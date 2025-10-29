@@ -21,6 +21,17 @@ module RubyLsp
   GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
   TEST_PATH_PATTERN = "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"
 
+  class << self
+    #: (String file_path) -> bool?
+    def not_in_dependencies?(file_path)
+      BUNDLE_PATH &&
+        !file_path.start_with?(
+          BUNDLE_PATH, #: as !nil
+        ) &&
+        !file_path.start_with?(RbConfig::CONFIG["rubylibdir"])
+    end
+  end
+
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
   # use this custom error class as a way to return a signal to the client that the request should be delegated to the
   # language server for the host language. The support for delegation is custom built on the client side, so each editor
