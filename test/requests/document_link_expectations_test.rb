@@ -69,6 +69,44 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_package_url_links
+    source = <<~RUBY
+      # pkg:gem/erb#:99
+      def bar
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/documentLink",
+        params: { textDocument: { uri: uri } },
+      )
+
+      server.pop_response
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_package_url_links_with_invalid_uris
+    source = <<~RUBY
+      # pkg:gem/rubocop$1.78.0#:99
+      def bar
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/documentLink",
+        params: { textDocument: { uri: uri } },
+      )
+
+      server.pop_response
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   private
 
   def substitute(original)
