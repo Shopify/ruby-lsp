@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "ruby_lsp/requests/support/source_uri"
+require "package_url"
 
 module RubyLsp
   module Listeners
@@ -102,19 +103,58 @@ module RubyLsp
         comment = @lines_to_comments[node.location.start_line - 1]
         return unless comment
 
-        match = comment.location.slice.match(%r{source://.*#\d+$})
+        match = comment.location.slice.match(%r{(source://.*#\d+|pkg:gem/.*#.*)$})
         return unless match
 
-        uri =  begin
-          URI(
-            match[0], #: as !nil
-          )
+        uri_string = match[0] #: as !nil
+
+        file_path, line_number = if uri_string.start_with?("pkg:gem/")
+          parse_package_url(uri_string)
+        else
+          parse_source_uri(uri_string)
+        end
+
+        return unless file_path
+
+        @response_builder << Interface::DocumentLink.new(
+          range: range_from_location(comment.location),
+          target: "file://#{file_path}##{line_number}",
+          tooltip: "Jump to #{file_path}##{line_number}",
+        )
+      end
+
+      #: (String uri_string) -> [String, String]?
+      def parse_package_url(uri_string)
+        purl = PackageURL.parse(uri_string) #: as PackageURL?
+        return unless purl
+
+        gem_version = resolve_version(purl.version, purl.name)
+        return if gem_version.nil?
+
+        path, line_number = purl.subpath.split(":", 2)
+        return unless path
+
+        gem_name = purl.name
+        return unless gem_name
+
+        file_path = self.class.gem_paths.dig(gem_name, gem_version, CGI.unescape(path))
+        return if file_path.nil?
+
+        [file_path, line_number]
+      rescue PackageURL::InvalidPackageURL
+        nil
+      end
+
+      #: (String uri_string) -> [String, String]?
+      def parse_source_uri(uri_string)
+        uri = begin
+          URI(uri_string)
         rescue URI::Error
           nil
         end #: as URI::Source?
         return unless uri
 
-        gem_version = resolve_version(uri)
+        gem_version = resolve_version(uri.gem_version, uri.gem_name)
         return if gem_version.nil?
 
         path = uri.path
@@ -126,28 +166,20 @@ module RubyLsp
         file_path = self.class.gem_paths.dig(gem_name, gem_version, CGI.unescape(path))
         return if file_path.nil?
 
-        @response_builder << Interface::DocumentLink.new(
-          range: range_from_location(comment.location),
-          target: "file://#{file_path}##{uri.line_number}",
-          tooltip: "Jump to #{file_path}##{uri.line_number}",
-        )
+        [file_path, uri.line_number || "0"]
       end
 
       # Try to figure out the gem version for a source:// link. The order of precedence is:
       # 1. The version in the URI
       # 2. The version in the RBI file name
       # 3. The version from the gemspec
-      #: (URI::Source uri) -> String?
-      def resolve_version(uri)
-        version = uri.gem_version
+      #: (String? version, String? gem_name) -> String?
+      def resolve_version(version, gem_name)
         return version unless version.nil? || version.empty?
 
         return @gem_version unless @gem_version.nil? || @gem_version.empty?
 
-        gem_name = uri.gem_name
-        return unless gem_name
-
-        GEM_TO_VERSION_MAP[gem_name]
+        GEM_TO_VERSION_MAP[gem_name.to_s]
       end
     end
   end
