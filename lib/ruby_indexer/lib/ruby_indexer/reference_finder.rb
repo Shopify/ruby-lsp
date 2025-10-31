@@ -309,7 +309,7 @@ module RubyIndexer
 
     #: (Prism::CallNode node) -> Array[String]
     def unescaped_argument_names(node)
-      return [] if node.arguments.nil?
+      return [] if node.arguments&.arguments.nil?
 
       node.arguments.arguments.select { |arg| arg.respond_to?(:unescaped) }.map(&:unescaped)
     end
