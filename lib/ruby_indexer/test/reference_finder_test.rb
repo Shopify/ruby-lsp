@@ -159,11 +159,11 @@ module RubyIndexer
 
       assert_equal("foo=", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo=", refs[1].name)
       assert_equal(5, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
     end
 
     def test_matches_attr_writer
@@ -186,11 +186,11 @@ module RubyIndexer
 
       assert_equal("foo=", refs[0].name)
       assert_equal(5, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo=", refs[1].name)
       assert_equal(8, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
     end
 
     def test_matches_attr_reader
@@ -213,11 +213,11 @@ module RubyIndexer
 
       assert_equal("foo", refs[0].name)
       assert_equal(5, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo", refs[1].name)
       assert_equal(9, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
     end
 
     def test_matches_attr_accessor
@@ -237,11 +237,11 @@ module RubyIndexer
 
       assert_equal("foo=", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo=", refs[1].name)
       assert_equal(5, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
 
       refs = find_method_references("foo", <<~RUBY)
         class Bar
@@ -256,11 +256,11 @@ module RubyIndexer
 
       assert_equal("foo", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo", refs[1].name)
       assert_equal(6, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
     end
 
     def test_matches_attr_accessor_multi
@@ -280,11 +280,11 @@ module RubyIndexer
 
       assert_equal("foo=", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo=", refs[1].name)
       assert_equal(5, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
 
       refs = find_method_references("foo", <<~RUBY)
         class Bar
@@ -299,11 +299,11 @@ module RubyIndexer
 
       assert_equal("foo", refs[0].name)
       assert_equal(2, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
 
       assert_equal("foo", refs[1].name)
       assert_equal(6, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
     end
 
     def test_matches_attr_emtpy
@@ -322,17 +322,17 @@ module RubyIndexer
       refs = find_method_references("foo", ruby_code)
       assert_equal(1, refs.size)
       assert_equal(8, refs[0].location.start_line)
-      assert_equal(false, refs[0].declaration)
+      refute(refs[0].declaration)
       refs = find_method_references("foo=", ruby_code)
       assert_equal(1, refs.size)
       assert_equal(2, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
       refs = find_method_references("baz", ruby_code)
       assert_equal(1, refs.size)
       assert_equal(7, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
     end
- 
+
     def test_matches_attr_string
       ruby_code = <<~RUBY
         class Bar
@@ -350,11 +350,11 @@ module RubyIndexer
       refs = find_method_references("foo", ruby_code)
       assert_equal(2, refs.size)
       assert_equal(5, refs[0].location.start_line)
-      assert_equal(true, refs[0].declaration)
+      assert(refs[0].declaration)
       assert_equal(8, refs[1].location.start_line)
-      assert_equal(false, refs[1].declaration)
+      refute(refs[1].declaration)
     end
-    
+
     def test_find_inherited_methods
       refs = find_method_references("foo", <<~RUBY)
         class Bar
