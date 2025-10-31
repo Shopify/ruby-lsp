@@ -828,7 +828,7 @@ class ServerTest < Minitest::Test
     end
   end
 
-  def test_cancelling_requests_returns_nil
+  def test_cancelling_requests_returns_expected_error_code
     uri = URI("file:///foo.rb")
 
     @server.process_message({
@@ -868,8 +868,9 @@ class ServerTest < Minitest::Test
     mutex.unlock
     thread.join
 
-    result = find_message(RubyLsp::Result)
-    assert_nil(result.response)
+    error = find_message(RubyLsp::Error)
+    assert_equal(RubyLsp::Constant::ErrorCodes::REQUEST_CANCELLED, error.code)
+    assert_equal("Request 1 was cancelled", error.message)
   end
 
   def test_unsaved_changes_are_indexed_when_computing_automatic_features
