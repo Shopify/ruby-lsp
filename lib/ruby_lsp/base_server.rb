@@ -13,6 +13,7 @@ module RubyLsp
       @install_error = options[:install_error] #: StandardError?
       @incoming_queue = Thread::Queue.new #: Thread::Queue
       @outgoing_queue = Thread::Queue.new #: Thread::Queue
+      @sent_requests = {}
       @cancelled_requests = [] #: Array[Integer]
       @worker = new_worker #: Thread
       @current_request_id = 1 #: Integer
@@ -21,7 +22,15 @@ module RubyLsp
       @outgoing_dispatcher = Thread.new do
         unless @test_mode
           while (message = @outgoing_queue.pop)
-            @global_state.synchronize { @writer.write(message.to_hash) }
+            @global_state.synchronize do
+              # If the message is a request from server to client, we save it because we might
+              # need it later to understand the response.
+              if message.is_a?(Request)
+                id = message.to_hash[:id]
+                @sent_requests[id] = message
+              end
+              @writer.write(message.to_hash)
+            end
           end
         end
       end #: Thread

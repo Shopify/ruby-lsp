@@ -80,6 +80,9 @@ module RubyLsp
         type_hierarchy_supertypes(message)
       when "typeHierarchy/subtypes"
         type_hierarchy_subtypes(message)
+      when "workspace/didChangeConfiguration"
+        send_log_message("Re-applying Ruby LSP configuration after workspace configuration change")
+        workspace_configuration_did_change(message)
       when "workspace/didChangeWatchedFiles"
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
@@ -157,9 +160,16 @@ module RubyLsp
     # Process responses to requests that were sent to the client
     #: (Hash[Symbol, untyped] message) -> void
     def process_response(message)
-      case message.dig(:result, :method)
+      # Some replies have method in their payload, but some do not and we need to match
+      # the request by id to find what the method is.
+      method = (message[:result].is_a?(Hash) && message.dig(:result, :method)) || @sent_requests[message[:id]]&.to_hash&.fetch(:method)
+
+      case method
       when "window/showMessageRequest"
         window_show_message_request(message)
+      when "workspace/configuration"
+        send_log_message("Received workspace configuration from client: #{message}")
+        workspace_configuration_received(message)
       end
     end
 
@@ -195,6 +205,21 @@ module RubyLsp
     end
 
     private
+
+    #: (Hash[Symbol, untyped] message) -> void
+    def workspace_configuration_did_change(message)
+      # This assumes that the workspace configuration is under "rubyLsp" key, which seems
+      # to be the standard naming convention.
+      send_message(Request.workspace_configuration(
+        @current_request_id, section: "rubyLsp"
+      ))
+    end
+
+    def workspace_configuration_received(message)
+      options = { initializationOptions: message[:result]&.first }
+      messages_to_send = @global_state.apply_options(options)
+      messages_to_send.each { |notification| send_message(notification) }
+    end
 
     #: (Hash[Symbol, untyped] message) -> void
     def run_initialize(message)
@@ -273,6 +298,9 @@ module RubyLsp
           rename_provider: rename_provider,
           references_provider: !@global_state.has_type_checker,
           document_range_formatting_provider: true,
+          workspace: {
+            configuration: true,
+          },
           experimental: {
             addon_detection: true,
             compose_bundle: true,
