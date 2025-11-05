@@ -83,7 +83,7 @@ module RubyLsp
         # The following requests need to be executed in the main thread directly to avoid concurrency issues. Everything
         # else is pushed into the incoming queue
         case method
-        when "initialize", "initialized", "rubyLsp/diagnoseState"
+        when "initialize", "initialized", "rubyLsp/diagnoseState", "$/cancelRequest"
           process_message(message)
         when "shutdown"
           @global_state.synchronize do
@@ -154,20 +154,29 @@ module RubyLsp
     def new_worker
       Thread.new do
         while (message = @incoming_queue.pop)
-          id = message[:id]
-
-          # Check if the request was cancelled before trying to process it
-          @global_state.synchronize do
-            if id && @cancelled_requests.include?(id)
-              send_message(Result.new(id: id, response: nil))
-              @cancelled_requests.delete(id)
-              next
-            end
-          end
-
-          process_message(message)
+          handle_incoming_message(message)
         end
       end
+    end
+
+    #: (Hash[Symbol, untyped]) -> void
+    def handle_incoming_message(message)
+      id = message[:id]
+
+      # Check if the request was cancelled before trying to process it
+      @global_state.synchronize do
+        if id && @cancelled_requests.include?(id)
+          send_message(Error.new(
+            id: id,
+            code: Constant::ErrorCodes::REQUEST_CANCELLED,
+            message: "Request #{id} was cancelled",
+          ))
+          @cancelled_requests.delete(id)
+          return
+        end
+      end
+
+      process_message(message)
     end
 
     #: ((Result | Error | Notification | Request) message) -> void
