@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require "ruby_lsp/requests/support/source_uri"
-require "package_url"
+require "ruby_lsp/requests/support/package_url"
 
 module RubyLsp
   module Listeners

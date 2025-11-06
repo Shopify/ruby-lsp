@@ -22,6 +22,8 @@ AllCops:
     - "test/fixtures/**/*"
     - "test/expectations/**/*"
     - "jekyll/**/*"
+    # This a vendored source file that is not a part of our codebase
+    - "lib/ruby_lsp/requests/support/package_url.rb"
 
 Layout/LeadingCommentSpace:
   AllowRBSInlineAnnotation: true

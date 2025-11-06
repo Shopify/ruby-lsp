@@ -3,7 +3,6 @@ PATH
   specs:
     ruby-lsp (0.26.3)
       language_server-protocol (~> 3.17.0)
-      packageurl-ruby
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
 
@@ -31,7 +30,6 @@ GEM
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     netrc (0.11.0)
-    packageurl-ruby (0.2.0)
     parallel (1.27.0)
     parser (3.3.8.0)
       ast (~> 2.4.1)
