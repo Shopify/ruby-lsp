@@ -41,20 +41,31 @@ module RubyIndexer
       @visibility == :private
     end
 
+    #: -> bool?
+    def in_dependencies?
+      @in_dependencies ||= if file_path
+        !RubyLsp.not_in_dependencies?(
+          file_path, #: as String
+        )
+      else
+        false
+      end #: bool?
+    end
+
     #: -> String
     def file_name
-      if @uri.scheme == "untitled"
+      @file_name ||= if @uri.scheme == "untitled"
         @uri.opaque #: as !nil
       else
         File.basename(
           file_path, #: as !nil
         )
-      end
+      end #: String?
     end
 
     #: -> String?
     def file_path
-      @uri.full_path
+      @file_path ||= @uri.full_path #: String?
     end
 
     #: -> String
