@@ -38,7 +38,9 @@
     "**/node_modules/**",
     "vendor/**",
     "coverage/**",
-    "test/fixtures/"
+    "test/fixtures/",
+    "lib/ruby_lsp/requests/support/package_url.rb"
+
   ],
   "dictionaries": [
     "ruby",
