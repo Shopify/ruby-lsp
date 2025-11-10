@@ -1,0 +1,47 @@
+{
+    "params": {
+        "kind": "refactor.rewrite",
+        "title": "Refactor: Toggle block style",
+        "data": {
+            "range": {
+                "start": {
+                    "line": 1,
+                    "character": 37
+                },
+                "end": {
+                    "line": 1,
+                    "character": 37
+                }
+            },
+            "uri": "file:///fake"
+        }
+    },
+    "result": {
+        "title": "Refactor: Toggle block style",
+        "edit": {
+            "documentChanges": [
+                {
+                    "textDocument": {
+                        "uri": "file:///fake",
+                        "version": null
+                    },
+                    "edits": [
+                        {
+                            "range": {
+                                "start": {
+                                    "line": 1,
+                                    "character": 32
+                                },
+                                "end": {
+                                    "line": 2,
+                                    "character": 5
+                                }
+                            },
+                            "newText": "{ |b| }"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
