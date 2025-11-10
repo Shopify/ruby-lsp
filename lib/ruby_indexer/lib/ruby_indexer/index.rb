@@ -195,12 +195,13 @@ module RubyIndexer
     end
 
     # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
-    #: (String? query) -> Array[Entry]
-    def fuzzy_search(query)
+    #: (String? query) ?{ (Entry) -> bool? } -> Array[Entry]
+    def fuzzy_search(query, &condition)
       unless query
         entries = @entries.filter_map do |_name, entries|
           next if entries.first.is_a?(Entry::SingletonClass)
 
+          entries = entries.select(&condition) if condition
           entries
         end
 
@@ -211,6 +212,9 @@ module RubyIndexer
 
       results = @entries.filter_map do |name, entries|
         next if entries.first.is_a?(Entry::SingletonClass)
+
+        entries = entries.select(&condition) if condition
+        next if entries.empty?
 
         similarity = DidYouMean::JaroWinkler.distance(name.gsub("::", "").downcase, normalized_query)
         [entries, -similarity] if similarity > ENTRY_SIMILARITY_THRESHOLD
