@@ -109,7 +109,9 @@ testresult
 testrunner
 testrunnermediator
 truffleruby
+tsort
 unaliased
+ucrt
 unindexed
 unparser
 unresolve
