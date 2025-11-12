@@ -289,6 +289,88 @@ class IntegrationTest < Minitest::Test
     end
   end
 
+  def test_launch_mode_update_does_not_modify_main_lockfile
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~RUBY)
+        source "https://rubygems.org"
+        gem "ruby-lsp-rails"
+        gem "debug"
+      RUBY
+
+      platforms = [
+        "arm64-darwin-23",
+        "ruby",
+      ]
+      platforms << "x64-mingw-ucrt" if Gem.win_platform?
+
+      lockfile_contents = <<~LOCKFILE
+        GEM
+          remote: https://rubygems.org/
+          specs:
+            date (3.5.0)
+            debug (1.11.0)
+              irb (~> 1.10)
+              reline (>= 0.3.8)
+            erb (5.1.3)
+            io-console (0.8.1)
+            irb (1.15.3)
+              pp (>= 0.6.0)
+              rdoc (>= 4.0.0)
+              reline (>= 0.4.2)
+            language_server-protocol (3.17.0.5)
+            logger (1.7.0)
+            pp (0.6.3)
+              prettyprint
+            prettyprint (0.2.0)
+            prism (1.6.0)
+            psych (5.2.6)
+              date
+              stringio
+            rbs (3.9.5)
+              logger
+            rdoc (6.15.1)
+              erb
+              psych (>= 4.0.0)
+              tsort
+            reline (0.6.3)
+              io-console (~> 0.5)
+            ruby-lsp (0.26.1)
+              language_server-protocol (~> 3.17.0)
+              prism (>= 1.2, < 2.0)
+              rbs (>= 3, < 5)
+            ruby-lsp-rails (0.4.8)
+              ruby-lsp (>= 0.26.0, < 0.27.0)
+            stringio (3.1.8)
+            tsort (0.2.0)
+
+        PLATFORMS
+          #{platforms.join("\n  ")}
+
+        DEPENDENCIES
+          debug
+          ruby-lsp-rails
+
+        BUNDLED WITH
+           2.7.1
+      LOCKFILE
+      File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
+
+      Bundler.with_unbundled_env do
+        capture_subprocess_io do
+          system("bundle", "install")
+        end
+
+        # First launch creates the composed bundle
+        launch(dir)
+
+        # Second launch updates
+        FileUtils.touch(File.join(dir, ".ruby-lsp", "needs_update"))
+        launch(dir)
+        assert_equal(lockfile_contents, File.read(File.join(dir, "Gemfile.lock")))
+      end
+    end
+  end
+
   def test_launch_mode_retries_if_setup_failed_after_successful_install
     # RubyGems asks for confirmation when uninstalling a gem, so we need to be able to write the `y` to stdin
     uninstall_rails = ->() {

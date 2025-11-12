@@ -270,12 +270,21 @@ module RubyLsp
     #: (Hash[String, String] env, ?force_install: bool) -> Hash[String, String]
     def run_bundle_install_directly(env, force_install: false)
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
+
+      # The should_bundle_update? check needs to run on the original Bundler environment, but everything else (like
+      # updating or running install) requires the modified environment. Here we compute the check ahead of time and
+      # merge the environment to ensure correct results.
+      #
+      # The symptoms of having these operations in the wrong order is seeing unwanted modifications in the application's
+      # main lockfile because we accidentally run update on the main bundle instead of the composed one.
+      needs_update = should_bundle_update?
+      ENV.merge!(env)
+
       return update(env) if @needs_update_path.exist?
 
       # The ENV can only be merged after checking if an update is required because we depend on the original value of
       # ENV["BUNDLE_GEMFILE"], which gets overridden after the merge
-      FileUtils.touch(@needs_update_path) if should_bundle_update?
-      ENV.merge!(env)
+      FileUtils.touch(@needs_update_path) if needs_update
 
       $stderr.puts("Ruby LSP> Checking if the composed bundle is satisfied...")
       missing_gems = bundle_check
