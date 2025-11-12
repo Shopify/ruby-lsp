@@ -105,6 +105,8 @@ module RubyLsp
       receiver = Thread.new do
         socket = server.accept
         socket.setsockopt(Socket::SOL_SOCKET, Socket::SO_KEEPALIVE, true)
+        socket.binmode
+        socket.sync = true
 
         loop do
           headers = socket.gets("\r\n\r\n")

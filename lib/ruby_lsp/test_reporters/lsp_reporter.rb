@@ -35,10 +35,10 @@ module RubyLsp
       @io = begin
         # The environment variable is only used for tests. The extension always writes to the temporary file
         if port
-          TCPSocket.new("localhost", port)
+          socket(port)
         elsif File.exist?(port_db_path)
           db = JSON.load_file(port_db_path)
-          TCPSocket.new("localhost", db[Dir.pwd])
+          socket(db[Dir.pwd])
         else
           # For tests that don't spawn the TCP server
           require "stringio"
@@ -208,6 +208,14 @@ module RubyLsp
     end
 
     private
+
+    #: (String) -> TCPSocket
+    def socket(port)
+      socket = TCPSocket.new("localhost", port)
+      socket.binmode
+      socket.sync = true
+      socket
+    end
 
     #: (String?, **untyped) -> void
     def send_message(method_name, **params)
