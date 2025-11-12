@@ -298,9 +298,6 @@ module RubyLsp
           rename_provider: rename_provider,
           references_provider: !@global_state.has_type_checker,
           document_range_formatting_provider: true,
-          workspace: {
-            configuration: true,
-          },
           experimental: {
             addon_detection: true,
             compose_bundle: true,
