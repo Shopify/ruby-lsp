@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 require_relative "support/expectations_test_runner"
 
 # Tests RuboCop disable directives - before/after on whole file

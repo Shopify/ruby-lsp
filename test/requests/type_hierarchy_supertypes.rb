@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class TypeHierarchySupertypesTest < Minitest::Test
   def test_type_hierarchy_supertypes_returns_nil_if_item_name_not_indexed

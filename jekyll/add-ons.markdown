@@ -530,7 +530,7 @@ Add-ons are automatically loaded, so simply executing the desired language serve
 add-on's contributions.
 
 ```ruby
-require "test_helper"
+require "old_test_helper"
 require "ruby_lsp/test_helper"
 
 class MyAddonTest < Minitest::Test

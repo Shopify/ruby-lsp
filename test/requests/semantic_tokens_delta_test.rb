@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class SemanticTokensDeltaTest < Minitest::Test
   def test_inserting_something_at_the_end

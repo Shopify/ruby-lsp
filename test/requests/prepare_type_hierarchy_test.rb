@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class PrepareTypeHierarchyTest < Minitest::Test
   def test_prepare_type_hierarchy_returns_nil_if_no_node_at_position

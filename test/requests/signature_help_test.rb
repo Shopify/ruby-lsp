@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class SignatureHelpTest < Minitest::Test
   def test_initial_request

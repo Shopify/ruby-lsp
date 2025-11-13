@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class CompletionTest < Minitest::Test
   def test_completion_keyword

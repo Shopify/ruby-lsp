@@ -6,6 +6,7 @@ gemspec
 
 gem "bundler", "~> 2.5"
 gem "minitest", "~> 5.25"
+gem "megatest", github: "byroot/megatest", branch: "main"
 gem "test-unit", require: false
 
 group :development do

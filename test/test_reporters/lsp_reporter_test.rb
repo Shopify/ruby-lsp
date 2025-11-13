@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 require "coverage"
 require "ruby_lsp/test_reporters/lsp_reporter"
 

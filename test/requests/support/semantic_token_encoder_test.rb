@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class SemanticTokenEncoderTest < Minitest::Test
   SemanticTokenEncoder = RubyLsp::ResponseBuilders::SemanticHighlighting::SemanticTokenEncoder

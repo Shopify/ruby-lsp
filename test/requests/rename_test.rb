@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class RenameTest < Minitest::Test
   def test_empty_diagnostics_for_ignored_file

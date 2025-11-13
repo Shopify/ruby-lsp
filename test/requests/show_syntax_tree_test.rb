@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-require "test_helper"
+require "old_test_helper"
 
 class ShowSyntaxTreeTest < Minitest::Test
   def test_returns_partial_tree_if_document_has_syntax_error

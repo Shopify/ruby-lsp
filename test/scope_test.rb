@@ -3,7 +3,7 @@
 
 require "test_helper"
 
-class ScopeTest < Minitest::Test
+class ScopeTest < TestCase
   def test_finding_parameter_in_immediate_scope
     scope = RubyLsp::Scope.new
     scope.add("foo", :parameter)

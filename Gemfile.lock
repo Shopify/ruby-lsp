@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/byroot/megatest.git
+  revision: 8f810e84f3d68418ac57876abc59e3aa5343dee5
+  branch: main
+  specs:
+    megatest (0.4.0)
+
 PATH
   remote: .
   specs:
@@ -90,6 +97,7 @@ GEM
     sorbet (0.5.12230)
       sorbet-static (= 0.5.12230)
     sorbet-runtime (0.5.12230)
+    sorbet-static (0.5.12230-aarch64-linux)
     sorbet-static (0.5.12230-universal-darwin)
     sorbet-static (0.5.12230-x86_64-linux)
     sorbet-static-and-runtime (0.5.12230)
@@ -129,15 +137,15 @@ GEM
       yard
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin
-  x64-mingw-ucrt
-  x64-mingw32
   x86_64-darwin
   x86_64-linux
 
 DEPENDENCIES
   bundler (~> 2.5)
   debug (~> 1.9)
+  megatest!
   minitest (~> 5.25)
   mocha (~> 2.3)
   psych (~> 5.1)
