@@ -175,6 +175,17 @@ module RubyLsp
           ),
         )
       end
+
+      def workspace_configuration(
+        id,
+        section:
+      )
+        new(id: id, method: "workspace/configuration", params: Interface::ConfigurationParams.new(
+          items: [
+            Interface::ConfigurationItem.new(section: section),
+          ],
+        ))
+      end
     end
 
     #: (id: (Integer | String), method: String, params: Object) -> void
