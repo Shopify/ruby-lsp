@@ -69,11 +69,15 @@ export class Workspace implements WorkspaceInterface {
 
     // If the git extension is available, use that to find the root of the git repository
     if (gitExtension) {
-      const api = gitExtension.exports.getAPI(1);
-      const repository = await api.openRepository(this.workspaceFolder.uri);
+      try {
+        const api = gitExtension.exports.getAPI(1);
+        const repository = await api.openRepository(this.workspaceFolder.uri);
 
-      if (repository) {
-        rootGitUri = repository.rootUri;
+        if (repository) {
+          rootGitUri = repository.rootUri;
+        }
+      } catch (_error: any) {
+        // Git extension might be disabled
       }
     }
 
