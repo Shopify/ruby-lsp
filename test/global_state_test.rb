@@ -199,6 +199,16 @@ module RubyLsp
       assert_predicate(state, :has_type_checker)
     end
 
+    def test_type_checker_is_bypassed_based_on_initialization_options
+      state = GlobalState.new
+
+      Bundler.locked_gems.stubs(dependencies: {})
+      stub_all_dependencies("sorbet-static")
+      state.apply_options({ initializationOptions: { bypassTypechecker: true } })
+
+      refute(state.has_type_checker)
+    end
+
     def test_addon_settings_are_stored
       global_state = GlobalState.new
 
