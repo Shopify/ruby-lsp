@@ -412,6 +412,31 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_reply_to_workspace_configuration_modifies_global_state
+    @server.instance_variable_set(:@sent_requests, {
+      1 => RubyLsp::Request.workspace_configuration(
+        1, section: "rubyLsp"
+      ),
+    })
+
+    @server.process_message({
+      id: 1,
+      result: [{ formatter: "standard" }],
+    })
+
+    assert_equal("standard", @server.global_state.formatter)
+  end
+
+  def test_did_change_configuration_sends_workspace_configuration_request
+    @server.process_message({
+      id: 1,
+      method: "workspace/didChangeConfiguration",
+      params: {},
+    })
+
+    find_message(RubyLsp::Request, "workspace/configuration")
+  end
+
   def test_changed_file_only_indexes_ruby
     path = File.join(Dir.pwd, "lib", "foo.rb")
     File.write(path, "class Foo\nend")
