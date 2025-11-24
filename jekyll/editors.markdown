@@ -105,6 +105,7 @@ new H2 header in this file containing the instructions. -->
 - [RubyMine](#rubymine)
 - [Kate](#kate)
 - [Helix](#helix)
+- [BBEdit](#bbedit)
 
 ## Emacs Eglot
 
@@ -374,3 +375,9 @@ auto-format = true
 ```
 
 [mason-abi]: https://github.com/williamboman/mason.nvim/issues/1292
+
+## BBEdit
+
+BBEdit has built-in support for the Language Server Protocol and can be configured to work with the Ruby LSP.
+
+To set up Ruby LSP in BBEdit, follow the instructions provided in the [official BBEdit documentation](https://www.barebones.com/support/bbedit/lsp-notes.html).
