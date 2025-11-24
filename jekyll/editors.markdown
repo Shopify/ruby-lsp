@@ -381,6 +381,4 @@ auto-format = true
 
 BBEdit has built-in support for the Language Server Protocol and can be configured to work with the Ruby LSP.
 
-To set up Ruby LSP in BBEdit, follow the instructions provided in the official BBEdit documentation:
-
-[BBEdit Language Server Configuration](https://www.barebones.com/support/bbedit/lsp-notes.html)
+To set up Ruby LSP in BBEdit, follow the instructions provided in the [official BBEdit documentation](https://www.barebones.com/support/bbedit/lsp-notes.html).
