@@ -107,7 +107,6 @@ new H2 header in this file containing the instructions. -->
 - [Helix](#helix)
 - [BBEdit](#bbedit)
 
-
 ## Emacs Eglot
 
 [Eglot](https://github.com/joaotavora/eglot) runs solargraph server by default. To set it up with ruby-lsp you need to
