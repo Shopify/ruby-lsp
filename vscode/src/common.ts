@@ -82,7 +82,7 @@ export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 // are not impacted by the user's choice of opting into all flags
 export const FEATURE_FLAGS = {
   tapiocaAddon: 1.0,
-  launcher: 0.1,
+  launcher: 0.3,
   fullTestDiscovery: 1.0,
 };
 
