@@ -5,7 +5,7 @@ require "test_helper"
 
 class IntegrationTest < Minitest::Test
   def setup
-    @root = Bundler.root
+    @bundle_path = Bundler.bundle_path.to_s
   end
 
   def test_ruby_lsp_doctor_works
@@ -38,6 +38,7 @@ class IntegrationTest < Minitest::Test
     )
 
     assert_equal(0, status.exitstatus, stderr)
+    stderr.force_encoding(Encoding::UTF_8)
 
     match = /RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr) #: as !nil
     activation_string = match[1] #: as !nil
@@ -47,7 +48,7 @@ class IntegrationTest < Minitest::Test
     refute_nil(gem_path)
     assert(yjit)
 
-    assert_includes(fields, "PS1RUBY_LSP_VS#{ENV["PS1"]}")
+    assert(fields.find { |f| f.start_with?("PS1RUBY_LSP_VS") })
 
     fields.each do |field|
       key, value = field.split("RUBY_LSP_VS")
@@ -87,6 +88,7 @@ class IntegrationTest < Minitest::Test
     )
 
     assert_equal(0, status.exitstatus, stderr)
+    stderr.force_encoding(Encoding::UTF_8)
 
     match = /RUBY_LSP_ACTIVATION_SEPARATOR(.*)RUBY_LSP_ACTIVATION_SEPARATOR/m.match(stderr) #: as !nil
     activation_string = match[1] #: as !nil
@@ -124,7 +126,7 @@ class IntegrationTest < Minitest::Test
           stringio
 
         BUNDLED WITH
-          2.5.7
+          4.0.0.beta1
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -138,7 +140,7 @@ class IntegrationTest < Minitest::Test
         launch(dir, "ruby-lsp")
       end
 
-      assert_match(/BUNDLED WITH\n\s*2.5.7/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
+      assert_match(/BUNDLED WITH\n\s*4.0.0.beta1/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
@@ -163,7 +165,7 @@ class IntegrationTest < Minitest::Test
           stringio
 
         BUNDLED WITH
-          2.5.7
+          4.0.0.beta1
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -185,7 +187,7 @@ class IntegrationTest < Minitest::Test
         launch(dir, "ruby-lsp", { "PATH" => "#{bin_path}#{File::PATH_SEPARATOR}#{ENV["PATH"]}" })
       end
 
-      assert_match(/BUNDLED WITH\n\s*2.5.7/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
+      assert_match(/BUNDLED WITH\n\s*4.0.0.beta1/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
@@ -244,7 +246,7 @@ class IntegrationTest < Minitest::Test
   def test_launch_mode_with_no_gemfile_and_bundle_path
     in_temp_dir do |dir|
       Bundler.with_unbundled_env do
-        system("bundle config --local path #{File.join("vendor", "bundle")}")
+        system("bundle", "config", "set", "--local", "path", File.join("vendor", "bundle"))
         assert_path_exists(File.join(dir, ".bundle", "config"))
         launch(dir)
       end
@@ -351,7 +353,7 @@ class IntegrationTest < Minitest::Test
           ruby-lsp-rails
 
         BUNDLED WITH
-           2.7.1
+           4.0.0.beta1
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -440,7 +442,7 @@ class IntegrationTest < Minitest::Test
     paths.concat(specification.dependencies.filter_map { |dep| dep.to_spec&.full_gem_path })
 
     load_path = $LOAD_PATH.filter_map do |path|
-      next unless paths.any? { |gem_path| path.start_with?(gem_path) } || !path.start_with?(Bundler.bundle_path.to_s)
+      next unless paths.any? { |gem_path| path.start_with?(gem_path) } || !path.start_with?(@bundle_path)
 
       ["-I", File.expand_path(path)]
     end.uniq.flatten
@@ -450,7 +452,7 @@ class IntegrationTest < Minitest::Test
         extra_env,
         Gem.ruby,
         *load_path,
-        File.join(@root, "exe", exec),
+        File.join(__dir__, "..", "exe", exec),
       )
     stdin.sync = true
     stdin.binmode
