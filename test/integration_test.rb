@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "timeout"
 
 class IntegrationTest < Minitest::Test
   def setup
@@ -126,7 +127,7 @@ class IntegrationTest < Minitest::Test
           stringio
 
         BUNDLED WITH
-          4.0.0.beta1
+          4.0.2
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -140,7 +141,7 @@ class IntegrationTest < Minitest::Test
         launch(dir, "ruby-lsp")
       end
 
-      assert_match(/BUNDLED WITH\n\s*4.0.0.beta1/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
+      assert_match(/BUNDLED WITH\n\s*4.0.2/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
@@ -165,7 +166,7 @@ class IntegrationTest < Minitest::Test
           stringio
 
         BUNDLED WITH
-          4.0.0.beta1
+          4.0.2
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -187,7 +188,7 @@ class IntegrationTest < Minitest::Test
         launch(dir, "ruby-lsp", { "PATH" => "#{bin_path}#{File::PATH_SEPARATOR}#{ENV["PATH"]}" })
       end
 
-      assert_match(/BUNDLED WITH\n\s*4.0.0.beta1/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
+      assert_match(/BUNDLED WITH\n\s*4.0.2/, File.read(File.join(dir, ".ruby-lsp", "Gemfile.lock")))
     end
   end
 
@@ -233,7 +234,7 @@ class IntegrationTest < Minitest::Test
           stringio
 
         BUNDLED WITH
-          2.5.7
+          4.0.2
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -353,7 +354,7 @@ class IntegrationTest < Minitest::Test
           ruby-lsp-rails
 
         BUNDLED WITH
-           4.0.0.beta1
+           4.0.2
       LOCKFILE
       File.write(File.join(dir, "Gemfile.lock"), lockfile_contents)
 
@@ -374,24 +375,19 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_launch_mode_retries_if_setup_failed_after_successful_install
-    # RubyGems asks for confirmation when uninstalling a gem, so we need to be able to write the `y` to stdin
-    uninstall_rails = ->() {
-      stdin, _stdout, _stderr, wait_thread = Open3.popen3("gem", "uninstall", "rails")
-      stdin.write("y\n")
-      wait_thread.join
-    }
+    skip("This test doesn't work on Windows for Ruby 3.2") if Gem.win_platform? && RUBY_VERSION.start_with?("3.2.")
 
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"
-        gem "rails"
+        gem "rails", "8.1.1"
       RUBY
 
       Bundler.with_unbundled_env do
         # Generate a lockfile first
         capture_subprocess_io { system("bundle", "install") }
         # Uninstall the gem so that composing the bundle has to install it
-        uninstall_rails.call
+        system("gem", "uninstall", "rails", "-v", "8.1.1", "--executables", "--silent")
 
         # Preemptively create the bundle_env file and acquire an exclusive lock on it, so that composing the bundle will
         # have to pause immediately after bundle installing, but before invoking Bundler.setup
@@ -407,7 +403,7 @@ class IntegrationTest < Minitest::Test
             sleep(2)
             # Uninstall Rails after successfully bundle installing and before invoking Bundler.setup, which will cause
             # it to fail with `Bundler::GemNotFound`. This triggers our retry mechanism
-            uninstall_rails.call
+            system("gem", "uninstall", "rails", "-v", "8.1.1", "--executables", "--silent")
           end
         end
 
@@ -421,7 +417,7 @@ class IntegrationTest < Minitest::Test
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"
-        gem "ruby-lsp", "0.23.0"
+        gem "ruby-lsp", "0.24.0"
       RUBY
 
       Bundler.with_unbundled_env do
@@ -437,60 +433,59 @@ class IntegrationTest < Minitest::Test
   private
 
   def launch(workspace_path, exec = "ruby-lsp-launcher", extra_env = {})
-    specification = Gem::Specification.find_by_name("ruby-lsp")
-    paths = [specification.full_gem_path]
-    paths.concat(specification.dependencies.filter_map { |dep| dep.to_spec&.full_gem_path })
+    stdin = nil #: IO?
+    stdout = nil #: IO?
+    stderr = nil #: IO?
 
-    load_path = $LOAD_PATH.filter_map do |path|
-      next unless paths.any? { |gem_path| path.start_with?(gem_path) } || !path.start_with?(@bundle_path)
+    begin
+      Timeout.timeout(180) do
+        stdin, stdout, stderr, wait_thr = Open3 #: as untyped
+          .popen3(
+            extra_env,
+            Gem.ruby,
+            File.join(__dir__, "..", "exe", exec),
+          )
+        stdin.sync = true
+        stdin.binmode
+        stdout.sync = true
+        stdout.binmode
+        stderr.sync = true
+        stderr.binmode
 
-      ["-I", File.expand_path(path)]
-    end.uniq.flatten
+        send_message(stdin, {
+          id: 1,
+          method: "initialize",
+          params: {
+            initializationOptions: {},
+            capabilities: { general: { positionEncodings: ["utf-8"] } },
+            workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace_path).to_s }],
+          },
+        })
 
-    stdin, stdout, stderr, wait_thr = Open3 #: as untyped
-      .popen3(
-        extra_env,
-        Gem.ruby,
-        *load_path,
-        File.join(__dir__, "..", "exe", exec),
-      )
-    stdin.sync = true
-    stdin.binmode
-    stdout.sync = true
-    stdout.binmode
-    stderr.sync = true
-    stderr.binmode
+        # First message is the log of initializing Ruby LSP
+        read_message(stdout, stderr)
+        # Verify that initialization didn't fail
+        initialize_response = read_message(stdout, stderr)
+        refute(initialize_response[:error], initialize_response.dig(:error, :message))
 
-    send_message(stdin, {
-      id: 1,
-      method: "initialize",
-      params: {
-        initializationOptions: {},
-        capabilities: { general: { positionEncodings: ["utf-8"] } },
-        workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace_path).to_s }],
-      },
-    })
+        send_message(stdin, { id: 2, method: "shutdown" })
+        send_message(stdin, { method: "exit" })
 
-    # First message is the log of initializing Ruby LSP
-    read_message(stdout)
-    # Verify that initialization didn't fail
-    initialize_response = read_message(stdout)
-    refute(initialize_response[:error], initialize_response.dig(:error, :message))
-
-    send_message(stdin, { id: 2, method: "shutdown" })
-    send_message(stdin, { method: "exit" })
-
-    # Wait until the process exits
-    wait_thr.join
-
-    # If the child process failed, it is really difficult to diagnose what's happening unless we read what was printed
-    # to stderr
-    unless wait_thr.value.success?
-      require "timeout"
-
-      Timeout.timeout(5) do
-        flunk("Process failed\n#{stderr.read}")
+        # Wait until the process exits
+        wait_thr.join
       end
+    rescue Timeout::Error
+      if stderr
+        Timeout.timeout(5) { flunk("Launching the server timed out\n#{stderr.read}") }
+      end
+
+      if stdout
+        Timeout.timeout(5) { flunk("Launching the server timed out\n#{stdout.read}") }
+      end
+    ensure
+      stdin&.close
+      stdout&.close
+      stderr&.close
     end
 
     assert_path_exists(File.join(workspace_path, ".ruby-lsp", "Gemfile"))
@@ -504,8 +499,10 @@ class IntegrationTest < Minitest::Test
     stdin.flush
   end
 
-  def read_message(stdout)
+  def read_message(stdout, stderr)
     headers = stdout.gets("\r\n\r\n")
+    flunk(stderr.read) unless headers
+
     length = headers[/Content-Length: (\d+)/i, 1].to_i
     JSON.parse(stdout.read(length), symbolize_names: true)
   end
