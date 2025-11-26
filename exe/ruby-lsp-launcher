@@ -110,8 +110,6 @@ rescue Bundler::GemNotFound, Bundler::GitError
     File.write(raw_initialize_path, raw_initialize)
     exec(Gem.ruby, __FILE__, *ARGV, "--retry")
   end
-
-  $LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
 rescue StandardError => e
   setup_error = e
   $stderr.puts("Failed to set up composed Bundle\n#{e.full_message}")

@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "bundler", "~> 2.5"
+gem "bundler", "~> 4.0.0.beta2"
 gem "minitest", "~> 5.25"
 gem "test-unit", require: false
 
