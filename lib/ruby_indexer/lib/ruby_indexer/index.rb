@@ -714,6 +714,7 @@ module RubyIndexer
         attached_ancestor = self[name]&.first #: as !nil
 
         singleton = Entry::SingletonClass.new(
+          @configuration,
           [full_singleton_name],
           attached_ancestor.uri,
           attached_ancestor.location,

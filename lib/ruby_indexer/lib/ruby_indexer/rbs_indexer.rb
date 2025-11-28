@@ -52,9 +52,9 @@ module RubyIndexer
       comments = comments_to_string(declaration)
       entry = if declaration.is_a?(RBS::AST::Declarations::Class)
         parent_class = declaration.super_class&.name&.name&.to_s
-        Entry::Class.new(nesting, uri, location, location, comments, parent_class)
+        Entry::Class.new(@index.configuration, nesting, uri, location, location, comments, parent_class)
       else
-        Entry::Module.new(nesting, uri, location, location, comments)
+        Entry::Module.new(@index.configuration, nesting, uri, location, location, comments)
       end
 
       add_declaration_mixins_to_entry(declaration, entry)
@@ -110,6 +110,7 @@ module RubyIndexer
       real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
       signatures = signatures(member)
       @index.add(Entry::Method.new(
+        @index.configuration,
         name,
         uri,
         location,
@@ -243,6 +244,7 @@ module RubyIndexer
     def handle_constant(declaration, nesting, uri)
       fully_qualified_name = [*nesting, declaration.name.name.to_s].join("::")
       @index.add(Entry::Constant.new(
+        @index.configuration,
         fully_qualified_name,
         uri,
         to_ruby_indexer_location(declaration.location),
@@ -258,6 +260,7 @@ module RubyIndexer
       comments = comments_to_string(declaration)
 
       @index.add(Entry::GlobalVariable.new(
+        @index.configuration,
         name,
         uri,
         location,
@@ -271,6 +274,7 @@ module RubyIndexer
       comments = comments_to_string(member)
 
       entry = Entry::UnresolvedMethodAlias.new(
+        @index.configuration,
         member.new_name.to_s,
         member.old_name.to_s,
         owner_entry,
