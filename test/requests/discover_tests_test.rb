@@ -822,6 +822,23 @@ module RubyLsp
       end
     end
 
+    def test_test_methods_inside_describe_blocks
+      source = <<~RUBY
+        describe MyGem do
+          def test_foo
+          end
+
+          def helper_method
+          end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["MyGem"], items.map { |i| i[:id] })
+        assert_equal(["MyGem#test_foo"], items.dig(0, :children).map { |i| i[:id] })
+      end
+    end
+
     private
 
     def create_test_discovery_addon

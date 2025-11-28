@@ -28,6 +28,7 @@ module RubyLsp
           :on_class_node_enter,
           :on_call_node_enter,
           :on_call_node_leave,
+          :on_def_node_enter,
         )
       end
 
@@ -77,6 +78,27 @@ module RubyLsp
         return unless description && current_group.id.end_with?(description)
 
         @spec_group_id_stack.pop
+      end
+
+      #: (Prism::DefNode) -> void
+      def on_def_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        return unless in_spec_context?
+        return unless node.name.start_with?("test_")
+
+        parent = latest_group
+        return unless parent.is_a?(Requests::Support::TestItem)
+
+        name = node.name.to_s
+
+        test_item = Requests::Support::TestItem.new(
+          "#{parent.id}##{name}",
+          name,
+          @uri,
+          range_from_node(node),
+          framework: :minitest,
+        )
+        parent.add(test_item)
+        @response_builder.add_code_lens(test_item)
       end
 
       private
