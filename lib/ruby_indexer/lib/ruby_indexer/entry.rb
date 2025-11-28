@@ -86,7 +86,7 @@ module RubyIndexer
           correct_group.filter_map do |comment|
             content = comment.slice.chomp
 
-            if content.valid_encoding?
+            if content.valid_encoding? && !content.match?(@configuration.magic_comment_regex)
               content.delete_prefix!("#")
               content.delete_prefix!(" ")
               content
