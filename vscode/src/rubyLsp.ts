@@ -423,7 +423,7 @@ export class RubyLsp {
         terminal.show();
         terminal.sendText("bundle install");
       }),
-      vscode.commands.registerCommand(Command.OpenFile, (rubySourceLocation: [string, string] | string[]) => {
+      vscode.commands.registerCommand(Command.OpenFile, (rubySourceLocation: string[]) => {
         // New command format: accepts an array of URIs
         if (typeof rubySourceLocation[0] === "string") {
           return openUris(rubySourceLocation);
