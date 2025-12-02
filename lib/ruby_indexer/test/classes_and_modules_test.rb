@@ -766,5 +766,25 @@ module RubyIndexer
         FileUtils.rm(path)
       end
     end
+
+    def test_lazy_comments_ignores_magic_comments
+      path = File.join(Dir.pwd, "lib", "foo.rb")
+      source = <<~RUBY
+        # frozen_string_literal: true
+
+        class Foo
+        end
+      RUBY
+      File.write(path, source)
+      @index.index_single(URI::Generic.from_path(path: path), source, collect_comments: false)
+
+      entry = @index["Foo"]&.first #: as !nil
+
+      begin
+        assert_empty(entry.comments)
+      ensure
+        FileUtils.rm(path)
+      end
+    end
   end
 end
