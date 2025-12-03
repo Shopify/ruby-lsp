@@ -1,11 +1,10 @@
-name: 'Close stale issues & pull requests'
+name: 'Close stale issues'
 on:
   schedule:
     - cron: '30 12 * * *'
 
 permissions:
   issues: write
-  pull-requests: write
 
 jobs:
   stale:
@@ -15,7 +14,7 @@ jobs:
         with:
           days-before-stale: 60
           days-before-close: 14
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
           exempt-issue-labels: pinned
-          exempt-pr-labels: pinned
           stale-issue-message: This issue is being marked as stale because there was no activity in the last 2 months
-          stale-pr-message: This pull request is being marked as stale because there was no activity in the last 2 months
