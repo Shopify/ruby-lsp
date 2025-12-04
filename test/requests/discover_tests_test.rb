@@ -822,6 +822,36 @@ module RubyLsp
       end
     end
 
+    def test_discovers_test_methods
+      source = <<~RUBY
+        describe "MySpec" do
+          def test_foo; end
+          def helper_method; end
+
+          describe "nested" do
+            def test_nested; end
+          end
+        end
+
+        class NotASpec
+          def test_ignored; end
+        end
+      RUBY
+
+      with_minitest_spec_configured(source) do |items|
+        assert_equal(["MySpec"], items.map { |i| i[:id] })
+        assert_equal(
+          ["MySpec#test_foo", "MySpec::nested"],
+          items.dig(0, :children).map { |i| i[:id] },
+        )
+        assert_equal(
+          ["MySpec::nested#test_nested"],
+          items.dig(0, :children, 1, :children).map { |i| i[:id] },
+        )
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
     private
 
     def create_test_discovery_addon
