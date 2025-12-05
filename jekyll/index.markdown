@@ -194,40 +194,52 @@ lens](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.
 request requires specific commands to be implemented in the editor in order to work. For VS Code, this is included with the Ruby LSP extension. If you are using a different editor, please check the editor's documentation on how to
 define the required commands.
 
-![Code lens demo](images/code_lens.gif)
+<video src="images/code_lens.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates Ruby LSP code lens run and debug buttons for tests.
+</video>
 
 ### Document symbol
 
 Document symbol allows users to fuzzy search declarations inside the current file. It is also used to populate the
 breadcrumbs and the outline.
 
-![Document symbol demo](images/document_symbol.gif)
+<video src="images/document_symbol.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video illustrates the document symbol feature for navigating within a file.
+</video>
 
 ### Workspace symbol
 
 Workspace symbol is the project-wide version of document symbol. It allows users to fuzzy search any declaration in the
 entire project.
 
-![Workspace symbol demo](images/workspace_symbol.gif)
+<video src="images/workspace_symbol.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates workspace-wide symbol search across the project.
+</video>
 
 ### Document link
 
 Document link makes magic `source` links clickable. This is used to connect two declarations for convenience. Note that
 the links are only processed if they are immediately above a declaration and not anywhere in the code.
 
-![Document link demo](images/document_link.gif)
+<video src="images/document_link.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows clickable source links provided by the document link feature.
+</video>
 
 ### Document highlight
 
 Document highlight reveals occurrences and declarations of the entity under the cursor.
 
-![Document highlight demo](images/document_highlight.gif)
+<video src="images/document_highlight.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video showcases document highlight revealing all occurrences of the symbol under the cursor.
+</video>
 
 ### Folding range
 
 Folding range allows users to fold code at relevant ranges of the source.
 
-![Folding range demo](images/folding_range.gif)
+<video src="images/folding_range.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates code folding ranges in action.
+</video>
 
 ### Semantic highlighting
 
@@ -254,13 +266,17 @@ of the code. The Ruby LSP has native support for syntax errors and also supports
 {: .note }
 You can configure which linters to use as long as they have integrations for the Ruby LSP. Check the available [configurations](editors#all-initialization-options).
 
-![Diagnostic demo](images/diagnostic.gif)
+<video src="images/diagnostic.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video displays diagnostics surfacing syntax and lint errors.
+</video>
 
 ### Formatting
 
 Formatting allows documents to be formatted automatically on save or manually if the editor supports it.
 
-![Formatting demo](images/formatting.gif)
+<video src="images/formatting.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows automatic document formatting being applied.
+</video>
 
 ### Code actions
 
@@ -268,13 +284,17 @@ Formatting allows documents to be formatted automatically on save or manually if
 
 The Ruby LSP supports fixing violations through quick fixes.
 
-![Quickfix demo](images/quickfix.gif)
+<video src="images/quickfix.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates applying quick fixes to resolve code issues.
+</video>
 
 **Refactors**
 
 The Ruby LSP supports some code refactorings, like extract to variable, extract to method and switch block style.
 
-![Refactors demo](images/refactors.gif)
+<video src="images/refactors.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video illustrates code refactorings such as extract to variable or method.
+</video>
 
 
 ### Inlay hints
@@ -298,7 +318,9 @@ hint behavior:
 
 To configure other editors, see the [initialization options](editors#all-initialization-options).
 
-![Inlay hint demo](images/inlay_hint.gif)
+<video src="images/inlay_hint.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows inlay hints making implicit information explicit.
+</video>
 
 ### On type formatting
 
@@ -307,7 +329,9 @@ On type formatting applies changes to the code as the user is typing. For exampl
 {: .note }
 In VS Code, format on type is disabled by default. You can enable it with `"editor.formatOnType": true`
 
-![On type formatting demo](images/on_type_formatting.gif)
+<video src="images/on_type_formatting.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates on-type formatting that auto-completes `end` tokens as you type.
+</video>
 
 ### Range formatting
 
@@ -323,14 +347,18 @@ formatting a file. Supporting range formatting for RuboCop or Standard requires 
 Ruby LSP can inform the formatter of the base indentation at the place of the selection. Additionally, the formatter
 can only apply corrections that make sense for the portion of the document.
 
-![Range formatting demo](images/range_formatting.gif)
+<video src="images/range_formatting.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows range formatting applied to a selected region of code.
+</video>
 
 ### Selection range
 
 Selection range (or smart ranges) expands or shrinks a selection based on the code's constructs. In VS Code, this can
 be triggered with `CTRL + SHIFT + LEFT/RIGHT ARROW` to expand/shrink, respectively.
 
-![Selection range demo](images/selection_range.gif)
+<video src="images/selection_range.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates smart selection range expansion and shrinking.
+</video>
 
 ### Show syntax tree
 
@@ -341,7 +369,9 @@ show the AST for the entire document or for a selection.
 This feature is not a part of the language server specification. It is a custom feature, which is implemented in the
 Ruby LSP's VS Code extension. Other editors can implement a similar approach to achieve the same functionality
 
-![Show syntax tree demo](images/show_syntax_tree.gif)
+<video src="images/show_syntax_tree.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video displays the AST visualization via the show syntax tree command.
+</video>
 
 ### ERB support
 
@@ -361,7 +391,9 @@ will sometimes display incorrect candidates. We believe this might be a limitati
 and we've opened a [discussion with VS Code](https://github.com/microsoft/vscode-discussions/discussions/1628) to better
 understand it.
 
-![ERB features demo](images/erb.gif)
+<video src="images/erb.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates ERB support with embedded Ruby and host language features.
+</video>
 
 ### Guessed types
 
@@ -449,14 +481,18 @@ edits that will be applied by pressing CTRL/CMD + Enter after typing the desired
 
 Rename is currently only supported for constants, module names and class names.
 
-![Rename demo](images/rename.gif)
+<video src="images/rename.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows renaming a symbol across the project.
+</video>
 
 ### Find references
 
 The find references request allows users to both see a list of references or jump to reference locations. Note that
 only constants are currently supported, but support for methods, instance variables and local variables is planned.
 
-![References demo](images/references.gif)
+<video src="images/references.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video demonstrates finding references to a constant.
+</video>
 
 ## VS Code features
 
@@ -467,7 +503,9 @@ The following features are all custom made for VS Code.
 The Ruby LSP contributes a custom dependencies view panel that allows users to navigate the dependencies of their
 projects.
 
-![Dependencies view demo](images/dependencies_view.gif)
+<video src="images/dependencies_view.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows the dependencies view panel for navigating project gems.
+</video>
 
 ### Rails generator integrations
 

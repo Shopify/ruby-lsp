@@ -12,7 +12,9 @@ for Ruby, used to improve rich features in editors.
 
 ## Features
 
-![Ruby LSP demo](images/ruby_lsp_demo.gif)
+<video src="images/ruby_lsp_demo.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video provides a quick overview of Ruby LSP features inside VS Code.
+</video>
 
 The Ruby LSP features include
 

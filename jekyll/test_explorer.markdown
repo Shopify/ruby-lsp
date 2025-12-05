@@ -24,7 +24,9 @@ users to execute the tests defined in their codebase in 4 modes directly from in
 - Debug: starts an interactive debugging session for the selected tests
 - Coverage: runs tests in coverage mode and shows results inside the editor
 
-![Test explorer demo](images/test_explorer.gif)
+<video src="images/test_explorer.mp4" width="100%" controls>
+Sorry, your browser doesn't support embedded videos. This video shows the test explorer UI with run, debug, and coverage actions.
+</video>
 
 ## Design
 
