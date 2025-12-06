@@ -5,6 +5,8 @@ require "test_helper"
 
 class IntegrationTest < Minitest::Test
   def setup
+    Bundler.reset!
+    Bundler.setup
     @bundle_path = Bundler.bundle_path.to_s
   end
 
@@ -472,9 +474,9 @@ class IntegrationTest < Minitest::Test
     })
 
     # First message is the log of initializing Ruby LSP
-    read_message(stdout)
+    read_message(stdout, stderr)
     # Verify that initialization didn't fail
-    initialize_response = read_message(stdout)
+    initialize_response = read_message(stdout, stderr)
     refute(initialize_response[:error], initialize_response.dig(:error, :message))
 
     send_message(stdin, { id: 2, method: "shutdown" })
@@ -504,8 +506,10 @@ class IntegrationTest < Minitest::Test
     stdin.flush
   end
 
-  def read_message(stdout)
+  def read_message(stdout, stderr)
     headers = stdout.gets("\r\n\r\n")
+    flunk(stderr.read) unless headers
+
     length = headers[/Content-Length: (\d+)/i, 1].to_i
     JSON.parse(stdout.read(length), symbolize_names: true)
   end
