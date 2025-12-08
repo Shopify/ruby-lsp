@@ -836,10 +836,14 @@ module RubyLsp
         class NotASpec
           def test_ignored; end
         end
+
+        class NotDescribeSpec < Minitest::Spec
+          def test_not_duplicate; end
+        end
       RUBY
 
       with_minitest_spec_configured(source) do |items|
-        assert_equal(["MySpec"], items.map { |i| i[:id] })
+        assert_equal(["MySpec", "NotDescribeSpec"], items.map { |i| i[:id] })
         assert_equal(
           ["MySpec#test_foo", "MySpec::nested"],
           items.dig(0, :children).map { |i| i[:id] },
@@ -847,6 +851,10 @@ module RubyLsp
         assert_equal(
           ["MySpec::nested#test_nested"],
           items.dig(0, :children, 1, :children).map { |i| i[:id] },
+        )
+        assert_equal(
+          ["NotDescribeSpec#test_not_duplicate"],
+          items.dig(1, :children).map { |i| i[:id] },
         )
         assert_all_items_tagged_with(items, :minitest)
       end
