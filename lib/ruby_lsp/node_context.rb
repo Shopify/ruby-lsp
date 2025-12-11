@@ -8,6 +8,9 @@ module RubyLsp
     #: Prism::Node?
     attr_reader :node, :parent
 
+    #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)]
+    attr_reader :nesting_nodes
+
     #: Array[String]
     attr_reader :nesting
 
