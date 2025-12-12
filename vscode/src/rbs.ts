@@ -5,6 +5,9 @@ import * as vscode from "vscode";
 //
 //   #: (String) -> (String | nil)
 //   #: (String) { (String) -> boolish } -> void
+//   #: (
+//   #|   String baz,
+//   #| ) -> void
 //   #: return: String
 //
 // However, this will not be dimmed:
@@ -57,7 +60,8 @@ export class RBS {
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (line.trim().startsWith("#:")) {
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith("#:") || trimmedLine.startsWith("#|")) {
         decorations.push({
           range: new vscode.Range(i, 0, i, line.length),
         });
