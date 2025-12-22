@@ -29,6 +29,7 @@ class ShowSyntaxTreeTest < Minitest::Test
                     ├── opening_loc: ∅
                     ├── arguments: ∅
                     ├── closing_loc: ∅
+                    ├── equal_loc: ∅
                     └── block:
                         @ BlockNode (location: (1,4)-(1,6))
                         ├── flags: ∅
