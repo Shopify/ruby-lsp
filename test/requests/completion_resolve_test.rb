@@ -207,4 +207,23 @@ class CompletionResolveTest < Minitest::Test
       assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
     end
   end
+
+  def test_resolve_for_require_completion
+    source = +<<~RUBY
+      require ""
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "foo",
+        kind: RubyLsp::Constant::CompletionItemKind::FILE,
+        data: {},
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      assert_nil(result[:documentation])
+    end
+  end
 end
