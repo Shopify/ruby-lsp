@@ -84,7 +84,7 @@ module RubyLsp
         content = KEYWORD_DOCS[keyword]
 
         if content
-          doc_path = File.join(STATIC_DOCS_PATH, "#{keyword}.md")
+          doc_uri = URI::Generic.from_path(path: File.join(STATIC_DOCS_PATH, "#{keyword}.md"))
 
           @item[:documentation] = Interface::MarkupContent.new(
             kind: "markdown",
@@ -93,7 +93,7 @@ module RubyLsp
               #{keyword}
               ```
 
-              [Read more](#{doc_path})
+              [Read more](#{doc_uri})
 
               #{content}
             MARKDOWN

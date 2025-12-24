@@ -204,7 +204,8 @@ class CompletionResolveTest < Minitest::Test
         RubyLsp::KEYWORD_DOCS["yield"], #: as !nil
         contents,
       )
-      assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/yield.md)", contents)
+      expected_uri = URI::Generic.from_path(path: File.join(RubyLsp::STATIC_DOCS_PATH, "yield.md"))
+      assert_match("[Read more](#{expected_uri})", contents)
     end
   end
 end

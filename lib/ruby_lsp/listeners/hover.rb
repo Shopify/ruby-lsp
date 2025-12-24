@@ -283,10 +283,10 @@ module RubyLsp
         content = KEYWORD_DOCS[keyword]
         return unless content
 
-        doc_path = File.join(STATIC_DOCS_PATH, "#{keyword}.md")
+        doc_uri = URI::Generic.from_path(path: File.join(STATIC_DOCS_PATH, "#{keyword}.md"))
 
         @response_builder.push("```ruby\n#{keyword}\n```", category: :title)
-        @response_builder.push("[Read more](#{doc_path})", category: :links)
+        @response_builder.push("[Read more](#{doc_uri})", category: :links)
         @response_builder.push(content, category: :documentation)
       end
 
