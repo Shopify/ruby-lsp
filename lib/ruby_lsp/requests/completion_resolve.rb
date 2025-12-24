@@ -68,10 +68,12 @@ module RubyLsp
           "[Learn more about guessed types](#{GUESSED_TYPES_URL})"
         end
 
-        @item[:documentation] = Interface::MarkupContent.new(
-          kind: "markdown",
-          value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES, extra_links: extra_links),
-        )
+        unless @item[:kind] == Constant::CompletionItemKind::FILE
+          @item[:documentation] = Interface::MarkupContent.new(
+            kind: "markdown",
+            value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES, extra_links: extra_links),
+          )
+        end
 
         @item
       end
