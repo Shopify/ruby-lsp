@@ -129,6 +129,26 @@ and are working on a codebase that uses Sorbet, then this may indicate the
 To avoid duplicate/conflicting behavior, Ruby LSP disables some features when a Sorbet codebase is detected, with the
 intention that Sorbet can provide better accuracy.
 
+When working on the Ruby LSP repository itself, you may want to disable Sorbet detection so that Ruby LSP provides all features directly.
+
+You can do this by setting the **bypassTypechecker** option during initialization:
+
+- **In VS Code:**
+
+  Set the `rubyLsp.bypassTypechecker` option in your workspace settings, or open the project using the provided ruby-lsp.code-workspace file.
+
+- **In other editors:**
+
+  Add the following to your editor’s LSP client configuration.
+
+  ```json
+  {
+    "initializationOptions": {
+      "bypassTypechecker": true
+    }
+  }
+  ````
+
 ### Gem installation locations and permissions
 
 To launch the Ruby LSP server, the `ruby-lsp` gem must be installed. And in order to automatically index your project's
