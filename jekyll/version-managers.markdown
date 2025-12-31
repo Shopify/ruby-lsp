@@ -31,6 +31,12 @@ Ensure Mise is up-to-date: https://mise.jdx.dev/faq.html#mise-is-failing-or-not-
 
 Ensure RVM is up-to-date: https://rvm.io/rvm/upgrading
 
+## rv
+
+Ensure rv 0.3.1 or later is installed. The extension automatically detects the Ruby version from a `.ruby-version` or `.tool-versions` file in the project.
+
+Learn more about rv: https://github.com/spinel-coop/rv
+
 ## Custom activation
 
 If you're using a different version manager that's not supported by this extension or if you're manually inserting the Ruby

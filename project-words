@@ -55,6 +55,7 @@ libexec
 linearization
 Linearizes
 linearizing
+linuxbrew
 lockfiles
 lspconfig
 Lstart
@@ -74,8 +75,8 @@ qtlzwssomeking
 quickfixes
 quux
 quxx
-rdbg
 rbundler
+rdbg
 readlines
 realpath
 reparsing
@@ -110,8 +111,8 @@ testrunner
 testrunnermediator
 truffleruby
 tsort
-unaliased
 ucrt
+unaliased
 unindexed
 unparser
 unresolve
