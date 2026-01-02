@@ -75,9 +75,17 @@ module RubyLsp
         return unless enclosing_call
 
         name = enclosing_call.name
-        return unless name == :require || name == :require_relative
+        case name
+        when :require, :require_relative
+          handle_require_definition(node, name)
+        when :send, :public_send
+          first_argument = enclosing_call.arguments.arguments.first
+          return unless first_argument.eql?(node)
 
-        handle_require_definition(node, name)
+          method_name = node.content
+
+          handle_method_definition(method_name, nil)
+        end
       end
 
       #: (Prism::SymbolNode node) -> void
@@ -85,10 +93,17 @@ module RubyLsp
         enclosing_call = @node_context.call_node
         return unless enclosing_call
 
-        name = enclosing_call.name
-        return unless name == :autoload
+        case enclosing_call.name
+        when :autoload
+          handle_autoload_definition(enclosing_call)
+        when :send, :public_send
+          first_argument = enclosing_call.arguments.arguments.first
+          return unless first_argument.eql?(node)
 
-        handle_autoload_definition(enclosing_call)
+          method_name = node.unescaped
+
+          handle_method_definition(method_name, nil)
+        end
       end
 
       #: (Prism::BlockArgumentNode node) -> void
