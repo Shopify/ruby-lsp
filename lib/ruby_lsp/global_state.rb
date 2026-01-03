@@ -2,6 +2,21 @@
 # frozen_string_literal: true
 
 module RubyLsp
+  # Holds the detected value and the reason for detection
+  class DetectionResult
+    #: String
+    attr_reader :value
+
+    #: String
+    attr_reader :reason
+
+    #: (String value, String reason) -> void
+    def initialize(value, reason)
+      @value = value
+      @reason = reason
+    end
+  end
+
   class GlobalState
     #: String
     attr_reader :test_library
@@ -122,8 +137,11 @@ module RubyLsp
       end
 
       if @formatter == "auto"
-        @formatter = detect_formatter(direct_dependencies, all_dependencies)
-        notifications << Notification.window_log_message("Auto detected formatter: #{@formatter}")
+        formatter_result = detect_formatter(direct_dependencies, all_dependencies)
+        @formatter = formatter_result.value
+        notifications << Notification.window_log_message(
+          "Auto detected formatter: #{@formatter} (#{formatter_result.reason})",
+        )
       end
 
       specified_linters = options.dig(:initializationOptions, :linters)
@@ -144,21 +162,28 @@ module RubyLsp
         specified_linters << "rubocop_internal"
       end
 
-      @linters = specified_linters || detect_linters(direct_dependencies, all_dependencies)
-
-      notifications << if specified_linters
-        Notification.window_log_message("Using linters specified by user: #{@linters.join(", ")}")
+      if specified_linters
+        @linters = specified_linters
+        notifications << Notification.window_log_message("Using linters specified by user: #{@linters.join(", ")}")
       else
-        Notification.window_log_message("Auto detected linters: #{@linters.join(", ")}")
+        linter_results = detect_linters(direct_dependencies, all_dependencies)
+        @linters = linter_results.map(&:value)
+        linter_messages = linter_results.map { |r| "#{r.value} (#{r.reason})" }
+        notifications << Notification.window_log_message("Auto detected linters: #{linter_messages.join(", ")}")
       end
 
-      @test_library = detect_test_library(direct_dependencies)
-      notifications << Notification.window_log_message("Detected test library: #{@test_library}")
+      test_library_result = detect_test_library(direct_dependencies)
+      @test_library = test_library_result.value
+      notifications << Notification.window_log_message(
+        "Detected test library: #{@test_library} (#{test_library_result.reason})",
+      )
 
-      @has_type_checker = detect_typechecker(all_dependencies)
-      if @has_type_checker
+      typechecker_result = detect_typechecker(all_dependencies)
+      @has_type_checker = !typechecker_result.nil?
+      if typechecker_result
         notifications << Notification.window_log_message(
-          "Ruby LSP detected this is a Sorbet project and will defer to the Sorbet LSP for some functionality",
+          "Ruby LSP detected this is a Sorbet project (#{typechecker_result.reason}) and will defer to the " \
+            "Sorbet LSP for some functionality",
         )
       end
 
@@ -228,60 +253,67 @@ module RubyLsp
 
     private
 
-    #: (Array[String] direct_dependencies, Array[String] all_dependencies) -> String
+    #: (Array[String] direct_dependencies, Array[String] all_dependencies) -> DetectionResult
     def detect_formatter(direct_dependencies, all_dependencies)
       # NOTE: Intentionally no $ at end, since we want to match rubocop-shopify, etc.
-      return "rubocop_internal" if direct_dependencies.any?(/^rubocop/)
+      if direct_dependencies.any?(/^rubocop/)
+        return DetectionResult.new("rubocop_internal", "direct dependency matching /^rubocop/")
+      end
 
-      syntax_tree_is_direct_dependency = direct_dependencies.include?("syntax_tree")
-      return "syntax_tree" if syntax_tree_is_direct_dependency
+      if direct_dependencies.include?("syntax_tree")
+        return DetectionResult.new("syntax_tree", "direct dependency")
+      end
 
-      rubocop_is_transitive_dependency = all_dependencies.include?("rubocop")
-      return "rubocop_internal" if dot_rubocop_yml_present && rubocop_is_transitive_dependency
+      if all_dependencies.include?("rubocop") && dot_rubocop_yml_present
+        return DetectionResult.new("rubocop_internal", "transitive dependency with .rubocop.yml present")
+      end
 
-      "none"
+      DetectionResult.new("none", "no formatter detected")
     end
 
     # Try to detect if there are linters in the project's dependencies. For auto-detection, we always only consider a
     # single linter. To have multiple linters running, the user must configure them manually
-    #: (Array[String] dependencies, Array[String] all_dependencies) -> Array[String]
+    #: (Array[String] dependencies, Array[String] all_dependencies) -> Array[DetectionResult]
     def detect_linters(dependencies, all_dependencies)
-      linters = []
+      linters = [] #: Array[DetectionResult]
 
-      if dependencies.any?(/^rubocop/) || (all_dependencies.include?("rubocop") && dot_rubocop_yml_present)
-        linters << "rubocop_internal"
+      if dependencies.any?(/^rubocop/)
+        linters << DetectionResult.new("rubocop_internal", "direct dependency matching /^rubocop/")
+      elsif all_dependencies.include?("rubocop") && dot_rubocop_yml_present
+        linters << DetectionResult.new("rubocop_internal", "transitive dependency with .rubocop.yml present")
       end
 
       linters
     end
 
-    #: (Array[String] dependencies) -> String
+    #: (Array[String] dependencies) -> DetectionResult
     def detect_test_library(dependencies)
       if dependencies.any?(/^rspec/)
-        "rspec"
+        DetectionResult.new("rspec", "direct dependency matching /^rspec/")
       # A Rails app may have a dependency on minitest, but we would instead want to use the Rails test runner provided
       # by ruby-lsp-rails. A Rails app doesn't need to depend on the rails gem itself, individual components like
       # activestorage may be added to the gemfile so that other components aren't downloaded. Check for the presence
       #  of bin/rails to support these cases.
       elsif bin_rails_present
-        "rails"
+        DetectionResult.new("rails", "bin/rails present")
       # NOTE: Intentionally ends with $ to avoid mis-matching minitest-reporters, etc. in a Rails app.
       elsif dependencies.any?(/^minitest$/)
-        "minitest"
+        DetectionResult.new("minitest", "direct dependency matching /^minitest$/")
       elsif dependencies.any?(/^test-unit/)
-        "test-unit"
+        DetectionResult.new("test-unit", "direct dependency matching /^test-unit/")
       else
-        "unknown"
+        DetectionResult.new("unknown", "no test library detected")
       end
     end
 
-    #: (Array[String] dependencies) -> bool
+    #: (Array[String] dependencies) -> DetectionResult?
     def detect_typechecker(dependencies)
-      return false if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
+      return if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
+      return if dependencies.none?(/^sorbet-static/)
 
-      dependencies.any?(/^sorbet-static/)
+      DetectionResult.new("sorbet", "sorbet-static in dependencies")
     rescue Bundler::GemfileNotFound
-      false
+      nil
     end
 
     #: -> bool
