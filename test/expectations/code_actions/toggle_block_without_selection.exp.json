@@ -1,0 +1,40 @@
+{
+  "params": {
+    "range": {
+      "start": {
+        "line": 0,
+        "character": 22
+      },
+      "end": {
+        "line": 0,
+        "character": 22
+      }
+    },
+    "textDocument": {
+      "uri": "file:///fake",
+      "version": null
+    },
+    "context": {
+      "diagnostics": []
+    }
+  },
+  "result": [
+    {
+      "title": "Refactor: Toggle block style",
+      "kind": "refactor.rewrite",
+      "data": {
+        "range": {
+          "start": {
+            "line": 0,
+            "character": 22
+          },
+          "end": {
+            "line": 0,
+            "character": 22
+          }
+        },
+        "uri": "file:///fake"
+      }
+    }
+  ]
+}
