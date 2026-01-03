@@ -62,7 +62,7 @@ document and to allow for quick navigation.
 Ruby LSP already provides document symbols for Ruby files, such as classes, modules, methods, etc. But the Rails add-on
 provides additional document symbols for Rails specific features.
 
-In VS Code, you can open the document symbols view by pressing `Ctrl + Shift + O`.
+In VS Code, you can open the document symbols view by pressing `Cmd + Shift + O` (Mac) or `Ctrl + Shift + O` (Windows/Linux).
 
 ### Active Record Callbacks, Validations, and Associations
 
