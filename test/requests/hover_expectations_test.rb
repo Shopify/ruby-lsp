@@ -965,7 +965,9 @@ class HoverExpectationsTest < ExpectationsTestRunner
           RubyLsp::KEYWORD_DOCS[keyword] || "No documentation found for #{keyword}",
           contents,
         )
-        assert_match("[Read more](#{RubyLsp::STATIC_DOCS_PATH}/#{keyword}.md)", contents)
+
+        expected_uri = URI::Generic.from_path(path: File.join(RubyLsp::STATIC_DOCS_PATH, "#{keyword}.md"))
+        assert_match("[Read more](#{expected_uri})", contents)
       end
     end
   end
