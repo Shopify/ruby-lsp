@@ -5,6 +5,7 @@ require "uri/file"
 
 module URI
   # Must be kept in sync with the one in Tapioca
+  # https://github.com/Shopify/tapioca/blob/main/lib/tapioca/helpers/source_uri.rb
   class Source < URI::File
     COMPONENT = [
       :scheme,
@@ -69,8 +70,10 @@ module URI
     end
 
     if URI.respond_to?(:register_scheme)
+      # Handle URI 0.11.0 and newer https://github.com/ruby/uri/pull/26
       URI.register_scheme("SOURCE", self)
     else
+      # Fallback for URI <0.11.0
       @@schemes = @@schemes #: Hash[String, untyped] # rubocop:disable Style/ClassVars
       @@schemes["SOURCE"] = self
     end
