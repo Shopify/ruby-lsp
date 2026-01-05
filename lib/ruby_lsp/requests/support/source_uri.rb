@@ -29,7 +29,7 @@ module URI
     attr_reader :gem_version
 
     class << self
-      #: (gem_name: String, gem_version: String?, path: String, line_number: String?) -> URI::Source
+      #: (gem_name: String, gem_version: String?, path: String, line_number: String?) -> instance
       def build(gem_name:, gem_version:, path:, line_number:)
         super(
           {
