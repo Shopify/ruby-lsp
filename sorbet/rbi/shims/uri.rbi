@@ -20,15 +20,5 @@ module URI
 
     sig { returns(T.nilable(String)) }
     attr_reader :fragment
-
-    # These are aliases we defined in `lib/ruby_lsp/requests/support/source_uri.rb`
-
-    # Alias for the `host`
-    sig { returns(String) }
-    attr_accessor :gem_name
-
-    # Alias for the `fragment`
-    sig { returns(T.nilable(String)) }
-    attr_accessor :line_number
   end
 end
