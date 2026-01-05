@@ -135,8 +135,6 @@ module RubyLsp
         return unless path
 
         gem_name = purl.name
-        return unless gem_name
-
         file_path = self.class.gem_paths.dig(gem_name, gem_version, CGI.unescape(path))
         return if file_path.nil?
 
@@ -160,10 +158,7 @@ module RubyLsp
         path = uri.path
         return unless path
 
-        gem_name = uri.gem_name
-        return unless gem_name
-
-        file_path = self.class.gem_paths.dig(gem_name, gem_version, CGI.unescape(path))
+        file_path = self.class.gem_paths.dig(uri.gem_name, gem_version, CGI.unescape(path))
         return if file_path.nil?
 
         [file_path, uri.line_number || "0"]
