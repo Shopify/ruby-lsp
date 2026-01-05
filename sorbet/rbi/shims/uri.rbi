@@ -18,7 +18,7 @@ module URI
     sig { returns(String) }
     attr_reader :host
 
-    sig { returns(String) }
+    sig { returns(T.nilable(String)) }
     attr_reader :fragment
 
     # These are aliases we defined in `lib/ruby_lsp/requests/support/source_uri.rb`
