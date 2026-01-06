@@ -2,7 +2,7 @@
 def foo
 end
 
-# source://pathname//pathname.rb#1
+# source://open3//open3.rb#1
 def bar
 end
 

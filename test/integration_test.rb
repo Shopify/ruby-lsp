@@ -224,7 +224,7 @@ class IntegrationTest < Minitest::Test
         GEM
           remote: https://rubygems.org/
           specs:
-            stringio (3.1.0)
+            stringio (3.2.0)
 
         PLATFORMS
           arm64-darwin-23
@@ -375,8 +375,6 @@ class IntegrationTest < Minitest::Test
   end
 
   def test_launch_mode_retries_if_setup_failed_after_successful_install
-    skip("This test doesn't work on Windows for Ruby 3.2") if Gem.win_platform? && RUBY_VERSION.start_with?("3.2.")
-
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~RUBY)
         source "https://rubygems.org"

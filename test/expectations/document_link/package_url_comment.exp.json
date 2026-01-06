@@ -22,11 +22,11 @@
                 },
                 "end": {
                     "line": 4,
-                    "character": 32
+                    "character": 26
                 }
             },
-            "target": "file://RUBY_ROOT/pathname.rb#1",
-            "tooltip": "Jump to RUBY_ROOT/pathname.rb#1"
+            "target": "file://RUBY_ROOT/open3.rb#1",
+            "tooltip": "Jump to RUBY_ROOT/open3.rb#1"
         },
         {
             "range": {
