@@ -66,7 +66,7 @@ module URI
 
     #: -> String
     def to_s
-      "source://#{gem_name}/#{gem_version}#{path}##{line_number}"
+      "source://#{gem_name}/#{gem_version}/#{path}##{line_number}"
     end
 
     if URI.respond_to?(:register_scheme)
