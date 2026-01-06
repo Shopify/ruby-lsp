@@ -5,6 +5,7 @@ require "uri/file"
 
 module URI
   # Must be kept in sync with the one in Tapioca
+  # https://github.com/Shopify/tapioca/blob/main/lib/tapioca/helpers/source_uri.rb
   class Source < URI::File
     COMPONENT = [
       :scheme,
@@ -21,16 +22,14 @@ module URI
     # have the uri gem in their own bundle and thus not use a compatible version.
     PARSER = const_defined?(:RFC2396_PARSER) ? RFC2396_PARSER : DEFAULT_PARSER #: RFC2396_Parser
 
-    self #: as untyped # rubocop:disable Style/RedundantSelf
-      .alias_method(:gem_name, :host)
-    self #: as untyped # rubocop:disable Style/RedundantSelf
-      .alias_method(:line_number, :fragment)
+    alias_method(:gem_name, :host)
+    alias_method(:line_number, :fragment)
 
     #: String?
     attr_reader :gem_version
 
     class << self
-      #: (gem_name: String, gem_version: String?, path: String, line_number: String?) -> URI::Source
+      #: (gem_name: String, gem_version: String?, path: String, line_number: String?) -> instance
       def build(gem_name:, gem_version:, path:, line_number:)
         super(
           {
@@ -67,12 +66,14 @@ module URI
 
     #: -> String
     def to_s
-      "source://#{gem_name}/#{gem_version}#{path}##{line_number}"
+      "source://#{gem_name}/#{gem_version}/#{path}##{line_number}"
     end
 
     if URI.respond_to?(:register_scheme)
+      # Handle URI 0.11.0 and newer https://github.com/ruby/uri/pull/26
       URI.register_scheme("SOURCE", self)
     else
+      # Fallback for URI <0.11.0
       @@schemes = @@schemes #: Hash[String, untyped] # rubocop:disable Style/ClassVars
       @@schemes["SOURCE"] = self
     end

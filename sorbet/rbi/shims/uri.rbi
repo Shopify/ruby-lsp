@@ -12,16 +12,13 @@ module URI
   end
 
   class Source
+    # These are inherited from `URI::File`.
+    # We need to repeat them so Sorbet statically knows about them, so they can be aliased.
+
     sig { returns(String) }
     attr_reader :host
 
-    sig { returns(String) }
+    sig { returns(T.nilable(String)) }
     attr_reader :fragment
-
-    sig { returns(T.nilable(String)) }
-    attr_accessor :line_number
-
-    sig { returns(T.nilable(String)) }
-    attr_accessor :gem_name
   end
 end

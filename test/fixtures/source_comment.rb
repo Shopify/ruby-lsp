@@ -31,3 +31,33 @@ FOO::BAR = 1
 # source://deleted//lib/foo.rb.rb#1
 def baz
 end
+
+# Various URIs crafted to attempt to make `URI::Source#host` nil.
+# All of these will be filtered out, and not appear in the expectation file.
+
+# source:+1-800-555-5555
+def attempt_to_make_empty_host_1; end
+
+# source:
+def attempt_to_make_empty_host_2; end
+
+# source:/
+def attempt_to_make_empty_host_3; end
+
+# source://
+def attempt_to_make_empty_host_4; end
+
+# source:///
+def attempt_to_make_empty_host_5; end
+
+# source:#123
+def attempt_to_make_empty_host_6; end
+
+# source:/#123
+def attempt_to_make_empty_host_7; end
+
+# source://#123
+def attempt_to_make_empty_host_8; end
+
+# source:///#123
+def attempt_to_make_empty_host_9; end
