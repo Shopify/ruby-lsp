@@ -9,6 +9,7 @@ permissions:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    if: github.repository == 'Shopify/ruby-lsp'
     steps:
       - uses: actions/stale@997185467fa4f803885201cee163a9f38240193d # v10.1.1
         with:
