@@ -3,7 +3,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, RubyInterface } from "./common";
+import { RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -349,13 +349,7 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managers = [
-      ManagerIdentifier.Chruby,
-      ManagerIdentifier.Rbenv,
-      ManagerIdentifier.Rvm,
-      ManagerIdentifier.Asdf,
-      ManagerIdentifier.Rv,
-    ];
+    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Rv];
 
     for (const tool of managers) {
       const exists = await this.toolExists(tool);
@@ -364,6 +358,11 @@ export class Ruby implements RubyInterface {
         this.versionManager = tool;
         return;
       }
+    }
+
+    if (await Asdf.detect(this.workspaceFolder, this.outputChannel)) {
+      this.versionManager = ManagerIdentifier.Asdf;
+      return;
     }
 
     if (await Mise.detect()) {
@@ -381,20 +380,7 @@ export class Ruby implements RubyInterface {
   }
 
   private async toolExists(tool: string) {
-    try {
-      const shell = vscode.env.shell.replace(/(\s+)/g, "\\$1");
-      const command = `${shell} -i -c '${tool} --version'`;
-
-      this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${command}`);
-
-      await asyncExec(command, {
-        cwd: this.workspaceFolder.uri.fsPath,
-        timeout: 1000,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    return VersionManager.toolExists(tool, this.workspaceFolder, this.outputChannel);
   }
 
   private async handleRubyError(message: string) {
