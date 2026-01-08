@@ -35,6 +35,34 @@ export interface ManagerConfiguration {
   identifier: ManagerIdentifier;
 }
 
+interface ManagerClass {
+  new (
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+    context: vscode.ExtensionContext,
+    manuallySelectRuby: () => Promise<void>,
+    ...args: any[]
+  ): VersionManager;
+  detect?: (
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ) => Promise<vscode.Uri | undefined>;
+}
+
+const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
+  [ManagerIdentifier.Asdf]: Asdf,
+  [ManagerIdentifier.Auto]: None, // Auto is handled specially
+  [ManagerIdentifier.Chruby]: Chruby,
+  [ManagerIdentifier.Rbenv]: Rbenv,
+  [ManagerIdentifier.Rvm]: Rvm,
+  [ManagerIdentifier.Rv]: Rv,
+  [ManagerIdentifier.Shadowenv]: Shadowenv,
+  [ManagerIdentifier.Mise]: Mise,
+  [ManagerIdentifier.RubyInstaller]: RubyInstaller,
+  [ManagerIdentifier.None]: None,
+  [ManagerIdentifier.Custom]: Custom,
+};
+
 export class Ruby implements RubyInterface {
   public rubyVersion?: string;
   // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
@@ -269,58 +297,14 @@ export class Ruby implements RubyInterface {
   }
 
   private async runManagerActivation() {
-    switch (this.versionManager.identifier) {
-      case ManagerIdentifier.Asdf:
-        await this.runActivation(
-          new Asdf(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Chruby:
-        await this.runActivation(
-          new Chruby(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Rbenv:
-        await this.runActivation(
-          new Rbenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Rvm:
-        await this.runActivation(
-          new Rvm(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Mise:
-        await this.runActivation(
-          new Mise(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Rv:
-        await this.runActivation(
-          new Rv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.RubyInstaller:
-        await this.runActivation(
-          new RubyInstaller(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Custom:
-        await this.runActivation(
-          new Custom(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.None:
-        await this.runActivation(
-          new None(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      default:
-        await this.runActivation(
-          new Shadowenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-    }
+    const ManagerClass = VERSION_MANAGERS[this.versionManager.identifier];
+    const manager = new ManagerClass(
+      this.workspaceFolder,
+      this.outputChannel,
+      this.context,
+      this.manuallySelectRuby.bind(this),
+    );
+    await this.runActivation(manager);
   }
 
   private async setupBundlePath() {
@@ -349,9 +333,14 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Rv];
+    const managersWithToolExists = [
+      ManagerIdentifier.Chruby,
+      ManagerIdentifier.Rbenv,
+      ManagerIdentifier.Rvm,
+      ManagerIdentifier.Rv,
+    ];
 
-    for (const tool of managers) {
+    for (const tool of managersWithToolExists) {
       const exists = await this.toolExists(tool);
 
       if (exists) {
@@ -360,14 +349,12 @@ export class Ruby implements RubyInterface {
       }
     }
 
-    if (await Asdf.detect(this.workspaceFolder, this.outputChannel)) {
-      this.versionManager = ManagerIdentifier.Asdf;
-      return;
-    }
-
-    if (await Mise.detect()) {
-      this.versionManager = ManagerIdentifier.Mise;
-      return;
+    // Check managers that have a detect() method
+    for (const [identifier, ManagerClass] of Object.entries(VERSION_MANAGERS)) {
+      if (ManagerClass.detect && (await ManagerClass.detect(this.workspaceFolder, this.outputChannel))) {
+        this.versionManager = identifier as ManagerIdentifier;
+        return;
+      }
     }
 
     if (os.platform() === "win32") {
