@@ -17,8 +17,11 @@ class RubyActivationCancellationError extends Error {}
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
 export class Chruby extends VersionManager {
-  static async detect(workspaceFolder: vscode.WorkspaceFolder): Promise<vscode.Uri | undefined> {
-    const exists = await VersionManager.toolExists("chruby", workspaceFolder);
+  static async detect(
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<vscode.Uri | undefined> {
+    const exists = await VersionManager.toolExists("chruby", workspaceFolder, outputChannel);
     return exists ? vscode.Uri.file("chruby") : undefined;
   }
 
