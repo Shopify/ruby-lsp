@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { ActivationResult, VersionManager, DetectionResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
 import { pathToUri } from "../common";
+import { ExecutableNotFoundError } from "./errors";
 
 // Ruby enVironment Manager. It manages Ruby application environments and enables switching between them.
 // Learn more:
@@ -53,8 +54,9 @@ export class Rvm extends VersionManager {
       }
     }
 
-    throw new Error(
-      `Cannot find RVM installation directory. Searched in ${possiblePaths.map((uri) => uri.fsPath).join(",")}`,
+    throw new ExecutableNotFoundError(
+      "rvm",
+      possiblePaths.map((uri) => uri.fsPath),
     );
   }
 }

@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
 import { pathToUri } from "../common";
+import { ExecutableNotFoundError } from "./errors";
 
 // Mise (mise en place) is a manager for dev tools, environment variables and tasks
 //
@@ -72,7 +73,7 @@ export class Mise extends VersionManager {
         await vscode.workspace.fs.stat(uri);
         return uri;
       } catch (_error: any) {
-        throw new Error(`${managerName} executable configured as ${uri.fsPath}, but that file doesn't exist`);
+        throw new ExecutableNotFoundError(managerName, [uri.fsPath], uri.fsPath);
       }
     }
 
@@ -83,9 +84,9 @@ export class Mise extends VersionManager {
     }
 
     const possiblePaths = constructor.getPossiblePaths();
-    throw new Error(
-      `The Ruby LSP version manager is configured to be ${managerName}, but could not find ${managerName} installation. Searched in
-        ${possiblePaths.map((p) => p.fsPath).join(", ")}`,
+    throw new ExecutableNotFoundError(
+      managerName,
+      possiblePaths.map((uri) => uri.fsPath),
     );
   }
 }

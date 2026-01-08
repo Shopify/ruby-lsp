@@ -9,7 +9,8 @@ import { Ruby, ManagerIdentifier } from "../../ruby";
 import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
-import { Shadowenv, UntrustedWorkspaceError } from "../../ruby/shadowenv";
+import { Shadowenv } from "../../ruby/shadowenv";
+import { UntrustedWorkspaceError } from "../../ruby/errors";
 import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR } from "../../ruby/versionManager";
 
 import { createContext, FakeContext } from "./helpers";

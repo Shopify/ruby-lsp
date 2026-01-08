@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { Chruby } from "./chruby";
 import { pathToUri, isWindows } from "../common";
+import { RubyInstallationNotFoundError } from "./errors";
 import { DetectionResult } from "./versionManager";
 
 interface RubyVersion {
@@ -50,9 +51,10 @@ export class RubyInstaller extends Chruby {
       }
     }
 
-    throw new Error(
-      `Cannot find installation directory for Ruby version ${rubyVersion.version}.\
-         Searched in ${possibleInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
+    throw new RubyInstallationNotFoundError(
+      "rubyInstaller",
+      rubyVersion.version,
+      possibleInstallationUris.map((uri) => uri.fsPath),
     );
   }
 

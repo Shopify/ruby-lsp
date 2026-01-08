@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
 import { pathToUri } from "../common";
+import { ExecutableNotFoundError } from "./errors";
 
 // A tool to manage multiple runtime versions with a single CLI tool
 //
@@ -75,12 +76,10 @@ export class Asdf extends VersionManager {
       } else if (result.type === "semantic") {
         // Use ASDF from PATH
       } else {
-        throw new Error(
-          `Could not find ASDF installation. Searched in ${[
-            ...Asdf.getPossibleExecutablePaths(),
-            ...Asdf.getPossibleScriptPaths(),
-          ].join(", ")}`,
-        );
+        throw new ExecutableNotFoundError("asdf", [
+          ...Asdf.getPossibleExecutablePaths().map((uri) => uri.fsPath),
+          ...Asdf.getPossibleScriptPaths().map((uri) => uri.fsPath),
+        ]);
       }
     }
 
@@ -120,7 +119,7 @@ export class Asdf extends VersionManager {
       this.outputChannel.info(`Using configured ASDF executable path: ${asdfPath}`);
       return configuredPath.fsPath;
     } catch (_error: any) {
-      throw new Error(`ASDF executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
+      throw new ExecutableNotFoundError("asdf", [configuredPath.fsPath], configuredPath.fsPath);
     }
   }
 }

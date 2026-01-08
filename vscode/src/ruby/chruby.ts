@@ -5,6 +5,12 @@ import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 import { pathToUri } from "../common";
+import {
+  RubyVersionFileError,
+  RubyInstallationNotFoundError,
+  RubyVersionFileNotFoundError,
+  ActivationCancellationError,
+} from "./errors";
 
 import { ActivationResult, VersionManager, ACTIVATION_SEPARATOR, DetectionResult } from "./versionManager";
 
@@ -12,8 +18,6 @@ interface RubyVersion {
   engine?: string;
   version: string;
 }
-
-class RubyActivationCancellationError extends Error {}
 
 // Delay before attempting fallback Ruby activation (in milliseconds)
 const FALLBACK_DELAY_MS = 10000;
@@ -70,7 +74,7 @@ export class Chruby extends VersionManager {
         rubyUri = fallback.uri;
       }
     } catch (error: any) {
-      if (error instanceof RubyActivationCancellationError) {
+      if (error instanceof ActivationCancellationError) {
         // Try to re-activate if the user has configured a fallback during cancellation
         return this.activate();
       }
@@ -95,7 +99,7 @@ export class Chruby extends VersionManager {
         rubyUri = fallback.uri;
       }
     } catch (error: any) {
-      if (error instanceof RubyActivationCancellationError) {
+      if (error instanceof ActivationCancellationError) {
         // Try to re-activate if the user has configured a fallback during cancellation
         return this.activate();
       }
@@ -234,7 +238,7 @@ export class Chruby extends VersionManager {
       return closest;
     }
 
-    throw new Error("Cannot find any Ruby installations");
+    throw new RubyInstallationNotFoundError("chruby");
   }
 
   // Returns the Ruby version information including version and engine. E.g.: ruby-3.3.0, truffleruby-21.3.0
@@ -256,15 +260,13 @@ export class Chruby extends VersionManager {
       }
 
       if (version === "") {
-        throw new Error(`Ruby version file ${rubyVersionUri.fsPath} is empty`);
+        throw new RubyVersionFileError(rubyVersionUri.fsPath, "empty", version);
       }
 
       const match = /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(version);
 
       if (!match?.groups) {
-        throw new Error(
-          `Ruby version file ${rubyVersionUri.fsPath} contains invalid format. Expected (engine-)?version, got ${version}`,
-        );
+        throw new RubyVersionFileError(rubyVersionUri.fsPath, "invalid_format", version);
       }
 
       this.outputChannel.info(`Discovered Ruby version ${version} from ${rubyVersionUri.fsPath}`);
@@ -316,7 +318,7 @@ export class Chruby extends VersionManager {
           await this.handleCancelledFallback(errorFn);
 
           // We throw this error to be able to catch and re-run activation after the user has configured a fallback
-          throw new RubyActivationCancellationError();
+          throw new ActivationCancellationError("chruby");
         }
 
         return fallbackFn();
@@ -433,17 +435,14 @@ export class Chruby extends VersionManager {
       }
     }
 
-    throw new Error("Cannot find any Ruby installations");
+    throw new RubyInstallationNotFoundError("chruby");
   }
 
   private missingRubyError(version: string) {
-    return new Error(`Cannot find Ruby installation for version ${version}`);
+    return new RubyInstallationNotFoundError("chruby", version);
   }
 
   private rubyVersionError() {
-    return new Error(
-      `Cannot find .ruby-version file. Please specify the Ruby version in a
-           .ruby-version either in ${this.bundleUri.fsPath} or in a parent directory`,
-    );
+    return new RubyVersionFileNotFoundError("chruby", this.bundleUri.fsPath);
   }
 }

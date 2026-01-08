@@ -4,7 +4,8 @@ import * as vscode from "vscode";
 
 import { RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
-import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
+import { Shadowenv } from "./ruby/shadowenv";
+import { UntrustedWorkspaceError } from "./ruby/errors";
 import { Chruby } from "./ruby/chruby";
 import { VersionManager, DetectionResult } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
