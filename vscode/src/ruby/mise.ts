@@ -21,7 +21,7 @@ export class Mise extends VersionManager {
     ];
   }
 
-  static async detect(): Promise<vscode.Uri | undefined> {
+  static async detect(_workspaceFolder: vscode.WorkspaceFolder): Promise<vscode.Uri | undefined> {
     return VersionManager.findFirst(Mise.getPossiblePaths());
   }
 
@@ -54,7 +54,7 @@ export class Mise extends VersionManager {
       }
     }
 
-    const detectedPath = await Mise.detect();
+    const detectedPath = await Mise.detect(this.workspaceFolder);
 
     if (detectedPath) {
       return detectedPath;

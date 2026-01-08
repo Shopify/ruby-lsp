@@ -34,7 +34,7 @@ export class Asdf extends VersionManager {
     ];
   }
 
-  static async detect(): Promise<vscode.Uri | undefined> {
+  static async detect(_workspaceFolder: vscode.WorkspaceFolder): Promise<vscode.Uri | undefined> {
     // Check for v0.16+ executables first
     const executablePaths = Asdf.getPossibleExecutablePaths();
     const asdfExecPaths = executablePaths.map((dir) => vscode.Uri.joinPath(dir, "asdf"));
@@ -50,7 +50,7 @@ export class Asdf extends VersionManager {
   async activate(): Promise<ActivationResult> {
     // Prefer the path configured by the user, then use detect() to find ASDF
     const configuredPath = await this.getConfiguredAsdfPath();
-    const asdfUri = configuredPath ? vscode.Uri.file(configuredPath) : await Asdf.detect();
+    const asdfUri = configuredPath ? vscode.Uri.file(configuredPath) : await Asdf.detect(this.workspaceFolder);
 
     if (!asdfUri) {
       throw new Error(
