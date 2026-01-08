@@ -144,3 +144,9 @@ export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   // If that number is below the percentage, then the feature is enabled for this user
   return hashNum < percentage;
 }
+
+// Helper to create a URI from a file path and optional path segments
+// Usage: pathToUri("/", "opt", "bin") instead of vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "bin")
+export function pathToUri(basePath: string, ...segments: string[]): vscode.Uri {
+  return vscode.Uri.joinPath(vscode.Uri.file(basePath), ...segments);
+}

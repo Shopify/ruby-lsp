@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
+import { pathToUri } from "../common";
 
 // A tool to manage multiple runtime versions with a single CLI tool
 //
@@ -12,10 +13,7 @@ import { WorkspaceChannel } from "../workspaceChannel";
 export class Asdf extends VersionManager {
   private static getPossibleExecutablePaths(): vscode.Uri[] {
     // These directories are where we can find the ASDF executable for v0.16 and above
-    return [
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "bin"),
-    ];
+    return [pathToUri("/", "opt", "homebrew", "bin"), pathToUri("/", "usr", "local", "bin")];
   }
 
   private static getPossibleScriptPaths(): vscode.Uri[] {
@@ -28,10 +26,10 @@ export class Asdf extends VersionManager {
     // 3. Homebrew M series
     // 4. Homebrew Intel series
     return [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".asdf", scriptName),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "asdf-vm", scriptName),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "opt", "asdf", "libexec", scriptName),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "opt", "asdf", "libexec", scriptName),
+      pathToUri(os.homedir(), ".asdf", scriptName),
+      pathToUri("/", "opt", "asdf-vm", scriptName),
+      pathToUri("/", "opt", "homebrew", "opt", "asdf", "libexec", scriptName),
+      pathToUri("/", "usr", "local", "opt", "asdf", "libexec", scriptName),
     ];
   }
 

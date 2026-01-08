@@ -46,7 +46,7 @@ suite("RVM", () => {
 
     const installationPathStub = sandbox
       .stub(rvm, "findRvmInstallation")
-      .resolves(vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rvm", "bin", "rvm-auto-ruby"));
+      .resolves(common.pathToUri(os.homedir(), ".rvm", "bin", "rvm-auto-ruby"));
 
     const envStub = ["3.0.0", "/path/to/gems", "true", `ANY${VALUE_SEPARATOR}true`].join(FIELD_SEPARATOR);
 

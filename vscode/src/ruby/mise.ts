@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
+import { pathToUri } from "../common";
 
 // Mise (mise en place) is a manager for dev tools, environment variables and tasks
 //
@@ -16,9 +17,9 @@ export class Mise extends VersionManager {
   // 3. Installation from `apt install mise`
   private static getPossiblePaths(): vscode.Uri[] {
     return [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
+      pathToUri(os.homedir(), ".local", "bin", "mise"),
+      pathToUri("/", "opt", "homebrew", "bin", "mise"),
+      pathToUri("/", "usr", "bin", "mise"),
     ];
   }
 
