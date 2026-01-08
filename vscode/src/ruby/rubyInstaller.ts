@@ -3,6 +3,7 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { Chruby } from "./chruby";
+import { pathToUri } from "../common";
 
 interface RubyVersion {
   engine?: string;
@@ -35,8 +36,8 @@ export class RubyInstaller extends Chruby {
     const [major, minor, _patch] = rubyVersion.version.split(".").map(Number);
 
     const possibleInstallationUris = [
-      vscode.Uri.joinPath(vscode.Uri.file("C:"), `Ruby${major}${minor}-${os.arch()}`),
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), `Ruby${major}${minor}-${os.arch()}`),
+      pathToUri("C:", `Ruby${major}${minor}-${os.arch()}`),
+      pathToUri(os.homedir(), `Ruby${major}${minor}-${os.arch()}`),
     ];
 
     for (const installationUri of possibleInstallationUris) {
