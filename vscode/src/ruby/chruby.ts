@@ -134,7 +134,16 @@ export class Chruby extends VersionManager {
     return process.env.PATH;
   }
 
-  // Returns the full URI to the Ruby executable
+  /**
+   * Finds the URI to the Ruby executable for a given Ruby version.
+   *
+   * This method searches through configured Ruby installation directories
+   * (like ~/.rubies and /opt/rubies) to find a matching Ruby installation
+   * based on the provided version information.
+   *
+   * @param rubyVersion - The Ruby version to search for, including optional engine name
+   * @returns URI to the Ruby executable if found, undefined otherwise
+   */
   protected async findRubyUri(rubyVersion: RubyVersion): Promise<vscode.Uri | undefined> {
     const possibleVersionNames = rubyVersion.engine
       ? [`${rubyVersion.engine}-${rubyVersion.version}`, rubyVersion.version]
@@ -165,7 +174,16 @@ export class Chruby extends VersionManager {
     return undefined;
   }
 
-  // Run the activation script using the Ruby installation we found so that we can discover gem paths
+  /**
+   * Runs the activation script to discover Ruby environment information.
+   *
+   * This executes a Ruby script (chruby_activation.rb) to determine gem paths,
+   * YJIT availability, and actual Ruby version for the specified installation.
+   *
+   * @param rubyExecutableUri - URI to the Ruby executable to activate
+   * @param rubyVersion - The Ruby version information
+   * @returns Object containing default gems path, gem home, YJIT status, and version
+   */
   protected async runActivationScript(
     rubyExecutableUri: vscode.Uri,
     rubyVersion: RubyVersion,
@@ -186,6 +204,23 @@ export class Chruby extends VersionManager {
     return { defaultGems, gemHome, yjit: yjit === "true", version };
   }
 
+  /**
+   * Finds the closest Ruby installation when exact version match is not available.
+   *
+   * This method implements a fallback strategy by:
+   * 1. Searching for Ruby installations with the same major version
+   * 2. Sorting to find the version with minimal minor version distance
+   * 3. For equal distances, preferring higher patch versions
+   *
+   * For example, if 3.2.0 is requested but not found:
+   * - 3.2.1 or 3.2.5 would be preferred (same minor, higher patch)
+   * - Then 3.1.x or 3.3.x (minor distance of 1)
+   * - Then 3.0.x or 3.4.x (minor distance of 2)
+   *
+   * @param rubyVersion - The requested Ruby version
+   * @returns Object with URI and version info of the closest installation
+   * @throws RubyInstallationNotFoundError if no Ruby with matching major version exists
+   */
   private async findClosestRubyInstallation(rubyVersion: RubyVersion): Promise<{
     uri: vscode.Uri;
     rubyVersion: RubyVersion;
@@ -249,7 +284,21 @@ export class Chruby extends VersionManager {
     throw new RubyInstallationNotFoundError("chruby");
   }
 
-  // Returns the Ruby version information including version and engine. E.g.: ruby-3.3.0, truffleruby-21.3.0
+  /**
+   * Discovers the Ruby version from .ruby-version files.
+   *
+   * This method walks up the directory tree starting from the workspace root,
+   * searching for a .ruby-version file. The first file found is parsed and
+   * validated using a regex pattern to extract engine (optional) and version.
+   *
+   * Supported formats:
+   * - 3.3.0 (just version)
+   * - ruby-3.3.0 (engine-version)
+   * - truffleruby-21.3.0 (alternative engine)
+   *
+   * @returns Ruby version information if found, undefined if no .ruby-version exists
+   * @throws RubyVersionFileError if .ruby-version is empty or has invalid format
+   */
   private async discoverRubyVersion(): Promise<RubyVersion | undefined> {
     let uri = this.bundleUri;
     const root = path.parse(uri.fsPath).root;
@@ -402,6 +451,16 @@ export class Chruby extends VersionManager {
     );
   }
 
+  /**
+   * Finds a fallback Ruby installation when no .ruby-version file exists.
+   *
+   * This searches through configured Ruby installation directories and
+   * returns the first valid Ruby installation found (sorted by version
+   * descending, so the latest version is preferred).
+   *
+   * @returns Object with URI and version info of the fallback installation
+   * @throws RubyInstallationNotFoundError if no Ruby installation exists
+   */
   private async findFallbackRuby(): Promise<{
     uri: vscode.Uri;
     rubyVersion: RubyVersion;
