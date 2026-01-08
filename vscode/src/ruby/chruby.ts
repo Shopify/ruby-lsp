@@ -191,6 +191,7 @@ export class Chruby extends VersionManager {
     rubyVersion: RubyVersion;
   }> {
     const [major, minor, _patch] = rubyVersion.version.split(".");
+    const targetMinor = Number(minor);
     const directories: { uri: vscode.Uri; rubyVersion: RubyVersion }[] = [];
 
     for (const uri of this.rubyInstallationUris) {
@@ -217,21 +218,28 @@ export class Chruby extends VersionManager {
       }
     }
 
-    // Sort the directories based on the difference between the minor version and the requested minor version. On
-    // conflicts, we use the patch version to break the tie. If there's no distance, we prefer the higher patch version
+    // Sort to find the closest match:
+    // 1. Prefer versions with minimal minor version distance
+    // 2. For equal minor version distance, prefer higher patch version
     const closest = directories.sort((left, right) => {
-      const leftVersion = left.rubyVersion.version.split(".");
-      const rightVersion = right.rubyVersion.version.split(".");
+      const leftParts = left.rubyVersion.version.split(".");
+      const rightParts = right.rubyVersion.version.split(".");
 
-      const leftDiff = Math.abs(Number(leftVersion[1]) - Number(minor));
-      const rightDiff = Math.abs(Number(rightVersion[1]) - Number(minor));
+      const leftMinor = Number(leftParts[1]);
+      const rightMinor = Number(rightParts[1]);
 
-      // If the distance to minor version is the same, prefer higher patch number
-      if (leftDiff === rightDiff) {
-        return Number(rightVersion[2] || 0) - Number(leftVersion[2] || 0);
+      const leftMinorDistance = Math.abs(leftMinor - targetMinor);
+      const rightMinorDistance = Math.abs(rightMinor - targetMinor);
+
+      // Primary sort: prefer closer minor version
+      if (leftMinorDistance !== rightMinorDistance) {
+        return leftMinorDistance - rightMinorDistance;
       }
 
-      return leftDiff - rightDiff;
+      // Secondary sort: for same minor distance, prefer higher patch
+      const leftPatch = Number(leftParts[2] || 0);
+      const rightPatch = Number(rightParts[2] || 0);
+      return rightPatch - leftPatch;
     })[0];
 
     if (closest) {
