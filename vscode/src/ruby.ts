@@ -343,7 +343,7 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Asdf];
+    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm];
 
     for (const tool of managers) {
       const exists = await this.toolExists(tool);
@@ -352,6 +352,11 @@ export class Ruby implements RubyInterface {
         this.versionManager = tool;
         return;
       }
+    }
+
+    if (await Asdf.detect()) {
+      this.versionManager = ManagerIdentifier.Asdf;
+      return;
     }
 
     if (await Mise.detect()) {

@@ -22,18 +22,7 @@ export class Mise extends VersionManager {
   }
 
   static async detect(): Promise<vscode.Uri | undefined> {
-    const possiblePaths = Mise.getPossiblePaths();
-
-    for (const possiblePath of possiblePaths) {
-      try {
-        await vscode.workspace.fs.stat(possiblePath);
-        return possiblePath;
-      } catch (_error: any) {
-        // Continue looking
-      }
-    }
-
-    return undefined;
+    return VersionManager.findFirst(Mise.getPossiblePaths());
   }
 
   async activate(): Promise<ActivationResult> {
