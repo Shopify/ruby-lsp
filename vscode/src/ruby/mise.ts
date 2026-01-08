@@ -3,6 +3,7 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
+import { WorkspaceChannel } from "../workspaceChannel";
 
 // Mise (mise en place) is a manager for dev tools, environment variables and tasks
 //
@@ -21,7 +22,10 @@ export class Mise extends VersionManager {
     ];
   }
 
-  static async detect(): Promise<vscode.Uri | undefined> {
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: WorkspaceChannel,
+  ): Promise<vscode.Uri | undefined> {
     return VersionManager.findFirst(Mise.getPossiblePaths());
   }
 
@@ -54,7 +58,7 @@ export class Mise extends VersionManager {
       }
     }
 
-    const detectedPath = await Mise.detect();
+    const detectedPath = await Mise.detect(this.workspaceFolder, this.outputChannel);
 
     if (detectedPath) {
       return detectedPath;
