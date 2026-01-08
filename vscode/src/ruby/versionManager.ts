@@ -53,6 +53,20 @@ export abstract class VersionManager {
   // language server
   abstract activate(): Promise<ActivationResult>;
 
+  // Finds the first existing path from a list of possible paths
+  protected static async findFirst(paths: vscode.Uri[]): Promise<vscode.Uri | undefined> {
+    for (const possiblePath of paths) {
+      try {
+        await vscode.workspace.fs.stat(possiblePath);
+        return possiblePath;
+      } catch (_error: any) {
+        // Continue looking
+      }
+    }
+
+    return undefined;
+  }
+
   protected async runEnvActivationScript(activatedRuby: string): Promise<ActivationResult> {
     const activationUri = vscode.Uri.joinPath(this.context.extensionUri, "activation.rb");
 
