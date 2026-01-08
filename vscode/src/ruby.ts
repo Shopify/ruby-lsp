@@ -42,24 +42,21 @@ interface ManagerClass {
     manuallySelectRuby: () => Promise<void>,
     ...args: any[]
   ): VersionManager;
-  detect?: (
-    workspaceFolder: vscode.WorkspaceFolder,
-    outputChannel: WorkspaceChannel,
-  ) => Promise<vscode.Uri | undefined>;
+  detect: (workspaceFolder: vscode.WorkspaceFolder, outputChannel: WorkspaceChannel) => Promise<vscode.Uri | undefined>;
 }
 
 const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
+  [ManagerIdentifier.Shadowenv]: Shadowenv,
   [ManagerIdentifier.Asdf]: Asdf,
-  [ManagerIdentifier.Auto]: None, // Auto is handled specially
   [ManagerIdentifier.Chruby]: Chruby,
   [ManagerIdentifier.Rbenv]: Rbenv,
   [ManagerIdentifier.Rvm]: Rvm,
   [ManagerIdentifier.Rv]: Rv,
-  [ManagerIdentifier.Shadowenv]: Shadowenv,
   [ManagerIdentifier.Mise]: Mise,
   [ManagerIdentifier.RubyInstaller]: RubyInstaller,
-  [ManagerIdentifier.None]: None,
   [ManagerIdentifier.Custom]: Custom,
+  [ManagerIdentifier.Auto]: None, // Auto is handled specially
+  [ManagerIdentifier.None]: None, // None is last as the fallback
 };
 
 export class Ruby implements RubyInterface {
@@ -333,16 +330,19 @@ export class Ruby implements RubyInterface {
       }
     }
 
-    // Check managers that have a detect() method
-    for (const [identifier, ManagerClass] of Object.entries(VERSION_MANAGERS)) {
-      if (ManagerClass.detect && (await ManagerClass.detect(this.workspaceFolder, this.outputChannel))) {
-        this.versionManager = identifier as ManagerIdentifier;
+    // Check all managers for detection
+    const entries = Object.entries(VERSION_MANAGERS) as [ManagerIdentifier, ManagerClass][];
+
+    for (const [identifier, ManagerClass] of entries) {
+      if (identifier === ManagerIdentifier.Auto) {
+        continue;
+      }
+
+      if (await ManagerClass.detect(this.workspaceFolder, this.outputChannel)) {
+        this.versionManager = identifier;
         return;
       }
     }
-
-    // If we can't find a version manager, just return None
-    this.versionManager = ManagerIdentifier.None;
   }
 
   private async handleRubyError(message: string) {
