@@ -1,5 +1,4 @@
 import path from "path";
-import os from "os";
 
 import * as vscode from "vscode";
 
@@ -340,11 +339,6 @@ export class Ruby implements RubyInterface {
         this.versionManager = identifier as ManagerIdentifier;
         return;
       }
-    }
-
-    if (os.platform() === "win32") {
-      this.versionManager = ManagerIdentifier.RubyInstaller;
-      return;
     }
 
     // If we can't find a version manager, just return None
