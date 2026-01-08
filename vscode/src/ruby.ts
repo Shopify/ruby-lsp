@@ -17,25 +17,6 @@ import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
 import { Rv } from "./ruby/rv";
 
-async function detectMise() {
-  const possiblePaths = [
-    vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
-  ];
-
-  for (const possiblePath of possiblePaths) {
-    try {
-      await vscode.workspace.fs.stat(possiblePath);
-      return true;
-    } catch (_error: any) {
-      // Continue looking
-    }
-  }
-
-  return false;
-}
-
 export enum ManagerIdentifier {
   Asdf = "asdf",
   Auto = "auto",
@@ -385,7 +366,7 @@ export class Ruby implements RubyInterface {
       }
     }
 
-    if (await detectMise()) {
+    if (await Mise.detect()) {
       this.versionManager = ManagerIdentifier.Mise;
       return;
     }
