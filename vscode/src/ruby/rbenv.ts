@@ -6,6 +6,11 @@ import { VersionManager, ActivationResult } from "./versionManager";
 //
 // Learn more: https://github.com/rbenv/rbenv
 export class Rbenv extends VersionManager {
+  static async detect(workspaceFolder: vscode.WorkspaceFolder): Promise<vscode.Uri | undefined> {
+    const exists = await VersionManager.toolExists("rbenv", workspaceFolder);
+    return exists ? vscode.Uri.file("rbenv") : undefined;
+  }
+
   async activate(): Promise<ActivationResult> {
     const rbenvExec = await this.findRbenv();
 
