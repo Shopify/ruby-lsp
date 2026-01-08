@@ -152,4 +152,15 @@ export abstract class VersionManager {
 
     return execName;
   }
+
+  /**
+   * Constructs a URI for a Ruby executable within a Ruby installation directory
+   * @param installationUri - The root directory of the Ruby installation
+   * @param versionDirectory - Optional subdirectory name (e.g., "ruby-3.3.0")
+   * @returns URI pointing to the Ruby executable (e.g., /path/to/ruby-3.3.0/bin/ruby)
+   */
+  protected rubyExecutableUri(installationUri: vscode.Uri, versionDirectory?: string): vscode.Uri {
+    const basePath = versionDirectory ? vscode.Uri.joinPath(installationUri, versionDirectory) : installationUri;
+    return vscode.Uri.joinPath(basePath, "bin", "ruby");
+  }
 }

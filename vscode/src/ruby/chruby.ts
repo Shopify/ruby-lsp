@@ -157,7 +157,7 @@ export class Chruby extends VersionManager {
         const targetDirectory = directories.find(([name]) => name.startsWith(versionName));
 
         if (targetDirectory) {
-          return vscode.Uri.joinPath(uri, targetDirectory[0], "bin", "ruby");
+          return this.rubyExecutableUri(uri, targetDirectory[0]);
         }
       }
     }
@@ -202,7 +202,7 @@ export class Chruby extends VersionManager {
 
           if (match?.groups && match.groups.version.startsWith(major)) {
             directories.push({
-              uri: vscode.Uri.joinPath(uri, name, "bin", "ruby"),
+              uri: this.rubyExecutableUri(uri, name),
               rubyVersion: {
                 engine: match.groups.engine,
                 version: match.groups.version,
@@ -421,7 +421,7 @@ export class Chruby extends VersionManager {
 
         if (targetDirectory && groups) {
           return {
-            uri: vscode.Uri.joinPath(uri, targetDirectory[0], "bin", "ruby"),
+            uri: this.rubyExecutableUri(uri, targetDirectory[0]),
             rubyVersion: {
               engine: groups.engine,
               version: groups.version,

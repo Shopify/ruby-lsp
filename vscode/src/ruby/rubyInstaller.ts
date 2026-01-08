@@ -45,7 +45,7 @@ export class RubyInstaller extends Chruby {
     for (const installationUri of possibleInstallationUris) {
       try {
         await vscode.workspace.fs.stat(installationUri);
-        return vscode.Uri.joinPath(installationUri, "bin", "ruby");
+        return this.rubyExecutableUri(installationUri);
       } catch (_error: unknown) {
         // Continue searching
       }
