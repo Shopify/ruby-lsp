@@ -63,12 +63,8 @@ module RubyLsp
             kind: Constant::CodeActionKind::REFACTOR_EXTRACT,
             data: { range: @range, uri: @uri.to_s },
           )
-          code_actions << Interface::CodeAction.new(
-            title: TOGGLE_BLOCK_STYLE_TITLE,
-            kind: Constant::CodeActionKind::REFACTOR_REWRITE,
-            data: { range: @range, uri: @uri.to_s },
-          )
         end
+        code_actions.concat(toggle_block_style_action)
         code_actions.concat(attribute_actions)
 
         code_actions
@@ -109,6 +105,25 @@ module RubyLsp
           Interface::CodeAction.new(
             title: CREATE_ATTRIBUTE_ACCESSOR,
             kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          ),
+        ]
+      end
+
+      #: -> Array[Interface::CodeAction]
+      def toggle_block_style_action
+        if @range[:start] == @range[:end]
+          block_context = @document.locate_node(
+            @range[:start],
+            node_types: [Prism::BlockNode],
+          )
+          return [] unless block_context.node.is_a?(Prism::BlockNode)
+        end
+
+        [
+          Interface::CodeAction.new(
+            title: TOGGLE_BLOCK_STYLE_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_REWRITE,
             data: { range: @range, uri: @uri.to_s },
           ),
         ]

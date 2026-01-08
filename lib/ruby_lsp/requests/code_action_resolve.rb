@@ -51,20 +51,42 @@ module RubyLsp
       #: -> (Interface::CodeAction)
       def switch_block_style
         source_range = @code_action.dig(:data, :range)
-        raise EmptySelectionError, "Invalid selection for refactor" if source_range[:start] == source_range[:end]
+        if source_range[:start] == source_range[:end]
+          block_context = @document.locate_node(
+            source_range[:start],
+            node_types: [Prism::BlockNode],
+          )
+          node = block_context.node
+          unless node.is_a?(Prism::BlockNode)
+            raise InvalidTargetRangeError, "Cursor is not inside a block"
+          end
 
-        target = @document.locate_first_within_range(
-          @code_action.dig(:data, :range),
-          node_types: [Prism::CallNode],
-        )
+          # Find the call node at the block node's start position.
+          # This should be the call node whose block the cursor is inside of.
+          call_context = RubyDocument.locate(
+            @document.ast,
+            node.location.cached_start_code_units_offset(@document.code_units_cache),
+            node_types: [Prism::CallNode],
+            code_units_cache: @document.code_units_cache,
+          )
+          target = call_context.node
+          unless target.is_a?(Prism::CallNode) && target.block == node
+            raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          end
+        else
+          target = @document.locate_first_within_range(
+            @code_action.dig(:data, :range),
+            node_types: [Prism::CallNode],
+          )
 
-        unless target.is_a?(Prism::CallNode)
-          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
-        end
+          unless target.is_a?(Prism::CallNode)
+            raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          end
 
-        node = target.block
-        unless node.is_a?(Prism::BlockNode)
-          raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          node = target.block
+          unless node.is_a?(Prism::BlockNode)
+            raise InvalidTargetRangeError, "Couldn't find an appropriate location to place extracted refactor"
+          end
         end
 
         indentation = " " * target.location.start_column unless node.opening_loc.slice == "do"
