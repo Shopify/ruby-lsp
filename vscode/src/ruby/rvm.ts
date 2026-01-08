@@ -3,12 +3,21 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { ActivationResult, VersionManager } from "./versionManager";
+import { WorkspaceChannel } from "../workspaceChannel";
 
 // Ruby enVironment Manager. It manages Ruby application environments and enables switching between them.
 // Learn more:
 // - https://github.com/rvm/rvm
 // - https://rvm.io
 export class Rvm extends VersionManager {
+  static async detect(
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<vscode.Uri | undefined> {
+    const exists = await VersionManager.toolExists("rvm", workspaceFolder, outputChannel);
+    return exists ? vscode.Uri.file("rvm") : undefined;
+  }
+
   async activate(): Promise<ActivationResult> {
     const installationPath = await this.findRvmInstallation();
     const parsedResult = await this.runEnvActivationScript(installationPath.fsPath);
