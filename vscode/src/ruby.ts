@@ -323,16 +323,6 @@ export class Ruby implements RubyInterface {
   }
 
   private async discoverVersionManager() {
-    // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
-    // created a .shadowenv.d folder
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"));
-      this.versionManager.identifier = ManagerIdentifier.Shadowenv;
-      return;
-    } catch (_error: any) {
-      // If .shadowenv.d doesn't exist, then we check the other version managers
-    }
-
     const managersWithToolExists = [ManagerIdentifier.Rv];
 
     for (const tool of managersWithToolExists) {

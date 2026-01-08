@@ -11,10 +11,26 @@ import { VersionManager, ActivationResult } from "./versionManager";
 export class UntrustedWorkspaceError extends Error {}
 
 export class Shadowenv extends VersionManager {
-  async activate(): Promise<ActivationResult> {
+  private static async shadowenvDirExists(workspaceUri: vscode.Uri): Promise<boolean> {
     try {
-      await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"));
+      await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, ".shadowenv.d"));
+      return true;
     } catch (_error: any) {
+      return false;
+    }
+  }
+
+  static async detect(
+    workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: vscode.LogOutputChannel,
+  ): Promise<vscode.Uri | undefined> {
+    const exists = await Shadowenv.shadowenvDirExists(workspaceFolder.uri);
+    return exists ? vscode.Uri.joinPath(workspaceFolder.uri, ".shadowenv.d") : undefined;
+  }
+
+  async activate(): Promise<ActivationResult> {
+    const exists = await Shadowenv.shadowenvDirExists(this.bundleUri);
+    if (!exists) {
       throw new Error(
         "The Ruby LSP version manager is configured to be shadowenv, \
         but no .shadowenv.d directory was found in the workspace",
