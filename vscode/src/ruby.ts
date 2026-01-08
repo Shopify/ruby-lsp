@@ -1,9 +1,8 @@
 import path from "path";
-import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, RubyInterface } from "./common";
+import { RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -15,25 +14,6 @@ import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
 import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
-
-async function detectMise() {
-  const possiblePaths = [
-    vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
-  ];
-
-  for (const possiblePath of possiblePaths) {
-    try {
-      await vscode.workspace.fs.stat(possiblePath);
-      return true;
-    } catch (_error: any) {
-      // Continue looking
-    }
-  }
-
-  return false;
-}
 
 export enum ManagerIdentifier {
   Asdf = "asdf",
@@ -52,6 +32,30 @@ export interface ManagerConfiguration {
   identifier: ManagerIdentifier;
 }
 
+interface ManagerClass {
+  new (
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+    context: vscode.ExtensionContext,
+    manuallySelectRuby: () => Promise<void>,
+    ...args: any[]
+  ): VersionManager;
+  detect: (workspaceFolder: vscode.WorkspaceFolder, outputChannel: WorkspaceChannel) => Promise<vscode.Uri | undefined>;
+}
+
+const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
+  [ManagerIdentifier.Shadowenv]: Shadowenv,
+  [ManagerIdentifier.Asdf]: Asdf,
+  [ManagerIdentifier.Chruby]: Chruby,
+  [ManagerIdentifier.Rbenv]: Rbenv,
+  [ManagerIdentifier.Rvm]: Rvm,
+  [ManagerIdentifier.Mise]: Mise,
+  [ManagerIdentifier.RubyInstaller]: RubyInstaller,
+  [ManagerIdentifier.Custom]: Custom,
+  [ManagerIdentifier.Auto]: None, // Auto is handled specially
+  [ManagerIdentifier.None]: None, // None is last as the fallback
+};
+
 export class Ruby implements RubyInterface {
   public rubyVersion?: string;
   // This property indicates that Ruby has been compiled with YJIT support and that we're running on a Ruby version
@@ -63,7 +67,6 @@ export class Ruby implements RubyInterface {
     .getConfiguration("rubyLsp")
     .get<ManagerConfiguration>("rubyVersionManager")!;
 
-  private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
   private readonly context: vscode.ExtensionContext;
@@ -287,53 +290,14 @@ export class Ruby implements RubyInterface {
   }
 
   private async runManagerActivation() {
-    switch (this.versionManager.identifier) {
-      case ManagerIdentifier.Asdf:
-        await this.runActivation(
-          new Asdf(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Chruby:
-        await this.runActivation(
-          new Chruby(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Rbenv:
-        await this.runActivation(
-          new Rbenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Rvm:
-        await this.runActivation(
-          new Rvm(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Mise:
-        await this.runActivation(
-          new Mise(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.RubyInstaller:
-        await this.runActivation(
-          new RubyInstaller(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.Custom:
-        await this.runActivation(
-          new Custom(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      case ManagerIdentifier.None:
-        await this.runActivation(
-          new None(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-      default:
-        await this.runActivation(
-          new Shadowenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
-        break;
-    }
+    const ManagerClass = VERSION_MANAGERS[this.versionManager.identifier];
+    const manager = new ManagerClass(
+      this.workspaceFolder,
+      this.outputChannel,
+      this.context,
+      this.manuallySelectRuby.bind(this),
+    );
+    await this.runActivation(manager);
   }
 
   private async setupBundlePath() {
@@ -352,59 +316,18 @@ export class Ruby implements RubyInterface {
   }
 
   private async discoverVersionManager() {
-    // For shadowenv, it wouldn't be enough to check for the executable's existence. We need to check if the project has
-    // created a .shadowenv.d folder
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.workspaceFolder.uri, ".shadowenv.d"));
-      this.versionManager.identifier = ManagerIdentifier.Shadowenv;
-      return;
-    } catch (_error: any) {
-      // If .shadowenv.d doesn't exist, then we check the other version managers
-    }
+    // Check all managers for detection
+    const entries = Object.entries(VERSION_MANAGERS) as [ManagerIdentifier, ManagerClass][];
 
-    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Asdf];
+    for (const [identifier, ManagerClass] of entries) {
+      if (identifier === ManagerIdentifier.Auto) {
+        continue;
+      }
 
-    for (const tool of managers) {
-      const exists = await this.toolExists(tool);
-
-      if (exists) {
-        this.versionManager = tool;
+      if (await ManagerClass.detect(this.workspaceFolder, this.outputChannel)) {
+        this.versionManager = identifier;
         return;
       }
-    }
-
-    if (await detectMise()) {
-      this.versionManager = ManagerIdentifier.Mise;
-      return;
-    }
-
-    if (os.platform() === "win32") {
-      this.versionManager = ManagerIdentifier.RubyInstaller;
-      return;
-    }
-
-    // If we can't find a version manager, just return None
-    this.versionManager = ManagerIdentifier.None;
-  }
-
-  private async toolExists(tool: string) {
-    try {
-      let command = this.shell ? `${this.shell} -i -c '` : "";
-      command += `${tool} --version`;
-
-      if (this.shell) {
-        command += "'";
-      }
-
-      this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${command}`);
-
-      await asyncExec(command, {
-        cwd: this.workspaceFolder.uri.fsPath,
-        timeout: 1000,
-      });
-      return true;
-    } catch {
-      return false;
     }
   }
 

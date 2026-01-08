@@ -19,6 +19,8 @@ export const VALUE_SEPARATOR = "RUBY_LSP_VS";
 export const FIELD_SEPARATOR = "RUBY_LSP_FS";
 
 export abstract class VersionManager {
+  private static readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
+
   protected readonly outputChannel: WorkspaceChannel;
   protected readonly workspaceFolder: vscode.WorkspaceFolder;
   protected readonly bundleUri: vscode.Uri;
@@ -52,6 +54,46 @@ export abstract class VersionManager {
   // Activate the Ruby environment for the version manager, returning all of the necessary information to boot the
   // language server
   abstract activate(): Promise<ActivationResult>;
+
+  // Finds the first existing path from a list of possible paths
+  protected static async findFirst(paths: vscode.Uri[]): Promise<vscode.Uri | undefined> {
+    for (const possiblePath of paths) {
+      try {
+        await vscode.workspace.fs.stat(possiblePath);
+        return possiblePath;
+      } catch (_error: any) {
+        // Continue looking
+      }
+    }
+
+    return undefined;
+  }
+
+  // Checks if a tool exists by running `tool --version`
+  static async toolExists(
+    tool: string,
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<boolean> {
+    try {
+      let command = this.shell ? `${this.shell} -i -c '` : "";
+      command += `${tool} --version`;
+
+      if (this.shell) {
+        command += "'";
+      }
+
+      outputChannel.info(`Checking if ${tool} is available on the path`);
+
+      await asyncExec(command, {
+        cwd: workspaceFolder.uri.fsPath,
+        timeout: 1000,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   protected async runEnvActivationScript(activatedRuby: string): Promise<ActivationResult> {
     const activationUri = vscode.Uri.joinPath(this.context.extensionUri, "activation.rb");

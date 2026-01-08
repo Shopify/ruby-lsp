@@ -50,7 +50,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(`${os.homedir()}/.asdf/asdf.sh`);
+    sandbox.stub(Asdf, "detect").resolves(vscode.Uri.file(`${os.homedir()}/.asdf/asdf.sh`));
     sandbox.stub(vscode.env, "shell").get(() => "/bin/bash");
 
     const { env, version, yjit } = await asdf.activate();
@@ -82,7 +82,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(`${os.homedir()}/.asdf/asdf.fish`);
+    sandbox.stub(Asdf, "detect").resolves(vscode.Uri.file(`${os.homedir()}/.asdf/asdf.fish`));
     sandbox.stub(vscode.env, "shell").get(() => "/opt/homebrew/bin/fish");
 
     const { env, version, yjit } = await asdf.activate();
@@ -114,7 +114,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(undefined);
+    sandbox.stub(Asdf, "detect").resolves(vscode.Uri.file("/opt/homebrew/bin/asdf"));
 
     sandbox.stub(vscode.workspace, "fs").value({
       stat: () => Promise.resolve(undefined),
@@ -124,34 +124,6 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(`/opt/homebrew/bin/asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
-        cwd: workspacePath,
-        shell: vscode.env.shell,
-
-        env: process.env,
-        encoding: "utf-8",
-      }),
-    );
-
-    assert.strictEqual(version, "3.0.0");
-    assert.strictEqual(yjit, true);
-    assert.strictEqual(env.ANY, "true");
-  });
-
-  test("Uses ASDF executable in PATH if script and Homebrew executable are not available", async () => {
-    const asdf = new Asdf(workspaceFolder, outputChannel, context, async () => {});
-
-    const envStub = ["3.0.0", "/path/to/gems", "true", `ANY${VALUE_SEPARATOR}true`].join(FIELD_SEPARATOR);
-    const execStub = sandbox.stub(common, "asyncExec").resolves({
-      stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
-    });
-
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(undefined);
-
-    const { env, version, yjit } = await asdf.activate();
-
-    assert.ok(
-      execStub.calledOnceWithExactly(`asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
