@@ -235,7 +235,7 @@ suite("Chruby", () => {
   });
 
   test("Uses closest Ruby if the version specified in .ruby-version is not installed (patch difference)", async () => {
-    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.3.3'");
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '4.0.1'");
 
     const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
     chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
@@ -245,7 +245,7 @@ suite("Chruby", () => {
   }).timeout(20000);
 
   test("Uses closest Ruby if the version specified in .ruby-version is not installed (minor difference)", async () => {
-    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.2.0'");
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '4.1.0'");
 
     const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
     chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];
@@ -255,7 +255,7 @@ suite("Chruby", () => {
   }).timeout(20000);
 
   test("Uses closest Ruby if the version specified in .ruby-version is not installed (previews)", async () => {
-    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '3.4.0-preview1'");
+    fs.writeFileSync(path.join(workspacePath, ".ruby-version"), "ruby '4.1.0-preview1'");
 
     const chruby = new Chruby(workspaceFolder, outputChannel, context, async () => {});
     chruby.rubyInstallationUris = [vscode.Uri.file(path.join(rootPath, "opt", "rubies"))];

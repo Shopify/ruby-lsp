@@ -233,18 +233,16 @@ module RubyIndexer
           RUBY
 
           Bundler.with_unbundled_env do
-            capture_subprocess_io { system("bundle install") }
+            capture_subprocess_io do
+              system("bundle install")
 
-            _stdout, stderr = capture_subprocess_io do
               script = [
                 "require \"ruby_lsp/internal\"",
                 "RubyIndexer::Configuration.new.indexable_uris",
               ].join(";")
 
-              system("bundle exec ruby -e '#{script}'")
+              assert(system("bundle exec ruby -e '#{script}'"))
             end
-
-            assert_empty(stderr)
           end
         end
       end

@@ -269,7 +269,7 @@ suite("Client", () => {
   }).timeout(20000);
 
   test("document link", async () => {
-    const text = "# source://pathname//pathname.rb#1\ndef foo\nend";
+    const text = "# source://open3//open3.rb#1\ndef foo\nend";
 
     await client.sendNotification("textDocument/didOpen", {
       textDocument: {
@@ -285,7 +285,7 @@ suite("Client", () => {
     });
 
     assert.strictEqual(response.length, 1);
-    assert.match(response[0].target!, /pathname\.rb/);
+    assert.match(response[0].target!, /open3\.rb/);
   }).timeout(20000);
 
   test("workspace symbol", async () => {

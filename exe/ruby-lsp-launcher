@@ -108,7 +108,10 @@ rescue Bundler::GemNotFound, Bundler::GitError
   unless install_error || ARGV.include?("--retry")
     $stderr.puts("Initial bundle compose succeeded, but Bundler.setup failed. Trying to restart from scratch...")
     File.write(raw_initialize_path, raw_initialize)
-    exec(Gem.ruby, __FILE__, *ARGV, "--retry")
+
+    Bundler.with_unbundled_env do
+      exec(Gem.ruby, __FILE__, *ARGV, "--retry")
+    end
   end
 rescue StandardError => e
   setup_error = e

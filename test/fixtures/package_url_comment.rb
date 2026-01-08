@@ -2,7 +2,7 @@
 def foo
 end
 
-# pkg:gem/pathname#pathname.rb:1
+# pkg:gem/open3#open3.rb:1
 def bar
 end
 

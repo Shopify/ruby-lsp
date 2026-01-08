@@ -229,24 +229,24 @@ end
 # source://psych//lib/psych/versions.rb#3
 module Psych
   class << self
-    # source://psych//lib/psych.rb#728
+    # source://psych//lib/psych.rb#729
     def add_builtin_type(type_tag, &block); end
 
     # :stopdoc:
     #
-    # source://psych//lib/psych.rb#722
+    # source://psych//lib/psych.rb#723
     def add_domain_type(domain, type_tag, &block); end
 
-    # source://psych//lib/psych.rb#738
+    # source://psych//lib/psych.rb#739
     def add_tag(tag, klass); end
 
-    # source://psych//lib/psych.rb#754
+    # source://psych//lib/psych.rb#755
     def config; end
 
-    # source://psych//lib/psych.rb#766
+    # source://psych//lib/psych.rb#767
     def domain_types; end
 
-    # source://psych//lib/psych.rb#778
+    # source://psych//lib/psych.rb#779
     def domain_types=(value); end
 
     # call-seq:
@@ -299,7 +299,7 @@ module Psych
     #   # Dump hash with symbol keys as string
     #   Psych.dump({a: "b"}, stringify_names: true) # => "---\na: b\n"
     #
-    # source://psych//lib/psych.rb#514
+    # source://psych//lib/psych.rb#515
     def dump(o, io = T.unsafe(nil), options = T.unsafe(nil)); end
 
     # Dump a list of objects as separate documents to a document stream.
@@ -308,13 +308,13 @@ module Psych
     #
     #   Psych.dump_stream("foo\n  ", {}) # => "--- ! \"foo\\n  \"\n--- {}\n"
     #
-    # source://psych//lib/psych.rb#612
+    # source://psych//lib/psych.rb#613
     def dump_stream(*objects); end
 
-    # source://psych//lib/psych.rb#762
+    # source://psych//lib/psych.rb#763
     def dump_tags; end
 
-    # source://psych//lib/psych.rb#774
+    # source://psych//lib/psych.rb#775
     def dump_tags=(value); end
 
     # source://psych//lib/psych.rb#15
@@ -350,14 +350,14 @@ module Psych
     # similar to `safe_load` except that `Symbol` objects are allowed by default.
     #
     # source://psych//lib/psych.rb#369
-    def load(yaml, permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
+    def load(yaml, permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
 
     # Loads the document contained in +filename+.  Returns the yaml contained in
     # +filename+ as a Ruby object, or if the file is empty, it returns
     # the specified +fallback+ return value, which defaults to +nil+.
     # See load for options.
     #
-    # source://psych//lib/psych.rb#715
+    # source://psych//lib/psych.rb#716
     def load_file(filename, **kwargs); end
 
     # Load multiple documents given in +yaml+.  Returns the parsed documents
@@ -374,13 +374,13 @@ module Psych
     #   end
     #   list # => ['foo', 'bar']
     #
-    # source://psych//lib/psych.rb#643
+    # source://psych//lib/psych.rb#644
     def load_stream(yaml, filename: T.unsafe(nil), fallback: T.unsafe(nil), **kwargs); end
 
-    # source://psych//lib/psych.rb#758
+    # source://psych//lib/psych.rb#759
     def load_tags; end
 
-    # source://psych//lib/psych.rb#770
+    # source://psych//lib/psych.rb#771
     def load_tags=(value); end
 
     # Parse a YAML string in +yaml+.  Returns the Psych::Nodes::Document.
@@ -402,14 +402,14 @@ module Psych
     #
     # See Psych::Nodes for more information about YAML AST.
     #
-    # source://psych//lib/psych.rb#399
+    # source://psych//lib/psych.rb#400
     def parse(yaml, filename: T.unsafe(nil)); end
 
     # Parse a file at +filename+. Returns the Psych::Nodes::Document.
     #
     # Raises a Psych::SyntaxError when a YAML syntax error is detected.
     #
-    # source://psych//lib/psych.rb#411
+    # source://psych//lib/psych.rb#412
     def parse_file(filename, fallback: T.unsafe(nil)); end
 
     # Parse a YAML string in +yaml+.  Returns the Psych::Nodes::Stream.
@@ -441,15 +441,15 @@ module Psych
     #
     # See Psych::Nodes for more information about YAML AST.
     #
-    # source://psych//lib/psych.rb#453
+    # source://psych//lib/psych.rb#454
     def parse_stream(yaml, filename: T.unsafe(nil), &block); end
 
     # Returns a default parser
     #
-    # source://psych//lib/psych.rb#420
+    # source://psych//lib/psych.rb#421
     def parser; end
 
-    # source://psych//lib/psych.rb#734
+    # source://psych//lib/psych.rb#735
     def remove_type(type_tag); end
 
     # call-seq:
@@ -522,7 +522,7 @@ module Psych
     #   # Dump hash with symbol keys as string
     #   Psych.dump({a: "b"}, stringify_names: true) # => "---\na: b\n"
     #
-    # source://psych//lib/psych.rb#595
+    # source://psych//lib/psych.rb#596
     def safe_dump(o, io = T.unsafe(nil), options = T.unsafe(nil)); end
 
     # Safely load the yaml string in +yaml+.  By default, only the following
@@ -570,14 +570,14 @@ module Psych
     #   Psych.safe_load("---\n foo: bar", symbolize_names: true)  # => {:foo=>"bar"}
     #
     # source://psych//lib/psych.rb#323
-    def safe_load(yaml, permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
+    def safe_load(yaml, permitted_classes: T.unsafe(nil), permitted_symbols: T.unsafe(nil), aliases: T.unsafe(nil), filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
 
     # Safely loads the document contained in +filename+.  Returns the yaml contained in
     # +filename+ as a Ruby object, or if the file is empty, it returns
     # the specified +fallback+ return value, which defaults to +nil+.
     # See safe_load for options.
     #
-    # source://psych//lib/psych.rb#704
+    # source://psych//lib/psych.rb#705
     def safe_load_file(filename, **kwargs); end
 
     # Load multiple documents given in +yaml+. Returns the parsed documents
@@ -593,12 +593,12 @@ module Psych
     #   end
     #   list # => ['foo', 'bar']
     #
-    # source://psych//lib/psych.rb#670
+    # source://psych//lib/psych.rb#671
     def safe_load_stream(yaml, filename: T.unsafe(nil), permitted_classes: T.unsafe(nil), aliases: T.unsafe(nil)); end
 
     # Dump Ruby +object+ to a JSON string.
     #
-    # source://psych//lib/psych.rb#622
+    # source://psych//lib/psych.rb#623
     def to_json(object); end
 
     # Load +yaml+ in to a Ruby data structure.  If multiple documents are
@@ -634,7 +634,7 @@ module Psych
     # load method or the safe_load method.
     #
     # source://psych//lib/psych.rb#272
-    def unsafe_load(yaml, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
+    def unsafe_load(yaml, filename: T.unsafe(nil), fallback: T.unsafe(nil), symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
 
     # Load the document contained in +filename+.  Returns the yaml contained in
     # +filename+ as a Ruby object, or if the file is empty, it returns
@@ -644,7 +644,7 @@ module Psych
     # YAML documents that are supplied via user input.  Instead, please use the
     # safe_load_file method.
     #
-    # source://psych//lib/psych.rb#693
+    # source://psych//lib/psych.rb#694
     def unsafe_load_file(filename, **kwargs); end
   end
 end
@@ -1576,7 +1576,7 @@ class Psych::Nodes::Node
   # See also Psych::Visitors::ToRuby
   #
   # source://psych//lib/psych/nodes/node.rb#48
-  def to_ruby(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
+  def to_ruby(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
 
   # Convert this node to YAML.
   #
@@ -1590,7 +1590,7 @@ class Psych::Nodes::Node
   # See also Psych::Visitors::ToRuby
   #
   # source://psych//lib/psych/nodes/node.rb#51
-  def transform(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
+  def transform(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
 
   # Convert this node to YAML.
   #
@@ -1905,7 +1905,7 @@ class Psych::ScalarScanner
   # @return [ScalarScanner] a new instance of ScalarScanner
   #
   # source://psych//lib/psych/scalar_scanner.rb#30
-  def initialize(class_loader, strict_integer: T.unsafe(nil)); end
+  def initialize(class_loader, strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
 
   # Returns the value of attribute class_loader.
   #
@@ -1914,17 +1914,17 @@ class Psych::ScalarScanner
 
   # Parse and return an int from +string+
   #
-  # source://psych//lib/psych/scalar_scanner.rb#108
+  # source://psych//lib/psych/scalar_scanner.rb#109
   def parse_int(string); end
 
   # Parse and return a Time from +string+
   #
-  # source://psych//lib/psych/scalar_scanner.rb#114
+  # source://psych//lib/psych/scalar_scanner.rb#115
   def parse_time(string); end
 
   # Tokenize +string+ returning the Ruby object
   #
-  # source://psych//lib/psych/scalar_scanner.rb#37
+  # source://psych//lib/psych/scalar_scanner.rb#38
   def tokenize(string); end
 end
 
@@ -2201,11 +2201,11 @@ class Psych::Visitors::JSONTree < ::Psych::Visitors::YAMLTree
   end
 end
 
-# source://psych//lib/psych/visitors/to_ruby.rb#469
+# source://psych//lib/psych/visitors/to_ruby.rb#473
 class Psych::Visitors::NoAliasRuby < ::Psych::Visitors::ToRuby
   # @raise [AliasesNotEnabled]
   #
-  # source://psych//lib/psych/visitors/to_ruby.rb#470
+  # source://psych//lib/psych/visitors/to_ruby.rb#474
   def visit_Psych_Nodes_Alias(o); end
 end
 
@@ -2232,83 +2232,83 @@ Psych::Visitors::RestrictedYAMLTree::DEFAULT_PERMITTED_CLASSES = T.let(T.unsafe(
 class Psych::Visitors::ToRuby < ::Psych::Visitors::Visitor
   # @return [ToRuby] a new instance of ToRuby
   #
-  # source://psych//lib/psych/visitors/to_ruby.rb#23
+  # source://psych//lib/psych/visitors/to_ruby.rb#27
   def initialize(ss, class_loader, symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil)); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#34
+  # source://psych//lib/psych/visitors/to_ruby.rb#38
   def accept(target); end
 
   # Returns the value of attribute class_loader.
   #
-  # source://psych//lib/psych/visitors/to_ruby.rb#21
+  # source://psych//lib/psych/visitors/to_ruby.rb#25
   def class_loader; end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#352
+  # source://psych//lib/psych/visitors/to_ruby.rb#356
   def visit_Psych_Nodes_Alias(o); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#344
+  # source://psych//lib/psych/visitors/to_ruby.rb#348
   def visit_Psych_Nodes_Document(o); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#164
+  # source://psych//lib/psych/visitors/to_ruby.rb#168
   def visit_Psych_Nodes_Mapping(o); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#128
+  # source://psych//lib/psych/visitors/to_ruby.rb#132
   def visit_Psych_Nodes_Scalar(o); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#132
+  # source://psych//lib/psych/visitors/to_ruby.rb#136
   def visit_Psych_Nodes_Sequence(o); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#348
+  # source://psych//lib/psych/visitors/to_ruby.rb#352
   def visit_Psych_Nodes_Stream(o); end
 
   private
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#369
+  # source://psych//lib/psych/visitors/to_ruby.rb#373
   def allocate_anon_data(node, members); end
 
   # source://psych//lib/psych.rb#15
   def build_exception(_arg0, _arg1); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#434
+  # source://psych//lib/psych/visitors/to_ruby.rb#438
   def deduplicate(key); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#51
+  # source://psych//lib/psych/visitors/to_ruby.rb#55
   def deserialize(o); end
 
-  # source://psych//lib/psych.rb#15
-  def init_struct(_arg0, _arg1); end
-
-  # source://psych//lib/psych/visitors/to_ruby.rb#451
+  # source://psych//lib/psych/visitors/to_ruby.rb#455
   def init_with(o, h, node); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#443
+  # source://psych//lib/psych/visitors/to_ruby.rb#447
   def merge_key(hash, key, val); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#358
+  # source://psych//lib/psych/visitors/to_ruby.rb#362
   def register(node, object); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#363
+  # source://psych//lib/psych/visitors/to_ruby.rb#367
   def register_empty(object); end
 
   # Convert +klassname+ to a Class
   #
-  # source://psych//lib/psych/visitors/to_ruby.rb#464
+  # source://psych//lib/psych/visitors/to_ruby.rb#468
   def resolve_class(klassname); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#446
+  # source://psych//lib/psych/visitors/to_ruby.rb#450
   def revive(klass, node); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#374
+  # source://psych//lib/psych/visitors/to_ruby.rb#378
   def revive_data_members(hash, o); end
 
-  # source://psych//lib/psych/visitors/to_ruby.rb#383
+  # source://psych//lib/psych/visitors/to_ruby.rb#387
   def revive_hash(hash, o, tagged = T.unsafe(nil)); end
 
   class << self
-    # source://psych//lib/psych/visitors/to_ruby.rb#15
-    def create(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil)); end
+    # source://psych//lib/psych/visitors/to_ruby.rb#19
+    def create(symbolize_names: T.unsafe(nil), freeze: T.unsafe(nil), strict_integer: T.unsafe(nil), parse_symbols: T.unsafe(nil)); end
   end
 end
+
+# source://psych//lib/psych/visitors/to_ruby.rb#16
+Psych::Visitors::ToRuby::DATA_INITIALIZE = T.let(T.unsafe(nil), UnboundMethod)
 
 # source://psych//lib/psych/visitors/visitor.rb#4
 class Psych::Visitors::Visitor
@@ -2540,3 +2540,16 @@ class Psych::Visitors::YAMLTree::Registrar
   # source://psych//lib/psych/visitors/yaml_tree.rb#23
   def register(target, node); end
 end
+
+# source://psych//lib/psych/core_ext.rb#22
+class Set
+  include ::Enumerable
+
+  # source://psych//lib/psych/core_ext.rb#23
+  def encode_with(coder); end
+
+  # source://psych//lib/psych/core_ext.rb#32
+  def init_with(coder); end
+end
+
+class Set::CoreSet < ::Set; end
