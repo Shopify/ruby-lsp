@@ -327,7 +327,7 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managersWithToolExists = [ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm];
+    const managersWithToolExists = [ManagerIdentifier.Rvm];
 
     for (const tool of managersWithToolExists) {
       const exists = await this.toolExists(tool);
