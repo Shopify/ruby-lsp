@@ -53,7 +53,7 @@ suite("Mise", () => {
     });
     const findStub = sandbox
       .stub(mise, "findMiseUri")
-      .resolves(vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"));
+      .resolves(common.pathToUri(os.homedir(), ".local", "bin", "mise"));
 
     const { env, version, yjit } = await mise.activate();
 

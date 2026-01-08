@@ -4,6 +4,7 @@ import path from "path";
 import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
+import { pathToUri } from "../common";
 
 import { ActivationResult, VersionManager, ACTIVATION_SEPARATOR } from "./versionManager";
 
@@ -26,10 +27,7 @@ export class Chruby extends VersionManager {
   }
 
   // Only public so that we can point to a different directory in tests
-  public rubyInstallationUris = [
-    vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rubies"),
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "rubies"),
-  ];
+  public rubyInstallationUris = [pathToUri(os.homedir(), ".rubies"), pathToUri("/", "opt", "rubies")];
 
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,
