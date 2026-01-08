@@ -118,7 +118,7 @@ export class Asdf extends VersionManager {
       await vscode.workspace.fs.stat(configuredPath);
       this.outputChannel.info(`Using configured ASDF executable path: ${asdfPath}`);
       return configuredPath.fsPath;
-    } catch (_error: any) {
+    } catch (_error: unknown) {
       throw new ExecutableNotFoundError("asdf", [configuredPath.fsPath], configuredPath.fsPath);
     }
   }

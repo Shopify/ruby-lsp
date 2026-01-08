@@ -73,7 +73,7 @@ export class Chruby extends VersionManager {
         versionInfo = fallback.rubyVersion;
         rubyUri = fallback.uri;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof ActivationCancellationError) {
         // Try to re-activate if the user has configured a fallback during cancellation
         return this.activate();
@@ -98,7 +98,7 @@ export class Chruby extends VersionManager {
         versionInfo = fallback.rubyVersion;
         rubyUri = fallback.uri;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof ActivationCancellationError) {
         // Try to re-activate if the user has configured a fallback during cancellation
         return this.activate();
@@ -147,7 +147,7 @@ export class Chruby extends VersionManager {
         directories = (await vscode.workspace.fs.readDirectory(uri)).sort((left, right) =>
           right[0].localeCompare(left[0]),
         );
-      } catch (_error: any) {
+      } catch (_error: unknown) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(`Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`);
         continue;
@@ -210,7 +210,7 @@ export class Chruby extends VersionManager {
             });
           }
         });
-      } catch (_error: any) {
+      } catch (_error: unknown) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(`Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`);
         continue;
@@ -286,7 +286,7 @@ export class Chruby extends VersionManager {
 
     try {
       gemfileContents = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(this.workspaceFolder.uri, "Gemfile"));
-    } catch (_error: any) {
+    } catch (_error: unknown) {
       // The Gemfile doesn't exist
     }
 
@@ -361,7 +361,7 @@ export class Chruby extends VersionManager {
             label: directory[0],
           });
         });
-      } catch (_error: any) {
+      } catch (_error: unknown) {
         continue;
       }
     }
@@ -428,7 +428,7 @@ export class Chruby extends VersionManager {
             },
           };
         }
-      } catch (_error: any) {
+      } catch (_error: unknown) {
         // If the directory doesn't exist, keep searching
         this.outputChannel.debug(`Tried searching for Ruby installation in ${uri.fsPath} but it doesn't exist`);
         continue;

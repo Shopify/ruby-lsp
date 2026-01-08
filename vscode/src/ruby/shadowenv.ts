@@ -20,7 +20,7 @@ export class Shadowenv extends VersionManager {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, ".shadowenv.d"));
       return true;
-    } catch (_error: any) {
+    } catch (_error: unknown) {
       return false;
     }
   }
@@ -57,7 +57,7 @@ export class Shadowenv extends VersionManager {
         version: parsedResult.version,
         gemPath: parsedResult.gemPath,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const err = error as Error;
       // If the workspace is untrusted, offer to trust it for the user
       if (err.message.includes("untrusted shadowenv program")) {
@@ -78,16 +78,12 @@ export class Shadowenv extends VersionManager {
 
       try {
         await asyncExec("shadowenv --version");
-      } catch (_error: any) {
+      } catch (_error: unknown) {
         throw new ExecutableNotFoundError("shadowenv", ["PATH"]);
       }
 
       // If it failed for some other reason, present the error to the user
-      throw new ActivationError(
-        `Failed to activate Ruby environment with Shadowenv: ${error.message}`,
-        "shadowenv",
-        error,
-      );
+      throw new ActivationError(`Failed to activate Ruby environment with Shadowenv: ${err.message}`, "shadowenv", err);
     }
   }
 }
