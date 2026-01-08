@@ -8,6 +8,34 @@ import { VersionManager, ActivationResult } from "./versionManager";
 //
 // Learn more: https://github.com/jdx/mise
 export class Mise extends VersionManager {
+  // Possible mise installation paths
+  //
+  // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
+  // 2. Homebrew M series
+  // 3. Installation from `apt install mise`
+  private static getPossiblePaths(): vscode.Uri[] {
+    return [
+      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
+    ];
+  }
+
+  static async detect(): Promise<vscode.Uri | undefined> {
+    const possiblePaths = Mise.getPossiblePaths();
+
+    for (const possiblePath of possiblePaths) {
+      try {
+        await vscode.workspace.fs.stat(possiblePath);
+        return possiblePath;
+      } catch (_error: any) {
+        // Continue looking
+      }
+    }
+
+    return undefined;
+  }
+
   async activate(): Promise<ActivationResult> {
     const miseUri = await this.findMiseUri();
 
@@ -37,26 +65,13 @@ export class Mise extends VersionManager {
       }
     }
 
-    // Possible mise installation paths
-    //
-    // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
-    // 2. Homebrew M series
-    // 3. Installation from `apt install mise`
-    const possiblePaths = [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
-    ];
+    const detectedPath = await Mise.detect();
 
-    for (const possiblePath of possiblePaths) {
-      try {
-        await vscode.workspace.fs.stat(possiblePath);
-        return possiblePath;
-      } catch (_error: any) {
-        // Continue looking
-      }
+    if (detectedPath) {
+      return detectedPath;
     }
 
+    const possiblePaths = Mise.getPossiblePaths();
     throw new Error(
       `The Ruby LSP version manager is configured to be Mise, but could not find Mise installation. Searched in
         ${possiblePaths.join(", ")}`,

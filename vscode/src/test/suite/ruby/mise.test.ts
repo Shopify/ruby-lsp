@@ -127,4 +127,61 @@ suite("Mise", () => {
     configStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
   });
+
+  test("detect returns the first found mise path", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    const misePath = path.join(tempDir, "mise");
+    fs.writeFileSync(misePath, "fakeMiseBinary");
+
+    const getPossiblePathsStub = sandbox
+      .stub(Mise as any, "getPossiblePaths")
+      .returns([vscode.Uri.file(misePath), vscode.Uri.file(path.join(tempDir, "other", "mise"))]);
+
+    const result = await Mise.detect();
+
+    assert.strictEqual(result?.fsPath, vscode.Uri.file(misePath).fsPath);
+
+    getPossiblePathsStub.restore();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  test("detect returns undefined when mise is not found", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+
+    const getPossiblePathsStub = sandbox
+      .stub(Mise as any, "getPossiblePaths")
+      .returns([
+        vscode.Uri.file(path.join(tempDir, "nonexistent1", "mise")),
+        vscode.Uri.file(path.join(tempDir, "nonexistent2", "mise")),
+      ]);
+
+    const result = await Mise.detect();
+
+    assert.strictEqual(result, undefined);
+
+    getPossiblePathsStub.restore();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  test("detect checks multiple paths in order", async () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    const secondPath = path.join(tempDir, "second", "mise");
+    fs.mkdirSync(path.dirname(secondPath), { recursive: true });
+    fs.writeFileSync(secondPath, "fakeMiseBinary");
+
+    const getPossiblePathsStub = sandbox
+      .stub(Mise as any, "getPossiblePaths")
+      .returns([
+        vscode.Uri.file(path.join(tempDir, "nonexistent", "mise")),
+        vscode.Uri.file(secondPath),
+        vscode.Uri.file(path.join(tempDir, "third", "mise")),
+      ]);
+
+    const result = await Mise.detect();
+
+    assert.strictEqual(result?.fsPath, vscode.Uri.file(secondPath).fsPath);
+
+    getPossiblePathsStub.restore();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
 });
