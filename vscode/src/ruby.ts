@@ -3,7 +3,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, RubyInterface } from "./common";
+import { RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -43,7 +43,7 @@ interface ManagerClass {
     manuallySelectRuby: () => Promise<void>,
     ...args: any[]
   ): VersionManager;
-  detect?: () => Promise<vscode.Uri | undefined>;
+  detect?: (workspaceFolder: vscode.WorkspaceFolder) => Promise<vscode.Uri | undefined>;
 }
 
 const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
@@ -71,7 +71,6 @@ export class Ruby implements RubyInterface {
     .getConfiguration("rubyLsp")
     .get<ManagerConfiguration>("rubyVersionManager")!;
 
-  private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
   private readonly context: vscode.ExtensionContext;
@@ -331,12 +330,7 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managersWithToolExists = [
-      ManagerIdentifier.Chruby,
-      ManagerIdentifier.Rbenv,
-      ManagerIdentifier.Rvm,
-      ManagerIdentifier.Rv,
-    ];
+    const managersWithToolExists = [ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Rv];
 
     for (const tool of managersWithToolExists) {
       const exists = await this.toolExists(tool);
@@ -349,7 +343,7 @@ export class Ruby implements RubyInterface {
 
     // Check managers that have a detect() method
     for (const [identifier, ManagerClass] of Object.entries(VERSION_MANAGERS)) {
-      if (ManagerClass.detect && (await ManagerClass.detect())) {
+      if (ManagerClass.detect && (await ManagerClass.detect(this.workspaceFolder))) {
         this.versionManager = identifier as ManagerIdentifier;
         return;
       }
@@ -365,24 +359,8 @@ export class Ruby implements RubyInterface {
   }
 
   private async toolExists(tool: string) {
-    try {
-      let command = this.shell ? `${this.shell} -i -c '` : "";
-      command += `${tool} --version`;
-
-      if (this.shell) {
-        command += "'";
-      }
-
-      this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${command}`);
-
-      await asyncExec(command, {
-        cwd: this.workspaceFolder.uri.fsPath,
-        timeout: 1000,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    this.outputChannel.info(`Checking if ${tool} is available on the path`);
+    return VersionManager.toolExists(tool, this.workspaceFolder);
   }
 
   private async handleRubyError(message: string) {
