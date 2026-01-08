@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 
 // Custom
 //
@@ -12,8 +12,8 @@ export class Custom extends VersionManager {
   static async detect(
     _workspaceFolder: vscode.WorkspaceFolder,
     _outputChannel: vscode.LogOutputChannel,
-  ): Promise<vscode.Uri | undefined> {
-    return undefined;
+  ): Promise<DetectionResult> {
+    return { type: "none" };
   }
 
   async activate(): Promise<ActivationResult> {

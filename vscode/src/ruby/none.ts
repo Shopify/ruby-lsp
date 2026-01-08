@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 
 // None
 //
@@ -17,9 +17,9 @@ export class None extends VersionManager {
   static async detect(
     _workspaceFolder: vscode.WorkspaceFolder,
     _outputChannel: vscode.LogOutputChannel,
-  ): Promise<vscode.Uri | undefined> {
+  ): Promise<DetectionResult> {
     // None always matches as the final fallback
-    return vscode.Uri.file("none");
+    return { type: "semantic", marker: "none" };
   }
 
   private readonly rubyPath: string;

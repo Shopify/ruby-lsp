@@ -2,7 +2,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
 import { pathToUri } from "../common";
 
@@ -13,8 +13,9 @@ export class Mise extends VersionManager {
   static async detect(
     _workspaceFolder: vscode.WorkspaceFolder,
     _outputChannel: WorkspaceChannel,
-  ): Promise<vscode.Uri | undefined> {
-    return this.findFirst(this.getPossiblePaths());
+  ): Promise<DetectionResult> {
+    const result = await this.findFirst(this.getPossiblePaths());
+    return result ? { type: "path", uri: result } : { type: "none" };
   }
 
   async activate(): Promise<ActivationResult> {
@@ -75,10 +76,10 @@ export class Mise extends VersionManager {
       }
     }
 
-    const detectedPath = await constructor.detect(this.workspaceFolder, this.outputChannel);
+    const result = await constructor.detect(this.workspaceFolder, this.outputChannel);
 
-    if (detectedPath) {
-      return detectedPath;
+    if (result.type === "path") {
+      return result.uri;
     }
 
     const possiblePaths = constructor.getPossiblePaths();

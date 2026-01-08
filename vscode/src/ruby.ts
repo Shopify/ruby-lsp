@@ -6,7 +6,7 @@ import { RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
-import { VersionManager } from "./ruby/versionManager";
+import { VersionManager, DetectionResult } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
@@ -42,7 +42,7 @@ interface ManagerClass {
     manuallySelectRuby: () => Promise<void>,
     ...args: any[]
   ): VersionManager;
-  detect: (workspaceFolder: vscode.WorkspaceFolder, outputChannel: WorkspaceChannel) => Promise<vscode.Uri | undefined>;
+  detect: (workspaceFolder: vscode.WorkspaceFolder, outputChannel: WorkspaceChannel) => Promise<DetectionResult>;
 }
 
 const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
@@ -326,7 +326,8 @@ export class Ruby implements RubyInterface {
         continue;
       }
 
-      if (await ManagerClass.detect(this.workspaceFolder, this.outputChannel)) {
+      const result = await ManagerClass.detect(this.workspaceFolder, this.outputChannel);
+      if (result.type !== "none") {
         this.versionManager = identifier;
         return;
       }

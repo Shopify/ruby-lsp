@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
 
 // Seamlessly manage your app’s Ruby environment with rbenv.
@@ -10,9 +10,9 @@ export class Rbenv extends VersionManager {
   static async detect(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
-  ): Promise<vscode.Uri | undefined> {
+  ): Promise<DetectionResult> {
     const exists = await VersionManager.toolExists("rbenv", workspaceFolder, outputChannel);
-    return exists ? vscode.Uri.file("rbenv") : undefined;
+    return exists ? { type: "semantic", marker: "rbenv" } : { type: "none" };
   }
 
   async activate(): Promise<ActivationResult> {

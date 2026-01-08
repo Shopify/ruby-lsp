@@ -13,6 +13,12 @@ export interface ActivationResult {
   gemPath: string[];
 }
 
+// Detection result types for version managers
+export type DetectionResult =
+  | { type: "semantic"; marker: string } // Detected by semantic markers (e.g., "chruby", "rbenv")
+  | { type: "path"; uri: vscode.Uri } // Detected with actual file/directory path
+  | { type: "none" }; // No detection (not found or not applicable)
+
 // Changes to either one of these values have to be synchronized with a corresponding update in `activation.rb`
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
 export const VALUE_SEPARATOR = "RUBY_LSP_VS";

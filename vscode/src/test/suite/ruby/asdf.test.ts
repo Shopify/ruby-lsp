@@ -50,7 +50,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(Asdf, "detect").resolves(vscode.Uri.file(`${os.homedir()}/.asdf/asdf.sh`));
+    sandbox.stub(Asdf, "detect").resolves({ type: "path", uri: vscode.Uri.file(`${os.homedir()}/.asdf/asdf.sh`) });
     sandbox.stub(vscode.env, "shell").get(() => "/bin/bash");
 
     const { env, version, yjit } = await asdf.activate();
@@ -82,7 +82,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(Asdf, "detect").resolves(vscode.Uri.file(`${os.homedir()}/.asdf/asdf.fish`));
+    sandbox.stub(Asdf, "detect").resolves({ type: "path", uri: vscode.Uri.file(`${os.homedir()}/.asdf/asdf.fish`) });
     sandbox.stub(vscode.env, "shell").get(() => "/opt/homebrew/bin/fish");
 
     const { env, version, yjit } = await asdf.activate();
@@ -114,7 +114,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(Asdf, "detect").resolves(vscode.Uri.file("/opt/homebrew/bin/asdf"));
+    sandbox.stub(Asdf, "detect").resolves({ type: "path", uri: vscode.Uri.file("/opt/homebrew/bin/asdf") });
 
     sandbox.stub(vscode.workspace, "fs").value({
       stat: () => Promise.resolve(undefined),

@@ -2,7 +2,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { ActivationResult, VersionManager } from "./versionManager";
+import { ActivationResult, VersionManager, DetectionResult } from "./versionManager";
 import { WorkspaceChannel } from "../workspaceChannel";
 import { pathToUri } from "../common";
 
@@ -14,9 +14,9 @@ export class Rvm extends VersionManager {
   static async detect(
     workspaceFolder: vscode.WorkspaceFolder,
     outputChannel: WorkspaceChannel,
-  ): Promise<vscode.Uri | undefined> {
+  ): Promise<DetectionResult> {
     const exists = await VersionManager.toolExists("rvm", workspaceFolder, outputChannel);
-    return exists ? vscode.Uri.file("rvm") : undefined;
+    return exists ? { type: "semantic", marker: "rvm" } : { type: "none" };
   }
 
   async activate(): Promise<ActivationResult> {

@@ -146,7 +146,7 @@ suite("Mise", () => {
 
     const result = await Mise.detect(workspaceFolder, outputChannel);
 
-    assert.strictEqual(result?.fsPath, vscode.Uri.file(misePath).fsPath);
+    assert.strictEqual(result.type === "path" ? result.uri.fsPath : undefined, vscode.Uri.file(misePath).fsPath);
 
     getPossiblePathsStub.restore();
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -171,7 +171,7 @@ suite("Mise", () => {
 
     const result = await Mise.detect(workspaceFolder, outputChannel);
 
-    assert.strictEqual(result, undefined);
+    assert.strictEqual(result.type, "none");
 
     getPossiblePathsStub.restore();
     fs.rmSync(tempDir, { recursive: true, force: true });
@@ -200,7 +200,7 @@ suite("Mise", () => {
 
     const result = await Mise.detect(workspaceFolder, outputChannel);
 
-    assert.strictEqual(result?.fsPath, vscode.Uri.file(secondPath).fsPath);
+    assert.strictEqual(result.type === "path" ? result.uri.fsPath : undefined, vscode.Uri.file(secondPath).fsPath);
 
     getPossiblePathsStub.restore();
     fs.rmSync(tempDir, { recursive: true, force: true });

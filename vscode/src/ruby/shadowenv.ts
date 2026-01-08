@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 
 // Shadowenv is a tool that allows managing environment variables upon entering a directory. It allows users to manage
 // which Ruby version should be used for each project, in addition to other customizations such as GEM_HOME.
@@ -23,9 +23,12 @@ export class Shadowenv extends VersionManager {
   static async detect(
     workspaceFolder: vscode.WorkspaceFolder,
     _outputChannel: vscode.LogOutputChannel,
-  ): Promise<vscode.Uri | undefined> {
+  ): Promise<DetectionResult> {
     const exists = await Shadowenv.shadowenvDirExists(workspaceFolder.uri);
-    return exists ? vscode.Uri.joinPath(workspaceFolder.uri, ".shadowenv.d") : undefined;
+    if (exists) {
+      return { type: "path", uri: vscode.Uri.joinPath(workspaceFolder.uri, ".shadowenv.d") };
+    }
+    return { type: "none" };
   }
 
   async activate(): Promise<ActivationResult> {
