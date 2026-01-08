@@ -15,6 +15,9 @@ interface RubyVersion {
 
 class RubyActivationCancellationError extends Error {}
 
+// Delay before attempting fallback Ruby activation (in milliseconds)
+const FALLBACK_DELAY_MS = 10000;
+
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
 export class Chruby extends VersionManager {
@@ -301,7 +304,7 @@ export class Chruby extends VersionManager {
 
         // If they don't cancel, we wait 10 seconds before falling back so that they are aware of what's happening
         await new Promise<void>((resolve) => {
-          setTimeout(resolve, 10000);
+          setTimeout(resolve, FALLBACK_DELAY_MS);
 
           // If the user cancels the fallback, resolve immediately so that they don't have to wait 10 seconds
           token.onCancellationRequested(() => {

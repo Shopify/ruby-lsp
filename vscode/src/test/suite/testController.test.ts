@@ -573,8 +573,9 @@ suite("TestController", () => {
   test("debugging a test", async () => {
     await controller.testController.resolveHandler!(undefined);
 
-    const manager =
-      os.platform() === "win32" ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
+    const manager = common.isWindows()
+      ? { identifier: ManagerIdentifier.None }
+      : { identifier: ManagerIdentifier.Chruby };
 
     if (process.env.CI) {
       createRubySymlinks();

@@ -3,7 +3,7 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { Chruby } from "./chruby";
-import { pathToUri } from "../common";
+import { pathToUri, isWindows } from "../common";
 import { DetectionResult } from "./versionManager";
 
 interface RubyVersion {
@@ -23,7 +23,7 @@ export class RubyInstaller extends Chruby {
     _workspaceFolder: vscode.WorkspaceFolder,
     _outputChannel: vscode.LogOutputChannel,
   ): Promise<DetectionResult> {
-    return os.platform() === "win32" ? { type: "semantic", marker: "RubyInstaller" } : { type: "none" };
+    return isWindows() ? { type: "semantic", marker: "RubyInstaller" } : { type: "none" };
   }
 
   // Environment variables are case sensitive on Windows when we access them through NodeJS. We need to ensure that

@@ -49,7 +49,7 @@ suite("None", () => {
     const activationUri = vscode.Uri.joinPath(context.extensionUri, "activation.rb");
 
     // We must not set the shell on Windows
-    const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
+    const shell = common.isWindows() ? undefined : vscode.env.shell;
 
     assert.ok(
       execStub.calledOnceWithExactly(`ruby -EUTF-8:UTF-8 '${activationUri.fsPath}'`, {

@@ -30,7 +30,15 @@ import {
   ErrorCodes,
 } from "vscode-languageclient/node";
 
-import { LSP_NAME, ClientInterface, Addon, SUPPORTED_LANGUAGE_IDS, FEATURE_FLAGS, featureEnabled } from "./common";
+import {
+  LSP_NAME,
+  ClientInterface,
+  Addon,
+  SUPPORTED_LANGUAGE_IDS,
+  FEATURE_FLAGS,
+  featureEnabled,
+  isWindows,
+} from "./common";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -121,7 +129,7 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
   } else {
     const workspacePath = workspaceFolder.uri.fsPath;
     const command =
-      path.basename(workspacePath) === "ruby-lsp" && os.platform() !== "win32"
+      path.basename(workspacePath) === "ruby-lsp" && !isWindows()
         ? path.join(workspacePath, "exe", "ruby-lsp")
         : "ruby-lsp";
 

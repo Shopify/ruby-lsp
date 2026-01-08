@@ -16,7 +16,7 @@ import * as common from "../../../common";
 import { createContext, FakeContext } from "../helpers";
 
 suite("Shadowenv", () => {
-  if (os.platform() === "win32") {
+  if (common.isWindows()) {
     // eslint-disable-next-line no-console
     console.log("Skipping Shadowenv tests on Windows");
     return;

@@ -1,10 +1,9 @@
 import path from "path";
-import os from "os";
 
 import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
-import { asyncExec } from "../common";
+import { asyncExec, isWindows } from "../common";
 
 export interface ActivationResult {
   env: NodeJS.ProcessEnv;
@@ -21,6 +20,9 @@ export type DetectionResult =
 
 // Changes to either one of these values have to be synchronized with a corresponding update in `activation.rb`
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
+
+// Timeout for tool detection commands (in milliseconds)
+const TOOL_DETECTION_TIMEOUT_MS = 1000;
 export const VALUE_SEPARATOR = "RUBY_LSP_VS";
 export const FIELD_SEPARATOR = "RUBY_LSP_FS";
 
@@ -87,7 +89,7 @@ export abstract class VersionManager {
 
       await asyncExec(command, {
         cwd: workspaceFolder.uri.fsPath,
-        timeout: 1000,
+        timeout: TOOL_DETECTION_TIMEOUT_MS,
       });
       return true;
     } catch {
@@ -120,7 +122,7 @@ export abstract class VersionManager {
     // If the user has configured a default shell, we use that one since they are probably sourcing their version
     // manager scripts in that shell's configuration files. On Windows, we never set the shell no matter what to ensure
     // that activation runs on `cmd.exe` and not PowerShell, which avoids complex quoting and escaping issues.
-    if (vscode.env.shell.length > 0 && os.platform() !== "win32") {
+    if (vscode.env.shell.length > 0 && !isWindows()) {
       shell = vscode.env.shell;
     }
 

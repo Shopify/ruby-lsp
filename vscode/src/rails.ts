@@ -1,10 +1,9 @@
-import os from "os";
-
 import * as vscode from "vscode";
 
 import { Workspace } from "./workspace";
+import { isWindows } from "./common";
 
-const BASE_COMMAND = os.platform() === "win32" ? "ruby bin/rails" : "bin/rails";
+const BASE_COMMAND = isWindows() ? "ruby bin/rails" : "bin/rails";
 
 export class Rails {
   private readonly showWorkspacePick: () => Promise<Workspace | undefined>;

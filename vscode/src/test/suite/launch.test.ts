@@ -1,6 +1,5 @@
 import assert from "assert";
 import path from "path";
-import os from "os";
 
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient/node";
@@ -43,7 +42,7 @@ suite("Launch integrations", () => {
   async function createClient() {
     const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
 
-    if (process.env.CI && os.platform() === "win32") {
+    if (process.env.CI && common.isWindows()) {
       await ruby.activateRuby({ identifier: ManagerIdentifier.RubyInstaller });
     } else if (process.env.CI) {
       await ruby.activateRuby({ identifier: ManagerIdentifier.Chruby });

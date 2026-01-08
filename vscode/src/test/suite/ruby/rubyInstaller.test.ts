@@ -16,7 +16,7 @@ import { ACTIVATION_SEPARATOR } from "../../../ruby/versionManager";
 import { createRubySymlinks, createContext, FakeContext } from "../helpers";
 
 suite("RubyInstaller", () => {
-  if (os.platform() !== "win32") {
+  if (!common.isWindows()) {
     // eslint-disable-next-line no-console
     console.log("This test can only run on Windows");
     return;

@@ -1,5 +1,4 @@
 import * as assert from "assert";
-import os from "os";
 import path from "path";
 
 import * as vscode from "vscode";
@@ -8,8 +7,9 @@ import { beforeEach, afterEach } from "mocha";
 
 import { Rails } from "../../rails";
 import { Workspace } from "../../workspace";
+import { isWindows } from "../../common";
 
-const BASE_COMMAND = os.platform() === "win32" ? "ruby bin/rails" : "bin/rails";
+const BASE_COMMAND = isWindows() ? "ruby bin/rails" : "bin/rails";
 
 suite("Rails", () => {
   const workspacePath = path.dirname(path.dirname(path.dirname(path.dirname(__dirname))));

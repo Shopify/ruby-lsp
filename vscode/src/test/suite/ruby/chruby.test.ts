@@ -9,7 +9,7 @@ import sinon from "sinon";
 
 import { Chruby } from "../../../ruby/chruby";
 import { WorkspaceChannel } from "../../../workspaceChannel";
-import { LOG_CHANNEL } from "../../../common";
+import { isWindows, LOG_CHANNEL } from "../../../common";
 import { RUBY_VERSION, MAJOR, MINOR, VERSION_REGEX } from "../../rubyVersion";
 import { ActivationResult } from "../../../ruby/versionManager";
 import { createContext, FakeContext } from "../helpers";
@@ -38,7 +38,7 @@ function createRubySymlinks(destination: string) {
 }
 
 suite("Chruby", () => {
-  if (os.platform() === "win32") {
+  if (isWindows()) {
     // eslint-disable-next-line no-console
     console.log("Skipping Chruby tests on Windows");
     return;
