@@ -135,6 +135,7 @@ suite("Mise", () => {
       name: path.basename(workspacePath),
       index: 0,
     };
+    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     const misePath = path.join(tempDir, "mise");
     fs.writeFileSync(misePath, "fakeMiseBinary");
@@ -143,7 +144,7 @@ suite("Mise", () => {
       .stub(Mise as any, "getPossiblePaths")
       .returns([vscode.Uri.file(misePath), vscode.Uri.file(path.join(tempDir, "other", "mise"))]);
 
-    const result = await Mise.detect(workspaceFolder);
+    const result = await Mise.detect(workspaceFolder, outputChannel);
 
     assert.strictEqual(result?.fsPath, vscode.Uri.file(misePath).fsPath);
 
@@ -158,6 +159,7 @@ suite("Mise", () => {
       name: path.basename(workspacePath),
       index: 0,
     };
+    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
 
     const getPossiblePathsStub = sandbox
@@ -167,7 +169,7 @@ suite("Mise", () => {
         vscode.Uri.file(path.join(tempDir, "nonexistent2", "mise")),
       ]);
 
-    const result = await Mise.detect(workspaceFolder);
+    const result = await Mise.detect(workspaceFolder, outputChannel);
 
     assert.strictEqual(result, undefined);
 
@@ -182,6 +184,7 @@ suite("Mise", () => {
       name: path.basename(workspacePath),
       index: 0,
     };
+    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     const secondPath = path.join(tempDir, "second", "mise");
     fs.mkdirSync(path.dirname(secondPath), { recursive: true });
@@ -195,7 +198,7 @@ suite("Mise", () => {
         vscode.Uri.file(path.join(tempDir, "third", "mise")),
       ]);
 
-    const result = await Mise.detect(workspaceFolder);
+    const result = await Mise.detect(workspaceFolder, outputChannel);
 
     assert.strictEqual(result?.fsPath, vscode.Uri.file(secondPath).fsPath);
 

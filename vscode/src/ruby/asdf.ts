@@ -4,6 +4,7 @@ import path from "path";
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
+import { WorkspaceChannel } from "../workspaceChannel";
 
 // A tool to manage multiple runtime versions with a single CLI tool
 //
@@ -34,7 +35,10 @@ export class Asdf extends VersionManager {
     ];
   }
 
-  static async detect(_workspaceFolder: vscode.WorkspaceFolder): Promise<vscode.Uri | undefined> {
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: WorkspaceChannel,
+  ): Promise<vscode.Uri | undefined> {
     // Check for v0.16+ executables first
     const executablePaths = Asdf.getPossibleExecutablePaths();
     const asdfExecPaths = executablePaths.map((dir) => vscode.Uri.joinPath(dir, "asdf"));
@@ -50,7 +54,9 @@ export class Asdf extends VersionManager {
   async activate(): Promise<ActivationResult> {
     // Prefer the path configured by the user, then use detect() to find ASDF
     const configuredPath = await this.getConfiguredAsdfPath();
-    const asdfUri = configuredPath ? vscode.Uri.file(configuredPath) : await Asdf.detect(this.workspaceFolder);
+    const asdfUri = configuredPath
+      ? vscode.Uri.file(configuredPath)
+      : await Asdf.detect(this.workspaceFolder, this.outputChannel);
 
     if (!asdfUri) {
       throw new Error(

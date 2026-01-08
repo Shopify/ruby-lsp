@@ -70,7 +70,11 @@ export abstract class VersionManager {
   }
 
   // Checks if a tool exists by running `tool --version`
-  static async toolExists(tool: string, workspaceFolder: vscode.WorkspaceFolder): Promise<boolean> {
+  static async toolExists(
+    tool: string,
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<boolean> {
     try {
       let command = this.shell ? `${this.shell} -i -c '` : "";
       command += `${tool} --version`;
@@ -78,6 +82,8 @@ export abstract class VersionManager {
       if (this.shell) {
         command += "'";
       }
+
+      outputChannel.info(`Checking if ${tool} is available on the path`);
 
       await asyncExec(command, {
         cwd: workspaceFolder.uri.fsPath,

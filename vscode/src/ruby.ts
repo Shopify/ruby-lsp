@@ -43,7 +43,10 @@ interface ManagerClass {
     manuallySelectRuby: () => Promise<void>,
     ...args: any[]
   ): VersionManager;
-  detect?: (workspaceFolder: vscode.WorkspaceFolder) => Promise<vscode.Uri | undefined>;
+  detect?: (
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ) => Promise<vscode.Uri | undefined>;
 }
 
 const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
@@ -330,10 +333,10 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managersWithToolExists = [ManagerIdentifier.Rvm, ManagerIdentifier.Rv];
+    const managersWithToolExists = [ManagerIdentifier.Rv];
 
     for (const tool of managersWithToolExists) {
-      const exists = await this.toolExists(tool);
+      const exists = await VersionManager.toolExists(tool, this.workspaceFolder, this.outputChannel);
 
       if (exists) {
         this.versionManager = tool;
@@ -343,7 +346,7 @@ export class Ruby implements RubyInterface {
 
     // Check managers that have a detect() method
     for (const [identifier, ManagerClass] of Object.entries(VERSION_MANAGERS)) {
-      if (ManagerClass.detect && (await ManagerClass.detect(this.workspaceFolder))) {
+      if (ManagerClass.detect && (await ManagerClass.detect(this.workspaceFolder, this.outputChannel))) {
         this.versionManager = identifier as ManagerIdentifier;
         return;
       }
@@ -356,11 +359,6 @@ export class Ruby implements RubyInterface {
 
     // If we can't find a version manager, just return None
     this.versionManager = ManagerIdentifier.None;
-  }
-
-  private async toolExists(tool: string) {
-    this.outputChannel.info(`Checking if ${tool} is available on the path`);
-    return VersionManager.toolExists(tool, this.workspaceFolder);
   }
 
   private async handleRubyError(message: string) {
