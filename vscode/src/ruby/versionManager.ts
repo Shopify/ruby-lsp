@@ -64,15 +64,26 @@ export abstract class VersionManager {
   // Finds the first existing path from a list of possible paths
   protected static async findFirst(paths: vscode.Uri[]): Promise<vscode.Uri | undefined> {
     for (const possiblePath of paths) {
-      try {
-        await vscode.workspace.fs.stat(possiblePath);
+      if (await this.pathExists(possiblePath)) {
         return possiblePath;
-      } catch (_error: any) {
-        // Continue looking
       }
     }
 
     return undefined;
+  }
+
+  /**
+   * Checks if a path exists in the filesystem
+   * @param uri - The URI to check for existence
+   * @returns true if the path exists, false otherwise
+   */
+  protected static async pathExists(uri: vscode.Uri): Promise<boolean> {
+    try {
+      await vscode.workspace.fs.stat(uri);
+      return true;
+    } catch (_error: unknown) {
+      return false;
+    }
   }
 
   // Checks if a tool exists by running `tool --version`

@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { Chruby } from "./chruby";
 import { pathToUri, isWindows } from "../common";
 import { RubyInstallationNotFoundError } from "./errors";
-import { DetectionResult } from "./versionManager";
+import { DetectionResult, VersionManager } from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -43,11 +43,8 @@ export class RubyInstaller extends Chruby {
     ];
 
     for (const installationUri of possibleInstallationUris) {
-      try {
-        await vscode.workspace.fs.stat(installationUri);
+      if (await VersionManager.pathExists(installationUri)) {
         return this.rubyExecutableUri(installationUri);
-      } catch (_error: unknown) {
-        // Continue searching
       }
     }
 

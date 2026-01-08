@@ -17,12 +17,7 @@ import { VersionManager, ActivationResult, DetectionResult } from "./versionMana
 
 export class Shadowenv extends VersionManager {
   private static async shadowenvDirExists(workspaceUri: vscode.Uri): Promise<boolean> {
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, ".shadowenv.d"));
-      return true;
-    } catch (_error: unknown) {
-      return false;
-    }
+    return VersionManager.pathExists(vscode.Uri.joinPath(workspaceUri, ".shadowenv.d"));
   }
 
   static async detect(
