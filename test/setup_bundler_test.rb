@@ -316,6 +316,27 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_creates_composed_bundle_with_specified_path
+    Dir.mktmpdir do |dir|
+      local_path = File.join(dir, "local-ruby-lsp")
+      FileUtils.mkdir_p(File.join(local_path, "lib"))
+      
+      Dir.chdir(dir) do
+        bundle_gemfile = Pathname.new(".ruby-lsp").expand_path(Dir.pwd) + "Gemfile"
+        Bundler.with_unbundled_env do
+          stub_bundle_with_env(bundle_env(dir, bundle_gemfile.to_s))
+          run_script(File.realpath(dir), lsp_path: local_path)
+        end
+  
+        assert_path_exists(".ruby-lsp")
+        assert_path_exists(".ruby-lsp/Gemfile")
+        assert_match(%r{ruby-lsp.*path: "#{Regexp.escape(local_path)}"}, File.read(".ruby-lsp/Gemfile"))
+        assert_match("debug", File.read(".ruby-lsp/Gemfile"))
+      end
+    end
+  end  
+
+
   def test_returns_bundle_app_config_if_there_is_local_config
     in_temp_dir do |dir|
       Bundler.with_unbundled_env do
