@@ -388,6 +388,7 @@
                 "none",
                 "rbenv",
                 "rvm",
+                "rv",
                 "shadowenv",
                 "mise",
                 "custom"
@@ -404,6 +405,10 @@
             },
             "rbenvExecutablePath": {
               "description": "The path to the rbenv executable, if not installed on one of the standard locations",
+              "type": "string"
+            },
+            "rvExecutablePath": {
+              "description": "The path to the rv executable, if not installed on one of the standard locations",
               "type": "string"
             },
             "chrubyRubies": {
