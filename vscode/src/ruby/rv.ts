@@ -26,9 +26,9 @@ export class Rv extends VersionManager {
       return this.ensureRvExistsAt(configuredRvPath);
     } else {
       const possiblePaths = [
-        vscode.Uri.file("/home/linuxbrew/.linuxbrew/bin"),
-        vscode.Uri.file("/usr/local/bin"),
-        vscode.Uri.file("/opt/homebrew/bin"),
+        vscode.Uri.joinPath(vscode.Uri.file("/"), "home", "linuxbrew", ".linuxbrew", "bin"),
+        vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "bin"),
+        vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin"),
         vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin"),
       ];
       return this.findExec(possiblePaths, "rv");
