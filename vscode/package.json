@@ -825,13 +825,13 @@
     "eslint-plugin-prettier": "^5.5.4",
     "glob": "^13.0.0",
     "mocha": "^11.7.5",
-    "ovsx": "^0.10.7",
+    "ovsx": "^0.10.8",
     "prettier": "^3.7.4",
     "sinon": "^21.0.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.51.0",
+    "typescript-eslint": "^8.52.0",
     "vscode-oniguruma": "^2.0.1",
-    "vscode-textmate": "^9.3.0"
+    "vscode-textmate": "^9.3.1"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1",
