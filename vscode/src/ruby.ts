@@ -319,18 +319,6 @@ export class Ruby implements RubyInterface {
   }
 
   private async discoverVersionManager() {
-    const managersWithToolExists = [ManagerIdentifier.Rv];
-
-    for (const tool of managersWithToolExists) {
-      const exists = await VersionManager.toolExists(tool, this.workspaceFolder, this.outputChannel);
-
-      if (exists) {
-        this.versionManager = tool;
-        return;
-      }
-    }
-
-    // Check all managers for detection
     const entries = Object.entries(VERSION_MANAGERS) as [ManagerIdentifier, ManagerClass][];
 
     for (const [identifier, ManagerClass] of entries) {

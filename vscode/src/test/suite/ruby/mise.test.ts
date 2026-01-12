@@ -52,7 +52,7 @@ suite("Mise", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
     const findStub = sandbox
-      .stub(mise, "findMiseUri")
+      .stub(mise, "findVersionManagerUri" as any)
       .resolves(common.pathToUri(os.homedir(), ".local", "bin", "mise"));
 
     const { env, version, yjit } = await mise.activate();

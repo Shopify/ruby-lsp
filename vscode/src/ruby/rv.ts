@@ -1,14 +1,37 @@
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult } from "./versionManager";
+import { pathToUri } from "../common";
+import { WorkspaceChannel } from "../workspaceChannel";
 
 // Manage your Ruby environment with rv
 //
 // Learn more: https://github.com/spinel-coop/rv
 export class Rv extends VersionManager {
+  private static getPossiblePaths(): vscode.Uri[] {
+    return [
+      pathToUri("/", "home", "linuxbrew", ".linuxbrew", "bin", "rv"),
+      pathToUri("/", "usr", "local", "bin", "rv"),
+      pathToUri("/", "opt", "homebrew", "bin", "rv"),
+      pathToUri("/", "usr", "bin", "rv"),
+    ];
+  }
+
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: WorkspaceChannel,
+  ): Promise<vscode.Uri | undefined> {
+    return VersionManager.findFirst(Rv.getPossiblePaths());
+  }
+
   async activate(): Promise<ActivationResult> {
-    const rvExec = await this.findRv();
-    const parsedResult = await this.runEnvActivationScript(`${rvExec} ruby run --`);
+    const rvExec = await this.findVersionManagerUri(
+      "Rv",
+      "rubyVersionManager.rvExecutablePath",
+      Rv.getPossiblePaths(),
+      () => Rv.detect(this.workspaceFolder, this.outputChannel),
+    );
+    const parsedResult = await this.runEnvActivationScript(`${rvExec.fsPath} ruby run --`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -16,31 +39,5 @@ export class Rv extends VersionManager {
       version: parsedResult.version,
       gemPath: parsedResult.gemPath,
     };
-  }
-
-  private async findRv(): Promise<string> {
-    const config = vscode.workspace.getConfiguration("rubyLsp");
-    const configuredRvPath = config.get<string | undefined>("rubyVersionManager.rvExecutablePath");
-
-    if (configuredRvPath) {
-      return this.ensureRvExistsAt(configuredRvPath);
-    } else {
-      const possiblePaths = [
-        vscode.Uri.joinPath(vscode.Uri.file("/"), "home", "linuxbrew", ".linuxbrew", "bin"),
-        vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "bin"),
-        vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin"),
-        vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin"),
-      ];
-      return this.findExec(possiblePaths, "rv");
-    }
-  }
-
-  private async ensureRvExistsAt(path: string): Promise<string> {
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.file(path));
-      return path;
-    } catch (_error: any) {
-      throw new Error(`The Ruby LSP version manager is configured to be rv, but ${path} does not exist`);
-    }
   }
 }
