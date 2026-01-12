@@ -53,13 +53,14 @@ suite("Rv", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    // Stub findRv to return the executable path
-    sandbox.stub(rv, "findRv" as any).resolves("rv");
+    // Stub findVersionManagerUri to return the executable path as a Uri
+    const rvPath = vscode.Uri.file("rv");
+    sandbox.stub(rv, "findVersionManagerUri" as any).resolves(rvPath);
 
     const { env, version, yjit } = await rv.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`rv ruby run -- -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`${rvPath.fsPath} ruby run -- -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
@@ -94,8 +95,8 @@ suite("Rv", () => {
     const rvPath = path.join(workspacePath, "rv");
     fs.writeFileSync(rvPath, "fakeRvBinary");
 
-    // Stub findRv to return the configured executable path
-    sandbox.stub(rv, "findRv" as any).resolves(rvPath);
+    // Stub findVersionManagerUri to return the configured executable path as a Uri
+    sandbox.stub(rv, "findVersionManagerUri" as any).resolves(vscode.Uri.file(rvPath));
 
     const configStub = sinon.stub(vscode.workspace, "getConfiguration").returns({
       get: (name: string) => {

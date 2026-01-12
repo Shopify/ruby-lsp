@@ -144,4 +144,37 @@ export abstract class VersionManager {
 
     return execName;
   }
+
+  // Common helper to find a version manager executable with configuration support
+  protected async findVersionManagerUri(
+    managerName: string,
+    configKey: string,
+    possiblePaths: vscode.Uri[],
+    detectFn: () => Promise<vscode.Uri | undefined>,
+  ): Promise<vscode.Uri> {
+    const config = vscode.workspace.getConfiguration("rubyLsp");
+    const configuredPath = config.get<string | undefined>(configKey);
+
+    if (configuredPath) {
+      const uri = vscode.Uri.file(configuredPath);
+
+      try {
+        await vscode.workspace.fs.stat(uri);
+        return uri;
+      } catch (_error: any) {
+        throw new Error(`${managerName} executable configured as ${uri.fsPath}, but that file doesn't exist`);
+      }
+    }
+
+    const detectedPath = await detectFn();
+
+    if (detectedPath) {
+      return detectedPath;
+    }
+
+    throw new Error(
+      `The Ruby LSP version manager is configured to be ${managerName}, but could not find ${managerName} installation. Searched in
+        ${possiblePaths.map((p) => p.fsPath).join(", ")}`,
+    );
+  }
 }

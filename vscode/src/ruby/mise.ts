@@ -31,7 +31,12 @@ export class Mise extends VersionManager {
   }
 
   async activate(): Promise<ActivationResult> {
-    const miseUri = await this.findMiseUri();
+    const miseUri = await this.findVersionManagerUri(
+      "Mise",
+      "rubyVersionManager.miseExecutablePath",
+      Mise.getPossiblePaths(),
+      () => Mise.detect(this.workspaceFolder, this.outputChannel),
+    );
 
     // The exec command in Mise is called `x`
     const parsedResult = await this.runEnvActivationScript(`${miseUri.fsPath} x -- ruby`);
@@ -42,33 +47,5 @@ export class Mise extends VersionManager {
       version: parsedResult.version,
       gemPath: parsedResult.gemPath,
     };
-  }
-
-  async findMiseUri(): Promise<vscode.Uri> {
-    const config = vscode.workspace.getConfiguration("rubyLsp");
-    const misePath = config.get<string | undefined>("rubyVersionManager.miseExecutablePath");
-
-    if (misePath) {
-      const configuredPath = vscode.Uri.file(misePath);
-
-      try {
-        await vscode.workspace.fs.stat(configuredPath);
-        return configuredPath;
-      } catch (_error: any) {
-        throw new Error(`Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
-      }
-    }
-
-    const detectedPath = await Mise.detect(this.workspaceFolder, this.outputChannel);
-
-    if (detectedPath) {
-      return detectedPath;
-    }
-
-    const possiblePaths = Mise.getPossiblePaths();
-    throw new Error(
-      `The Ruby LSP version manager is configured to be Mise, but could not find Mise installation. Searched in
-        ${possiblePaths.join(", ")}`,
-    );
   }
 }
