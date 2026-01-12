@@ -15,6 +15,7 @@ import { Rvm } from "./ruby/rvm";
 import { None } from "./ruby/none";
 import { Custom } from "./ruby/custom";
 import { Asdf } from "./ruby/asdf";
+import { Rv } from "./ruby/rv";
 
 async function detectMise() {
   const possiblePaths = [
@@ -44,6 +45,7 @@ export enum ManagerIdentifier {
   Shadowenv = "shadowenv",
   Mise = "mise",
   RubyInstaller = "rubyInstaller",
+  Rv = "rv",
   None = "none",
   Custom = "custom",
 }
@@ -313,6 +315,11 @@ export class Ruby implements RubyInterface {
           new Mise(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
         );
         break;
+      case ManagerIdentifier.Rv:
+        await this.runActivation(
+          new Rv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
+        );
+        break;
       case ManagerIdentifier.RubyInstaller:
         await this.runActivation(
           new RubyInstaller(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
@@ -362,7 +369,13 @@ export class Ruby implements RubyInterface {
       // If .shadowenv.d doesn't exist, then we check the other version managers
     }
 
-    const managers = [ManagerIdentifier.Chruby, ManagerIdentifier.Rbenv, ManagerIdentifier.Rvm, ManagerIdentifier.Asdf];
+    const managers = [
+      ManagerIdentifier.Chruby,
+      ManagerIdentifier.Rbenv,
+      ManagerIdentifier.Rvm,
+      ManagerIdentifier.Asdf,
+      ManagerIdentifier.Rv,
+    ];
 
     for (const tool of managers) {
       const exists = await this.toolExists(tool);

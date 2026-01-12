@@ -105,6 +105,7 @@ by clicking `Change version manager` in the language status center or by changin
 // "asdf"
 // "chruby"
 // "rbenv"
+// "rv"
 // "rvm"
 // "shadowenv"
 // "mise"
