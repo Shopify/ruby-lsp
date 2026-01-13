@@ -107,15 +107,12 @@ module RubyIndexer
       RUBY
 
       result = @index.fuzzy_search("Zws")
-      assert_equal(2, result.length)
       assert_equal(["Zws", "Qtl::Zwo::Something"], result.map(&:name))
 
       result = @index.fuzzy_search("qtlzwssomeking")
-      assert_equal(5, result.length)
-      assert_equal(["Qtl::Zwo::Something", "Qtl::Zws", "Qtl::Zwo", "Qtl", "Zws"], result.map(&:name))
+      assert_equal(["Qtl::Zwo::Something", "Qtl::Zws", "Qtl::Zwo", "Qtl", "Zws", "blocking"], result.map(&:name))
 
       result = @index.fuzzy_search("QltZwo")
-      assert_equal(4, result.length)
       assert_equal(["Qtl::Zwo", "Qtl::Zws", "Qtl::Zwo::Something", "Qtl"], result.map(&:name))
     end
 

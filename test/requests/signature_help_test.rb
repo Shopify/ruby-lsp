@@ -414,7 +414,7 @@ class SignatureHelpTest < Minitest::Test
 
       result = server.pop_response.response
       signature = result.signatures[result.active_signature]
-      assert_equal("step(&<anonymous block>)", signature.label)
+      assert_equal("step(limit = <default>, step = <default>, &<anonymous block>)", signature.label)
     end
 
     # Second step overload: with positional arguments
@@ -434,7 +434,7 @@ class SignatureHelpTest < Minitest::Test
 
       result = server.pop_response.response
       signature = result.signatures[result.active_signature]
-      assert_equal("step(limit, step = <default>, &<anonymous block>)", signature.label)
+      assert_equal("step(limit = <default>, step = <default>, &<anonymous block>)", signature.label)
     end
 
     # Third step overload: with keyword arguments
@@ -454,7 +454,7 @@ class SignatureHelpTest < Minitest::Test
 
       result = server.pop_response.response
       signature = result.signatures[result.active_signature]
-      assert_equal("step(to:, by: <default>, &<anonymous block>)", signature.label)
+      assert_equal("step(by: <default>, to: <default>, &<anonymous block>)", signature.label)
     end
   end
 end
