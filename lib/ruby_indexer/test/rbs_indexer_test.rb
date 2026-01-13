@@ -28,7 +28,7 @@ module RubyIndexer
     def test_index_core_modules
       entries = @index["Kernel"] #: as !nil
       refute_nil(entries)
-      assert_equal(1, entries.length)
+      assert_equal(2, entries.length)
       entry = entries.first #: as Entry::Module
       assert_match(%r{/gems/rbs-.*/core/kernel.rbs}, entry.file_path)
       assert_equal("kernel.rbs", entry.file_name)
