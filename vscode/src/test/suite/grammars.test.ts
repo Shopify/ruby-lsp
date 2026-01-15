@@ -586,6 +586,95 @@ suite("Grammars", () => {
       });
     });
 
+    suite("regex", () => {
+      test("division at end of line is not treated as regex", () => {
+        const ruby = "a = 1 /\n  2\nb = 3";
+        const expectedTokens = [
+          ["a", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [" ", ["source.ruby"]],
+          ["1", ["source.ruby", "constant.numeric.ruby"]],
+          [" ", ["source.ruby"]],
+          ["/", ["source.ruby", "keyword.operator.arithmetic.ruby"]],
+          ["  ", ["source.ruby"]],
+          ["2", ["source.ruby", "constant.numeric.ruby"]],
+          ["b", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [" ", ["source.ruby"]],
+          ["3", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("regex literal is still recognized", () => {
+        const ruby = "a = /foo/";
+        const expectedTokens = [
+          ["a", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [" ", ["source.ruby"]],
+          ["/", ["source.ruby", "string.regexp.interpolated.ruby", "punctuation.section.regexp.ruby"]],
+          ["foo", ["source.ruby", "string.regexp.interpolated.ruby"]],
+          ["/", ["source.ruby", "string.regexp.interpolated.ruby", "punctuation.section.regexp.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("regex with flags is still recognized", () => {
+        const ruby = "a = /foo/i";
+        const expectedTokens = [
+          ["a", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [" ", ["source.ruby"]],
+          ["/", ["source.ruby", "string.regexp.interpolated.ruby", "punctuation.section.regexp.ruby"]],
+          ["foo", ["source.ruby", "string.regexp.interpolated.ruby"]],
+          ["/i", ["source.ruby", "string.regexp.interpolated.ruby", "punctuation.section.regexp.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("regex followed by keyword is still recognized", () => {
+        const ruby = "a = /foo/ if bar";
+        const expectedTokens = [
+          ["a", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [" ", ["source.ruby"]],
+          ["/", ["source.ruby", "string.regexp.interpolated.ruby", "punctuation.section.regexp.ruby"]],
+          ["foo", ["source.ruby", "string.regexp.interpolated.ruby"]],
+          ["/", ["source.ruby", "string.regexp.interpolated.ruby", "punctuation.section.regexp.ruby"]],
+          [" ", ["source.ruby"]],
+          ["if", ["source.ruby", "keyword.control.ruby"]],
+          [" bar", ["source.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("string containing slash does not break subsequent highlighting", () => {
+        const ruby = '"foo /\nbar"\nb = 3';
+        const expectedTokens = [
+          ['"', ["source.ruby", "string.quoted.double.interpolated.ruby", "punctuation.definition.string.begin.ruby"]],
+          ["foo /", ["source.ruby", "string.quoted.double.interpolated.ruby"]],
+          ["bar", ["source.ruby", "string.quoted.double.interpolated.ruby"]],
+          ['"', ["source.ruby", "string.quoted.double.interpolated.ruby", "punctuation.definition.string.end.ruby"]],
+          ["b", ["source.ruby", "variable.ruby"]],
+          [" ", ["source.ruby"]],
+          ["=", ["source.ruby", "keyword.operator.assignment.ruby"]],
+          [" ", ["source.ruby"]],
+          ["3", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+    });
+
     function tokenizeRBS(rbs: string): [string, string[]][] {
       if (!rbsGrammar) {
         throw new Error("RBS grammar not loaded");

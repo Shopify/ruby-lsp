@@ -540,7 +540,7 @@
       ]
     },
     {
-      "begin": "(?x)\n(?<![\\w)])((/))(?![?*+])\n(?=\n  (?:\\\\/|[^/])*+          # Do NOT change the order\n  /[eimnosux]*\\s*\n  (?:\n    [)\\]}#.,?:]|\\|\\||&&|<=>|=>|==|=~|!~|!=|;|$|\n    if|else|elsif|then|do|end|unless|while|until|or|and\n  )\n  |\n  $\n)",
+      "begin": "(?x)\n(?<![\\w)])((/))(?![?*+])(?!\\s*$)\n(?=\n  (?:\\\\/|[^/])*+          # Do NOT change the order\n  /[eimnosux]*\\s*\n  (?:\n    [)\\]}#.,?:]|\\|\\||&&|<=>|=>|==|=~|!~|!=|;|$|\n    if|else|elsif|then|do|end|unless|while|until|or|and\n  )\n)",
       "captures": {
         "1": {
           "name": "string.regexp.interpolated.ruby"
