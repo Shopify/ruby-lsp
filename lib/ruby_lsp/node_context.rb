@@ -29,7 +29,7 @@ module RubyLsp
       @nesting_nodes = nesting_nodes
       @call_node = call_node
 
-      nesting, surrounding_method = handle_nesting_nodes(nesting_nodes)
+      nesting, surrounding_method = handle_nesting_nodes
       @nesting = nesting #: Array[String]
       @surrounding_method = surrounding_method #: String?
     end
@@ -57,8 +57,8 @@ module RubyLsp
 
     private
 
-    #: (Array[nesting_node] nodes) -> [Array[String], String?]
-    def handle_nesting_nodes(nodes)
+    #: -> [Array[String], String?]
+    def handle_nesting_nodes
       nesting = []
       surrounding_method = nil #: String?
 
