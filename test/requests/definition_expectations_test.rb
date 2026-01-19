@@ -408,6 +408,162 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_go_to_definition_for_send_symbol
+    source = <<~RUBY
+      class Foo
+        def foo; end
+      end
+
+      obj = Foo.new
+      obj.send(:foo)
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 11, line: 5 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(1, response.target_range.start.line)
+      assert_equal(1, response.target_range.end.line)
+    end
+  end
+
+  def test_go_to_definition_for_send_symbol_multiple_objects
+    source = <<~RUBY
+      class Foo
+        def foo; end
+      end
+
+      class Bar
+        def foo; end
+      end
+
+      f = Foo.new
+      b = Bar.new
+
+      f.send(:foo)
+      b.send(:foo)
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 11 } },
+      )
+      response = server.pop_response.response
+      assert_equal(2, response.size)
+
+      assert_equal(1, response[0].target_range.start.line)
+      assert_equal(1, response[0].target_range.end.line)
+
+      assert_equal(5, response[1].target_range.start.line)
+      assert_equal(5, response[1].target_range.end.line)
+    end
+  end
+
+  def test_go_to_definition_ignores_non_method_send_symbol
+    source = <<~RUBY
+      class Foo
+        def foo; end
+      end
+
+      obj = Foo.new
+      obj.send(:foo, :foo)
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 17, line: 5 } },
+      )
+      response = server.pop_response.response
+
+      assert_empty(response)
+    end
+  end
+
+  def test_go_to_definition_for_send_string
+    source = <<~RUBY
+      class Foo
+        def foo; end
+      end
+
+      obj = Foo.new
+      obj.send("foo")
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 2,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 11, line: 5 } },
+      )
+      response = server.pop_response.response.first
+      assert_equal(1, response.target_range.start.line)
+      assert_equal(1, response.target_range.end.line)
+    end
+  end
+
+  def test_go_to_definition_for_send_string_multiple_objects
+    source = <<~RUBY
+      class Foo
+        def foo; end
+      end
+
+      class Bar
+        def foo; end
+      end
+
+      f = Foo.new
+      b = Bar.new
+
+      f.send("foo")
+      b.send("foo")
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 11 } },
+      )
+      response = server.pop_response.response
+      assert_equal(2, response.size)
+
+      assert_equal(1, response[0].target_range.start.line)
+      assert_equal(1, response[0].target_range.end.line)
+
+      assert_equal(5, response[1].target_range.start.line)
+      assert_equal(5, response[1].target_range.end.line)
+    end
+  end
+
+  def test_go_to_definition_ignores_non_method_string_symbol
+    source = <<~RUBY
+      class Foo
+        def foo; end
+      end
+
+      obj = Foo.new
+      obj.send("foo", "foo")
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 17, line: 5 } },
+      )
+      response = server.pop_response.response
+
+      assert_empty(response)
+    end
+  end
+
   def test_does_nothing_when_autoload_declaration_does_not_exist
     source = <<~RUBY
       # typed: ignore

@@ -71,24 +71,26 @@ module RubyLsp
 
       #: (Prism::StringNode node) -> void
       def on_string_node_enter(node)
-        enclosing_call = @node_context.call_node
-        return unless enclosing_call
-
-        name = enclosing_call.name
-        return unless name == :require || name == :require_relative
-
-        handle_require_definition(node, name)
+        with_enclosing_call(node) do |enclosing_call, name|
+          case name
+          when :require, :require_relative
+            handle_require_definition(node, name)
+          when :send, :public_send
+            handle_send_or_public_send_definition(enclosing_call, node) { node.content }
+          end
+        end
       end
 
       #: (Prism::SymbolNode node) -> void
       def on_symbol_node_enter(node)
-        enclosing_call = @node_context.call_node
-        return unless enclosing_call
-
-        name = enclosing_call.name
-        return unless name == :autoload
-
-        handle_autoload_definition(enclosing_call)
+        with_enclosing_call(node) do |enclosing_call, name|
+          case name
+          when :autoload
+            handle_autoload_definition(enclosing_call)
+          when :send, :public_send
+            handle_send_or_public_send_definition(enclosing_call, node) { node.unescaped }
+          end
+        end
       end
 
       #: (Prism::BlockArgumentNode node) -> void
@@ -219,6 +221,24 @@ module RubyLsp
       end
 
       private
+
+      #: (Prism::Node node) { (Prism::CallNode, Symbol) -> void } -> void
+      def with_enclosing_call(node, &block)
+        enclosing_call = @node_context.call_node
+        return unless enclosing_call
+
+        block.call(enclosing_call, enclosing_call.name)
+      end
+
+      #: (Prism::CallNode enclosing_call, Prism::Node node) { -> String } -> void
+      def handle_send_or_public_send_definition(enclosing_call, node, &block)
+        first_argument = enclosing_call.arguments&.arguments&.first
+        return unless first_argument.eql?(node)
+
+        method_name = block.call
+
+        handle_method_definition(method_name, nil)
+      end
 
       #: -> void
       def handle_super_node_definition
