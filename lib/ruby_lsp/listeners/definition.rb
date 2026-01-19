@@ -79,12 +79,7 @@ module RubyLsp
         when :require, :require_relative
           handle_require_definition(node, name)
         when :send, :public_send
-          first_argument = enclosing_call.arguments.arguments.first
-          return unless first_argument.eql?(node)
-
-          method_name = node.content
-
-          handle_method_definition(method_name, nil)
+          handle_send_or_public_send_definition(enclosing_call, node) { node.content }
         end
       end
 
@@ -97,12 +92,7 @@ module RubyLsp
         when :autoload
           handle_autoload_definition(enclosing_call)
         when :send, :public_send
-          first_argument = enclosing_call.arguments.arguments.first
-          return unless first_argument.eql?(node)
-
-          method_name = node.unescaped
-
-          handle_method_definition(method_name, nil)
+          handle_send_or_public_send_definition(enclosing_call, node) { node.unescaped }
         end
       end
 
@@ -234,6 +224,16 @@ module RubyLsp
       end
 
       private
+
+      #: (Prism::CallNode enclosing_call, Prism::Node node) { -> String } -> void
+      def handle_send_or_public_send_definition(enclosing_call, node, &block)
+        first_argument = enclosing_call.arguments&.arguments&.first
+        return unless first_argument.eql?(node)
+
+        method_name = block.call
+
+        handle_method_definition(method_name, nil)
+      end
 
       #: -> void
       def handle_super_node_definition
