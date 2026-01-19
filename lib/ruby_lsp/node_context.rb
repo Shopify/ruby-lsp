@@ -44,11 +44,7 @@ module RubyLsp
       locals = []
 
       nesting_nodes.each do |node|
-        if node.is_a?(Prism::ClassNode) || node.is_a?(Prism::ModuleNode) || node.is_a?(Prism::SingletonClassNode) ||
-            node.is_a?(Prism::DefNode)
-          locals.clear
-        end
-
+        locals.clear if scope_boundary?(node)
         locals.concat(node.locals)
       end
 
@@ -56,6 +52,12 @@ module RubyLsp
     end
 
     private
+
+    #: (nesting_node node) -> bool
+    def scope_boundary?(node)
+      node.is_a?(Prism::ClassNode) || node.is_a?(Prism::ModuleNode) ||
+        node.is_a?(Prism::SingletonClassNode) || node.is_a?(Prism::DefNode)
+    end
 
     #: -> [Array[String], String?]
     def handle_nesting_nodes
