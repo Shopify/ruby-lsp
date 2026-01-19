@@ -43,7 +43,7 @@ module RubyLsp
     def locals_for_scope
       locals = []
 
-      @nesting_nodes.each do |node|
+      nesting_nodes.each do |node|
         if node.is_a?(Prism::ClassNode) || node.is_a?(Prism::ModuleNode) || node.is_a?(Prism::SingletonClassNode) ||
             node.is_a?(Prism::DefNode)
           locals.clear
@@ -62,7 +62,7 @@ module RubyLsp
       nesting = []
       surrounding_method = nil #: String?
 
-      @nesting_nodes.each do |node|
+      nesting_nodes.each do |node|
         case node
         when Prism::ClassNode, Prism::ModuleNode
           nesting << node.constant_path.slice
