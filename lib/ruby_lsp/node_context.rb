@@ -5,10 +5,12 @@ module RubyLsp
   # This class allows listeners to access contextual information about a node in the AST, such as its parent,
   # its namespace nesting, and the surrounding CallNode (e.g. a method call).
   class NodeContext
+    #: type nesting_node = Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode
+
     #: Prism::Node?
     attr_reader :node, :parent
 
-    #: Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)]
+    #: Array[nesting_node]
     attr_reader :nesting_nodes
 
     #: Array[String]
@@ -20,7 +22,7 @@ module RubyLsp
     #: String?
     attr_reader :surrounding_method
 
-    #: (Prism::Node? node, Prism::Node? parent, Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nesting_nodes, Prism::CallNode? call_node) -> void
+    #: (Prism::Node? node, Prism::Node? parent, Array[nesting_node] nesting_nodes, Prism::CallNode? call_node) -> void
     def initialize(node, parent, nesting_nodes, call_node)
       @node = node
       @parent = parent
@@ -55,7 +57,7 @@ module RubyLsp
 
     private
 
-    #: (Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nodes) -> [Array[String], String?]
+    #: (Array[nesting_node] nodes) -> [Array[String], String?]
     def handle_nesting_nodes(nodes)
       nesting = []
       surrounding_method = nil #: String?
