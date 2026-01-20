@@ -1616,13 +1616,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)HTML)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)HTML)\\b\\1))",
       "comment": "Heredoc with embedded HTML",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.html",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)HTML)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)HTML)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1653,13 +1653,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)HAML)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)HAML)\\b\\1))",
       "comment": "Heredoc with embedded HAML",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.haml",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)HAML)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)HAML)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1690,13 +1690,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)XML)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)XML)\\b\\1))",
       "comment": "Heredoc with embedded XML",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.xml",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)XML)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)XML)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1727,13 +1727,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)SQL)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)SQL)\\b\\1))",
       "comment": "Heredoc with embedded SQL",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.sql",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)SQL)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)SQL)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1764,13 +1764,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:GRAPHQL|GQL))\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:GRAPHQL|GQL))\\b\\1))",
       "comment": "Heredoc with embedded GraphQL",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.graphql",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:GRAPHQL|GQL))\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:GRAPHQL|GQL))\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1801,13 +1801,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)CSS)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)CSS)\\b\\1))",
       "comment": "Heredoc with embedded CSS",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.css",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)CSS)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)CSS)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1838,13 +1838,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)CPP)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)CPP)\\b\\1))",
       "comment": "Heredoc with embedded C++",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.cpp",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)CPP)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)CPP)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1875,13 +1875,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)C)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)C)\\b\\1))",
       "comment": "Heredoc with embedded C",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.c",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)C)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)C)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1912,13 +1912,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:JS|JAVASCRIPT))\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:JS|JAVASCRIPT))\\b\\1))",
       "comment": "Heredoc with embedded Javascript",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.js",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:JS|JAVASCRIPT))\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:JS|JAVASCRIPT))\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1949,13 +1949,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)JQUERY)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)JQUERY)\\b\\1))",
       "comment": "Heredoc with embedded jQuery Javascript",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.js.jquery",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)JQUERY)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)JQUERY)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -1986,13 +1986,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:SH|SHELL))\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:SH|SHELL))\\b\\1))",
       "comment": "Heredoc with embedded Shell",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.shell",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:SH|SHELL))\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:SH|SHELL))\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -2023,13 +2023,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)LUA)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)LUA)\\b\\1))",
       "comment": "Heredoc with embedded Lua",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.lua",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)LUA)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)LUA)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -2060,13 +2060,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)RUBY)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)RUBY)\\b\\1))",
       "comment": "Heredoc with embedded Ruby",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.ruby",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)RUBY)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)RUBY)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -2097,13 +2097,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:YAML|YML))\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:YAML|YML))\\b\\1))",
       "comment": "Heredoc with embedded YAML",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.yaml",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)(?:YAML|YML))\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)(?:YAML|YML))\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -2134,13 +2134,13 @@
       ]
     },
     {
-      "begin": "(?=(?><<[-~]([\"'`]?)((?:[_\\w]+_|)SLIM)\\b\\1))",
+      "begin": "(?=(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)SLIM)\\b\\1))",
       "comment": "Heredoc with embedded Slim",
       "end": "(?!\\G)",
       "name": "meta.embedded.block.slim",
       "patterns": [
         {
-          "begin": "(?><<[-~]([\"'`]?)((?:[_\\w]+_|)SLIM)\\b\\1)",
+          "begin": "(?><<[-~]?([\"'`]?)((?:[_\\w]+_|)SLIM)\\b\\1)",
           "beginCaptures": {
             "0": {
               "name": "string.definition.begin.ruby"
@@ -2197,7 +2197,7 @@
       ]
     },
     {
-      "begin": "(?>((<<[-~]([\"'`]?)(\\w+)\\3,\\s?)*<<[-~]([\"'`]?)(\\w+)\\5))(.*)",
+      "begin": "(?>((<<[-~]?([\"'`]?)(\\w+)\\3,\\s?)*<<[-~]?([\"'`]?)(\\w+)\\5))(.*)",
       "beginCaptures": {
         "1": {
           "name": "string.definition.begin.ruby"
