@@ -1,5 +1,6 @@
 name: ruby-lsp
 
+nix: true
 type: ruby
 
 up:
@@ -11,6 +12,8 @@ up:
       version: 22.15.1
       packages:
         - vscode
+  - packages:
+      - libyaml
 
 commands:
   server: exe/ruby-lsp
