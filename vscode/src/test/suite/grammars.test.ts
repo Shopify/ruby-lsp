@@ -191,6 +191,21 @@ suite("Grammars", () => {
               `Tokens did not match expected for HEREDOC using ${delimiter}.`,
             );
           });
+
+          test(`bare HEREDOC using ${delimiter} is tokenized correctly`, () => {
+            const expectedTokens = [
+              [`<<${delimiter}`, ["source.ruby", languageConfig.name, "string.definition.begin.ruby"]],
+              [delimiter, ["source.ruby", languageConfig.name, "string.definition.end.ruby"]],
+            ];
+            const ruby = expectedTokens.map((token) => token[0]).join("\n");
+            const actualTokens = tokenizeRuby(ruby);
+
+            assert.deepStrictEqual(
+              actualTokens,
+              expectedTokens,
+              `Tokens did not match expected for bare HEREDOC using ${delimiter}.`,
+            );
+          });
         });
       });
 
@@ -247,6 +262,45 @@ suite("Grammars", () => {
           [")", ["source.ruby", "meta.function-call.ruby", "punctuation.section.function.ruby"]],
           ["foo", ["source.ruby", "meta.function-call.ruby", "string.unquoted.heredoc.ruby"]],
           ["FOO", ["source.ruby", "meta.function-call.ruby", "string.definition.end.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("HEREDOC without dash or tilde after parenthesis is tokenized correctly", () => {
+        const ruby = "p(<<FOO)\nfoo\nFOO";
+        const expectedTokens = [
+          ["p", ["source.ruby", "support.function.kernel.ruby"]],
+          ["(", ["source.ruby", "punctuation.section.function.ruby"]],
+          ["<<FOO", ["source.ruby", "string.definition.begin.ruby"]],
+          [")", ["source.ruby", "punctuation.section.function.ruby"]],
+          ["foo", ["source.ruby", "string.unquoted.heredoc.ruby"]],
+          ["FOO", ["source.ruby", "string.definition.end.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("HEREDOC with dash after parenthesis is tokenized correctly", () => {
+        const ruby = "p(<<-FOO)\nfoo\nFOO";
+        const expectedTokens = [
+          ["p", ["source.ruby", "support.function.kernel.ruby"]],
+          ["(", ["source.ruby", "punctuation.section.function.ruby"]],
+          ["<<-FOO", ["source.ruby", "string.definition.begin.ruby"]],
+          [")", ["source.ruby", "punctuation.section.function.ruby"]],
+          ["foo", ["source.ruby", "string.unquoted.heredoc.ruby"]],
+          ["FOO", ["source.ruby", "string.definition.end.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
+      test("plain HEREDOC without dash or tilde is tokenized correctly", () => {
+        const ruby = "<<FOO\nfoo\nFOO";
+        const expectedTokens = [
+          ["<<FOO", ["source.ruby", "string.definition.begin.ruby"]],
+          ["foo", ["source.ruby", "string.unquoted.heredoc.ruby"]],
+          ["FOO", ["source.ruby", "string.definition.end.ruby"]],
         ];
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
@@ -735,13 +789,13 @@ suite("Grammars", () => {
       const delimiter = delimiters.length > 1 ? `(?:${delimiters.join("|")})` : delimiters[0];
 
       return {
-        begin: `(?=(?><<[-~](["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1))`,
+        begin: `(?=(?><<[-~]?(["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1))`,
         comment: `Heredoc with embedded ${label}`,
         end: "(?!\\G)",
         name,
         patterns: [
           {
-            begin: `(?><<[-~](["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1)`,
+            begin: `(?><<[-~]?(["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1)`,
             beginCaptures: {
               "0": { name: "string.definition.begin.ruby" },
             },
