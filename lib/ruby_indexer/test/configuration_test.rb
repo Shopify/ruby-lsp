@@ -93,14 +93,19 @@ module RubyIndexer
     end
 
     def test_indexable_uris_does_not_include_non_ruby_files_inside_rubylibdir
-      path = Pathname.new(RbConfig::CONFIG["rubylibdir"]).join("extra_file.txt").to_s
-      FileUtils.touch(path)
+      Dir.mktmpdir do |dir|
+        original_rubylibdir = RbConfig::CONFIG["rubylibdir"]
+        RbConfig::CONFIG["rubylibdir"] = dir
 
-      begin
-        uris = @config.indexable_uris
-        assert(uris.none? { |uri| uri.full_path == path })
-      ensure
-        FileUtils.rm(path)
+        begin
+          path = Pathname.new(dir).join("extra_file.txt").to_s
+          FileUtils.touch(path)
+
+          uris = @config.indexable_uris
+          assert(uris.none? { |uri| uri.full_path == path })
+        ensure
+          RbConfig::CONFIG["rubylibdir"] = original_rubylibdir
+        end
       end
     end
 
