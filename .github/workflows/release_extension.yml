@@ -1,28 +1,101 @@
-name: Release
+name: Release VS Code extension
 
 on:
   push:
     tags:
-      - v[0-9]+.[0-9]+.[0-9]+
+      - vscode-ruby-lsp-v[0-9]+.[0-9]+.[0-9]+(-preview)?
 
 jobs:
-  publish:
+  release_extension:
+    if: github.repository == 'Shopify/ruby-lsp'
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         name: Checkout
 
-      - name: Create release
+      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        name: Use Node.js
+        env:
+          DISABLE_V8_COMPILE_CACHE: "1"
+        with:
+          node-version: "22.15"
+          cache: "yarn"
+          cache-dependency-path: "vscode"
+
+      - name: Create CHANGELOG.md
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
-            const { data }  = await github.rest.repos.listReleases({
+            const fs = require("fs");
+
+            const { data: releases } = await github.rest.repos.listReleases({
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            const previousRelease = data.find((release) => !release.tag_name.startsWith("vscode-ruby-lsp") && release.tag_name !== "${{ github.ref_name }}");
+
+            const includePrereleases = context.payload.release.prerelease;
+
+            const changelog = releases
+              .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
+              .map((release) => `${release.body}\n`)
+              .join("\n");
+
+            fs.writeFileSync("vscode/CHANGELOG.md", changelog);
+
+      - name: Copy files needed for release
+        run: |
+          cp CODE_OF_CONDUCT.md vscode/CODE_OF_CONDUCT.md
+
+      - name: 📦 Install dependencies
+        working-directory: ./vscode
+        run: yarn --frozen-lockfile
+
+      # Stable releases
+      - name: Publish extension in the marketplace
+        if: ${{ !endsWith(github.ref_name, '-preview') }}
+        working-directory: ./vscode
+        run: |
+          yarn run package
+          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Prereleases
+      - name: Package and publish prerelease extension in the marketplace
+        if: ${{ endsWith(github.ref_name, '-preview') }}
+        working-directory: ./vscode
+        run: |
+          yarn run package_prerelease
+          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Stable releases for OpenVSX
+      - name: Publish extension on OpenVSX
+        if: ${{ !endsWith(github.ref_name, '-preview') }}
+        working-directory: ./vscode
+        run: |
+          yarn run package
+          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
+
+  release_github:
+    name: Create GitHub release
+    if: github.repository == 'Shopify/ruby-lsp'
+    needs: release_extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const { data } = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const previousRelease = data.find((release) => release.tag_name.startsWith("vscode-ruby-lsp") && release.tag_name !== "${{ github.ref_name }}");
 
             const commitResponse = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
@@ -30,6 +103,7 @@ jobs:
               base: previousRelease.tag_name,
               head: "${{ github.ref_name }}"
             });
+            console.log(`Found ${commitResponse.data.commits.length} commits`);
 
             const pullRequests = [];
 
@@ -47,9 +121,10 @@ jobs:
                 }
               });
             }
+            console.log(`Found ${pullRequests.length} pull requests`);
 
             const relevantPulls = pullRequests.filter((pull) => {
-              return pull.labels.some((label) => label === "server") &&
+              return pull.labels.some((label) => label === "vscode") &&
                 !pull.labels.some((label) => label === "dependencies") &&
                 !pull.labels.some((label) => label === "chore")
             });

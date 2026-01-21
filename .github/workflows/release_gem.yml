@@ -1,0 +1,117 @@
+name: Release gem on RubyGems.org and create GitHub release
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  release_gem:
+    name: Release gem on RubyGems.org
+    if: github.repository == 'Shopify/ruby-lsp'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      id-token: write
+
+    environment: release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@80740b3b13bf9857e28854481ca95a84e78a2bdf # v1.284.0
+        with:
+          bundler-cache: true
+
+      - name: Release gem on RubyGems.org
+        uses: rubygems/release-gem@1c162a739e8b4cb21a676e97b087e8268d8fc40b # v1.1.2
+
+  release_github:
+    name: Create GitHub release
+    if: github.repository == 'Shopify/ruby-lsp'
+    needs: release_gem
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Create release
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const { data }  = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const previousRelease = data.find((release) => !release.tag_name.startsWith("vscode-ruby-lsp") && release.tag_name !== "${{ github.ref_name }}");
+
+            const commitResponse = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: previousRelease.tag_name,
+              head: "${{ github.ref_name }}"
+            });
+
+            const pullRequests = [];
+
+            for (const commit of commitResponse.data.commits) {
+              const pullsResponse = await github.request(`GET /repos/shopify/ruby-lsp/commits/${commit.sha}/pulls`);
+
+              pullsResponse.data.forEach((pr) => {
+                if (!pullRequests.some((pull) => pull.url === pr.html_url)) {
+                  pullRequests.push({
+                    title: pr.title,
+                    url: pr.html_url,
+                    labels: pr.labels.map((label) => label.name),
+                    author: pr.user.login
+                  });
+                }
+              });
+            }
+
+            const relevantPulls = pullRequests.filter((pull) => {
+              return pull.labels.some((label) => label === "server") &&
+                !pull.labels.some((label) => label === "dependencies") &&
+                !pull.labels.some((label) => label === "chore")
+            });
+
+            const breakingChanges = relevantPulls.filter((pull) => pull.labels.some((label) => label === "breaking-change"));
+            const bugFixes = relevantPulls.filter((pull) => pull.labels.some((label) => label === "bugfix"));
+            const enhancements = relevantPulls.filter((pull) => pull.labels.some((label) => label === "enhancement"));
+            const otherChanges = relevantPulls.filter((pull) => !pull.labels.some((label) => ["bugfix", "enhancement", "breaking-change"].includes(label)));
+
+            let content = `# ${{ github.ref_name }}\n`;
+
+            if (breakingChanges.length > 0) {
+              content += `## 🚧 Breaking Changes\n\n${breakingChanges.map((pull) => `- ${pull.title} (${pull.url}) by @${pull.author}`).join("\n")}\n\n`;
+            }
+
+            if (enhancements.length > 0) {
+              content += `## ✨ Enhancements\n\n${enhancements.map((pull) => `- ${pull.title} (${pull.url}) by @${pull.author}`).join("\n")}\n\n`;
+            }
+
+            if (bugFixes.length > 0) {
+              content += `## 🐛 Bug Fixes\n\n${bugFixes.map((pull) => `- ${pull.title} (${pull.url}) by @${pull.author}`).join("\n")}\n\n`;
+            }
+
+            if (otherChanges.length > 0) {
+              content += `## 📦 Other Changes\n\n${otherChanges.map((pull) => `- ${pull.title} (${pull.url}) by @${pull.author}`).join("\n")}\n\n`;
+            }
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: "${{ github.ref }}",
+              name: "${{ github.ref_name }}",
+              body: content
+            });
