@@ -19,7 +19,7 @@ jobs:
         env:
           DISABLE_V8_COMPILE_CACHE: "1"
         with:
-          node-version: "22.15"
+          node-version: "22.21"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
@@ -157,5 +157,6 @@ jobs:
               repo: context.repo.repo,
               tag_name: "${{ github.ref }}",
               name: "${{ github.ref_name }}",
-              body: content
+              body: content,
+              prerelease: "${{ github.ref_name }}".endsWith("-preview")
             });

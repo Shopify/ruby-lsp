@@ -9,7 +9,7 @@ up:
   - bundler
   - node:
       yarn: true
-      version: 22.15.1
+      version: 22.21.1
       packages:
         - vscode
   - packages:
