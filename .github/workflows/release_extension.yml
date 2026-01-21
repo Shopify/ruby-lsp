@@ -1,12 +1,13 @@
-name: Publish
+name: Release VS Code extension
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - vscode-ruby-lsp-v[0-9]+.[0-9]+.[0-9]+(-preview)?
 
 jobs:
-  publish:
-    if: ${{ startsWith(github.ref, 'refs/tags/vscode-ruby-lsp') }}
+  release_extension:
+    if: github.repository == 'Shopify/ruby-lsp'
     runs-on: ubuntu-latest
 
     steps:
@@ -18,11 +19,74 @@ jobs:
         env:
           DISABLE_V8_COMPILE_CACHE: "1"
         with:
-          node-version: "22.15"
+          node-version: "22.21"
           cache: "yarn"
           cache-dependency-path: "vscode"
 
-      - name: Update release notes
+      - name: Create CHANGELOG.md
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          script: |
+            const fs = require("fs");
+
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const includePrereleases = context.payload.release.prerelease;
+
+            const changelog = releases
+              .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
+              .map((release) => `${release.body}\n`)
+              .join("\n");
+
+            fs.writeFileSync("vscode/CHANGELOG.md", changelog);
+
+      - name: Copy files needed for release
+        run: |
+          cp CODE_OF_CONDUCT.md vscode/CODE_OF_CONDUCT.md
+
+      - name: 📦 Install dependencies
+        working-directory: ./vscode
+        run: yarn --frozen-lockfile
+
+      # Stable releases
+      - name: Publish extension in the marketplace
+        if: ${{ !endsWith(github.ref_name, '-preview') }}
+        working-directory: ./vscode
+        run: |
+          yarn run package
+          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Prereleases
+      - name: Package and publish prerelease extension in the marketplace
+        if: ${{ endsWith(github.ref_name, '-preview') }}
+        working-directory: ./vscode
+        run: |
+          yarn run package_prerelease
+          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      # Stable releases for OpenVSX
+      - name: Publish extension on OpenVSX
+        if: ${{ !endsWith(github.ref_name, '-preview') }}
+        working-directory: ./vscode
+        run: |
+          yarn run package
+          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn
+
+  release_github:
+    name: Create GitHub release
+    if: github.repository == 'Shopify/ruby-lsp'
+    needs: release_extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
@@ -88,72 +152,11 @@ jobs:
               content += `## 📦 Other Changes\n\n${otherChanges.map((pull) => `- ${pull.title} (${pull.url}) by @${pull.author}`).join("\n")}\n\n`;
             }
 
-            const releaseResponse = await github.rest.repos.getReleaseByTag({
+            await github.rest.repos.createRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              tag: "${{ github.ref_name }}",
+              tag_name: "${{ github.ref }}",
+              name: "${{ github.ref_name }}",
+              body: content,
+              prerelease: "${{ github.ref_name }}".endsWith("-preview")
             });
-
-            await github.rest.repos.updateRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: releaseResponse.data.id,
-              body: content
-            });
-
-      - name: Create CHANGELOG.md
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          script: |
-            const fs = require("fs");
-
-            const { data: releases } = await github.rest.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-
-            const includePrereleases = context.payload.release.prerelease;
-
-            const changelog = releases
-              .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
-              .map((release) => `${release.body}\n`)
-              .join("\n");
-
-            fs.writeFileSync("vscode/CHANGELOG.md", changelog);
-
-      - name: Copy files needed for release
-        run: |
-          cp CODE_OF_CONDUCT.md vscode/CODE_OF_CONDUCT.md
-
-      - name: 📦 Install dependencies
-        working-directory: ./vscode
-        run: yarn --frozen-lockfile
-
-      # Stable releases
-      - name: Publish extension in the marketplace
-        if: "!github.event.release.prerelease"
-        working-directory: ./vscode
-        run: |
-          yarn run package
-          node_modules/.bin/vsce publish --packagePath vscode-ruby-lsp.vsix
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      # Prereleases
-      - name: Package and publish prerelease extension in the marketplace
-        if: "github.event.release.prerelease"
-        working-directory: ./vscode
-        run: |
-          yarn run package_prerelease
-          node_modules/.bin/vsce publish --pre-release --packagePath vscode-ruby-lsp.vsix
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      # Stable releases for OpenVSX
-      - name: Publish extension on OpenVSX
-        if: "!github.event.release.prerelease"
-        working-directory: ./vscode
-        run: |
-          yarn run package
-          node_modules/.bin/ovsx publish vscode-ruby-lsp.vsix -p ${{ secrets.OPENVSX_TOKEN }} --yarn

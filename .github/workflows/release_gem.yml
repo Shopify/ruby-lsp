@@ -1,4 +1,4 @@
-name: Release
+name: Release gem on RubyGems.org and create GitHub release
 
 on:
   push:
@@ -6,12 +6,43 @@ on:
       - v[0-9]+.[0-9]+.[0-9]+
 
 jobs:
-  publish:
+  release_gem:
+    name: Release gem on RubyGems.org
+    if: github.repository == 'Shopify/ruby-lsp'
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      id-token: write
+
+    environment: release
+
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        name: Checkout
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@80740b3b13bf9857e28854481ca95a84e78a2bdf # v1.284.0
+        with:
+          bundler-cache: true
+
+      - name: Release gem on RubyGems.org
+        uses: rubygems/release-gem@1c162a739e8b4cb21a676e97b087e8268d8fc40b # v1.1.2
+
+  release_github:
+    name: Create GitHub release
+    if: github.repository == 'Shopify/ruby-lsp'
+    needs: release_gem
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Create release
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
