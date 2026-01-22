@@ -45,7 +45,7 @@ interface ManagerClass {
   detect: (workspaceFolder: vscode.WorkspaceFolder, outputChannel: WorkspaceChannel) => Promise<DetectionResult>;
 }
 
-const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
+const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass | undefined> = {
   [ManagerIdentifier.Shadowenv]: Shadowenv,
   [ManagerIdentifier.Asdf]: Asdf,
   [ManagerIdentifier.Chruby]: Chruby,
@@ -55,8 +55,8 @@ const VERSION_MANAGERS: Record<ManagerIdentifier, ManagerClass> = {
   [ManagerIdentifier.Mise]: Mise,
   [ManagerIdentifier.RubyInstaller]: RubyInstaller,
   [ManagerIdentifier.Custom]: Custom,
-  [ManagerIdentifier.Auto]: None, // Auto is handled specially
   [ManagerIdentifier.None]: None, // None is last as the fallback
+  [ManagerIdentifier.Auto]: undefined, // Auto is handled specially
 };
 
 export class Ruby implements RubyInterface {
@@ -294,6 +294,15 @@ export class Ruby implements RubyInterface {
 
   private async runManagerActivation() {
     const ManagerClass = VERSION_MANAGERS[this.versionManager.identifier];
+
+    if (!ManagerClass) {
+      throw new Error(
+        `BUG: No ManagerClass found for identifier '${this.versionManager.identifier}'. ` +
+          `This indicates either: (1) discoverVersionManager() failed to detect any version manager and left identifier as 'auto', ` +
+          `or (2) a new ManagerIdentifier enum value was added without updating VERSION_MANAGERS.`,
+      );
+    }
+
     const manager = new ManagerClass(
       this.workspaceFolder,
       this.outputChannel,
