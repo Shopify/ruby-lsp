@@ -227,7 +227,7 @@ module RubyIndexer
       others.uniq!
       others.map!(&:name)
 
-      excluded.each do |dependency|
+      transitive_excluded = excluded.each_with_object([]) do |dependency, acc|
         next unless dependency.runtime?
 
         spec = dependency.to_spec
@@ -236,7 +236,7 @@ module RubyIndexer
         spec.dependencies.each do |transitive_dependency|
           next if others.include?(transitive_dependency.name)
 
-          excluded << transitive_dependency
+          acc << transitive_dependency
         end
       rescue Gem::MissingSpecError
         # If a gem is scoped only to some specific platform, then its dependencies may not be installed either, but they
@@ -244,6 +244,7 @@ module RubyIndexer
         # just ignore if they're missing
       end
 
+      excluded.concat(transitive_excluded)
       excluded.uniq!
       excluded.map(&:name)
     rescue Bundler::GemfileNotFound
