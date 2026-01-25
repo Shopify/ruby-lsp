@@ -305,6 +305,22 @@ suite("Grammars", () => {
         const actualTokens = tokenizeRuby(ruby);
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
+
+      test("embedded HEREDOC with interpolation containing question mark methods terminates correctly", () => {
+        // This test verifies that heredocs with embedded language highlighting properly terminate
+        // even when the content contains characters that might start begin/end patterns in the
+        // embedded grammar (like ? which starts C's ternary operator pattern).
+        const ruby = "<<C\n(#{' ' unless foo.empty?})\nC\n\nsome_ruby";
+        const actualTokens = tokenizeRuby(ruby);
+
+        const someRubyToken = actualTokens.find((token) => token[0] === "some_ruby");
+        assert(someRubyToken, "Expected to find 'some_ruby' token");
+        assert.deepStrictEqual(
+          someRubyToken[1],
+          ["source.ruby"],
+          "Code after heredoc terminator should be plain Ruby, not embedded C",
+        );
+      });
     });
 
     suite("Backtick String Literals", () => {
@@ -791,7 +807,10 @@ suite("Grammars", () => {
       return {
         begin: `(?=(?><<[-~]?(["'\`]?)((?:[_\\w]+_|)${delimiter})\\b\\1))`,
         comment: `Heredoc with embedded ${label}`,
-        end: "(?!\\G)",
+        end: `^\\s*((?:[_\\w]+_|)${delimiter})$\\n?`,
+        endCaptures: {
+          "0": { name: "string.definition.end.ruby" },
+        },
         name,
         patterns: [
           {
@@ -800,10 +819,7 @@ suite("Grammars", () => {
               "0": { name: "string.definition.begin.ruby" },
             },
             contentName,
-            end: "^\\s*\\2$\\n?",
-            endCaptures: {
-              "0": { name: "string.definition.end.ruby" },
-            },
+            while: `^(?!\\s*((?:[_\\w]+_|)${delimiter})\\s*$)`,
             patterns: [
               { include: "#heredoc" },
               { include: "#interpolated_ruby" },
