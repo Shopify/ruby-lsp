@@ -65,7 +65,6 @@ export class Ruby implements RubyInterface {
     .getConfiguration("rubyLsp")
     .get<ManagerConfiguration>("rubyVersionManager")!;
 
-  private readonly shell = process.env.SHELL?.replace(/(\s+)/g, "\\$1");
   private _env: NodeJS.ProcessEnv = {};
   private _error = false;
   private readonly context: vscode.ExtensionContext;
@@ -402,12 +401,8 @@ export class Ruby implements RubyInterface {
 
   private async toolExists(tool: string) {
     try {
-      let command = this.shell ? `${this.shell} -i -c '` : "";
-      command += `${tool} --version`;
-
-      if (this.shell) {
-        command += "'";
-      }
+      const shell = vscode.env.shell.replace(/(\s+)/g, "\\$1");
+      const command = `${shell} -i -c '${tool} --version'`;
 
       this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${command}`);
 
