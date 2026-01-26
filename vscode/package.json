@@ -831,12 +831,12 @@
     "glob": "^13.0.0",
     "mocha": "^11.7.5",
     "ovsx": "^0.10.8",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "sinon": "^21.0.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.0",
+    "typescript-eslint": "^8.53.1",
     "vscode-oniguruma": "^2.0.1",
-    "vscode-textmate": "^9.3.1"
+    "vscode-textmate": "^9.3.2"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1",
