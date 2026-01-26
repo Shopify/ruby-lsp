@@ -1,10 +1,9 @@
 import net from "net";
-import os from "os";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 
 import * as vscode from "vscode";
 
-import { LOG_CHANNEL, asyncExec } from "./common";
+import { LOG_CHANNEL, asyncExec, isWindows } from "./common";
 import { Workspace } from "./workspace";
 
 class TerminalLogger {
@@ -220,7 +219,7 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
     const configuration = session.configuration;
     const workspaceFolder = configuration.targetFolder;
     const cwd = workspaceFolder.path;
-    const port = os.platform() === "win32" ? await this.availablePort() : undefined;
+    const port = isWindows() ? await this.availablePort() : undefined;
 
     return new Promise((resolve, reject) => {
       const args = ["exec", "rdbg"];

@@ -3,8 +3,9 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { Chruby } from "./chruby";
-import { pathToUri } from "../common";
-import { DetectionResult } from "./versionManager";
+import { pathToUri, isWindows } from "../common";
+import { RubyInstallationNotFoundError } from "./errors";
+import { DetectionResult, VersionManager } from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -23,7 +24,7 @@ export class RubyInstaller extends Chruby {
     _workspaceFolder: vscode.WorkspaceFolder,
     _outputChannel: vscode.LogOutputChannel,
   ): Promise<DetectionResult> {
-    return os.platform() === "win32" ? { type: "semantic", marker: "RubyInstaller" } : { type: "none" };
+    return isWindows() ? { type: "semantic", marker: "RubyInstaller" } : { type: "none" };
   }
 
   // Environment variables are case sensitive on Windows when we access them through NodeJS. We need to ensure that
@@ -42,17 +43,15 @@ export class RubyInstaller extends Chruby {
     ];
 
     for (const installationUri of possibleInstallationUris) {
-      try {
-        await vscode.workspace.fs.stat(installationUri);
-        return vscode.Uri.joinPath(installationUri, "bin", "ruby");
-      } catch (_error: any) {
-        // Continue searching
+      if (await VersionManager.pathExists(installationUri)) {
+        return this.rubyExecutableUri(installationUri);
       }
     }
 
-    throw new Error(
-      `Cannot find installation directory for Ruby version ${rubyVersion.version}.\
-         Searched in ${possibleInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
+    throw new RubyInstallationNotFoundError(
+      "rubyInstaller",
+      rubyVersion.version,
+      possibleInstallationUris.map((uri) => uri.fsPath),
     );
   }
 

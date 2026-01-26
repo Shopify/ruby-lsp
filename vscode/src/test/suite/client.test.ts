@@ -33,6 +33,7 @@ import { MAJOR, MINOR } from "../rubyVersion";
 
 import { FAKE_TELEMETRY, FakeLogger } from "./fakeTelemetry";
 import { createContext, createRubySymlinks } from "./helpers";
+import { isWindows } from "../../common";
 
 async function launchClient(workspaceUri: vscode.Uri) {
   const workspaceFolder: vscode.WorkspaceFolder = {
@@ -54,7 +55,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
 
     createRubySymlinks();
 
-    if (os.platform() === "win32") {
+    if (isWindows()) {
       managerConfig = { identifier: ManagerIdentifier.RubyInstaller };
     } else {
       managerConfig = { identifier: ManagerIdentifier.Chruby };

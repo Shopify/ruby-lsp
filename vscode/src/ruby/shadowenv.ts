@@ -1,6 +1,12 @@
 import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
+import {
+  VersionManagerDirectoryNotFoundError,
+  UntrustedWorkspaceError,
+  ExecutableNotFoundError,
+  ActivationError,
+} from "./errors";
 
 import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 
@@ -8,16 +14,10 @@ import { VersionManager, ActivationResult, DetectionResult } from "./versionMana
 // which Ruby version should be used for each project, in addition to other customizations such as GEM_HOME.
 //
 // Learn more: https://github.com/Shopify/shadowenv
-export class UntrustedWorkspaceError extends Error {}
 
 export class Shadowenv extends VersionManager {
   private static async shadowenvDirExists(workspaceUri: vscode.Uri): Promise<boolean> {
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.joinPath(workspaceUri, ".shadowenv.d"));
-      return true;
-    } catch (_error: any) {
-      return false;
-    }
+    return VersionManager.pathExists(vscode.Uri.joinPath(workspaceUri, ".shadowenv.d"));
   }
 
   static async detect(
@@ -34,10 +34,7 @@ export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const exists = await Shadowenv.shadowenvDirExists(this.bundleUri);
     if (!exists) {
-      throw new Error(
-        "The Ruby LSP version manager is configured to be shadowenv, \
-        but no .shadowenv.d directory was found in the workspace",
-      );
+      throw new VersionManagerDirectoryNotFoundError("shadowenv", ".shadowenv.d");
     }
 
     const shadowenvExec = await this.findExec([vscode.Uri.file("/opt/homebrew/bin")], "shadowenv");
@@ -55,7 +52,7 @@ export class Shadowenv extends VersionManager {
         version: parsedResult.version,
         gemPath: parsedResult.gemPath,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const err = error as Error;
       // If the workspace is untrusted, offer to trust it for the user
       if (err.message.includes("untrusted shadowenv program")) {
@@ -71,21 +68,17 @@ export class Shadowenv extends VersionManager {
           return this.activate();
         }
 
-        throw new UntrustedWorkspaceError("Cannot activate Ruby environment in an untrusted workspace");
+        throw new UntrustedWorkspaceError("shadowenv");
       }
 
       try {
         await asyncExec("shadowenv --version");
-      } catch (_error: any) {
-        throw new Error(
-          `Shadowenv executable not found. Ensure it is installed and available in the PATH.
-           This error may happen if your shell configuration is failing to be sourced from the editor or if
-           another extension is mutating the process PATH.`,
-        );
+      } catch (_error: unknown) {
+        throw new ExecutableNotFoundError("shadowenv", ["PATH"]);
       }
 
       // If it failed for some other reason, present the error to the user
-      throw new Error(`Failed to activate Ruby environment with Shadowenv: ${error.message}`);
+      throw new ActivationError(`Failed to activate Ruby environment with Shadowenv: ${err.message}`, "shadowenv", err);
     }
   }
 }

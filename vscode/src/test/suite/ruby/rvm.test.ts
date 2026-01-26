@@ -13,7 +13,7 @@ import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR } from "../../..
 import { createContext, FakeContext } from "../helpers";
 
 suite("RVM", () => {
-  if (os.platform() === "win32") {
+  if (common.isWindows()) {
     // eslint-disable-next-line no-console
     console.log("Skipping RVM tests on Windows");
     return;

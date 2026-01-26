@@ -10,7 +10,7 @@ import { Debugger } from "../../debugger";
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { Workspace } from "../../workspace";
 import { WorkspaceChannel } from "../../workspaceChannel";
-import { LOG_CHANNEL, asyncExec, pathToUri } from "../../common";
+import { LOG_CHANNEL, asyncExec, pathToUri, isWindows } from "../../common";
 import { RUBY_VERSION } from "../rubyVersion";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
@@ -167,8 +167,7 @@ suite("Debugger", () => {
   });
 
   test("Launching the debugger", async () => {
-    const manager =
-      os.platform() === "win32" ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
+    const manager = isWindows() ? { identifier: ManagerIdentifier.None } : { identifier: ManagerIdentifier.Chruby };
 
     if (process.env.CI) {
       createRubySymlinks();

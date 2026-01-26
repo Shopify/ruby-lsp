@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { createHash } from "crypto";
 import { promisify } from "util";
+import os from "os";
 
 import * as vscode from "vscode";
 import { State } from "vscode-languageclient";
@@ -149,4 +150,9 @@ export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
 // Usage: pathToUri("/", "opt", "bin") instead of vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "bin")
 export function pathToUri(basePath: string, ...segments: string[]): vscode.Uri {
   return vscode.Uri.joinPath(vscode.Uri.file(basePath), ...segments);
+}
+
+// Helper to check if running on Windows platform
+export function isWindows(): boolean {
+  return os.platform() === "win32";
 }

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
+import { MissingConfigurationError } from "./errors";
 
 // Custom
 //
@@ -32,10 +33,7 @@ export class Custom extends VersionManager {
     const customCommand: string | undefined = configuration.get("customRubyCommand");
 
     if (customCommand === undefined) {
-      throw new Error(
-        "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
-        See the [README](https://shopify.github.io/ruby-lsp/version-managers.html) for instructions.",
-      );
+      throw new MissingConfigurationError("custom", "rubyLsp.customRubyCommand");
     }
 
     return customCommand;
