@@ -10,6 +10,6 @@ gem "jekyll-feed", "~> 0.12"
 gem "jekyll-redirect-from"
 
 # Theme
-gem "just-the-docs", "~> 0.11.1"
+gem "just-the-docs", "~> 0.12.0"
 gem "csv"
 gem "base64"
