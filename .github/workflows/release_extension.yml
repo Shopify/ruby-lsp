@@ -36,7 +36,7 @@ jobs:
               repo: context.repo.repo,
             });
 
-            const includePrereleases = context.payload.release.prerelease;
+            const includePrereleases = "${{ github.ref_name }}".endsWith("-preview");
 
             const changelog = releases
               .filter((release) => release.tag_name.startsWith("vscode-ruby-lsp") && (includePrereleases || !release.prerelease))
