@@ -2,7 +2,7 @@
   "name": "ruby-lsp",
   "displayName": "Ruby LSP",
   "description": "VS Code plugin for connecting with the Ruby LSP",
-  "version": "0.9.33",
+  "version": "0.10.0",
   "publisher": "Shopify",
   "repository": {
     "type": "git",
@@ -422,7 +422,8 @@
         },
         "rubyLsp.customRubyCommand": {
           "description": "A shell command to activate the right Ruby version or add a custom Ruby bin folder to the PATH. Only used if rubyVersionManager is set to 'custom'",
-          "type": "string"
+          "type": "string",
+          "scope": "machine"
         },
         "rubyLsp.formatter": {
           "description": "Which tool the Ruby LSP should use for formatting files",
