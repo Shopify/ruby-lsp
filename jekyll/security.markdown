@@ -10,7 +10,7 @@ This page documents potential risks when using the Ruby LSP VS Code extension an
 
 ## Trust Model
 
-**Ruby LSP assumes that all code in your workspace is trusted.**
+**Ruby LSP assumes that all code in your workspace (including dependencies) is trusted.**
 
 When you open a project with Ruby LSP, the extension and language server will execute code from that project as part of
 normal operation. This is fundamentally similar to running `bundle install` in that project directory.
