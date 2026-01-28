@@ -2,17 +2,26 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
+import { WorkspaceChannel } from "../workspaceChannel";
+import { pathToUri } from "../common";
 
 // Mise (mise en place) is a manager for dev tools, environment variables and tasks
 //
 // Learn more: https://github.com/jdx/mise
 export class Mise extends VersionManager {
-  async activate(): Promise<ActivationResult> {
-    const miseUri = await this.findMiseUri();
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: WorkspaceChannel,
+  ): Promise<DetectionResult> {
+    const result = await this.findFirst(this.getPossiblePaths());
+    return result ? { type: "path", uri: result } : { type: "none" };
+  }
 
-    // The exec command in Mise is called `x`
-    const parsedResult = await this.runEnvActivationScript(`${miseUri.fsPath} x -- ruby`);
+  async activate(): Promise<ActivationResult> {
+    const execUri = await this.findVersionManagerUri();
+
+    const parsedResult = await this.runEnvActivationScript(this.getExecutionCommand(execUri.fsPath));
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -22,44 +31,61 @@ export class Mise extends VersionManager {
     };
   }
 
-  async findMiseUri(): Promise<vscode.Uri> {
-    const config = vscode.workspace.getConfiguration("rubyLsp");
-    const misePath = config.get<string | undefined>("rubyVersionManager.miseExecutablePath");
-
-    if (misePath) {
-      const configuredPath = vscode.Uri.file(misePath);
-
-      try {
-        await vscode.workspace.fs.stat(configuredPath);
-        return configuredPath;
-      } catch (_error: any) {
-        throw new Error(`Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
-      }
-    }
-
-    // Possible mise installation paths
-    //
-    // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
-    // 2. Homebrew M series
-    // 3. Installation from `apt install mise`
-    const possiblePaths = [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
+  // Possible mise installation paths
+  //
+  // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
+  // 2. Homebrew M series
+  // 3. Installation from `apt install mise`
+  protected static getPossiblePaths(): vscode.Uri[] {
+    return [
+      pathToUri(os.homedir(), ".local", "bin", "mise"),
+      pathToUri("/", "opt", "homebrew", "bin", "mise"),
+      pathToUri("/", "usr", "bin", "mise"),
     ];
+  }
 
-    for (const possiblePath of possiblePaths) {
+  protected getVersionManagerName(): string {
+    return "Mise";
+  }
+
+  protected getConfigKey(): string {
+    return "rubyVersionManager.miseExecutablePath";
+  }
+
+  protected getExecutionCommand(executablePath: string): string {
+    // The exec command in Mise is called `x`
+    return `${executablePath} x -- ruby`;
+  }
+
+  private async findVersionManagerUri(): Promise<vscode.Uri> {
+    const constructor = this.constructor as typeof Mise;
+    const managerName = this.getVersionManagerName();
+    const configKey = this.getConfigKey();
+
+    const config = vscode.workspace.getConfiguration("rubyLsp");
+    const configuredPath = config.get<string | undefined>(configKey);
+
+    if (configuredPath) {
+      const uri = vscode.Uri.file(configuredPath);
+
       try {
-        await vscode.workspace.fs.stat(possiblePath);
-        return possiblePath;
+        await vscode.workspace.fs.stat(uri);
+        return uri;
       } catch (_error: any) {
-        // Continue looking
+        throw new Error(`${managerName} executable configured as ${uri.fsPath}, but that file doesn't exist`);
       }
     }
 
+    const result = await constructor.detect(this.workspaceFolder, this.outputChannel);
+
+    if (result.type === "path") {
+      return result.uri;
+    }
+
+    const possiblePaths = constructor.getPossiblePaths();
     throw new Error(
-      `The Ruby LSP version manager is configured to be Mise, but could not find Mise installation. Searched in
-        ${possiblePaths.join(", ")}`,
+      `The Ruby LSP version manager is configured to be ${managerName}, but could not find ${managerName} installation. Searched in
+        ${possiblePaths.map((p) => p.fsPath).join(", ")}`,
     );
   }
 }

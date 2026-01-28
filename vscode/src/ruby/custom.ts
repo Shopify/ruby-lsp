@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 
 // Custom
 //
@@ -8,6 +8,14 @@ import { VersionManager, ActivationResult } from "./versionManager";
 // Users are allowed to define a shell script that runs before calling ruby, giving them the chance to modify the PATH,
 // GEM_HOME and GEM_PATH as needed to find the correct Ruby runtime.
 export class Custom extends VersionManager {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: vscode.LogOutputChannel,
+  ): Promise<DetectionResult> {
+    return { type: "none" };
+  }
+
   async activate(): Promise<ActivationResult> {
     const parsedResult = await this.runEnvActivationScript(`${this.customCommand()} && ruby`);
 

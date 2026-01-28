@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, DetectionResult } from "./versionManager";
 
 // None
 //
@@ -13,6 +13,15 @@ import { VersionManager, ActivationResult } from "./versionManager";
 // If you don't have Ruby automatically available in your PATH and are not using a version manager, look into
 // configuring custom Ruby activation
 export class None extends VersionManager {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: vscode.LogOutputChannel,
+  ): Promise<DetectionResult> {
+    // None always matches as the final fallback
+    return { type: "semantic", marker: "none" };
+  }
+
   private readonly rubyPath: string;
 
   constructor(

@@ -2,13 +2,23 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { ActivationResult, VersionManager } from "./versionManager";
+import { ActivationResult, VersionManager, DetectionResult } from "./versionManager";
+import { WorkspaceChannel } from "../workspaceChannel";
+import { pathToUri } from "../common";
 
 // Ruby enVironment Manager. It manages Ruby application environments and enables switching between them.
 // Learn more:
 // - https://github.com/rvm/rvm
 // - https://rvm.io
 export class Rvm extends VersionManager {
+  static async detect(
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<DetectionResult> {
+    const exists = await VersionManager.toolExists("rvm", workspaceFolder, outputChannel);
+    return exists ? { type: "semantic", marker: "rvm" } : { type: "none" };
+  }
+
   async activate(): Promise<ActivationResult> {
     const installationPath = await this.findRvmInstallation();
     const parsedResult = await this.runEnvActivationScript(installationPath.fsPath);
@@ -29,9 +39,9 @@ export class Rvm extends VersionManager {
 
   async findRvmInstallation(): Promise<vscode.Uri> {
     const possiblePaths = [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rvm", "bin", "rvm-auto-ruby"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "rvm", "bin", "rvm-auto-ruby"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "share", "rvm", "bin", "rvm-auto-ruby"),
+      pathToUri(os.homedir(), ".rvm", "bin", "rvm-auto-ruby"),
+      pathToUri("/", "usr", "local", "rvm", "bin", "rvm-auto-ruby"),
+      pathToUri("/", "usr", "share", "rvm", "bin", "rvm-auto-ruby"),
     ];
 
     for (const uri of possiblePaths) {
