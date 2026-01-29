@@ -425,6 +425,10 @@
           "type": "string",
           "scope": "machine"
         },
+        "rubyLsp.customBinaryPath": {
+          "description": "A path to a custom Ruby LSP binary executable",
+          "type": "string"
+        },
         "rubyLsp.formatter": {
           "description": "Which tool the Ruby LSP should use for formatting files",
           "type": "string",
