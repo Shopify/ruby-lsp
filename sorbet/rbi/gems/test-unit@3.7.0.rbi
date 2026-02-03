@@ -630,14 +630,6 @@ module Test::Unit::Assertions
   # `expected_message`. `expected_message` can be a `String` or
   # `Regexp`.
   #
-  # @example Pass pattern: String
-  #   assert_raise_with_message(RuntimeError, "Boom!!!") do
-  #   raise "Boom!!!"
-  #   end # -> pass
-  # @example Pass pattern: Regexp
-  #   assert_raise_with_message(RuntimeError, /!!!/) do
-  #   raise "Boom!!!"
-  #   end # -> pass
   # @example Failure pattern: Exception class isn't matched
   #   assert_raise_with_message(RuntimeError, "Boom!!!") do
   #   raise ArgumentError, "Boom!!!"
@@ -646,6 +638,14 @@ module Test::Unit::Assertions
   #   assert_raise_with_message(RuntimeError, "Boom!!!") do
   #   raise "Hello"
   #   end # -> failure
+  # @example Pass pattern: Regexp
+  #   assert_raise_with_message(RuntimeError, /!!!/) do
+  #   raise "Boom!!!"
+  #   end # -> pass
+  # @example Pass pattern: String
+  #   assert_raise_with_message(RuntimeError, "Boom!!!") do
+  #   raise "Boom!!!"
+  #   end # -> pass
   # @since 3.4.3
   #
   # source://test-unit//lib/test/unit/assertions.rb#318
@@ -752,12 +752,12 @@ module Test::Unit::Assertions
 
   # Asserts that `object` is false or nil.
   #
-  # @example Pass patterns
-  #   refute(false)    # => pass
-  #   refute(nil)      # => pass
   # @example Failure patterns
   #   refute(true)     # => failure
   #   refute("string") # => failure
+  # @example Pass patterns
+  #   refute(false)    # => pass
+  #   refute(nil)      # => pass
   # @note Just for minitest compatibility. :<
   # @param object [Object] The object to be asserted.
   # @return [void]
@@ -2562,8 +2562,8 @@ module Test::Unit::FailureHandler
   # @option options
   # @option options
   # @option options
-  # @param message [String] The description about the failure.
   # @param backtrace [Array<String>] The backtrace for the failure.
+  # @param message [String] The description about the failure.
   # @param options [Hash] a customizable set of options
   # @return [void]
   #

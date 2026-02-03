@@ -9948,6 +9948,7 @@ class SyntaxTree::Parser < ::Ripper
 
   # :call-seq:
   #   on_in: (RAssign pattern, nil statements, nil consequent) -> RAssign
+  #        | (
   #            untyped pattern,
   #            Statements statements,
   #            (nil | In | Else) consequent
@@ -10499,6 +10500,7 @@ class SyntaxTree::Parser < ::Ripper
 
   # :call-seq:
   #   on_unary: (:not operator, untyped statement) -> Not
+  #           | (Symbol operator, untyped statement) -> Unary
   #
   # source://syntax_tree//lib/syntax_tree/parser.rb#3766
   def on_unary(operator, statement); end
@@ -23310,10 +23312,10 @@ class SyntaxTree::YARV::VM
   def local_set(index, level, value); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#212
-  def pop(*args, **_arg1, &block); end
+  def pop(*_arg0, **_arg1, &_arg2); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#212
-  def push(*args, **_arg1, &block); end
+  def push(*_arg0, **_arg1, &_arg2); end
 
   # source://syntax_tree//lib/syntax_tree/yarv/vm.rb#598
   def require(filepath); end
