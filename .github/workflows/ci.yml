@@ -61,7 +61,7 @@ jobs:
           cache-version: 2
 
       - name: Run tests
-        run: bundle exec rake
+        run: bundle exec rake --trace
   lint_node:
     runs-on: ubuntu-latest
     steps:

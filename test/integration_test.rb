@@ -488,7 +488,12 @@ class IntegrationTest < Minitest::Test
 
     assert_path_exists(File.join(workspace_path, ".ruby-lsp", "Gemfile"))
     assert_path_exists(File.join(workspace_path, ".ruby-lsp", "Gemfile.lock"))
-    refute_path_exists(File.join(workspace_path, ".ruby-lsp", "install_error"))
+    message = -> do
+      errors = File.read(File.join(workspace_path, ".ruby-lsp", "install_error"))
+
+      "Expected no install errors, but found:\n#{errors}"
+    end
+    refute_path_exists(File.join(workspace_path, ".ruby-lsp", "install_error"), )
   end
 
   def send_message(stdin, message)
