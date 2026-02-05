@@ -92,6 +92,7 @@ GEM
     sorbet (0.5.12230)
       sorbet-static (= 0.5.12230)
     sorbet-runtime (0.5.12230)
+    sorbet-static (0.5.12230-aarch64-linux)
     sorbet-static (0.5.12230-universal-darwin)
     sorbet-static (0.5.12230-x86_64-linux)
     sorbet-static-and-runtime (0.5.12230)
@@ -132,6 +133,7 @@ GEM
       yard
 
 PLATFORMS
+  aarch64-linux
   arm64-darwin
   x64-mingw-ucrt
   x86_64-darwin
@@ -200,6 +202,7 @@ CHECKSUMS
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
   sorbet (0.5.12230) sha256=f13c654b498a2ce5dbfd2a87cb4d9311fdf7a8c9e2639abfcd83b685d268e093
   sorbet-runtime (0.5.12230) sha256=06cd707492495a66a4a94ba5d4a1da3d74c698328ac0274a072a49980368eba5
+  sorbet-static (0.5.12230-aarch64-linux) sha256=8186a0979fdc37836c5c823a5dd9b3cab184118bf7067ced66eb72d2586bdec3
   sorbet-static (0.5.12230-universal-darwin) sha256=ca632252d853c7523ae0a1a7c806d7518848ee05cf234b65114f6c5295519021
   sorbet-static (0.5.12230-x86_64-linux) sha256=5525a2e9e870020ddb668c3ed2dbff1839817015b2482d934aa456182e287266
   sorbet-static-and-runtime (0.5.12230) sha256=afea11eddbe145806354f6b4060d7883bf4dcc7015fdd463eb401bdbc9b7be7f
