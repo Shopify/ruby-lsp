@@ -31,6 +31,10 @@ module RubyLsp
 
     FOUR_HOURS = 4 * 60 * 60 #: Integer
 
+    # Gems that should be kept up to date in the composed bundle. When updating, any of these gems that are not
+    # already in the user's Gemfile will be updated together.
+    GEMS_TO_UPDATE = ["ruby-lsp", "debug", "prism", "rbs"].freeze #: Array[String]
+
     #: (String project_path, **untyped options) -> void
     def initialize(project_path, **options)
       @project_path = project_path
@@ -331,7 +335,7 @@ module RubyLsp
     def update(env)
       # Try to auto upgrade the gems we depend on, unless they are in the Gemfile as that would result in undesired
       # source control changes
-      gems = ["ruby-lsp", "debug", "prism", "rbs"].reject { |dep| @dependencies[dep] }
+      gems = GEMS_TO_UPDATE.reject { |dep| @dependencies[dep] }
       gems << "ruby-lsp-rails" if @rails_app && !@dependencies["ruby-lsp-rails"]
 
       Bundler::CLI::Update.new({ conservative: true }, gems).run
@@ -343,15 +347,14 @@ module RubyLsp
 
     #: (Hash[String, String] env) -> Hash[String, String]
     def run_bundle_install_through_command(env)
-      # If `ruby-lsp`, `debug` and `rbs` (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we
-      # shouldn't try to upgrade them or else we'll produce undesired source control changes. If the composed bundle was
-      # just created and any of `ruby-lsp`, `ruby-lsp-rails`, `debug` or `rbs` weren't a part of the Gemfile, then we
-      # need to run `bundle install` for the first time to generate the Gemfile.lock with them included or else Bundler
-      # will complain that they're missing. We can only update if the custom `.ruby-lsp/Gemfile.lock` already exists and
-      # includes all gems
+      # If the gems in GEMS_TO_UPDATE (and potentially `ruby-lsp-rails`) are already in the Gemfile, then we shouldn't
+      # try to upgrade them or else we'll produce undesired source control changes. If the composed bundle was just
+      # created and any of those gems weren't a part of the Gemfile, then we need to run `bundle install` for the first
+      # time to generate the Gemfile.lock with them included or else Bundler will complain that they're missing. We can
+      # only update if the custom `.ruby-lsp/Gemfile.lock` already exists and includes all gems
 
       # When not updating, we run `(bundle check || bundle install)`
-      # When updating, we run `((bundle check && bundle update ruby-lsp debug rbs) || bundle install)`
+      # When updating, we run `((bundle check && bundle update <GEMS_TO_UPDATE>) || bundle install)`
       bundler_path = File.join(Gem.default_bindir, "bundle")
       base_command = (!Gem.win_platform? && File.exist?(bundler_path) ? "#{Gem.ruby} #{bundler_path}" : "bundle").dup
 
@@ -362,13 +365,11 @@ module RubyLsp
       command = +"(#{base_command} check"
 
       if should_bundle_update?
-        # If any of `ruby-lsp`, `ruby-lsp-rails`, `debug` or `rbs` are not in the Gemfile, try to update them to the
-        # latest version
+        # If any of the gems in GEMS_TO_UPDATE (or `ruby-lsp-rails` for Rails apps) are not in the Gemfile, try to
+        # update them to the latest version
         command.prepend("(")
         command << " && #{base_command} update "
-        command << "ruby-lsp " unless @dependencies["ruby-lsp"]
-        command << "debug " unless @dependencies["debug"]
-        command << "rbs " unless @dependencies["rbs"]
+        GEMS_TO_UPDATE.each { |gem| command << "#{gem} " unless @dependencies[gem] }
         command << "ruby-lsp-rails " if @rails_app && !@dependencies["ruby-lsp-rails"]
         command.delete_suffix!(" ")
         command << ")"

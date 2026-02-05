@@ -176,7 +176,7 @@ class SetupBundlerTest < Minitest::Test
         Bundler.with_unbundled_env do
           stub_bundle_with_env(
             bundle_env(dir, ".ruby-lsp/Gemfile"),
-            /((bundle _[\d\.]+_ check && bundle _[\d\.]+_ update ruby-lsp debug rbs) || bundle _[\d\.]+_ install) 1>&2/,
+            /((bundle _[\d\.]+_ check && bundle _[\d\.]+_ update ruby-lsp debug prism rbs) || bundle _[\d\.]+_ install) 1>&2/,
           )
 
           FileUtils.expects(:cp).never
