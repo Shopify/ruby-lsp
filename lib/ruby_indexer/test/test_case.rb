@@ -5,9 +5,21 @@ require "test_helper"
 
 module RubyIndexer
   class TestCase < Minitest::Test
+    class << self
+      #: String?
+      attr_accessor :core_index_data
+    end
+
     def setup
-      @index = Index.new
-      RBSIndexer.new(@index).index_ruby_core
+      self.class.core_index_data ||= begin
+        index = Index.new
+        RBSIndexer.new(index).index_ruby_core
+        Marshal.dump(index)
+      end
+
+      core_data = self.class.core_index_data #: as !nil
+      loaded_index = Marshal.load(core_data) #: as Index
+      @index = loaded_index
       @default_indexed_entries = @index.instance_variable_get(:@entries).dup
     end
 
