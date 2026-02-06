@@ -3756,8 +3756,8 @@ class REXML::Instruction < ::REXML::Child
   # be a Parent if the target argument is a Source.  Otherwise, this
   # String is set as the content of this instruction.
   #
-  # @param target can be one of a number of things.  If String, then
   # @param content Must be either a String, or a Parent.  Can only
+  # @param target can be one of a number of things.  If String, then
   # @return [Instruction] a new instance of Instruction
   #
   # source://rexml//lib/rexml/instruction.rb#25
@@ -4005,9 +4005,9 @@ class REXML::Parent < ::REXML::Child
 
   # Set an index entry.  See Array.[]=
   #
+  # @param child if opt is an Integer, this is the child to set
   # @param index the index of the element to set
   # @param opt either the object to set, or an Integer length
-  # @param child if opt is an Integer, this is the child to set
   # @return the parent (self)
   #
   # source://rexml//lib/rexml/parent.rb#70
@@ -4092,8 +4092,8 @@ class REXML::Parent < ::REXML::Child
   # Replaces one child with another, making sure the nodelist is correct
   # Child)
   #
-  # @param to_replace the child to replace (must be a Child)
   # @param replacement the child to insert into the nodelist (must be a
+  # @param to_replace the child to replace (must be a Child)
   #
   # source://rexml//lib/rexml/parent.rb#140
   def replace_child(to_replace, replacement); end
@@ -4474,6 +4474,9 @@ class REXML::Parsers::XPathParser
   def FunctionCall(rest, parsed); end
 
   # LocationPath
+  #  | RelativeLocationPath
+  #  | '/' RelativeLocationPath?
+  #  | '//' RelativeLocationPath
   #
   # source://rexml//lib/rexml/parsers/xpathparser.rb#243
   def LocationPath(path, parsed); end
@@ -4530,6 +4533,11 @@ REXML::Parsers::XPathParser::LOCAL_NAME_WILDCARD = T.let(T.unsafe(nil), Regexp)
 #   true/false, if a positive match
 #   String, if a name match
 # NodeTest
+#  | ('*' | NCNAME ':' '*' | QNAME)                NameTest
+#  | '*' ':' NCNAME                                NameTest since XPath 2.0
+#  | NODE_TYPE '(' ')'                             NodeType
+#  | PI '(' LITERAL ')'                            PI
+#    | '[' expr ']'                                Predicate
 #
 # source://rexml//lib/rexml/parsers/xpathparser.rb#338
 REXML::Parsers::XPathParser::PREFIX_WILDCARD = T.let(T.unsafe(nil), Regexp)

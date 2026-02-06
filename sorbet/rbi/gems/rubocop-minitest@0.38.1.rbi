@@ -979,24 +979,6 @@ RuboCop::Cop::Minitest::Focus::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 # Checks for deprecated global expectations
 # and autocorrects them to use expect format.
 #
-# @example EnforcedStyle: any (default)
-#   # bad
-#   musts.must_equal expected_musts
-#   wonts.wont_match expected_wonts
-#   musts.must_raise TypeError
-#
-#   # good
-#   _(musts).must_equal expected_musts
-#   _(wonts).wont_match expected_wonts
-#   _ { musts }.must_raise TypeError
-#
-#   expect(musts).must_equal expected_musts
-#   expect(wonts).wont_match expected_wonts
-#   expect { musts }.must_raise TypeError
-#
-#   value(musts).must_equal expected_musts
-#   value(wonts).wont_match expected_wonts
-#   value { musts }.must_raise TypeError
 # @example EnforcedStyle: _
 #   # bad
 #   musts.must_equal expected_musts
@@ -1015,6 +997,24 @@ RuboCop::Cop::Minitest::Focus::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 #   _(musts).must_equal expected_musts
 #   _(wonts).wont_match expected_wonts
 #   _ { musts }.must_raise TypeError
+# @example EnforcedStyle: any (default)
+#   # bad
+#   musts.must_equal expected_musts
+#   wonts.wont_match expected_wonts
+#   musts.must_raise TypeError
+#
+#   # good
+#   _(musts).must_equal expected_musts
+#   _(wonts).wont_match expected_wonts
+#   _ { musts }.must_raise TypeError
+#
+#   expect(musts).must_equal expected_musts
+#   expect(wonts).wont_match expected_wonts
+#   expect { musts }.must_raise TypeError
+#
+#   value(musts).must_equal expected_musts
+#   value(wonts).wont_match expected_wonts
+#   value { musts }.must_raise TypeError
 # @example EnforcedStyle: expect
 #   # bad
 #   musts.must_equal expected_musts
@@ -2486,13 +2486,13 @@ module RuboCop::Cop::MinitestCopRule
   #   define_rule :assert, target_method: %i[match match? =~],
   #   preferred_method: :assert_match, inverse: 'regexp_type?'
   # @param assertion_method [Symbol] Assertion method like `assert` or `refute`.
-  # @param target_method [Symbol, Array<Symbol>] Method name(s) offensed by assertion method arguments.
+  # @param inverse [Boolean, String] An optional param. Order of arguments replaced by autocorrection.
+  #   If string is passed, it becomes a predicate method for the first argument node.
   # @param preferred_method [Symbol] Is required if passing multiple target methods. Custom method name replaced by
   #   autocorrection. The preferred method name that connects
   #   `assertion_method` and `target_method` with `_` is
   #   the default name.
-  # @param inverse [Boolean, String] An optional param. Order of arguments replaced by autocorrection.
-  #   If string is passed, it becomes a predicate method for the first argument node.
+  # @param target_method [Symbol, Array<Symbol>] Method name(s) offensed by assertion method arguments.
   #
   # source://rubocop-minitest//lib/rubocop/cop/mixin/minitest_cop_rule.rb#31
   def define_rule(assertion_method, target_method:, preferred_method: T.unsafe(nil), inverse: T.unsafe(nil)); end

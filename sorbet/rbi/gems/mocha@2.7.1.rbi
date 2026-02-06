@@ -112,13 +112,6 @@ module Mocha::API
   # Specify that an expected invocation must occur within a named {Sequence} by calling {Expectation#in_sequence}
   # on each expectation or by passing a block within which all expectations should be constrained by the {Sequence}.
   #
-  # @example Ensure methods on egg are invoked in correct order.
-  #   breakfast = sequence('breakfast')
-  #
-  #   egg = mock('egg')
-  #   egg.expects(:crack).in_sequence(breakfast)
-  #   egg.expects(:fry).in_sequence(breakfast)
-  #   egg.expects(:eat).in_sequence(breakfast)
   # @example Ensure methods across multiple objects are invoked in correct order.
   #   sequence = sequence(:task_order)
   #
@@ -130,6 +123,13 @@ module Mocha::API
   #
   #   task_one.execute
   #   task_two.execute
+  # @example Ensure methods on egg are invoked in correct order.
+  #   breakfast = sequence('breakfast')
+  #
+  #   egg = mock('egg')
+  #   egg.expects(:crack).in_sequence(breakfast)
+  #   egg.expects(:fry).in_sequence(breakfast)
+  #   egg.expects(:eat).in_sequence(breakfast)
   # @example Ensure methods on egg are invoked in the correct order using a block.
   #   egg = mock('egg')
   #   sequence('breakfast') do
@@ -1175,6 +1175,12 @@ class Mocha::Expectation
 
   # Modifies expectation so that when the expected method is called, it raises the specified +exception+ with the specified +message+ i.e. calls +Kernel#raise(exception, message)+.
   #
+  # @example Raise an exception on first invocation of expected method and then return values on subsequent invocations.
+  #   object = stub()
+  #   object.stubs(:expected_method).raises(Exception).then.returns(2, 3)
+  #   object.expected_method # => raises exception of class Exception1
+  #   object.expected_method # => 2
+  #   object.expected_method # => 3
   # @example Raise custom exception with extra constructor parameters by passing in an instance of the exception.
   #   object = stub()
   #   object.stubs(:expected_method).raises(MyException.new('message', 1, 2, 3))
@@ -1188,36 +1194,20 @@ class Mocha::Expectation
   #   object = stub()
   #   object.stubs(:expected_method).raises(Exception, 'message')
   #   object.expected_method # => raises exception of class Exception and with message 'message'
-  # @example Raise an exception on first invocation of expected method and then return values on subsequent invocations.
-  #   object = stub()
-  #   object.stubs(:expected_method).raises(Exception).then.returns(2, 3)
-  #   object.expected_method # => raises exception of class Exception1
-  #   object.expected_method # => 2
-  #   object.expected_method # => 3
   # @overload raises
   # @overload raises
   # @overload raises
   # @param exception [Class, Exception, String, #exception] exception to be raised or message to be passed to RuntimeError.
   # @param message [String] exception message.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
-  # @see Kernel#raise
   # @see #then
+  # @see Kernel#raise
   #
   # source://mocha//lib/mocha/expectation.rb#483
   def raises(exception = T.unsafe(nil), message = T.unsafe(nil)); end
 
   # Modifies expectation so that when the expected method is called, it returns the specified +value+.
   #
-  # @example Return the same value on every invocation.
-  #   object = mock()
-  #   object.stubs(:stubbed_method).returns('result')
-  #   object.stubbed_method # => 'result'
-  #   object.stubbed_method # => 'result'
-  # @example Return a different value on consecutive invocations.
-  #   object = mock()
-  #   object.stubs(:stubbed_method).returns(1, 2)
-  #   object.stubbed_method # => 1
-  #   object.stubbed_method # => 2
   # @example Alternative way to return a different value on consecutive invocations.
   #   object = mock()
   #   object.stubs(:expected_method).returns(1, 2).then.returns(3)
@@ -1236,6 +1226,16 @@ class Mocha::Expectation
   #   x, y = object.expected_method
   #   x # => 1
   #   y # => 2
+  # @example Return a different value on consecutive invocations.
+  #   object = mock()
+  #   object.stubs(:stubbed_method).returns(1, 2)
+  #   object.stubbed_method # => 1
+  #   object.stubbed_method # => 2
+  # @example Return the same value on every invocation.
+  #   object = mock()
+  #   object.stubs(:stubbed_method).returns('result')
+  #   object.stubbed_method # => 'result'
+  #   object.stubbed_method # => 'result'
   # @overload returns
   # @overload returns
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
@@ -1276,14 +1276,6 @@ class Mocha::Expectation
 
   # Modifies expectation so that when the expected method is called, it throws the specified +tag+ with the specific return value +object+ i.e. calls +Kernel#throw(tag, object)+.
   #
-  # @example Throw tag with return value +object+ c.f. +Kernel#throw+.
-  #   object = stub()
-  #   object.stubs(:expected_method).throws(:done, 'result')
-  #   object.expected_method # => throws tag :done and causes catch block to return 'result'
-  # @example Throw tag when expected method is invoked.
-  #   object = stub()
-  #   object.stubs(:expected_method).throws(:done)
-  #   object.expected_method # => throws tag :done
   # @example Throw different tags on consecutive invocations of the expected method.
   #   object = stub()
   #   object.stubs(:expected_method).throws(:done).then.throws(:continue)
@@ -1295,29 +1287,27 @@ class Mocha::Expectation
   #   object.expected_method # => throws :done
   #   object.expected_method # => 2
   #   object.expected_method # => 3
+  # @example Throw tag when expected method is invoked.
+  #   object = stub()
+  #   object.stubs(:expected_method).throws(:done)
+  #   object.expected_method # => throws tag :done
+  # @example Throw tag with return value +object+ c.f. +Kernel#throw+.
+  #   object = stub()
+  #   object.stubs(:expected_method).throws(:done, 'result')
+  #   object.expected_method # => throws tag :done and causes catch block to return 'result'
   # @overload throw
   # @overload throw
-  # @param tag [Symbol, String] tag to throw to transfer control to the active catch block.
   # @param object [Object] return value for the catch block.
+  # @param tag [Symbol, String] tag to throw to transfer control to the active catch block.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
-  # @see Kernel#throw
   # @see #then
+  # @see Kernel#throw
   #
   # source://mocha//lib/mocha/expectation.rb#522
   def throws(tag, object = T.unsafe(nil)); end
 
   # Modifies expectation so that the number of calls to the expected method must be within a specific +range+.
   #
-  # @example Specifying a specific number of expected invocations.
-  #   object = mock()
-  #   object.expects(:expected_method).times(3)
-  #   3.times { object.expected_method }
-  #   # => verify succeeds
-  #
-  #   object = mock()
-  #   object.expects(:expected_method).times(3)
-  #   2.times { object.expected_method }
-  #   # => verify fails
   # @example Specifying a range in the number of expected invocations.
   #   object = mock()
   #   object.expects(:expected_method).times(2..4)
@@ -1327,6 +1317,16 @@ class Mocha::Expectation
   #   object = mock()
   #   object.expects(:expected_method).times(2..4)
   #   object.expected_method
+  #   # => verify fails
+  # @example Specifying a specific number of expected invocations.
+  #   object = mock()
+  #   object.expects(:expected_method).times(3)
+  #   3.times { object.expected_method }
+  #   # => verify succeeds
+  #
+  #   object = mock()
+  #   object.expects(:expected_method).times(3)
+  #   2.times { object.expected_method }
   #   # => verify fails
   # @param range [Range, Integer] specifies the allowable range in the number of expected invocations.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
@@ -1384,9 +1384,9 @@ class Mocha::Expectation
   #   radio.expects(:switch_off).then(power.is('off'))
   # @param state_predicate [StateMachine::StatePredicate] +state_machine.is(state_name)+ provides a mechanism to determine whether the +state_machine+ is in the state specified by +state_predicate+ when the expected method is invoked.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
+  # @see #then
   # @see API#states
   # @see StateMachine
-  # @see #then
   #
   # source://mocha//lib/mocha/expectation.rb#581
   def when(state_predicate); end
@@ -1426,6 +1426,21 @@ class Mocha::Expectation
   #   object.expects(:expected_method).with(includes('string2'), anything)
   #   object.expected_method(['string1'], 'any-old-value')
   #   # => verify fails
+  # @example Extracting a custom matcher into an instance method on the test class.
+  #   class MyTest < Minitest::Test
+  #   def test_expected_method_is_called_with_a_value_divisible_by_4
+  #   object = mock()
+  #   object.expects(:expected_method).with(&method(:divisible_by_4))
+  #   object.expected_method(16)
+  #   # => verify succeeds
+  #   end
+  #
+  #   private
+  #
+  #   def divisible_by_4(value)
+  #   value % 4 == 0
+  #   end
+  #   end
   # @example Loose keyword argument matching (default)
   #
   #   class Example
@@ -1460,25 +1475,10 @@ class Mocha::Expectation
   #   object.expects(:expected_method).with() { |value| value % 4 == 0 }
   #   object.expected_method(17)
   #   # => verify fails
-  # @example Extracting a custom matcher into an instance method on the test class.
-  #   class MyTest < Minitest::Test
-  #   def test_expected_method_is_called_with_a_value_divisible_by_4
-  #   object = mock()
-  #   object.expects(:expected_method).with(&method(:divisible_by_4))
-  #   object.expected_method(16)
-  #   # => verify succeeds
-  #   end
-  #
-  #   private
-  #
-  #   def divisible_by_4(value)
-  #   value % 4 == 0
-  #   end
-  #   end
   # @param expected_parameters_or_matchers [Array<Object,ParameterMatchers::Base>] expected parameter values or parameter matchers.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
-  # @see ParameterMatchers
   # @see Configuration#strict_keyword_argument_matching=
+  # @see ParameterMatchers
   # @yield optional block specifying custom matching.
   # @yieldparam actual_parameters [Array<Object>] parameters with which expected method was invoked.
   # @yieldreturn [Boolean] +true+ if +actual_parameters+ are acceptable; +false+ otherwise.
@@ -1528,18 +1528,6 @@ class Mocha::Expectation
   #
   # May be called multiple times on the same expectation for consecutive invocations.
   #
-  # @example Yield when expected method is invoked.
-  #   benchmark = mock()
-  #   benchmark.expects(:measure).yields
-  #   yielded = false
-  #   benchmark.measure { yielded = true }
-  #   yielded # => true
-  # @example Yield parameters when expected method is invoked.
-  #   fibonacci = mock()
-  #   fibonacci.expects(:next_pair).yields(0, 1)
-  #   sum = 0
-  #   fibonacci.next_pair { |first, second| sum = first + second }
-  #   sum # => 1
   # @example Yield different parameters on different invocations of the expected method.
   #   fibonacci = mock()
   #   fibonacci.expects(:next_pair).yields(0, 1).then.yields(1, 1)
@@ -1548,6 +1536,18 @@ class Mocha::Expectation
   #   sum # => 1
   #   fibonacci.next_pair { |first, second| sum = first + second }
   #   sum # => 2
+  # @example Yield parameters when expected method is invoked.
+  #   fibonacci = mock()
+  #   fibonacci.expects(:next_pair).yields(0, 1)
+  #   sum = 0
+  #   fibonacci.next_pair { |first, second| sum = first + second }
+  #   sum # => 1
+  # @example Yield when expected method is invoked.
+  #   benchmark = mock()
+  #   benchmark.expects(:measure).yields
+  #   yielded = false
+  #   benchmark.measure { yielded = true }
+  #   yielded # => true
   # @param parameters [*Array] parameters to be yielded.
   # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
   # @see #then
@@ -1665,10 +1665,10 @@ end
 #
 # See the code in the +Adapter+ modules for examples of how to use the methods in this module. +Mocha::ExpectationErrorFactory+ may be used if you want +Mocha+ to raise a different type of exception.
 #
-# @see Mocha::Integration::TestUnit::Adapter
-# @see Mocha::Integration::Minitest::Adapter
-# @see Mocha::ExpectationErrorFactory
 # @see Mocha::API
+# @see Mocha::ExpectationErrorFactory
+# @see Mocha::Integration::Minitest::Adapter
+# @see Mocha::Integration::TestUnit::Adapter
 #
 # source://mocha//lib/mocha/hooks.rb#18
 module Mocha::Hooks
@@ -2026,15 +2026,15 @@ class Mocha::Mock
   #   object = mock()
   #   object.expects(:expected_method)
   #   object.expected_method
-  # @example Expected method not invoked so error raised
-  #   object = mock()
-  #   object.expects(:expected_method)
-  #   # error raised when test completes, because expected_method not called exactly once
   # @example Expected method invoked twice so error raised
   #   object = mock()
   #   object.expects(:expected_method)
   #   object.expected_method
   #   object.expected_method # => error raised when expected method invoked second time
+  # @example Expected method not invoked so error raised
+  #   object = mock()
+  #   object.expects(:expected_method)
+  #   # error raised when test completes, because expected_method not called exactly once
   # @example Setup multiple expectations using +expected_methods_vs_return_values+.
   #   object = mock()
   #   object.expects(expected_method_one: :result_one, expected_method_two: :result_two)
@@ -2116,15 +2116,15 @@ class Mocha::Mock
   #   object = mock()
   #   object.expects(:expected_method)
   #   object.expected_method
-  # @example Expected method not invoked so error raised
-  #   object = mock()
-  #   object.expects(:expected_method)
-  #   # error raised when test completes, because expected_method not called exactly once
   # @example Expected method invoked twice so error raised
   #   object = mock()
   #   object.expects(:expected_method)
   #   object.expected_method
   #   object.expected_method # => error raised when expected method invoked second time
+  # @example Expected method not invoked so error raised
+  #   object = mock()
+  #   object.expects(:expected_method)
+  #   # error raised when test completes, because expected_method not called exactly once
   # @example Setup multiple expectations using +expected_methods_vs_return_values+.
   #   object = mock()
   #   object.expects(expected_method_one: :result_one, expected_method_two: :result_two)
@@ -2178,19 +2178,6 @@ class Mocha::Mock
   #   sheep.chew
   #   sheep.foo
   #   # no error raised
-  # @example Using {#responds_like} with an instance method
-  #   class Sheep
-  #   def chew(grass); end
-  #   end
-  #
-  #   sheep = mock('sheep')
-  #   sheep.responds_like(Sheep.new)
-  #   sheep.expects(:chew)
-  #   sheep.expects(:foo)
-  #   sheep.respond_to?(:chew) # => true
-  #   sheep.respond_to?(:foo) # => false
-  #   sheep.chew
-  #   sheep.foo # => raises NoMethodError exception
   # @example Using {#responds_like} with a class method
   #   class Sheep
   #   def self.number_of_legs; end
@@ -2204,6 +2191,19 @@ class Mocha::Mock
   #   sheep_class.respond_to?(:foo) # => false
   #   sheep_class.number_of_legs # => 4
   #   sheep_class.foo # => raises NoMethodError exception
+  # @example Using {#responds_like} with an instance method
+  #   class Sheep
+  #   def chew(grass); end
+  #   end
+  #
+  #   sheep = mock('sheep')
+  #   sheep.responds_like(Sheep.new)
+  #   sheep.expects(:chew)
+  #   sheep.expects(:foo)
+  #   sheep.respond_to?(:chew) # => true
+  #   sheep.respond_to?(:foo) # => false
+  #   sheep.chew
+  #   sheep.foo # => raises NoMethodError exception
   # @param responder [Object, #respond_to?] an object used to determine whether {Mock} instance should +#respond_to?+ to an invocation.
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like_instance_of
@@ -2259,19 +2259,6 @@ class Mocha::Mock
   #   sheep.chew
   #   sheep.foo
   #   # no error raised
-  # @example Using {#responds_like} with an instance method
-  #   class Sheep
-  #   def chew(grass); end
-  #   end
-  #
-  #   sheep = mock('sheep')
-  #   sheep.responds_like(Sheep.new)
-  #   sheep.expects(:chew)
-  #   sheep.expects(:foo)
-  #   sheep.respond_to?(:chew) # => true
-  #   sheep.respond_to?(:foo) # => false
-  #   sheep.chew
-  #   sheep.foo # => raises NoMethodError exception
   # @example Using {#responds_like} with a class method
   #   class Sheep
   #   def self.number_of_legs; end
@@ -2285,6 +2272,19 @@ class Mocha::Mock
   #   sheep_class.respond_to?(:foo) # => false
   #   sheep_class.number_of_legs # => 4
   #   sheep_class.foo # => raises NoMethodError exception
+  # @example Using {#responds_like} with an instance method
+  #   class Sheep
+  #   def chew(grass); end
+  #   end
+  #
+  #   sheep = mock('sheep')
+  #   sheep.responds_like(Sheep.new)
+  #   sheep.expects(:chew)
+  #   sheep.expects(:foo)
+  #   sheep.respond_to?(:chew) # => true
+  #   sheep.respond_to?(:foo) # => false
+  #   sheep.chew
+  #   sheep.foo # => raises NoMethodError exception
   # @param responder [Object, #respond_to?] an object used to determine whether {Mock} instance should +#respond_to?+ to an invocation.
   # @return [Mock] the same {Mock} instance, thereby allowing invocations of other {Mock} methods to be chained.
   # @see #responds_like_instance_of
@@ -2650,16 +2650,16 @@ end
 module Mocha::ParameterMatchers
   # Matches if +matcher+ does *not* match.
   #
-  # @example Actual parameter does not include the value +1+.
-  #   object = mock()
-  #   object.expects(:method_1).with(Not(includes(1)))
-  #   object.method_1([0, 2, 3])
-  #   # no error raised
   # @example Actual parameter does include the value +1+.
   #   object = mock()
   #   object.expects(:method_1).with(Not(includes(1)))
   #   object.method_1([0, 1, 2, 3])
   #   # error raised, because method_1 was not called with object not including 1
+  # @example Actual parameter does not include the value +1+.
+  #   object = mock()
+  #   object.expects(:method_1).with(Not(includes(1)))
+  #   object.method_1([0, 2, 3])
+  #   # no error raised
   # @param matcher [Base] matcher whose logic to invert.
   # @return [Not] parameter matcher.
   # @see Expectation#with
@@ -2688,6 +2688,11 @@ module Mocha::ParameterMatchers
 
   # Matches if any +matchers+ match.
   #
+  # @example Neither parameter matcher matches.
+  #   object = mock()
+  #   object.expects(:method_1).with(any_of(1, 3))
+  #   object.method_1(2)
+  #   # error raised, because method_1 was not called with 1 or 3
   # @example One parameter matcher matches.
   #   object = mock()
   #   object.expects(:method_1).with(any_of(1, 3))
@@ -2698,11 +2703,6 @@ module Mocha::ParameterMatchers
   #   object.expects(:method_1).with(any_of(1, 3))
   #   object.method_1(3)
   #   # no error raised
-  # @example Neither parameter matcher matches.
-  #   object = mock()
-  #   object.expects(:method_1).with(any_of(1, 3))
-  #   object.method_1(2)
-  #   # error raised, because method_1 was not called with 1 or 3
   # @param matchers [*Array<Base>] parameter matchers.
   # @return [AnyOf] parameter matcher.
   # @see Expectation#with
@@ -2745,16 +2745,16 @@ module Mocha::ParameterMatchers
 
   # Matches any +Object+ equalling +value+.
   #
-  # @example Actual parameter equals expected parameter.
-  #   object = mock()
-  #   object.expects(:method_1).with(equals(2))
-  #   object.method_1(2)
-  #   # no error raised
   # @example Actual parameter does not equal expected parameter.
   #   object = mock()
   #   object.expects(:method_1).with(equals(2))
   #   object.method_1(3)
   #   # error raised, because method_1 was not called with an +Object+ that equals 2
+  # @example Actual parameter equals expected parameter.
+  #   object = mock()
+  #   object.expects(:method_1).with(equals(2))
+  #   object.method_1(2)
+  #   # no error raised
   # @param value [Object] expected value.
   # @return [Equals] parameter matcher.
   # @see Expectation#with
@@ -2803,25 +2803,25 @@ module Mocha::ParameterMatchers
 
   # Matches +Hash+ containing entry with +key+ and +value+.
   #
-  # @example Actual parameter contains expected entry supplied as key and value.
-  #   object = mock()
-  #   object.expects(:method_1).with(has_entry('key_1', 1))
-  #   object.method_1('key_1' => 1, 'key_2' => 2)
-  #   # no error raised
   # @example Actual parameter contains expected entry supplied as +Hash+ entry.
   #   object = mock()
   #   object.expects(:method_1).with(has_entry('key_1' => 1))
   #   object.method_1('key_1' => 1, 'key_2' => 2)
   #   # no error raised
-  # @example Actual parameter does not contain expected entry supplied as key and value.
+  # @example Actual parameter contains expected entry supplied as key and value.
   #   object = mock()
   #   object.expects(:method_1).with(has_entry('key_1', 1))
-  #   object.method_1('key_1' => 2, 'key_2' => 1)
-  #   # error raised, because method_1 was not called with Hash containing entry: 'key_1' => 1
+  #   object.method_1('key_1' => 1, 'key_2' => 2)
+  #   # no error raised
   # @example Actual parameter does not contain expected entry supplied as +Hash+ entry.
   #
   #   object = mock()
   #   object.expects(:method_1).with(has_entry('key_1' => 1))
+  #   object.method_1('key_1' => 2, 'key_2' => 1)
+  #   # error raised, because method_1 was not called with Hash containing entry: 'key_1' => 1
+  # @example Actual parameter does not contain expected entry supplied as key and value.
+  #   object = mock()
+  #   object.expects(:method_1).with(has_entry('key_1', 1))
   #   object.method_1('key_1' => 2, 'key_2' => 1)
   #   # error raised, because method_1 was not called with Hash containing entry: 'key_1' => 1
   # @overload has_entry
@@ -2892,22 +2892,38 @@ module Mocha::ParameterMatchers
   # Matches any object that responds with +true+ to +include?(item)+
   # for all items.
   #
+  # @example Actual parameter does not include all items.
+  #   object.method_1(['foo', 'baz'])
+  #   # error raised, because ['foo', 'baz'] does not include 'bar'.
+  # @example Actual parameter does not include item matching nested matcher.
+  #   object.method_1(['foo', 'bar', {:other_key => 'baz'}])
+  #   # error raised, because no element matches `has_key(:key)` matcher
   # @example Actual parameter includes all items.
   #   object = mock()
   #   object.expects(:method_1).with(includes('foo', 'bar'))
   #   object.method_1(['foo', 'bar', 'baz'])
   #   # no error raised
-  # @example Actual parameter does not include all items.
-  #   object.method_1(['foo', 'baz'])
-  #   # error raised, because ['foo', 'baz'] does not include 'bar'.
   # @example Actual parameter includes item which matches nested matcher.
   #   object = mock()
   #   object.expects(:method_1).with(includes(has_key(:key)))
   #   object.method_1(['foo', 'bar', {key: 'baz'}])
   #   # no error raised
-  # @example Actual parameter does not include item matching nested matcher.
-  #   object.method_1(['foo', 'bar', {:other_key => 'baz'}])
-  #   # error raised, because no element matches `has_key(:key)` matcher
+  # @example Actual parameter is a Hash including the given key.
+  #   object = mock()
+  #   object.expects(:method_1).with(includes(:bar))
+  #   object.method_1({foo: 1, bar: 2})
+  #   # no error raised
+  # @example Actual parameter is a Hash no key matching the given matcher.
+  #   object.method_1({'foo' => 1, 'baz' => 3})
+  #   # error raised, because hash does not include a key matching /ar/
+  # @example Actual parameter is a Hash with a key matching the given matcher.
+  #   object = mock()
+  #   object.expects(:method_1).with(includes(regexp_matches(/ar/)))
+  #   object.method_1({'foo' => 1, 'bar' => 2})
+  #   # no error raised
+  # @example Actual parameter is a Hash without the given key.
+  #   object.method_1({foo: 1, baz: 2})
+  #   # error raised, because hash does not include key 'bar'
   # @example Actual parameter is a String including substring.
   #   object = mock()
   #   object.expects(:method_1).with(includes('bar'))
@@ -2916,22 +2932,6 @@ module Mocha::ParameterMatchers
   # @example Actual parameter is a String not including substring.
   #   object.method_1('foobaz')
   #   # error raised, because 'foobaz' does not include 'bar'
-  # @example Actual parameter is a Hash including the given key.
-  #   object = mock()
-  #   object.expects(:method_1).with(includes(:bar))
-  #   object.method_1({foo: 1, bar: 2})
-  #   # no error raised
-  # @example Actual parameter is a Hash without the given key.
-  #   object.method_1({foo: 1, baz: 2})
-  #   # error raised, because hash does not include key 'bar'
-  # @example Actual parameter is a Hash with a key matching the given matcher.
-  #   object = mock()
-  #   object.expects(:method_1).with(includes(regexp_matches(/ar/)))
-  #   object.method_1({'foo' => 1, 'bar' => 2})
-  #   # no error raised
-  # @example Actual parameter is a Hash no key matching the given matcher.
-  #   object.method_1({'foo' => 1, 'baz' => 3})
-  #   # error raised, because hash does not include a key matching /ar/
   # @param items [*Array] expected items.
   # @return [Includes] parameter matcher.
   # @see Expectation#with
@@ -3001,26 +3001,26 @@ module Mocha::ParameterMatchers
 
   # Matches optional parameters if available.
   #
-  # @example Only the two required parameters are supplied and they both match their expected value.
+  # @example Both required parameters and both of the optional parameters are supplied and they all match their expected value.
   #   object = mock()
   #   object.expects(:method_1).with(1, 2, optionally(3, 4))
-  #   object.method_1(1, 2)
+  #   object.method_1(1, 2, 3, 4)
   #   # no error raised
   # @example Both required parameters and one of the optional parameters are supplied and they all match their expected value.
   #   object = mock()
   #   object.expects(:method_1).with(1, 2, optionally(3, 4))
   #   object.method_1(1, 2, 3)
   #   # no error raised
-  # @example Both required parameters and both of the optional parameters are supplied and they all match their expected value.
-  #   object = mock()
-  #   object.expects(:method_1).with(1, 2, optionally(3, 4))
-  #   object.method_1(1, 2, 3, 4)
-  #   # no error raised
   # @example One of the actual optional parameters does not match the expected value.
   #   object = mock()
   #   object.expects(:method_1).with(1, 2, optionally(3, 4))
   #   object.method_1(1, 2, 3, 5)
   #   # error raised, because optional parameters did not match
+  # @example Only the two required parameters are supplied and they both match their expected value.
+  #   object = mock()
+  #   object.expects(:method_1).with(1, 2, optionally(3, 4))
+  #   object.method_1(1, 2)
+  #   # no error raised
   # @param matchers [*Array<Base>] matchers for optional parameters.
   # @return [Optionally] parameter matcher.
   # @see Expectation#with
@@ -3048,11 +3048,6 @@ module Mocha::ParameterMatchers
   # source://mocha//lib/mocha/parameter_matchers/regexp_matches.rb#24
   def regexp_matches(regexp); end
 
-  # @example Actual parameter responds with "FOO" when :upcase is invoked.
-  #   object = mock()
-  #   object.expects(:method_1).with(responds_with(:upcase, "FOO"))
-  #   object.method_1("foo")
-  #   # no error raised, because "foo".upcase == "FOO"
   # @example Actual parameter does not respond with "FOO" when :upcase is invoked.
   #   object = mock()
   #   object.expects(:method_1).with(responds_with(:upcase, "BAR"))
@@ -3063,6 +3058,11 @@ module Mocha::ParameterMatchers
   #   object.expects(:method_1).with(responds_with(upcase: "FOO", reverse: "oof"))
   #   object.method_1("foo")
   #   # no error raised, because "foo".upcase == "FOO" and "foo".reverse == "oof"
+  # @example Actual parameter responds with "FOO" when :upcase is invoked.
+  #   object = mock()
+  #   object.expects(:method_1).with(responds_with(:upcase, "FOO"))
+  #   object.method_1("foo")
+  #   # no error raised, because "foo".upcase == "FOO"
   # @overload responds_with
   # @overload responds_with
   # @return [RespondsWith] parameter matcher.
@@ -3932,7 +3932,6 @@ class Mocha::StubbedMethod
   def use_prepended_module_for_stub_method; end
 end
 
-# source://mocha//lib/mocha/stubbed_method.rb#6
 class Mocha::StubbedMethod::PrependedModule < ::Module; end
 
 # Exception raised when stubbing a particular method is not allowed.

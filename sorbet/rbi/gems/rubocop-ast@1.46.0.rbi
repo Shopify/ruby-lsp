@@ -980,6 +980,9 @@ module RuboCop::AST::CollectionNode
   def reverse_each(*_arg0, **_arg1, &_arg2); end
 
   # source://rubocop-ast//lib/rubocop/ast/node/mixin/collection_node.rb#13
+  def rfind(*_arg0, **_arg1, &_arg2); end
+
+  # source://rubocop-ast//lib/rubocop/ast/node/mixin/collection_node.rb#13
   def rindex(*_arg0, **_arg1, &_arg2); end
 
   # source://rubocop-ast//lib/rubocop/ast/node/mixin/collection_node.rb#13
@@ -4650,7 +4653,6 @@ class RuboCop::AST::NodePattern::Compiler::Subcompiler
   end
 end
 
-# source://rubocop-ast//lib/rubocop/ast/node_pattern.rb#53
 class RuboCop::AST::NodePattern::Invalid < ::StandardError; end
 
 # Lexer class for `NodePattern`

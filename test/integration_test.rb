@@ -30,7 +30,7 @@ class IntegrationTest < Minitest::Test
   def test_activation_script_succeeds_even_on_binary_encoding
     ENV["LC_ALL"] = "C"
     ENV["LANG"] = "C"
-    ENV["PS1"] = "\xE2\x96\xB7".b
+    ENV["NOT_VALID"] = "\xE2\x96\xB7".b
 
     _stdout, stderr, status = Open3.capture3(
       "ruby",
@@ -49,7 +49,7 @@ class IntegrationTest < Minitest::Test
     refute_nil(gem_path)
     assert(yjit)
 
-    assert(fields.find { |f| f.start_with?("PS1RUBY_LSP_VS") })
+    assert(fields.find { |f| f.start_with?("NOT_VALIDRUBY_LSP_VS") })
 
     fields.each do |field|
       key, value = field.split("RUBY_LSP_VS")

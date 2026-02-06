@@ -5942,6 +5942,7 @@ class RBS::Prototype::Runtime::DataGenerator < ::RBS::Prototype::Runtime::ValueO
   def add_decl_members(decl); end
 
   # def self.new: (untyped foo, untyped bar) -> instance
+  #             | (foo: untyped, bar: untyped) -> instance
   #
   # source://rbs//lib/rbs/prototype/runtime/value_object_generator.rb#237
   def build_s_new; end
@@ -6009,6 +6010,7 @@ class RBS::Prototype::Runtime::StructGenerator < ::RBS::Prototype::Runtime::Valu
   def build_s_keyword_init_p; end
 
   # def self.new: (?untyped foo, ?untyped bar) -> instance
+  #             | (?foo: untyped, ?bar: untyped) -> instance
   #
   # source://rbs//lib/rbs/prototype/runtime/value_object_generator.rb#117
   def build_s_new; end

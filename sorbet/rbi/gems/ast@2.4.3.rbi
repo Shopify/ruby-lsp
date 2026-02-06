@@ -234,9 +234,9 @@ class AST::Node
   #
   # If the resulting node would be identical to `self`, does nothing.
   #
-  # @param type [Symbol, nil]
   # @param children [Array, nil]
   # @param properties [Hash, nil]
+  # @param type [Symbol, nil]
   # @return [AST::Node]
   #
   # source://ast//lib/ast/node.rb#133
