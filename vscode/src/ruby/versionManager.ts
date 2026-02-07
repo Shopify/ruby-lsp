@@ -13,6 +13,12 @@ export interface ActivationResult {
   gemPath: string[];
 }
 
+// Detection result types for version managers
+export type DetectionResult =
+  | { type: "semantic"; marker: string } // Detected by semantic markers (e.g., "chruby", "rbenv")
+  | { type: "path"; uri: vscode.Uri } // Detected with actual file/directory path
+  | { type: "none" }; // No detection (not found or not applicable)
+
 // Changes to either one of these values have to be synchronized with a corresponding update in `activation.rb`
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
 export const VALUE_SEPARATOR = "RUBY_LSP_VS";
@@ -52,6 +58,42 @@ export abstract class VersionManager {
   // Activate the Ruby environment for the version manager, returning all of the necessary information to boot the
   // language server
   abstract activate(): Promise<ActivationResult>;
+
+  // Finds the first existing path from a list of possible paths
+  protected static async findFirst(paths: vscode.Uri[]): Promise<vscode.Uri | undefined> {
+    for (const possiblePath of paths) {
+      try {
+        await vscode.workspace.fs.stat(possiblePath);
+        return possiblePath;
+      } catch (_error: any) {
+        // Continue looking
+      }
+    }
+
+    return undefined;
+  }
+
+  // Checks if a tool exists by running `tool --version`
+  static async toolExists(
+    tool: string,
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<boolean> {
+    try {
+      const shell = vscode.env.shell.replace(/(\s+)/g, "\\$1");
+      const command = `${shell} -i -c '${tool} --version'`;
+
+      outputChannel.info(`Checking if ${tool} is available on the path`);
+
+      await asyncExec(command, {
+        cwd: workspaceFolder.uri.fsPath,
+        timeout: 1000,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   protected async runEnvActivationScript(activatedRuby: string): Promise<ActivationResult> {
     const activationUri = vscode.Uri.joinPath(this.context.extensionUri, "activation.rb");
