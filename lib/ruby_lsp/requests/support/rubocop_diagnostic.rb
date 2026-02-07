@@ -14,6 +14,12 @@ module RubyLsp
           fatal: Constant::DiagnosticSeverity::ERROR,
         }.freeze #: Hash[Symbol, Integer]
 
+        # Cops where adding a `rubocop:disable` inline comment would itself resolve the offense,
+        # causing Lint/RedundantCopDisableDirective to flag the disable as unnecessary.
+        SELF_RESOLVING_DISABLE_COPS = [
+          "Layout/EmptyComment",
+        ].freeze #: Array[String]
+
         ENHANCED_DOC_URL = begin
           gem("rubocop", ">= 1.64.0")
           true
@@ -35,7 +41,7 @@ module RubyLsp
           code_actions = []
 
           code_actions << autocorrect_action if correctable?
-          code_actions << disable_line_action
+          code_actions << disable_line_action unless SELF_RESOLVING_DISABLE_COPS.include?(@offense.cop_name)
 
           code_actions
         end

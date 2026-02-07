@@ -39,6 +39,48 @@ class CodeActionsFormattingTest < Minitest::Test
     assert_disable_line("continuation", "Layout/SpaceAroundOperators")
   end
 
+  def test_no_disable_line_for_self_resolving_cops
+    global_state = RubyLsp::GlobalState.new
+    global_state.apply_options({
+      initializationOptions: { linters: ["rubocop_internal"] },
+    })
+    global_state.register_formatter(
+      "rubocop_internal",
+      RubyLsp::Requests::Support::RuboCopFormatter.new,
+    )
+
+    source = <<~RUBY
+      #
+      def foo; end
+    RUBY
+
+    document = RubyLsp::RubyDocument.new(
+      source: source,
+      version: 1,
+      uri: URI::Generic.from_path(path: __FILE__),
+      global_state: global_state,
+    )
+
+    diagnostics = RubyLsp::Requests::Diagnostics.new(global_state, document).perform
+    rubocop_diagnostics = diagnostics&.select { _1.attributes[:source] == "RuboCop" }
+    diagnostic = rubocop_diagnostics&.find { |d| d.attributes[:code] == "Layout/EmptyComment" }
+
+    assert(diagnostic, "Expected Layout/EmptyComment diagnostic to be present")
+
+    range = diagnostic #: as !nil
+      .range.to_hash.transform_values(&:to_hash)
+    result = RubyLsp::Requests::CodeActions.new(document, range, {
+      diagnostics: [JSON.parse(diagnostic.to_json, symbolize_names: true)],
+    }).perform
+
+    untyped_result = result #: untyped
+    disable_action = untyped_result.find do |ca|
+      ca.respond_to?(:[]) && ca[:title] == "Disable Layout/EmptyComment for this line"
+    end
+
+    assert_nil(disable_action, "Should not offer disable action for self-resolving cops")
+  end
+
   private
 
   def assert_disable_line(fixture, cop_name)
