@@ -16,9 +16,9 @@ module RubyLsp
 
         # Cops where adding a `rubocop:disable` inline comment would itself resolve the offense,
         # causing Lint/RedundantCopDisableDirective to flag the disable as unnecessary.
-        SELF_RESOLVING_DISABLE_COPS = [
+        SELF_RESOLVING_DISABLE_COPS = Set.new([
           "Layout/EmptyComment",
-        ].freeze #: Array[String]
+        ]).freeze #: Set[String]
 
         ENHANCED_DOC_URL = begin
           gem("rubocop", ">= 1.64.0")
