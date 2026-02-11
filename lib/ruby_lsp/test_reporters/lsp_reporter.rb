@@ -102,17 +102,6 @@ module RubyLsp
       send_message("error", id: id, message: message, uri: uri.to_s)
     end
 
-    #: (Method | UnboundMethod) -> [URI::Generic, Integer?]?
-    def uri_and_line_for(method_object)
-      file_path, line = method_object.source_location
-      return unless file_path
-      return if file_path.start_with?("(eval at ")
-
-      uri = URI::Generic.from_path(path: File.expand_path(file_path))
-      zero_based_line = line ? line - 1 : nil
-      [uri, zero_based_line]
-    end
-
     # Gather the results returned by Coverage.result and format like the VS Code test explorer expects
     #
     # Coverage result format:
@@ -210,6 +199,17 @@ module RubyLsp
       #: -> bool
       def executed_under_test_runner?
         !!(ENV["RUBY_LSP_TEST_RUNNER"] && ENV["RUBY_LSP_ENV"] != "test")
+      end
+
+      #: (Method | UnboundMethod) -> [URI::Generic, Integer?]?
+      def uri_and_line_for(method_object)
+        file_path, line = method_object.source_location
+        return unless file_path
+        return if file_path.start_with?("(eval at ")
+
+        uri = URI::Generic.from_path(path: File.expand_path(file_path))
+        zero_based_line = line ? line - 1 : nil
+        [uri, zero_based_line]
       end
     end
 

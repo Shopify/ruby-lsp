@@ -117,5 +117,49 @@ module RubyLsp
     ensure
       ENV.delete("RUBY_LSP_TEST_RUNNER")
     end
+
+    def test_uri_and_line_for_with_regular_method
+      uri, line = LspReporter.uri_and_line_for(method(:test_uri_and_line_for_with_regular_method))
+
+      assert_kind_of(URI::Generic, uri)
+      assert_match(/lsp_reporter_test\.rb$/, uri.to_s)
+      assert_kind_of(Integer, line)
+      # Line should be zero-based
+      assert_operator(line, :>=, 0)
+    end
+
+    def test_uri_and_line_for_with_unbound_method
+      uri, line = LspReporter.uri_and_line_for(LspReporterTest.instance_method(:test_uri_and_line_for_with_unbound_method))
+
+      assert_kind_of(URI::Generic, uri)
+      assert_match(/lsp_reporter_test\.rb$/, uri.to_s)
+      assert_kind_of(Integer, line)
+      assert_operator(line, :>=, 0)
+    end
+
+    def test_uri_and_line_for_with_native_method
+      result = LspReporter.uri_and_line_for(method(:puts))
+
+      assert_nil(result)
+    end
+
+    def test_uri_and_line_for_with_eval_method
+      eval("def self.eval_method; end", binding, "(eval at something)")
+
+      result = LspReporter.uri_and_line_for(method(:eval_method))
+
+      assert_nil(result)
+    end
+
+    def test_uri_and_line_for_converts_to_zero_based_line
+      # Get the actual line number where this method is defined
+      _uri, line = LspReporter.uri_and_line_for(method(:test_uri_and_line_for_converts_to_zero_based_line))
+
+      # The method definition should be on a 1-based line, but uri_and_line_for returns 0-based
+      # So we verify it's not the same as what source_location returns
+      _file_path, one_based_line = method(:test_uri_and_line_for_converts_to_zero_based_line).source_location
+
+      assert_equal(one_based_line - 1, line)
+    end
   end
 end

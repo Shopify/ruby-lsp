@@ -89,7 +89,7 @@ module RubyLsp
         test_class_or_wrapper
       end
 
-      uri, line = LspReporter.instance.uri_and_line_for(klass.instance_method(method_name))
+      uri, line = LspReporter.uri_and_line_for(klass.instance_method(method_name))
       return unless uri
 
       id = "#{name}##{handle_spec_test_id(method_name, line)}"
