@@ -4,7 +4,7 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
-import { asyncExec } from "../common";
+import { asyncExec, expandPath } from "../common";
 
 export interface ActivationResult {
   env: NodeJS.ProcessEnv;
@@ -36,7 +36,8 @@ export abstract class VersionManager {
     this.outputChannel = outputChannel;
     this.context = context;
     this.manuallySelectRuby = manuallySelectRuby;
-    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
+    const rawBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
+    const customBundleGemfile = expandPath(rawBundleGemfile, this.workspaceFolder);
 
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)

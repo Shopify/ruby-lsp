@@ -3,7 +3,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, RubyInterface } from "./common";
+import { asyncExec, expandPath, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -83,7 +83,8 @@ export class Ruby implements RubyInterface {
     this.outputChannel = outputChannel;
     this.telemetry = telemetry;
 
-    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
+    const rawBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
+    const customBundleGemfile = expandPath(rawBundleGemfile, this.workspaceFolder);
 
     if (customBundleGemfile.length > 0) {
       this.customBundleGemfile = path.isAbsolute(customBundleGemfile)

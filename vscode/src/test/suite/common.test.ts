@@ -3,9 +3,39 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import sinon from "sinon";
 
-import { featureEnabled, FEATURE_FLAGS } from "../../common";
+import { expandPath, featureEnabled, FEATURE_FLAGS } from "../../common";
 
-suite("Common", () => {
+suite("expandPath", () => {
+  const workspaceFolder: vscode.WorkspaceFolder = {
+    uri: vscode.Uri.file("/home/user/project"),
+    name: "project",
+    index: 0,
+  };
+
+  // eslint-disable-next-line no-template-curly-in-string
+  test("replaces ${workspaceFolder} with the workspace folder path", () => {
+    // eslint-disable-next-line no-template-curly-in-string
+    const result = expandPath("${workspaceFolder}/Gemfile", workspaceFolder);
+    assert.strictEqual(result, "/home/user/project/Gemfile");
+  });
+
+  // eslint-disable-next-line no-template-curly-in-string
+  test("replaces multiple occurrences of ${workspaceFolder}", () => {
+    // eslint-disable-next-line no-template-curly-in-string
+    const result = expandPath("${workspaceFolder}/a:${workspaceFolder}/b", workspaceFolder);
+    assert.strictEqual(result, "/home/user/project/a:/home/user/project/b");
+  });
+
+  test("returns the string unchanged when there is no variable", () => {
+    assert.strictEqual(expandPath("Gemfile", workspaceFolder), "Gemfile");
+  });
+
+  test("returns empty string unchanged", () => {
+    assert.strictEqual(expandPath("", workspaceFolder), "");
+  });
+});
+
+suite("featureEnabled", () => {
   let sandbox: sinon.SinonSandbox;
 
   setup(() => {
