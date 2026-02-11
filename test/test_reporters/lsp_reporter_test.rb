@@ -7,6 +7,54 @@ require "ruby_lsp/test_reporters/lsp_reporter"
 
 module RubyLsp
   class LspReporterTest < Minitest::Test
+    def setup
+      @old_port = ENV["RUBY_LSP_REPORTER_PORT"]
+      @old_test_runner = ENV["RUBY_LSP_TEST_RUNNER"]
+    end
+
+    def teardown
+      ENV["RUBY_LSP_REPORTER_PORT"] = @old_port
+      ENV["RUBY_LSP_TEST_RUNNER"] = @old_test_runner
+    end
+
+    def test_socket_connection_failure_fallbacks_to_stringio
+      ENV["RUBY_LSP_REPORTER_PORT"] = "99999"
+
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
+
+      assert_kind_of(StringIO, io)
+    end
+
+    def test_socket_uses_ipv4_address_not_localhost
+      server = TCPServer.new("127.0.0.1", 0)
+      port = server.addr[1].to_s
+
+      peer_info = nil #: [String, String]?
+      thread = Thread.new do
+        socket = server.accept
+        peer_addr = socket.peeraddr
+        # Store the values to assert outside the thread
+        peer_info = [peer_addr[0], peer_addr[3]] #: [String, String]
+        socket.close
+      end
+
+      ENV["RUBY_LSP_REPORTER_PORT"] = port
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
+
+      assert_kind_of(TCPSocket, io)
+
+      thread.join(1)
+      io.close
+      server.close
+
+      assert(peer_info, "Thread did not complete successfully")
+      family, address = peer_info
+      assert_equal("AF_INET", family)
+      assert_equal("127.0.0.1", address)
+    end
+
     def test_coverage_results_are_formatted_as_vscode_expects
       path = "/path/to/file.rb"
       Dir.expects(:pwd).returns("/path/to").at_least_once
@@ -56,15 +104,16 @@ module RubyLsp
               },
             ],
         },
-        LspReporter.instance.gather_coverage_results,
+        LspReporter.new.gather_coverage_results,
       )
     end
 
     def test_shutdown_does_nothing_in_coverage_mode
       ENV["RUBY_LSP_TEST_RUNNER"] = "coverage"
-      io = LspReporter.instance.instance_variable_get(:@io)
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
       io.expects(:close).never
-      LspReporter.instance.shutdown
+      reporter.shutdown
     ensure
       ENV.delete("RUBY_LSP_TEST_RUNNER")
     end

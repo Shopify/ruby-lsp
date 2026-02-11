@@ -188,7 +188,7 @@ export class StreamingRunner implements vscode.Disposable {
       server.unref();
 
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      server.listen(0, "localhost", async () => {
+      server.listen(0, "127.0.0.1", async () => {
         const address = server.address();
 
         if (!address) {

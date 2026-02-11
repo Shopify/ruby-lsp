@@ -4,13 +4,19 @@
 require "English"
 require "json"
 require "socket"
-require "singleton"
 require "tmpdir"
 require_relative "../../ruby_indexer/lib/ruby_indexer/uri"
 
 module RubyLsp
   class LspReporter
-    include Singleton
+    @instance = nil #: LspReporter?
+
+    class << self
+      #: -> LspReporter
+      def instance
+        @instance ||= new
+      end
+    end
 
     # https://code.visualstudio.com/api/references/vscode-api#Position
     #: type position = { line: Integer, character: Integer }
@@ -211,7 +217,10 @@ module RubyLsp
 
     #: (String) -> TCPSocket
     def socket(port)
-      socket = TCPSocket.new("localhost", port)
+      # Connect to 127.0.0.1 (IPv4) explicitly since the extension listens on IPv4 only
+      # Using "localhost" hostname can cause connection failures on systems where it resolves
+      # to IPv6 first, but the server is only listening on IPv4
+      socket = TCPSocket.new("127.0.0.1", port)
       socket.binmode
       socket.sync = true
       socket

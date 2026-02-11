@@ -97,7 +97,7 @@ module RubyLsp
     def gather_events(uri, output: :stdout)
       reporter_path = File.expand_path(File.join("lib", "ruby_lsp", "test_reporters", "test_unit_reporter.rb"))
 
-      server = TCPServer.new("localhost", 0)
+      server = TCPServer.new("127.0.0.1", 0)
       port = server.addr[1].to_s
       events = []
       socket = nil #: Socket?
