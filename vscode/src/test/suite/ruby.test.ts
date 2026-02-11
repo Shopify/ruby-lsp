@@ -1,5 +1,7 @@
 import * as assert from "assert";
 import * as path from "path";
+import * as os from "os";
+import * as fs from "fs";
 
 import * as vscode from "vscode";
 import sinon from "sinon";
@@ -168,5 +170,36 @@ suite("Ruby environment activation", () => {
     await ruby.activateRuby();
 
     assert.strictEqual(context.workspaceState.get(`rubyLsp.workspaceRubyPath.${workspaceFolder.name}`), undefined);
+  });
+
+  test("Raises an error if the configured bundleGemfile does not exist", async () => {
+    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    const tmpWorkspaceFolder: vscode.WorkspaceFolder = {
+      uri: vscode.Uri.file(tmpPath),
+      name: path.basename(tmpPath),
+      index: 0,
+    };
+
+    const nonExistentGemfile = path.join(tmpPath, "nonexistent", "Gemfile");
+
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "bundleGemfile") {
+          return nonExistentGemfile;
+        } else if (name === "rubyVersionManager") {
+          return { identifier: ManagerIdentifier.None };
+        }
+
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
+
+    const ruby = new Ruby(context, tmpWorkspaceFolder, outputChannel, FAKE_TELEMETRY);
+
+    await assert.rejects(() => ruby.activateRuby(), {
+      message: `The configured bundle gemfile ${nonExistentGemfile} does not exist`,
+    });
+
+    fs.rmSync(tmpPath, { recursive: true, force: true });
   });
 });

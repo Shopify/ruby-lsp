@@ -121,6 +121,14 @@ export class Ruby implements RubyInterface {
     this.versionManager = versionManager;
     this._error = false;
 
+    if (this.customBundleGemfile) {
+      try {
+        await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
+      } catch (_error: any) {
+        throw new Error(`The configured bundle gemfile ${this.customBundleGemfile} does not exist`);
+      }
+    }
+
     const workspaceRubyPath = await this.cachedWorkspaceRubyPath();
 
     if (workspaceRubyPath) {
@@ -184,7 +192,7 @@ export class Ruby implements RubyInterface {
 
     if (!this.error) {
       this.fetchRubyVersionInfo();
-      await this.setupBundlePath();
+      this.setupBundlePath();
     }
   }
 
@@ -343,18 +351,11 @@ export class Ruby implements RubyInterface {
     }
   }
 
-  private async setupBundlePath() {
+  private setupBundlePath() {
     // Some users like to define a completely separate Gemfile for development tools. We allow them to use
     // `rubyLsp.bundleGemfile` to configure that and need to inject it into the environment
-    if (!this.customBundleGemfile) {
-      return;
-    }
-
-    try {
-      await vscode.workspace.fs.stat(vscode.Uri.file(this.customBundleGemfile));
+    if (this.customBundleGemfile) {
       this._env.BUNDLE_GEMFILE = this.customBundleGemfile;
-    } catch (_error: any) {
-      throw new Error(`The configured bundle gemfile ${this.customBundleGemfile} does not exist`);
     }
   }
 
