@@ -3,7 +3,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, expandPath, RubyInterface } from "./common";
+import { asyncExec, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -84,12 +84,10 @@ export class Ruby implements RubyInterface {
     this.telemetry = telemetry;
 
     const rawBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
-    const customBundleGemfile = expandPath(rawBundleGemfile, this.workspaceFolder);
+    const customBundleGemfile = rawBundleGemfile.replace(/\$\{workspaceFolder\}/g, this.workspaceFolder.uri.fsPath);
 
     if (customBundleGemfile.length > 0) {
-      this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
-        ? customBundleGemfile
-        : path.resolve(path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile));
+      this.customBundleGemfile = path.resolve(this.workspaceFolder.uri.fsPath, customBundleGemfile);
     }
   }
 
@@ -140,6 +138,7 @@ export class Ruby implements RubyInterface {
           this.context,
           this.manuallySelectRuby.bind(this),
           workspaceRubyPath,
+          this.customBundleGemfile,
         ),
       );
     } else {
@@ -174,6 +173,7 @@ export class Ruby implements RubyInterface {
               this.context,
               this.manuallySelectRuby.bind(this),
               globalRubyPath,
+              this.customBundleGemfile,
             ),
           );
         } else {
@@ -297,56 +297,54 @@ export class Ruby implements RubyInterface {
   }
 
   private async runManagerActivation() {
+    const manuallySelectRuby = this.manuallySelectRuby.bind(this);
+    const args = [
+      this.workspaceFolder,
+      this.outputChannel,
+      this.context,
+      manuallySelectRuby,
+      this.customBundleGemfile,
+    ] as const;
+
     switch (this.versionManager.identifier) {
       case ManagerIdentifier.Asdf:
-        await this.runActivation(
-          new Asdf(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Asdf(...args));
         break;
       case ManagerIdentifier.Chruby:
-        await this.runActivation(
-          new Chruby(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Chruby(...args));
         break;
       case ManagerIdentifier.Rbenv:
-        await this.runActivation(
-          new Rbenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Rbenv(...args));
         break;
       case ManagerIdentifier.Rvm:
-        await this.runActivation(
-          new Rvm(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Rvm(...args));
         break;
       case ManagerIdentifier.Mise:
-        await this.runActivation(
-          new Mise(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Mise(...args));
         break;
       case ManagerIdentifier.Rv:
-        await this.runActivation(
-          new Rv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Rv(...args));
         break;
       case ManagerIdentifier.RubyInstaller:
-        await this.runActivation(
-          new RubyInstaller(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new RubyInstaller(...args));
         break;
       case ManagerIdentifier.Custom:
-        await this.runActivation(
-          new Custom(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Custom(...args));
         break;
       case ManagerIdentifier.None:
         await this.runActivation(
-          new None(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
+          new None(
+            this.workspaceFolder,
+            this.outputChannel,
+            this.context,
+            manuallySelectRuby,
+            undefined,
+            this.customBundleGemfile,
+          ),
         );
         break;
       default:
-        await this.runActivation(
-          new Shadowenv(this.workspaceFolder, this.outputChannel, this.context, this.manuallySelectRuby.bind(this)),
-        );
+        await this.runActivation(new Shadowenv(...args));
         break;
     }
   }

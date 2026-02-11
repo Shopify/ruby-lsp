@@ -88,12 +88,6 @@ export const FEATURE_FLAGS = {
 
 type FeatureFlagConfigurationKey = keyof typeof FEATURE_FLAGS | "all";
 
-// Expands VS Code predefined variables (e.g., `${workspaceFolder}`) in a configuration string, since VS Code does not
-// automatically expand variables in extension settings retrieved via `getConfiguration()`
-export function expandPath(value: string, workspaceFolder: vscode.WorkspaceFolder): string {
-  return value.replace(/\$\{workspaceFolder\}/g, workspaceFolder.uri.fsPath);
-}
-
 // Creates a debounced version of a function with the specified delay. If the function is invoked before the delay runs
 // out, then the previous invocation of the function gets cancelled and a new one is scheduled.
 //

@@ -172,6 +172,52 @@ suite("Ruby environment activation", () => {
     assert.strictEqual(context.workspaceState.get(`rubyLsp.workspaceRubyPath.${workspaceFolder.name}`), undefined);
   });
 
+  // eslint-disable-next-line no-template-curly-in-string
+  test("Expands ${workspaceFolder} in bundleGemfile setting", async () => {
+    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    // Use the URI's fsPath to normalize the drive letter casing on Windows (e.g. c: -> C:)
+    const normalizedTmpPath = vscode.Uri.file(tmpPath).fsPath;
+    const gemfilePath = path.resolve(normalizedTmpPath, "Gemfile");
+    fs.writeFileSync(gemfilePath, "");
+
+    const tmpWorkspaceFolder: vscode.WorkspaceFolder = {
+      uri: vscode.Uri.file(tmpPath),
+      name: path.basename(tmpPath),
+      index: 0,
+    };
+
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "rubyVersionManager") {
+          return { identifier: ManagerIdentifier.None };
+        } else if (name === "bundleGemfile") {
+          // eslint-disable-next-line no-template-curly-in-string
+          return "${workspaceFolder}/Gemfile";
+        }
+
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
+
+    const envStub = [
+      "3.3.5",
+      "~/.gem/ruby/3.3.5,/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
+      "true",
+      `ANY${VALUE_SEPARATOR}true`,
+    ].join(FIELD_SEPARATOR);
+
+    sandbox.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
+    });
+
+    const ruby = new Ruby(context, tmpWorkspaceFolder, outputChannel, FAKE_TELEMETRY);
+    await ruby.activateRuby();
+
+    assert.strictEqual(ruby.env.BUNDLE_GEMFILE, gemfilePath);
+    fs.rmSync(tmpPath, { recursive: true, force: true });
+  });
+
   test("Raises an error if the configured bundleGemfile does not exist", async () => {
     const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     const tmpWorkspaceFolder: vscode.WorkspaceFolder = {
