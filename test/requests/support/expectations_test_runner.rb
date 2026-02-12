@@ -26,7 +26,11 @@ class ExpectationsTestRunner < Minitest::Test
             if ENV['WRITE_EXPECTATIONS'] && parsed_expected["result"] != JSON.parse(actual.to_json)
               File.write(@_expectation_path, JSON.pretty_generate(result: actual, params: @__params) + "\\n")
             else
-              assert_equal(parsed_expected["result"], JSON.parse(actual.to_json))
+              if parsed_expected["result"].nil?
+                assert_nil(JSON.parse(actual.to_json))
+              else
+                assert_equal(parsed_expected["result"], JSON.parse(actual.to_json))
+              end
             end
           end
 

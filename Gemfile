@@ -5,7 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "bundler", "~> 4.0.0"
-gem "minitest", "~> 5.25"
+gem "minitest", "~> 6.0"
 gem "test-unit", require: false
 
 group :development do
