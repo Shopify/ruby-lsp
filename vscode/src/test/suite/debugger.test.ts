@@ -10,7 +10,7 @@ import { Debugger } from "../../debugger";
 import { Ruby, ManagerIdentifier } from "../../ruby";
 import { Workspace } from "../../workspace";
 import { WorkspaceChannel } from "../../workspaceChannel";
-import { LOG_CHANNEL, asyncExec } from "../../common";
+import { LOG_CHANNEL, asyncExec, pathToUri } from "../../common";
 import { RUBY_VERSION } from "../rubyVersion";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
@@ -156,7 +156,7 @@ suite("Debugger", () => {
       {
         parallel: "1",
         ...ruby.env,
-        BUNDLE_GEMFILE: vscode.Uri.joinPath(vscode.Uri.file(tmpPath), ".ruby-lsp", "Gemfile").fsPath,
+        BUNDLE_GEMFILE: pathToUri(tmpPath, ".ruby-lsp", "Gemfile").fsPath,
       },
       configs.env,
     );

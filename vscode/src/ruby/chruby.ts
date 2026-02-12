@@ -4,8 +4,9 @@ import path from "path";
 import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
+import { pathToUri } from "../common";
 
-import { ActivationResult, VersionManager, ACTIVATION_SEPARATOR } from "./versionManager";
+import { ActivationResult, VersionManager, ACTIVATION_SEPARATOR, DetectionResult } from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -17,11 +18,16 @@ class RubyActivationCancellationError extends Error {}
 // A tool to change the current Ruby version
 // Learn more: https://github.com/postmodern/chruby
 export class Chruby extends VersionManager {
+  static async detect(
+    workspaceFolder: vscode.WorkspaceFolder,
+    outputChannel: WorkspaceChannel,
+  ): Promise<DetectionResult> {
+    const exists = await VersionManager.toolExists("chruby", workspaceFolder, outputChannel);
+    return exists ? { type: "semantic", marker: "chruby" } : { type: "none" };
+  }
+
   // Only public so that we can point to a different directory in tests
-  public rubyInstallationUris = [
-    vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".rubies"),
-    vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "rubies"),
-  ];
+  public rubyInstallationUris = [pathToUri(os.homedir(), ".rubies"), pathToUri("/", "opt", "rubies")];
 
   constructor(
     workspaceFolder: vscode.WorkspaceFolder,

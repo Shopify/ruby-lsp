@@ -3,6 +3,8 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { Chruby } from "./chruby";
+import { pathToUri } from "../common";
+import { DetectionResult } from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -16,6 +18,14 @@ interface RubyVersion {
 //
 // If we can't find it there, then we throw an error and rely on the user to manually select where Ruby is installed.
 export class RubyInstaller extends Chruby {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  static async detect(
+    _workspaceFolder: vscode.WorkspaceFolder,
+    _outputChannel: vscode.LogOutputChannel,
+  ): Promise<DetectionResult> {
+    return os.platform() === "win32" ? { type: "semantic", marker: "RubyInstaller" } : { type: "none" };
+  }
+
   // Environment variables are case sensitive on Windows when we access them through NodeJS. We need to ensure that
   // we're searching through common variations, so that we don't accidentally miss the path we should inherit
   protected getProcessPath() {
@@ -27,8 +37,8 @@ export class RubyInstaller extends Chruby {
     const [major, minor, _patch] = rubyVersion.version.split(".").map(Number);
 
     const possibleInstallationUris = [
-      vscode.Uri.joinPath(vscode.Uri.file("C:"), `Ruby${major}${minor}-${os.arch()}`),
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), `Ruby${major}${minor}-${os.arch()}`),
+      pathToUri("C:", `Ruby${major}${minor}-${os.arch()}`),
+      pathToUri(os.homedir(), `Ruby${major}${minor}-${os.arch()}`),
     ];
 
     for (const installationUri of possibleInstallationUris) {

@@ -9,7 +9,7 @@ import { afterEach, beforeEach } from "mocha";
 import { Asdf } from "../../../ruby/asdf";
 import { WorkspaceChannel } from "../../../workspaceChannel";
 import * as common from "../../../common";
-import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR } from "../../../ruby/versionManager";
+import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR, VersionManager } from "../../../ruby/versionManager";
 import { createContext, FakeContext } from "../helpers";
 
 suite("Asdf", () => {
@@ -50,7 +50,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(`${os.homedir()}/.asdf/asdf.sh`);
+    sandbox.stub(Asdf, "detect").resolves({ type: "path", uri: vscode.Uri.file(`${os.homedir()}/.asdf/asdf.sh`) });
     sandbox.stub(vscode.env, "shell").get(() => "/bin/bash");
 
     const { env, version, yjit } = await asdf.activate();
@@ -82,7 +82,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(`${os.homedir()}/.asdf/asdf.fish`);
+    sandbox.stub(Asdf, "detect").resolves({ type: "path", uri: vscode.Uri.file(`${os.homedir()}/.asdf/asdf.fish`) });
     sandbox.stub(vscode.env, "shell").get(() => "/opt/homebrew/bin/fish");
 
     const { env, version, yjit } = await asdf.activate();
@@ -114,7 +114,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(undefined);
+    sandbox.stub(Asdf, "detect").resolves({ type: "path", uri: vscode.Uri.file("/opt/homebrew/bin/asdf") });
 
     sandbox.stub(vscode.workspace, "fs").value({
       stat: () => Promise.resolve(undefined),
@@ -146,7 +146,7 @@ suite("Asdf", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
 
-    sandbox.stub(asdf, "findAsdfInstallation").resolves(undefined);
+    sandbox.stub(VersionManager, "toolExists").resolves(true);
 
     const { env, version, yjit } = await asdf.activate();
 

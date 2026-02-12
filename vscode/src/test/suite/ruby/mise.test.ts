@@ -52,8 +52,8 @@ suite("Mise", () => {
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
     const findStub = sandbox
-      .stub(mise, "findMiseUri")
-      .resolves(vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"));
+      .stub(mise, "findVersionManagerUri" as any)
+      .resolves(common.pathToUri(os.homedir(), ".local", "bin", "mise"));
 
     const { env, version, yjit } = await mise.activate();
 
@@ -126,5 +126,83 @@ suite("Mise", () => {
     execStub.restore();
     configStub.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
+  });
+
+  test("detect returns the first found mise path", async () => {
+    const workspacePath = process.env.PWD!;
+    const workspaceFolder = {
+      uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
+      name: path.basename(workspacePath),
+      index: 0,
+    };
+    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    const misePath = path.join(tempDir, "mise");
+    fs.writeFileSync(misePath, "fakeMiseBinary");
+
+    const getPossiblePathsStub = sandbox
+      .stub(Mise as any, "getPossiblePaths")
+      .returns([vscode.Uri.file(misePath), vscode.Uri.file(path.join(tempDir, "other", "mise"))]);
+
+    const result = await Mise.detect(workspaceFolder, outputChannel);
+
+    assert.strictEqual(result.type === "path" ? result.uri.fsPath : undefined, vscode.Uri.file(misePath).fsPath);
+
+    getPossiblePathsStub.restore();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  test("detect returns undefined when mise is not found", async () => {
+    const workspacePath = process.env.PWD!;
+    const workspaceFolder = {
+      uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
+      name: path.basename(workspacePath),
+      index: 0,
+    };
+    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+
+    const getPossiblePathsStub = sandbox
+      .stub(Mise as any, "getPossiblePaths")
+      .returns([
+        vscode.Uri.file(path.join(tempDir, "nonexistent1", "mise")),
+        vscode.Uri.file(path.join(tempDir, "nonexistent2", "mise")),
+      ]);
+
+    const result = await Mise.detect(workspaceFolder, outputChannel);
+
+    assert.strictEqual(result.type, "none");
+
+    getPossiblePathsStub.restore();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  test("detect checks multiple paths in order", async () => {
+    const workspacePath = process.env.PWD!;
+    const workspaceFolder = {
+      uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
+      name: path.basename(workspacePath),
+      index: 0,
+    };
+    const outputChannel = new WorkspaceChannel("fake", common.LOG_CHANNEL);
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
+    const secondPath = path.join(tempDir, "second", "mise");
+    fs.mkdirSync(path.dirname(secondPath), { recursive: true });
+    fs.writeFileSync(secondPath, "fakeMiseBinary");
+
+    const getPossiblePathsStub = sandbox
+      .stub(Mise as any, "getPossiblePaths")
+      .returns([
+        vscode.Uri.file(path.join(tempDir, "nonexistent", "mise")),
+        vscode.Uri.file(secondPath),
+        vscode.Uri.file(path.join(tempDir, "third", "mise")),
+      ]);
+
+    const result = await Mise.detect(workspaceFolder, outputChannel);
+
+    assert.strictEqual(result.type === "path" ? result.uri.fsPath : undefined, vscode.Uri.file(secondPath).fsPath);
+
+    getPossiblePathsStub.restore();
+    fs.rmSync(tempDir, { recursive: true, force: true });
   });
 });
