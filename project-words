@@ -70,6 +70,7 @@ nvim
 onig # abbreviation for oniguruma
 Pacman
 pathlist
+peeraddr
 popen
 qorge
 qtlzwssomeking

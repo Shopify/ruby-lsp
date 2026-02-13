@@ -7,6 +7,54 @@ require "ruby_lsp/test_reporters/lsp_reporter"
 
 module RubyLsp
   class LspReporterTest < Minitest::Test
+    def setup
+      @old_port = ENV["RUBY_LSP_REPORTER_PORT"]
+      @old_test_runner = ENV["RUBY_LSP_TEST_RUNNER"]
+    end
+
+    def teardown
+      ENV["RUBY_LSP_REPORTER_PORT"] = @old_port
+      ENV["RUBY_LSP_TEST_RUNNER"] = @old_test_runner
+    end
+
+    def test_socket_connection_failure_fallbacks_to_stringio
+      ENV["RUBY_LSP_REPORTER_PORT"] = "99999"
+
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
+
+      assert_kind_of(StringIO, io)
+    end
+
+    def test_socket_uses_ipv4_address_not_localhost
+      server = TCPServer.new("127.0.0.1", 0)
+      port = server.addr[1].to_s
+
+      peer_info = nil #: [String, String]?
+      thread = Thread.new do
+        socket = server.accept
+        peer_addr = socket.peeraddr
+        # Store the values to assert outside the thread
+        peer_info = [peer_addr[0], peer_addr[3]] #: [String, String]
+        socket.close
+      end
+
+      ENV["RUBY_LSP_REPORTER_PORT"] = port
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
+
+      assert_kind_of(TCPSocket, io)
+
+      thread.join(1)
+      io.close
+      server.close
+
+      assert(peer_info, "Thread did not complete successfully")
+      family, address = peer_info
+      assert_equal("AF_INET", family)
+      assert_equal("127.0.0.1", address)
+    end
+
     def test_coverage_results_are_formatted_as_vscode_expects
       path = "/path/to/file.rb"
       Dir.expects(:pwd).returns("/path/to").at_least_once
@@ -56,17 +104,62 @@ module RubyLsp
               },
             ],
         },
-        LspReporter.instance.gather_coverage_results,
+        LspReporter.new.gather_coverage_results,
       )
     end
 
     def test_shutdown_does_nothing_in_coverage_mode
       ENV["RUBY_LSP_TEST_RUNNER"] = "coverage"
-      io = LspReporter.instance.instance_variable_get(:@io)
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
       io.expects(:close).never
-      LspReporter.instance.shutdown
+      reporter.shutdown
     ensure
       ENV.delete("RUBY_LSP_TEST_RUNNER")
+    end
+
+    def test_uri_and_line_for_with_regular_method
+      uri, line = LspReporter.uri_and_line_for(method(:test_uri_and_line_for_with_regular_method))
+
+      assert_kind_of(URI::Generic, uri)
+      assert_match(/lsp_reporter_test\.rb$/, uri.to_s)
+      assert_kind_of(Integer, line)
+      # Line should be zero-based
+      assert_operator(line, :>=, 0)
+    end
+
+    def test_uri_and_line_for_with_unbound_method
+      uri, line = LspReporter.uri_and_line_for(LspReporterTest.instance_method(:test_uri_and_line_for_with_unbound_method))
+
+      assert_kind_of(URI::Generic, uri)
+      assert_match(/lsp_reporter_test\.rb$/, uri.to_s)
+      assert_kind_of(Integer, line)
+      assert_operator(line, :>=, 0)
+    end
+
+    def test_uri_and_line_for_with_native_method
+      result = LspReporter.uri_and_line_for(method(:puts))
+
+      assert_nil(result)
+    end
+
+    def test_uri_and_line_for_with_eval_method
+      eval("def self.eval_method; end", binding, "(eval at something)")
+
+      result = LspReporter.uri_and_line_for(method(:eval_method))
+
+      assert_nil(result)
+    end
+
+    def test_uri_and_line_for_converts_to_zero_based_line
+      # Get the actual line number where this method is defined
+      _uri, line = LspReporter.uri_and_line_for(method(:test_uri_and_line_for_converts_to_zero_based_line))
+
+      # The method definition should be on a 1-based line, but uri_and_line_for returns 0-based
+      # So we verify it's not the same as what source_location returns
+      _file_path, one_based_line = method(:test_uri_and_line_for_converts_to_zero_based_line).source_location
+
+      assert_equal(one_based_line - 1, line)
     end
   end
 end

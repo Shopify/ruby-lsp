@@ -25,7 +25,7 @@ module RubyLsp
     def test_started(test)
       super
 
-      uri, line = LspReporter.instance.uri_and_line_for(test.method(test.method_name))
+      uri, line = LspReporter.uri_and_line_for(test.method(test.method_name))
       return unless uri
 
       @current_uri = uri
