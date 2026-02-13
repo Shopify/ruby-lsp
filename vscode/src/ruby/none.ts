@@ -21,8 +21,9 @@ export class None extends VersionManager {
     context: vscode.ExtensionContext,
     manuallySelectRuby: () => Promise<void>,
     rubyPath?: string,
+    customBundleGemfile?: string,
   ) {
-    super(workspaceFolder, outputChannel, context, manuallySelectRuby);
+    super(workspaceFolder, outputChannel, context, manuallySelectRuby, customBundleGemfile);
     this.rubyPath = rubyPath ?? "ruby";
   }
 

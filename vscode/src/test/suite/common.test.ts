@@ -5,7 +5,7 @@ import sinon from "sinon";
 
 import { featureEnabled, FEATURE_FLAGS } from "../../common";
 
-suite("Common", () => {
+suite("featureEnabled", () => {
   let sandbox: sinon.SinonSandbox;
 
   setup(() => {

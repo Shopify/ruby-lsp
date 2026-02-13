@@ -31,18 +31,13 @@ export abstract class VersionManager {
     outputChannel: WorkspaceChannel,
     context: vscode.ExtensionContext,
     manuallySelectRuby: () => Promise<void>,
+    customBundleGemfile?: string,
   ) {
     this.workspaceFolder = workspaceFolder;
     this.outputChannel = outputChannel;
     this.context = context;
     this.manuallySelectRuby = manuallySelectRuby;
-    const customBundleGemfile: string = vscode.workspace.getConfiguration("rubyLsp").get("bundleGemfile")!;
-
-    if (customBundleGemfile.length > 0) {
-      this.customBundleGemfile = path.isAbsolute(customBundleGemfile)
-        ? customBundleGemfile
-        : path.resolve(path.join(this.workspaceFolder.uri.fsPath, customBundleGemfile));
-    }
+    this.customBundleGemfile = customBundleGemfile;
 
     this.bundleUri = this.customBundleGemfile
       ? vscode.Uri.file(path.dirname(this.customBundleGemfile))
