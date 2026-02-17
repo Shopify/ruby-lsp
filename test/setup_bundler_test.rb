@@ -961,6 +961,53 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_update_does_not_fail_when_lockfile_is_recopied_with_needs_update
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+        source "https://rubygems.org"
+        gem "rdoc"
+      GEMFILE
+
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          system("bundle install")
+          # Run setup once to create the composed bundle (adds ruby-lsp to composed lockfile)
+          RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+        end
+      end
+
+      # Modify the main bundle so the lockfile hash changes
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+            source "https://rubygems.org"
+            gem "rdoc"
+            gem "irb"
+          GEMFILE
+          system("bundle install")
+        end
+      end
+
+      # Simulate that a previous run flagged for update. This normally happens when
+      # should_bundle_update? returns true on a run where needs_update_path doesn't exist yet.
+      FileUtils.touch(File.join(dir, ".ruby-lsp", "needs_update"))
+
+      # Run setup again. The lockfile hash changed, so setup! copies the main lockfile
+      # (which doesn't have ruby-lsp) over the composed lockfile. Then needs_update
+      # causes run_bundle_install_directly to call update(), which tries
+      # `bundle update ruby-lsp` on a lockfile missing ruby-lsp, raising
+      # Bundler::GemNotFound.
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+        end
+      end
+
+      # The setup should handle this gracefully without recording an error
+      refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+    end
+  end
+
   def test_is_resilient_to_pipe_being_closed_by_client_during_compose
     in_temp_dir do |dir|
       File.write(File.join(dir, "gems.rb"), <<~GEMFILE)

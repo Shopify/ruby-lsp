@@ -126,6 +126,7 @@ module RubyLsp
         return run_bundle_install(@custom_gemfile)
       end
 
+      @needs_update_path.delete if @needs_update_path.exist?
       FileUtils.cp(@lockfile.to_s, @custom_lockfile.to_s)
       correct_relative_remote_paths
       @lockfile_hash_path.write(@lockfile_hash)
