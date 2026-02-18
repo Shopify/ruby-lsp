@@ -77,6 +77,8 @@ module RubyLsp
       end #: IO | StringIO
 
       @invoked_shutdown = false #: bool
+      @message_queue = Thread::Queue.new #: Thread::Queue
+      @writer = Thread.new { write_loop } #: Thread
     end
 
     #: -> void
@@ -95,6 +97,8 @@ module RubyLsp
       @invoked_shutdown = true
 
       send_message("finish")
+      @message_queue.close
+      @writer.join
       @io.close
     end
 
@@ -227,7 +231,14 @@ module RubyLsp
     #: (String?, **untyped) -> void
     def send_message(method_name, **params)
       json_message = { method: method_name, params: params }.to_json
-      @io.write("Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}")
+      @message_queue << "Content-Length: #{json_message.bytesize}\r\n\r\n#{json_message}"
+    end
+
+    #: -> void
+    def write_loop
+      while (message = @message_queue.pop)
+        @io.write(message)
+      end
     end
   end
 end
