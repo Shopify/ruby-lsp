@@ -26,33 +26,40 @@ module RubyLsp
       assert_kind_of(StringIO, io)
     end
 
-    def test_socket_uses_ipv4_address_not_localhost
+    def test_socket_connects_to_ipv4_server
       server = TCPServer.new("127.0.0.1", 0)
       port = server.addr[1].to_s
 
-      peer_info = nil #: [String, String]?
-      thread = Thread.new do
-        socket = server.accept
-        peer_addr = socket.peeraddr
-        # Store the values to assert outside the thread
-        peer_info = [peer_addr[0], peer_addr[3]] #: [String, String]
-        socket.close
-      end
+      thread = Thread.new { server.accept }
 
       ENV["RUBY_LSP_REPORTER_PORT"] = port
       reporter = LspReporter.new
       io = reporter.instance_variable_get(:@io)
 
-      assert_kind_of(TCPSocket, io)
+      assert_kind_of(Socket, io)
 
-      thread.join(1)
+      accepted = thread.join(1)&.value #: untyped
+      accepted&.close
       io.close
       server.close
+    end
 
-      assert(peer_info, "Thread did not complete successfully")
-      family, address = peer_info
-      assert_equal("AF_INET", family)
-      assert_equal("127.0.0.1", address)
+    def test_socket_connects_to_ipv6_server
+      server = TCPServer.new("::1", 0)
+      port = server.addr[1].to_s
+
+      thread = Thread.new { server.accept }
+
+      ENV["RUBY_LSP_REPORTER_PORT"] = port
+      reporter = LspReporter.new
+      io = reporter.instance_variable_get(:@io)
+
+      assert_kind_of(Socket, io)
+
+      accepted = thread.join(1)&.value #: untyped
+      accepted&.close
+      io.close
+      server.close
     end
 
     def test_coverage_results_are_formatted_as_vscode_expects
