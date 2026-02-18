@@ -340,7 +340,7 @@ module RubyLsp
 
       Bundler::CLI::Update.new({ conservative: true }, gems).run
       correct_relative_remote_paths if @custom_lockfile.exist?
-      @needs_update_path.delete
+      @needs_update_path.delete if @needs_update_path.exist?
       @last_updated_path.write(Time.now.iso8601)
       env
     end
