@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 if [[ 2 -eq $# ]]; then
-  bundle exec rake TEST="$1" TESTOPTS="-n='/$2/'"
+  bundle exec ruby -Itest $1 --name "/$2/"
 elif [[ 1 -eq $# ]]; then
-  bundle exec rake TEST="$1"
+  bundle exec ruby -Itest $1
 else
   bundle exec rake "$@"
 fi
