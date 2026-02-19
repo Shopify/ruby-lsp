@@ -742,6 +742,45 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_update_does_not_fail_if_needs_update_path_was_deleted_by_concurrent_process
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+        source "https://rubygems.org"
+        gem "rdoc"
+      GEMFILE
+
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          system("bundle install")
+          run_script(dir)
+        end
+      end
+
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          needs_update_path = File.join(dir, ".ruby-lsp", "needs_update")
+
+          # Simulate a concurrent process deleting the needs_update file during bundle update
+          mock_update = mock("update")
+          mock_update.expects(:run).with do
+            File.delete(needs_update_path)
+            true
+          end
+          require "bundler/cli/update"
+          Bundler::CLI::Update.expects(:new).with(
+            { conservative: true },
+            ["ruby-lsp", "debug", "prism", "rbs"],
+          ).returns(mock_update)
+
+          FileUtils.touch(needs_update_path)
+          RubyLsp::SetupBundler.new(dir, launcher: true).setup!
+
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
   def test_progress_is_printed_to_stderr
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
