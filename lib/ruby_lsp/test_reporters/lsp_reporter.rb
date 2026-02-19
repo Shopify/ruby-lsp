@@ -217,12 +217,9 @@ module RubyLsp
 
     private
 
-    #: (String) -> TCPSocket
+    #: (String) -> Socket
     def socket(port)
-      # Connect to 127.0.0.1 (IPv4) explicitly since the extension listens on IPv4 only
-      # Using "localhost" hostname can cause connection failures on systems where it resolves
-      # to IPv6 first, but the server is only listening on IPv4
-      socket = TCPSocket.new("127.0.0.1", port)
+      socket = Socket.tcp("localhost", port)
       socket.binmode
       socket.sync = true
       socket
