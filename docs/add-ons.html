@@ -1,0 +1,351 @@
+<!DOCTYPE html> <html lang="en-US"> <head> <meta charset="UTF-8"> <meta http-equiv="X-UA-Compatible" content="IE=Edge"> <link rel="stylesheet" href="/ruby-lsp/assets/css/just-the-docs-default.css"> <link rel="stylesheet" href="/ruby-lsp/assets/css/just-the-docs-head-nav.css" id="jtd-head-nav-stylesheet"> <style id="jtd-nav-activation"> .site-nav > ul.nav-list:first-child > li > a, .site-nav > ul.nav-list:first-child > li > ul > li:not(:nth-child(3)) > a, .site-nav > ul.nav-list:first-child > li > ul > li > ul > li a { background-image: none; } .site-nav > ul.nav-list:not(:first-child) a, .site-nav li.external a { background-image: none; } .site-nav > ul.nav-list:first-child > li:nth-child(1) > ul > li:nth-child(3) > a { font-weight: 600; text-decoration: none; }.site-nav > ul.nav-list:first-child > li:nth-child(1) > button svg, .site-nav > ul.nav-list:first-child > li:nth-child(1) > ul > li:nth-child(3) > button svg { transform: rotate(-90deg); }.site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(1) > ul.nav-list, .site-nav > ul.nav-list:first-child > li.nav-list-item:nth-child(1) > ul.nav-list > li.nav-list-item:nth-child(3) > ul.nav-list { display: block; } </style> <script src="/ruby-lsp/assets/js/vendor/lunr.min.js"></script> <script src="/ruby-lsp/assets/js/just-the-docs.js"></script> <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Begin Jekyll SEO tag v2.8.0 --> <title>Add-ons | Ruby LSP</title> <meta name="generator" content="Jekyll v4.4.1" /> <meta property="og:title" content="Add-ons" /> <meta property="og:locale" content="en_US" /> <meta name="description" content="An opinionated language server for Ruby. Batteries included!" /> <meta property="og:description" content="An opinionated language server for Ruby. Batteries included!" /> <link rel="canonical" href="https://shopify.github.io/ruby-lsp/add-ons.html" /> <meta property="og:url" content="https://shopify.github.io/ruby-lsp/add-ons.html" /> <meta property="og:site_name" content="Ruby LSP" /> <meta property="og:image" content="https://shopify.github.io/ruby-lsp/icon.png" /> <meta property="og:type" content="website" /> <meta name="twitter:card" content="summary_large_image" /> <meta property="twitter:image" content="https://shopify.github.io/ruby-lsp/icon.png" /> <meta property="twitter:title" content="Add-ons" /> <script type="application/ld+json"> {"@context":"https://schema.org","@type":"WebPage","description":"An opinionated language server for Ruby. Batteries included!","headline":"Add-ons","image":"https://shopify.github.io/ruby-lsp/icon.png","url":"https://shopify.github.io/ruby-lsp/add-ons.html"}</script> <!-- End Jekyll SEO tag --> </head> <body> <a class="skip-to-main" href="#main-content">Skip to main content</a> <svg xmlns="http://www.w3.org/2000/svg" class="d-none"> <symbol id="svg-link" viewBox="0 0 24 24"> <title>Link</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link"> <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path> </svg> </symbol> <symbol id="svg-menu" viewBox="0 0 24 24"> <title>Menu</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"> <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line> </svg> </symbol> <symbol id="svg-arrow-right" viewBox="0 0 24 24"> <title>Expand</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"> <polyline points="9 18 15 12 9 6"></polyline> </svg> </symbol> <!-- Feather. MIT License: https://github.com/feathericons/feather/blob/master/LICENSE --> <symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"> <title id="svg-external-link-title">(external link)</title> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line> </symbol> <symbol id="svg-doc" viewBox="0 0 24 24"> <title>Document</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"> <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline> </svg> </symbol> <symbol id="svg-search" viewBox="0 0 24 24"> <title>Search</title> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"> <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line> </svg> </symbol> <!-- Bootstrap Icons. MIT License: https://github.com/twbs/icons/blob/main/LICENSE.md --> <symbol id="svg-copy" viewBox="0 0 16 16"> <title>Copy</title> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/> </svg> </symbol> <symbol id="svg-copied" viewBox="0 0 16 16"> <title>Copied</title> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard-check-fill" viewBox="0 0 16 16"> <path d="M6.5 0A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3Zm3 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3Z"/> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1A2.5 2.5 0 0 1 9.5 5h-3A2.5 2.5 0 0 1 4 2.5v-1Zm6.854 7.354-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L7.5 10.793l2.646-2.647a.5.5 0 0 1 .708.708Z"/> </svg> </symbol> </svg> <header class="side-bar"> <div class="site-header"> <a href="/ruby-lsp/" class="site-title lh-tight"> Ruby LSP </a> <button id="menu-button" class="site-button btn-reset" aria-label="Menu" aria-expanded="false"> <svg viewBox="0 0 24 24" class="icon" aria-hidden="true"><use xlink:href="#svg-menu"></use></svg> </button> </div> <nav aria-label="Main" id="site-nav" class="site-nav"> <ul class="nav-list"><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="Ruby LSP submenu" aria-expanded="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/ruby-lsp/" class="nav-list-link">Ruby LSP</a><ul class="nav-list"><li class="nav-list-item"><a href="/ruby-lsp/editors.html" class="nav-list-link">Editors</a></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="VS Code extension submenu" aria-expanded="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/ruby-lsp/vscode-extension.html" class="nav-list-link">VS Code extension</a><ul class="nav-list"><li class="nav-list-item"><a href="/ruby-lsp/test_explorer.html" class="nav-list-link">Test explorer</a></li></ul></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="Add-ons submenu" aria-expanded="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/ruby-lsp/add-ons.html" class="nav-list-link">Add-ons</a><ul class="nav-list"><li class="nav-list-item"><a href="/ruby-lsp/test_framework_addons.html" class="nav-list-link">Test framework add-ons</a></li></ul></li><li class="nav-list-item"><a href="/ruby-lsp/design-and-roadmap.html" class="nav-list-link">Design and roadmap</a></li><li class="nav-list-item"><a href="/ruby-lsp/semantic-highlighting.html" class="nav-list-link">Semantic Highlighting for Themes</a></li><li class="nav-list-item"><a href="/ruby-lsp/composed-bundle.html" class="nav-list-link">Composed Ruby LSP bundle</a></li></ul></li><li class="nav-list-item"><a href="/ruby-lsp/rails-add-on.html" class="nav-list-link">Rails add-on</a></li><li class="nav-list-item"><button class="nav-list-expander btn-reset" aria-label="Troubleshooting submenu" aria-expanded="false"> <svg viewBox="0 0 24 24" aria-hidden="true"><use xlink:href="#svg-arrow-right"></use></svg> </button><a href="/ruby-lsp/troubleshooting.html" class="nav-list-link">Troubleshooting</a><ul class="nav-list"><li class="nav-list-item"><a href="/ruby-lsp/version-managers.html" class="nav-list-link">Version Managers</a></li></ul></li><li class="nav-list-item"><a href="/ruby-lsp/security.html" class="nav-list-link">Security</a></li><li class="nav-list-item"><a href="/ruby-lsp/contributing.html" class="nav-list-link">Contributing</a></li><li class="nav-list-item"><a href="/ruby-lsp/supported_versions.html" class="nav-list-link">Supported Versions Policy</a></li></ul> <ul class="nav-list"><li class="nav-list-item external"> <a href="https://github.com/Shopify/ruby-lsp" class="nav-list-link external" target="_blank" rel="noopener noreferrer" > Ruby LSP on GitHub <svg viewBox="0 0 24 24" aria-labelledby="svg-external-link-title"><use xlink:href="#svg-external-link"></use></svg> </a> </li><li class="nav-list-item external"> <a href="https://github.com/Shopify/ruby-lsp-rails" class="nav-list-link external" target="_blank" rel="noopener noreferrer" > Ruby LSP Rails on GitHub <svg viewBox="0 0 24 24" aria-labelledby="svg-external-link-title"><use xlink:href="#svg-external-link"></use></svg> </a> </li></ul> </nav> <div class="d-md-block d-none site-footer"> This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll. </div> </header> <div class="main" id="top"> <div id="main-header" class="main-header"> <div class="search" role="search"> <div class="search-input-wrap"> <input type="text" id="search-input" class="search-input" tabindex="0" placeholder="Search Ruby LSP" autocomplete="off"> <label for="search-input" class="search-label"> <span class="sr-only">Search Ruby LSP</span> <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true"><use xlink:href="#svg-search"></use></svg> </label> </div> <div id="search-results" class="search-results"></div> </div> <nav aria-label="Auxiliary" class="aux-nav"> <ul class="aux-nav-list"> <li class="aux-nav-list-item"> <a href="https://shopify.github.io/ruby-lsp/invite" class="site-button" > Ruby DX Slack </a> </li> <li class="aux-nav-list-item"> <a href="https://github.com/Shopify/ruby-lsp/issues/new/choose" class="site-button" > Report an Issue </a> </li> </ul> </nav> </div> <div class="main-content-wrap"> <nav aria-label="Breadcrumb" class="breadcrumb-nav"> <ol class="breadcrumb-nav-list"> <li class="breadcrumb-nav-list-item"><a href="/ruby-lsp/">Ruby LSP</a></li> <li class="breadcrumb-nav-list-item"><span>Add-ons</span></li> </ol> </nav> <div id="main-content" class="main-content"> <main> <h1 id="add-ons"> <a href="#add-ons" class="anchor-heading" aria-labelledby="add-ons"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Add-ons </h1> <blockquote class="warning"> <p>The Ruby LSP add-on system is currently experimental and subject to changes in the API</p> </blockquote> <p>Need help writing add-ons? Consider joining the <code class="language-plaintext highlighter-rouge">#ruby-lsp-addons</code> channel in the <a href="invite">Ruby DX Slack workspace</a>.</p> <h2 id="motivation-and-goals"> <a href="#motivation-and-goals" class="anchor-heading" aria-labelledby="motivation-and-goals"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Motivation and goals </h2> <p>Editor features that are specific to certain tools or frameworks can be incredibly powerful. Typically, language servers are aimed at providing features for a particular programming language (like Ruby!) and not specific tools. This is reasonable since not every programmer uses the same combination of tools.</p> <p>Including tool specific functionality in the Ruby LSP would not scale well given the large number of tools in the ecosystem. It would also create a bottleneck for authors to push new features. Building separate tooling, on the other hand, increases fragmentation which tends to increase the effort required by users to configure their development environments.</p> <p>For these reasons, the Ruby LSP ships with an add-on system that authors can use to enhance the behavior of the base LSP with tool specific functionality, aimed at</p> <ul> <li>Allowing gem authors to export Ruby LSP add-ons from their own gems</li> <li>Allowing LSP features to be enhanced by add-ons present in the application the developer is currently working on</li> <li>Not requiring extra configuration from the user</li> <li>Seamlessly integrating with the base features of the Ruby LSP</li> <li>Providing add-on authors with the entire static analysis toolkit that the Ruby LSP uses</li> </ul> <h2 id="guidelines"> <a href="#guidelines" class="anchor-heading" aria-labelledby="guidelines"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Guidelines </h2> <p>When building a Ruby LSP add-on, refer to these guidelines to ensure a good developer experience.</p> <ul> <li>Performance over features. A single slow request may result in lack of responsiveness in the editor</li> <li>There are two types of LSP requests: automatic (e.g.: semantic highlighting) and user initiated (go to definition). The performance of automatic requests is critical for responsiveness as they are executed every time the user types</li> <li>Avoid duplicate work where possible. If something can be computed once and memoized, like configurations, do it</li> <li>Do not mutate LSP state directly. Add-ons sometimes have access to important state such as document objects, which should never be mutated directly, but instead through the mechanisms provided by the LSP specification - like text edits</li> <li>Do not over-notify users. It’s generally annoying and diverts attention from the current task</li> <li>Show the right context at the right time. When adding visual features, think about <strong>when</strong> the information is relevant for users to avoid polluting the editor</li> </ul> <h2 id="building-a-ruby-lsp-add-on"> <a href="#building-a-ruby-lsp-add-on" class="anchor-heading" aria-labelledby="building-a-ruby-lsp-add-on"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Building a Ruby LSP add-on </h2> <p><strong>Note</strong>: the Ruby LSP uses <a href="https://sorbet.org/">Sorbet</a>. We recommend using Sorbet in add-ons as well, which allows authors to benefit from types declared by the Ruby LSP.</p> <p>As an example, check out <a href="https://github.com/Shopify/ruby-lsp-rails">Ruby LSP Rails</a>, which is a Ruby LSP add-on to provide Rails related features.</p> <h3 id="activating-the-add-on"> <a href="#activating-the-add-on" class="anchor-heading" aria-labelledby="activating-the-add-on"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Activating the add-on </h3> <p>The Ruby LSP discovers add-ons based on the existence of an <code class="language-plaintext highlighter-rouge">addon.rb</code> file placed inside a <code class="language-plaintext highlighter-rouge">ruby_lsp</code> folder. For example, <code class="language-plaintext highlighter-rouge">my_gem/lib/ruby_lsp/my_gem/addon.rb</code>. This file must declare the add-on class, which can be used to perform any necessary activation when the server starts.</p> <p class="note">Projects can also define their own private add-ons for functionality that only applies to a particular application. As long as a file matching <code class="language-plaintext highlighter-rouge">ruby_lsp/**/addon.rb</code> exists inside of the workspace (not necessarily at the root), it will be loaded by the Ruby LSP.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># frozen_string_literal: true</span>
+
+<span class="nb">require</span> <span class="s2">"ruby_lsp/addon"</span>
+
+<span class="k">module</span> <span class="nn">RubyLsp</span>
+  <span class="k">module</span> <span class="nn">MyGem</span>
+    <span class="k">class</span> <span class="nc">Addon</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span>
+      <span class="c1"># Performs any activation that needs to happen once when the language server is booted</span>
+      <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="c1"># Performs any cleanup when shutting down the server, like terminating a subprocess</span>
+      <span class="k">def</span> <span class="nf">deactivate</span>
+      <span class="k">end</span>
+
+      <span class="c1"># Returns the name of the add-on</span>
+      <span class="k">def</span> <span class="nf">name</span>
+        <span class="s2">"Ruby LSP My Gem"</span>
+      <span class="k">end</span>
+
+      <span class="c1"># Defining a version for the add-on is mandatory. This version doesn't necessarily need to match the version of</span>
+      <span class="c1"># the gem it belongs to</span>
+      <span class="k">def</span> <span class="nf">version</span>
+        <span class="s2">"0.1.0"</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <h3 id="listeners"> <a href="#listeners" class="anchor-heading" aria-labelledby="listeners"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Listeners </h3> <p>An essential component to add-ons are listeners. All Ruby LSP requests are listeners that handle specific node types.</p> <p>Listeners work in conjunction with a <code class="language-plaintext highlighter-rouge">Prism::Dispatcher</code>, which is responsible for dispatching events during the parsing of Ruby code. Each event corresponds to a specific node in the Abstract Syntax Tree (AST) of the code being parsed.</p> <p>Here’s a simple example of a listener:</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># frozen_string_literal: true</span>
+
+<span class="k">class</span> <span class="nc">MyListener</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">dispatcher</span><span class="p">)</span>
+    <span class="c1"># Register to listen to `on_class_node_enter` events</span>
+    <span class="n">dispatcher</span><span class="p">.</span><span class="nf">register</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="ss">:on_class_node_enter</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Define the handler method for the `on_class_node_enter` event</span>
+  <span class="k">def</span> <span class="nf">on_class_node_enter</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="vg">$stderr</span><span class="p">.</span><span class="nf">puts</span> <span class="s2">"Hello, </span><span class="si">#{</span><span class="n">node</span><span class="p">.</span><span class="nf">constant_path</span><span class="p">.</span><span class="nf">slice</span><span class="si">}</span><span class="s2">!"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">dispatcher</span> <span class="o">=</span> <span class="no">Prism</span><span class="o">::</span><span class="no">Dispatcher</span><span class="p">.</span><span class="nf">new</span>
+<span class="no">MyListener</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">dispatcher</span><span class="p">)</span>
+
+<span class="n">parse_result</span> <span class="o">=</span> <span class="no">Prism</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="s2">"class Foo; end"</span><span class="p">)</span>
+<span class="n">dispatcher</span><span class="p">.</span><span class="nf">dispatch</span><span class="p">(</span><span class="n">parse_result</span><span class="p">.</span><span class="nf">value</span><span class="p">)</span>
+
+<span class="c1"># Prints</span>
+<span class="c1"># =&gt; Hello, Foo!</span>
+</code></pre></div></div> <p>In this example, the listener is registered to the dispatcher to listen for the <code class="language-plaintext highlighter-rouge">:on_class_node_enter</code> event. When a class node is encountered during the parsing of the code, a greeting message is outputted with the class name.</p> <p>This approach enables all add-on responses to be captured in a single round of AST visits, greatly improving performance.</p> <h3 id="enhancing-features"> <a href="#enhancing-features" class="anchor-heading" aria-labelledby="enhancing-features"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Enhancing features </h3> <p>There are two ways to enhance Ruby LSP features. One is handling DSLs that occur at a call site and that do not change which declarations exist in the project. A great example of this is the Rails <code class="language-plaintext highlighter-rouge">validate</code> method, which accepts a symbol that represents a method that gets dynamically invoked. That style of DSL is what we refer to as a <a href="#dealing-with-call-site-dsls">call site DSL</a>.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="c1"># From Ruby's perspective, `:something` is just a regular symbol. It's Rails that defines this as a DSL and specifies</span>
+  <span class="c1"># that the argument represents a method name.</span>
+  <span class="c1">#</span>
+  <span class="c1"># If an add-on wanted to handle go to definition or completion for these symbols, then it would need to enhance the</span>
+  <span class="c1"># handling for call site DSLs</span>
+  <span class="n">validate</span> <span class="ss">:something</span>
+
+  <span class="kp">private</span>
+
+  <span class="k">def</span> <span class="nf">something</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <p>The second way to augment the Ruby LSP is to handle declaration DSLs. These are DSLs that create declarations via meta-programming. To use another Rails example, <code class="language-plaintext highlighter-rouge">belongs_to</code> is a DSL that mutates the current class and adds extra methods based on the arguments passed to it.</p> <p>DSLs that add extra declarations should be handled through an <a href="#dealing-with-declaration-dsls">indexing enhancement</a>.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+  <span class="c1"># When this method is invoked, a bunch of new methods will be defined in the `User` class, such as `company` and</span>
+  <span class="c1"># `company=`. By informing the Ruby LSP about the new methods through an indexing enhancement, features such as</span>
+  <span class="c1"># go to definition, completion, hover, signature help and workspace symbol will automatically pick up the new</span>
+  <span class="c1"># declaration</span>
+  <span class="n">belongs_to</span> <span class="ss">:company</span>
+<span class="k">end</span>
+</code></pre></div></div> <h4 id="dealing-with-call-site-dsls"> <a href="#dealing-with-call-site-dsls" class="anchor-heading" aria-labelledby="dealing-with-call-site-dsls"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Dealing with call site DSLs </h4> <p>To enhance a request, the add-on must create a listener that will collect extra results that will be automatically appended to the base language server response. Additionally, <code class="language-plaintext highlighter-rouge">Addon</code> has to implement a factory method that instantiates the listener. When instantiating the listener, also note that a <code class="language-plaintext highlighter-rouge">ResponseBuilders</code> object is passed in. This object should be used to return responses back to the Ruby LSP.</p> <p>For example: to add a message on hover saying “Hello!” on top of the base hover behavior of the Ruby LSP, we can use the following listener implementation.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># frozen_string_literal: true</span>
+
+<span class="k">module</span> <span class="nn">RubyLsp</span>
+  <span class="k">module</span> <span class="nn">MyGem</span>
+    <span class="k">class</span> <span class="nc">Addon</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span>
+      <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+        <span class="vi">@message_queue</span> <span class="o">=</span> <span class="n">message_queue</span>
+        <span class="vi">@config</span> <span class="o">=</span> <span class="no">SomeConfiguration</span><span class="p">.</span><span class="nf">new</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">deactivate</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">name</span>
+        <span class="s2">"Ruby LSP My Gem"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">version</span>
+        <span class="s2">"0.1.0"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">create_hover_listener</span><span class="p">(</span><span class="n">response_builder</span><span class="p">,</span> <span class="n">node_context</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">)</span>
+        <span class="c1"># Use the listener factory methods to instantiate listeners with parameters sent by the LSP combined with any</span>
+        <span class="c1"># pre-computed information in the add-on. These factory methods are invoked on every request</span>
+        <span class="no">Hover</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">response_builder</span><span class="p">,</span> <span class="vi">@config</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="k">class</span> <span class="nc">Hover</span>
+      <span class="c1"># The Requests::Support::Common module provides some helper methods you may find helpful.</span>
+      <span class="kp">include</span> <span class="no">Requests</span><span class="o">::</span><span class="no">Support</span><span class="o">::</span><span class="no">Common</span>
+
+      <span class="c1"># Listeners are initialized with the Prism::Dispatcher. This object is used by the Ruby LSP to emit the events</span>
+      <span class="c1"># when it finds nodes during AST analysis. Listeners must register which nodes they want to handle with the</span>
+      <span class="c1"># dispatcher (see below).</span>
+      <span class="c1"># Listeners are initialized with a `ResponseBuilders` object. The listener will push the associated content</span>
+      <span class="c1"># to this object, which will then build the Ruby LSP's response.</span>
+      <span class="c1"># Additionally, listeners are instantiated with a message_queue to push notifications (not used in this example).</span>
+      <span class="c1"># See "Sending notifications to the client" for more information.</span>
+      <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">response_builder</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">)</span>
+        <span class="vi">@response_builder</span> <span class="o">=</span> <span class="n">response_builder</span>
+        <span class="vi">@config</span> <span class="o">=</span> <span class="n">config</span>
+
+        <span class="c1"># Register that this listener will handle `on_constant_read_node_enter` events (i.e.: whenever a constant read</span>
+        <span class="c1"># is found in the code)</span>
+        <span class="n">dispatcher</span><span class="p">.</span><span class="nf">register</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="ss">:on_constant_read_node_enter</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="c1"># Listeners must define methods for each event they registered with the dispatcher. In this case, we have to</span>
+      <span class="c1"># define `on_constant_read_node_enter` to specify what this listener should do every time we find a constant</span>
+      <span class="k">def</span> <span class="nf">on_constant_read_node_enter</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="c1"># Certain builders are made available to listeners to build LSP responses. The classes under</span>
+        <span class="c1"># `RubyLsp::ResponseBuilders` are used to build responses conforming to the LSP Specification.</span>
+        <span class="c1"># ResponseBuilders::Hover itself also requires a content category to be specified (title, links,</span>
+        <span class="c1"># or documentation).</span>
+        <span class="vi">@response_builder</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="s2">"Hello!"</span><span class="p">,</span> <span class="ss">category: :documentation</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <h4 id="dealing-with-declaration-dsls"> <a href="#dealing-with-declaration-dsls" class="anchor-heading" aria-labelledby="dealing-with-declaration-dsls"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Dealing with declaration DSLs </h4> <p>Add-ons can inform the Ruby LSP about declarations that are made via meta-programming. By ensuring that the index is populated with all declarations, features like go to definition, hover, completion, signature help and workspace symbol will all automatically work.</p> <p>To achieve this the add-on must create an indexing enhancement class and register it. Here’s an example of how to do it. Consider that a gem defines this DSL:</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyThing</span> <span class="o">&lt;</span> <span class="no">MyLibrary</span><span class="o">::</span><span class="no">ParentClass</span>
+  <span class="c1"># After invoking this method from the `MyLibrary::ParentClass`, a method called `new_method` will be created,</span>
+  <span class="c1"># accepting a single required parameter named `a`</span>
+  <span class="n">my_dsl_that_creates_methods</span>
+
+  <span class="c1"># Produces this with meta-programming</span>
+  <span class="c1"># def my_method(a); end</span>
+<span class="k">end</span>
+</code></pre></div></div> <p>This is how you could write an enhancement to teach the Ruby LSP to understand that DSL:</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyIndexingEnhancement</span> <span class="o">&lt;</span> <span class="no">RubyIndexer</span><span class="o">::</span><span class="no">Enhancement</span>
+  <span class="c1"># This on call node handler is invoked any time during indexing when we find a method call. It can be used to insert</span>
+  <span class="c1"># more entries into the index depending on the conditions</span>
+  <span class="k">def</span> <span class="nf">on_call_node_enter</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">return</span> <span class="k">unless</span> <span class="vi">@listener</span><span class="p">.</span><span class="nf">current_owner</span>
+
+    <span class="c1"># Return early unless the method call is the one we want to handle</span>
+    <span class="k">return</span> <span class="k">unless</span> <span class="n">node</span><span class="p">.</span><span class="nf">name</span> <span class="o">==</span> <span class="ss">:my_dsl_that_creates_methods</span>
+
+    <span class="c1"># Create a new entry to be inserted in the index. This entry will represent the declaration that is created via</span>
+    <span class="c1"># meta-programming. All entries are defined in the `entry.rb` file.</span>
+    <span class="c1">#</span>
+    <span class="c1"># In this example, we will add a new method to the index</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="n">node</span><span class="p">.</span><span class="nf">location</span>
+
+    <span class="c1"># Create the array of signatures that this method will accept. Every signatures is composed of a list of</span>
+    <span class="c1"># parameters. The parameter classes represent each type of parameter</span>
+    <span class="n">signatures</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="no">RubyIndexer</span><span class="o">::</span><span class="no">Entry</span><span class="o">::</span><span class="no">Signature</span><span class="p">.</span><span class="nf">new</span><span class="p">([</span><span class="no">RubyIndexer</span><span class="o">::</span><span class="no">Entry</span><span class="o">::</span><span class="no">RequiredParameter</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">name: :a</span><span class="p">)])</span>
+    <span class="p">]</span>
+
+    <span class="vi">@listener</span><span class="p">.</span><span class="nf">add_method</span><span class="p">(</span>
+      <span class="s2">"new_method"</span><span class="p">,</span> <span class="c1"># Name of the method</span>
+      <span class="n">location</span><span class="p">,</span>     <span class="c1"># Prism location for the node defining this method</span>
+      <span class="n">signatures</span>    <span class="c1"># Signatures available to invoke this method</span>
+    <span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="c1"># This method is invoked when the parser has finished processing the method call node.</span>
+  <span class="c1"># It can be used to perform cleanups like popping a stack...etc.</span>
+  <span class="k">def</span> <span class="nf">on_call_node_leave</span><span class="p">(</span><span class="n">node</span><span class="p">);</span> <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <p>With this the Ruby LSP should automatically handle calls to <code class="language-plaintext highlighter-rouge">my_dsl_that_creates_methods</code> and create an accurate representation of the declarations that will be available in the runtime.</p> <h3 id="registering-formatters"> <a href="#registering-formatters" class="anchor-heading" aria-labelledby="registering-formatters"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Registering formatters </h3> <p>Gems may also provide a formatter to be used by the Ruby LSP. To do that, the add-on must create a formatter runner and register it. The formatter is used if the <code class="language-plaintext highlighter-rouge">rubyLsp.formatter</code> option configured by the user matches the identifier registered.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">MyFormatterRubyLspAddon</span> <span class="o">&lt;</span> <span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span>
+  <span class="k">def</span> <span class="nf">name</span>
+    <span class="s2">"My Formatter"</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+    <span class="c1"># The first argument is an identifier users can pick to select this formatter. To use this formatter, users must</span>
+    <span class="c1"># have rubyLsp.formatter configured to "my_formatter"</span>
+    <span class="c1"># The second argument is a class instance that implements the `FormatterRunner` interface (see below)</span>
+    <span class="n">global_state</span><span class="p">.</span><span class="nf">register_formatter</span><span class="p">(</span><span class="s2">"my_formatter"</span><span class="p">,</span> <span class="no">MyFormatterRunner</span><span class="p">.</span><span class="nf">new</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># Custom formatter</span>
+<span class="k">class</span> <span class="nc">MyFormatter</span>
+  <span class="c1"># If using Sorbet to develop the add-on, then include this interface to make sure the class is properly implemented</span>
+  <span class="kp">include</span> <span class="no">RubyLsp</span><span class="o">::</span><span class="no">Requests</span><span class="o">::</span><span class="no">Support</span><span class="o">::</span><span class="no">Formatter</span>
+
+  <span class="c1"># Use the initialize method to perform any sort of ahead of time work. For example, reading configurations for your</span>
+  <span class="c1"># formatter since they are unlikely to change between requests</span>
+  <span class="k">def</span> <span class="nf">initialize</span>
+    <span class="vi">@config</span> <span class="o">=</span> <span class="n">read_config_file!</span>
+  <span class="k">end</span>
+
+  <span class="c1"># IMPORTANT: None of the following methods should mutate the document in any way or that will lead to a corrupt state!</span>
+
+  <span class="c1"># Provide formatting for a given document. This method should return the formatted string for the entire document</span>
+  <span class="k">def</span> <span class="nf">run_formatting</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">document</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">document</span><span class="p">.</span><span class="nf">source</span>
+    <span class="n">formatted_source</span> <span class="o">=</span> <span class="n">format_the_source_using_my_formatter</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">formatted_source</span>
+  <span class="k">end</span>
+
+  <span class="c1"># Provide diagnostics for the given document. This method must return an array of `RubyLsp::Interface::Diagnostic`</span>
+  <span class="c1"># objects</span>
+  <span class="k">def</span> <span class="nf">run_diagnostic</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">document</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <h3 id="sending-notifications-to-the-client"> <a href="#sending-notifications-to-the-client" class="anchor-heading" aria-labelledby="sending-notifications-to-the-client"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Sending notifications to the client </h3> <p>Sometimes, add-ons may need to send asynchronous information to the client. For example, a slow request might want to indicate progress or diagnostics may be computed in the background without blocking the language server.</p> <p>For this purpose, all add-ons receive the message queue when activated, which is a thread queue that can receive notifications for the client. The add-on should keep a reference to this message queue and pass it to listeners that are interested in using it.</p> <p><strong>Note</strong>: do not close the message queue anywhere. The Ruby LSP will handle closing the message queue when appropriate.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">RubyLsp</span>
+  <span class="k">module</span> <span class="nn">MyGem</span>
+    <span class="k">class</span> <span class="nc">Addon</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span>
+      <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+        <span class="vi">@message_queue</span> <span class="o">=</span> <span class="n">message_queue</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">deactivate</span><span class="p">;</span> <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">name</span>
+        <span class="s2">"Ruby LSP My Gem"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">version</span>
+        <span class="s2">"0.1.0"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">create_hover_listener</span><span class="p">(</span><span class="n">response_builder</span><span class="p">,</span> <span class="n">node_context</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">)</span>
+        <span class="no">MyHoverListener</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="vi">@message_queue</span><span class="p">,</span> <span class="n">response_builder</span><span class="p">,</span> <span class="n">node_context</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="k">class</span> <span class="nc">MyHoverListener</span>
+      <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">message_queue</span><span class="p">,</span> <span class="n">response_builder</span><span class="p">,</span> <span class="n">node_context</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">)</span>
+        <span class="vi">@message_queue</span> <span class="o">=</span> <span class="n">message_queue</span>
+
+        <span class="vi">@message_queue</span> <span class="o">&lt;&lt;</span> <span class="no">Notification</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span>
+          <span class="ss">message: </span><span class="s2">"$/progress"</span><span class="p">,</span>
+          <span class="ss">params: </span><span class="no">Interface</span><span class="o">::</span><span class="no">ProgressParams</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span>
+            <span class="ss">token: </span><span class="s2">"progress-token-id"</span><span class="p">,</span>
+            <span class="ss">value: </span><span class="no">Interface</span><span class="o">::</span><span class="no">WorkDoneProgressBegin</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">kind: </span><span class="s2">"begin"</span><span class="p">,</span> <span class="ss">title: </span><span class="s2">"Starting slow work!"</span><span class="p">),</span>
+          <span class="p">),</span>
+        <span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <h3 id="registering-for-file-update-events"> <a href="#registering-for-file-update-events" class="anchor-heading" aria-labelledby="registering-for-file-update-events"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Registering for file update events </h3> <p>By default, the Ruby LSP listens for changes to files ending in <code class="language-plaintext highlighter-rouge">.rb</code> to continuously update its index when Ruby source code is modified. If your add-on uses a tool that is configured through a file (like RuboCop and its <code class="language-plaintext highlighter-rouge">.rubocop.yml</code>) you can register for changes to these files and react when the configuration changes.</p> <p><strong>Note</strong>: you will receive events from <code class="language-plaintext highlighter-rouge">ruby-lsp</code> and other add-ons as well, in addition to your own registered ones.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">RubyLsp</span>
+  <span class="k">module</span> <span class="nn">MyGem</span>
+    <span class="k">class</span> <span class="nc">Addon</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span>
+      <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+        <span class="n">register_additional_file_watchers</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">deactivate</span><span class="p">;</span> <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">version</span>
+        <span class="s2">"0.1.0"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">name</span>
+        <span class="s2">"My Addon"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">register_additional_file_watchers</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+        <span class="c1"># Clients are not required to implement this capability</span>
+        <span class="k">return</span> <span class="k">unless</span> <span class="n">global_state</span><span class="p">.</span><span class="nf">supports_watching_files</span>
+
+        <span class="n">message_queue</span> <span class="o">&lt;&lt;</span> <span class="no">Request</span><span class="p">.</span><span class="nf">register_watched_files</span><span class="p">(</span>
+          <span class="s2">"ruby-lsp-my-gem-file-watcher"</span><span class="p">,</span>
+          <span class="s2">"**/.my-config.yml"</span><span class="p">,</span>
+          <span class="ss">registration_id: </span><span class="s2">"my-config-watcher"</span><span class="p">,</span>
+        <span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">workspace_did_change_watched_files</span><span class="p">(</span><span class="n">changes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">changes</span><span class="p">.</span><span class="nf">any?</span> <span class="p">{</span> <span class="o">|</span><span class="n">change</span><span class="o">|</span> <span class="n">change</span><span class="p">[</span><span class="ss">:uri</span><span class="p">].</span><span class="nf">end_with?</span><span class="p">(</span><span class="s2">".my-config.yml"</span><span class="p">)</span> <span class="p">}</span>
+          <span class="c1"># Do something to reload the config here</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <h3 id="dependency-constraints"> <a href="#dependency-constraints" class="anchor-heading" aria-labelledby="dependency-constraints"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Dependency constraints </h3> <p>While we figure out a good design for the add-ons API, breaking changes are bound to happen. To avoid having your add-on accidentally break editor functionality, you should define the version that your add-on depends on. There are two ways of achieving this.</p> <h4 id="add-ons-that-have-a-runtime-dependency-on-the-ruby-lsp"> <a href="#add-ons-that-have-a-runtime-dependency-on-the-ruby-lsp" class="anchor-heading" aria-labelledby="add-ons-that-have-a-runtime-dependency-on-the-ruby-lsp"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Add-ons that have a runtime dependency on the ruby-lsp </h4> <p>For add-ons that have a runtime dependency on the <code class="language-plaintext highlighter-rouge">ruby-lsp</code> gem, you can simply use regular gemspec constraints to define which version is supported.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">spec</span><span class="p">.</span><span class="nf">add_dependency</span><span class="p">(</span><span class="s2">"ruby-lsp"</span><span class="p">,</span> <span class="s2">"~&gt; 0.6.0"</span><span class="p">)</span>
+</code></pre></div></div> <h4 id="add-ons-that-do-not-have-a-runtime-dependency-on-the-ruby-lsp"> <a href="#add-ons-that-do-not-have-a-runtime-dependency-on-the-ruby-lsp" class="anchor-heading" aria-labelledby="add-ons-that-do-not-have-a-runtime-dependency-on-the-ruby-lsp"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Add-ons that do not have a runtime dependency on the ruby-lsp </h4> <p>For add-ons that are defined inside other gems that do not wish to have a runtime dependency on <code class="language-plaintext highlighter-rouge">ruby-lsp</code>, please use the following API to ensure compatibility.</p> <p class="note">If the Ruby LSP is automatically upgraded to a version not supported by an add-on using this approach, the add-on will simply not be activated with a warning and the functionality will not be available. The author must update to ensure compatibility with the current state of the API.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c1"># Declare that this add-on supports the base Ruby LSP version v0.18.0, but not v0.19 or above</span>
+<span class="c1">#</span>
+<span class="c1"># If the Ruby LSP is upgraded to v0.19.0, this add-on will fail gracefully to activate and a warning will be printed</span>
+<span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span><span class="p">.</span><span class="nf">depend_on_ruby_lsp!</span><span class="p">(</span><span class="s2">"~&gt; 0.18.0"</span><span class="p">)</span>
+
+<span class="k">module</span> <span class="nn">RubyLsp</span>
+  <span class="k">module</span> <span class="nn">MyGem</span>
+    <span class="k">class</span> <span class="nc">Addon</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">RubyLsp</span><span class="o">::</span><span class="no">Addon</span>
+      <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="n">global_state</span><span class="p">,</span> <span class="n">message_queue</span><span class="p">)</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">deactivate</span><span class="p">;</span> <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">version</span>
+        <span class="s2">"0.1.0"</span>
+      <span class="k">end</span>
+
+      <span class="k">def</span> <span class="nf">name</span>
+        <span class="s2">"My Addon"</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <h3 id="testing-add-ons"> <a href="#testing-add-ons" class="anchor-heading" aria-labelledby="testing-add-ons"><svg viewBox="0 0 16 16" aria-hidden="true"><use xlink:href="#svg-link"></use></svg></a> Testing add-ons </h3> <p>When writing unit tests for add-ons, it’s essential to keep in mind that code is rarely in its final state while the developer is coding. Therefore, be sure to test valid scenarios where the code is still incomplete.</p> <p>For example, if you are writing a feature related to <code class="language-plaintext highlighter-rouge">require</code>, do not test <code class="language-plaintext highlighter-rouge">require "library"</code> exclusively. Consider intermediate states the user might end up while typing. Additionally, consider syntax that is uncommon, yet still valid Ruby.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Still no argument</span>
+<span class="nb">require</span>
+
+<span class="c1"># With quotes autocompleted, but no content on the string</span>
+<span class="nb">require</span> <span class="s2">""</span>
+
+<span class="c1"># Using uncommon, but valid syntax, such as invoking require directly on Kernel using parenthesis</span>
+<span class="no">Kernel</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="s2">"library"</span><span class="p">)</span>
+</code></pre></div></div> <p>The Ruby LSP exports a test helper which creates a server instance with a document already initialized with the desired content. This is useful to test the integration of your add-on with the language server.</p> <p>Add-ons are automatically loaded, so simply executing the desired language server request should already include your add-on’s contributions.</p> <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s2">"test_helper"</span>
+<span class="nb">require</span> <span class="s2">"ruby_lsp/test_helper"</span>
+
+<span class="k">class</span> <span class="nc">MyAddonTest</span> <span class="o">&lt;</span> <span class="no">Minitest</span><span class="o">::</span><span class="no">Test</span>
+  <span class="k">def</span> <span class="nf">test_my_addon_works</span>
+    <span class="n">source</span> <span class="o">=</span>  <span class="o">&lt;&lt;~</span><span class="no">RUBY</span><span class="sh">
+      # Some test code that allows you to trigger your add-on's contribution
+      class Foo
+        def something
+        end
+      end
+</span><span class="no">    RUBY</span>
+
+    <span class="n">with_server</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">server</span><span class="p">,</span> <span class="n">uri</span><span class="o">|</span>
+      <span class="c1"># Tell the server to execute the definition request</span>
+      <span class="n">server</span><span class="p">.</span><span class="nf">process_message</span><span class="p">(</span>
+        <span class="ss">id: </span><span class="mi">1</span><span class="p">,</span>
+        <span class="ss">method: </span><span class="s2">"textDocument/definition"</span><span class="p">,</span>
+        <span class="ss">params: </span><span class="p">{</span>
+          <span class="ss">textDocument: </span><span class="p">{</span>
+            <span class="ss">uri: </span><span class="n">uri</span><span class="p">.</span><span class="nf">to_s</span><span class="p">,</span>
+          <span class="p">},</span>
+          <span class="ss">position: </span><span class="p">{</span>
+            <span class="ss">line: </span><span class="mi">3</span><span class="p">,</span>
+            <span class="ss">character: </span><span class="mi">5</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">)</span>
+
+      <span class="c1"># Pop the server's response to the definition request</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">server</span><span class="p">.</span><span class="nf">pop_response</span><span class="p">.</span><span class="nf">response</span>
+      <span class="c1"># Assert that the response includes your add-on's contribution</span>
+      <span class="n">assert_equal</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span> <span class="n">result</span><span class="p">.</span><span class="nf">response</span><span class="p">.</span><span class="nf">location</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div> <hr> <h2 class="text-delta">Table of contents</h2> <ul> <li> <a href="/ruby-lsp/test_framework_addons.html">Test framework add-ons</a> </li> </ul> </main> <hr> <footer> <div class="d-md-none mt-4 fs-2"> This site uses <a href="https://github.com/just-the-docs/just-the-docs">Just the Docs</a>, a documentation theme for Jekyll. </div> </footer> </div> </div> <div class="search-overlay"></div> </div> </body> </html>
