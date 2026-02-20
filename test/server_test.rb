@@ -888,6 +888,54 @@ class ServerTest < Minitest::Test
     assert_equal("Request 1 was cancelled", error.message)
   end
 
+  def test_requests_cancelled_during_processing_are_deleted_from_cancelled_requests_list
+    uri = URI("file:///foo.rb")
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    started_processing = Queue.new
+    can_finish = Queue.new
+
+    original = @server.method(:text_document_definition)
+
+    # Simulate the request starting to process, but taking long to finish. It will only finish once there's something in
+    # the `can_finish` queue
+    @server.define_singleton_method(:text_document_definition) do |message|
+      started_processing << true
+      can_finish.pop
+      original.call(message)
+    end
+
+    @server.push_message({
+      id: 1,
+      method: "textDocument/definition",
+      params: {
+        textDocument: { uri: uri },
+        position: { line: 0, character: 6 },
+      },
+    })
+
+    # Only cancel the request once we know it started processing
+    started_processing.pop
+    @server.process_message({ method: "$/cancelRequest", params: { id: 1 } })
+    # Only allow the request to finish once we know it got cancelled
+    can_finish << true
+
+    # Verify we still receive a response and that we cleaned up the cancelled list
+    find_message(RubyLsp::Result, id: 1)
+    assert_empty(@server.instance_variable_get(:@cancelled_requests))
+  end
+
   def test_unsaved_changes_are_indexed_when_computing_automatic_features
     uri = URI("file:///foo.rb")
     index = @server.global_state.index
