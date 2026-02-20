@@ -273,7 +273,7 @@ export class Ruby implements RubyInterface {
       // RUBYOPT may be empty or it may contain bundler paths. In the second case, we must concat to avoid accidentally
       // removing the paths from the env variable
       if (this._env.RUBYOPT) {
-        this._env.RUBYOPT.concat(" --yjit");
+        this._env.RUBYOPT += " --yjit";
       } else {
         this._env.RUBYOPT = "--yjit";
       }
