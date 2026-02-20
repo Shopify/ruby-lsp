@@ -218,6 +218,37 @@ suite("Ruby environment activation", () => {
     fs.rmSync(tmpPath, { recursive: true, force: true });
   });
 
+  test("Appends YJIT flag to existing RUBYOPT for Ruby 3.2", async () => {
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (name: string) => {
+        if (name === "rubyVersionManager") {
+          return { identifier: ManagerIdentifier.None };
+        } else if (name === "bundleGemfile") {
+          return "";
+        }
+
+        return undefined;
+      },
+    } as unknown as vscode.WorkspaceConfiguration);
+
+    const envStub = [
+      "3.2.0",
+      "~/.gem/ruby/3.2.0,/opt/rubies/3.2.0/lib/ruby/gems/3.2.0",
+      "true",
+      `RUBYOPT${VALUE_SEPARATOR}-rbundler/setup`,
+    ].join(FIELD_SEPARATOR);
+
+    sandbox.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
+    });
+
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
+    await ruby.activateRuby();
+
+    assert.strictEqual(ruby.env.RUBYOPT, "-rbundler/setup --yjit");
+  });
+
   test("Raises an error if the configured bundleGemfile does not exist", async () => {
     const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     const tmpWorkspaceFolder: vscode.WorkspaceFolder = {
