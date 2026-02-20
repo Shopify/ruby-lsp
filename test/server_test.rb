@@ -412,6 +412,21 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_send_log_message_passes_type_parameter
+    @server.expects(:workspace_dependencies).raises(StandardError, "boom")
+
+    capture_io do
+      @server.process_message({
+        id: 1,
+        method: "rubyLsp/workspace/dependencies",
+        params: {},
+      })
+    end
+
+    log = find_message(RubyLsp::Notification, "window/logMessage")
+    assert_equal(RubyLsp::Constant::MessageType::ERROR, log.params.type)
+  end
+
   def test_changed_file_only_indexes_ruby
     path = File.join(Dir.pwd, "lib", "foo.rb")
     File.write(path, "class Foo\nend")

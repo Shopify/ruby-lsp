@@ -197,7 +197,7 @@ module RubyLsp
 
     #: (String message, ?type: Integer) -> void
     def send_log_message(message, type: Constant::MessageType::LOG)
-      send_message(Notification.window_log_message(message, type: Constant::MessageType::LOG))
+      send_message(Notification.window_log_message(message, type: type))
     end
   end
 end
