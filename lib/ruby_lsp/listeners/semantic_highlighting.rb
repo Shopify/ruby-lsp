@@ -94,7 +94,7 @@ module RubyLsp
 
       #: (Prism::MatchWriteNode node) -> void
       def on_match_write_node_leave(node)
-        @inside_regex_capture = true if node.call.message == "=~"
+        @inside_regex_capture = false if node.call.message == "=~"
       end
 
       #: (Prism::DefNode node) -> void
