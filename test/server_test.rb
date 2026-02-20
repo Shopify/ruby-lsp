@@ -931,6 +931,140 @@ class ServerTest < Minitest::Test
     assert_equal(1, entries.length)
   end
 
+  def test_indexing_occurs_on_did_change_without_combined_requests
+    uri = URI("file:///foo.rb")
+    index = @server.global_state.index
+
+    # Open a file with a class
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: +"class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    # Simulate an editor that never sends combined requests (e.g., Neovim).
+    # Edit the file to add a new method — no combined request fired.
+    @server.process_message({
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri: uri, version: 2 },
+        contentChanges: [
+          {
+            text: "class Foo\n  def bar\n  end\nend",
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 1, character: 3 },
+            },
+          },
+        ],
+      },
+    })
+
+    # The new method should be indexed WITHOUT needing a combined request
+    entries = index["bar"]
+    assert_equal(1, entries.length)
+  end
+
+  def test_did_change_skips_indexing_when_combined_requests_are_used
+    uri = URI("file:///foo.rb")
+    index = @server.global_state.index
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: +"class Foo\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    # Fire a combined request first — this sets @combined_requests_used = true
+    @server.process_message({
+      id: 1,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+    @server.pop_response
+
+    # Now edit to add a method
+    @server.process_message({
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri: uri, version: 2 },
+        contentChanges: [
+          {
+            text: "class Foo\n  def bar\n  end\nend",
+            range: {
+              start: { line: 0, character: 0 },
+              end: { line: 1, character: 3 },
+            },
+          },
+        ],
+      },
+    })
+
+    # didChange should NOT have indexed because combined requests are active
+    assert_nil(index["bar"])
+
+    # But a subsequent combined request SHOULD index it
+    store = @server.instance_variable_get(:@store)
+    store.get(uri).parse!
+
+    @server.process_message({
+      id: 2,
+      method: "textDocument/documentSymbol",
+      params: { textDocument: { uri: uri } },
+    })
+    @server.pop_response
+
+    entries = index["bar"]
+    assert_equal(1, entries.length)
+  end
+
+  def test_did_change_skips_indexing_for_non_declaration_edits
+    uri = URI("file:///foo.rb")
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: +"class Foo\n  def bar\n    x = 1\n  end\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+
+    # No combined requests fired — simulating Neovim.
+    # Edit inside a method body — should NOT trigger indexing
+    @server.global_state.index.expects(:handle_change).never
+    @server.process_message({
+      method: "textDocument/didChange",
+      params: {
+        textDocument: { uri: uri, version: 2 },
+        contentChanges: [
+          {
+            text: "2",
+            range: {
+              start: { line: 2, character: 8 },
+              end: { line: 2, character: 9 },
+            },
+          },
+        ],
+      },
+    })
+  end
+
   def test_ancestors_are_recomputed_even_on_unsaved_changes
     uri = URI("file:///foo.rb")
     index = @server.global_state.index

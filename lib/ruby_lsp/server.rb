@@ -414,6 +414,29 @@ module RubyLsp
       text_document = params[:textDocument]
 
       @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+
+      # Index the document if the edit may have changed declarations and the client doesn't trigger combined
+      # requests (documentSymbol, codeLens, foldingRange, documentLink). Editors like Neovim don't send these,
+      # so indexing would otherwise never occur for open files.
+      return if @combined_requests_used
+
+      uri = text_document[:uri]
+      document = @store.get(uri)
+      return unless document.is_a?(RubyDocument)
+
+      @global_state.synchronize do
+        document.parse!
+        return unless document.should_index?
+
+        @global_state.index.handle_change(uri) do |index|
+          index.delete(uri, skip_require_paths_tree: true)
+          dispatcher = Prism::Dispatcher.new
+          RubyIndexer::DeclarationListener.new(index, dispatcher, document.parse_result, uri, collect_comments: true)
+          dispatcher.dispatch(document.ast)
+        end
+
+        document.mark_as_indexed!
+      end
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -477,6 +500,11 @@ module RubyLsp
       code_lens = nil #: Requests::CodeLens?
 
       if document.is_a?(RubyDocument) && document.should_index?
+        unless @combined_requests_used
+          @combined_requests_used = true
+          send_log_message("Combined requests detected; textDocument/didChange indexing path disabled")
+        end
+
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
         # updated on save
         @global_state.synchronize do
@@ -489,7 +517,12 @@ module RubyLsp
             dispatcher.dispatch(document.ast)
           end
         end
+        document.mark_as_indexed!
       else
+        unless @combined_requests_used || document.is_a?(ERBDocument)
+          @combined_requests_used = true
+          send_log_message("Combined requests detected; textDocument/didChange indexing path disabled")
+        end
         code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
         dispatcher.dispatch(document.ast)
       end

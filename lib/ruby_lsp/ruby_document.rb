@@ -193,6 +193,8 @@ module RubyLsp
 
     #: -> bool
     def should_index?
+      return false unless @needs_indexing
+
       # This method controls when we should index documents. If there's no recent edit and the document has just been
       # opened, we need to index it
       return true unless @last_edit

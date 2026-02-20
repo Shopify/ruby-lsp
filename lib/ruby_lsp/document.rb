@@ -44,6 +44,7 @@ module RubyLsp
       @uri = uri #: URI::Generic
       @needs_parsing = true #: bool
       @last_edit = nil #: Edit?
+      @needs_indexing = true #: bool
 
       # Workaround to be able to type parse_result properly. It is immediately set when invoking parse!
       @parse_result = ( # rubocop:disable Style/RedundantParentheses
@@ -117,6 +118,8 @@ module RubyLsp
       else
         Replace.new(last_edit_range)
       end
+
+      @needs_indexing = true
     end
 
     # Returns `true` if the document was parsed and `false` if nothing needed parsing
@@ -143,6 +146,11 @@ module RubyLsp
       start_index = scanner.find_char_position(start_pos)
       end_index = scanner.find_char_position(end_pos) if end_pos
       [start_index, end_index]
+    end
+
+    #: -> void
+    def mark_as_indexed!
+      @needs_indexing = false
     end
 
     private

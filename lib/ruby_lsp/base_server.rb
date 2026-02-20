@@ -18,6 +18,7 @@ module RubyLsp
       @current_request_id = 1 #: Integer
       @global_state = GlobalState.new #: GlobalState
       @store = Store.new(@global_state) #: Store
+      @combined_requests_used = false #: bool
       @outgoing_dispatcher = Thread.new do
         unless @test_mode
           while (message = @outgoing_queue.pop)
