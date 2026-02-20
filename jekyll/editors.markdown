@@ -325,6 +325,22 @@ Zed has support for the Ruby LSP through the [Ruby extension](https://github.com
 
 Documentation can be found in [Setting up Ruby LSP](https://zed.dev/docs/languages/ruby#setting-up-ruby-lsp).
 
+To configure an add-on, add the `addonSettings` configuration within `initialization_options`, for example:
+
+```json
+"lsp": {
+  "ruby-lsp": {
+    "initialization_options": {
+      "addonSettings": {
+        "Ruby LSP Rails": {
+          "enablePendingMigrationsPrompt": false
+        }
+      }
+    }
+  }
+}
+```
+
 ## RubyMine
 
 You can use the Ruby LSP with RubyMine (or IntelliJ IDEA Ultimate) through the following plugin.
