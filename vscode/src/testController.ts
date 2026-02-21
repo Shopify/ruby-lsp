@@ -15,6 +15,13 @@ const asyncExec = promisify(exec);
 
 const NESTED_TEST_DIR_PATTERN = "**/{test,spec,features}/**/";
 const TEST_FILE_PATTERN = `${NESTED_TEST_DIR_PATTERN}{*_test.rb,test_*.rb,*_spec.rb,*.feature}`;
+const IGNORED_FOLDERS = [".bundle", "vendor/bundle", "node_modules", "tmp", "log"];
+const IGNORED_FOLDERS_EXCLUDE_PATTERN = `{${IGNORED_FOLDERS.map((folder) => `**/${folder}/**`).join(",")}}`;
+
+// Build a regex to match paths containing any of the ignored folders
+const IGNORED_FOLDERS_PATH_REGEX = new RegExp(
+  IGNORED_FOLDERS.map((folder) => `/${folder.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/`).join("|"),
+);
 
 interface CodeLensData {
   type: string;
@@ -142,6 +149,10 @@ export class TestController {
       testFileWatcher,
       nestedTestDirWatcher,
       testFileWatcher.onDidCreate(async (uri) => {
+        if (this.isInIgnoredFolder(uri)) {
+          return;
+        }
+
         const workspace = vscode.workspace.getWorkspaceFolder(uri);
 
         if (!workspace || !vscode.workspace.workspaceFolders) {
@@ -160,6 +171,10 @@ export class TestController {
         await this.addTestItemsForFile(uri, workspace, initialCollection);
       }),
       testFileWatcher.onDidChange(async (uri) => {
+        if (this.isInIgnoredFolder(uri)) {
+          return;
+        }
+
         const item = await this.getParentTestItem(uri);
 
         if (item) {
@@ -172,6 +187,10 @@ export class TestController {
         }
       }),
       nestedTestDirWatcher.onDidDelete(async (uri) => {
+        if (this.isInIgnoredFolder(uri)) {
+          return;
+        }
+
         const pathParts = uri.fsPath.split(path.sep);
         if (pathParts.includes(".git")) {
           return;
@@ -184,6 +203,10 @@ export class TestController {
         }
       }),
       testFileWatcher.onDidDelete(async (uri) => {
+        if (this.isInIgnoredFolder(uri)) {
+          return;
+        }
+
         const item = await this.getParentTestItem(uri);
 
         if (item) {
@@ -358,7 +381,8 @@ export class TestController {
         Does the file path match the expected glob pattern?
         [Read more](https://shopify.github.io/ruby-lsp/test_explorer.html)
 
-        Expected pattern: "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"`,
+        Expected pattern: "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"
+        Excluded paths: ${IGNORED_FOLDERS.map((p) => `"${p}"`).join(", ")}`,
       );
       return;
     }
@@ -981,7 +1005,7 @@ export class TestController {
       for (const workspaceFolder of workspaceFolders) {
         // Check if there is at least one Ruby test file in the workspace, otherwise we don't consider it
         const pattern = this.testPattern(workspaceFolder);
-        const files = await vscode.workspace.findFiles(pattern, undefined, 1);
+        const files = await vscode.workspace.findFiles(pattern, IGNORED_FOLDERS_EXCLUDE_PATTERN, 1);
         if (files.length === 0) {
           continue;
         }
@@ -1002,7 +1026,7 @@ export class TestController {
   ) {
     const initialCollection = item ? item.children : this.testController.items;
     const pattern = this.testPattern(workspaceFolder);
-    const filePaths = await vscode.workspace.findFiles(pattern);
+    const filePaths = await vscode.workspace.findFiles(pattern, IGNORED_FOLDERS_EXCLUDE_PATTERN);
     const increment = Math.floor(filePaths.length / 100);
 
     for (const uri of filePaths) {
@@ -1144,6 +1168,11 @@ export class TestController {
     }
 
     return false;
+  }
+
+  private isInIgnoredFolder(uri: vscode.Uri): boolean {
+    const normalizedPath = uri.fsPath.split(path.sep).join("/");
+    return IGNORED_FOLDERS_PATH_REGEX.test(normalizedPath);
   }
 
   private testPattern(workspaceFolder: vscode.WorkspaceFolder) {
