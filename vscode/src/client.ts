@@ -83,6 +83,7 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
   const config = vscode.workspace.getConfiguration("rubyLsp");
   const branch: string = config.get("branch")!;
   const customBundleGemfile: string = config.get("bundleGemfile")!;
+  const customBinPath: string = config.get("customBinaryPath")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
   const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
 
@@ -92,9 +93,23 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
     shell: true,
   };
 
+  // If there's a user defined custom binary path, run it and just trust that it is `ruby-lsp` compatible.
+  if (customBinPath) {
+    run = {
+      command: customBinPath,
+      args: [],
+      options: executableOptions,
+    };
+
+    debug = {
+      command: customBinPath,
+      args: ["--debug"],
+      options: executableOptions,
+    };
+  }
   // If there's a user defined custom bundle, we run the LSP with `bundle exec` and just trust the user configured
   // their bundle. Otherwise, we run the global install of the LSP and use our composed bundle logic in the server
-  if (customBundleGemfile.length > 0) {
+  else if (customBundleGemfile.length > 0) {
     run = {
       command: "bundle",
       args: ["exec", "ruby-lsp"],
