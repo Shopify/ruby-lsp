@@ -20,6 +20,7 @@ if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.5")
 end
 require "set"
 require "strscan"
+require "rubydex"
 require "prism"
 require "prism/visitor"
 require "language_server-protocol"
