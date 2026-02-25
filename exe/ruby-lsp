@@ -62,12 +62,12 @@ rescue OptionParser::InvalidOption => e
 end
 
 if options[:branch] && options[:lsp_path]
-  warn('Invalid options: --branch and --lsp-path cannot both be set.')
+  warn("Invalid options: --branch and --lsp-path cannot both be set.")
   exit(1)
 end
 
 if options[:lsp_path] && !File.absolute_path?(options[:lsp_path])
-  warn('Invalid option: --lsp-path must be an absolute path.')
+  warn("Invalid option: --lsp-path must be an absolute path.")
   exit(1)
 end
 
