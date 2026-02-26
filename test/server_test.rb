@@ -383,6 +383,24 @@ class ServerTest < Minitest::Test
     assert_empty(@server.pop_response.response)
   end
 
+  def test_workspace_dependencies_returns_empty_response_when_cwd_is_deleted
+    original_dir = Dir.pwd
+
+    begin
+      parent = Dir.mktmpdir
+      workspace = File.join(parent, "workspace")
+      Dir.mkdir(workspace)
+      Dir.chdir(workspace)
+      FileUtils.rm_rf(parent)
+
+      @server.process_message({ id: 1, method: "rubyLsp/workspace/dependencies" })
+
+      assert_empty(@server.pop_response.response)
+    ensure
+      Dir.chdir(original_dir)
+    end
+  end
+
   def test_workspace_dependencies_returns_empty_list_when_there_is_no_bundle
     @server.global_state.expects(:top_level_bundle).returns(false)
     @server.process_message({ id: 1, method: "rubyLsp/workspace/dependencies" })
