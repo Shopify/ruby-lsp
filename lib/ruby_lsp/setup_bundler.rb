@@ -34,6 +34,7 @@ module RubyLsp
     # Gems that should be kept up to date in the composed bundle. When updating, any of these gems that are not
     # already in the user's Gemfile will be updated together.
     GEMS_TO_UPDATE = ["ruby-lsp", "debug", "prism", "rbs"].freeze #: Array[String]
+    RUBY_LSP_MIN_VERSION = ">= 0.18.0" #: String
 
     #: (String project_path, **untyped options) -> void
     def initialize(project_path, **options)
@@ -169,7 +170,7 @@ module RubyLsp
       end
 
       unless @dependencies["ruby-lsp"]
-        ruby_lsp_entry = +'gem "ruby-lsp", require: false, group: :development'
+        ruby_lsp_entry = +"gem \"ruby-lsp\", \"#{RUBY_LSP_MIN_VERSION}\", require: false, group: :development"
         ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
         parts << ruby_lsp_entry
       end
