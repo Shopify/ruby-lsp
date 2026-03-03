@@ -37,6 +37,10 @@ parser = OptionParser.new do |opts|
     options[:launcher] = true
   end
 
+  opts.on("--beta", "Use pre-release server gems") do
+    options[:beta] = true
+  end
+
   opts.on("-h", "--help", "Print this help") do
     puts opts.help
     puts
@@ -66,6 +70,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
   if options[:launcher]
     flags = []
     flags << "--debug" if options[:debug]
+    flags << "--beta" if options[:beta]
     exit exec(Gem.ruby, File.expand_path("ruby-lsp-launcher", __dir__), *flags)
   end
 

@@ -40,6 +40,7 @@ module RubyLsp
       @project_path = project_path
       @branch = options[:branch] #: String?
       @launcher = options[:launcher] #: bool?
+      @beta = options[:beta] #: bool?
       force_output_to_stderr! if @launcher
 
       # Regular bundle paths
@@ -169,7 +170,9 @@ module RubyLsp
       end
 
       unless @dependencies["ruby-lsp"]
-        ruby_lsp_entry = +'gem "ruby-lsp", require: false, group: :development'
+        ruby_lsp_entry = +'gem "ruby-lsp"'
+        ruby_lsp_entry << ", \">= 0.a\"" if @beta
+        ruby_lsp_entry << ", require: false, group: :development"
         ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
         parts << ruby_lsp_entry
       end

@@ -49,16 +49,18 @@ pid = if Gem.win_platform?
     ["-I", File.expand_path(path)]
   end
 
-  Process.spawn(
+  args = [
     Gem.ruby,
     *load_path,
     File.expand_path("../lib/ruby_lsp/scripts/compose_bundle_windows.rb", __dir__),
     raw_initialize,
-  )
+  ]
+  args << "--beta" if ARGV.include?("--beta")
+  Process.spawn(*args)
 else
   fork do
     require_relative "../lib/ruby_lsp/scripts/compose_bundle"
-    compose(raw_initialize)
+    compose(raw_initialize, beta: ARGV.include?("--beta"))
   end
 end
 
