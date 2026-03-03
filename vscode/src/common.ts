@@ -84,6 +84,7 @@ export const FEATURE_FLAGS = {
   tapiocaAddon: 1.0,
   launcher: 0.3,
   fullTestDiscovery: 1.0,
+  betaServer: -1,
 };
 
 type FeatureFlagConfigurationKey = keyof typeof FEATURE_FLAGS | "all";

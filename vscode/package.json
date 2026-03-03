@@ -562,6 +562,10 @@
             "launcher": {
               "description": "Opt-in/out of the new launcher mode",
               "type": "boolean"
+            },
+            "betaServer": {
+              "description": "Opt-in/out of beta server versions",
+              "type": "boolean"
             }
           },
           "default": {}

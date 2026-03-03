@@ -135,6 +135,10 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
       args.push("--use-launcher");
     }
 
+    if (featureEnabled("betaServer")) {
+      args.push("--beta");
+    }
+
     run = { command, args, options: executableOptions };
     debug = {
       command,
