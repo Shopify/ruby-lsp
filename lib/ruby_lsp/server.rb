@@ -1226,12 +1226,18 @@ module RubyLsp
 
     #: -> void
     def perform_initial_indexing
+      progress("indexing-progress", message: "Indexing workspace...")
+      @global_state.graph.index_workspace
+
+      progress("indexing-progress", message: "Resolving graph...")
+      @global_state.graph.resolve
+
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
       Thread.new do
         begin
           @global_state.index.index_all do |percentage|
-            progress("indexing-progress", percentage)
+            progress("indexing-progress", percentage: percentage)
             true
           rescue ClosedQueueError
             # Since we run indexing on a separate thread, it's possible to kill the server before indexing is complete.
@@ -1285,11 +1291,13 @@ module RubyLsp
       send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
     end
 
-    #: (String id, Integer percentage) -> void
-    def progress(id, percentage)
+    #: (String, ?message: String?, ?percentage: Integer?) -> void
+    def progress(id, message: nil, percentage: nil)
       return unless @global_state.client_capabilities.supports_progress
 
-      send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
+      message ||= "#{percentage}% completed" if percentage
+
+      send_message(Notification.progress_report(id, percentage: percentage, message: message))
     end
 
     #: (String id) -> void
