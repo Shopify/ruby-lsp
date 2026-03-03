@@ -30,6 +30,9 @@ module RubyLsp
     #: RubyIndexer::Index
     attr_reader :index
 
+    #: Rubydex::Graph
+    attr_reader :graph
+
     #: Encoding
     attr_reader :encoding
 
@@ -58,6 +61,7 @@ module RubyLsp
       @test_library = "minitest" #: String
       @has_type_checker = true #: bool
       @index = RubyIndexer::Index.new #: RubyIndexer::Index
+      @graph = Rubydex::Graph.new #: Rubydex::Graph
       @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
       @type_inferrer = TypeInferrer.new(@index) #: TypeInferrer
       @addon_settings = {} #: Hash[String, untyped]
@@ -117,6 +121,7 @@ module RubyLsp
       all_dependencies = gather_direct_and_indirect_dependencies
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
       @workspace_uri = URI(workspace_uri) if workspace_uri
+      @graph.workspace_path = workspace_path
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
       rubocop_has_addon = defined?(::RuboCop::Version::STRING) &&
@@ -189,12 +194,16 @@ module RubyLsp
 
       encodings = options.dig(:capabilities, :general, :positionEncodings)
       @encoding = if !encodings || encodings.empty?
+        @graph.encoding = "utf16"
         Encoding::UTF_16LE
       elsif encodings.include?(Constant::PositionEncodingKind::UTF8)
+        @graph.encoding = "utf8"
         Encoding::UTF_8
       elsif encodings.include?(Constant::PositionEncodingKind::UTF16)
+        @graph.encoding = "utf16"
         Encoding::UTF_16LE
       else
+        @graph.encoding = "utf32"
         Encoding::UTF_32
       end
       @index.configuration.encoding = @encoding
