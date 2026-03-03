@@ -5,4 +5,8 @@ require_relative "compose_bundle"
 
 # When this is invoked on Windows, we pass the raw initialize as an argument to this script. On other platforms, we
 # invoke the compose method from inside a forked process
-compose(ARGV.first, beta: ARGV.include?("--beta"))
+options = {}
+options[:beta] = true if ARGV.include?("--beta")
+branch_index = ARGV.index("--branch")
+options[:branch] = ARGV[branch_index + 1] if branch_index
+compose(ARGV.first, **options)
