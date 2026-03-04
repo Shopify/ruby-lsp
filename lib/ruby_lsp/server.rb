@@ -1436,6 +1436,7 @@ module RubyLsp
             ),
             File.expand_path("../../exe/ruby-lsp-launcher", __dir__),
             @global_state.workspace_uri.to_s,
+            *ARGV,
             chdir: @global_state.workspace_path,
           )
         end
