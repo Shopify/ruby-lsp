@@ -28,7 +28,7 @@ module RubyIndexer
     end
 
     def test_finds_constant_references_inside_singleton_contexts
-      refs = find_const_references("Foo::<Class:Foo>::Bar", <<~RUBY)
+      refs = find_const_references("Foo::<Foo>::Bar", <<~RUBY)
         class Foo
           class << self
             class Bar

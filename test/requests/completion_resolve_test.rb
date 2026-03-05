@@ -122,7 +122,7 @@ class CompletionResolveTest < Minitest::Test
       existing_item = {
         label: "try_convert",
         kind: RubyLsp::Constant::CompletionItemKind::METHOD,
-        data: { owner_name: "String::<Class:String>" },
+        data: { owner_name: "String::<String>" },
       }
 
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
