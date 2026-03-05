@@ -953,15 +953,15 @@ class RubyDocumentTest < Minitest::Test
     assert_nil(node_context.surrounding_method)
 
     node_context = document.locate_node({ line: 4, character: 4 })
-    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal(["Foo", "<Foo>"], node_context.nesting)
     assert_equal("bar", node_context.surrounding_method)
 
     node_context = document.locate_node({ line: 8, character: 4 })
-    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal(["Foo", "<Foo>"], node_context.nesting)
     assert_nil(node_context.surrounding_method)
 
     node_context = document.locate_node({ line: 11, character: 6 })
-    assert_equal(["Foo", "<Class:Foo>"], node_context.nesting)
+    assert_equal(["Foo", "<Foo>"], node_context.nesting)
     assert_equal("baz", node_context.surrounding_method)
 
     node_context = document.locate_node({ line: 16, character: 6 })
