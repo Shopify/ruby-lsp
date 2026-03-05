@@ -49,7 +49,7 @@ module RubyIndexer
 
       entry = @index["bar"]&.first #: as Entry::Method
       owner = entry.owner
-      assert_equal("Foo::<Class:Foo>", owner&.name)
+      assert_equal("Foo::<Foo>", owner&.name)
       assert_instance_of(Entry::SingletonClass, owner)
     end
 
@@ -145,7 +145,7 @@ module RubyIndexer
         assert_instance_of(Entry::Module, first_entry&.owner)
         assert_predicate(first_entry, :private?)
         # The second entry points to the public singleton method
-        assert_equal("Test::<Class:Test>", second_entry&.owner&.name)
+        assert_equal("Test::<Test>", second_entry&.owner&.name)
         assert_instance_of(Entry::SingletonClass, second_entry&.owner)
         assert_equal(:public, second_entry&.visibility)
       end
@@ -873,7 +873,7 @@ module RubyIndexer
       assert_equal("Foo", instance_baz&.owner&.name)
 
       assert_predicate(singleton_baz, :public?)
-      assert_equal("Foo::<Class:Foo>", singleton_baz&.owner&.name)
+      assert_equal("Foo::<Foo>", singleton_baz&.owner&.name)
 
       # After invoking `public`, the state of `module_function` is reset
       instance_qux, singleton_qux = @index["qux"] #: as Array[Entry::Method]

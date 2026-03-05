@@ -507,7 +507,7 @@ module RubyIndexer
       singleton_levels = 0
 
       parts.reverse_each do |part|
-        break unless part.include?("<Class:")
+        break unless part.start_with?("<")
 
         singleton_levels += 1
         parts.pop
@@ -551,7 +551,7 @@ module RubyIndexer
 
       if nesting.any?
         singleton_levels.times do
-          nesting << "<Class:#{nesting.last}>"
+          nesting << "<#{nesting.last}>"
         end
       end
 
@@ -616,7 +616,7 @@ module RubyIndexer
       if class_variables.any?
         name_parts = owner_name.split("::")
 
-        if name_parts.last&.start_with?("<Class:")
+        if name_parts.last&.start_with?("<")
           attached_name = name_parts[0..-2] #: as !nil
             .join("::")
           attached_ancestors = linearized_ancestors_of(attached_name)
@@ -707,7 +707,7 @@ module RubyIndexer
     #: (String name) -> Entry::SingletonClass
     def existing_or_new_singleton_class(name)
       *_namespace, unqualified_name = name.split("::")
-      full_singleton_name = "#{name}::<Class:#{unqualified_name}>"
+      full_singleton_name = "#{name}::<#{unqualified_name}>"
       singleton = self[full_singleton_name]&.first #: as Entry::SingletonClass?
 
       unless singleton
@@ -744,7 +744,7 @@ module RubyIndexer
     def linearized_attached_ancestors(name)
       name_parts = name.split("::")
 
-      if name_parts.last&.start_with?("<Class:")
+      if name_parts.last&.start_with?("<")
         attached_name = name_parts[0..-2] #: as !nil
           .join("::")
         linearized_ancestors_of(attached_name)
@@ -866,7 +866,7 @@ module RubyIndexer
 
           parent_name_parts = parent_class_name.split("::")
           singleton_levels.times do
-            parent_name_parts << "<Class:#{parent_name_parts.last}>"
+            parent_name_parts << "<#{parent_name_parts.last}>"
           end
 
           ancestors.concat(linearized_ancestors_of(parent_name_parts.join("::")))
@@ -878,7 +878,7 @@ module RubyIndexer
           class_class_name_parts = ["Class"]
 
           (singleton_levels - 1).times do
-            class_class_name_parts << "<Class:#{class_class_name_parts.last}>"
+            class_class_name_parts << "<#{class_class_name_parts.last}>"
           end
 
           ancestors.concat(linearized_ancestors_of(class_class_name_parts.join("::")))
@@ -892,7 +892,7 @@ module RubyIndexer
           module_class_name_parts = ["Module"]
 
           (singleton_levels - 1).times do
-            module_class_name_parts << "<Class:#{module_class_name_parts.last}>"
+            module_class_name_parts << "<#{module_class_name_parts.last}>"
           end
 
           ancestors.concat(linearized_ancestors_of(module_class_name_parts.join("::")))

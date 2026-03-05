@@ -1386,7 +1386,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve_method("found_me!", "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>")&.first #: as !nil
+      entry = @index.resolve_method("found_me!", "Foo::Bar::<Bar>::Baz::<Baz>")&.first #: as !nil
       refute_nil(entry)
       assert_equal("found_me!", entry.name)
     end
@@ -1411,7 +1411,7 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve("CONST", ["Foo", "Bar", "<Class:Bar>", "Baz", "<Class:Baz>"])&.first #: as !nil
+      entry = @index.resolve("CONST", ["Foo", "Bar", "<Bar>", "Baz", "<Baz>"])&.first #: as !nil
       refute_nil(entry)
       assert_equal(9, entry.location.start_line)
     end
@@ -1433,15 +1433,15 @@ module RubyIndexer
         end
       RUBY
 
-      entry = @index.resolve_instance_variable("@a", "Foo::Bar::<Class:Bar>")&.first #: as !nil
+      entry = @index.resolve_instance_variable("@a", "Foo::Bar::<Bar>")&.first #: as !nil
       refute_nil(entry)
       assert_equal("@a", entry.name)
 
-      entry = @index.resolve_instance_variable("@b", "Foo::Bar::<Class:Bar>")&.first #: as !nil
+      entry = @index.resolve_instance_variable("@b", "Foo::Bar::<Bar>")&.first #: as !nil
       refute_nil(entry)
       assert_equal("@b", entry.name)
 
-      entry = @index.resolve_instance_variable("@c", "Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>")&.first #: as !nil
+      entry = @index.resolve_instance_variable("@c", "Foo::Bar::<Bar>::<<Bar>>")&.first #: as !nil
       refute_nil(entry)
       assert_equal("@c", entry.name)
     end
@@ -1463,7 +1463,7 @@ module RubyIndexer
         end
       RUBY
 
-      entries = @index.instance_variable_completion_candidates("@", "Foo::Bar::<Class:Bar>").map(&:name)
+      entries = @index.instance_variable_completion_candidates("@", "Foo::Bar::<Bar>").map(&:name)
       assert_includes(entries, "@a")
       assert_includes(entries, "@b")
     end
@@ -1724,37 +1724,37 @@ module RubyIndexer
 
       assert_equal(
         [
-          "Baz::<Class:Baz>::<Class:<Class:Baz>>",
-          "Bar::<Class:Bar>::<Class:<Class:Bar>>",
-          "Foo::<Class:Foo>::<Class:<Class:Foo>>",
-          "Object::<Class:Object>::<Class:<Class:Object>>",
-          "BasicObject::<Class:BasicObject>::<Class:<Class:BasicObject>>",
-          "Class::<Class:Class>",
-          "Module::<Class:Module>",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Baz::<Baz>::<<Baz>>",
+          "Bar::<Bar>::<<Bar>>",
+          "Foo::<Foo>::<<Foo>>",
+          "Object::<Object>::<<Object>>",
+          "BasicObject::<BasicObject>::<<BasicObject>>",
+          "Class::<Class>",
+          "Module::<Module>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("Baz::<Class:Baz>::<Class:<Class:Baz>>"),
+        @index.linearized_ancestors_of("Baz::<Baz>::<<Baz>>"),
       )
     end
 
     def test_linearizing_singleton_object
       assert_equal(
         [
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("Object::<Class:Object>"),
+        @index.linearized_ancestors_of("Object::<Object>"),
       )
     end
 
@@ -1771,7 +1771,7 @@ module RubyIndexer
         end
       RUBY
 
-      ["bar", "baz"].product(["Foo", "Foo::<Class:Foo>"]).each do |method, receiver|
+      ["bar", "baz"].product(["Foo", "Foo::<Foo>"]).each do |method, receiver|
         entry = @index.resolve_method(method, receiver)&.first #: as !nil
         refute_nil(entry)
         assert_equal(method, entry.name)
@@ -1779,14 +1779,14 @@ module RubyIndexer
 
       assert_equal(
         [
-          "Foo::<Class:Foo>",
+          "Foo::<Foo>",
           "Foo",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("Foo::<Class:Foo>"),
+        @index.linearized_ancestors_of("Foo::<Foo>"),
       )
     end
 
@@ -1816,18 +1816,18 @@ module RubyIndexer
 
       assert_equal(
         [
-          "Foo::Bar::<Class:Bar>::Baz::<Class:Baz>",
+          "Foo::Bar::<Bar>::Baz::<Baz>",
           "Second",
           "First",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("Foo::Bar::<Class:Bar>::Baz::<Class:Baz>"),
+        @index.linearized_ancestors_of("Foo::Bar::<Bar>::Baz::<Baz>"),
       )
     end
 
@@ -1846,18 +1846,18 @@ module RubyIndexer
 
       assert_equal(
         [
-          "Baz::<Class:Baz>",
-          "Bar::<Class:Bar>",
-          "Foo::<Class:Foo>",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Baz::<Baz>",
+          "Bar::<Bar>",
+          "Foo::<Foo>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("Baz::<Class:Baz>"),
+        @index.linearized_ancestors_of("Baz::<Baz>"),
       )
     end
 
@@ -1868,19 +1868,19 @@ module RubyIndexer
 
       assert_equal(
         [
-          "A::<Class:A>",
+          "A::<A>",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("A::<Class:A>"),
+        @index.linearized_ancestors_of("A::<A>"),
       )
     end
 
     def test_linearizing_a_singleton_class_with_no_attached
       assert_raises(Index::NonExistingNamespaceError) do
-        @index.linearized_ancestors_of("A::<Class:A>")
+        @index.linearized_ancestors_of("A::<A>")
       end
     end
 
@@ -1894,17 +1894,17 @@ module RubyIndexer
 
       assert_equal(
         [
-          "User::<Class:User>",
-          "ActiveRecord::Base::<Class:Base>",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "User::<User>",
+          "ActiveRecord::Base::<Base>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("User::<Class:User>"),
+        @index.linearized_ancestors_of("User::<User>"),
       )
     end
 
@@ -1926,18 +1926,18 @@ module RubyIndexer
 
       assert_equal(
         [
-          "Foo::Child::<Class:Child>",
-          "Foo::Namespace::Parent::<Class:Parent>",
+          "Foo::Child::<Child>",
+          "Foo::Namespace::Parent::<Parent>",
           "Bar",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("Foo::Child::<Class:Child>"),
+        @index.linearized_ancestors_of("Foo::Child::<Child>"),
       )
     end
 
@@ -1972,13 +1972,13 @@ module RubyIndexer
       RUBY
 
       entries = @index.entries_for("file:///fake/path/foo.rb", Entry) #: as !nil
-      assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
+      assert_equal(["Foo", "Bar", "my_def", "Bar::<Bar>", "my_singleton_def"], entries.map(&:name))
 
       entries = @index.entries_for("file:///fake/path/foo.rb", RubyIndexer::Entry::Namespace) #: as !nil
-      assert_equal(["Foo", "Bar", "Bar::<Class:Bar>"], entries.map(&:name))
+      assert_equal(["Foo", "Bar", "Bar::<Bar>"], entries.map(&:name))
 
       entries = @index.entries_for("file:///fake/path/foo.rb") #: as !nil
-      assert_equal(["Foo", "Bar", "my_def", "Bar::<Class:Bar>", "my_singleton_def"], entries.map(&:name))
+      assert_equal(["Foo", "Bar", "my_def", "Bar::<Bar>", "my_singleton_def"], entries.map(&:name))
     end
 
     def test_entries_for_returns_nil_if_no_matches
@@ -2204,7 +2204,7 @@ module RubyIndexer
         end
       RUBY
 
-      adf, abc = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+      adf, abc = @index.instance_variable_completion_candidates("@", "Child::<Child>")
 
       refute_nil(abc)
       refute_nil(adf)
@@ -2223,7 +2223,7 @@ module RubyIndexer
         end
       RUBY
 
-      candidates = @index.class_variable_completion_candidates("@@", "Foo::<Class:Foo>")
+      candidates = @index.class_variable_completion_candidates("@@", "Foo::<Foo>")
       refute_empty(candidates)
 
       assert_equal("@@hello", candidates.first&.name)
@@ -2236,7 +2236,7 @@ module RubyIndexer
         end
       RUBY
 
-      candidates = @index.resolve_class_variable("@@hello", "Foo::<Class:Foo>") #: as !nil
+      candidates = @index.resolve_class_variable("@@hello", "Foo::<Foo>") #: as !nil
       refute_empty(candidates)
 
       assert_equal("@@hello", candidates.first&.name)

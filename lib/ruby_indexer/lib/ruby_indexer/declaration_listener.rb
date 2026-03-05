@@ -129,7 +129,7 @@ module RubyIndexer
 
       if current_owner
         expression = node.expression
-        name = (expression.is_a?(Prism::SelfNode) ? "<Class:#{last_name_in_stack}>" : "<Class:#{expression.slice}>")
+        name = (expression.is_a?(Prism::SelfNode) ? "<#{last_name_in_stack}>" : "<#{expression.slice}>")
         real_nesting = Index.actual_nesting(@stack, name)
 
         existing_entries = @index[real_nesting.join("::")] #: as Array[Entry::SingletonClass]?
@@ -577,7 +577,7 @@ module RubyIndexer
 
       # set the class variable's owner to the attached context when defined within a singleton scope.
       if owner.is_a?(Entry::SingletonClass)
-        owner = @owner_stack.reverse.find { |entry| !entry.name.include?("<Class:") }
+        owner = @owner_stack.reverse.find { |entry| !entry.name.include?("<") }
       end
 
       @index.add(Entry::ClassVariable.new(

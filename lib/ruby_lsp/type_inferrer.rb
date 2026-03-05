@@ -86,9 +86,9 @@ module RubyLsp
         return unless name
 
         *parts, last = name.split("::")
-        return Type.new("#{last}::<Class:#{last}>") if parts.empty?
+        return Type.new("#{last}::<#{last}>") if parts.empty?
 
-        Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
+        Type.new("#{parts.join("::")}::#{last}::<#{last}>")
       when Prism::CallNode
         raw_receiver = receiver.message
 
@@ -142,7 +142,7 @@ module RubyLsp
       # If the class/module definition is using compact style (e.g.: `class Foo::Bar`), then we need to split the name
       # into its individual parts to build the correct singleton name
       parts = nesting.flat_map { |part| part.split("::") }
-      Type.new("#{parts.join("::")}::<Class:#{parts.last}>")
+      Type.new("#{parts.join("::")}::<#{parts.last}>")
     end
 
     #: (NodeContext node_context) -> Type?
@@ -152,7 +152,7 @@ module RubyLsp
       return Type.new("Object") if nesting_parts.empty?
 
       nesting_parts.reverse_each do |part|
-        break unless part.include?("<Class:")
+        break unless part.start_with?("<")
 
         nesting_parts.pop
       end
@@ -174,7 +174,7 @@ module RubyLsp
         @name = name
       end
 
-      # Returns the attached version of this type by removing the `<Class:...>` part from its name
+      # Returns the attached version of this type by removing the `<...>` part from its name
       #: -> Type
       def attached
         Type.new(
