@@ -134,7 +134,7 @@ module RubyIndexer
       expression = node.expression
       return unless expression.is_a?(Prism::SelfNode)
 
-      @stack << "<Class:#{@stack.last}>"
+      @stack << "<#{@stack.last}>"
     end
 
     #: (Prism::SingletonClassNode node) -> void
@@ -239,7 +239,7 @@ module RubyIndexer
       end
 
       if node.receiver.is_a?(Prism::SelfNode)
-        @stack << "<Class:#{@stack.last}>"
+        @stack << "<#{@stack.last}>"
       end
     end
 

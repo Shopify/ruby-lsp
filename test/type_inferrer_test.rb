@@ -29,7 +29,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_self_inside_singleton_method
@@ -41,7 +41,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_self_inside_singleton_block_body
@@ -53,7 +53,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>::<<Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_self_inside_singleton_block_method
@@ -67,7 +67,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_constant
@@ -79,7 +79,7 @@ module RubyLsp
         Foo.bar
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_constant_path
@@ -93,7 +93,7 @@ module RubyLsp
         Foo::Bar.baz
       RUBY
 
-      assert_equal("Foo::Bar::<Class:Bar>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_top_level_receiver
@@ -111,7 +111,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_instance_variables_in_singleton_method
@@ -123,7 +123,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_instance_variables_in_singleton_block_body
@@ -135,7 +135,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>::<<Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_in_namespaced_singleton_method
@@ -148,7 +148,7 @@ module RubyLsp
       RUBY
 
       result = @type_inferrer.infer_receiver_type(node_context).name
-      assert_equal("Foo::Bar::<Class:Bar>", result)
+      assert_equal("Foo::Bar::<Bar>", result)
     end
 
     def test_infer_receiver_type_instance_variables_in_singleton_block_method
@@ -162,7 +162,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_instance_variables_in_instance_method
@@ -376,7 +376,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Admin::User::<User>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_self_type_for_compact_namespace_inside_method
@@ -400,7 +400,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Admin::User::<User>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_class_variables_in_class_body
