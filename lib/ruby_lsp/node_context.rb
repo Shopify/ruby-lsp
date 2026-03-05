@@ -62,12 +62,12 @@ module RubyLsp
         when Prism::ClassNode, Prism::ModuleNode
           nesting << node.constant_path.slice
         when Prism::SingletonClassNode
-          nesting << "<Class:#{nesting.flat_map { |n| n.split("::") }.last}>"
+          nesting << "<#{nesting.flat_map { |n| n.split("::") }.last}>"
         when Prism::DefNode
           surrounding_method = node.name.to_s
           next unless node.receiver.is_a?(Prism::SelfNode)
 
-          nesting << "<Class:#{nesting.flat_map { |n| n.split("::") }.last}>"
+          nesting << "<#{nesting.flat_map { |n| n.split("::") }.last}>"
         end
       end
 

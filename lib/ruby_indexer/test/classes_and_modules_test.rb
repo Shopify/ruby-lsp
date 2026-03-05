@@ -489,15 +489,15 @@ module RubyIndexer
         end
       RUBY
 
-      foo = @index["Foo::<Class:Foo>"] #: as !nil
+      foo = @index["Foo::<Foo>"] #: as !nil
         .first #: as Entry::Class
       assert_equal(["A1", "A2", "A3", "A4", "A5", "A6"], foo.mixin_operation_module_names)
 
-      qux = @index["Foo::Qux::<Class:Qux>"] #: as !nil
+      qux = @index["Foo::Qux::<Qux>"] #: as !nil
         .first #: as Entry::Class
       assert_equal(["Corge", "Corge", "Baz"], qux.mixin_operation_module_names)
 
-      constant_path_references = @index["ConstantPathReferences::<Class:ConstantPathReferences>"] #: as !nil
+      constant_path_references = @index["ConstantPathReferences::<ConstantPathReferences>"] #: as !nil
         .first #: as Entry::Class
       assert_equal(["Foo::Bar", "Foo::Bar2"], constant_path_references.mixin_operation_module_names)
     end
@@ -512,7 +512,7 @@ module RubyIndexer
         end
       RUBY
 
-      foo = @index["Foo::<Class:Foo>"] #: as !nil
+      foo = @index["Foo::<Foo>"] #: as !nil
         .first #: as Entry::SingletonClass
       assert_equal(4, foo.location.start_line)
       assert_equal("Some extra comments", foo.comments)
@@ -527,7 +527,7 @@ module RubyIndexer
         end
       RUBY
 
-      singleton = @index["Foo::<Class:bar>"] #: as !nil
+      singleton = @index["Foo::<bar>"] #: as !nil
         .first #: as Entry::SingletonClass
 
       # Even though this is not correct, we consider any dynamic singleton class block as a regular singleton class.
@@ -547,7 +547,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_entry("Foo::<Class:Foo>::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
+      assert_entry("Foo::<Foo>::Bar", Entry::Class, "/fake/path/foo.rb:2-4:3-7")
     end
 
     def test_name_location_points_to_constant_path_location
@@ -614,10 +614,10 @@ module RubyIndexer
       entries = @index.instance_variable_get(:@entries)
       refute(entries.key?("::Foo"))
       refute(entries.key?("::Foo::Bar"))
-      refute(entries.key?("::Foo::Bar::<Class:Bar>"))
+      refute(entries.key?("::Foo::Bar::<Bar>"))
       assert_entry("Foo", Entry::Module, "/fake/path/foo.rb:0-0:5-3")
       assert_entry("Foo::Bar", Entry::Class, "/fake/path/foo.rb:1-2:4-5")
-      assert_entry("Foo::Bar::<Class:Bar>", Entry::SingletonClass, "/fake/path/foo.rb:2-4:3-7")
+      assert_entry("Foo::Bar::<Bar>", Entry::SingletonClass, "/fake/path/foo.rb:2-4:3-7")
     end
 
     def test_indexing_namespaces_inside_nested_top_level_references
@@ -683,13 +683,13 @@ module RubyIndexer
       RUBY
 
       # Verify we didn't index the incorrect name
-      assert_nil(@index["Foo::Bar::<Class:Foo::Bar>"])
+      assert_nil(@index["Foo::Bar::<Foo::Bar>"])
 
       # Verify we indexed the correct name
-      assert_entry("Foo::Bar::<Class:Bar>", Entry::SingletonClass, "/fake/path/foo.rb:1-2:3-5")
+      assert_entry("Foo::Bar::<Bar>", Entry::SingletonClass, "/fake/path/foo.rb:1-2:3-5")
 
       method = @index["baz"]&.first #: as Entry::Method
-      assert_equal("Foo::Bar::<Class:Bar>", method.owner&.name)
+      assert_equal("Foo::Bar::<Bar>", method.owner&.name)
     end
 
     def test_lazy_comments_with_spaces_are_properly_attributed
