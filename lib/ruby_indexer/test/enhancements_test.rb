@@ -76,18 +76,18 @@ module RubyIndexer
 
       assert_equal(
         [
-          "User::<Class:User>",
-          "ActiveRecord::Base::<Class:Base>",
+          "User::<User>",
+          "ActiveRecord::Base::<Base>",
           "ActiveRecord::Associations::ClassMethods",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("User::<Class:User>"),
+        @index.linearized_ancestors_of("User::<User>"),
       )
 
       assert_entry("new_method", Entry::Method, "/fake/path/foo.rb:10-4:10-33")
@@ -271,20 +271,20 @@ module RubyIndexer
 
       assert_equal(
         [
-          "User::<Class:User>",
+          "User::<User>",
           "MyConcern::ClassMethods",
-          "Object::<Class:Object>",
-          "BasicObject::<Class:BasicObject>",
+          "Object::<Object>",
+          "BasicObject::<BasicObject>",
           "Class",
           "Module",
           "Object",
           "Kernel",
           "BasicObject",
         ],
-        @index.linearized_ancestors_of("User::<Class:User>"),
+        @index.linearized_ancestors_of("User::<User>"),
       )
 
-      refute_nil(@index.resolve_method("foo", "User::<Class:User>"))
+      refute_nil(@index.resolve_method("foo", "User::<User>"))
     end
 
     def test_creating_anonymous_classes_from_enhancement

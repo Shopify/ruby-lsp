@@ -159,21 +159,21 @@ module RubyIndexer
       entry = @index["@a"]&.first #: as Entry::InstanceVariable
       owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::Bar::<Class:Bar>", owner&.name)
+      assert_equal("Foo::Bar::<Bar>", owner&.name)
 
       assert_entry("@b", Entry::InstanceVariable, "/fake/path/foo.rb:6-8:6-10")
 
       entry = @index["@b"]&.first #: as Entry::InstanceVariable
       owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::Bar::<Class:Bar>", owner&.name)
+      assert_equal("Foo::Bar::<Bar>", owner&.name)
 
       assert_entry("@c", Entry::InstanceVariable, "/fake/path/foo.rb:9-6:9-8")
 
       entry = @index["@c"]&.first #: as Entry::InstanceVariable
       owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::Bar::<Class:Bar>::<Class:<Class:Bar>>", owner&.name)
+      assert_equal("Foo::Bar::<Bar>::<<Bar>>", owner&.name)
     end
 
     def test_top_level_instance_variables
@@ -197,7 +197,7 @@ module RubyIndexer
       entry = @index["@a"]&.first #: as Entry::InstanceVariable
       owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::<Class:Foo>", owner&.name)
+      assert_equal("Foo::<Foo>", owner&.name)
     end
 
     def test_instance_variable_inside_dynamic_method_declaration
@@ -234,7 +234,7 @@ module RubyIndexer
       entry = @index["@a"]&.first #: as Entry::InstanceVariable
       owner = entry.owner
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("Foo::<Class:Foo>", owner&.name)
+      assert_equal("Foo::<Foo>", owner&.name)
     end
 
     def test_class_instance_variable_comments

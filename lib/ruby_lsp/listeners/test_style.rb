@@ -266,7 +266,7 @@ module RubyLsp
         # We only support regular Minitest tests. The declarative syntax provided by ActiveSupport is handled by the
         # Rails add-on
         name_parts = fully_qualified_name.split("::")
-        singleton_name = "#{name_parts.join("::")}::<Class:#{name_parts.last}>"
+        singleton_name = "#{name_parts.join("::")}::<#{name_parts.last}>"
         !@index.linearized_ancestors_of(singleton_name).include?("ActiveSupport::Testing::Declarative")
       rescue RubyIndexer::Index::NonExistingNamespaceError
         true
