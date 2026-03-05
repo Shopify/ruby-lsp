@@ -89,7 +89,7 @@ module RubyIndexer
 
       owner = entries.first&.owner #: as Entry::SingletonClass
       assert_instance_of(Entry::SingletonClass, owner)
-      assert_equal("File::<Class:File>", owner.name)
+      assert_equal("File::<File>", owner.name)
     end
 
     def test_location_and_name_location_are_the_same
@@ -122,7 +122,7 @@ module RubyIndexer
 
     def test_rbs_method_with_unnamed_required_positionals
       entries = @index["try_convert"] #: as Array[Entry::Method]
-      entry = entries.find { |entry| entry.owner&.name == "Array::<Class:Array>" } #: as Entry::Method
+      entry = entries.find { |entry| entry.owner&.name == "Array::<Array>" } #: as Entry::Method
 
       parameters = entry.signatures[0]&.parameters #: as Array[Entry::Parameter]
 
@@ -132,7 +132,7 @@ module RubyIndexer
 
     def test_rbs_method_with_optional_positionals
       entries = @index["polar"] #: as Array[Entry::Method]
-      entry = entries.find { |entry| entry.owner&.name == "Complex::<Class:Complex>" } #: as Entry::Method
+      entry = entries.find { |entry| entry.owner&.name == "Complex::<Complex>" } #: as Entry::Method
 
       # def self.polar: (Numeric, ?Numeric) -> Complex
 
@@ -190,7 +190,7 @@ module RubyIndexer
 
     def test_rbs_anonymous_block_parameter
       entries = @index["open"] #: as Array[Entry::Method]
-      entry = entries.find { |entry| entry.owner&.name == "File::<Class:File>" } #: as Entry::Method
+      entry = entries.find { |entry| entry.owner&.name == "File::<File>" } #: as Entry::Method
 
       assert_equal(2, entry.signatures.length)
 
@@ -227,7 +227,7 @@ module RubyIndexer
 
     def test_rbs_method_with_trailing_positionals
       entries = @index["select"] #: as Array[Entry::Method]
-      entry = entries.find { |entry| entry.owner&.name == "IO::<Class:IO>" } #: as !nil
+      entry = entries.find { |entry| entry.owner&.name == "IO::<IO>" } #: as !nil
 
       signatures = entry.signatures
       assert_equal(2, signatures.length)
