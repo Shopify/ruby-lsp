@@ -13,6 +13,7 @@ module RubyLsp
         @response_builder = response_builder
         @global_state = global_state
         @index = global_state.index #: RubyIndexer::Index
+        @graph = global_state.graph #: Rubydex::Graph
         @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @language_id = language_id
         @uri = uri
@@ -152,32 +153,32 @@ module RubyLsp
 
       #: (Prism::InstanceVariableReadNode node) -> void
       def on_instance_variable_read_node_enter(node)
-        handle_instance_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableWriteNode node) -> void
       def on_instance_variable_write_node_enter(node)
-        handle_instance_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableAndWriteNode node) -> void
       def on_instance_variable_and_write_node_enter(node)
-        handle_instance_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableOperatorWriteNode node) -> void
       def on_instance_variable_operator_write_node_enter(node)
-        handle_instance_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableOrWriteNode node) -> void
       def on_instance_variable_or_write_node_enter(node)
-        handle_instance_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableTargetNode node) -> void
       def on_instance_variable_target_node_enter(node)
-        handle_instance_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::SuperNode node) -> void
@@ -192,32 +193,32 @@ module RubyLsp
 
       #: (Prism::ClassVariableAndWriteNode node) -> void
       def on_class_variable_and_write_node_enter(node)
-        handle_class_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::ClassVariableOperatorWriteNode node) -> void
       def on_class_variable_operator_write_node_enter(node)
-        handle_class_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::ClassVariableOrWriteNode node) -> void
       def on_class_variable_or_write_node_enter(node)
-        handle_class_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::ClassVariableTargetNode node) -> void
       def on_class_variable_target_node_enter(node)
-        handle_class_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::ClassVariableReadNode node) -> void
       def on_class_variable_read_node_enter(node)
-        handle_class_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
-        handle_class_variable_definition(node.name.to_s)
+        handle_variable_definition(node.name.to_s)
       end
 
       private
@@ -257,93 +258,63 @@ module RubyLsp
 
       #: (String name) -> void
       def handle_global_variable_definition(name)
-        entries = @index[name]
+        declaration = @graph[name]
+        return unless declaration
 
-        return unless entries
-
-        entries.each do |entry|
-          location = entry.location
-
-          @response_builder << Interface::Location.new(
-            uri: entry.uri.to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
-          )
-        end
+        declaration.definitions.each { |definition| @response_builder << definition.to_lsp_selection_location }
       end
 
+      # Handle class or instance variables. We collect all definitions across the ancestors of the type
+      #
       #: (String name) -> void
-      def handle_class_variable_definition(name)
-        type = @type_inferrer.infer_receiver_type(@node_context)
-        return unless type
-
-        entries = @index.resolve_class_variable(name, type.name)
-        return unless entries
-
-        entries.each do |entry|
-          @response_builder << Interface::Location.new(
-            uri: entry.uri.to_s,
-            range: range_from_location(entry.location),
-          )
-        end
-      rescue RubyIndexer::Index::NonExistingNamespaceError
-        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
-      end
-
-      #: (String name) -> void
-      def handle_instance_variable_definition(name)
-        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
-        # to provide all features for them
+      def handle_variable_definition(name)
+        # Sorbet enforces that all variables be declared on typed strict or higher, which means it will be able to
+        # provide all features for them
         return if @sorbet_level.strict?
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        entries = @index.resolve_instance_variable(name, type.name)
-        return unless entries
+        owner = @graph[type.name]
+        return unless owner.is_a?(Rubydex::Namespace)
 
-        entries.each do |entry|
-          location = entry.location
+        owner.ancestors.each do |ancestor|
+          member = ancestor.member(name)
+          next unless member
 
-          @response_builder << Interface::Location.new(
-            uri: entry.uri.to_s,
-            range: Interface::Range.new(
-              start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
-              end: Interface::Position.new(line: location.end_line - 1, character: location.end_column),
-            ),
-          )
+          member.definitions.each { |definition| @response_builder << definition.to_lsp_selection_location }
         end
-      rescue RubyIndexer::Index::NonExistingNamespaceError
-        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       #: (String message, TypeInferrer::Type? receiver_type, ?inherited_only: bool) -> void
       def handle_method_definition(message, receiver_type, inherited_only: false)
-        methods = if receiver_type
-          @index.resolve_method(message, receiver_type.name, inherited_only: inherited_only)
+        declaration = if receiver_type
+          owner = @graph[receiver_type.name]
+          owner.find_member("#{message}()", only_inherited: inherited_only) if owner.is_a?(Rubydex::Namespace)
         end
 
-        # If the method doesn't have a receiver, or the guessed receiver doesn't have any matched candidates,
-        # then we provide a few candidates to jump to
-        # But we don't want to provide too many candidates, as it can be overwhelming
-        if receiver_type.nil? || (receiver_type.is_a?(TypeInferrer::GuessedType) && methods.nil?)
-          methods = @index[message]&.take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
+        # If the method doesn't have a receiver, or the guessed receiver doesn't have any matched candidates, then we
+        # provide a few candidates to jump to. However, we don't want to provide too many candidates, as it can be
+        # overwhelming
+        if receiver_type.nil? || (receiver_type.is_a?(TypeInferrer::GuessedType) && declaration.nil?)
+          declaration = @graph.search("##{message}()").take(MAX_NUMBER_OF_DEFINITION_CANDIDATES_WITHOUT_RECEIVER)
         end
 
-        return unless methods
+        return unless declaration
 
-        methods.each do |target_method|
-          uri = target_method.uri
-          full_path = uri.full_path
-          next if @sorbet_level.true_or_higher? && (!full_path || not_in_dependencies?(full_path))
+        Array(declaration).each do |decl|
+          decl.definitions.each do |definition|
+            location = definition.location
+            uri = URI(location.uri)
+            full_path = uri.full_path
+            next if @sorbet_level.true_or_higher? && (!full_path || not_in_dependencies?(full_path))
 
-          @response_builder << Interface::LocationLink.new(
-            target_uri: uri.to_s,
-            target_range: range_from_location(target_method.location),
-            target_selection_range: range_from_location(target_method.name_location),
-          )
+            @response_builder << Interface::LocationLink.new(
+              target_uri: uri.to_s,
+              target_range: definition.to_lsp_selection_range,
+              target_selection_range: definition.to_lsp_name_range || definition.to_lsp_selection_range,
+            )
+          end
         end
       end
 
@@ -351,12 +322,10 @@ module RubyLsp
       def handle_require_definition(node, message)
         case message
         when :require
-          entry = @index.search_require_paths(node.content).find do |uri|
-            uri.require_path == node.content
-          end
+          document = @graph.resolve_require_path(node.content, $LOAD_PATH)
 
-          if entry
-            candidate = entry.full_path
+          if document
+            candidate = URI(document.uri).full_path
 
             if candidate
               @response_builder << Interface::Location.new(
