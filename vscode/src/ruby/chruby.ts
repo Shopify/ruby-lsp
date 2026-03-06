@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 
-import { ActivationResult, VersionManager, ACTIVATION_SEPARATOR } from "./versionManager";
+import { ActivationResult, MissingRubyError, VersionManager, ACTIVATION_SEPARATOR } from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -226,7 +226,7 @@ export class Chruby extends VersionManager {
       return closest;
     }
 
-    throw new Error("Cannot find any Ruby installations");
+    throw new MissingRubyError("Cannot find any Ruby installations");
   }
 
   // Returns the Ruby version information including version and engine. E.g.: ruby-3.3.0, truffleruby-21.3.0
@@ -425,11 +425,11 @@ export class Chruby extends VersionManager {
       }
     }
 
-    throw new Error("Cannot find any Ruby installations");
+    throw new MissingRubyError("Cannot find any Ruby installations");
   }
 
   private missingRubyError(version: string) {
-    return new Error(`Cannot find Ruby installation for version ${version}`);
+    return new MissingRubyError(`Cannot find Ruby installation for version ${version}`);
   }
 
   private rubyVersionError() {
