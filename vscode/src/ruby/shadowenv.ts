@@ -2,13 +2,13 @@ import * as vscode from "vscode";
 
 import { asyncExec } from "../common";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, NonReportableError } from "./versionManager";
 
 // Shadowenv is a tool that allows managing environment variables upon entering a directory. It allows users to manage
 // which Ruby version should be used for each project, in addition to other customizations such as GEM_HOME.
 //
 // Learn more: https://github.com/Shopify/shadowenv
-export class UntrustedWorkspaceError extends Error {}
+export class UntrustedWorkspaceError extends NonReportableError {}
 
 export class Shadowenv extends VersionManager {
   async activate(): Promise<ActivationResult> {

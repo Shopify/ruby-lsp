@@ -5,9 +5,9 @@ import * as vscode from "vscode";
 
 import { asyncExec, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
-import { Shadowenv, UntrustedWorkspaceError } from "./ruby/shadowenv";
+import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
-import { VersionManager } from "./ruby/versionManager";
+import { NonReportableError, VersionManager } from "./ruby/versionManager";
 import { Mise } from "./ruby/mise";
 import { RubyInstaller } from "./ruby/rubyInstaller";
 import { Rbenv } from "./ruby/rbenv";
@@ -151,7 +151,7 @@ export class Ruby implements RubyInterface {
       try {
         await this.runManagerActivation();
       } catch (error: any) {
-        if (!(error instanceof UntrustedWorkspaceError)) {
+        if (!(error instanceof NonReportableError)) {
           this.telemetry.logError(error, {
             appType: "extension",
             appVersion: this.context.extension.packageJSON.version,

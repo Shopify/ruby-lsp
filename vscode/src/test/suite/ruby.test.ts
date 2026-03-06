@@ -12,7 +12,8 @@ import { WorkspaceChannel } from "../../workspaceChannel";
 import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
 import { Shadowenv, UntrustedWorkspaceError } from "../../ruby/shadowenv";
-import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, VALUE_SEPARATOR } from "../../ruby/versionManager";
+import { Chruby } from "../../ruby/chruby";
+import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, MissingRubyError, VALUE_SEPARATOR } from "../../ruby/versionManager";
 
 import { createContext, FakeContext } from "./helpers";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
@@ -141,6 +142,21 @@ suite("Ruby environment activation", () => {
 
     await assert.rejects(async () => {
       await ruby.activateRuby({ identifier: ManagerIdentifier.Shadowenv });
+    });
+
+    assert.ok(!telemetry.logError.called);
+  });
+
+  test("Ignores missing Ruby version for telemetry", async () => {
+    const telemetry = { ...FAKE_TELEMETRY, logError: sandbox.stub() };
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, telemetry);
+
+    sandbox
+      .stub(Chruby.prototype, "activate")
+      .rejects(new MissingRubyError("Cannot find Ruby installation for version 3.4.0"));
+
+    await assert.rejects(async () => {
+      await ruby.activateRuby({ identifier: ManagerIdentifier.Chruby });
     });
 
     assert.ok(!telemetry.logError.called);
