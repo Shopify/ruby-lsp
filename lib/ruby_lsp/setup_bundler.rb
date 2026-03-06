@@ -242,7 +242,7 @@ module RubyLsp
         # If no error occurred, then clear previous errors
         @error_path.delete if @error_path.exist?
         $stderr.puts("Ruby LSP> Composed bundle installation complete")
-      rescue Errno::EPIPE, Bundler::HTTPError
+      rescue Errno::EPIPE, Bundler::HTTPError, Bundler::InstallError
         # There are cases where we expect certain errors to happen occasionally, and we don't want to write them to
         # a file, which would report to telemetry on the next launch.
         #
@@ -250,6 +250,7 @@ module RubyLsp
         # install. This situation may happen because, while running bundle install, the server is not yet ready to
         # receive shutdown requests and we may continue doing work until the process is killed.
         # - Bundler might also encounter a network error.
+        # - Native extension build failures (InstallError) are user environment issues that Ruby LSP cannot resolve.
         @error_path.delete if @error_path.exist?
       rescue => e
         # Write the error object to a file so that we can read it from the parent process
