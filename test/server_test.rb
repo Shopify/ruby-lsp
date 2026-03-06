@@ -1024,7 +1024,7 @@ class ServerTest < Minitest::Test
       params: { textDocument: { uri: uri } },
     })
 
-    assert_equal(["Foo::<Class:Foo>", "Bar"], index.linearized_ancestors_of("Foo::<Class:Foo>"))
+    assert_equal(["Foo::<Foo>", "Bar"], index.linearized_ancestors_of("Foo::<Foo>"))
 
     # Delete the extend
     @server.process_message({
@@ -1063,7 +1063,7 @@ class ServerTest < Minitest::Test
     result = find_message(RubyLsp::Result, id: 2)
     refute_nil(result)
 
-    assert_equal(["Foo::<Class:Foo>"], index.linearized_ancestors_of("Foo::<Class:Foo>"))
+    assert_equal(["Foo::<Foo>"], index.linearized_ancestors_of("Foo::<Foo>"))
   end
 
   def test_edits_outside_of_declarations_do_not_trigger_indexing
