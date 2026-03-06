@@ -647,6 +647,21 @@ class ServerTest < Minitest::Test
     assert_match("mocha/exception_raiser.rb", data[:backtrace])
   end
 
+  def test_gem_not_found_setup_error_does_not_send_telemetry
+    RubyLsp::Notification.expects(:telemetry).never
+    run_initialize_server_with_setup_error(Bundler::GemNotFound.new("Could not find gem 'foo'"))
+  end
+
+  def test_git_error_setup_error_does_not_send_telemetry
+    RubyLsp::Notification.expects(:telemetry).never
+    run_initialize_server_with_setup_error(Bundler::GitError.new("Revision abc123 does not exist"))
+  end
+
+  def test_other_setup_errors_are_reported_to_telemetry
+    RubyLsp::Notification.expects(:telemetry).once
+    run_initialize_server_with_setup_error(StandardError.new("something unexpected"))
+  end
+
   def test_handles_editor_indexing_settings
     capture_io do
       @server.process_message({
@@ -1713,6 +1728,22 @@ class ServerTest < Minitest::Test
   end
 
   private
+
+  def run_initialize_server_with_setup_error(error)
+    server = RubyLsp::Server.new(test_mode: true, setup_error: error)
+    capture_subprocess_io do
+      server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: { enabledFeatures: [] },
+          capabilities: { general: { positionEncodings: ["utf-8"] } },
+        },
+      })
+    end
+  ensure
+    server&.run_shutdown
+  end
 
   def wait_for_indexing
     message = @server.pop_response
