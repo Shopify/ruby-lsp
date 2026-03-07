@@ -85,6 +85,7 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
   const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
+  const serverPath: string = config.get("serverPath")!;
 
   const executableOptions: ExecutableOptions = {
     cwd: workspaceFolder.uri.fsPath,
@@ -119,16 +120,19 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
       options: executableOptions,
     };
   } else {
-    const workspacePath = workspaceFolder.uri.fsPath;
+    const basePath = serverPath || workspaceFolder.uri.fsPath;
     const command =
-      path.basename(workspacePath) === "ruby-lsp" && os.platform() !== "win32"
-        ? path.join(workspacePath, "exe", "ruby-lsp")
+      path.basename(basePath) === "ruby-lsp" && os.platform() !== "win32"
+        ? path.join(basePath, "exe", "ruby-lsp")
         : "ruby-lsp";
 
     const args = [];
-
     if (branch.length > 0) {
       args.push("--branch", branch);
+    }
+
+    if (serverPath) {
+      args.push("--lsp-path", serverPath);
     }
 
     if (featureEnabled("launcher")) {

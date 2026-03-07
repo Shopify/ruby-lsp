@@ -40,6 +40,7 @@ module RubyLsp
     def initialize(project_path, **options)
       @project_path = project_path
       @branch = options[:branch] #: String?
+      @lsp_path = options[:lsp_path] #: String?
       @launcher = options[:launcher] #: bool?
       @beta = options[:beta] #: bool?
       force_output_to_stderr! if @launcher
@@ -174,6 +175,7 @@ module RubyLsp
         version = @beta ? "0.a" : RUBY_LSP_MIN_VERSION
         ruby_lsp_entry = +"gem \"ruby-lsp\", \">= #{version}\", require: false, group: :development"
         ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
+        ruby_lsp_entry << ", path: \"#{@lsp_path}\"" if @lsp_path
         parts << ruby_lsp_entry
       end
 
