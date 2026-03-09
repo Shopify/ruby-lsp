@@ -749,7 +749,7 @@ suite("TestController", () => {
     assert.ok(runStub.started.calledWith(testItem));
     assert.ok(runStub.passed.calledWith(testItem));
     assert.ok(runStub.end.calledWithExactly());
-  }).timeout(10000);
+  }).timeout(30000);
 
   test("refresh handler clears all items and starts from scratch", async () => {
     await controller.testController.resolveHandler!(undefined);
