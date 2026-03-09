@@ -1067,6 +1067,29 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_does_not_report_native_extension_build_failures_to_telemetry
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "gems.rb"), <<~GEMFILE)
+        source "https://rubygems.org"
+        gem "irb"
+      GEMFILE
+
+      Bundler.with_unbundled_env do
+        capture_subprocess_io do
+          system("bundle install")
+
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:run_bundle_install_directly).raises(
+            Bundler::InstallError,
+            "Gem::Ext::BuildError: ERROR: Failed to build gem native extension",
+          )
+          compose.setup!
+          refute_path_exists(File.join(dir, ".ruby-lsp", "install_error"))
+        end
+      end
+    end
+  end
+
   def test_beta_adds_prerelease_constraint_to_composed_gemfile
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
