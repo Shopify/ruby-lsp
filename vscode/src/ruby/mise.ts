@@ -2,7 +2,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, NonReportableError } from "./versionManager";
 
 // Mise (mise en place) is a manager for dev tools, environment variables and tasks
 //
@@ -33,7 +33,9 @@ export class Mise extends VersionManager {
         await vscode.workspace.fs.stat(configuredPath);
         return configuredPath;
       } catch (_error: any) {
-        throw new Error(`Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
+        throw new NonReportableError(
+          `Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`,
+        );
       }
     }
 
@@ -57,7 +59,7 @@ export class Mise extends VersionManager {
       }
     }
 
-    throw new Error(
+    throw new NonReportableError(
       `The Ruby LSP version manager is configured to be Mise, but could not find Mise installation. Searched in
         ${possiblePaths.join(", ")}`,
     );

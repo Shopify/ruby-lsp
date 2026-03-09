@@ -3,7 +3,7 @@ import path from "path";
 
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, NonReportableError } from "./versionManager";
 
 // A tool to manage multiple runtime versions with a single CLI tool
 //
@@ -82,7 +82,9 @@ export class Asdf extends VersionManager {
       this.outputChannel.info(`Using configured ASDF executable path: ${asdfPath}`);
       return configuredPath.fsPath;
     } catch (_error: any) {
-      throw new Error(`ASDF executable configured as ${configuredPath.fsPath}, but that file doesn't exist`);
+      throw new NonReportableError(
+        `ASDF executable configured as ${configuredPath.fsPath}, but that file doesn't exist`,
+      );
     }
   }
 }

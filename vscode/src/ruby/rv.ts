@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, NonReportableError } from "./versionManager";
 
 // Manage your Ruby environment with rv
 //
@@ -40,7 +40,7 @@ export class Rv extends VersionManager {
       await vscode.workspace.fs.stat(vscode.Uri.file(path));
       return path;
     } catch (_error: any) {
-      throw new Error(`The Ruby LSP version manager is configured to be rv, but ${path} does not exist`);
+      throw new NonReportableError(`The Ruby LSP version manager is configured to be rv, but ${path} does not exist`);
     }
   }
 }
