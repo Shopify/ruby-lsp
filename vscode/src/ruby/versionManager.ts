@@ -13,6 +13,9 @@ export interface ActivationResult {
   gemPath: string[];
 }
 
+export class NonReportableError extends Error {}
+export class MissingRubyError extends NonReportableError {}
+
 // Changes to either one of these values have to be synchronized with a corresponding update in `activation.rb`
 export const ACTIVATION_SEPARATOR = "RUBY_LSP_ACTIVATION_SEPARATOR";
 export const VALUE_SEPARATOR = "RUBY_LSP_VS";

@@ -3,6 +3,7 @@ import os from "os";
 import * as vscode from "vscode";
 
 import { Chruby } from "./chruby";
+import { MissingRubyError } from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -40,7 +41,7 @@ export class RubyInstaller extends Chruby {
       }
     }
 
-    throw new Error(
+    throw new MissingRubyError(
       `Cannot find installation directory for Ruby version ${rubyVersion.version}.\
          Searched in ${possibleInstallationUris.map((uri) => uri.fsPath).join(", ")}`,
     );
