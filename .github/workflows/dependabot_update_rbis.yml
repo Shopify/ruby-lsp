@@ -21,7 +21,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.SHOPIFY_GH_ACCESS_TOKEN }}
-      - uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
+      - uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
         id: setup
         with:
           bundler-cache: true
