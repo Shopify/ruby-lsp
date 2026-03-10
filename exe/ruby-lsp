@@ -3,7 +3,6 @@
 
 require "optparse"
 
-original_args = ARGV.dup
 options = {}
 parser = OptionParser.new do |opts|
   opts.banner = "Usage: ruby-lsp [options]"
@@ -50,7 +49,7 @@ parser = OptionParser.new do |opts|
 end
 
 begin
-  parser.parse!
+  parser.parse(ARGV)
 rescue OptionParser::InvalidOption => e
   warn(e)
   warn("")
@@ -71,6 +70,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
     flags = []
     flags << "--debug" if options[:debug]
     flags << "--beta" if options[:beta]
+    flags.push("--branch", options[:branch]) if options[:branch]
     exit exec(Gem.ruby, File.expand_path("ruby-lsp-launcher", __dir__), *flags)
   end
 
@@ -90,7 +90,7 @@ if ENV["BUNDLE_GEMFILE"].nil?
     base_command << " _#{env["BUNDLER_VERSION"]}_"
   end
 
-  exit exec(env, "#{base_command} exec ruby-lsp #{original_args.join(" ")}".strip)
+  exit exec(env, "#{base_command} exec ruby-lsp #{ARGV.join(" ")}".strip)
 end
 
 $stdin.sync = true

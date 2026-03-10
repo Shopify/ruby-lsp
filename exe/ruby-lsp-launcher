@@ -20,6 +20,12 @@ reboot = false
 workspace_uri = ARGV.first
 raw_initialize_path = File.join(".ruby-lsp", "raw_initialize")
 
+# Extract CLI options that affect bundle composition (e.g. --branch, --beta) from the arguments passed by the server
+cli_options = {}
+branch_index = ARGV.index("--branch")
+cli_options[:branch] = ARGV[branch_index + 1] if branch_index
+cli_options[:beta] = true if ARGV.include?("--beta")
+
 raw_initialize = if workspace_uri && !workspace_uri.start_with?("--")
   # If there's an argument without `--`, then it's the server asking to compose the bundle and passing to this
   # executable the workspace URI. We can't require gems at this point, so we built a fake initialize request manually
@@ -49,18 +55,21 @@ pid = if Gem.win_platform?
     ["-I", File.expand_path(path)]
   end
 
-  args = [
+  cli_flags = []
+  cli_flags << "--beta" if cli_options[:beta]
+  cli_flags.push("--branch", cli_options[:branch]) if cli_options[:branch]
+
+  Process.spawn(
     Gem.ruby,
     *load_path,
     File.expand_path("../lib/ruby_lsp/scripts/compose_bundle_windows.rb", __dir__),
     raw_initialize,
-  ]
-  args << "--beta" if ARGV.include?("--beta")
-  Process.spawn(*args)
+    *cli_flags,
+  )
 else
   fork do
     require_relative "../lib/ruby_lsp/scripts/compose_bundle"
-    compose(raw_initialize, beta: ARGV.include?("--beta"))
+    compose(raw_initialize, **cli_options)
   end
 end
 

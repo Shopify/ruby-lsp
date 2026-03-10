@@ -1665,6 +1665,35 @@ class ServerTest < Minitest::Test
     assert_match("Document::InvalidLocationError", attributes[:message])
   end
 
+  def test_launch_bundle_compose_forwards_argv_to_launcher
+    original_argv = ARGV.dup
+    ARGV.replace(["--branch", "main"])
+
+    @server.global_state.apply_options({
+      workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
+    })
+
+    # Capture the arguments passed to capture3 to verify that we're actually forwarding ARGV. This is important because
+    # the CLI arguments may change the composed Gemfile and thus running an update should not mutate it in incompatible
+    # ways
+    captured_args = nil #: Array[String]?
+    mock_status = mock("status")
+    mock_status.stubs(:exitstatus).returns(0)
+
+    Open3.stubs(:capture3).with do |*args, **_kwargs|
+      captured_args = args
+      true
+    end.returns(["", "", mock_status])
+
+    thread = @server.send(:launch_bundle_compose, "Test") { |_stderr, _status| }
+    thread.join
+
+    assert_includes(captured_args, "--branch")
+    assert_includes(captured_args, "main")
+  ensure
+    ARGV.replace(original_argv)
+  end
+
   private
 
   def wait_for_indexing

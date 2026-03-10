@@ -1,7 +1,7 @@
 # typed: true
 # frozen_string_literal: true
 
-def compose(raw_initialize, beta: false)
+def compose(raw_initialize, **options)
   require_relative "../setup_bundler"
   require "json"
   require "uri"
@@ -12,7 +12,7 @@ def compose(raw_initialize, beta: false)
   workspace_path = workspace_uri && URI(workspace_uri).to_standardized_path
   workspace_path ||= Dir.pwd
 
-  env = RubyLsp::SetupBundler.new(workspace_path, launcher: true, beta: beta).setup!
+  env = RubyLsp::SetupBundler.new(workspace_path, launcher: true, **options).setup!
 
   File.open(File.join(".ruby-lsp", "bundle_env"), "w") do |f|
     f.flock(File::LOCK_EX)

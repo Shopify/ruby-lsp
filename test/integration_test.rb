@@ -9,6 +9,22 @@ class IntegrationTest < Minitest::Test
     @bundle_path = Bundler.bundle_path.to_s
   end
 
+  def test_ruby_lsp_flags_parsed_correctly
+    stdout, _stderr, status = Open3.capture3(
+      Gem.ruby, File.join(__dir__, "..", "exe", "ruby-lsp"), "--version"
+    )
+    assert_equal(0, status.exitstatus)
+    assert_match(/\d+\.\d+\.\d+/, stdout)
+  end
+
+  def test_ruby_lsp_invalid_option_rejected
+    _stdout, stderr, status = Open3.capture3(
+      Gem.ruby, File.join(__dir__, "..", "exe", "ruby-lsp"), "--nonexistent"
+    )
+    assert_equal(1, status.exitstatus)
+    assert_match(/invalid option/, stderr)
+  end
+
   def test_ruby_lsp_doctor_works
     skip("CI only") unless ENV["CI"]
 
