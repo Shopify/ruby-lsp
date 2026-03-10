@@ -49,7 +49,7 @@ parser = OptionParser.new do |opts|
 end
 
 begin
-  parser.parse
+  parser.parse(ARGV)
 rescue OptionParser::InvalidOption => e
   warn(e)
   warn("")
