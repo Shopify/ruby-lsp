@@ -61,7 +61,7 @@ module RubyLsp
       @custom_dir = Pathname.new(".ruby-lsp").expand_path(@project_path) #: Pathname
       @custom_gemfile = @custom_dir + @gemfile_name #: Pathname
       @custom_lockfile = @custom_dir + (@lockfile&.basename || "Gemfile.lock") #: Pathname
-      @lockfile_hash_path = @custom_dir + "main_lockfile_hash" #: Pathname
+      @freshness_hash_path = @custom_dir + "freshness_hash" #: Pathname
       @last_updated_path = @custom_dir + "last_updated" #: Pathname
       @error_path = @custom_dir + "install_error" #: Pathname
       @already_composed_path = @custom_dir + "bundle_is_composed" #: Pathname
@@ -120,8 +120,14 @@ module RubyLsp
         return run_bundle_install(@custom_gemfile)
       end
 
-      if @lockfile_hash && @custom_lockfile.exist? && @lockfile_hash_path.exist? &&
-          @lockfile_hash_path.read == @lockfile_hash
+      # Our freshness hash determines if we need to copy the lockfile from the main app again and run bundle install
+      # from scratch. We use a combination of the main app's lockfile and the composed Gemfile. The goal is to
+      # automatically account for CLI arguments which can change the Gemfile we compose. If the CLI arguments or the
+      # main lockfile change, we need to make sure we're re-composing.
+      freshness_digest = Digest::SHA256.hexdigest("#{@lockfile_hash}#{@custom_gemfile.read}")
+
+      if @lockfile_hash && @custom_lockfile.exist? && @freshness_hash_path.exist? &&
+          @freshness_hash_path.read == freshness_digest
         $stderr.puts(
           "Ruby LSP> Skipping composed bundle setup since #{@custom_lockfile} already exists and is up to date",
         )
@@ -131,7 +137,7 @@ module RubyLsp
       @needs_update_path.delete if @needs_update_path.exist?
       FileUtils.cp(@lockfile.to_s, @custom_lockfile.to_s)
       correct_relative_remote_paths
-      @lockfile_hash_path.write(@lockfile_hash)
+      @freshness_hash_path.write(freshness_digest)
       run_bundle_install(@custom_gemfile)
     end
 
