@@ -15,7 +15,7 @@ export class Shadowenv extends VersionManager {
     try {
       await vscode.workspace.fs.stat(vscode.Uri.joinPath(this.bundleUri, ".shadowenv.d"));
     } catch (_error: any) {
-      throw new Error(
+      throw new NonReportableError(
         "The Ruby LSP version manager is configured to be shadowenv, \
         but no .shadowenv.d directory was found in the workspace",
       );
@@ -58,7 +58,7 @@ export class Shadowenv extends VersionManager {
       try {
         await asyncExec("shadowenv --version");
       } catch (_error: any) {
-        throw new Error(
+        throw new NonReportableError(
           `Shadowenv executable not found. Ensure it is installed and available in the PATH.
            This error may happen if your shell configuration is failing to be sourced from the editor or if
            another extension is mutating the process PATH.`,
@@ -66,7 +66,7 @@ export class Shadowenv extends VersionManager {
       }
 
       // If it failed for some other reason, present the error to the user
-      throw new Error(`Failed to activate Ruby environment with Shadowenv: ${error.message}`);
+      throw new NonReportableError(`Failed to activate Ruby environment with Shadowenv: ${error.message}`);
     }
   }
 }

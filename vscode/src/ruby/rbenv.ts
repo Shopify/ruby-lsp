@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { VersionManager, ActivationResult } from "./versionManager";
+import { VersionManager, ActivationResult, NonReportableError } from "./versionManager";
 
 // Seamlessly manage your app’s Ruby environment with rbenv.
 //
@@ -36,7 +36,9 @@ export class Rbenv extends VersionManager {
 
       return path;
     } catch (_error: any) {
-      throw new Error(`The Ruby LSP version manager is configured to be rbenv, but ${path} does not exist`);
+      throw new NonReportableError(
+        `The Ruby LSP version manager is configured to be rbenv, but ${path} does not exist`,
+      );
     }
   }
 }

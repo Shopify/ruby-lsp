@@ -2,7 +2,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { ActivationResult, VersionManager } from "./versionManager";
+import { ActivationResult, NonReportableError, VersionManager } from "./versionManager";
 
 // Ruby enVironment Manager. It manages Ruby application environments and enables switching between them.
 // Learn more:
@@ -43,7 +43,7 @@ export class Rvm extends VersionManager {
       }
     }
 
-    throw new Error(
+    throw new NonReportableError(
       `Cannot find RVM installation directory. Searched in ${possiblePaths.map((uri) => uri.fsPath).join(",")}`,
     );
   }

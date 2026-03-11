@@ -5,7 +5,13 @@ import * as vscode from "vscode";
 
 import { WorkspaceChannel } from "../workspaceChannel";
 
-import { ActivationResult, MissingRubyError, VersionManager, ACTIVATION_SEPARATOR } from "./versionManager";
+import {
+  ActivationResult,
+  MissingRubyError,
+  NonReportableError,
+  VersionManager,
+  ACTIVATION_SEPARATOR,
+} from "./versionManager";
 
 interface RubyVersion {
   engine?: string;
@@ -248,13 +254,13 @@ export class Chruby extends VersionManager {
       }
 
       if (version === "") {
-        throw new Error(`Ruby version file ${rubyVersionUri.fsPath} is empty`);
+        throw new NonReportableError(`Ruby version file ${rubyVersionUri.fsPath} is empty`);
       }
 
       const match = /((?<engine>[A-Za-z]+)-)?(?<version>\d+\.\d+(\.\d+)?(-[A-Za-z0-9]+)?)/.exec(version);
 
       if (!match?.groups) {
-        throw new Error(
+        throw new NonReportableError(
           `Ruby version file ${rubyVersionUri.fsPath} contains invalid format. Expected (engine-)?version, got ${version}`,
         );
       }
@@ -433,7 +439,7 @@ export class Chruby extends VersionManager {
   }
 
   private rubyVersionError() {
-    return new Error(
+    return new NonReportableError(
       `Cannot find .ruby-version file. Please specify the Ruby version in a
            .ruby-version either in ${this.bundleUri.fsPath} or in a parent directory`,
     );
