@@ -89,11 +89,24 @@ Outputs `METRIC name=number` lines parsed by the experiment tooling.
 - RuboCopFormatter.new: ~50ms (2 RuboCopRunner creations)
 - Bundler.default_gemfile: 1.66ms (not a bottleneck)
 
+### Experiment 3: Default load_addons: false for Definition and Hover classes (KEPT)
+- Override `with_server` default to `load_addons: false` in these two test classes
+- Saves ~3s from ~79 fewer addon activation/deactivation cycles
+- Only test_definition_addons and test_hover_addons explicitly enable addon loading
+- **Impact**: ~3s (hard to measure due to run-to-run variance)
+
 ### Current bottlenecks (post-optimization)
 - SetupBundlerTest: 102s (off-limits, subprocess `bundle install`)
 - IntegrationTest: 40s (off-limits, subprocess spawning)
 - FormattingExpectationsTest: 19s (actual RuboCop work on 1176 fixtures)
 - ServerTest: 17s (59 tests testing server message processing)
-- DefinitionExpectationsTest: 15s (with_server per test, already skip addons)
+- DefinitionExpectationsTest: ~12s (with_server per test, now skip addons)
 - DiagnosticsExpectationsTest: 8s (actual RuboCop work)
 - CommonTest: 4.5s (indexes entire workspace in 1 test)
+
+### Ideas considered but not pursued
+- **GC tuning (RUBY_GC_HEAP_INIT_SLOTS)**: Made things slower (297s vs 217-243s)
+- **Minitest parallelize_me!**: Thread safety concerns with shared mutable state (Addon.addons, RuboCop runners)
+- **Caching Bundler lookups**: Only 1.66ms per call, not a bottleneck
+- **Caching indexed files per DefinitionExpectationsTest**: Would need Server cloning, too invasive
+- **Changing with_server default to load_addons: false globally**: Would break public API for addon authors
