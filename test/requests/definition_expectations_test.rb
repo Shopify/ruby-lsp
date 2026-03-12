@@ -9,7 +9,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, stub_no_typechecker: true) do |server, uri|
+    with_server(source, stub_no_typechecker: true, load_addons: false) do |server, uri|
       position = @__params&.first || { character: 0, line: 0 }
 
       index = server.global_state.index

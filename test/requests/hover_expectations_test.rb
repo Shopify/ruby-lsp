@@ -10,7 +10,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
   def run_expectations(source)
     position = @__params&.first || { character: 0, line: 0 }
 
-    with_server(source, stub_no_typechecker: true) do |server, uri|
+    with_server(source, stub_no_typechecker: true, load_addons: false) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       server.process_message(
         id: 1,
