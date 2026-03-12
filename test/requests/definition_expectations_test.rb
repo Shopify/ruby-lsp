@@ -7,15 +7,11 @@ require_relative "support/expectations_test_runner"
 class DefinitionExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Definition, "definition"
 
-  private
-
-  # Skip addon loading by default — only test_definition_addons needs addons
+  # Skip add-on loading by default — only test_definition_addons needs it
   def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: false,
     &block)
     super
   end
-
-  public
 
   def run_expectations(source)
     # We need to pretend that Sorbet is not a dependency or else we can't properly test
