@@ -7,10 +7,20 @@ require_relative "support/expectations_test_runner"
 class HoverExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Hover, "hover"
 
+  private
+
+  # Skip addon loading by default — only test_hover_addons needs addons
+  def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: false,
+    &block)
+    super
+  end
+
+  public
+
   def run_expectations(source)
     position = @__params&.first || { character: 0, line: 0 }
 
-    with_server(source, stub_no_typechecker: true, load_addons: false) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       # We need to pretend that Sorbet is not a dependency or else we can't properly test
       server.process_message(
         id: 1,
@@ -356,7 +366,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     begin
       create_hover_addon
 
-      with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_server(source, stub_no_typechecker: true, load_addons: true) do |server, uri|
         server.process_message(
           id: 1,
           method: "textDocument/hover",

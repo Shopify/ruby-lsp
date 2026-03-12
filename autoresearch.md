@@ -64,4 +64,36 @@ Outputs `METRIC name=number` lines parsed by the experiment tooling.
 - Activation: `source /opt/homebrew/share/chruby/chruby.sh && chruby ruby-3.4.7`
 
 ## What's Been Tried
-(Nothing yet — this is the initial baseline.)
+
+### Experiment 1: Cache GlobalState at class level (KEPT)
+- Changed `ExpectationsTestRunner#setup` to share GlobalState across tests in same class
+- **Impact alone**: negligible (~0s saved) — GlobalState.new is only ~2ms
+- But enables experiment 1b below
+
+### Experiment 1b: Cache RuboCopFormatter at class level (KEPT)
+- `FormattingExpectationsTest` and `DiagnosticsExpectationsTest` were creating new `RuboCopFormatter` (which creates 2 `RuboCopRunner` instances each) for every test
+- Cached at class level since runners are designed for reuse
+- **Impact**: 454s → 301s (**153s saved, 33.8%**)
+
+### Experiment 2: Skip addon loading in expectation tests (KEPT)
+- `with_server(load_addons: true)` costs ~103ms per call vs ~2ms without
+- RuboCop addon activation/deactivation per test was the main cost
+- Definition and Hover expectation `run_expectations` don't need addons
+- **Impact**: 301s → 217s (**84s saved, 27.9%**)
+
+### Micro-benchmarks (informational)
+- Server.new + shutdown: 1.72ms (fast)
+- GlobalState.new: 2.1ms (fast)
+- with_server(load_addons: true): 104.84ms (slow due to addon loading)
+- with_server(load_addons: false): 2.19ms (fast)
+- RuboCopFormatter.new: ~50ms (2 RuboCopRunner creations)
+- Bundler.default_gemfile: 1.66ms (not a bottleneck)
+
+### Current bottlenecks (post-optimization)
+- SetupBundlerTest: 102s (off-limits, subprocess `bundle install`)
+- IntegrationTest: 40s (off-limits, subprocess spawning)
+- FormattingExpectationsTest: 19s (actual RuboCop work on 1176 fixtures)
+- ServerTest: 17s (59 tests testing server message processing)
+- DefinitionExpectationsTest: 15s (with_server per test, already skip addons)
+- DiagnosticsExpectationsTest: 8s (actual RuboCop work)
+- CommonTest: 4.5s (indexes entire workspace in 1 test)

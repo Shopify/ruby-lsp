@@ -7,9 +7,19 @@ require_relative "support/expectations_test_runner"
 class DefinitionExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Definition, "definition"
 
+  private
+
+  # Skip addon loading by default — only test_definition_addons needs addons
+  def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: false,
+    &block)
+    super
+  end
+
+  public
+
   def run_expectations(source)
     # We need to pretend that Sorbet is not a dependency or else we can't properly test
-    with_server(source, stub_no_typechecker: true, load_addons: false) do |server, uri|
+    with_server(source, stub_no_typechecker: true) do |server, uri|
       position = @__params&.first || { character: 0, line: 0 }
 
       index = server.global_state.index
@@ -229,7 +239,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     begin
       create_definition_addon
 
-      with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_server(source, stub_no_typechecker: true, load_addons: true) do |server, uri|
         server.global_state.index.index_file(
           URI::Generic.from_path(
             load_path_entry: "#{Dir.pwd}/lib",
