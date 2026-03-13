@@ -7,6 +7,12 @@ require_relative "support/expectations_test_runner"
 class HoverExpectationsTest < ExpectationsTestRunner
   expectations_tests RubyLsp::Requests::Hover, "hover"
 
+  # Skip add-on loading by default — only test_hover_addons needs it
+  def with_server(source = nil, uri = Kernel.URI("file:///fake.rb"), stub_no_typechecker: false, load_addons: false,
+    &block)
+    super
+  end
+
   def run_expectations(source)
     position = @__params&.first || { character: 0, line: 0 }
 
@@ -356,7 +362,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     begin
       create_hover_addon
 
-      with_server(source, stub_no_typechecker: true) do |server, uri|
+      with_server(source, stub_no_typechecker: true, load_addons: true) do |server, uri|
         server.process_message(
           id: 1,
           method: "textDocument/hover",

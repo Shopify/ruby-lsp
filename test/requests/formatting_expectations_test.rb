@@ -11,7 +11,7 @@ class FormattingExpectationsTest < ExpectationsTestRunner
     @global_state.formatter = "rubocop_internal"
     @global_state.register_formatter(
       "rubocop_internal",
-      RubyLsp::Requests::Support::RuboCopFormatter.new,
+      self.class.cached_rubocop_formatter,
     )
     document = RubyLsp::RubyDocument.new(
       source: source,
@@ -36,5 +36,11 @@ class FormattingExpectationsTest < ExpectationsTestRunner
   end
 
   def initialize_params(_expected)
+  end
+
+  class << self
+    def cached_rubocop_formatter
+      @cached_rubocop_formatter ||= RubyLsp::Requests::Support::RuboCopFormatter.new
+    end
   end
 end
