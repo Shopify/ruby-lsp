@@ -43,7 +43,7 @@ module RubyLsp
         async: 6,
         modification: 7,
         documentation: 8,
-        default_library: 9,
+        defaultLibrary: 9,
       }.freeze #: Hash[Symbol, Integer]
 
       #: ((^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache) -> void
@@ -184,8 +184,8 @@ module RubyLsp
         end
 
         # Encode an array of modifiers to positions onto a bit flag
-        # For example, [:default_library] will be encoded as
-        # 0b1000000000, as :default_library is the 10th bit according
+        # For example, [:defaultLibrary] will be encoded as
+        # 0b1000000000, as :defaultLibrary is the 10th bit according
         # to the token modifiers index map.
         #: (Array[Integer] modifiers) -> Integer
         def encode_modifiers(modifiers)

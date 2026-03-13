@@ -82,6 +82,15 @@ class SemanticHighlightingExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_provider_uses_lsp_default_library_modifier_casing
+    token_modifiers = JSON.parse(
+      RubyLsp::Requests::SemanticHighlighting.provider.to_json,
+    ).dig("legend", "tokenModifiers")
+
+    assert_includes(token_modifiers, "defaultLibrary")
+    refute_includes(token_modifiers, "default_library")
+  end
+
   private
 
   def create_semantic_highlighting_addon
