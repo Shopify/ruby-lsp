@@ -21,7 +21,7 @@ export class Shadowenv extends VersionManager {
       );
     }
 
-    const shadowenvExec = await this.findExec([vscode.Uri.file("/opt/homebrew/bin")], "shadowenv");
+    const shadowenvExec = await this.findExec([], "shadowenv");
 
     try {
       const parsedResult = await this.runEnvActivationScript(`${shadowenvExec} exec -- ruby`);
