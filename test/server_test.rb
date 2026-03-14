@@ -647,6 +647,18 @@ class ServerTest < Minitest::Test
     assert_match("mocha/exception_raiser.rb", data[:backtrace])
   end
 
+  def test_gem_not_found_setup_error_does_not_send_telemetry
+    assert_setup_error_skips_telemetry(Bundler::GemNotFound.new("Could not find gem 'foo'"))
+  end
+
+  def test_git_error_setup_error_does_not_send_telemetry
+    assert_setup_error_skips_telemetry(Bundler::GitError.new("Revision abc123 does not exist"))
+  end
+
+  def test_other_setup_errors_are_reported_to_telemetry
+    assert_setup_error_sends_telemetry(StandardError.new("something unexpected"))
+  end
+
   def test_handles_editor_indexing_settings
     capture_io do
       @server.process_message({
@@ -1713,6 +1725,44 @@ class ServerTest < Minitest::Test
   end
 
   private
+
+  def collect_telemetry_for_setup_error(error)
+    server = RubyLsp::Server.new(test_mode: true, setup_error: error)
+
+    capture_subprocess_io do
+      server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: { enabledFeatures: [] },
+          capabilities: { general: { positionEncodings: ["utf-8"] } },
+        },
+      })
+    end
+
+    messages = []
+    messages << server.pop_response until server.instance_variable_get(:@outgoing_queue).empty?
+
+    messages.select do |msg|
+      msg.is_a?(RubyLsp::Notification) && msg.method == "telemetry/event"
+    end
+  ensure
+    server&.run_shutdown
+  end
+
+  def assert_setup_error_skips_telemetry(error)
+    assert_empty(
+      collect_telemetry_for_setup_error(error),
+      "#{error.class} setup errors should not be reported to telemetry",
+    )
+  end
+
+  def assert_setup_error_sends_telemetry(error)
+    refute_empty(
+      collect_telemetry_for_setup_error(error),
+      "#{error.class} setup errors should be reported to telemetry",
+    )
+  end
 
   def wait_for_indexing
     message = @server.pop_response

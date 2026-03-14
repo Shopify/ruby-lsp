@@ -3,6 +3,8 @@
 
 module RubyLsp
   class Server < BaseServer
+    NON_REPORTABLE_SETUP_ERRORS = [Bundler::GemNotFound, Bundler::GitError].freeze #: Array[singleton(StandardError)]
+
     # Only for testing
     #: GlobalState
     attr_reader :global_state
@@ -315,7 +317,7 @@ module RubyLsp
 
       global_state_notifications.each { |notification| send_message(notification) }
 
-      if @setup_error
+      if @setup_error && NON_REPORTABLE_SETUP_ERRORS.none? { |error_class| @setup_error.is_a?(error_class) }
         send_message(Notification.telemetry(
           type: "error",
           errorMessage: @setup_error.message,
