@@ -162,7 +162,7 @@ module RubyLsp
 
       #: (Prism::SelfNode node) -> void
       def on_self_node_enter(node)
-        @response_builder.add_token(node.location, :variable, [:default_library])
+        @response_builder.add_token(node.location, :variable, [:defaultLibrary])
       end
 
       #: (Prism::LocalVariableWriteNode node) -> void

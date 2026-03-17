@@ -43,7 +43,7 @@ contained in the default list.
 | Method calls with any syntax  | method | |
 | Constant references (including classes and modules)  | namespace | We don't yet differentiate between module and class references |
 | Method definition  | method.declaration | |
-| self  | variable.default_library | |
+| self  | variable.defaultLibrary | |
 | Method, block and lambda arguments | parameter | |
 | Class declaration | class.declaration | |
 | Module declaration | class.declaration | |
