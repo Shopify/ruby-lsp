@@ -49,7 +49,7 @@ module RubyLsp
 
       # Discovers and loads all add-ons. Returns a list of errors when trying to require add-ons
       #: (GlobalState global_state, Thread::Queue outgoing_queue, ?include_project_addons: bool) -> Array[StandardError]
-      def load_addons(global_state, outgoing_queue, include_project_addons: true)
+      def load_addons(global_state, outgoing_queue, include_project_addons: true, &logging)
         # Require all add-ons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb` or in the workspace under
         # `your_project/ruby_lsp/project_name/addon.rb`

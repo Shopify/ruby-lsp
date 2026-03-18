@@ -172,7 +172,18 @@ module RubyLsp
       # different versions of the same files. We cannot load add-ons if Bundler.setup failed
       return if @setup_error
 
-      errors = Addon.load_addons(@global_state, @outgoing_queue, include_project_addons: include_project_addons)
+      errors = Addon.load_addons(
+        @global_state,
+        @outgoing_queue,
+        include_project_addons: include_project_addons
+      ) do |log: nil, error: nil|
+        send_log_message(log) if log
+        if error
+          send_log_message(error, type: Constant::MessageType::ERROR)
+          send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
+        end
+      end
+
       return if test_mode?
 
       if errors.any?
