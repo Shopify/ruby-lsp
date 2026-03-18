@@ -63,7 +63,7 @@ module RubyLsp
       @index = RubyIndexer::Index.new #: RubyIndexer::Index
       @graph = Rubydex::Graph.new #: Rubydex::Graph
       @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
-      @type_inferrer = TypeInferrer.new(@index) #: TypeInferrer
+      @type_inferrer = TypeInferrer.new(@graph) #: TypeInferrer
       @addon_settings = {} #: Hash[String, untyped]
       @top_level_bundle = begin
         Bundler.with_original_env { Bundler.default_gemfile }
