@@ -1,9 +1,12 @@
 # typed: true
 # frozen_string_literal: true
 
+require "set"
+
 module RubyIndexer
-  # A PrefixTree is a data structure that allows searching for partial strings fast. The tree is similar to a nested
-  # hash structure, where the keys are the characters of the inserted strings.
+  # A PrefixTree is a data structure that allows searching for partial strings fast. Instead of using a character-level
+  # trie (which creates one node per character and is very memory-intensive), this implementation uses a sorted array
+  # with binary search for memory-efficient prefix matching.
   #
   # ## Example
   # ```ruby
@@ -11,15 +14,6 @@ module RubyIndexer
   # # Insert entries using the same key and value
   # tree.insert("bar", "bar")
   # tree.insert("baz", "baz")
-  # # Internally, the structure is analogous to this, but using nodes:
-  # # {
-  # #   "b" => {
-  # #     "a" => {
-  # #       "r" => "bar",
-  # #       "z" => "baz"
-  # #     }
-  # #   }
-  # # }
   # # When we search it, it finds all possible values based on partial (or complete matches):
   # tree.search("") # => ["bar", "baz"]
   # tree.search("b") # => ["bar", "baz"]
@@ -34,12 +28,17 @@ module RubyIndexer
   # See https://en.wikipedia.org/wiki/Trie for more information
   #: [Value]
   class PrefixTree
-    #: -> void
-    def initialize
-      @root = Node.new(
-        "",
-        "", #: as untyped
-      ) #: Node[Value]
+    # Creates a new PrefixTree. If `external_store` is provided, the tree uses that hash for value storage and lookups
+    # instead of maintaining its own internal hash. This avoids duplicating data when the caller already maintains a
+    # hash with the same key-value mapping. The caller is responsible for populating the external store; the tree only
+    # tracks which keys exist for prefix searching.
+    #: (?Hash[String, Value]? external_store) -> void
+    def initialize(external_store = nil)
+      @external = external_store #: Hash[String, Value]?
+      @values = external_store || {} #: Hash[String, Value]
+      @sorted_keys = [] #: Array[String]
+      @tracked_keys = Set.new #: Set[String]
+      @dirty = false #: bool
     end
 
     # Search the PrefixTree based on a given `prefix`. If `foo` is an entry in the tree, then searching for `fo` will
@@ -48,64 +47,97 @@ module RubyIndexer
     # of values for a given match
     #: (String prefix) -> Array[Value]
     def search(prefix)
-      node = find_node(prefix)
-      return [] unless node
+      if prefix.empty?
+        return @values.values
+      end
 
-      node.collect
+      ensure_sorted!
+
+      # Binary search to find the first key >= prefix
+      idx = @sorted_keys.bsearch_index { |k| k >= prefix }
+      return [] unless idx
+
+      results = []
+      len = @sorted_keys.length
+
+      while idx < len
+        key = @sorted_keys[idx]
+        break unless key.start_with?(prefix)
+
+        val = @values[key] #: Value?
+        results << val if val
+        idx += 1
+      end
+
+      results
     end
 
     # Inserts a `value` using the given `key`
     #: (String key, Value value) -> void
     def insert(key, value)
-      node = @root
-
-      key.each_char do |char|
-        node = node.children[char] ||= Node.new(char, value, node)
+      unless @tracked_keys.include?(key)
+        @sorted_keys << key
+        @tracked_keys << key
+        @dirty = true
       end
 
-      # This line is to allow a value to be overridden. When we are indexing files, we want to be able to update entries
-      # for a given fully qualified name if we find more occurrences of it. Without being able to override, that would
-      # not be possible
-      node.value = value
-      node.leaf = true
+      # When using an external store, the caller manages the values directly.
+      # Otherwise, store it in our internal hash.
+      @values[key] = value unless @external
     end
 
     # Deletes the entry identified by `key` from the tree. Notice that a partial match will still delete all entries
     # that match it. For example, if the tree contains `foo` and we ask to delete `fo`, then `foo` will be deleted
     #: (String key) -> void
     def delete(key)
-      node = find_node(key)
-      return unless node
+      # Check for exact match first (most common case)
+      if @tracked_keys.include?(key)
+        @values.delete(key) unless @external
+        @tracked_keys.delete(key)
+        @sorted_keys.delete(key)
+        return
+      end
 
-      # Remove the node from the tree and then go up the parents to remove any of them with empty children
-      parent = node.parent #: Node[Value]?
+      # Handle partial prefix match: delete all entries whose key starts with the given prefix
+      ensure_sorted!
 
-      while parent
-        parent.children.delete(node.key)
-        return if parent.children.any? || parent.leaf
+      idx = @sorted_keys.bsearch_index { |k| k >= key }
+      return unless idx
 
-        node = parent
-        parent = parent.parent
+      keys_to_delete = []
+      len = @sorted_keys.length
+
+      while idx < len
+        k = @sorted_keys[idx]
+        break unless k.start_with?(key)
+
+        keys_to_delete << k
+        idx += 1
+      end
+
+      keys_to_delete.each do |k|
+        @values.delete(k) unless @external
+        @tracked_keys.delete(k)
+      end
+
+      # Rebuild sorted_keys from tracked keys (more efficient than multiple deletes)
+      if keys_to_delete.any?
+        @sorted_keys = @tracked_keys.to_a
+        @dirty = true
       end
     end
 
     private
 
-    # Find a node that matches the given `key`
-    #: (String key) -> Node[Value]?
-    def find_node(key)
-      node = @root
-
-      key.each_char do |char|
-        snode = node.children[char]
-        return nil unless snode
-
-        node = snode
+    #: -> void
+    def ensure_sorted!
+      if @dirty
+        @sorted_keys.sort!
+        @dirty = false
       end
-
-      node
     end
 
+    # Keep the Node class for backwards compatibility with any external consumers, but it's no longer used internally
     #: [Value]
     class Node
       #: Hash[String, Node[Value]]

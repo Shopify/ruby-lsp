@@ -58,7 +58,8 @@ module RubyIndexer
       @entries = {} #: Hash[String, Array[Entry]]
 
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
-      @entries_tree = PrefixTree.new #: PrefixTree[Array[Entry]]
+      # Use @entries as external value store to avoid duplicating the hash
+      @entries_tree = PrefixTree.new(@entries) #: PrefixTree[Array[Entry]]
 
       # Holds references to where entries where discovered so that we can easily delete them
       # {
@@ -78,8 +79,11 @@ module RubyIndexer
       @included_hooks = {} #: Hash[String, Array[^(Index index, Entry::Namespace base) -> void]]
 
       @configuration = RubyIndexer::Configuration.new #: Configuration
+      # Share configuration with entries via module-level accessor to avoid per-entry storage
+      RubyIndexer.current_configuration = @configuration
 
       @initial_indexing_completed = false #: bool
+      @indexing_in_progress = false #: bool
     end
 
     # Register an included `hook` that will be executed when `module_name` is included into any namespace
@@ -90,7 +94,7 @@ module RubyIndexer
 
     #: (URI::Generic uri, ?skip_require_paths_tree: bool) -> void
     def delete(uri, skip_require_paths_tree: false)
-      key = uri.to_s
+      key = -uri.to_s
       # For each constant discovered in `path`, delete the associated entry from the index. If there are no entries
       # left, delete the constant from the index.
       @uris_to_entries[key]&.each do |entry|
@@ -123,9 +127,9 @@ module RubyIndexer
       name = entry.name
 
       (@entries[name] ||= []) << entry
-      (@uris_to_entries[entry.uri.to_s] ||= []) << entry
+      (@uris_to_entries[-entry.uri.to_s] ||= []) << entry
 
-      unless skip_prefix_tree
+      unless skip_prefix_tree || @indexing_in_progress
         @entries_tree.insert(
           name,
           @entries[name], #: as !nil
@@ -367,6 +371,9 @@ module RubyIndexer
       # Calculate how many paths are worth 1% of progress
       progress_step = (uris.length / 100.0).ceil
 
+      # Skip prefix tree insertion during bulk indexing for performance. We'll build it in one pass at the end.
+      @indexing_in_progress = true
+
       uris.each_with_index do |uri, index|
         if block && index % progress_step == 0
           progress = (index / progress_step) + 1
@@ -374,6 +381,12 @@ module RubyIndexer
         end
 
         index_file(uri, collect_comments: false)
+      end
+
+      # Build the prefix tree from the final entries hash in one pass
+      @indexing_in_progress = false
+      @entries.each do |name, entries_for_name|
+        @entries_tree.insert(name, entries_for_name)
       end
 
       @initial_indexing_completed = true
@@ -404,10 +417,38 @@ module RubyIndexer
     #: (URI::Generic uri, ?collect_comments: bool) -> void
     def index_file(uri, collect_comments: true)
       path = uri.full_path #: as !nil
-      index_single(uri, File.read(path), collect_comments: collect_comments)
+
+      # When not collecting comments, use Prism.parse_file to avoid creating a Ruby string for the source.
+      # This reduces memory allocations during initial indexing.
+      if collect_comments
+        index_single(uri, File.read(path), collect_comments: true)
+      else
+        index_file_direct(uri, path)
+      end
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it
+    end
+
+    # Indexes a file directly from disk using Prism.parse_file to avoid creating a Ruby string for the source
+    #: (URI::Generic uri, String path) -> void
+    def index_file_direct(uri, path)
+      dispatcher = Prism::Dispatcher.new
+      result = Prism.parse_file(path)
+      listener = DeclarationListener.new(self, dispatcher, result, uri, collect_comments: false)
+      dispatcher.dispatch(result.value)
+
+      require_path = uri.require_path
+      @require_paths_tree.insert(require_path, uri) if require_path
+
+      indexing_errors = listener.indexing_errors.uniq
+      indexing_errors.each { |error| $stderr.puts(error) } if indexing_errors.any?
+    rescue SystemStackError => e
+      if e.backtrace&.first&.include?("prism")
+        $stderr.puts "Prism error indexing #{uri}: #{e.message}"
+      else
+        raise
+      end
     end
 
     # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
@@ -648,7 +689,7 @@ module RubyIndexer
     # document's source (used to handle unsaved changes to files)
     #: (URI::Generic uri, ?String? source) ?{ (Index index) -> void } -> void
     def handle_change(uri, source = nil, &block)
-      key = uri.to_s
+      key = -uri.to_s
       original_entries = @uris_to_entries[key]
 
       if block
@@ -730,7 +771,7 @@ module RubyIndexer
 
     #: [T] (String uri, ?Class[(T & Entry)]? type) -> (Array[Entry] | Array[T])?
     def entries_for(uri, type = nil)
-      entries = @uris_to_entries[uri.to_s]
+      entries = @uris_to_entries[uri.is_a?(String) ? uri : uri.to_s]
       return entries unless type
 
       entries&.grep(type)

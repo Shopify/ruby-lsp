@@ -100,7 +100,7 @@ module RubyIndexer
       refute_nil(entries)
       entry = entries.find { |entry| entry.is_a?(Entry::Class) } #: as Entry::Class
 
-      assert_same(entry.location, entry.name_location)
+      assert_equal(entry.location, entry.name_location)
     end
 
     def test_rbs_method_with_required_positionals

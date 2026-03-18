@@ -17,4 +17,10 @@ require "ruby_indexer/lib/ruby_indexer/location"
 require "ruby_indexer/lib/ruby_indexer/rbs_indexer"
 
 module RubyIndexer
+  class << self
+    # The current configuration, shared across all entries to avoid per-instance storage overhead.
+    # Set by Index#initialize. Thread-safe because the GVL ensures only one thread writes at a time.
+    #: Configuration?
+    attr_accessor :current_configuration
+  end
 end

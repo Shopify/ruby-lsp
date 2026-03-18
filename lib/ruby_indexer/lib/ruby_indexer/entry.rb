@@ -3,8 +3,10 @@
 
 module RubyIndexer
   class Entry
-    #: Configuration
-    attr_reader :configuration
+    #: -> Configuration
+    def configuration
+      RubyIndexer.current_configuration #: as Configuration
+    end
 
     #: String
     attr_reader :name
@@ -12,37 +14,49 @@ module RubyIndexer
     #: URI::Generic
     attr_reader :uri
 
-    #: RubyIndexer::Location
-    attr_reader :location
+    #: -> RubyIndexer::Location
+    def location
+      packed = @location_packed #: Integer
+      Location.from_packed(packed)
+    end
 
     alias_method :name_location, :location
 
-    #: Symbol
-    attr_accessor :visibility
+    #: -> Symbol
+    def visibility
+      defined?(@visibility) ? @visibility : :public
+    end
+
+    #: (Symbol value) -> void
+    def visibility=(value)
+      @visibility = value
+    end
 
     #: (Configuration configuration, String name, URI::Generic uri, Location location, String? comments) -> void
     def initialize(configuration, name, uri, location, comments)
-      @configuration = configuration
-      @name = name
+      @name = -name
       @uri = uri
-      @comments = comments
-      @visibility = :public #: Symbol
-      @location = location
+      # Only set @comments if non-nil to keep the object shape smaller during initial indexing
+      # where comments are not collected. The comments accessor handles the nil/undefined case.
+      @comments = comments if comments
+      # Don't set @visibility — defaults to :public via accessor. Most entries are public,
+      # so this keeps the object shape smaller for the common case.
+      @location_packed = location.instance_variable_get(:@packed) #: Integer
     end
 
     #: -> bool
     def public?
-      @visibility == :public
+      visibility == :public
     end
 
     #: -> bool
     def protected?
-      @visibility == :protected
+      visibility == :protected
     end
 
     #: -> bool
     def private?
-      @visibility == :private
+      visibility == :private
     end
 
     #: -> String
@@ -76,7 +90,7 @@ module RubyIndexer
         # Find the group that is either immediately or two lines above the current entry
         correct_group = grouped.find do |group|
           comment_end_line = group.last.location.start_line
-          (comment_end_line..comment_end_line + 1).cover?(@location.start_line - 1)
+          (comment_end_line..comment_end_line + 1).cover?(location.start_line - 1)
         end
 
         # If we found something, we join the comments together. Otherwise, the entry has no documentation and we don't
@@ -86,7 +100,7 @@ module RubyIndexer
           correct_group.filter_map do |comment|
             content = comment.slice.chomp
 
-            if content.valid_encoding? && !content.match?(@configuration.magic_comment_regex)
+            if content.valid_encoding? && !content.match?(configuration.magic_comment_regex)
               content.delete_prefix!("#")
               content.delete_prefix!(" ")
               content
@@ -109,7 +123,7 @@ module RubyIndexer
 
       #: (String module_name) -> void
       def initialize(module_name)
-        @module_name = module_name
+        @module_name = -module_name
       end
     end
 
@@ -122,18 +136,22 @@ module RubyIndexer
       attr_reader :nesting
 
       # Returns the location of the constant name, excluding the parent class or the body
-      #: Location
-      attr_reader :name_location
+      #: -> Location
+      def name_location
+        packed = @name_location_packed #: Integer
+        Location.from_packed(packed)
+      end
 
       #: (Configuration configuration, Array[String] nesting, URI::Generic uri, Location location, Location name_location, String? comments) -> void
       def initialize(configuration, nesting, uri, location, name_location, comments) # rubocop:disable Metrics/ParameterLists
         @name = nesting.join("::") #: String
-        # The original nesting where this namespace was discovered
+        # The original nesting where this namespace was discovered. Deduplicate component strings to save memory.
+        nesting.map! { |n| -n }
         @nesting = nesting
 
         super(configuration, @name, uri, location, comments)
 
-        @name_location = name_location
+        @name_location_packed = name_location.instance_variable_get(:@packed) #: Integer
       end
 
       #: -> Array[String]
@@ -167,7 +185,7 @@ module RubyIndexer
       #: (Configuration configuration, Array[String] nesting, URI::Generic uri, Location location, Location name_location, String? comments, String? parent_class) -> void
       def initialize(configuration, nesting, uri, location, name_location, comments, parent_class) # rubocop:disable Metrics/ParameterLists
         super(configuration, nesting, uri, location, name_location, comments)
-        @parent_class = parent_class
+        @parent_class = parent_class ? -parent_class : nil
       end
 
       # @override
@@ -180,8 +198,8 @@ module RubyIndexer
     class SingletonClass < Class
       #: (Location location, Location name_location, String? comments) -> void
       def update_singleton_information(location, name_location, comments)
-        @location = location
-        @name_location = name_location
+        @location_packed = location.instance_variable_get(:@packed)
+        @name_location_packed = name_location.instance_variable_get(:@packed)
         (@comments ||= +"") << comments if comments
       end
     end
@@ -201,6 +219,19 @@ module RubyIndexer
       #: (name: Symbol) -> void
       def initialize(name:)
         @name = name
+      end
+
+      # Intern/cache Parameter instances to share identical parameters across methods. Most projects
+      # have many methods with the same parameter names (e.g., :name, :id, :options).
+      #: Hash[Integer, Parameter]
+      INTERN_CACHE = {} #: Hash[Integer, Parameter]
+
+      class << self
+        #: (name: Symbol) -> Parameter
+        def interned(name:)
+          key = (object_id << 32) | name.object_id
+          INTERN_CACHE[key] ||= new(name: name)
+        end
       end
     end
 
@@ -277,6 +308,8 @@ module RubyIndexer
 
     # A forwarding method parameter, e.g. `def foo(...)`
     class ForwardingParameter < Parameter
+      INSTANCE = new(name: :"...") #: ForwardingParameter
+
       #: -> void
       def initialize
         # You can't name a forwarding parameter, it's always called `...`
@@ -292,7 +325,7 @@ module RubyIndexer
       #: (Configuration configuration, String name, URI::Generic uri, Location location, String? comments, Symbol visibility, Entry::Namespace? owner) -> void
       def initialize(configuration, name, uri, location, comments, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(configuration, name, uri, location, comments)
-        @visibility = visibility
+        @visibility = visibility unless visibility == :public
         @owner = owner
       end
 
@@ -329,27 +362,38 @@ module RubyIndexer
       #: -> Array[Signature]
       def signatures
         @signatures ||= begin
-          params = []
-          params << RequiredParameter.new(name: name.delete_suffix("=").to_sym) if name.end_with?("=")
-          [Entry::Signature.new(params)]
+          if name.end_with?("=")
+            [Entry::Signature.new([RequiredParameter.interned(name: name.delete_suffix("=").to_sym)])]
+          else
+            Entry::Signature.empty_methods_signatures
+          end
         end #: Array[Signature]?
       end
     end
 
     class Method < Member
       # @override
-      #: Array[Signature]
-      attr_reader :signatures
+      #: -> Array[Signature]
+      def signatures
+        # For parameterless methods, @signatures is not set to save memory (smaller object shape).
+        # Return the shared empty singleton in that case.
+        defined?(@signatures) ? @signatures : Signature.empty_methods_signatures
+      end
 
       # Returns the location of the method name, excluding parameters or the body
-      #: Location
-      attr_reader :name_location
+      #: -> Location
+      def name_location
+        packed = @name_location_packed #: Integer
+        Location.from_packed(packed)
+      end
 
       #: (Configuration configuration, String name, URI::Generic uri, Location location, Location name_location, String? comments, Array[Signature] signatures, Symbol visibility, Entry::Namespace? owner) -> void
       def initialize(configuration, name, uri, location, name_location, comments, signatures, visibility, owner) # rubocop:disable Metrics/ParameterLists
         super(configuration, name, uri, location, comments, visibility, owner)
-        @signatures = signatures
-        @name_location = name_location
+        # Only set @signatures if the method has parameters. Parameterless methods use the lazy
+        # accessor which returns a frozen singleton, keeping the object shape smaller (fewer ivars = less memory).
+        @signatures = signatures.freeze unless signatures.equal?(Signature.empty_methods_signatures)
+        @name_location_packed = name_location.instance_variable_get(:@packed) #: Integer
       end
     end
 
@@ -374,7 +418,8 @@ module RubyIndexer
       def initialize(configuration, target, nesting, name, uri, location, comments) # rubocop:disable Metrics/ParameterLists
         super(configuration, name, uri, location, comments)
 
-        @target = target
+        @target = -target
+        nesting.map! { |n| -n }
         @nesting = nesting
       end
     end
@@ -394,7 +439,8 @@ module RubyIndexer
           unresolved_alias.comments,
         )
 
-        @visibility = unresolved_alias.visibility
+        vis = unresolved_alias.visibility
+        @visibility = vis unless vis == :public
         @target = target
       end
     end
@@ -440,8 +486,8 @@ module RubyIndexer
       def initialize(configuration, new_name, old_name, owner, uri, location, comments) # rubocop:disable Metrics/ParameterLists
         super(configuration, new_name, uri, location, comments)
 
-        @new_name = new_name
-        @old_name = old_name
+        @new_name = -new_name
+        @old_name = -old_name
         @owner = owner
       end
     end
@@ -495,9 +541,20 @@ module RubyIndexer
       #: Array[Parameter]
       attr_reader :parameters
 
+      EMPTY_PARAMS = [].freeze #: Array[Parameter]
+
       #: (Array[Parameter] parameters) -> void
       def initialize(parameters)
-        @parameters = parameters
+        @parameters = parameters.empty? ? EMPTY_PARAMS : parameters
+      end
+
+      class << self
+        # Returns a frozen singleton array containing an empty Signature for methods with no parameters.
+        # This avoids creating 221K+ identical Signature objects during indexing.
+        #: -> Array[Signature]
+        def empty_methods_signatures
+          @empty_methods_signatures ||= [new(EMPTY_PARAMS)].freeze #: Array[Signature]?
+        end
       end
 
       # Returns a string with the decorated names of the parameters of this member. E.g.: `(a, b = 1, c: 2)`

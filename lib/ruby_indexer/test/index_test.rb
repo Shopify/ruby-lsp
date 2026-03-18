@@ -137,7 +137,7 @@ module RubyIndexer
         end
       RUBY
 
-      assert_equal(["path/other_foo", "path/foo"], @index.search_require_paths("path").map(&:require_path))
+      assert_equal(["path/foo", "path/other_foo"], @index.search_require_paths("path").map(&:require_path).sort)
     end
 
     def test_searching_for_entries_based_on_prefix
@@ -2204,13 +2204,10 @@ module RubyIndexer
         end
       RUBY
 
-      adf, abc = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+      candidates = @index.instance_variable_completion_candidates("@", "Child::<Class:Child>")
+      names = candidates.map(&:name).sort
 
-      refute_nil(abc)
-      refute_nil(adf)
-
-      assert_equal("@@abc", abc&.name)
-      assert_equal("@@adf", adf&.name)
+      assert_equal(["@@abc", "@@adf"], names)
     end
 
     def test_class_variable_completion_from_singleton_context

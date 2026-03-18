@@ -124,9 +124,19 @@ module RubyIndexer
 
     #: (RBS::AST::Members::MethodDefinition member) -> Array[Entry::Signature]
     def signatures(member)
-      member.overloads.map do |overload|
-        parameters = process_overload(overload)
-        Entry::Signature.new(parameters)
+      overloads = member.overloads
+      if overloads.size == 1
+        first_overload = overloads.first #: RBS::AST::Members::MethodDefinition::Overload?
+        parameters = process_overload(first_overload #: as !nil
+        )
+        return Entry::Signature.empty_methods_signatures if parameters.empty?
+
+        [Entry::Signature.new(parameters)]
+      else
+        overloads.map do |overload|
+          parameters = process_overload(overload)
+          Entry::Signature.new(parameters)
+        end
       end
     end
 
@@ -145,7 +155,7 @@ module RubyIndexer
       # Untyped functions are a new RBS feature (since v3.6.0) to declare methods that accept any parameters. For our
       # purposes, accepting any argument is equivalent to `...`
       if HAS_UNTYPED_FUNCTION && function.is_a?(RBS::Types::UntypedFunction)
-        [Entry::ForwardingParameter.new]
+        [Entry::ForwardingParameter::INSTANCE]
       else
         []
       end
@@ -173,7 +183,7 @@ module RubyIndexer
         name = param.name || :"arg#{i}"
         argument_offset += 1
 
-        Entry::RequiredParameter.new(name: name)
+        Entry::RequiredParameter.interned(name: name)
       end
 
       optional = function.optional_positionals.map.with_index(argument_offset) do |param, i|
@@ -181,7 +191,7 @@ module RubyIndexer
         #  def self.polar: (Numeric, ?Numeric) -> Complex
         name = param.name || :"arg#{i}"
 
-        Entry::OptionalParameter.new(name: name)
+        Entry::OptionalParameter.interned(name: name)
       end
 
       required + optional
@@ -190,7 +200,7 @@ module RubyIndexer
     #: (RBS::Types::Function function) -> Array[Entry::OptionalParameter]
     def process_trailing_positionals(function)
       function.trailing_positionals.map do |param|
-        Entry::OptionalParameter.new(name: param.name)
+        Entry::OptionalParameter.interned(name: param.name)
       end
     end
 
@@ -200,20 +210,20 @@ module RubyIndexer
 
       rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
 
-      Entry::RestParameter.new(name: rest_name)
+      Entry::RestParameter.interned(name: rest_name)
     end
 
     #: (RBS::Types::Function function) -> Array[Entry::KeywordParameter]
     def process_required_keywords(function)
       function.required_keywords.map do |name, _param|
-        Entry::KeywordParameter.new(name: name)
+        Entry::KeywordParameter.interned(name: name)
       end
     end
 
     #: (RBS::Types::Function function) -> Array[Entry::OptionalKeywordParameter]
     def process_optional_keywords(function)
       function.optional_keywords.map do |name, _param|
-        Entry::OptionalKeywordParameter.new(name: name)
+        Entry::OptionalKeywordParameter.interned(name: name)
       end
     end
 
@@ -223,7 +233,7 @@ module RubyIndexer
 
       name = param.name || Entry::KeywordRestParameter::DEFAULT_NAME
 
-      Entry::KeywordRestParameter.new(name: name)
+      Entry::KeywordRestParameter.interned(name: name)
     end
 
     # RBS treats constant definitions differently depend on where they are defined.

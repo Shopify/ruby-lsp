@@ -324,7 +324,8 @@ module RubyIndexer
       when nil
         location = Location.from_prism_location(node.location, @code_units_cache)
         name_location = Location.from_prism_location(node.name_loc, @code_units_cache)
-        signatures = [Entry::Signature.new(list_params(node.parameters))]
+        params = list_params(node.parameters)
+        signatures = params.empty? ? Entry::Signature.empty_methods_signatures : [Entry::Signature.new(params)]
 
         @index.add(Entry::Method.new(
           @index.configuration,
@@ -356,6 +357,8 @@ module RubyIndexer
       when Prism::SelfNode
         singleton = @index.existing_or_new_singleton_class(owner.name)
 
+        params = list_params(node.parameters)
+        sigs = params.empty? ? Entry::Signature.empty_methods_signatures : [Entry::Signature.new(params)]
         @index.add(Entry::Method.new(
           @index.configuration,
           method_name,
@@ -363,7 +366,7 @@ module RubyIndexer
           Location.from_prism_location(node.location, @code_units_cache),
           Location.from_prism_location(node.name_loc, @code_units_cache),
           comments,
-          [Entry::Signature.new(list_params(node.parameters))],
+          sigs,
           scope.visibility,
           singleton,
         ))
@@ -965,21 +968,21 @@ module RubyIndexer
         name = parameter_name(required)
         next unless name
 
-        parameters << Entry::RequiredParameter.new(name: name)
+        parameters << Entry::RequiredParameter.interned(name: name)
       end
 
       parameters_node.optionals.each do |optional|
         name = parameter_name(optional)
         next unless name
 
-        parameters << Entry::OptionalParameter.new(name: name)
+        parameters << Entry::OptionalParameter.interned(name: name)
       end
 
       rest = parameters_node.rest
 
       if rest.is_a?(Prism::RestParameterNode)
         rest_name = rest.name || Entry::RestParameter::DEFAULT_NAME
-        parameters << Entry::RestParameter.new(name: rest_name)
+        parameters << Entry::RestParameter.interned(name: rest_name)
       end
 
       parameters_node.keywords.each do |keyword|
@@ -988,9 +991,9 @@ module RubyIndexer
 
         case keyword
         when Prism::RequiredKeywordParameterNode
-          parameters << Entry::KeywordParameter.new(name: name)
+          parameters << Entry::KeywordParameter.interned(name: name)
         when Prism::OptionalKeywordParameterNode
-          parameters << Entry::OptionalKeywordParameter.new(name: name)
+          parameters << Entry::OptionalKeywordParameter.interned(name: name)
         end
       end
 
@@ -999,20 +1002,20 @@ module RubyIndexer
       case keyword_rest
       when Prism::KeywordRestParameterNode
         keyword_rest_name = parameter_name(keyword_rest) || Entry::KeywordRestParameter::DEFAULT_NAME
-        parameters << Entry::KeywordRestParameter.new(name: keyword_rest_name)
+        parameters << Entry::KeywordRestParameter.interned(name: keyword_rest_name)
       when Prism::ForwardingParameterNode
-        parameters << Entry::ForwardingParameter.new
+        parameters << Entry::ForwardingParameter::INSTANCE
       end
 
       parameters_node.posts.each do |post|
         name = parameter_name(post)
         next unless name
 
-        parameters << Entry::RequiredParameter.new(name: name)
+        parameters << Entry::RequiredParameter.interned(name: name)
       end
 
       block = parameters_node.block
-      parameters << Entry::BlockParameter.new(name: block.name || Entry::BlockParameter::DEFAULT_NAME) if block
+      parameters << Entry::BlockParameter.interned(name: block.name || Entry::BlockParameter::DEFAULT_NAME) if block
 
       parameters
     end

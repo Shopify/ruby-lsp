@@ -1248,9 +1248,14 @@ module RubyLsp
         end
 
         # Indexing produces a high number of short lived object allocations. That might lead to some fragmentation and
-        # an unnecessarily expanded heap. Compacting ensures that the heap is as small as possible and that future
-        # allocations and garbage collections are faster
-        GC.compact unless @test_mode
+        # an unnecessarily expanded heap. Multiple rounds of GC + compaction ensures that the heap is as small as
+        # possible and that future allocations and garbage collections are faster
+        unless @test_mode
+          3.times do
+            GC.start(full_mark: true, immediate_sweep: true)
+            GC.compact
+          end
+        end
 
         @global_state.synchronize do
           # If we linearize ancestors while the index is not fully populated, we may end up caching incorrect results
