@@ -174,6 +174,18 @@ module RubyLsp
             "Add-on is not compatible with this version of the Ruby LSP. Skipping its activation"
         end
       end
+
+      private
+
+      #: -> Array[String]
+      def top_level_directories
+        Dir.glob("#{Dir.pwd}/*").filter_map do |path|
+          dir_name = File.basename(path)
+          next unless File.directory?(path)
+
+          dir_name
+        end
+      end
     end
 
     #: -> void
@@ -284,16 +296,6 @@ module RubyLsp
     #: (Array[Hash[Symbol, untyped]]) -> Array[String]
     def resolve_test_commands(items)
       []
-    end
-
-    #: -> Array[String]
-    def top_level_directories
-      Dir.glob("#{Dir.pwd}/*").filter_map do |path|
-        dir_name = File.basename(path)
-        next unless File.directory?(path)
-
-        dir_name
-      end
     end
   end
 end
