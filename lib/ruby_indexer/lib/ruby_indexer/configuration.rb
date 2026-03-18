@@ -65,9 +65,6 @@ module RubyIndexer
 
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
 
-      logging.call(log: "Spotting uris of included_patterns...")
-      sleep(1.5)
-
       uris = @included_patterns.flat_map do |pattern|
         load_path_entry = nil #: String?
 
@@ -75,9 +72,8 @@ module RubyIndexer
           glob_pattern = File.join(@workspace_path, pattern)
           glob_results = Dir.glob(glob_pattern, flags)
         rescue StandardError => error
-          message  = "Failed to spot uris of included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
-          message << "\nExcluded patterns: #{@excluded_patterns.join(', ')}"
-          logging.call(log: message)
+          message  = "Indexation error on included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
+          logging.call(error: message)
           next
         end
 
