@@ -39,7 +39,7 @@ module RubyIndexer
 
       # We start the included patterns with only the non excluded directories so that we can avoid paying the price of
       # traversing large directories that don't include Ruby files like `node_modules`
-      @included_patterns = ["{#{top_level_directories.join(",")}}/**/*.rb", "*.rb"] #: Array[String]
+      @included_patterns = ["*.rb", *top_level_directories.map {|name| "#{name}/**/*.rb"}] #: Array[String]
       @excluded_magic_comments = [
         "frozen_string_literal:",
         "typed:",
@@ -189,8 +189,11 @@ module RubyIndexer
 
       @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
       @included_gems.concat(config["included_gems"]) if config["included_gems"]
-      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
       @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
+      if config["excluded_patterns"]
+        @excluded_patterns.concat(config["excluded_patterns"])
+        @included_patterns -= config["excluded_patterns"]
+      end
       @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
     end
 
