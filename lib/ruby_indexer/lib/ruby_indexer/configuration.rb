@@ -91,7 +91,7 @@ module RubyIndexer
 
           URI::Generic.from_path(path: path, load_path_entry: load_path_entry)
         end
-      end
+      end.compact
 
       # If the patterns are relative, we make it relative to the workspace path. If they are absolute, then we shouldn't
       # concatenate anything
