@@ -56,7 +56,7 @@ module RubyIndexer
     end
 
     #: -> Array[URI::Generic]
-    def indexable_uris
+    def indexable_uris(&block)
       excluded_gems = @excluded_gems - @included_gems
       locked_gems = Bundler.locked_gems&.specs
 
@@ -64,6 +64,9 @@ module RubyIndexer
       # having duplicates if BUNDLE_PATH is set to a folder inside the project structure
 
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
+
+      block.call(0, debug: "spotting uris of included_patterns")
+      sleep(1.5)
 
       uris = @included_patterns.flat_map do |pattern|
         load_path_entry = nil #: String?
@@ -81,6 +84,9 @@ module RubyIndexer
         end
       end
 
+      block.call(0, debug: "spotted included_patterns")
+      sleep(1.5)
+
       # If the patterns are relative, we make it relative to the workspace path. If they are absolute, then we shouldn't
       # concatenate anything
       excluded_patterns = @excluded_patterns.map do |pattern|
@@ -91,6 +97,9 @@ module RubyIndexer
         end
       end
 
+      block.call(0, debug: "spotted excluded_patterns")
+      sleep(1.5)
+
       # Remove user specified patterns
       bundle_path = Bundler.settings["path"]&.gsub(/[\\]+/, "/")
       uris.reject! do |indexable|
@@ -99,6 +108,9 @@ module RubyIndexer
 
         excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
       end
+
+      block.call(0, debug: "rejected excluded_patterns")
+      sleep(1.5)
 
       # Add default gems to the list of files to be indexed
       Dir.glob(File.join(RbConfig::CONFIG["rubylibdir"], "*")).each do |default_path|

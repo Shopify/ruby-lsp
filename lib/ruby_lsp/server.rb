@@ -1232,8 +1232,8 @@ module RubyLsp
       # stuck indexing files
       Thread.new do
         begin
-          @global_state.index.index_all do |percentage|
-            progress("indexing-progress", percentage)
+          @global_state.index.index_all do |percentage, debug: nil|
+            progress("indexing-progress", percentage, debug: debug)
             true
           rescue ClosedQueueError
             # Since we run indexing on a separate thread, it's possible to kill the server before indexing is complete.
@@ -1275,7 +1275,7 @@ module RubyLsp
     end
 
     #: (String id, String title, ?percentage: Integer) -> void
-    def begin_progress(id, title, percentage: 0)
+    def begin_progress(id, title, percentage: 0, debug: nil)
       return unless @global_state.client_capabilities.supports_progress
 
       send_message(Request.new(
@@ -1284,14 +1284,20 @@ module RubyLsp
         params: Interface::WorkDoneProgressCreateParams.new(token: id),
       ))
 
-      send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
+      message  = "#{percentage}% completed"
+      message << "(#{debug})" if debug
+
+      send_message(Notification.progress_begin(id, title, percentage: percentage, message: message))
     end
 
     #: (String id, Integer percentage) -> void
-    def progress(id, percentage)
+    def progress(id, percentage, debug: nil)
       return unless @global_state.client_capabilities.supports_progress
 
-      send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
+      message  = "#{percentage}% completed"
+      message << "(#{debug})" if debug
+
+      send_message(Notification.progress_report(id, percentage: percentage, message: message))
     end
 
     #: (String id) -> void

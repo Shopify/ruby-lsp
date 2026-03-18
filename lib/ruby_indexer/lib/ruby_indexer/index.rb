@@ -354,7 +354,13 @@ module RubyIndexer
     # indexing progress. That block is invoked with the current progress percentage and should return `true` to continue
     # indexing or `false` to stop indexing.
     #: (?uris: Array[URI::Generic]) ?{ (Integer progress) -> bool } -> void
-    def index_all(uris: @configuration.indexable_uris, &block)
+    def index_all(uris: [], &block)
+      block.call(0, debug: "in '#{__method__}'...")
+      sleep 5
+      uris = @configuration.indexable_uris(&block) if uris.empty?
+
+      block.call(0, debug: "spotted indexable_uris")
+
       # When troubleshooting an indexing issue, e.g. through irb, it's not obvious that `index_all` will augment the
       # existing index values, meaning it may contain 'stale' entries. This check ensures that the user is aware of this
       # behavior and can take appropriate action.
@@ -370,7 +376,7 @@ module RubyIndexer
       uris.each_with_index do |uri, index|
         if block && index % progress_step == 0
           progress = (index / progress_step) + 1
-          break unless block.call(progress)
+          break unless block.call(progress, debug: "#{index} Indexing '#{uri}'")
         end
 
         index_file(uri, collect_comments: false)
