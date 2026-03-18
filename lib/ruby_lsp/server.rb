@@ -166,7 +166,7 @@ module RubyLsp
     end
 
     #: (?include_project_addons: bool) -> void
-    def load_addons(include_project_addons: true)
+    def load_addons(include_project_addons: false)
       # If invoking Bundler.setup failed, then the load path will not be configured properly and trying to load add-ons
       # with Gem.find_files will find every single version installed of an add-on, leading to requiring several
       # different versions of the same files. We cannot load add-ons if Bundler.setup failed
