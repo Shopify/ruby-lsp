@@ -1232,8 +1232,8 @@ module RubyLsp
       # stuck indexing files
       Thread.new do
         begin
-          @global_state.index.index_all do |percentage, debug: nil|
-            progress("indexing-progress", percentage, debug: debug)
+          @global_state.index.index_all do |percentage = 0, log: nil|
+            progress("indexing-progress", percentage, log: log)
             true
           rescue ClosedQueueError
             # Since we run indexing on a separate thread, it's possible to kill the server before indexing is complete.
@@ -1244,6 +1244,7 @@ module RubyLsp
         rescue StandardError => error
           message = "Error while indexing (see [troubleshooting steps]" \
             "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): #{error.message}"
+          send_log_message("#{message}\n\n#{error.backtrace.join("\n")}")
           send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
         end
 
@@ -1275,7 +1276,7 @@ module RubyLsp
     end
 
     #: (String id, String title, ?percentage: Integer) -> void
-    def begin_progress(id, title, percentage: 0, debug: nil)
+    def begin_progress(id, title, percentage: 0)
       return unless @global_state.client_capabilities.supports_progress
 
       send_message(Request.new(
@@ -1284,20 +1285,15 @@ module RubyLsp
         params: Interface::WorkDoneProgressCreateParams.new(token: id),
       ))
 
-      message  = "#{percentage}% completed"
-      message << "(#{debug})" if debug
-
-      send_message(Notification.progress_begin(id, title, percentage: percentage, message: message))
+      send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
     end
 
     #: (String id, Integer percentage) -> void
-    def progress(id, percentage, debug: nil)
+    def progress(id, percentage, log: nil)
       return unless @global_state.client_capabilities.supports_progress
 
-      message  = "#{percentage}% completed"
-      message << "(#{debug})" if debug
-
-      send_message(Notification.progress_report(id, percentage: percentage, message: message))
+      send_log_message(log) if log
+      send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
     end
 
     #: (String id) -> void

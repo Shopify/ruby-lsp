@@ -56,7 +56,7 @@ module RubyIndexer
     end
 
     #: -> Array[URI::Generic]
-    def indexable_uris(&block)
+    def indexable_uris(&logging)
       excluded_gems = @excluded_gems - @included_gems
       locked_gems = Bundler.locked_gems&.specs
 
@@ -65,13 +65,22 @@ module RubyIndexer
 
       flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
 
-      block.call(0, debug: "spotting uris of included_patterns")
+      logging.call(log: "Spotting uris of included_patterns...")
       sleep(1.5)
 
       uris = @included_patterns.flat_map do |pattern|
         load_path_entry = nil #: String?
 
-        Dir.glob(File.join(@workspace_path, pattern), flags).map! do |path|
+        begin
+          glob_pattern = File.join(@workspace_path, pattern)
+          glob_results = Dir.glob(glob_pattern, flags)
+        rescue StandardError => error
+          message = "Failed to spot uris of included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
+          logging.call(log: message)
+          next
+        end
+
+        glob_results.map! do |path|
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
           # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
           # on repositories that define multiple gems, like Rails. All frameworks are defined inside the current
@@ -84,9 +93,6 @@ module RubyIndexer
         end
       end
 
-      block.call(0, debug: "spotted included_patterns")
-      sleep(1.5)
-
       # If the patterns are relative, we make it relative to the workspace path. If they are absolute, then we shouldn't
       # concatenate anything
       excluded_patterns = @excluded_patterns.map do |pattern|
@@ -97,9 +103,6 @@ module RubyIndexer
         end
       end
 
-      block.call(0, debug: "spotted excluded_patterns")
-      sleep(1.5)
-
       # Remove user specified patterns
       bundle_path = Bundler.settings["path"]&.gsub(/[\\]+/, "/")
       uris.reject! do |indexable|
@@ -108,9 +111,6 @@ module RubyIndexer
 
         excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
       end
-
-      block.call(0, debug: "rejected excluded_patterns")
-      sleep(1.5)
 
       # Add default gems to the list of files to be indexed
       Dir.glob(File.join(RbConfig::CONFIG["rubylibdir"], "*")).each do |default_path|
