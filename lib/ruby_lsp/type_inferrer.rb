@@ -5,9 +5,9 @@ module RubyLsp
   # A minimalistic type checker to try to resolve types that can be inferred without requiring a type system or
   # annotations
   class TypeInferrer
-    #: (RubyIndexer::Index index) -> void
-    def initialize(index)
-      @index = index
+    #: (Rubydex::Graph) -> void
+    def initialize(graph)
+      @graph = graph
     end
 
     #: (NodeContext node_context) -> Type?
@@ -81,11 +81,10 @@ module RubyLsp
         receiver_name = RubyIndexer::Index.constant_name(receiver)
         return unless receiver_name
 
-        resolved_receiver = @index.resolve(receiver_name, node_context.nesting)
-        name = resolved_receiver&.first&.name
-        return unless name
+        resolved_receiver = @graph.resolve_constant(receiver_name, node_context.nesting)
+        return unless resolved_receiver
 
-        *parts, last = name.split("::")
+        *parts, last = resolved_receiver.name.split("::")
         return Type.new("#{last}::<#{last}>") if parts.empty?
 
         Type.new("#{parts.join("::")}::#{last}::<#{last}>")
@@ -96,12 +95,14 @@ module RubyLsp
           # When invoking `new`, we recursively infer the type of the receiver to get the class type its being invoked
           # on and then return the attached version of that type, since it's being instantiated.
           type = infer_receiver_for_call_node(receiver, node_context)
-
           return unless type
 
           # If the method `new` was overridden, then we cannot assume that it will return a new instance of the class
-          new_method = @index.resolve_method("new", type.name)&.first
-          return if new_method && new_method.owner&.name != "Class"
+          declaration = @graph[type.name] #: as Rubydex::Namespace?
+          return unless declaration
+
+          new_method = declaration.find_member("new()")
+          return if new_method && new_method.owner.name != "Class"
 
           type.attached
         elsif raw_receiver
@@ -121,11 +122,11 @@ module RubyLsp
         .map(&:capitalize)
         .join
 
-      entries = @index.resolve(guessed_name, nesting) || @index.first_unqualified_const(guessed_name)
-      name = entries&.first&.name
-      return unless name
+      declaration = @graph.resolve_constant(guessed_name, nesting)
+      declaration ||= @graph.search(guessed_name).first
+      return unless declaration
 
-      GuessedType.new(name)
+      GuessedType.new(declaration.name)
     end
 
     #: (NodeContext node_context) -> Type
@@ -148,7 +149,6 @@ module RubyLsp
     #: (NodeContext node_context) -> Type?
     def infer_receiver_for_class_variables(node_context)
       nesting_parts = node_context.nesting.dup
-
       return Type.new("Object") if nesting_parts.empty?
 
       nesting_parts.reverse_each do |part|
@@ -157,9 +157,11 @@ module RubyLsp
         nesting_parts.pop
       end
 
-      receiver_name = nesting_parts.join("::")
-      resolved_receiver = @index.resolve(receiver_name, node_context.nesting)&.first
-      return unless resolved_receiver&.name
+      resolved_receiver = @graph.resolve_constant(
+        nesting_parts.last, #: as !nil
+        nesting_parts[0...-1], #: as !nil
+      )
+      return unless resolved_receiver
 
       Type.new(resolved_receiver.name)
     end
