@@ -6,8 +6,8 @@ require "test_helper"
 module RubyLsp
   class TypeInferrerTest < Minitest::Test
     def setup
-      @index = RubyIndexer::Index.new
-      @type_inferrer = TypeInferrer.new(@index)
+      @graph = Rubydex::Graph.new
+      @type_inferrer = TypeInferrer.new(@graph)
     end
 
     def test_infer_receiver_type_self_inside_method
@@ -499,7 +499,9 @@ module RubyLsp
     private
 
     def index_and_locate(source, position)
-      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), source)
+      @graph.index_source(URI::Generic.from_path(path: "/fake/path/foo.rb").to_s, source, "ruby")
+      @graph.resolve
+
       document = RubyLsp::RubyDocument.new(
         source: source,
         version: 1,
