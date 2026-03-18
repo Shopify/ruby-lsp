@@ -56,7 +56,19 @@ module RubyLsp
         addon_files = Gem.find_files("ruby_lsp/**/addon.rb")
 
         if include_project_addons
-          project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
+          workspace_path = global_state.workspace_path
+          spaces         = top_level_directories.map do |space|
+            "#{workspace_path}/#{space}/**/ruby_lsp/**/addon.rb"
+          end
+
+          project_addons = spaces.flat_map do |pattern|
+            Dir.glob(pattern)
+          rescue StandardError => error
+            message  = "Addon discovery failed with pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
+            logging.call(error: message)
+            next
+          end.compact
+
           bundle_path = Bundler.bundle_path.to_s
           gems_dir = Bundler.bundle_path.join("gems")
 
@@ -272,6 +284,16 @@ module RubyLsp
     #: (Array[Hash[Symbol, untyped]]) -> Array[String]
     def resolve_test_commands(items)
       []
+    end
+
+    #: -> Array[String]
+    def top_level_directories
+      Dir.glob("#{Dir.pwd}/*").filter_map do |path|
+        dir_name = File.basename(path)
+        next unless File.directory?(path)
+
+        dir_name
+      end
     end
   end
 end
