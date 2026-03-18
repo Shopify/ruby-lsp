@@ -75,7 +75,8 @@ module RubyIndexer
           glob_pattern = File.join(@workspace_path, pattern)
           glob_results = Dir.glob(glob_pattern, flags)
         rescue StandardError => error
-          message = "Failed to spot uris of included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
+          message  = "Failed to spot uris of included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
+          message << "\nExcluded patterns: #{@excluded_patterns.join(', ')}"
           logging.call(log: message)
           next
         end
