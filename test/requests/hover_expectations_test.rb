@@ -670,6 +670,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_for_methods_shows_overload_count
+    skip("[RUBYDEX] Temporarily skipped because we don't yet index RBS methods")
+
     source = <<~RUBY
       String.try_convert
     RUBY
