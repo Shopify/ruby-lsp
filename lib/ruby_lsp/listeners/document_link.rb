@@ -60,6 +60,7 @@ module RubyLsp
         @lines_to_comments = comments.to_h do |comment|
           [comment.location.end_line, comment]
         end #: Hash[Integer, Prism::Comment]
+        @sig_comments = {} #: Hash[Integer, Prism::Comment]
 
         dispatcher.register(
           self,
@@ -68,7 +69,18 @@ module RubyLsp
           :on_module_node_enter,
           :on_constant_write_node_enter,
           :on_constant_path_write_node_enter,
+          :on_call_node_enter,
         )
+      end
+
+      #: (Prism::CallNode node) -> void
+      def on_call_node_enter(node)
+        return unless node.name == :sig
+
+        comment = @lines_to_comments[node.location.start_line - 1]
+        return unless comment
+
+        @sig_comments[node.location.end_line] = comment
       end
 
       #: (Prism::DefNode node) -> void
@@ -100,7 +112,7 @@ module RubyLsp
 
       #: (Prism::Node node) -> void
       def extract_document_link(node)
-        comment = @lines_to_comments[node.location.start_line - 1]
+        comment = @lines_to_comments[node.location.start_line - 1] || @sig_comments[node.location.start_line - 1]
         return unless comment
 
         match = comment.location.slice.match(%r{(source://.*#\d+|pkg:gem/.*#.*)$})
