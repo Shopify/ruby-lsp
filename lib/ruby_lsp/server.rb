@@ -1243,14 +1243,14 @@ module RubyLsp
       # stuck indexing files
       Thread.new do
         begin
-          @global_state.index.index_all do |percentage = 0, log: nil, error: nil|
+          @global_state.index.index_all do |percentage = nil, log: nil, error: nil|
             send_log_message(log) if log
             if error
               send_log_message(error, type: Constant::MessageType::ERROR)
               send_message(Notification.window_show_message(error, type: Constant::MessageType::ERROR))
             end
 
-            progress("indexing-progress", percentage)
+            progress("indexing-progress", percentage) unless percentage.nil?
 
             true
           rescue ClosedQueueError
