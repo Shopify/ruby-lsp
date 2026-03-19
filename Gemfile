@@ -7,7 +7,6 @@ gemspec
 gem "bundler", "~> 4.0.0"
 gem "minitest", "~> 6.0"
 gem "test-unit", require: false
-gem "byebug"
 
 group :development do
   gem "debug", "~> 1.9", require: false

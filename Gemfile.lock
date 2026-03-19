@@ -11,8 +11,6 @@ GEM
   specs:
     ast (2.4.3)
     benchmark (0.5.0)
-    byebug (13.0.0)
-      reline (>= 0.6.0)
     date (3.5.1)
     debug (1.11.1)
       irb (~> 1.10)
@@ -143,7 +141,6 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 4.0.0)
-  byebug
   debug (~> 1.9)
   minitest (~> 6.0)
   mocha (~> 2.3)
@@ -163,7 +160,6 @@ DEPENDENCIES
 CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   benchmark (0.5.0) sha256=465df122341aedcb81a2a24b4d3bd19b6c67c1530713fd533f3ff034e419236c
-  byebug (13.0.0) sha256=d2263efe751941ca520fa29744b71972d39cbc41839496706f5d9b22e92ae05d
   date (3.5.1) sha256=750d06384d7b9c15d562c76291407d89e368dda4d4fff957eb94962d325a0dc0
   debug (1.11.1) sha256=2e0b0ac6119f2207a6f8ac7d4a73ca8eb4e440f64da0a3136c30343146e952b6
   erb (6.0.1) sha256=28ecdd99c5472aebd5674d6061e3c6b0a45c049578b071e5a52c2a7f13c197e5
