@@ -60,6 +60,7 @@ module RubyLsp
           spaces         = top_level_directories.map do |space|
             "#{workspace_path}/#{space}/**/ruby_lsp/**/addon.rb"
           end
+          spaces << "#{workspace_path}/ruby_lsp/**/addon.rb"
 
           project_addons = spaces.flat_map do |pattern|
             Dir.glob(pattern)
