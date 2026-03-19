@@ -1262,6 +1262,7 @@ module RubyLsp
         rescue StandardError => error
           message = "Error while indexing (see [troubleshooting steps]" \
             "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): #{error.message}"
+
           send_log_message("#{message}\n\n#{error.backtrace.join("\n")}", type: Constant::MessageType::ERROR)
           send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
         end
