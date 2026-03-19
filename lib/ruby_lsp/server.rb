@@ -180,7 +180,7 @@ module RubyLsp
         send_log_message(log) if log
         if error
           send_log_message(error, type: Constant::MessageType::ERROR)
-          send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
+          send_message(Notification.window_show_message(error, type: Constant::MessageType::ERROR))
         end
       end
 
@@ -1247,7 +1247,7 @@ module RubyLsp
             send_log_message(log) if log
             if error
               send_log_message(error, type: Constant::MessageType::ERROR)
-              send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
+              send_message(Notification.window_show_message(error, type: Constant::MessageType::ERROR))
             end
 
             progress("indexing-progress", percentage)

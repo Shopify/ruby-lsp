@@ -72,7 +72,7 @@ module RubyIndexer
           glob_pattern = File.join(@workspace_path, pattern)
           glob_results = Dir.glob(glob_pattern, flags)
         rescue StandardError => error
-          message  = "Indexation error on included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
+          message = "Indexation error on included_pattern: '#{pattern}': (#{error.class.name} - #{error.message})"
           logging.call(error: message)
           next
         end
