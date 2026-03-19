@@ -88,6 +88,34 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_source_link_with_single_line_sig_block
+    source = <<~RUBY
+      # source://syntax_tree//lib/syntax_tree.rb#39
+      sig { returns(String) }
+      def foo
+      end
+    RUBY
+
+    links = run_expectations(source)
+    refute_empty(links, "Expected document link for source comment above single-line sig block")
+  end
+
+  def test_source_link_with_multi_line_sig_block
+    source = <<~RUBY
+      # source://syntax_tree//lib/syntax_tree.rb#39
+      sig do
+        params(
+          x: Integer,
+        ).returns(String)
+      end
+      def foo(x)
+      end
+    RUBY
+
+    links = run_expectations(source)
+    refute_empty(links, "Expected document link for source comment above multi-line sig block")
+  end
+
   def test_package_url_links_with_invalid_uris
     source = <<~RUBY
       # pkg:gem/rubocop$1.78.0#:99
