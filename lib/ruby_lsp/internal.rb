@@ -31,6 +31,9 @@ require "securerandom"
 require "shellwords"
 require "set"
 
+# Rubydex LSP additions
+require "ruby_lsp/rubydex/definition"
+
 require "ruby-lsp"
 require "ruby_lsp/base_server"
 require "ruby_indexer/ruby_indexer"
