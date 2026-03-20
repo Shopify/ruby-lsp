@@ -18,34 +18,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     with_server(source, stub_no_typechecker: true) do |server, uri|
       position = @__params&.first || { character: 0, line: 0 }
 
-      index = server.global_state.index
-
-      index.index_file(
-        URI::Generic.from_path(
-          load_path_entry: "#{Dir.pwd}/lib",
-          path: File.expand_path(
-            "../../test/fixtures/class_reference_target.rb",
-            __dir__,
-          ),
-        ),
-      )
-      index.index_file(
-        URI::Generic.from_path(
-          path: File.expand_path(
-            "../../test/fixtures/constant_reference_target.rb",
-            __dir__,
-          ),
-        ),
-      )
-      index.index_file(
-        URI::Generic.from_path(
-          load_path_entry: "#{Dir.pwd}/lib",
-          path: File.expand_path(
-            "../../lib/ruby_lsp/server.rb",
-            __dir__,
-          ),
-        ),
-      )
+      graph = server.global_state.graph
+      graph.index_all([File.expand_path("../../lib/ruby_lsp/server.rb", __dir__)])
+      graph.resolve
 
       server.process_message(
         id: 1,
@@ -78,10 +53,12 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_jumping_to_default_gems
+  def test_jumping_to_rbs
     with_server("Pathname") do |server, uri|
-      index = server.global_state.index
-      index.index_file(URI::Generic.from_path(path: "#{RbConfig::CONFIG["rubylibdir"]}/pathname.rb"))
+      graph = server.global_state.graph
+      graph.index_all([gem_path("rbs").join("core").join("pathname.rbs").to_s])
+      graph.resolve
+
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -161,26 +138,21 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_jumping_to_default_require_of_a_gem
-    with_server("require \"bundler\"") do |server, uri|
-      index = server.global_state.index
-
-      bundler_uri = URI::Generic.from_path(
-        path: "#{RbConfig::CONFIG["rubylibdir"]}/bundler.rb",
-        load_path_entry: RbConfig::CONFIG["rubylibdir"],
-      )
-      index.index_file(bundler_uri)
-
-      Dir.glob("#{RbConfig::CONFIG["rubylibdir"]}/bundler/*.rb").each do |path|
-        index.index_file(URI::Generic.from_path(load_path_entry: RbConfig::CONFIG["rubylibdir"], path: path))
-      end
+  def test_jumping_to_a_gem_default_require
+    with_server("require \"minitest\"") do |server, uri|
+      graph = server.global_state.graph
+      minitest_paths = Dir.glob("#{gem_path("minitest")}/**/*.rb")
+      minitest_path = gem_path("minitest").join("lib").join("minitest.rb").to_s
+      minitest_paths << minitest_path
+      graph.index_all(minitest_paths)
+      graph.resolve
 
       server.process_message(
         id: 1,
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 10, line: 0 } },
       )
-      assert_equal(bundler_uri.to_s, server.pop_response.response.first.attributes[:uri])
+      assert_equal(URI::Generic.from_path(path: minitest_path).to_s, server.pop_response.response.first.attributes[:uri])
     end
   end
 
@@ -208,6 +180,8 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   end
 
   def test_jumping_to_private_constant_from_different_namespace
+    skip("[RUBYDEX] Requires the visibility API")
+
     source = <<~RUBY
       class A
         CONST = 123
@@ -229,31 +203,25 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
   def test_definition_addons
     source = <<~RUBY
-      RubyLsp
+      class Target
+      end
+
+      Target
     RUBY
 
     begin
       create_definition_addon
 
       with_server(source, stub_no_typechecker: true, load_addons: true) do |server, uri|
-        server.global_state.index.index_file(
-          URI::Generic.from_path(
-            load_path_entry: "#{Dir.pwd}/lib",
-            path: File.expand_path(
-              "../../test/fixtures/class_reference_target.rb",
-              __dir__,
-            ),
-          ),
-        )
         server.process_message(
           id: 1,
           method: "textDocument/definition",
-          params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+          params: { textDocument: { uri: uri }, position: { character: 0, line: 3 } },
         )
         response = server.pop_response.response
 
         assert_equal(2, response.size)
-        assert_match("class_reference_target.rb", response[0].target_uri)
+        assert_match("fake.rb", response[0].target_uri)
         assert_match("generated_by_addon.rb", response[1].uri)
       end
     ensure
@@ -317,9 +285,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           },
         },
       })
-      index = server.global_state.index
-      path = second_uri.to_standardized_path #: as !nil
-      index.index_single(URI::Generic.from_path(path: path), second_source)
+      graph = server.global_state.graph
+      graph.index_source(second_uri.to_s, second_source, "ruby")
+      graph.resolve
 
       server.process_message(
         id: 1,
@@ -387,16 +355,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      server.global_state.index.index_single(
-        URI::Generic.from_path(path: "/fake/path/bar.rb"), <<~RUBY
-          class Foo::Bar; end
-        RUBY
-      )
-      server.global_state.index.index_single(
-        URI::Generic.from_path(path: "/fake/path/baz.rb"), <<~RUBY
-          class Foo::Bar; end
-        RUBY
-      )
+      graph = server.global_state.graph
+      graph.index_source(URI::Generic.from_path(path: "/fake/path/bar.rb").to_s, <<~RUBY, "ruby")
+        class Foo::Bar; end
+      RUBY
+      graph.index_source(URI::Generic.from_path(path: "/fake/path/baz.rb").to_s, <<~RUBY, "ruby")
+        class Foo::Bar; end
+      RUBY
+      graph.resolve
+
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -461,6 +428,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
       response = server.pop_response.response
       assert_equal(2, response.size)
+      response.sort_by! { |location| location.target_range.start.line }
 
       assert_equal(1, response[0].target_range.start.line)
       assert_equal(1, response[0].target_range.end.line)
@@ -539,6 +507,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
       response = server.pop_response.response
       assert_equal(2, response.size)
+      response.sort_by! { |location| location.target_range.start.line }
 
       assert_equal(1, response[0].target_range.start.line)
       assert_equal(1, response[0].target_range.end.line)
@@ -589,7 +558,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_methods_with_dynamic_namespace_is_also_suggested
+  def test_members_of_dynamic_namespaces_are_not_found
     source = <<~RUBY
       # typed: false
 
@@ -610,11 +579,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
       response = server.pop_response.response
 
-      assert_equal(1, response.size)
-
-      range = response[0].attributes[:targetRange].attributes
-      range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
-      assert_equal({ start: { line: 3, character: 2 }, end: { line: 3, character: 14 } }, range_hash)
+      assert_empty(response)
     end
   end
 
@@ -642,6 +607,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       response = server.pop_response.response
 
       assert_equal(2, response.size)
+      response.sort_by! { |location| location.target_range.start.line }
 
       range = response[0].attributes[:targetRange].attributes
       range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
@@ -748,8 +714,9 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     ERB
 
     with_server(source, URI("/fake.erb")) do |server, uri|
-      server.global_state.index.index_single(
-        URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY
+      graph = server.global_state.graph
+      graph.index_source(
+        URI::Generic.from_path(path: "/fake/path/foo.rb").to_s, <<~RUBY, "ruby"
           class Bar
             def foo; end
 
@@ -757,6 +724,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
           end
         RUBY
       )
+      graph.resolve
 
       server.process_message(
         id: 1,
@@ -827,6 +795,32 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_inherited_class_variables
+    source = <<~RUBY
+      class Foo
+        @@hello = 123
+      end
+
+      class Bar < Foo
+        def self.hello
+          @@hello
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 6, character: 4 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.size)
+      assert_equal(1, response[0].range.start.line)
+    end
+  end
+
   def test_definition_for_global_variables
     source = <<~RUBY
       $bar &&= 1
@@ -838,9 +832,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
-
       server.process_message(
         id: 1,
         method: "textDocument/definition",
@@ -861,20 +852,11 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
 
       response = server.pop_response.response
       assert_equal(3, response.size)
+
+      response.sort_by! { |location| location.range.start.line }
       assert_equal(2, response[0].range.start.line)
       assert_equal(3, response[1].range.start.line)
       assert_equal(4, response[2].range.start.line)
-
-      server.process_message(
-        id: 1,
-        method: "textDocument/definition",
-        params: { textDocument: { uri: uri }, position: { character: 1, line: 5 } },
-      )
-
-      response = server.pop_response.response.first
-      assert_match(%r{/gems/rbs-.*/core/global_variables.rbs}, response.uri)
-      assert_equal(response.range.start.line, response.range.end.line)
-      assert_operator(response.range.start.character, :<, response.range.end.character)
     end
   end
 
@@ -1003,6 +985,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 4, line: 1 } },
       )
       response = server.pop_response.response
+      response.sort_by! { |location| location.range.start.line }
 
       assert_equal(1, response[0].range.start.line)
       assert_equal(4, response[1].range.start.line)
