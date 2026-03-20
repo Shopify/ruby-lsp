@@ -36,9 +36,10 @@ module RubyLsp
       #: -> Array[String]
       def find_relevant_paths
         patterns = relevant_filename_patterns
+        root = search_root
 
         candidate_paths = patterns.flat_map do |pattern|
-          Dir.glob(File.join(search_root, "**", pattern))
+          Dir.glob(File.join("**", pattern), base: root).map! { |p| File.join(root, p) }
         end
 
         return [] if candidate_paths.empty?
@@ -89,24 +90,32 @@ module RubyLsp
           # Test file -> find implementation
           base = input_basename.gsub(TEST_PATTERN, "")
           parent_dir = File.basename(File.dirname(@path))
+          escaped_base = escape_glob_metacharacters(base)
+          escaped_parent_dir = escape_glob_metacharacters(parent_dir)
 
           # If test file is in a directory matching the implementation name
           # (e.g., go_to_relevant_file/test_go_to_relevant_file_a.rb)
           # return patterns for both the base file name and the parent directory name
           if base.include?(parent_dir) && base != parent_dir
-            ["#{base}#{extension}", "#{parent_dir}#{extension}"]
+            ["#{escaped_base}#{extension}", "#{escaped_parent_dir}#{extension}"]
           else
-            ["#{base}#{extension}"]
+            ["#{escaped_base}#{extension}"]
           end
         else
           # Implementation file -> find tests (including in matching directory)
+          escaped_basename = escape_glob_metacharacters(input_basename)
           [
-            "{#{TEST_PREFIX_GLOB}}#{input_basename}#{extension}",
-            "#{input_basename}{#{TEST_SUFFIX_GLOB}}#{extension}",
-            "#{input_basename}/{#{TEST_PREFIX_GLOB}}*#{extension}",
-            "#{input_basename}/*{#{TEST_SUFFIX_GLOB}}#{extension}",
+            "{#{TEST_PREFIX_GLOB}}#{escaped_basename}#{extension}",
+            "#{escaped_basename}{#{TEST_SUFFIX_GLOB}}#{extension}",
+            "#{escaped_basename}/{#{TEST_PREFIX_GLOB}}*#{extension}",
+            "#{escaped_basename}/*{#{TEST_SUFFIX_GLOB}}#{extension}",
           ]
         end
+      end
+
+      #: (String str) -> String
+      def escape_glob_metacharacters(str)
+        str.gsub(/[\[\]{}*?\\]/) { |c| "\\#{c}" }
       end
 
       # Using the Jaccard algorithm to determine the similarity between the

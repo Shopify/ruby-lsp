@@ -457,10 +457,11 @@ module RubyLsp
         # if the path is not a directory, glob all possible next characters
         # for example ../somethi| (where | is the cursor position)
         # should find files for ../somethi*/
+        escaped_content = content.gsub(/[\[\]{}*?\\]/) { |c| "\\#{c}" }
         path_query = if content.end_with?("/") || content.empty?
-          "#{content}**/*.rb"
+          "#{escaped_content}**/*.rb"
         else
-          "{#{content}*/**/*.rb,**/#{content}*.rb}"
+          "{#{escaped_content}*/**/*.rb,**/#{escaped_content}*.rb}"
         end
 
         Dir.glob(path_query, File::FNM_PATHNAME | File::FNM_EXTGLOB, base: origin_dir).sort!.each do |path|
