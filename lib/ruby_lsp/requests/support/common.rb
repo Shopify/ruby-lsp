@@ -64,6 +64,46 @@ module RubyLsp
           receiver.nil? || receiver.is_a?(Prism::SelfNode)
         end
 
+        #: (String, Enumerable[Rubydex::Definition], ?Integer?) -> Hash[Symbol, String]
+        def categorized_markdown_from_definitions(title, definitions, max_entries = nil)
+          markdown_title = "```ruby\n#{title}\n```"
+          file_links = []
+          content = +""
+          defs = max_entries ? definitions.take(max_entries) : definitions
+          defs.each do |definition|
+            # For Markdown links, we need 1 based display locations
+            loc = definition.location.to_display
+            uri = URI(loc.uri)
+            file_name = if uri.scheme == "untitled"
+              uri.opaque #: as !nil
+            else
+              File.basename(
+                uri.full_path, #: as !nil
+              )
+            end
+
+            # The format for VS Code file URIs is `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
+            string_uri = "#{loc.uri}#L#{loc.start_line},#{loc.start_column}-#{loc.end_line},#{loc.end_column}"
+            file_links << "[#{file_name}](#{string_uri})"
+            content << "\n\n#{definition.comments.map { |comment| comment.string.delete_prefix("# ") }.join("\n")}" unless definition.comments.empty?
+          end
+
+          total_definitions = definitions.count
+
+          additional_entries_text = if max_entries && total_definitions > max_entries
+            additional = total_definitions - max_entries
+            " | #{additional} other#{additional > 1 ? "s" : ""}"
+          else
+            ""
+          end
+
+          {
+            title: markdown_title,
+            links: "**Definitions**: #{file_links.join(" | ")}#{additional_entries_text}",
+            documentation: content,
+          }
+        end
+
         #: (String title, (Array[RubyIndexer::Entry] | RubyIndexer::Entry) entries, ?Integer? max_entries) -> Hash[Symbol, String]
         def categorized_markdown_from_index_entries(title, entries, max_entries = nil)
           markdown_title = "```ruby\n#{title}\n```"

@@ -51,18 +51,25 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def test_hovering_on_erb
     source = <<~ERB
-      <% String %>
+      <% Person %>
     ERB
 
     with_server(source, Kernel.URI("file:///fake.erb"), stub_no_typechecker: true) do |server, uri|
-      RubyIndexer::RBSIndexer.new(server.global_state.index).index_ruby_core
+      graph = server.global_state.graph
+      graph.index_source(URI::Generic.from_path(path: "/person.rb").to_s, <<~RUBY, "ruby")
+        # Hello from person.rb
+        class Person
+        end
+      RUBY
+      graph.resolve
+
       server.process_message(
         id: 1,
         method: "textDocument/hover",
         params: { textDocument: { uri: uri }, position: { line: 0, character: 4 } },
       )
       response = server.pop_response
-      assert_match(/String\b/, response.response.contents.value)
+      assert_match(/Hello from person\.rb/, response.response.contents.value)
     end
   end
 
@@ -76,10 +83,9 @@ class HoverExpectationsTest < ExpectationsTestRunner
       $qux ||= 1
       # target write node
       $quux, $corge = 1
-      # write node
+      # foo docs
       $foo = 1
-      # read node
-      $DEBUG
+      $foo
     RUBY
 
     expectations = [
@@ -87,14 +93,11 @@ class HoverExpectationsTest < ExpectationsTestRunner
       { line: 3, documentation: "operator write node" },
       { line: 5, documentation: "or write node" },
       { line: 7, documentation: "target write node" },
-      { line: 9, documentation: "write node" },
-      { line: 11, documentation: "The debug flag" },
+      { line: 9, documentation: "foo docs" },
+      { line: 10, documentation: "foo docs" },
     ]
 
     with_server(source) do |server, uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
-
       expectations.each do |expectation|
         server.process_message(
           id: 1,
@@ -264,10 +267,9 @@ class HoverExpectationsTest < ExpectationsTestRunner
         private_constant(:CONST)
       end
 
-      A::CONST # invalid private reference
+      A::CONST
     RUBY
 
-    # We need to pretend that Sorbet is not a dependency or else we can't properly test
     with_server(source, stub_no_typechecker: true) do |server, uri|
       server.process_message(
         id: 1,
@@ -275,7 +277,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
       )
 
-      assert_nil(server.pop_response.response)
+      # TODO: once we have visibility exposed from Rubydex, let's show that the constant is private
+      assert_match("A::CONST", server.pop_response.response.contents.value)
     end
   end
 
