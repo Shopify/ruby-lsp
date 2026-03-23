@@ -48,6 +48,7 @@ module RubyLsp
         @response_builder = response_builder
         @global_state = global_state
         @index = global_state.index #: RubyIndexer::Index
+        @graph = global_state.graph #: Rubydex::Graph
         @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @path = uri.to_standardized_path #: String?
         @node_context = node_context
@@ -178,32 +179,32 @@ module RubyLsp
 
       #: (Prism::InstanceVariableReadNode node) -> void
       def on_instance_variable_read_node_enter(node)
-        handle_instance_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableWriteNode node) -> void
       def on_instance_variable_write_node_enter(node)
-        handle_instance_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableAndWriteNode node) -> void
       def on_instance_variable_and_write_node_enter(node)
-        handle_instance_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableOperatorWriteNode node) -> void
       def on_instance_variable_operator_write_node_enter(node)
-        handle_instance_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableOrWriteNode node) -> void
       def on_instance_variable_or_write_node_enter(node)
-        handle_instance_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::InstanceVariableTargetNode node) -> void
       def on_instance_variable_target_node_enter(node)
-        handle_instance_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::SuperNode node) -> void
@@ -223,32 +224,32 @@ module RubyLsp
 
       #: (Prism::ClassVariableAndWriteNode node) -> void
       def on_class_variable_and_write_node_enter(node)
-        handle_class_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::ClassVariableOperatorWriteNode node) -> void
       def on_class_variable_operator_write_node_enter(node)
-        handle_class_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::ClassVariableOrWriteNode node) -> void
       def on_class_variable_or_write_node_enter(node)
-        handle_class_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::ClassVariableTargetNode node) -> void
       def on_class_variable_target_node_enter(node)
-        handle_class_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::ClassVariableReadNode node) -> void
       def on_class_variable_read_node_enter(node)
-        handle_class_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       #: (Prism::ClassVariableWriteNode node) -> void
       def on_class_variable_write_node_enter(node)
-        handle_class_variable_hover(node.name.to_s)
+        handle_variable_hover(node.name.to_s)
       end
 
       private
@@ -325,61 +326,45 @@ module RubyLsp
       end
 
       #: (String name) -> void
-      def handle_instance_variable_hover(name)
-        # Sorbet enforces that all instance variables be declared on typed strict or higher, which means it will be able
-        # to provide all features for them
+      def handle_global_variable_hover(name)
+        declaration = @graph[name]
+        return unless declaration
+
+        categorized_markdown_from_definitions(name, declaration.definitions).each do |category, content|
+          @response_builder.push(content, category: category)
+        end
+      end
+
+      # Handle class or instance variables. We collect all definitions across the ancestors of the type
+      #
+      #: (String name) -> void
+      def handle_variable_hover(name)
+        # Sorbet enforces that all variables be declared on typed strict or higher, which means it will be able to
+        # provide all features for them
         return if @sorbet_level.strict?
 
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        entries = @index.resolve_instance_variable(name, type.name)
-        return unless entries
+        owner = @graph[type.name]
+        return unless owner.is_a?(Rubydex::Namespace)
 
-        categorized_markdown_from_index_entries(name, entries).each do |category, content|
-          @response_builder.push(content, category: category)
+        owner.ancestors.each do |ancestor|
+          member = ancestor.member(name)
+          next unless member
+
+          categorized_markdown_from_definitions(member.name, member.definitions).each do |category, content|
+            @response_builder.push(content, category: category)
+          end
         end
-      rescue RubyIndexer::Index::NonExistingNamespaceError
-        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
-      end
-
-      #: (String name) -> void
-      def handle_global_variable_hover(name)
-        entries = @index[name]
-        return unless entries
-
-        categorized_markdown_from_index_entries(name, entries).each do |category, content|
-          @response_builder.push(content, category: category)
-        end
-      end
-
-      #: (String name) -> void
-      def handle_class_variable_hover(name)
-        type = @type_inferrer.infer_receiver_type(@node_context)
-        return unless type
-
-        entries = @index.resolve_class_variable(name, type.name)
-        return unless entries
-
-        categorized_markdown_from_index_entries(name, entries).each do |category, content|
-          @response_builder.push(content, category: category)
-        end
-      rescue RubyIndexer::Index::NonExistingNamespaceError
-        # If by any chance we haven't indexed the owner, then there's no way to find the right declaration
       end
 
       #: (String name, Prism::Location location) -> void
       def generate_hover(name, location)
-        entries = @index.resolve(name, @node_context.nesting)
-        return unless entries
+        declaration = @graph.resolve_constant(name, @node_context.nesting)
+        return unless declaration
 
-        # We should only show hover for private constants if the constant is defined in the same namespace as the
-        # reference
-        first_entry = entries.first #: as !nil
-        full_name = first_entry.name
-        return if first_entry.private? && full_name != "#{@node_context.fully_qualified_name}::#{name}"
-
-        categorized_markdown_from_index_entries(full_name, entries).each do |category, content|
+        categorized_markdown_from_definitions(declaration.name, declaration.definitions).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end
