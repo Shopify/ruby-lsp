@@ -81,7 +81,6 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
   let run: Executable;
   let debug: Executable;
   const config = vscode.workspace.getConfiguration("rubyLsp");
-  const branch: string = config.get("branch")!;
   const customBundleGemfile: string = config.get("bundleGemfile")!;
   const useBundlerCompose: boolean = config.get("useBundlerCompose")!;
   const bypassTypechecker: boolean = config.get("bypassTypechecker")!;
@@ -126,10 +125,6 @@ function getLspExecutables(workspaceFolder: vscode.WorkspaceFolder, env: NodeJS.
         : "ruby-lsp";
 
     const args = [];
-
-    if (branch.length > 0) {
-      args.push("--branch", branch);
-    }
 
     if (featureEnabled("launcher")) {
       args.push("--use-launcher");
