@@ -91,14 +91,14 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    sorbet (0.6.12913)
-      sorbet-static (= 0.6.12913)
-    sorbet-runtime (0.6.12913)
-    sorbet-static (0.6.12913-universal-darwin)
-    sorbet-static (0.6.12913-x86_64-linux)
-    sorbet-static-and-runtime (0.6.12913)
-      sorbet (= 0.6.12913)
-      sorbet-runtime (= 0.6.12913)
+    sorbet (0.6.13055)
+      sorbet-static (= 0.6.13055)
+    sorbet-runtime (0.6.13055)
+    sorbet-static (0.6.13055-universal-darwin)
+    sorbet-static (0.6.13055-x86_64-linux)
+    sorbet-static-and-runtime (0.6.13055)
+      sorbet (= 0.6.13055)
+      sorbet-runtime (= 0.6.13055)
     spoom (1.7.11)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
@@ -200,11 +200,11 @@ CHECKSUMS
   ruby-lsp (0.26.8)
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
-  sorbet (0.6.12913) sha256=259e28215af2b80bf530d3b6af1c509ddadcdef6fa34417a9afd315f76d4eaf4
-  sorbet-runtime (0.6.12913) sha256=b07b29c4070e7729fcda55f42ca2cf76ed369537be6680b36208e66c17934ff1
-  sorbet-static (0.6.12913-universal-darwin) sha256=bc064e1930f3736d7f7ded8ff7631c43d8d66681540be7103e1a3faaa08cc10f
-  sorbet-static (0.6.12913-x86_64-linux) sha256=8c9db957392b706e85c2e597ede567e64d46859dd6ae3ef9901e3894e971a49c
-  sorbet-static-and-runtime (0.6.12913) sha256=63b3c66aa107b4b1aea689b23690ad4d8b1a7b29f6cfcd16222fa1c436c555c9
+  sorbet (0.6.13055) sha256=5f5e8f37c13c281fa2b2f95e261d2e531d8331ddcc8e2dd8c4f16457935872ec
+  sorbet-runtime (0.6.13055) sha256=c8ae8c81310e0a28d290b11f44ddca59659b7d7f13752c0ef5d16964bbb84d18
+  sorbet-static (0.6.13055-universal-darwin) sha256=649c8e79a443be85318922f9ecbb46be72f6c585443f4440c4ec0fb1737c86e8
+  sorbet-static (0.6.13055-x86_64-linux) sha256=01b6941106dadb334a87d56afce1a5fffcdcf5de21c718858975b666a624bfb1
+  sorbet-static-and-runtime (0.6.13055) sha256=050f9ef00dda7578a2de729cf3a1accf3111eca23671e3a5a9adfd563d197fb7
   spoom (1.7.11) sha256=4e27384af6d3fde5aadc0287c51e6f76c0802259cbb3b6a67603bf718352f4cf
   stringio (3.2.0) sha256=c37cb2e58b4ffbd33fe5cd948c05934af997b36e0b6ca6fdf43afa234cf222e1
   syntax_tree (6.3.0) sha256=56e25a9692c798ec94c5442fe94c5e94af76bef91edc8bb02052cbdecf35f13d
