@@ -1700,7 +1700,7 @@ class ServerTest < Minitest::Test
 
   def test_launch_bundle_compose_forwards_argv_to_launcher
     original_argv = ARGV.dup
-    ARGV.replace(["--branch", "main"])
+    ARGV.replace(["--beta"])
 
     @server.global_state.apply_options({
       workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
@@ -1721,8 +1721,7 @@ class ServerTest < Minitest::Test
     thread = @server.send(:launch_bundle_compose, "Test") { |_stderr, _status| }
     thread.join
 
-    assert_includes(captured_args, "--branch")
-    assert_includes(captured_args, "main")
+    assert_includes(captured_args, "--beta")
   ensure
     ARGV.replace(original_argv)
   end

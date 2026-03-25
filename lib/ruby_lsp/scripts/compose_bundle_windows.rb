@@ -7,6 +7,4 @@ require_relative "compose_bundle"
 # invoke the compose method from inside a forked process
 options = {}
 options[:beta] = true if ARGV.include?("--beta")
-branch_index = ARGV.index("--branch")
-options[:branch] = ARGV[branch_index + 1] if branch_index
 compose(ARGV.first, **options)

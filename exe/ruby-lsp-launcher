@@ -20,10 +20,8 @@ reboot = false
 workspace_uri = ARGV.first
 raw_initialize_path = File.join(".ruby-lsp", "raw_initialize")
 
-# Extract CLI options that affect bundle composition (e.g. --branch, --beta) from the arguments passed by the server
+# Extract CLI options that affect bundle composition (e.g. --beta) from the arguments passed by the server
 cli_options = {}
-branch_index = ARGV.index("--branch")
-cli_options[:branch] = ARGV[branch_index + 1] if branch_index
 cli_options[:beta] = true if ARGV.include?("--beta")
 
 raw_initialize = if workspace_uri && !workspace_uri.start_with?("--")
@@ -57,7 +55,6 @@ pid = if Gem.win_platform?
 
   cli_flags = []
   cli_flags << "--beta" if cli_options[:beta]
-  cli_flags.push("--branch", cli_options[:branch]) if cli_options[:branch]
 
   Process.spawn(
     Gem.ruby,

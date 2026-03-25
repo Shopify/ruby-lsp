@@ -21,13 +21,6 @@ parser = OptionParser.new do |opts|
     options[:time_index] = true
   end
 
-  opts.on(
-    "--branch [BRANCH]",
-    "Launch the Ruby LSP using the specified branch rather than the release version",
-  ) do |branch|
-    options[:branch] = branch
-  end
-
   opts.on("--doctor", "Run troubleshooting steps") do
     options[:doctor] = true
   end
@@ -70,7 +63,6 @@ if ENV["BUNDLE_GEMFILE"].nil?
     flags = []
     flags << "--debug" if options[:debug]
     flags << "--beta" if options[:beta]
-    flags.push("--branch", options[:branch]) if options[:branch]
     exit exec(Gem.ruby, File.expand_path("ruby-lsp-launcher", __dir__), *flags)
   end
 
