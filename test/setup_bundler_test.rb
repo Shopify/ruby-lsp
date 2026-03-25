@@ -302,20 +302,6 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
-  def test_creates_composed_bundle_with_specified_branch
-    in_temp_dir do |dir|
-      Bundler.with_unbundled_env do
-        stub_bundle_with_env(bundle_env(dir, ".ruby-lsp/Gemfile"))
-        run_script(File.realpath(dir), branch: "test-branch")
-      end
-
-      assert_path_exists(".ruby-lsp")
-      assert_path_exists(".ruby-lsp/Gemfile")
-      assert_match(%r{ruby-lsp.*github: "Shopify/ruby-lsp", branch: "test-branch"}, File.read(".ruby-lsp/Gemfile"))
-      assert_match("debug", File.read(".ruby-lsp/Gemfile"))
-    end
-  end
-
   def test_returns_bundle_app_config_if_there_is_local_config
     in_temp_dir do |dir|
       Bundler.with_unbundled_env do

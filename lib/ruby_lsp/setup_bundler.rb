@@ -39,7 +39,6 @@ module RubyLsp
     #: (String project_path, **untyped options) -> void
     def initialize(project_path, **options)
       @project_path = project_path
-      @branch = options[:branch] #: String?
       @launcher = options[:launcher] #: bool?
       @beta = options[:beta] #: bool?
       force_output_to_stderr! if @launcher
@@ -178,9 +177,7 @@ module RubyLsp
 
       unless @dependencies["ruby-lsp"]
         version = @beta ? "0.a" : RUBY_LSP_MIN_VERSION
-        ruby_lsp_entry = +"gem \"ruby-lsp\", \">= #{version}\", require: false, group: :development"
-        ruby_lsp_entry << ", github: \"Shopify/ruby-lsp\", branch: \"#{@branch}\"" if @branch
-        parts << ruby_lsp_entry
+        parts << "gem \"ruby-lsp\", \">= #{version}\", require: false, group: :development"
       end
 
       unless @dependencies["debug"]
