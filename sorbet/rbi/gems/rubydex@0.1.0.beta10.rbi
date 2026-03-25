@@ -245,6 +245,10 @@ class Rubydex::Graph
   def encoding=(encoding); end
 
   # source://rubydex//lib/rubydex.rb#10
+  sig { params(query: String).returns(T::Enumerable[Rubydex::Declaration]) }
+  def fuzzy_search(query); end
+
+  # source://rubydex//lib/rubydex.rb#10
   sig { params(paths: T::Array[String]).returns(T::Array[String]) }
   def index_all(paths); end
 
@@ -280,7 +284,7 @@ class Rubydex::Graph
   def resolve_require_path(require_path, load_path); end
 
   # source://rubydex//lib/rubydex.rb#10
-  sig { params(query: String).returns(T::Array[Rubydex::Declaration]) }
+  sig { params(query: String).returns(T::Enumerable[Rubydex::Declaration]) }
   def search(query); end
 
   # source://rubydex//lib/rubydex/graph.rb#17
@@ -424,6 +428,10 @@ class Rubydex::Namespace < ::Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#10
   sig { params(name: String).returns(T.nilable(Rubydex::Declaration)) }
   def member(name); end
+
+  # source://rubydex//lib/rubydex.rb#10
+  sig { returns(T::Enumerable[Rubydex::Declaration]) }
+  def members; end
 
   # source://rubydex//lib/rubydex.rb#10
   sig { returns(T.nilable(Rubydex::SingletonClass)) }
