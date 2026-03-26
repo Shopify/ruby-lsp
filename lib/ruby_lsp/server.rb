@@ -429,7 +429,16 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
-      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+      document = @store.get(text_document[:uri])
+      document.push_edits(params[:contentChanges], version: text_document[:version])
+
+      language_id = document.language_id
+
+      if [:ruby, :rbs].include?(language_id)
+        graph = @global_state.graph
+        graph.index_source(text_document[:uri].to_s, document.source, language_id.to_s)
+        graph.resolve
+      end
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1046,6 +1055,23 @@ module RubyLsp
       # same pattern is registered more than once, the LSP will receive duplicate change notifications. Receiving them
       # is fine, but we shouldn't process the same file changes more than once
       changes.uniq!
+
+      graph = @global_state.graph
+
+      # Handle deletions and accumulate additions and changes for indexing
+      additions_and_changes = changes.each_with_object([]) do |change, acc|
+        if change[:type] == Constant::FileChangeType::DELETED
+          graph.delete_document(change[:uri])
+        else
+          path = URI(change[:uri]).to_standardized_path
+          next if path.nil?
+          next unless File.directory?(path) || [".rb", ".rbs"].include?(File.extname(path))
+
+          acc << path
+        end
+      end
+      graph.index_all(additions_and_changes)
+      graph.resolve
 
       index = @global_state.index
       changes.each do |change|
