@@ -465,7 +465,7 @@ class ServerTest < Minitest::Test
               type: RubyLsp::Constant::FileChangeType::CREATED,
             },
             {
-              uri: URI("file:///.rubocop.yml"),
+              uri: URI("file:///.rubocop.yml").to_s,
               type: RubyLsp::Constant::FileChangeType::CREATED,
             },
           ],
@@ -505,7 +505,7 @@ class ServerTest < Minitest::Test
       uri.full_path == path
     end
 
-    uri = URI::Generic.from_path(path: path)
+    uri = URI::Generic.from_path(path: path).to_s
 
     @server.global_state.index.index_all(uris: [])
     @server.process_message({
@@ -1175,7 +1175,7 @@ class ServerTest < Minitest::Test
     @server.global_state.index.index_all(uris: [])
 
     [".rubocop.yml", ".rubocop", ".rubocop_todo.yml"].each do |config_file|
-      uri = URI::Generic.from_path(path: File.join(Dir.pwd, config_file))
+      uri = URI::Generic.from_path(path: File.join(Dir.pwd, config_file)).to_s
 
       @server.process_message({
         method: "workspace/didChangeWatchedFiles",
@@ -1324,7 +1324,7 @@ class ServerTest < Minitest::Test
       end
     RUBY
     File.write(path, source)
-    uri = URI::Generic.from_path(path: path)
+    uri = URI::Generic.from_path(path: path).to_s
 
     begin
       @server.process_message({
