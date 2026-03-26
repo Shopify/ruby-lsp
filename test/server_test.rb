@@ -924,6 +924,10 @@ class ServerTest < Minitest::Test
   def test_requests_cancelled_during_processing_are_deleted_from_cancelled_requests_list
     uri = URI("file:///foo.rb")
 
+    graph = @server.global_state.graph
+    graph.index_source(uri.to_s, "class Foo\nend", "ruby")
+    graph.resolve
+
     @server.process_message({
       method: "textDocument/didOpen",
       params: {
