@@ -33,6 +33,7 @@ require "set"
 
 # Rubydex LSP additions
 require "ruby_lsp/rubydex/definition"
+require "ruby_lsp/rubydex/reference"
 
 require "ruby-lsp"
 require "ruby_lsp/base_server"
