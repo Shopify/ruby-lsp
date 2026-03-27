@@ -839,6 +839,7 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
       )
 
       response = server.pop_response.response
+      response.sort_by! { |location| location.range.start.line }
       assert_equal(3, response.size)
       assert_equal(0, response[0].range.start.line)
       assert_equal(1, response[1].range.start.line)
