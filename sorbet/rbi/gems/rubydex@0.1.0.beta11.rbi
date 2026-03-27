@@ -52,6 +52,8 @@ class Rubydex::ConstantReference < ::Rubydex::Reference
   def name; end
 end
 
+class Rubydex::ConstantVisibilityDefinition < ::Rubydex::Definition; end
+
 class Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#10
   def initialize(_arg0, _arg1); end
