@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
+      - v[0-9]+.[0-9]+.[0-9]+.beta[0-9]*
 
 jobs:
   release_gem:
@@ -53,7 +54,12 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            const previousRelease = data.find((release) => !release.tag_name.startsWith("vscode-ruby-lsp") && release.tag_name !== "${{ github.ref_name }}");
+            const isPreRelease = "${{ github.ref_name }}".includes(".beta");
+            const previousRelease = data.find((release) =>
+              !release.tag_name.startsWith("vscode-ruby-lsp") &&
+              release.tag_name !== "${{ github.ref_name }}" &&
+              release.prerelease === isPreRelease
+            );
 
             const commitResponse = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
@@ -113,5 +119,6 @@ jobs:
               repo: context.repo.repo,
               tag_name: "${{ github.ref }}",
               name: "${{ github.ref_name }}",
-              body: content
+              body: content,
+              prerelease: "${{ github.ref_name }}".includes(".beta")
             });
