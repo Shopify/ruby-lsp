@@ -120,6 +120,12 @@ module RubyLsp
         @global_state.synchronize { @cancelled_requests << message[:params][:id] }
       when nil
         process_response(message) if message[:result]
+      else
+        send_message(Error.new(
+          id: message[:id],
+          code: -32601,
+          message: "Method not found: #{message[:method]}",
+        )) if message[:id]
       end
     rescue DelegateRequestError
       send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))
