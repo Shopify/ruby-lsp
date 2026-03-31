@@ -121,11 +121,15 @@ module RubyLsp
       when nil
         process_response(message) if message[:result]
       else
-        send_message(Error.new(
-          id: message[:id],
-          code: -32601,
-          message: "Method not found: #{message[:method]}",
-        )) if message[:id]
+        id = message[:id]
+
+        if id
+          send_message(Error.new(
+            id: id,
+            code: Constant::ErrorCodes::METHOD_NOT_FOUND,
+            message: "Method not found: #{message[:method]}",
+          ))
+        end
       end
     rescue DelegateRequestError
       send_message(Error.new(id: message[:id], code: DelegateRequestError::CODE, message: "DELEGATE_REQUEST"))

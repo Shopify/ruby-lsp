@@ -1727,15 +1727,16 @@ class ServerTest < Minitest::Test
   end
 
   def test_unrecognized_request_returns_method_not_found
+    non_existent_method = "textDocument/nonExistentMethod"
     @server.process_message({
       id: 1,
-      method: "textDocument/nonExistentMethod",
+      method: non_existent_method,
       params: {},
     })
 
     error = find_message(RubyLsp::Error)
-    assert_equal(-32601, error.code)
-    assert_equal("Method not found: textDocument/nonExistentMethod", error.message)
+    assert_equal(Constant::ErrorCodes::METHOD_NOT_FOUND, error.code)
+    assert_equal("Method not found: #{non_existent_method}", error.message)
   end
 
   private
