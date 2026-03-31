@@ -1122,4 +1122,86 @@ class OnTypeFormattingTest < Minitest::Test
     ]
     assert_equal(expected_edits.to_json, edits.to_json)
   end
+
+  def test_does_not_add_end_for_endless_method
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "def foo = 42",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 0 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+
+    assert_empty(edits)
+  end
+
+  def test_does_not_add_end_for_multiline_endless_method
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "def hello = puts(",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 0 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+
+    assert_empty(edits)
+  end
+
+  def test_does_not_add_end_for_endless_method_with_equals_and_parameters
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    # This is actually invalid Ruby. It crashes with a syntax error. But we shouldn't add the `end` token anyway
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "def foo=(bar) = 42",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 0 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+
+    assert_empty(edits)
+  end
 end

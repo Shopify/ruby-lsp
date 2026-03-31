@@ -120,6 +120,10 @@ module RubyLsp
 
         return unless END_REGEXES.any? { |regex| regex.match?(@previous_line) }
 
+        # Endless method definitions (e.g., `def foo = 42`) are complete statements
+        # and should not have `end` added
+        return if @previous_line.match?(/\bdef\s+[\w.]+[!?=]?(\([^)]*\))?\s*=[^=~>]/)
+
         indents = " " * @indentation
         current_line = @lines[@position[:line]]
         next_line = @lines[@position[:line] + 1]
