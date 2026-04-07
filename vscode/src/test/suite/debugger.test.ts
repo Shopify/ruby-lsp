@@ -45,14 +45,14 @@ suite("Debugger", () => {
           name: "Debug script",
           request: "launch",
           // eslint-disable-next-line no-template-curly-in-string
-          program: "ruby ${file}",
+          program: 'ruby "${file}"',
         },
         {
           type: "ruby_lsp",
           name: "Debug test",
           request: "launch",
           // eslint-disable-next-line no-template-curly-in-string
-          program: "ruby -Itest ${relativeFile}",
+          program: 'ruby -Itest "${relativeFile}"',
         },
         {
           type: "ruby_lsp",
@@ -87,7 +87,7 @@ suite("Debugger", () => {
       name: "Debug",
       request: "launch",
       // eslint-disable-next-line no-template-curly-in-string
-      program: "ruby ${file}",
+      program: 'ruby "${file}"',
       env: {
         overrideMe: "newValue",
       },
@@ -117,7 +117,7 @@ suite("Debugger", () => {
       name: "Debug",
       request: "launch",
       // eslint-disable-next-line no-template-curly-in-string
-      program: "ruby ${file}",
+      program: 'ruby "${file}"',
       env: { parallel: "1" },
     });
 
@@ -148,7 +148,7 @@ suite("Debugger", () => {
       name: "Debug",
       request: "launch",
       // eslint-disable-next-line no-template-curly-in-string
-      program: "ruby ${file}",
+      program: 'ruby "${file}"',
       env: { parallel: "1" },
     });
 

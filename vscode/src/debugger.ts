@@ -66,14 +66,14 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
         name: "Debug script",
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby ${file}",
+        program: 'ruby "${file}"',
       },
       {
         type: "ruby_lsp",
         name: "Debug test",
         request: "launch",
         // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby -Itest ${relativeFile}",
+        program: 'ruby -Itest "${relativeFile}"',
       },
       {
         type: "ruby_lsp",
