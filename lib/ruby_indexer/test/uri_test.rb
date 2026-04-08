@@ -84,15 +84,11 @@ module RubyIndexer
 
     def test_from_path_with_brackets
       uri = URI::Generic.from_path(path: "/some/path/[id].rb")
-      assert_match("%5B", uri.path)
-      assert_match("%5D", uri.path)
       assert_equal("file:///some/path/%5Bid%5D.rb", uri.to_s)
     end
 
     def test_from_path_with_braces
       uri = URI::Generic.from_path(path: "/some/path/{slug}.rb")
-      assert_match("%7B", uri.path)
-      assert_match("%7D", uri.path)
       assert_equal("file:///some/path/%7Bslug%7D.rb", uri.to_s)
     end
 

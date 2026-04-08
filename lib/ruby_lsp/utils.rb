@@ -21,6 +21,12 @@ module RubyLsp
   GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
   TEST_PATH_PATTERN = "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"
 
+  # Escape characters that have special meaning in Dir.glob patterns
+  #: (String str) -> String
+  def self.escape_glob_metacharacters(str)
+    str.gsub(/[\[\]{}*?\\]/) { |c| "\\#{c}" }
+  end
+
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
   # use this custom error class as a way to return a signal to the client that the request should be delegated to the
   # language server for the host language. The support for delegation is custom built on the client side, so each editor

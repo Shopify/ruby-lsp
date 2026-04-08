@@ -115,7 +115,7 @@ module RubyLsp
 
       #: (String str) -> String
       def escape_glob_metacharacters(str)
-        str.gsub(/[\[\]{}*?\\]/) { |c| "\\#{c}" }
+        RubyLsp.escape_glob_metacharacters(str)
       end
 
       # Using the Jaccard algorithm to determine the similarity between the

@@ -457,7 +457,7 @@ module RubyLsp
         # if the path is not a directory, glob all possible next characters
         # for example ../somethi| (where | is the cursor position)
         # should find files for ../somethi*/
-        escaped_content = content.gsub(/[\[\]{}*?\\]/) { |c| "\\#{c}" }
+        escaped_content = RubyLsp.escape_glob_metacharacters(content)
         path_query = if content.end_with?("/") || content.empty?
           "#{escaped_content}**/*.rb"
         else
