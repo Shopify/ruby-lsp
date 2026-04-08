@@ -1726,6 +1726,19 @@ class ServerTest < Minitest::Test
     ARGV.replace(original_argv)
   end
 
+  def test_unrecognized_request_returns_method_not_found
+    non_existent_method = "textDocument/nonExistentMethod"
+    @server.process_message({
+      id: 1,
+      method: non_existent_method,
+      params: {},
+    })
+
+    error = find_message(RubyLsp::Error)
+    assert_equal(RubyLsp::Constant::ErrorCodes::METHOD_NOT_FOUND, error.code)
+    assert_equal("Method not found: #{non_existent_method}", error.message)
+  end
+
   private
 
   def run_initialize_server_with_setup_error(error)
