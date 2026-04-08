@@ -44,15 +44,15 @@ suite("Debugger", () => {
           type: "ruby_lsp",
           name: "Debug script",
           request: "launch",
-          // eslint-disable-next-line no-template-curly-in-string
-          program: "ruby ${file}",
+          command: "ruby",
         },
         {
           type: "ruby_lsp",
           name: "Debug test",
           request: "launch",
+          command: "ruby -Itest",
           // eslint-disable-next-line no-template-curly-in-string
-          program: "ruby -Itest ${relativeFile}",
+          file: "${relativeFile}",
         },
         {
           type: "ruby_lsp",
@@ -95,6 +95,34 @@ suite("Debugger", () => {
 
     assert.strictEqual(configs.env.bogus, "hello!");
     assert.strictEqual(configs.env.overrideMe, "newValue");
+    debug.dispose();
+    context.subscriptions.forEach((subscription) => subscription.dispose());
+  });
+
+  test("Resolve configuration defaults file to active file when command is used", async () => {
+    const ruby = {
+      env: { bogus: "hello!" },
+    } as unknown as Ruby;
+    const workspaceFolder = {
+      name: "fake",
+      uri: vscode.Uri.file("fake"),
+      index: 0,
+    };
+    const debug = new Debugger(context, () => {
+      return {
+        ruby,
+        workspaceFolder,
+      } as Workspace;
+    });
+    const configs: any = await debug.resolveDebugConfiguration!(workspaceFolder, {
+      type: "ruby_lsp",
+      name: "Debug",
+      request: "launch",
+      command: "ruby",
+    });
+
+    // eslint-disable-next-line no-template-curly-in-string
+    assert.strictEqual(configs.file, "${file}");
     debug.dispose();
     context.subscriptions.forEach((subscription) => subscription.dispose());
   });
@@ -174,7 +202,7 @@ suite("Debugger", () => {
       createRubySymlinks();
     }
 
-    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-debugger"));
+    const tmpPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp test debugger with spaces-"));
     fs.writeFileSync(path.join(tmpPath, "test.rb"), "1 + 1");
     fs.writeFileSync(path.join(tmpPath, ".ruby-version"), RUBY_VERSION);
     fs.writeFileSync(path.join(tmpPath, "Gemfile"), 'source "https://rubygems.org"\ngem "debug"');
@@ -210,7 +238,8 @@ suite("Debugger", () => {
         type: "ruby_lsp",
         name: "Debug",
         request: "launch",
-        program: `ruby ${path.join(tmpPath, "test.rb")}`,
+        command: "ruby",
+        file: path.join(tmpPath, "test.rb"),
       });
     } catch (error: any) {
       assert.fail(`Failed to launch debugger: ${error.message}`);
