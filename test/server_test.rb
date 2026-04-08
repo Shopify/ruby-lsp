@@ -1735,7 +1735,7 @@ class ServerTest < Minitest::Test
     })
 
     error = find_message(RubyLsp::Error)
-    assert_equal(Constant::ErrorCodes::METHOD_NOT_FOUND, error.code)
+    assert_equal(RubyLsp::Constant::ErrorCodes::METHOD_NOT_FOUND, error.code)
     assert_equal("Method not found: #{non_existent_method}", error.message)
   end
 
