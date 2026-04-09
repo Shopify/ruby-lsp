@@ -56,26 +56,9 @@ module RubyLsp
         addon_files = Gem.find_files("ruby_lsp/**/addon.rb")
 
         if include_project_addons
-          project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
           bundle_path = Bundler.bundle_path.to_s
-          gems_dir = Bundler.bundle_path.join("gems")
-
-          # Create an array of rejection glob patterns to ignore add-ons already discovered through Gem.find_files if
-          # they are also copied inside the workspace for whatever reason. We received reports of projects having gems
-          # installed in vendor/bundle despite BUNDLE_PATH pointing elsewhere. Without this mechanism, we will
-          # double-require the same add-on, potentially for different versions of the same gem, which leads to incorrect
-          # behavior
-          reject_glob_patterns = addon_files.map do |path|
-            relative_gem_path = Pathname.new(path).relative_path_from(gems_dir)
-            first_part, *parts = relative_gem_path.to_s.split(File::SEPARATOR)
-            first_part&.gsub!(/-([0-9.]+)$/, "*")
-            "**/#{first_part}/#{parts.join("/")}"
-          end
-
-          project_addons.reject! do |path|
-            path.start_with?(bundle_path) ||
-              reject_glob_patterns.any? { |pattern| File.fnmatch?(pattern, path, File::Constants::FNM_PATHNAME) }
-          end
+          project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
+          project_addons.reject! { |path| path.start_with?(bundle_path) || gem_installation_path?(path) }
 
           addon_files.concat(project_addons)
         end
@@ -161,6 +144,23 @@ module RubyLsp
           raise IncompatibleApiError,
             "Add-on is not compatible with this version of the Ruby LSP. Skipping its activation"
         end
+      end
+
+      private
+
+      # Checks if a path appears to be inside a versioned gem installation directory (e.g., `rubocop-1.73.0/lib/...`) by
+      # looking for a directory segment matching `name-version` before the `lib` component
+      #
+      #: (String path) -> bool
+      def gem_installation_path?(path)
+        parts = path.split(%r{[/\\]})
+        lib_index = parts.rindex("lib")
+        return false unless lib_index
+
+        prefix = parts[0...lib_index] #: Array[String]?
+        return false unless prefix
+
+        prefix.any? { |part| part.match?(/-\d+(\.\d+)+$/) }
       end
     end
 
