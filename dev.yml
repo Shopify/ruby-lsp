@@ -14,7 +14,6 @@ up:
         - vscode
   - packages:
       - libyaml
-      - watchman
 
 commands:
   server: exe/ruby-lsp
