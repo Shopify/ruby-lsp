@@ -3,7 +3,11 @@
 
 module RubyLsp
   class Server < BaseServer
-    NON_REPORTABLE_SETUP_ERRORS = [Bundler::GemNotFound, Bundler::GitError].freeze #: Array[singleton(StandardError)]
+    NON_REPORTABLE_SETUP_ERRORS = [
+      Bundler::GemNotFound,
+      Bundler::GitError,
+      Bundler::Dsl::DSLError,
+    ].freeze #: Array[singleton(StandardError)]
 
     # Only for testing
     #: GlobalState

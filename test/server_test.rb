@@ -662,6 +662,16 @@ class ServerTest < Minitest::Test
     run_initialize_server_with_setup_error(StandardError.new("something unexpected"))
   end
 
+  def test_dsl_error_setup_error_does_not_send_telemetry
+    RubyLsp::Notification.expects(:telemetry).never
+
+    run_initialize_server_with_setup_error(Bundler::Dsl::DSLError.new(
+      "There was an error parsing `Gemfile`: syntax errors found",
+      "Gemfile",
+      [],
+    ))
+  end
+
   def test_handles_editor_indexing_settings
     capture_io do
       @server.process_message({
