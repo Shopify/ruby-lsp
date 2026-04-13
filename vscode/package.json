@@ -833,7 +833,7 @@
     "ovsx": "^0.10.10",
     "prettier": "^3.8.2",
     "sinon": "^21.1.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "typescript-eslint": "^8.58.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
