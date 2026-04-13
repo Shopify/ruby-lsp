@@ -831,10 +831,10 @@
     "glob": "^13.0.6",
     "mocha": "^11.7.5",
     "ovsx": "^0.10.10",
-    "prettier": "^3.8.1",
-    "sinon": "^21.0.3",
+    "prettier": "^3.8.2",
+    "sinon": "^21.1.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.58.0",
+    "typescript-eslint": "^8.58.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
