@@ -21,6 +21,8 @@ module RubyLsp
 
             Gem::Specification.stubs.each do |stub|
               spec = stub.to_spec
+              next unless spec
+
               lookup[spec.name] = {}
               lookup[spec.name][spec.version.to_s] = {}
 
@@ -31,6 +33,8 @@ module RubyLsp
 
             Gem::Specification.default_stubs.each do |stub|
               spec = stub.to_spec
+              next unless spec
+
               lookup[spec.name] = {}
               lookup[spec.name][spec.version.to_s] = {}
               prefix_matchers = Regexp.union(spec.require_paths.map do |rp|

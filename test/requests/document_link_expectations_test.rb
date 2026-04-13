@@ -116,6 +116,19 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     refute_empty(links, "Expected document link for source comment above multi-line sig block")
   end
 
+  def test_does_not_fail_if_to_spec_returns_nil
+    # Guarantee that the cache is reset
+    RubyLsp::Listeners::DocumentLink.instance_variable_set(:@gem_paths, nil)
+
+    Gem::Specification.any_instance.stubs(:to_spec).returns(nil)
+
+    result = RubyLsp::Listeners::DocumentLink.gem_paths
+    refute_nil(result)
+  ensure
+    # Reset the cache again since we stubbed `to_spec` to return nil
+    RubyLsp::Listeners::DocumentLink.instance_variable_set(:@gem_paths, nil)
+  end
+
   def test_package_url_links_with_invalid_uris
     source = <<~RUBY
       # pkg:gem/rubocop$1.78.0#:99
