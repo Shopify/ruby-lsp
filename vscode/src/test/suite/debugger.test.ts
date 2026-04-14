@@ -226,6 +226,11 @@ suite("Debugger", () => {
     assert.ok(fs.existsSync(path.join(tmpPath, "Gemfile.lock")));
     assert.match(fs.readFileSync(path.join(tmpPath, "Gemfile.lock")).toString(), /debug/);
 
+    const scriptUri = vscode.Uri.file(path.join(tmpPath, "test.rb"));
+    const scriptDocument = await vscode.workspace.openTextDocument(scriptUri);
+    await vscode.window.showTextDocument(scriptDocument);
+    assert.strictEqual(vscode.window.activeTextEditor?.document.uri.fsPath, scriptUri.fsPath);
+
     const debug = new Debugger(context, () => {
       return {
         ruby,
@@ -239,7 +244,8 @@ suite("Debugger", () => {
         name: "Debug",
         request: "launch",
         command: "ruby",
-        file: path.join(tmpPath, "test.rb"),
+        // eslint-disable-next-line no-template-curly-in-string
+        file: "${file}",
       });
     } catch (error: any) {
       assert.fail(`Failed to launch debugger: ${error.message}`);
