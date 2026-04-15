@@ -299,7 +299,7 @@ module RubyLsp
         surrounding_method = @node_context.surrounding_method
         return unless surrounding_method
 
-        handle_method_hover(surrounding_method, inherited_only: true)
+        handle_method_hover(surrounding_method.name, inherited_only: true)
       end
 
       #: (String message, ?inherited_only: bool) -> void
