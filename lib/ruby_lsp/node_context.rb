@@ -82,6 +82,8 @@ module RubyLsp
           receiver = node.receiver
 
           surrounding_method = case receiver
+          when nil
+            MethodDef.new(node.name.to_s, "none")
           when Prism::SelfNode
             MethodDef.new(node.name.to_s, "self")
           when Prism::ConstantReadNode, Prism::ConstantPathNode

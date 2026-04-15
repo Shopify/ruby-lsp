@@ -129,7 +129,7 @@ module RubyLsp
       GuessedType.new(declaration.name)
     end
 
-    #: (NodeContext node_context) -> Type
+    #: (NodeContext node_context) -> Type?
     def self_receiver_handling(node_context)
       nesting = node_context.nesting
       # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
@@ -145,9 +145,12 @@ module RubyLsp
         when "self"
           # `def self.foo` — self is the singleton of the enclosing class/module
           return resolve_singleton_type_from_nesting(nesting)
-        when nil
+        when "none"
           # Instance method — self is an instance of the enclosing class/module
           return resolve_type_from_nesting(nesting)
+        when nil
+          # Dynamic receiver that we cannot handle
+          return
         else
           # Explicit constant receiver (e.g. `def Bar.baz`) — self is that constant's singleton class
           resolved = resolve_receiver_singleton_type(receiver_name, nesting)

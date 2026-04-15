@@ -72,6 +72,21 @@ module RubyLsp
       assert_equal("Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_receiver_type_self_inside_method_with_dynamic_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 5, character: 4 })
+        class Bar; end
+        var = Bar
+
+        class Foo
+          def var.baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
     def test_infer_receiver_inside_hoisted_parent_scope
       node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
         module Bar; end
