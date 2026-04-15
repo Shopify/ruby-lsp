@@ -446,7 +446,7 @@ module RubyLsp
         # we still push those
         unless @sorbet_level.true_or_higher?
           surrounding_method = @node_context.surrounding_method
-          handle_method_hover(surrounding_method, inherited_only: true) if surrounding_method
+          handle_method_hover(surrounding_method.name, inherited_only: true) if surrounding_method
         end
 
         handle_keyword_at_location(keyword_location)
