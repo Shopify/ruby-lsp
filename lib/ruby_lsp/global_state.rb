@@ -204,7 +204,7 @@ module RubyLsp
         Encoding::UTF_16LE
       else
         @graph.encoding = "utf32"
-        Encoding::UTF_32
+        Encoding::UTF_32LE
       end
       @index.configuration.encoding = @encoding
 
