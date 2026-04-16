@@ -13,7 +13,7 @@ module RubyLsp
       def initialize(response_builder, global_state, uri)
         @response_builder = response_builder
         @uri = uri
-        @index = global_state.index #: RubyIndexer::Index
+        @graph = global_state.graph #: Rubydex::Graph
         @visibility_stack = [:public] #: Array[Symbol]
         @nesting = [] #: Array[String]
       end
@@ -64,22 +64,29 @@ module RubyLsp
         superclass = node.superclass
 
         begin
-          ancestors = @index.linearized_ancestors_of(fully_qualified_name)
-          # If the project has no bundle and a test class inherits from `Minitest::Test`, the linearized ancestors will
-          # not include the parent class because we never indexed it in the first place. Here we add the superclass
-          # directly, so that we can support running tests in projects without a bundle
-          return ancestors if ancestors.length > 1
+          declaration = @graph[fully_qualified_name]
 
-          # If all we found is the class itself, then manually include the parent class
-          if ancestors.first == fully_qualified_name && superclass
-            return [*ancestors, superclass.slice]
+          unless declaration.is_a?(Rubydex::Namespace)
+            # When there are dynamic parts in the constant path, we will not have indexed the namespace. We can still
+            # provide test functionality if the class inherits directly from Test::Unit::TestCase or Minitest::Test
+            return [superclass&.slice].compact
           end
 
+          ancestors = declaration.ancestors.map(&:name)
+          superclass_ref = declaration.definitions
+            .filter_map { |d| d.superclass if d.is_a?(Rubydex::ClassDefinition) }
+            .find { |ref| !ref.is_a?(Rubydex::ResolvedConstantReference) || ref.declaration.name != "Object" }
+
+          # If we couldn't resolve the parent class, then artificially inject it into the ancestors
+          if superclass_ref.is_a?(Rubydex::UnresolvedConstantReference) && superclass
+            insert_index = ancestors.index(fully_qualified_name) #: as !nil
+            insert_index += 1
+            ancestors.insert(insert_index, superclass.slice)
+            return ancestors
+          end
+
+          # If the parent class is properly resolved or if there isn't one, then just use the ancestors
           ancestors
-        rescue RubyIndexer::Index::NonExistingNamespaceError
-          # When there are dynamic parts in the constant path, we will not have indexed the namespace. We can still
-          # provide test functionality if the class inherits directly from Test::Unit::TestCase or Minitest::Test
-          [superclass&.slice].compact
         end
       end
 
