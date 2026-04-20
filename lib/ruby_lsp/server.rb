@@ -1212,7 +1212,7 @@ module RubyLsp
 
       response = Requests::PrepareTypeHierarchy.new(
         document,
-        @global_state.index,
+        @global_state,
         params[:position],
       ).perform
 
@@ -1222,7 +1222,7 @@ module RubyLsp
     #: (Hash[Symbol, untyped] message) -> void
     def type_hierarchy_supertypes(message)
       response = Requests::TypeHierarchySupertypes.new(
-        @global_state.index,
+        @global_state,
         message.dig(:params, :item),
       ).perform
       send_message(Result.new(id: message[:id], response: response))
