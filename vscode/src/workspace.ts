@@ -5,7 +5,7 @@ import { CodeLens, State } from "vscode-languageclient/node";
 
 import { Ruby } from "./ruby";
 import Client from "./client";
-import { asyncExec, LOG_CHANNEL, WorkspaceInterface, STATUS_EMITTER, debounce } from "./common";
+import { asyncExec, LOG_CHANNEL, WorkspaceInterface, STATUS_EMITTER, debounce, featureEnabled } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 
 const WATCHED_FILES = ["Gemfile.lock", "gems.locked"];
@@ -263,11 +263,13 @@ export class Workspace implements WorkspaceInterface {
       env: this.ruby.env,
     });
 
+    const preFlag = featureEnabled("betaServer") ? " --pre" : "";
+
     // If any of the Ruby LSP's dependencies are missing, we need to install them. For example, if the user runs `gem
     // uninstall prism`, then we must ensure it's installed or else rubygems will fail when trying to launch the
     // executable
     if (!dependencies.every((dep) => new RegExp(`${dep}\\s`).exec(stdout))) {
-      await asyncExec("gem install ruby-lsp", {
+      await asyncExec(`gem install ruby-lsp${preFlag}`, {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
       });
@@ -293,7 +295,7 @@ export class Workspace implements WorkspaceInterface {
     // If we haven't updated the gem in the last 24 hours or if the user manually asked for an update, update it
     if (manualInvocation || lastUpdatedAt === undefined || Date.now() - lastUpdatedAt > oneDayInMs) {
       try {
-        await asyncExec("gem update ruby-lsp", {
+        await asyncExec(`gem update ruby-lsp${preFlag}`, {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
