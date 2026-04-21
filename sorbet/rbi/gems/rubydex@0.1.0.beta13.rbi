@@ -81,6 +81,7 @@ end
 
 class Rubydex::ConstantVisibilityDefinition < ::Rubydex::Definition; end
 
+# source://rubydex//lib/rubydex/declaration.rb#4
 class Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
@@ -97,7 +98,10 @@ class Rubydex::Declaration
   sig { returns(Rubydex::Declaration) }
   def owner; end
 
-  # source://rubydex//lib/rubydex.rb#11
+  # @abstract
+  # @raise [NotImplementedError]
+  #
+  # source://rubydex//lib/rubydex/declaration.rb#7
   sig { returns(T::Enumerable[Rubydex::Reference]) }
   def references; end
 
@@ -300,6 +304,14 @@ class Rubydex::Graph
   def encoding=(encoding); end
 
   # source://rubydex//lib/rubydex.rb#11
+  sig { params(paths: T::Array[String]).void }
+  def exclude_paths(paths); end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T::Array[String]) }
+  def excluded_paths; end
+
+  # source://rubydex//lib/rubydex.rb#11
   sig { params(query: String).returns(T::Enumerable[Rubydex::Declaration]) }
   def fuzzy_search(query); end
 
@@ -317,6 +329,9 @@ class Rubydex::Graph
   # Index all files and dependencies of the workspace that exists in `@workspace_path`
   sig { returns(T::Array[String]) }
   def index_workspace; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  def keyword(_arg0); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::MethodReference]) }
@@ -374,14 +389,6 @@ class Rubydex::Graph
   # source://rubydex//lib/rubydex/graph.rb#63
   sig { params(paths: T::Array[String]).void }
   def add_workspace_dependency_paths(paths); end
-
-  # source://rubydex//lib/rubydex.rb#11
-  sig { params(paths: T::Array[String]).void }
-  def exclude_paths(paths); end
-
-  # source://rubydex//lib/rubydex.rb#11
-  sig { returns(T::Array[String]) }
-  def excluded_paths; end
 end
 
 # source://rubydex//lib/rubydex/graph.rb#8
