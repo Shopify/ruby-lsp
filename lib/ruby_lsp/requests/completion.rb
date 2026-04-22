@@ -61,7 +61,7 @@ module RubyLsp
           code_units_cache: document.code_units_cache,
         )
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem]
 
         Listeners::Completion.new(
           @response_builder,

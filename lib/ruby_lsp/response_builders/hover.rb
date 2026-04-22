@@ -5,8 +5,8 @@ module RubyLsp
   module ResponseBuilders
     #: [ResponseType = String]
     class Hover < ResponseBuilder
-      #: -> void
-      def initialize
+      #: (Encoding, Prism::ParseLexResult) -> void
+      def initialize(encoding, parse_result)
         super
 
         @response = {

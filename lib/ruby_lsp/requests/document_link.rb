@@ -16,12 +16,12 @@ module RubyLsp
         end
       end
 
-      #: (URI::Generic uri, Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
-      def initialize(uri, comments, dispatcher)
+      #: (URI::Generic uri, (RubyDocument | ERBDocument) document, Prism::Dispatcher dispatcher) -> void
+      def initialize(uri, document, dispatcher)
         super()
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink]
-        Listeners::DocumentLink.new(@response_builder, uri, comments, dispatcher)
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentLink]
+        Listeners::DocumentLink.new(@response_builder, uri, document.parse_result.comments, dispatcher)
       end
 
       # @override

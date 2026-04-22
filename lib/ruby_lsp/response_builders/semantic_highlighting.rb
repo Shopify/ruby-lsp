@@ -46,10 +46,10 @@ module RubyLsp
         defaultLibrary: 9,
       }.freeze #: Hash[Symbol, Integer]
 
-      #: ((^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache) -> void
-      def initialize(code_units_cache)
-        super()
-        @code_units_cache = code_units_cache
+      #: (Encoding, Prism::ParseLexResult) -> void
+      def initialize(encoding, parse_result)
+        super
+        @code_units_cache = parse_result.code_units_cache(encoding) #: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache)
         @stack = [] #: Array[SemanticToken]
       end
 

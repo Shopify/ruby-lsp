@@ -25,8 +25,7 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    parse_result = document.parse_result
-    listener = RubyLsp::Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
+    listener = RubyLsp::Requests::DocumentLink.new(uri, document, dispatcher)
     dispatcher.dispatch(document.ast)
     listener.perform
   end
