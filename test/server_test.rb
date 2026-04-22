@@ -194,8 +194,7 @@ class ServerTest < Minitest::Test
       @server.process_message({ method: "initialized" })
     end
 
-    notification = @server.pop_response
-    assert_equal("window/showMessage", notification.method)
+    notification = find_message(RubyLsp::Notification, "window/showMessage")
     expected_message = "Error while indexing (see [troubleshooting steps]" \
       "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): boom!"
     assert_equal(
@@ -576,7 +575,7 @@ class ServerTest < Minitest::Test
         },
       })
 
-      message = @server.pop_response.params.message
+      message = find_message(RubyLsp::Notification, "window/logMessage").params.message
       assert_match("Error in Foo add-on while processing watched file notifications", message)
       assert_match("boom", message)
     ensure
