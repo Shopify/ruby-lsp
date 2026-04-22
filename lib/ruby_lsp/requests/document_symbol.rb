@@ -20,10 +20,10 @@ module RubyLsp
         end
       end
 
-      #: (URI::Generic uri, Prism::Dispatcher dispatcher) -> void
-      def initialize(uri, dispatcher)
+      #: (URI::Generic uri, (RubyDocument | ERBDocument) document, Prism::Dispatcher dispatcher) -> void
+      def initialize(uri, document, dispatcher)
         super()
-        @response_builder = ResponseBuilders::DocumentSymbol.new #: ResponseBuilders::DocumentSymbol
+        @response_builder = ResponseBuilders::DocumentSymbol.new(document.encoding, document.parse_result) #: ResponseBuilders::DocumentSymbol
         Listeners::DocumentSymbol.new(@response_builder, uri, dispatcher)
 
         Addon.addons.each do |addon|

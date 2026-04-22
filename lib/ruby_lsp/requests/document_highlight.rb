@@ -26,7 +26,7 @@ module RubyLsp
         )
 
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight]
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[Interface::DocumentHighlight]
         Listeners::DocumentHighlight.new(
           @response_builder,
           node_context.node,

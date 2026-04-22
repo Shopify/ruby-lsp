@@ -8,8 +8,8 @@ module RubyLsp
       #: Array[Interface::CodeLens]
       attr_reader :code_lens
 
-      #: -> void
-      def initialize
+      #: (Encoding, Prism::ParseLexResult) -> void
+      def initialize(encoding, parse_result)
         super
         @items = {} #: Hash[String, ResponseType]
         @code_lens = [] #: Array[Interface::CodeLens]

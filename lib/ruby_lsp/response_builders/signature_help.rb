@@ -5,8 +5,8 @@ module RubyLsp
   module ResponseBuilders
     #: [ResponseType = Interface::SignatureHelp?]
     class SignatureHelp < ResponseBuilder
-      #: -> void
-      def initialize
+      #: (Encoding, Prism::ParseLexResult) -> void
+      def initialize(encoding, parse_result)
         super
         @signature_help = nil #: ResponseType
       end

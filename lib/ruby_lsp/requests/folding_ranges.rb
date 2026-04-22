@@ -15,12 +15,12 @@ module RubyLsp
         end
       end
 
-      #: (Array[Prism::Comment] comments, Prism::Dispatcher dispatcher) -> void
-      def initialize(comments, dispatcher)
+      #: ((RubyDocument | ERBDocument) document, Prism::Dispatcher dispatcher) -> void
+      def initialize(document, dispatcher)
         super()
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange]
-        @listener = Listeners::FoldingRanges.new(@response_builder, comments, dispatcher) #: Listeners::FoldingRanges
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[Interface::FoldingRange]
+        @listener = Listeners::FoldingRanges.new(@response_builder, document.parse_result.comments, dispatcher) #: Listeners::FoldingRanges
       end
 
       # @override

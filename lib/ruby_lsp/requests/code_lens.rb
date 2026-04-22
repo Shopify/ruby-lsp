@@ -21,11 +21,11 @@ module RubyLsp
       #: (GlobalState, RubyDocument | ERBDocument, Prism::Dispatcher) -> void
       def initialize(global_state, document, dispatcher)
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[Interface::CodeLens]
         super()
 
         @document = document
-        @test_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
+        @test_builder = ResponseBuilders::TestCollection.new(document.encoding, document.parse_result) #: ResponseBuilders::TestCollection
         uri = document.uri
         file_path = uri.full_path
         code_lens_config = global_state.feature_configuration(:codeLens)

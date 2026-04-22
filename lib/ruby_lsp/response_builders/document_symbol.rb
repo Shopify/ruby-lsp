@@ -15,8 +15,8 @@ module RubyLsp
         end
       end
 
-      #: -> void
-      def initialize
+      #: (Encoding, Prism::ParseLexResult) -> void
+      def initialize(encoding, parse_result)
         super
         @stack = [SymbolHierarchyRoot.new] #: Array[(SymbolHierarchyRoot | Interface::DocumentSymbol)]
       end

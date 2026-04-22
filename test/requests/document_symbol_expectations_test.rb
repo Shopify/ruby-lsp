@@ -20,7 +20,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, document, dispatcher)
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
@@ -43,7 +43,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, document, dispatcher)
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
@@ -65,7 +65,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, document, dispatcher)
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
@@ -114,7 +114,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
-    listener = RubyLsp::Requests::DocumentSymbol.new(uri, dispatcher)
+    listener = RubyLsp::Requests::DocumentSymbol.new(uri, document, dispatcher)
     dispatcher.dispatch(document.ast)
     listener.perform
   end
