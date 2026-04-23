@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-
+import os from "os";
 import { asyncExec } from "../common";
 
 import { VersionManager, ActivationResult, NonReportableError } from "./versionManager";
@@ -21,7 +21,10 @@ export class Shadowenv extends VersionManager {
       );
     }
 
-    const shadowenvExec = await this.findExec([vscode.Uri.file("/opt/homebrew/bin")], "shadowenv");
+    const shadowenvExec = await this.findExec(
+      [vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin"), vscode.Uri.file("/opt/homebrew/bin")],
+      "shadowenv",
+    );
 
     try {
       const parsedResult = await this.runEnvActivationScript(`${shadowenvExec} exec -- ruby`);
