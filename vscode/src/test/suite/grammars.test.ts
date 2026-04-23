@@ -306,6 +306,21 @@ suite("Grammars", () => {
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
 
+      test("numeric heredoc delimiters are not recognized (known limitation)", () => {
+        // Ruby allows this syntax, but the grammar now intentionally avoids numeric delimiters to prevent
+        // false positives such as `16<<10` inside interpolation.
+        const ruby = "<<123\nThis is a string\n123";
+        const expectedTokens = [
+          ["<<", ["source.ruby", "keyword.operator.assignment.augmented.ruby"]],
+          ["123", ["source.ruby", "constant.numeric.ruby"]],
+          ["This", ["source.ruby", "variable.other.constant.ruby"]],
+          [" is a string", ["source.ruby"]],
+          ["123", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
       test("embedded HEREDOC with interpolation containing question mark methods terminates correctly", () => {
         // This test verifies that heredocs with embedded language highlighting properly terminate
         // even when the content contains characters that might start begin/end patterns in the
@@ -319,6 +334,32 @@ suite("Grammars", () => {
           someRubyToken[1],
           ["source.ruby"],
           "Code after heredoc terminator should be plain Ruby, not embedded C",
+        );
+      });
+
+      test("shift operator inside interpolation is not tokenized as HEREDOC", () => {
+        const ruby = 'very_over = "+ 3456789 #{?a * (16<<10)}\\r\\n"';
+        const actualTokens = tokenizeRuby(ruby);
+
+        const shiftToken = actualTokens.find((token) => token[0] === "<<");
+        assert(shiftToken, "Expected to find shift operator token");
+        assert.deepStrictEqual(
+          shiftToken[1],
+          [
+            "source.ruby",
+            "string.quoted.double.interpolated.ruby",
+            "meta.embedded.line.ruby",
+            "source.ruby",
+            "keyword.operator.assignment.augmented.ruby",
+          ],
+          "Shift operator inside interpolation should not be recognized as HEREDOC start",
+        );
+
+        const interpolationEndToken = actualTokens.find((token) => token[0] === "}");
+        assert(interpolationEndToken, "Expected interpolation end token");
+        assert(
+          interpolationEndToken[1].includes("punctuation.section.embedded.end.ruby"),
+          "Interpolation should terminate normally",
         );
       });
     });
