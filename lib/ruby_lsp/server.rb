@@ -436,8 +436,11 @@ module RubyLsp
 
       if [:ruby, :rbs].include?(language_id)
         graph = @global_state.graph
-        graph.index_source(text_document[:uri].to_s, document.source, language_id.to_s)
-        graph.resolve
+
+        benchmark("index_source") do
+          graph.index_source(text_document[:uri].to_s, document.source, language_id.to_s)
+        end
+        benchmark("incremental_resolve") { graph.resolve }
       end
     end
 
@@ -1070,8 +1073,8 @@ module RubyLsp
           acc << path
         end
       end
-      graph.index_all(additions_and_changes)
-      graph.resolve
+      benchmark("index_all") { graph.index_all(additions_and_changes) }
+      benchmark("incremental_resolve") { graph.resolve }
 
       index = @global_state.index
       changes.each do |change|
@@ -1269,10 +1272,10 @@ module RubyLsp
     #: -> void
     def perform_initial_indexing
       progress("indexing-progress", message: "Indexing workspace...")
-      @global_state.graph.index_workspace
+      benchmark("index_workspace") { @global_state.graph.index_workspace }
 
       progress("indexing-progress", message: "Resolving graph...")
-      @global_state.graph.resolve
+      benchmark("full_resolve") { @global_state.graph.resolve }
 
       # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
       # stuck indexing files
@@ -1571,6 +1574,29 @@ module RubyLsp
         id: message[:id],
         response: code_lens,
       ))
+    end
+
+    #: [T] (String) { () -> T } -> T
+    def benchmark(label, &block)
+      start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
+      result = block.call
+      duration = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond) - start
+
+      send_message(Notification.telemetry({
+        type: "data",
+        eventName: "ruby_lsp.response_time",
+        data: {
+          type: "histogram",
+          value: duration,
+          attributes: {
+            message: label,
+            lspVersion: RubyLsp::VERSION,
+            rubyVersion: RUBY_VERSION,
+          },
+        },
+      }))
+
+      result
     end
   end
 end
