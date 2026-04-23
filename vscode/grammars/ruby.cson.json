@@ -2171,7 +2171,7 @@
       ]
     },
     {
-      "begin": "(?>=\\s*<<([\"'`]?)(\\w+)\\1)",
+      "begin": "(?>=\\s*<<([\"'`]?)([A-Za-z_]\\w*)\\1)",
       "beginCaptures": {
         "0": {
           "name": "string.definition.begin.ruby"
@@ -2197,7 +2197,7 @@
       ]
     },
     {
-      "begin": "(?>((<<[-~]?([\"'`]?)(\\w+)\\3,\\s?)*<<[-~]?([\"'`]?)(\\w+)\\5))(.*)",
+      "begin": "(?>((<<[-~]?([\"'`]?)([A-Za-z_]\\w*)\\3,\\s?)*<<[-~]?([\"'`]?)([A-Za-z_]\\w*)\\5))(.*)",
       "beginCaptures": {
         "1": {
           "name": "string.definition.begin.ruby"
@@ -2522,7 +2522,7 @@
       "name": "constant.character.escape.ruby"
     },
     "heredoc": {
-      "begin": "^<<[-~]?\\w+",
+      "begin": "^<<[-~]?[A-Za-z_]\\w*",
       "end": "$",
       "patterns": [
         {

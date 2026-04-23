@@ -321,6 +321,32 @@ suite("Grammars", () => {
           "Code after heredoc terminator should be plain Ruby, not embedded C",
         );
       });
+
+      test("shift operator inside interpolation is not tokenized as HEREDOC", () => {
+        const ruby = 'very_over = "+ 3456789 #{?a * (16<<10)}\\r\\n"';
+        const actualTokens = tokenizeRuby(ruby);
+
+        const shiftToken = actualTokens.find((token) => token[0] === "<<");
+        assert(shiftToken, "Expected to find shift operator token");
+        assert.deepStrictEqual(
+          shiftToken[1],
+          [
+            "source.ruby",
+            "string.quoted.double.interpolated.ruby",
+            "meta.embedded.line.ruby",
+            "source.ruby",
+            "keyword.operator.assignment.augmented.ruby",
+          ],
+          "Shift operator inside interpolation should not be recognized as HEREDOC start",
+        );
+
+        const interpolationEndToken = actualTokens.find((token) => token[0] === "}");
+        assert(interpolationEndToken, "Expected interpolation end token");
+        assert(
+          interpolationEndToken[1].includes("punctuation.section.embedded.end.ruby"),
+          "Interpolation should terminate normally",
+        );
+      });
     });
 
     suite("Backtick String Literals", () => {
