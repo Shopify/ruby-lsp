@@ -306,6 +306,21 @@ suite("Grammars", () => {
         assert.deepStrictEqual(actualTokens, expectedTokens);
       });
 
+      test("numeric heredoc delimiters are not recognized (known limitation)", () => {
+        // Ruby allows this syntax, but the grammar now intentionally avoids numeric delimiters to prevent
+        // false positives such as `16<<10` inside interpolation.
+        const ruby = "<<123\nThis is a string\n123";
+        const expectedTokens = [
+          ["<<", ["source.ruby", "keyword.operator.assignment.augmented.ruby"]],
+          ["123", ["source.ruby", "constant.numeric.ruby"]],
+          ["This", ["source.ruby", "variable.other.constant.ruby"]],
+          [" is a string", ["source.ruby"]],
+          ["123", ["source.ruby", "constant.numeric.ruby"]],
+        ];
+        const actualTokens = tokenizeRuby(ruby);
+        assert.deepStrictEqual(actualTokens, expectedTokens);
+      });
+
       test("embedded HEREDOC with interpolation containing question mark methods terminates correctly", () => {
         // This test verifies that heredocs with embedded language highlighting properly terminate
         // even when the content contains characters that might start begin/end patterns in the
