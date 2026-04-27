@@ -198,5 +198,36 @@ is the client).
 
 ```bash
 pnpm run lint # Lint TypeScript code
-pnpm run test # Run extension tests
+pnpm run test # Run extension tests (compiles via the `pretest` hook, then runs vscode-test)
+```
+
+### Running targeted tests
+
+Pass flags through `pnpm run test --` so they reach `vscode-test` instead of being consumed by pnpm:
+
+```bash
+# Run a single compiled test file (use the .js path, not .ts)
+pnpm run test -- --run out/test/suite/workspace.test.js
+
+# Run several files at once
+pnpm run test -- --run out/test/suite/workspace.test.js --run out/test/suite/client.test.js
+
+# Filter by suite or test name (regex match against the full "suite > test" name)
+pnpm run test -- --grep "Workspace"
+pnpm run test -- --grep "does not restart when watched files"
+
+# Literal string match (no regex) — useful when the test name has regex metacharacters
+pnpm run test -- --fgrep "repeated rebase steps"
+
+# Invert the match — run everything except what `--grep`/`--fgrep` selects
+pnpm run test -- --grep "slow integration" --invert
+
+# Combine file scoping with name filtering for the fastest feedback loop
+pnpm run test -- --run out/test/suite/testController.test.js --grep "discovers tests"
+
+# List which tests would run without executing them (great for verifying a filter)
+pnpm run test -- --dry-run --grep "Workspace"
+
+# Stop at the first failure
+pnpm run test -- --bail --grep "Client"
 ```

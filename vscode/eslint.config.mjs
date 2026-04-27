@@ -27,6 +27,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/.vscode-test/**",
+      ".vscode-test.mjs",
       "eslint.config.mjs",
       "**/out/",
       "src/test/suite/fakeTestServer.js",
