@@ -197,6 +197,6 @@ is the client).
 ## Commands
 
 ```bash
-yarn run lint # Lint TypeScript code
-yarn run test # Run extension tests
+pnpm run lint # Lint TypeScript code
+pnpm run test # Run extension tests
 ```

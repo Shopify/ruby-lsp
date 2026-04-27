@@ -21,6 +21,8 @@ updates:
     directory: "vscode/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     reviewers:
       - "Shopify/ruby-dev-exp"
     ignore:
