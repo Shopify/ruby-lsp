@@ -2,102 +2,67 @@ import fs from "fs";
 import assert from "assert";
 import path from "path";
 import os from "os";
-import { execSync } from "child_process";
 
 import { beforeEach, afterEach } from "mocha";
 import * as vscode from "vscode";
 import sinon from "sinon";
 
-import { Shadowenv } from "../../../ruby/shadowenv";
+import { Shadowenv, UntrustedWorkspaceError } from "../../../ruby/shadowenv";
 import { WorkspaceChannel } from "../../../workspaceChannel";
-import { LOG_CHANNEL, asyncExec } from "../../../common";
-import { RUBY_VERSION } from "../../rubyVersion";
+import { LOG_CHANNEL } from "../../../common";
 import * as common from "../../../common";
+import { ActivationResult, NonReportableError } from "../../../ruby/versionManager";
 import { createContext, FakeContext } from "../helpers";
 
+// Typed view over the private method we need to stub. Kept in one place so the cast doesn't leak into each test.
+type ShadowenvStub = { runEnvActivationScript: (command: string) => Promise<ActivationResult> };
+type ActivationBehavior = ActivationResult | Error;
+
 suite("Shadowenv", () => {
-  if (os.platform() === "win32") {
-    // eslint-disable-next-line no-console
-    console.log("Skipping Shadowenv tests on Windows");
-    return;
-  }
-
-  try {
-    execSync("shadowenv --version >/dev/null 2>&1");
-  } catch {
-    // eslint-disable-next-line no-console
-    console.log("Skipping Shadowenv tests because no `shadowenv` found");
-    return;
-  }
-
-  let context: FakeContext;
-  beforeEach(() => {
-    context = createContext();
-  });
-  afterEach(() => {
-    context.dispose();
-  });
-
   let rootPath: string;
   let workspacePath: string;
   let workspaceFolder: vscode.WorkspaceFolder;
   let outputChannel: WorkspaceChannel;
-  let rubyBinPath: string;
-  const [major, minor, patch] = RUBY_VERSION.split(".");
+  let context: FakeContext;
+  let sandbox: sinon.SinonSandbox;
+  const FAKE_ACTIVATION: ActivationResult = {
+    env: { PATH: "/fake/ruby/bin:/usr/bin", GEM_ROOT: "/fake/gem/root" },
+    yjit: true,
+    version: "3.3.5",
+    gemPath: ["/fake/gem/path"],
+  };
 
-  if (process.env.CI && os.platform() === "linux") {
-    rubyBinPath = path.join("/", "opt", "hostedtoolcache", "Ruby", RUBY_VERSION, "x64", "bin");
-  } else if (process.env.CI) {
-    rubyBinPath = path.join("/", "Users", "runner", "hostedtoolcache", "Ruby", RUBY_VERSION, "arm64", "bin");
-  } else {
-    rubyBinPath = path.join("/", "opt", "rubies", RUBY_VERSION, "bin");
+  function stubActivation(behaviors: ActivationBehavior[]): sinon.SinonStub {
+    const stub = sandbox.stub(Shadowenv.prototype as unknown as ShadowenvStub, "runEnvActivationScript");
+
+    behaviors.forEach((behavior, i) => {
+      if (behavior instanceof Error) {
+        stub.onCall(i).rejects(behavior);
+      } else {
+        stub.onCall(i).resolves(behavior);
+      }
+    });
+
+    return stub;
   }
 
-  assert.ok(fs.existsSync(rubyBinPath), `Ruby bin path does not exist ${rubyBinPath}`);
-
-  const shadowLispFile = `
-    (provide "ruby" "${RUBY_VERSION}")
-
-    (when-let ((ruby-root (env/get "RUBY_ROOT")))
-    (env/remove-from-pathlist "PATH" (path-concat ruby-root "bin"))
-    (when-let ((gem-root (env/get "GEM_ROOT")))
-      (env/remove-from-pathlist "PATH" (path-concat gem-root "bin")))
-    (when-let ((gem-home (env/get "GEM_HOME")))
-      (env/remove-from-pathlist "PATH" (path-concat gem-home "bin"))))
-
-    (env/set "BUNDLE_PATH" ())
-    (env/set "GEM_PATH" ())
-    (env/set "GEM_HOME" ())
-    (env/set "RUBYOPT" ())
-    (env/set "RUBYLIB" ())
-
-    (env/set "RUBY_ROOT" "${path.dirname(rubyBinPath)}")
-    (env/prepend-to-pathlist "PATH" "${rubyBinPath}")
-    (env/set "RUBY_ENGINE" "ruby")
-    (env/set "RUBY_VERSION" "${RUBY_VERSION}")
-    (env/set "GEM_ROOT" "${path.dirname(rubyBinPath)}/lib/ruby/gems/${major}.${minor}.0")
-
-    (when-let ((gem-root (env/get "GEM_ROOT")))
-      (env/prepend-to-pathlist "GEM_PATH" gem-root)
-      (env/prepend-to-pathlist "PATH" (path-concat gem-root "bin")))
-
-    (let ((gem-home
-          (path-concat (env/get "HOME") ".gem" (env/get "RUBY_ENGINE") "${RUBY_VERSION}")))
-      (do
-        (env/set "GEM_HOME" gem-home)
-        (env/prepend-to-pathlist "GEM_PATH" gem-home)
-        (env/prepend-to-pathlist "PATH" (path-concat gem-home "bin"))))
-  `;
+  function expectNonReportable(error: Error, messagePattern: RegExp): boolean {
+    assert.ok(error instanceof NonReportableError);
+    assert.match(error.message, messagePattern);
+    return true;
+  }
 
   beforeEach(() => {
+    sandbox = sinon.createSandbox();
+    context = createContext();
+
     rootPath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-shadowenv-"));
     workspacePath = path.join(rootPath, "workspace");
-
     fs.mkdirSync(workspacePath);
     fs.mkdirSync(path.join(workspacePath, ".shadowenv.d"));
 
     workspaceFolder = {
-      uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
+      uri: vscode.Uri.file(workspacePath),
       name: path.basename(workspacePath),
       index: 0,
     };
@@ -105,92 +70,107 @@ suite("Shadowenv", () => {
   });
 
   afterEach(() => {
+    sandbox.restore();
+    context.dispose();
     fs.rmSync(rootPath, { recursive: true, force: true });
   });
 
-  test("Finds Ruby only binary path is appended to PATH", async () => {
-    await asyncExec("shadowenv trust", { cwd: workspacePath });
+  test("Throws when .shadowenv.d is missing from the workspace", async () => {
+    fs.rmSync(path.join(workspacePath, ".shadowenv.d"), { recursive: true, force: true });
 
-    fs.writeFileSync(
-      path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"),
-      `(env/prepend-to-pathlist "PATH" "${rubyBinPath}")`,
+    await assert.rejects(
+      () => new Shadowenv(workspaceFolder, outputChannel, context, async () => {}).activate(),
+      (error: Error) => expectNonReportable(error, /no \.shadowenv\.d directory was found/),
     );
-
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
-    const { env, version, yjit } = await shadowenv.activate();
-
-    assert.match(env.PATH!, new RegExp(rubyBinPath));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
   });
 
-  test("Finds Ruby on a complete shadowenv configuration", async () => {
-    await asyncExec("shadowenv trust", { cwd: workspacePath });
+  test("Invokes `shadowenv exec -- ruby` and strips BUNDLE_GEMFILE coming from shadowenv", async () => {
+    const originalBundleGemfile = process.env.BUNDLE_GEMFILE;
+    process.env.BUNDLE_GEMFILE = "/from/process/env/Gemfile";
 
-    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
+    try {
+      const stub = stubActivation([
+        {
+          ...FAKE_ACTIVATION,
+          env: { ...FAKE_ACTIVATION.env, PATH: "/fake/ruby/bin", BUNDLE_GEMFILE: "/from/shadowenv/Gemfile" },
+        },
+      ]);
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
-    const { env, version, yjit } = await shadowenv.activate();
+      const { env, version, yjit, gemPath } = await new Shadowenv(
+        workspaceFolder,
+        outputChannel,
+        context,
+        async () => {},
+      ).activate();
 
-    assert.match(env.PATH!, new RegExp(rubyBinPath));
-    assert.strictEqual(env.GEM_ROOT, `${path.dirname(rubyBinPath)}/lib/ruby/gems/${major}.${minor}.0`);
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
+      assert.ok(stub.calledOnce);
+      assert.match(stub.firstCall.args[0] as string, /shadowenv exec -- ruby$/);
+      // Shadowenv's BUNDLE_GEMFILE must not leak into the final env; the server needs to control this value
+      assert.notStrictEqual(env.BUNDLE_GEMFILE, "/from/shadowenv/Gemfile");
+      assert.strictEqual(env.BUNDLE_GEMFILE, "/from/process/env/Gemfile");
+      assert.strictEqual(env.PATH, "/fake/ruby/bin");
+      assert.strictEqual(version, "3.3.5");
+      assert.strictEqual(yjit, true);
+      assert.deepStrictEqual(gemPath, ["/fake/gem/path"]);
+    } finally {
+      if (originalBundleGemfile === undefined) {
+        delete process.env.BUNDLE_GEMFILE;
+      } else {
+        process.env.BUNDLE_GEMFILE = originalBundleGemfile;
+      }
+    }
   });
 
-  test("Untrusted workspace offers to trust it", async () => {
-    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
+  test("Prompts to trust the workspace when shadowenv reports it is untrusted, and retries on accept", async () => {
+    const activationStub = stubActivation([new Error("untrusted shadowenv program"), FAKE_ACTIVATION]);
 
-    const stub = sinon.stub(vscode.window, "showErrorMessage").resolves("Trust workspace" as any);
+    const showError = sandbox.stub(vscode.window, "showErrorMessage") as sinon.SinonStub;
+    showError.resolves("Trust workspace");
+    const execStub = sandbox.stub(common, "asyncExec").resolves({ stdout: "", stderr: "" });
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
-    const { env, version, yjit } = await shadowenv.activate();
+    const result = await new Shadowenv(workspaceFolder, outputChannel, context, async () => {}).activate();
 
-    assert.match(env.PATH!, new RegExp(rubyBinPath));
-    assert.match(env.GEM_HOME!, new RegExp(`\\.gem\\/ruby\\/${major}\\.${minor}\\.${patch}`));
-    assert.strictEqual(version, RUBY_VERSION);
-    assert.notStrictEqual(yjit, undefined);
-
-    assert.ok(stub.calledOnce);
-
-    stub.restore();
+    assert.ok(showError.calledOnce);
+    assert.ok(execStub.calledOnce);
+    assert.match(execStub.firstCall.args[0], /^shadowenv trust$/);
+    assert.strictEqual(activationStub.callCount, 2);
+    assert.strictEqual(result.version, "3.3.5");
   });
 
-  test("Deciding not to trust the workspace fails activation", async () => {
-    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
+  test("Rejects with UntrustedWorkspaceError when the user declines to trust the workspace", async () => {
+    stubActivation([new Error("untrusted shadowenv program")]);
 
-    const stub = sinon.stub(vscode.window, "showErrorMessage").resolves("Cancel" as any);
+    const showError = sandbox.stub(vscode.window, "showErrorMessage") as sinon.SinonStub;
+    showError.resolves("Shutdown Ruby LSP");
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
-
-    await assert.rejects(async () => {
-      await shadowenv.activate();
-    });
-
-    assert.ok(stub.calledOnce);
-
-    stub.restore();
+    await assert.rejects(
+      () => new Shadowenv(workspaceFolder, outputChannel, context, async () => {}).activate(),
+      UntrustedWorkspaceError,
+    );
+    assert.ok(showError.calledOnce);
   });
 
-  test("Warns user is shadowenv executable can't be found", async () => {
-    await asyncExec("shadowenv trust", { cwd: workspacePath });
+  test("Reports a PATH-related error when the shadowenv executable cannot be found", async () => {
+    stubActivation([new Error("spawn shadowenv ENOENT")]);
+    const execStub = sandbox.stub(common, "asyncExec").rejects(new Error("shadowenv: command not found"));
 
-    fs.writeFileSync(path.join(workspacePath, ".shadowenv.d", "500_ruby.lisp"), shadowLispFile);
+    await assert.rejects(
+      () => new Shadowenv(workspaceFolder, outputChannel, context, async () => {}).activate(),
+      (error: Error) => expectNonReportable(error, /Shadowenv executable not found/),
+    );
+    assert.ok(execStub.calledOnce);
+    assert.match(execStub.firstCall.args[0], /^shadowenv --version$/);
+  });
 
-    const shadowenv = new Shadowenv(workspaceFolder, outputChannel, context, async () => {});
+  test("Surfaces the underlying error when activation fails for a non-trust, non-missing reason", async () => {
+    stubActivation([new Error("boom")]);
+    const execStub = sandbox.stub(common, "asyncExec").resolves({ stdout: "shadowenv 2.1.5", stderr: "" });
 
-    // First, reject the call to `shadowenv exec`. Then resolve the call to `which shadowenv` to return nothing
-    const execStub = sinon
-      .stub(common, "asyncExec")
-      .onFirstCall()
-      .rejects(new Error("shadowenv: command not found"))
-      .onSecondCall()
-      .rejects(new Error("shadowenv: command not found"));
-
-    await assert.rejects(async () => {
-      await shadowenv.activate();
-    });
-
-    execStub.restore();
+    await assert.rejects(
+      () => new Shadowenv(workspaceFolder, outputChannel, context, async () => {}).activate(),
+      (error: Error) => expectNonReportable(error, /Failed to activate Ruby environment with Shadowenv: boom/),
+    );
+    assert.ok(execStub.calledOnce);
+    assert.match(execStub.firstCall.args[0], /^shadowenv --version$/);
   });
 });
