@@ -273,5 +273,12 @@ module RubyLsp
     def resolve_test_commands(items)
       []
     end
+
+    # Allows add-ons to add additional file rename operations during a rename request. This is invoked after the
+    # standard file rename logic and allows add-ons to handle cases where file naming conventions differ from the
+    # default (e.g., Rails migration files with timestamp prefixes)
+    # @overridable
+    #: (String fully_qualified_name, String new_name, Array[(Interface::RenameFile | Interface::TextDocumentEdit)] document_changes) -> void
+    def collect_file_renames(fully_qualified_name, new_name, document_changes); end
   end
 end
