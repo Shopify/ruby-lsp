@@ -174,9 +174,10 @@ module RubyLsp
       #: (Prism::ClassNode node) -> void
       def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         with_test_ancestor_tracking(node) do |name, ancestors|
-          @framework = :test_unit if ancestors.include?("Test::Unit::TestCase")
+          is_test_unit = test_unit_group?(ancestors, name)
+          @framework = :test_unit if is_test_unit
 
-          if @framework == :test_unit || non_declarative_minitest?(ancestors, name)
+          if is_test_unit || non_declarative_minitest?(ancestors, name)
             test_item = Requests::Support::TestItem.new(
               name,
               name,
@@ -259,17 +260,28 @@ module RubyLsp
         @parent_stack[index] #: as Requests::Support::TestItem | ResponseBuilders::TestCollection
       end
 
-      #: (Array[String] attached_ancestors, String fully_qualified_name) -> bool
+      #: (Array[String], String) -> bool
+      def test_unit_group?(ancestors, fully_qualified_name)
+        fully_qualified_name != "Test::Unit::TestCase" && ancestors.include?("Test::Unit::TestCase")
+      end
+
+      #: (Array[String], String) -> bool
       def non_declarative_minitest?(attached_ancestors, fully_qualified_name)
+        return false if ["Minitest::Spec", "Minitest::Test", "ActiveSupport::TestCase"].include?(fully_qualified_name)
         return false unless attached_ancestors.include?("Minitest::Test")
 
         # We only support regular Minitest tests. The declarative syntax provided by ActiveSupport is handled by the
         # Rails add-on
-        name_parts = fully_qualified_name.split("::")
-        singleton_name = "#{name_parts.join("::")}::<#{name_parts.last}>"
-        !@index.linearized_ancestors_of(singleton_name).include?("ActiveSupport::Testing::Declarative")
-      rescue RubyIndexer::Index::NonExistingNamespaceError
-        true
+
+        declaration = @graph[fully_qualified_name]
+        # If we don't find the fully qualified name in the graph, it means there's a dynamic portion in the test class
+        # definition. In that case, if the ancestors did include `Minitest::Test`, we always assume it's a test
+        return true unless declaration.is_a?(Rubydex::Namespace)
+
+        singleton = declaration.singleton_class
+        return !singleton.ancestors.map(&:name).include?("ActiveSupport::Testing::Declarative") if singleton
+
+        !attached_ancestors.include?("ActiveSupport::TestCase")
       end
     end
   end
