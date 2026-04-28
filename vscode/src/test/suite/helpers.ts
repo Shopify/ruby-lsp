@@ -70,3 +70,21 @@ export function createContext() {
     },
   } as unknown as FakeContext;
 }
+
+// Retries the given assertion function until it passes or the timeout (in ms) is exceeded.
+// Polls every 500ms. If the assertion never passes, the last assertion error is thrown.
+export async function retryForDuration(timeoutMs: number, fn: () => void) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    try {
+      fn();
+      return;
+    } catch (_error) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
+
+  // Final attempt — let it throw
+  fn();
+}

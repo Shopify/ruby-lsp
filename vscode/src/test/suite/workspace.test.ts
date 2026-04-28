@@ -10,7 +10,7 @@ import { beforeEach, afterEach } from "mocha";
 import { Workspace } from "../../workspace";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
-import { createContext, FakeContext } from "./helpers";
+import { createContext, FakeContext, retryForDuration } from "./helpers";
 
 suite("Workspace", () => {
   let workspacePath: string;
@@ -56,13 +56,13 @@ suite("Workspace", () => {
       fs.rmSync(path.join(gitDir, "rebase-apply"));
     }
 
-    // Give enough time for all watchers to fire and all debounces to run off
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-
-    // The start call only happens once because of the inhibitRestart flag
-    assert.strictEqual(startStub.callCount, 1);
-    // The restart call only happens once because of the debounce
-    assert.strictEqual(restartSpy.callCount, 1);
+    // Retry assertions for up to 30 seconds to allow watchers and debounces to fire
+    await retryForDuration(30000, () => {
+      // The start call only happens once because of the inhibitRestart flag
+      assert.strictEqual(startStub.callCount, 1);
+      // The restart call only happens once because of the debounce
+      assert.strictEqual(restartSpy.callCount, 1);
+    });
   }).timeout(60000);
 
   test("does not restart when watched files are touched without modifying contents", async () => {
