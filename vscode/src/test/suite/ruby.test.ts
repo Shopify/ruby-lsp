@@ -15,8 +15,26 @@ import { Shadowenv, UntrustedWorkspaceError } from "../../ruby/shadowenv";
 import { Chruby } from "../../ruby/chruby";
 import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, MissingRubyError, VALUE_SEPARATOR } from "../../ruby/versionManager";
 
-import { createContext, FakeContext } from "./helpers";
+import { createContext, FakeContext, stubWorkspaceConfiguration } from "./helpers";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
+
+interface EnvStub {
+  rubyVersion: string;
+  gemPath: string;
+  yjitEnabled: string;
+  envVars: string[];
+}
+
+const DEFAULT_ENV_STUB: EnvStub = {
+  rubyVersion: "3.3.5",
+  gemPath: "~/.gem/ruby/3.3.5,/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
+  yjitEnabled: "true",
+  envVars: [`ANY${VALUE_SEPARATOR}true`],
+};
+
+function buildEnvStub(stub: EnvStub = DEFAULT_ENV_STUB): string {
+  return [stub.rubyVersion, stub.gemPath, stub.yjitEnabled, ...stub.envVars].join(FIELD_SEPARATOR);
+}
 
 suite("Ruby environment activation", () => {
   const workspacePath = path.dirname(path.dirname(path.dirname(path.dirname(__dirname))));
@@ -39,81 +57,67 @@ suite("Ruby environment activation", () => {
     context.dispose();
   });
 
-  test("Activate fetches Ruby information when outside of Ruby LSP", async () => {
-    const manager = process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby;
-
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "rubyVersionManager") {
-          return { identifier: manager };
-        } else if (name === "bundleGemfile") {
-          return "";
-        }
-
-        return undefined;
+  test("Populates Ruby version and YJIT support from the activation script", async () => {
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.None },
+        bundleGemfile: "",
       },
-    } as unknown as vscode.WorkspaceConfiguration);
+    });
+
+    sandbox.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: `${ACTIVATION_SEPARATOR}${buildEnvStub()}${ACTIVATION_SEPARATOR}`,
+    });
 
     const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
     await ruby.activateRuby();
 
-    assert.ok(ruby.rubyVersion, "Expected Ruby version to be set");
-    assert.notStrictEqual(ruby.yjitEnabled, undefined, "Expected YJIT support to be set to true or false");
-  }).timeout(10000);
+    assert.strictEqual(ruby.rubyVersion, "3.3.5");
+    assert.strictEqual(ruby.yjitEnabled, true);
+  });
 
   test("Deletes verbose and GC settings from activated environment", async () => {
-    const manager = process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby;
-
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "rubyVersionManager") {
-          return { identifier: manager };
-        } else if (name === "bundleGemfile") {
-          return "";
-        }
-
-        return undefined;
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.None },
+        bundleGemfile: "",
       },
-    } as unknown as vscode.WorkspaceConfiguration);
+    });
+
+    const envStub = buildEnvStub({
+      ...DEFAULT_ENV_STUB,
+      envVars: [
+        `VERBOSE${VALUE_SEPARATOR}1`,
+        `DEBUG${VALUE_SEPARATOR}WARN`,
+        `RUBY_GC_HEAP_GROWTH_FACTOR${VALUE_SEPARATOR}1.7`,
+      ],
+    });
+
+    sandbox.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
+    });
 
     const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
-
-    process.env.VERBOSE = "1";
-    process.env.DEBUG = "WARN";
-    process.env.RUBY_GC_HEAP_GROWTH_FACTOR = "1.7";
     await ruby.activateRuby();
 
     assert.strictEqual(ruby.env.VERBOSE, undefined);
     assert.strictEqual(ruby.env.DEBUG, undefined);
     assert.strictEqual(ruby.env.RUBY_GC_HEAP_GROWTH_FACTOR, undefined);
-    delete process.env.VERBOSE;
-    delete process.env.DEBUG;
-    delete process.env.RUBY_GC_HEAP_GROWTH_FACTOR;
   });
 
   test("Sets gem path for version managers based on shims", async () => {
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "rubyVersionManager") {
-          return { identifier: ManagerIdentifier.Rbenv };
-        } else if (name === "bundleGemfile") {
-          return "";
-        }
-
-        return undefined;
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.Rbenv },
+        bundleGemfile: "",
       },
-    } as unknown as vscode.WorkspaceConfiguration);
-
-    const envStub = [
-      "3.3.5",
-      "~/.gem/ruby/3.3.5,/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
-      "true",
-      `ANY${VALUE_SEPARATOR}true`,
-    ].join(FIELD_SEPARATOR);
+    });
 
     sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${buildEnvStub()}${ACTIVATION_SEPARATOR}`,
     });
 
     const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
@@ -163,19 +167,17 @@ suite("Ruby environment activation", () => {
   });
 
   test("Clears outdated workspace Ruby path caches", async () => {
-    const manager = process.env.CI ? ManagerIdentifier.None : ManagerIdentifier.Chruby;
-
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "rubyVersionManager") {
-          return { identifier: manager };
-        } else if (name === "bundleGemfile") {
-          return "";
-        }
-
-        return undefined;
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.None },
+        bundleGemfile: "",
       },
-    } as unknown as vscode.WorkspaceConfiguration);
+    });
+
+    sandbox.stub(common, "asyncExec").resolves({
+      stdout: "",
+      stderr: `${ACTIVATION_SEPARATOR}${buildEnvStub()}${ACTIVATION_SEPARATOR}`,
+    });
 
     await context.workspaceState.update(
       `rubyLsp.workspaceRubyPath.${workspaceFolder.name}`,
@@ -202,29 +204,17 @@ suite("Ruby environment activation", () => {
       index: 0,
     };
 
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "rubyVersionManager") {
-          return { identifier: ManagerIdentifier.None };
-        } else if (name === "bundleGemfile") {
-          // eslint-disable-next-line no-template-curly-in-string
-          return "${workspaceFolder}/Gemfile";
-        }
-
-        return undefined;
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.None },
+        // eslint-disable-next-line no-template-curly-in-string
+        bundleGemfile: "${workspaceFolder}/Gemfile",
       },
-    } as unknown as vscode.WorkspaceConfiguration);
-
-    const envStub = [
-      "3.3.5",
-      "~/.gem/ruby/3.3.5,/opt/rubies/3.3.5/lib/ruby/gems/3.3.0",
-      "true",
-      `ANY${VALUE_SEPARATOR}true`,
-    ].join(FIELD_SEPARATOR);
+    });
 
     sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
-      stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
+      stderr: `${ACTIVATION_SEPARATOR}${buildEnvStub()}${ACTIVATION_SEPARATOR}`,
     });
 
     const ruby = new Ruby(context, tmpWorkspaceFolder, outputChannel, FAKE_TELEMETRY);
@@ -235,24 +225,19 @@ suite("Ruby environment activation", () => {
   });
 
   test("Appends YJIT flag to existing RUBYOPT for Ruby 3.2", async () => {
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "rubyVersionManager") {
-          return { identifier: ManagerIdentifier.None };
-        } else if (name === "bundleGemfile") {
-          return "";
-        }
-
-        return undefined;
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.None },
+        bundleGemfile: "",
       },
-    } as unknown as vscode.WorkspaceConfiguration);
+    });
 
-    const envStub = [
-      "3.2.0",
-      "~/.gem/ruby/3.2.0,/opt/rubies/3.2.0/lib/ruby/gems/3.2.0",
-      "true",
-      `RUBYOPT${VALUE_SEPARATOR}-rbundler/setup`,
-    ].join(FIELD_SEPARATOR);
+    const envStub = buildEnvStub({
+      ...DEFAULT_ENV_STUB,
+      rubyVersion: "3.2.0",
+      gemPath: "~/.gem/ruby/3.2.0,/opt/rubies/3.2.0/lib/ruby/gems/3.2.0",
+      envVars: [`RUBYOPT${VALUE_SEPARATOR}-rbundler/setup`],
+    });
 
     sandbox.stub(common, "asyncExec").resolves({
       stdout: "",
@@ -275,17 +260,12 @@ suite("Ruby environment activation", () => {
 
     const nonExistentGemfile = path.join(tmpPath, "nonexistent", "Gemfile");
 
-    sandbox.stub(vscode.workspace, "getConfiguration").returns({
-      get: (name: string) => {
-        if (name === "bundleGemfile") {
-          return nonExistentGemfile;
-        } else if (name === "rubyVersionManager") {
-          return { identifier: ManagerIdentifier.None };
-        }
-
-        return undefined;
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.None },
+        bundleGemfile: nonExistentGemfile,
       },
-    } as unknown as vscode.WorkspaceConfiguration);
+    });
 
     const ruby = new Ruby(context, tmpWorkspaceFolder, outputChannel, FAKE_TELEMETRY);
 
