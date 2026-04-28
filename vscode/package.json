@@ -810,7 +810,7 @@
     "pretest": "pnpm run compile",
     "format": "eslint . --fix && prettier '**/*.{ts,json,md,yaml,yml}' --write",
     "lint": "eslint . && prettier '**/*.{ts,json,md,yaml,yml}' --check",
-    "test": "node ./out/test/runTest.js"
+    "test": "vscode-test"
   },
   "pnpm": {
     "overrides": {
@@ -825,12 +825,12 @@
     "@types/node": "25.x",
     "@types/sinon": "^21.0.1",
     "@types/vscode": "^1.91.0",
+    "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.9.1",
     "esbuild": "^0.28.0",
     "eslint": "^9.30.1",
     "eslint-plugin-prettier": "^5.5.5",
-    "glob": "^13.0.6",
     "mocha": "^11.7.5",
     "ovsx": "^0.10.11",
     "prettier": "^3.8.3",
