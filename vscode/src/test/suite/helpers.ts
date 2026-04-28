@@ -3,6 +3,7 @@ import os from "os";
 import fs from "fs";
 
 import * as vscode from "vscode";
+import sinon from "sinon";
 
 import { MAJOR, MINOR, RUBY_VERSION } from "../rubyVersion";
 
@@ -56,6 +57,43 @@ export const LSP_WORKSPACE_FOLDER: vscode.WorkspaceFolder = {
 };
 
 export type FakeContext = vscode.ExtensionContext & { dispose: () => void };
+
+// Stubs `vscode.workspace.getConfiguration` so that requested keys return stubbed values, while any unspecified keys
+// (or unspecified sections) fall through to the real configuration
+export function stubWorkspaceConfiguration(
+  sandbox: sinon.SinonSandbox,
+  stubs: Record<string, Record<string, unknown>>,
+): sinon.SinonStub {
+  const original = vscode.workspace.getConfiguration.bind(vscode.workspace);
+
+  return sandbox
+    .stub(vscode.workspace, "getConfiguration")
+    .callsFake((section?: string, scope?: vscode.ConfigurationScope | null) => {
+      const real = original(section, scope);
+      const sectionStubs = stubs[section ?? ""];
+
+      if (!sectionStubs) {
+        return real;
+      }
+
+      // Can't Proxy a WorkspaceConfiguration: VS Code defines `get` as non-configurable + non-writable, which
+      // violates Proxy invariants. Instead, build a delegating object that overrides `get` and forwards everything
+      // else to the real configuration (preserving `this` via bind so private state access still works).
+      const wrapper: vscode.WorkspaceConfiguration = {
+        get(key: string, defaultValue?: unknown) {
+          if (key in sectionStubs) {
+            return sectionStubs[key];
+          }
+          return defaultValue === undefined ? real.get(key) : real.get(key, defaultValue);
+        },
+        has: real.has.bind(real),
+        inspect: real.inspect.bind(real),
+        update: real.update.bind(real),
+      };
+
+      return wrapper;
+    });
+}
 
 export function createContext() {
   const subscriptions: vscode.Disposable[] = [];
