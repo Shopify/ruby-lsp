@@ -32,6 +32,7 @@ require "shellwords"
 require "set"
 
 # Rubydex LSP additions
+require "ruby_lsp/rubydex/declaration"
 require "ruby_lsp/rubydex/definition"
 require "ruby_lsp/rubydex/reference"
 
