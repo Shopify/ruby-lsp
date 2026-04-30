@@ -1523,6 +1523,283 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hover_for_instance_variable_in_method_with_constant_receiver
+    source = <<~RUBY
+      class Bar
+        class << self; end
+
+        # Bar's class ivar
+        @config = "default"
+      end
+
+      class Foo
+        def Bar.configure
+          @config
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      # @config should resolve through Bar's singleton class, not Foo
+      contents = server.pop_response.response.contents.value
+      assert_match("Bar's class ivar", contents)
+    end
+  end
+
+  def test_hover_for_class_variable_in_method_with_constant_receiver
+    source = <<~RUBY
+      class Bar
+        # Bar's class var
+        @@shared = 1
+      end
+
+      class Foo
+        def Bar.check
+          @@shared
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      # @@shared follows lexical scope (Foo), not the receiver (Bar).
+      # Since @@shared is defined in Bar but not in Foo, hovering should return nil
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_for_constant_in_method_with_constant_receiver
+    source = <<~RUBY
+      # typed: ignore
+      class Bar
+        OTHER = "other"
+      end
+
+      class Foo
+        MY_CONST = "hello"
+
+        def Bar.check
+          MY_CONST
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      # MY_CONST resolves through Foo's lexical scope, not Bar
+      contents = server.pop_response.response.contents.value
+      assert_match("Foo::MY_CONST", contents)
+    end
+  end
+
+  def test_hover_for_implicit_self_method_call_inside_singleton_method
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        # Docs for bar
+        def self.bar; end
+
+        def self.baz
+          bar
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      assert_match("Docs for bar", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_for_method_call_inside_method_with_constant_receiver
+    source = <<~RUBY
+      # typed: false
+
+      class Bar
+        # Helper docs
+        def self.helper; end
+      end
+
+      class Foo
+        def Bar.check
+          helper
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      assert_match("Helper docs", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_for_super_inside_singleton_method
+    source = <<~RUBY
+      class Parent
+        # Parent foo
+        def self.foo; end
+      end
+
+      class Child < Parent
+        def self.foo
+          super
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      assert_match("Parent foo", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_for_implicit_self_method_call_inside_singleton_method_with_compact_namespace
+    source = <<~RUBY
+      # typed: false
+
+      module Foo; end
+
+      class Foo::Bar
+        # Helper docs
+        def self.helper; end
+
+        def self.check
+          helper
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      assert_match("Helper docs", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_super_hover_for_method_definition_with_receiver
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        class << self
+          # You found me!
+          def bar; end
+        end
+      end
+
+      class Bar < Foo
+        class << self
+        end
+      end
+
+      class Qux
+        def Bar.bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 16 } },
+      )
+
+      assert_match("You found me!", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_for_method_call_inside_class_singleton_block_method
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        # Docs for bar
+        def self.bar; end
+
+        class << self
+          def baz
+            bar
+          end
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 8 } },
+      )
+
+      assert_match("Docs for bar", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hover_for_instance_variable_in_hoisted_parent_scope
+    source = <<~RUBY
+      module Bar; end
+
+      module Foo
+        class Bar::Baz
+          class << self; end
+
+          # Baz's ivar
+          @var = 1
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      # @var should resolve through Bar::Baz's singleton class, not Foo::Bar::Baz
+      contents = server.pop_response.response.contents.value
+      assert_match("Baz's ivar", contents)
+    end
+  end
+
   private
 
   def create_hover_addon

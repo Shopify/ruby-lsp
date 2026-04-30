@@ -129,21 +129,99 @@ module RubyLsp
       GuessedType.new(declaration.name)
     end
 
-    #: (NodeContext node_context) -> Type
+    #: (NodeContext node_context) -> Type?
     def self_receiver_handling(node_context)
       nesting = node_context.nesting
       # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
       # inherits from Object
       return Type.new("Object") if nesting.empty?
-      return Type.new(node_context.fully_qualified_name) if node_context.surrounding_method
+
+      surrounding_method = node_context.surrounding_method
+
+      if surrounding_method
+        receiver_name = surrounding_method.receiver
+
+        case receiver_name
+        when "self"
+          # `def self.foo` — self is the singleton of the enclosing class/module
+          return resolve_singleton_type_from_nesting(nesting)
+        when "none"
+          # Instance method — self is an instance of the enclosing class/module
+          return resolve_type_from_nesting(nesting)
+        when nil
+          # Dynamic receiver that we cannot handle
+          return
+        else
+          # Explicit constant receiver (e.g. `def Bar.baz`) — self is that constant's singleton class
+          resolved = resolve_receiver_singleton_type(receiver_name, nesting)
+          return resolved if resolved
+
+          return resolve_type_from_nesting(nesting)
+        end
+      end
 
       # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
-      # context.
-      #
-      # If the class/module definition is using compact style (e.g.: `class Foo::Bar`), then we need to split the name
-      # into its individual parts to build the correct singleton name
-      parts = nesting.flat_map { |part| part.split("::") }
-      Type.new("#{parts.join("::")}::<#{parts.last}>")
+      # context. Resolve through the graph to get the correct fully qualified name
+      resolve_singleton_type_from_nesting(nesting)
+    end
+
+    # Resolves the fully qualified name of the innermost constant from the nesting and returns it as a type.
+    # For instance methods, the nesting won't have singleton markers, so the result is an instance type.
+    # For `def self.` methods, the nesting includes a singleton marker, which is preserved in the result.
+    #: (Array[String] nesting) -> Type
+    def resolve_type_from_nesting(nesting)
+      resolved_name = resolve_nesting_fully_qualified_name(nesting)
+      Type.new(resolved_name)
+    end
+
+    # Resolves the nesting and returns a singleton type (appends `::<Last>`)
+    #: (Array[String] nesting) -> Type
+    def resolve_singleton_type_from_nesting(nesting)
+      resolved_name = resolve_nesting_fully_qualified_name(nesting)
+      last_part = resolved_name.split("::").last #: as !nil
+      Type.new("#{resolved_name}::<#{last_part}>")
+    end
+
+    # Resolves the innermost constant in the nesting through the graph, handling compact-path definitions
+    # like `class Bar::Baz` inside a different module where the lexical nesting doesn't reflect the true
+    # constant hierarchy. Falls back to lexical joining if resolution fails.
+    #: (Array[String] nesting) -> String
+    def resolve_nesting_fully_qualified_name(nesting)
+      nesting_parts = nesting.dup
+      trailing_singletons = [] #: Array[String]
+
+      nesting_parts.reverse_each do |part|
+        break unless part.start_with?("<")
+
+        popped = nesting_parts.pop #: as !nil
+        trailing_singletons.unshift(popped)
+      end
+
+      if nesting_parts.any?
+        resolved = @graph.resolve_constant(
+          nesting_parts.last, #: as !nil
+          nesting_parts[0...-1], #: as !nil
+        )
+
+        if resolved
+          parts = resolved.name.split("::") + trailing_singletons
+          return parts.join("::")
+        end
+      end
+
+      # Fallback to lexical joining if resolution fails
+      nesting.flat_map { |part| part.split("::") }.join("::")
+    end
+
+    #: (String, Array[String]) -> Type?
+    def resolve_receiver_singleton_type(receiver_name, nesting)
+      receiver_declaration = @graph.resolve_constant(receiver_name, nesting)
+      return unless receiver_declaration.is_a?(Rubydex::Namespace)
+
+      singleton = receiver_declaration.singleton_class
+      return unless singleton
+
+      Type.new(singleton.name)
     end
 
     #: (NodeContext node_context) -> Type?
