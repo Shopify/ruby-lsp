@@ -730,6 +730,44 @@ class RubyDocumentTest < Minitest::Test
     )
   end
 
+  def test_locate_handles_method_receivers
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Bar; end
+
+      class Foo
+        def Bar.baz
+          @var
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 4, character: 4 })
+    assert_instance_of(Prism::InstanceVariableReadNode, node_context.node)
+    assert_equal(["Foo"], node_context.nesting)
+
+    surrounding_method = node_context.surrounding_method #: as !nil
+    assert_equal("baz", surrounding_method.name)
+    assert_equal("Bar", surrounding_method.receiver)
+  end
+
+  def test_locate_constant_inside_method_with_receiver_uses_lexical_nesting
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Bar; end
+
+      class Foo
+        def Bar.baz
+          MY_CONST
+        end
+      end
+    RUBY
+
+    # Constants follow lexical scope, not the method receiver. The nesting must remain ["Foo"]
+    # so that MY_CONST resolves through Foo, not Bar
+    node_context = document.locate_node({ line: 4, character: 4 })
+    assert_instance_of(Prism::ConstantReadNode, node_context.node)
+    assert_equal(["Foo"], node_context.nesting)
+  end
+
   def test_locate_returns_nesting
     document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       module Foo
@@ -953,8 +991,9 @@ class RubyDocumentTest < Minitest::Test
     assert_nil(node_context.surrounding_method)
 
     node_context = document.locate_node({ line: 4, character: 4 })
-    assert_equal(["Foo", "<Foo>"], node_context.nesting)
-    assert_equal("bar", node_context.surrounding_method)
+    assert_equal(["Foo"], node_context.nesting)
+    assert_equal("bar", node_context.surrounding_method&.name)
+    assert_equal("self", node_context.surrounding_method&.receiver)
 
     node_context = document.locate_node({ line: 8, character: 4 })
     assert_equal(["Foo", "<Foo>"], node_context.nesting)
@@ -962,11 +1001,13 @@ class RubyDocumentTest < Minitest::Test
 
     node_context = document.locate_node({ line: 11, character: 6 })
     assert_equal(["Foo", "<Foo>"], node_context.nesting)
-    assert_equal("baz", node_context.surrounding_method)
+    assert_equal("baz", node_context.surrounding_method&.name)
+    assert_equal("none", node_context.surrounding_method&.receiver)
 
     node_context = document.locate_node({ line: 16, character: 6 })
     assert_equal(["Foo"], node_context.nesting)
-    assert_equal("qux", node_context.surrounding_method)
+    assert_equal("qux", node_context.surrounding_method&.name)
+    assert_equal("none", node_context.surrounding_method&.receiver)
   end
 
   def test_locate_first_within_range

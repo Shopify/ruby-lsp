@@ -249,7 +249,7 @@ module RubyLsp
         return unless surrounding_method
 
         handle_method_definition(
-          surrounding_method,
+          surrounding_method.name,
           @type_inferrer.infer_receiver_type(@node_context),
           inherited_only: true,
         )
