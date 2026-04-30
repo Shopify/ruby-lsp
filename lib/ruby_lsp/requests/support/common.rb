@@ -34,6 +34,19 @@ module RubyLsp
           )
         end
 
+        #: (Prism::Location? location, Hash[Symbol, untyped] position) -> bool
+        def covers_position?(location, position)
+          return false unless location
+
+          start_line = location.start_line - 1
+          end_line = location.end_line - 1
+          line = position[:line]
+          character = position[:character]
+
+          (start_line < line || (start_line == line && location.start_column <= character)) &&
+            (end_line > line || (end_line == line && location.end_column >= character))
+        end
+
         #: (Prism::Node node, title: String, command_name: String, arguments: Array[untyped]?, data: Hash[untyped, untyped]?) -> Interface::CodeLens
         def create_code_lens(node, title:, command_name:, arguments:, data:)
           range = range_from_node(node)

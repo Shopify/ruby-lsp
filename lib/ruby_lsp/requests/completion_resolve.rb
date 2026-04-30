@@ -24,6 +24,7 @@ module RubyLsp
       def initialize(global_state, item)
         super()
         @index = global_state.index #: RubyIndexer::Index
+        @graph = global_state.graph #: Rubydex::Graph
         @item = item
       end
 
@@ -40,7 +41,7 @@ module RubyLsp
         # For example, forgetting to return the `insertText` included in the original item will make the editor use the
         # `label` for the text edit instead
         label = @item[:label].dup
-        return keyword_resolve(@item) if @item.dig(:data, :keyword)
+        return keyword_resolve if @item.dig(:data, :keyword)
 
         entries = @index[label] || []
 
@@ -80,29 +81,24 @@ module RubyLsp
 
       private
 
-      #: (Hash[Symbol, untyped] item) -> Hash[Symbol, untyped]
-      def keyword_resolve(item)
-        keyword = item[:label]
-        content = KEYWORD_DOCS[keyword]
+      #: () -> Hash[Symbol, untyped]
+      def keyword_resolve
+        keyword = @graph.keyword(@item[:label])
 
-        if content
-          doc_uri = URI::Generic.from_path(path: File.join(STATIC_DOCS_PATH, "#{keyword}.md"))
-
+        if keyword
           @item[:documentation] = Interface::MarkupContent.new(
             kind: "markdown",
             value: <<~MARKDOWN.chomp,
               ```ruby
-              #{keyword}
+              #{keyword.name}
               ```
 
-              [Read more](#{doc_uri})
-
-              #{content}
+              #{keyword.documentation}
             MARKDOWN
           )
         end
 
-        item
+        @item
       end
     end
   end

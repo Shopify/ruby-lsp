@@ -199,13 +199,9 @@ class CompletionResolveTest < Minitest::Test
       result = server.pop_response.response
       contents = result[:documentation].value
 
+      keyword = server.global_state.graph.keyword("yield") #: as !nil
       assert_match("```ruby\nyield\n```", contents)
-      assert_match(
-        RubyLsp::KEYWORD_DOCS["yield"], #: as !nil
-        contents,
-      )
-      expected_uri = URI::Generic.from_path(path: File.join(RubyLsp::STATIC_DOCS_PATH, "yield.md"))
-      assert_match("[Read more](#{expected_uri})", contents)
+      assert_match(keyword.documentation, contents)
     end
   end
 
