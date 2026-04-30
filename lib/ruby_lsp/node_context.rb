@@ -5,6 +5,21 @@ module RubyLsp
   # This class allows listeners to access contextual information about a node in the AST, such as its parent,
   # its namespace nesting, and the surrounding CallNode (e.g. a method call).
   class NodeContext
+    # Represents the surrounding method definition context, tracking both the method name and its receiver
+    class MethodDef
+      #: String
+      attr_reader :name
+
+      #: String?
+      attr_reader :receiver
+
+      #: (String name, String? receiver) -> void
+      def initialize(name, receiver)
+        @name = name
+        @receiver = receiver
+      end
+    end
+
     #: Prism::Node?
     attr_reader :node, :parent
 
@@ -14,7 +29,7 @@ module RubyLsp
     #: Prism::CallNode?
     attr_reader :call_node
 
-    #: String?
+    #: MethodDef?
     attr_reader :surrounding_method
 
     #: (Prism::Node? node, Prism::Node? parent, Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nesting_nodes, Prism::CallNode? call_node) -> void
@@ -26,7 +41,7 @@ module RubyLsp
 
       nesting, surrounding_method = handle_nesting_nodes(nesting_nodes)
       @nesting = nesting #: Array[String]
-      @surrounding_method = surrounding_method #: String?
+      @surrounding_method = surrounding_method #: MethodDef?
     end
 
     #: -> String
@@ -52,10 +67,10 @@ module RubyLsp
 
     private
 
-    #: (Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nodes) -> [Array[String], String?]
+    #: (Array[(Prism::ClassNode | Prism::ModuleNode | Prism::SingletonClassNode | Prism::DefNode | Prism::BlockNode | Prism::LambdaNode | Prism::ProgramNode)] nodes) -> [Array[String], MethodDef?]
     def handle_nesting_nodes(nodes)
       nesting = []
-      surrounding_method = nil #: String?
+      surrounding_method = nil #: MethodDef?
 
       @nesting_nodes.each do |node|
         case node
@@ -64,10 +79,18 @@ module RubyLsp
         when Prism::SingletonClassNode
           nesting << "<#{nesting.flat_map { |n| n.split("::") }.last}>"
         when Prism::DefNode
-          surrounding_method = node.name.to_s
-          next unless node.receiver.is_a?(Prism::SelfNode)
+          receiver = node.receiver
 
-          nesting << "<#{nesting.flat_map { |n| n.split("::") }.last}>"
+          surrounding_method = case receiver
+          when nil
+            MethodDef.new(node.name.to_s, "none")
+          when Prism::SelfNode
+            MethodDef.new(node.name.to_s, "self")
+          when Prism::ConstantReadNode, Prism::ConstantPathNode
+            MethodDef.new(node.name.to_s, receiver.slice)
+          else
+            MethodDef.new(node.name.to_s, nil)
+          end
         end
       end
 
