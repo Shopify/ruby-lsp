@@ -26,7 +26,6 @@ module RubyLsp
         node_context = RubyDocument.locate(
           document.ast,
           char_position,
-          node_types: Listeners::Hover::ALLOWED_TARGETS,
           code_units_cache: document.code_units_cache,
         )
         target = node_context.node
@@ -48,7 +47,7 @@ module RubyLsp
         @target = target #: Prism::Node?
         uri = document.uri
         @response_builder = ResponseBuilders::Hover.new #: ResponseBuilders::Hover
-        Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, sorbet_level)
+        Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, sorbet_level, position)
         Addon.addons.each do |addon|
           addon.create_hover_listener(@response_builder, node_context, dispatcher)
         end
@@ -77,9 +76,7 @@ module RubyLsp
 
       #: (Prism::Node? parent, Prism::Node? target) -> bool
       def should_refine_target?(parent, target)
-        (Listeners::Hover::ALLOWED_TARGETS.include?(parent.class) &&
-        !Listeners::Hover::ALLOWED_TARGETS.include?(target.class)) ||
-          (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
+        parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode)
       end
 
       #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool

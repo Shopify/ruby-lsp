@@ -893,7 +893,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
-  def test_hover_is_disabled_on_super_for_typed_true
+  def test_hover_on_super_for_typed_true_shows_keyword_doc_only
     source = <<~RUBY
       # typed: true
       class Parent
@@ -913,7 +913,12 @@ class HoverExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
       )
 
-      assert_nil(server.pop_response.response)
+      response = server.pop_response.response
+      refute_nil(response)
+
+      contents = response.contents.value
+      refute_match("foo", contents)
+      assert_match("```ruby\nsuper\n```", contents)
     end
   end
 
@@ -941,45 +946,506 @@ class HoverExpectationsTest < ExpectationsTestRunner
 
   def test_hover_for_keywords
     test_cases = {
-      "yield" => {
-        source: <<~RUBY,
-          def foo
-            yield
-          end
-        RUBY
-        position: { line: 1, character: 2 },
-      },
-      "break" => {
-        source: <<~RUBY,
-          while true
-            break
-          end
-        RUBY
-        position: { line: 1, character: 2 },
-      },
+      "BEGIN" => { source: "BEGIN { }" },
+      "END" => { source: "END { }" },
+      "__ENCODING__" => { source: "__ENCODING__" },
+      "__FILE__" => { source: "__FILE__" },
+      "__LINE__" => { source: "__LINE__" },
+      "alias" => { source: "alias foo bar" },
+      "and" => { source: "true and false", position: { character: 5, line: 0 } },
+      "begin" => { source: "begin\nend" },
+      "break" => { source: "break" },
+      "case" => { source: "case 1\nwhen 1\nend" },
+      "class" => { source: "class A\nend" },
+      "def" => { source: "def foo\nend" },
+      "defined?" => { source: "defined?(x)" },
+      "do" => { source: "proc do\nend", position: { character: 5, line: 0 } },
+      "else" => { source: "if true\nelse\nend", position: { character: 0, line: 1 } },
+      "ensure" => { source: "begin\nensure\nend", position: { character: 0, line: 1 } },
+      "false" => { source: "false" },
+      "for" => { source: "for x in [1]\nend" },
+      "if" => { source: "if true\nend" },
+      "in" => { source: "case x\nin 1\nend", position: { character: 0, line: 1 } },
+      "module" => { source: "module A\nend" },
+      "next" => { source: "next" },
+      "nil" => { source: "nil" },
+      "or" => { source: "true or false", position: { character: 5, line: 0 } },
+      "redo" => { source: "redo" },
+      "rescue" => { source: "begin\nrescue\nend", position: { character: 0, line: 1 } },
+      "retry" => { source: "retry" },
+      "return" => { source: "return" },
+      "self" => { source: "self" },
+      "true" => { source: "true" },
+      "undef" => { source: "undef :foo" },
+      "unless" => { source: "unless true\nend" },
+      "until" => { source: "until true\nend" },
+      "when" => { source: "case x\nwhen 1\nend", position: { character: 0, line: 1 } },
+      "while" => { source: "while true\nend" },
+      "yield" => { source: "yield" },
     }
 
     test_cases.each do |keyword, config|
+      position = config[:position] || { character: 0, line: 0 }
+
       with_server(config[:source]) do |server, uri|
         server.process_message(
           id: 1,
           method: "textDocument/hover",
           params: {
             textDocument: { uri: uri },
-            position: config[:position],
+            position: position,
           },
         )
 
-        contents = server.pop_response.response.contents.value
+        graph = server.global_state.graph
+        response = server.pop_response.response
+        refute_nil(response, "expected hover response for keyword `#{keyword}`")
+        contents = response.contents.value
         assert_match("```ruby\n#{keyword}\n```", contents)
-        assert_match(
-          RubyLsp::KEYWORD_DOCS[keyword] || "No documentation found for #{keyword}",
-          contents,
-        )
-
-        expected_uri = URI::Generic.from_path(path: File.join(RubyLsp::STATIC_DOCS_PATH, "#{keyword}.md"))
-        assert_match("[Read more](#{expected_uri})", contents)
+        assert_match(graph.keyword(keyword).documentation, contents)
       end
+    end
+  end
+
+  def test_hover_does_not_show_keyword_doc_on_constant_path_of_class
+    source = "class Foo\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `Foo`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 7, line: 0 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      refute_match("```ruby\nclass\n```", contents)
+      assert_match("Foo", contents)
+    end
+  end
+
+  def test_hover_does_not_show_keyword_doc_on_constant_path_of_module
+    source = "module Foo\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `Foo`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 8, line: 0 } },
+      )
+
+      contents = server.pop_response.response.contents.value
+      refute_match("```ruby\nmodule\n```", contents)
+      assert_match("Foo", contents)
+    end
+  end
+
+  def test_hover_does_not_show_keyword_doc_on_nested_constant_path
+    source = "class Foo::Bar\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `Foo`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 7, line: 0 } },
+      )
+      contents = server.pop_response.response.contents.value
+      refute_match("```ruby\nclass\n```", contents)
+
+      # cursor on `Bar`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 0 } },
+      )
+      contents = server.pop_response.response.contents.value
+      refute_match("```ruby\nclass\n```", contents)
+    end
+  end
+
+  def test_hover_does_not_show_keyword_doc_on_superclass
+    source = "class Bar\nend\nclass Foo < Bar\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `Bar` (the superclass)
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 13, line: 2 } },
+      )
+      contents = server.pop_response.response.contents.value
+      refute_match("```ruby\nclass\n```", contents)
+      assert_match("Bar", contents)
+    end
+  end
+
+  def test_hover_does_not_show_and_keyword_doc_on_double_ampersand_operator
+    source = "true && false"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `&&`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_does_not_show_or_keyword_doc_on_double_pipe_operator
+    source = "true || false"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `||`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_does_not_show_do_keyword_doc_on_brace_block
+    source = "proc { 1 }"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `{`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 5, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_does_not_show_keyword_doc_on_ternary_punctuation
+    source = "x ? 1 : 2"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `?`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 2, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+
+      # cursor on `:`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_class
+    source = "class Foo\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `end`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+      response = server.pop_response.response
+      refute_nil(response)
+      contents = response.contents.value
+      assert_match("```ruby\nend\n```", contents)
+      refute_match("```ruby\nclass\n```", contents)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_def
+    source = "def foo\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `end`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+      response = server.pop_response.response
+      refute_nil(response)
+      contents = response.contents.value
+      assert_match("```ruby\nend\n```", contents)
+      refute_match("```ruby\ndef\n```", contents)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_if
+    source = "if true\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `end`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+      response = server.pop_response.response
+      refute_nil(response)
+      contents = response.contents.value
+      assert_match("```ruby\nend\n```", contents)
+      refute_match("```ruby\nif\n```", contents)
+    end
+  end
+
+  def test_hover_on_elsif_shows_elsif_keyword_doc
+    source = "if a\nelsif b\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `elsif`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+      response = server.pop_response.response
+      refute_nil(response)
+      contents = response.contents.value
+      assert_match("```ruby\nelsif\n```", contents)
+      refute_match("```ruby\nif\n```", contents)
+    end
+  end
+
+  def test_hover_shows_class_keyword_doc_for_singleton_class
+    source = "class << self\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `class`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nclass\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_shows_end_keyword_doc_for_singleton_class
+    source = "class << self\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `end`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nend\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_shows_do_keyword_doc_for_lambda
+    source = "-> do\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `do`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 0 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\ndo\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_shows_end_keyword_doc_for_lambda
+    source = "-> do\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `end`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nend\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_does_not_show_keyword_doc_on_lambda_operator_or_braces
+    with_server("-> { }", stub_no_typechecker: true) do |server, uri|
+      # cursor on `->`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+
+      # cursor on `{`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 0 } },
+      )
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hover_shows_not_keyword_doc
+    source = "not true"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `not`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 0 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nnot\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_on_forwarding_super_shows_method_doc_and_keyword_doc
+    source = <<~RUBY
+      class Parent
+        # Parent greeting
+        def greet
+        end
+      end
+
+      class Child < Parent
+        def greet
+          super
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `super`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      contents = response.contents.value
+
+      assert_match("greet", contents)
+      assert_match("```ruby\nsuper\n```", contents)
+    end
+  end
+
+  def test_hover_on_super_call_shows_method_doc_and_keyword_doc
+    source = <<~RUBY
+      class Parent
+        def greet(name)
+        end
+      end
+
+      class Child < Parent
+        def greet(name)
+          super(name)
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # cursor on `super` of `super(name)`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 7 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+
+      contents = response.contents.value
+      assert_match("greet", contents)
+      assert_match("```ruby\nsuper\n```", contents)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_module
+    source = "module Foo\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nend\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_while
+    source = "while true\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 1 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nend\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_begin_ensure
+    source = "begin\nensure\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 2 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nend\n```", response.contents.value)
+    end
+  end
+
+  def test_hover_on_end_shows_end_keyword_doc_for_if_else
+    source = "if true\nelse\nend"
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 0, line: 2 } },
+      )
+
+      response = server.pop_response.response
+      refute_nil(response)
+      assert_match("```ruby\nend\n```", response.contents.value)
     end
   end
 
