@@ -1419,6 +1419,294 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_implicit_self_method_call_inside_singleton_method
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        def self.bar; end
+
+        def self.baz
+          bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(3, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_method_call_inside_method_with_constant_receiver
+    source = <<~RUBY
+      # typed: false
+
+      class Bar
+        def self.helper; end
+      end
+
+      class Foo
+        def Bar.check
+          helper
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(3, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_super_inside_singleton_method
+    source = <<~RUBY
+      class Parent
+        def self.foo; end
+      end
+
+      class Child < Parent
+        def self.foo
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(1, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_implicit_self_method_call_inside_singleton_method_with_compact_namespace
+    source = <<~RUBY
+      # typed: false
+
+      module Foo; end
+
+      class Foo::Bar
+        def self.helper; end
+
+        def self.check
+          helper
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(5, response[0].target_range.start.line)
+    end
+  end
+
+  def test_super_definition_for_method_definition_with_receiver
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        class << self
+          # You found me!
+          def bar; end
+        end
+      end
+
+      class Bar < Foo
+        class << self
+        end
+      end
+
+      class Qux
+        def Bar.bar
+          super
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 16 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(5, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_method_call_inside_class_singleton_block_method
+    source = <<~RUBY
+      # typed: false
+
+      class Foo
+        def self.bar; end
+
+        class << self
+          def baz
+            bar
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 7 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(3, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_instance_variable_in_method_with_constant_receiver
+    source = <<~RUBY
+      class Bar
+        class << self; end
+
+        @config = "default"
+      end
+
+      class Foo
+        def Bar.configure
+          @config
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 8 } },
+      )
+
+      # @config should resolve through Bar's singleton class, not Foo
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(3, response[0].range.start.line)
+    end
+  end
+
+  def test_definition_for_class_variable_in_method_with_constant_receiver
+    source = <<~RUBY
+      class Bar
+        @@shared = 1
+      end
+
+      class Foo
+        def Bar.check
+          @@shared
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 6 } },
+      )
+
+      # @@shared follows lexical scope (Foo), not the receiver (Bar).
+      # Since @@shared is defined in Bar but not in Foo, definition should be empty
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_for_constant_in_method_with_constant_receiver
+    source = <<~RUBY
+      # typed: ignore
+      class Bar
+        OTHER = "other"
+      end
+
+      class Foo
+        MY_CONST = "hello"
+
+        def Bar.check
+          MY_CONST
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 9 } },
+      )
+
+      # MY_CONST resolves through Foo's lexical scope, not Bar
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(6, response[0].target_range.start.line)
+    end
+  end
+
+  def test_definition_for_instance_variable_in_hoisted_parent_scope
+    source = <<~RUBY
+      module Bar; end
+
+      module Foo
+        class Bar::Baz
+          class << self; end
+
+          @var = 1
+
+          def self.get_var
+            @var
+          end
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 9 } },
+      )
+
+      # @var should resolve through Bar::Baz's singleton class, not Foo::Bar::Baz
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(6, response[0].range.start.line)
+    end
+  end
+
   private
 
   def create_definition_addon

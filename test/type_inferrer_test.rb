@@ -44,6 +44,96 @@ module RubyLsp
       assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_receiver_type_self_inside_method_with_constant_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        class Bar; end
+
+        class Foo
+          def Bar.baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_instance_variables_in_method_with_constant_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        class Bar; end
+
+        class Foo
+          def Bar.baz
+            @hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_self_inside_method_with_dynamic_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 5, character: 4 })
+        class Bar; end
+        var = Bar
+
+        class Foo
+          def var.baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_inside_hoisted_parent_scope
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        module Bar; end
+
+        module Foo
+          class Bar::Baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::Baz::<Baz>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_inside_inherited_parent_scope
+      node_context = index_and_locate(<<~RUBY, { line: 8, character: 4 })
+        module Bar
+          module Baz; end
+        end
+
+        module Foo
+          include Bar
+
+          class Baz::Qux
+            @var
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::Baz::Qux::<Qux>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_class_variables_in_method_with_constant_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        class Bar; end
+
+        class Foo
+          def Bar.baz
+            @@hello1
+          end
+        end
+      RUBY
+
+      # Class variables follow lexical scope, not the method receiver
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
     def test_infer_receiver_type_self_inside_singleton_block_body
       node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
         class Foo
