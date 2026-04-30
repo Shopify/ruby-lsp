@@ -21,6 +21,29 @@ module Rubydex
       raise RubyLsp::AbstractMethodInvokedError
     end
 
+    # Direct ancestor references contributed by this definition (superclass, includes, prepends).
+    # Extends are intentionally excluded here because they extend the singleton class, not the
+    # instance-side ancestor chain. Definition subclasses that can't contribute ancestors return [].
+    #: () -> Array[Rubydex::ConstantReference]
+    def direct_supertype_references
+      []
+    end
+
+    #: (String name, ?detail: String?) -> RubyLsp::Interface::TypeHierarchyItem
+    def to_lsp_type_hierarchy_item(name, detail: nil)
+      range = to_lsp_selection_range
+
+      RubyLsp::Interface::TypeHierarchyItem.new(
+        name: name,
+        kind: to_lsp_kind,
+        uri: location.uri,
+        range: range,
+        selection_range: to_lsp_name_range || range,
+        detail: detail,
+        data: { fully_qualified_name: name },
+      )
+    end
+
     #: (String name) -> RubyLsp::Interface::WorkspaceSymbol
     def to_lsp_workspace_symbol(name)
       # We use the namespace as the container name, but we also use the full name as the regular name. The reason we do
@@ -86,15 +109,47 @@ module Rubydex
     end
   end
 
+  # Shared supertype aggregation for Rubydex definition types that carry namespace mixins
+  # (`ClassDefinition`, `ModuleDefinition`, `SingletonClassDefinition`). The including class is
+  # expected to provide `#mixins`, which every Rubydex namespace definition already does.
+  # @abstract
+  module NamespaceDefinition
+    # @abstract
+    #: () -> Array[Rubydex::Mixin]
+    def mixins
+      raise RubyLsp::AbstractMethodInvokedError
+    end
+
+    #: () -> Array[Rubydex::ConstantReference]
+    def direct_supertype_references
+      mixins.filter_map do |mixin|
+        mixin.constant_reference if mixin.is_a?(Include) || mixin.is_a?(Prepend)
+      end
+    end
+  end
+
   class ClassDefinition
+    include NamespaceDefinition
+
     # @override
     #: () -> Integer
     def to_lsp_kind
       RubyLsp::Constant::SymbolKind::CLASS
     end
+
+    # @override
+    #: () -> Array[Rubydex::ConstantReference]
+    def direct_supertype_references
+      refs = super
+      superclass_ref = superclass
+      refs << superclass_ref if superclass_ref
+      refs
+    end
   end
 
   class ModuleDefinition
+    include NamespaceDefinition
+
     # @override
     #: () -> Integer
     def to_lsp_kind
@@ -103,6 +158,8 @@ module Rubydex
   end
 
   class SingletonClassDefinition
+    include NamespaceDefinition
+
     # @override
     #: () -> Integer
     def to_lsp_kind
