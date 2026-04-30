@@ -585,6 +585,9 @@ class Rubydex::Reference
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
 
+  sig { returns(Rubydex::Location) }
+  def location; end
+
   class << self
     private
 
