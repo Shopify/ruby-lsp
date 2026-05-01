@@ -61,6 +61,10 @@ class Rubydex::ConstantAlias < ::Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::ConstantReference]) }
   def references; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T.nilable(Rubydex::Declaration)) }
+  def target; end
 end
 
 class Rubydex::ConstantAliasDefinition < ::Rubydex::Definition; end
@@ -296,6 +300,10 @@ class Rubydex::Graph
   def diagnostics; end
 
   # source://rubydex//lib/rubydex.rb#11
+  sig { params(uri: String).returns(T.nilable(Rubydex::Document)) }
+  def document(uri); end
+
+  # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::Document]) }
   def documents; end
 
@@ -522,6 +530,10 @@ class Rubydex::MethodReference < ::Rubydex::Reference
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(String) }
   def name; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T.nilable(Rubydex::Declaration)) }
+  def receiver; end
 end
 
 class Rubydex::MethodVisibilityDefinition < ::Rubydex::Definition; end

@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency("language_server-protocol", "~> 3.17.0")
   s.add_dependency("prism", ">= 1.2", "< 2.0")
   s.add_dependency("rbs", ">= 3", "< 5")
-  s.add_dependency("rubydex", "~> 0.1.0.beta1")
+  s.add_dependency("rubydex", "~> 0.2.0", "< 0.3.0")
 
   s.required_ruby_version = ">= 3.0"
 end

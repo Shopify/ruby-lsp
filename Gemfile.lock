@@ -5,7 +5,7 @@ PATH
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
-      rubydex (~> 0.1.0.beta1)
+      rubydex (~> 0.2.0, < 0.3.0)
 
 GEM
   remote: https://rubygems.org/
@@ -92,10 +92,10 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    rubydex (0.1.0.beta13-arm64-darwin)
-    rubydex (0.1.0.beta13-x64-mingw-ucrt)
-    rubydex (0.1.0.beta13-x86_64-darwin)
-    rubydex (0.1.0.beta13-x86_64-linux)
+    rubydex (0.2.0-arm64-darwin)
+    rubydex (0.2.0-x64-mingw-ucrt)
+    rubydex (0.2.0-x86_64-darwin)
+    rubydex (0.2.0-x86_64-linux)
     sorbet (0.6.13055)
       sorbet-static (= 0.6.13055)
     sorbet-runtime (0.6.13055)
@@ -205,10 +205,10 @@ CHECKSUMS
   ruby-lsp (0.27.0.beta2)
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
-  rubydex (0.1.0.beta13-arm64-darwin) sha256=f840d6ec14368cca6951c093ec19518baa91fa627998ac9ff06653943a6919f1
-  rubydex (0.1.0.beta13-x64-mingw-ucrt) sha256=c834f3ced16fe5384b138ab8d7aa2335c43043ba4927de904a89b16bfaa05c2a
-  rubydex (0.1.0.beta13-x86_64-darwin) sha256=be1b16aaa2c933d437049c67f50e8e8c1c778c3a7b9661681d7ba8106b88428c
-  rubydex (0.1.0.beta13-x86_64-linux) sha256=0d33d3820b0e43402e019e5ae516f7de11f590fd2a1ec50063f1d820e36e1ed1
+  rubydex (0.2.0-arm64-darwin) sha256=8c0ad11bd6a103de7e9fea2fddd55dc7d7ea5635ef9751c1569b6418185381a5
+  rubydex (0.2.0-x64-mingw-ucrt) sha256=9dddbc4382271d323141dc297afa98d2fcc09ad3394010c2f125e77b34e97e91
+  rubydex (0.2.0-x86_64-darwin) sha256=06baad305bd09a49f9abcfae5e1aa1f54d71bdae6d42d148035dab5bcaf7660a
+  rubydex (0.2.0-x86_64-linux) sha256=28071b3189f80daf5ed76ad87faaf95665f987cdebc2b5203876536253442616
   sorbet (0.6.13055) sha256=5f5e8f37c13c281fa2b2f95e261d2e531d8331ddcc8e2dd8c4f16457935872ec
   sorbet-runtime (0.6.13055) sha256=c8ae8c81310e0a28d290b11f44ddca59659b7d7f13752c0ef5d16964bbb84d18
   sorbet-static (0.6.13055-universal-darwin) sha256=649c8e79a443be85318922f9ecbb46be72f6c585443f4440c4ec0fb1737c86e8
