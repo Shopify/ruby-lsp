@@ -183,6 +183,14 @@ module Rubydex
     end
   end
 
+  class ConstantVisibilityDefinition
+    # @override
+    #: () -> Integer
+    def to_lsp_kind
+      RubyLsp::Constant::SymbolKind::CONSTANT
+    end
+  end
+
   class MethodDefinition
     # @override
     #: () -> Integer
@@ -192,6 +200,14 @@ module Rubydex
   end
 
   class MethodAliasDefinition
+    # @override
+    #: () -> Integer
+    def to_lsp_kind
+      RubyLsp::Constant::SymbolKind::METHOD
+    end
+  end
+
+  class MethodVisibilityDefinition
     # @override
     #: () -> Integer
     def to_lsp_kind
