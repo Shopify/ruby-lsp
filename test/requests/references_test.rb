@@ -71,43 +71,72 @@ class ReferencesTest < Minitest::Test
     assert_includes(ref_lines, 5) # reference
   end
 
-  def test_does_not_match_simple_names_when_method_receiver_is_known
+  AMBIGUOUS_BAR_SOURCE = <<~RUBY
+    class Foo
+      def self.bar
+      end
+    end
+
+    class Qux
+      def bar
+      end
+    end
+
+    class Other
+      def self.bar
+      end
+    end
+
+    it = Qux.new
+    it.bar
+
+    Foo.bar
+    Other.bar
+  RUBY
+
+  def test_filters_method_references_when_call_site_receiver_is_a_known_constant
+    refs = find_references(AMBIGUOUS_BAR_SOURCE, { line: 18, character: 4 }, include_declarations: true)
+    ref_lines = refs.map { |r| r.range.start.line }
+
+    assert_includes(ref_lines, 1) # def self.bar declaration
+    refute_includes(ref_lines, 6) # def bar (Qux) must not appear
+    refute_includes(ref_lines, 11) # def self.bar (Other) must not appear
+    assert_includes(ref_lines, 16) # it.bar included because receiver is unresolved
+    assert_includes(ref_lines, 18) # Foo.bar call site
+    refute_includes(ref_lines, 19) # Other.bar call site is filtered out by its resolved receiver
+  end
+
+  def test_falls_back_to_all_candidates_when_call_site_receiver_is_unresolvable
+    refs = find_references(AMBIGUOUS_BAR_SOURCE, { line: 16, character: 3 }, include_declarations: true)
+    ref_lines = refs.map { |r| r.range.start.line }
+
+    assert_includes(ref_lines, 1) # Foo.bar declaration
+    assert_includes(ref_lines, 6) # Qux#bar declaration
+    assert_includes(ref_lines, 11) # Other.bar declaration
+    assert_includes(ref_lines, 16) # it.bar call site
+    assert_includes(ref_lines, 18) # Foo.bar call site
+    assert_includes(ref_lines, 19) # Other.bar call site
+  end
+
+  def test_method_references_match_through_superclass_chain
     source = <<~RUBY
-      class Foo
+      class Parent
         def self.bar
         end
       end
 
-      class Qux
-        def bar
-        end
+      class Child < Parent
       end
 
-      it = Qux.new
-      it.bar
-
-      Foo.bar
+      Parent.bar
+      Child.bar
     RUBY
 
-    # Cursor on `bar` in `Foo.bar` — the receiver is the `Foo` singleton, so only the `Foo.bar`
-    # declaration is a valid target. We must not surface `Qux#bar` as a candidate declaration.
-    refs = find_references(source, { line: 13, character: 4 }, include_declarations: true)
+    refs = find_references(source, { line: 1, character: 11 }, include_declarations: true)
     ref_lines = refs.map { |r| r.range.start.line }
-    assert_includes(ref_lines, 1) # def self.bar declaration
-    assert_includes(ref_lines, 13) # Foo.bar call site
-    refute_includes(ref_lines, 6) # def bar (Qux) must not appear
-
-    # it.bar must not appear, but we don't currently expose method reference receivers in the API
-    assert_includes(ref_lines, 11)
-
-    # Cursor on `bar` in `it.bar` — the type of the local `it` can't be inferred, so we fall back
-    # to including every `bar` declaration and call site as candidates.
-    refs = find_references(source, { line: 11, character: 3 }, include_declarations: true)
-    ref_lines = refs.map { |r| r.range.start.line }
-    assert_includes(ref_lines, 1) # Foo.bar declaration
-    assert_includes(ref_lines, 6) # Qux#bar declaration
-    assert_includes(ref_lines, 11) # it.bar call site
-    assert_includes(ref_lines, 13) # Foo.bar call site
+    assert_includes(ref_lines, 1) # Parent.bar declaration
+    assert_includes(ref_lines, 8) # Parent.bar call site
+    assert_includes(ref_lines, 9) # Child.bar call site (matched through Child::<Child>'s ancestors)
   end
 
   def test_finds_references_from_def_node
