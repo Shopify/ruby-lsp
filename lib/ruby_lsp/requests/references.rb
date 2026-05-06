@@ -145,7 +145,7 @@ module RubyLsp
         end
         return if declarations.empty?
 
-        collect_references(method_references_for(message), declarations, include_declarations)
+        collect_references(method_references_for(message, declarations), declarations, include_declarations)
       end
 
       # Handles instance and class variable references. Resolves the receiver type from the node context to locate
@@ -187,14 +187,28 @@ module RubyLsp
         declaration = owner.find_member("#{method_name}()")
         return unless declaration
 
-        collect_references(method_references_for(method_name), [declaration], include_declarations)
+        collect_references(method_references_for(method_name, [declaration]), [declaration], include_declarations)
       end
 
-      # Method references in Rubydex are not yet resolved to specific declarations, so we filter from the global
-      # method references by name
-      #: (String) -> Array[Rubydex::MethodReference]
-      def method_references_for(method_name)
-        @graph.method_references.select { |reference| reference.name == method_name }
+      #: (String, Array[Rubydex::Declaration]) -> Array[Rubydex::MethodReference]
+      def method_references_for(method_name, declarations)
+        target_owner_names = declarations.map do |d|
+          d.owner #: as Rubydex::Namespace
+            .name
+        end
+
+        @graph.method_references.select do |reference|
+          next false unless reference.name == method_name
+
+          receiver = reference.receiver
+          next true if receiver.nil? || target_owner_names.empty?
+
+          if receiver.is_a?(Rubydex::Namespace)
+            receiver.ancestors.any? { |ancestor| target_owner_names.include?(ancestor.name) }
+          else
+            target_owner_names.include?(receiver.name)
+          end
+        end
       end
 
       #: (Enumerable[Rubydex::Reference] references, Array[Rubydex::Declaration] declarations, bool include_declarations) -> void
