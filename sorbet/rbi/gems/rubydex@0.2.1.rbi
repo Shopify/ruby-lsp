@@ -14,7 +14,14 @@ module Rubydex; end
 class Rubydex::AttrAccessorDefinition < ::Rubydex::Definition; end
 class Rubydex::AttrReaderDefinition < ::Rubydex::Definition; end
 class Rubydex::AttrWriterDefinition < ::Rubydex::Definition; end
-class Rubydex::Class < ::Rubydex::Namespace; end
+
+# source://rubydex//lib/rubydex/declaration.rb#23
+class Rubydex::Class < ::Rubydex::Namespace
+  include ::Rubydex::Visibility
+
+  # source://rubydex//lib/rubydex.rb#11
+  def visibility; end
+end
 
 class Rubydex::ClassDefinition < ::Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
@@ -51,13 +58,22 @@ class Rubydex::Comment
   def string; end
 end
 
+# source://rubydex//lib/rubydex/declaration.rb#31
 class Rubydex::Constant < ::Rubydex::Declaration
+  include ::Rubydex::Visibility
+
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::ConstantReference]) }
   def references; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  def visibility; end
 end
 
+# source://rubydex//lib/rubydex/declaration.rb#35
 class Rubydex::ConstantAlias < ::Rubydex::Declaration
+  include ::Rubydex::Visibility
+
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::ConstantReference]) }
   def references; end
@@ -65,6 +81,9 @@ class Rubydex::ConstantAlias < ::Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T.nilable(Rubydex::Declaration)) }
   def target; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  def visibility; end
 end
 
 class Rubydex::ConstantAliasDefinition < ::Rubydex::Definition; end
@@ -85,7 +104,7 @@ end
 
 class Rubydex::ConstantVisibilityDefinition < ::Rubydex::Definition; end
 
-# source://rubydex//lib/rubydex/declaration.rb#4
+# source://rubydex//lib/rubydex/declaration.rb#15
 class Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
@@ -105,7 +124,7 @@ class Rubydex::Declaration
   # @abstract
   # @raise [NotImplementedError]
   #
-  # source://rubydex//lib/rubydex/declaration.rb#7
+  # source://rubydex//lib/rubydex/declaration.rb#18
   sig { returns(T::Enumerable[Rubydex::Reference]) }
   def references; end
 
@@ -267,21 +286,46 @@ class Rubydex::Graph
   sig { returns(T::Array[Rubydex::Failure]) }
   def check_integrity; end
 
+  # Returns completion candidates for an expression context. This includes all keywords, constants, methods, instance
+  # variables, class variables and global variables reachable from the current lexical scope and self type.
+  #
+  # The nesting array represents the lexical scope stack. The optional `self_receiver` keyword argument overrides the
+  # self type independently of the lexical scope (e.g., `"Foo::<Foo>"` for `def Foo.bar`). This distinction is important
+  # because constants and class variables are always attached to the lexical scope. Meanwhile, methods and instance
+  # variables are attached to the type of `self` and those don't always match.
+  #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(nesting: T::Array[String]).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword)]) }
-  def complete_expression(nesting); end
+  sig { params(nesting: T::Array[String], self_receiver: T.nilable(String)).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword)]) }
+  def complete_expression(nesting, self_receiver: T.unsafe(nil)); end
 
+  # Returns completion candidates inside a method call's argument list (e.g., `foo.bar(|)`). This includes everything
+  # that expression completion provides plus keyword argument names of the method being called.
+  #
+  # See `complete_expression` for the semantics of `nesting` and `self_receiver`.
+  #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String, nesting: T::Array[String]).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword, Rubydex::KeywordParameter)]) }
-  def complete_method_argument(name, nesting); end
+  sig { params(name: String, nesting: T::Array[String], self_receiver: T.nilable(String)).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword, Rubydex::KeywordParameter)]) }
+  def complete_method_argument(name, nesting, self_receiver: T.unsafe(nil)); end
 
+  # Returns completion candidates after a method call operator (e.g., `foo.`). This includes all methods that exist on
+  # the type of the receiver and its ancestors.
+  #
+  # The optional `self_receiver` kwarg is the caller's runtime self type. It's used for visibility checks for `private`
+  # and `protected` methods. Pass `nil` (the default) for top-level/script scope.
+  #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String).returns(T::Array[Rubydex::Method]) }
-  def complete_method_call(name); end
+  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Method]) }
+  def complete_method_call(name, self_receiver: T.unsafe(nil)); end
 
+  # Returns completion candidates after a namespace access operator (e.g., `Foo::`). This includes all constants and
+  # singleton methods for the namespace and its ancestors.
+  #
+  # The optional `self_receiver` kwarg is the caller's runtime self type. It's used to filter visibility-restricted
+  # singleton methods (e.g., `private_class_method`). Pass `nil` (the default) for top-level/script scope.
+  #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String).returns(T::Array[Rubydex::Declaration]) }
-  def complete_namespace_access(name); end
+  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Declaration]) }
+  def complete_namespace_access(name, self_receiver: T.unsafe(nil)); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::ConstantReference]) }
@@ -510,10 +554,16 @@ end
 # source://rubydex//lib/rubydex/location.rb#7
 class Rubydex::Location::NotFileUriError < ::StandardError; end
 
+# source://rubydex//lib/rubydex/declaration.rb#39
 class Rubydex::Method < ::Rubydex::Declaration
+  include ::Rubydex::Visibility
+
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::MethodReference]) }
   def references; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  def visibility; end
 end
 
 class Rubydex::MethodAliasDefinition < ::Rubydex::Definition; end
@@ -547,10 +597,17 @@ class Rubydex::Mixin
   def initialize(constant_reference); end
 
   # source://rubydex//lib/rubydex/mixin.rb#6
+  sig { returns(Rubydex::ConstantReference) }
   def constant_reference; end
 end
 
-class Rubydex::Module < ::Rubydex::Namespace; end
+# source://rubydex//lib/rubydex/declaration.rb#27
+class Rubydex::Module < ::Rubydex::Namespace
+  include ::Rubydex::Visibility
+
+  # source://rubydex//lib/rubydex.rb#11
+  def visibility; end
+end
 
 class Rubydex::ModuleDefinition < ::Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
@@ -632,3 +689,21 @@ end
 
 # source://rubydex//lib/rubydex/version.rb#4
 Rubydex::VERSION = T.let(T.unsafe(nil), String)
+
+# source://rubydex//lib/rubydex/declaration.rb#4
+module Rubydex::Visibility
+  # @return [Boolean]
+  #
+  # source://rubydex//lib/rubydex/declaration.rb#9
+  def private?; end
+
+  # @return [Boolean]
+  #
+  # source://rubydex//lib/rubydex/declaration.rb#12
+  def protected?; end
+
+  # @return [Boolean]
+  #
+  # source://rubydex//lib/rubydex/declaration.rb#6
+  def public?; end
+end
