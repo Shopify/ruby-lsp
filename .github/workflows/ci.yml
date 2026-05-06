@@ -99,21 +99,6 @@ jobs:
           bundler-cache: true
           cache-version: 3
 
-      - name: Download shadowenv
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
-            pattern="shadowenv-x86_64-unknown-linux-gnu"
-          else
-            pattern="shadowenv-x86_64-apple-darwin"
-          fi
-
-          gh release download --pattern $pattern --repo=Shopify/shadowenv --output shadowenv
-          chmod +x shadowenv
-          sudo mv shadowenv /usr/local/bin/shadowenv
-
       - name: Install gems for node tests
         shell: bash
         run: |
