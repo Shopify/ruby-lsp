@@ -13,7 +13,7 @@ module RubyLsp
       def initialize(document, global_state, position, dispatcher, sorbet_level)
         super()
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)]
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[(Interface::Location | Interface::LocationLink)]
         @dispatcher = dispatcher
 
         char_position, _ = document.find_index_by_position(position)

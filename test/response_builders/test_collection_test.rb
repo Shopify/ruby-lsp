@@ -11,10 +11,11 @@ module RubyLsp
         start: Interface::Position.new(line: 0, character: 0),
         end: Interface::Position.new(line: 10, character: 3),
       )
+      @parse_result = Prism.parse_lex("")
     end
 
     def test_allows_building_hierarchy_of_tests
-      builder = ResponseBuilders::TestCollection.new
+      builder = ResponseBuilders::TestCollection.new(Encoding::UTF_8, @parse_result)
       test_item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range, framework: :minitest)
       nested_item = Requests::Support::TestItem.new("nested-id", "Nested label", @uri, @range, framework: :minitest)
 
@@ -29,7 +30,7 @@ module RubyLsp
     end
 
     def test_overrides_if_trying_to_add_item_with_same_id
-      builder = ResponseBuilders::TestCollection.new
+      builder = ResponseBuilders::TestCollection.new(Encoding::UTF_8, @parse_result)
       test_item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range, framework: :minitest)
       nested_item = Requests::Support::TestItem.new("nested-id", "Nested label", @uri, @range, framework: :minitest)
 

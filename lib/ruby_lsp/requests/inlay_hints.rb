@@ -21,7 +21,7 @@ module RubyLsp
         super()
 
         @response_builder = ResponseBuilders::CollectionResponseBuilder
-          .new #: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint]
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::CollectionResponseBuilder[Interface::InlayHint]
         Listeners::InlayHints.new(global_state, @response_builder, dispatcher)
       end
 

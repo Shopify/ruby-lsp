@@ -18,7 +18,7 @@ module RubyLsp
         @global_state = global_state
         @document = document
         @dispatcher = dispatcher
-        @response_builder = ResponseBuilders::TestCollection.new #: ResponseBuilders::TestCollection
+        @response_builder = ResponseBuilders::TestCollection.new(document.encoding, document.parse_result) #: ResponseBuilders::TestCollection
       end
 
       # @override

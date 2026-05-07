@@ -83,7 +83,7 @@ module RubyLsp
         @range = range
         @result_id = SemanticHighlighting.next_result_id.to_s #: String
         @response_builder = ResponseBuilders::SemanticHighlighting
-          .new(document.code_units_cache) #: ResponseBuilders::SemanticHighlighting
+          .new(document.encoding, document.parse_result) #: ResponseBuilders::SemanticHighlighting
         Listeners::SemanticHighlighting.new(dispatcher, @response_builder)
 
         Addon.addons.each do |addon|

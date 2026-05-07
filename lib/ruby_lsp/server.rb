@@ -491,9 +491,9 @@ module RubyLsp
 
       # Run requests for the document
       dispatcher = Prism::Dispatcher.new
-      folding_range = Requests::FoldingRanges.new(parse_result.comments, dispatcher)
-      document_symbol = Requests::DocumentSymbol.new(uri, dispatcher)
-      document_link = Requests::DocumentLink.new(uri, parse_result.comments, dispatcher)
+      folding_range = Requests::FoldingRanges.new(document, dispatcher)
+      document_symbol = Requests::DocumentSymbol.new(uri, document, dispatcher)
+      document_link = Requests::DocumentLink.new(uri, document, dispatcher)
       inlay_hint = Requests::InlayHints.new(
         @global_state,
         document,

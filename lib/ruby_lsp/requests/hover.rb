@@ -46,7 +46,7 @@ module RubyLsp
 
         @target = target #: Prism::Node?
         uri = document.uri
-        @response_builder = ResponseBuilders::Hover.new #: ResponseBuilders::Hover
+        @response_builder = ResponseBuilders::Hover.new(document.encoding, document.parse_result) #: ResponseBuilders::Hover
         Listeners::Hover.new(@response_builder, global_state, uri, node_context, dispatcher, sorbet_level, position)
         Addon.addons.each do |addon|
           addon.create_hover_listener(@response_builder, node_context, dispatcher)

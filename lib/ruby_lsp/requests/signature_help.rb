@@ -37,7 +37,7 @@ module RubyLsp
 
         @target = target #: Prism::Node?
         @dispatcher = dispatcher
-        @response_builder = ResponseBuilders::SignatureHelp.new #: ResponseBuilders::SignatureHelp
+        @response_builder = ResponseBuilders::SignatureHelp.new(document.encoding, document.parse_result) #: ResponseBuilders::SignatureHelp
         Listeners::SignatureHelp.new(@response_builder, global_state, node_context, dispatcher, sorbet_level)
       end
 
