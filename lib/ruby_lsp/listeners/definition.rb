@@ -302,7 +302,8 @@ module RubyLsp
         return unless declaration
 
         Array(declaration).each do |decl|
-          next unless reachable_from_call_site?(decl, receiver_type)
+          next if decl.is_a?(Rubydex::Method) &&
+            !method_reachable_from_call_site?(decl, receiver_type, @graph, @node_context)
 
           decl.definitions.each do |definition|
             location = definition.location
@@ -317,31 +318,6 @@ module RubyLsp
             )
           end
         end
-      end
-
-      # A method is reachable from the call site when:
-      # - it is public, or there's no concrete receiver type to compare against
-      # - the call site is inside the receiver's own namespace (implicit/self call)
-      # - it is protected and the call site's class is in the same hierarchy as the method's defining class
-      #
-      #: (Rubydex::Declaration, TypeInferrer::Type?) -> bool
-      def reachable_from_call_site?(decl, receiver_type)
-        return true unless receiver_type
-        return true unless decl.is_a?(Rubydex::Method)
-
-        caller_namespace = @node_context.fully_qualified_name
-        return true if caller_namespace == receiver_type.name
-
-        return true if decl.public?
-        return false if decl.private?
-
-        owner = decl.owner
-        return false unless owner.is_a?(Rubydex::Namespace)
-
-        caller_declaration = @graph[caller_namespace]
-        return false unless caller_declaration.is_a?(Rubydex::Namespace)
-
-        caller_declaration.ancestors.any? { |ancestor| ancestor.name == owner.name }
       end
 
       #: (Prism::StringNode node, Symbol message) -> void
@@ -394,14 +370,7 @@ module RubyLsp
       def handle_constant_definition(value)
         declaration = @graph.resolve_constant(value, @node_context.nesting)
         return unless declaration
-
-        # Only allow jumping to the definition of a private constant if the constant is defined in the same namespace
-        # as the reference. Not every declaration kind exposes visibility (e.g. unresolved namespaces), so we gate on
-        # the Visibility module
-        if declaration.is_a?(Rubydex::Visibility) && declaration.private? &&
-            declaration.name != "#{@node_context.fully_qualified_name}::#{value}"
-          return
-        end
+        return unless constant_reachable_from_call_site?(declaration, value, @node_context)
 
         declaration.definitions.each do |definition|
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
