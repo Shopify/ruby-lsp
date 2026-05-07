@@ -223,7 +223,7 @@ module RubyLsp
 
     def test_resolve_test_command_entire_directories
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/test/fake_test.rb", "/other/test/fake_test2.rb"])
+        Dir.stubs(:glob).returns(["fake_test.rb", "fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -539,7 +539,7 @@ module RubyLsp
 
     def test_resolve_test_command_mix_of_directories_and_examples
       with_server do |server|
-        Dir.stubs(:glob).returns(["/test/unit/fake_test.rb", "/test/unit/fake_test2.rb"])
+        Dir.stubs(:glob).returns(["fake_test.rb", "fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -637,7 +637,7 @@ module RubyLsp
 
     def test_resolve_test_command_for_minitest_spec_directory
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/spec/fake_spec.rb", "/other/spec/fake2_spec.rb"])
+        Dir.stubs(:glob).returns(["fake_spec.rb", "fake2_spec.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -782,7 +782,7 @@ module RubyLsp
 
     def test_resolve_properly_escapes_file_paths_within_directories
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/test/fake(v2)_test.rb"])
+        Dir.stubs(:glob).returns(["fake(v2)_test.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -1298,7 +1298,7 @@ module RubyLsp
 
     def test_resolve_test_command_mix_of_directories_and_examples
       with_server do |server|
-        Dir.stubs(:glob).returns(["/test/unit/fake_test.rb", "/test/unit/fake_test2.rb"])
+        Dir.stubs(:glob).returns(["fake_test.rb", "fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -1366,7 +1366,7 @@ module RubyLsp
 
     def test_resolve_properly_escapes_file_paths_within_directories
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/test/fake(v2)_test.rb"])
+        Dir.stubs(:glob).returns(["fake(v2)_test.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
