@@ -108,6 +108,44 @@ module Rubydex
     def to_lsp_completion_kind
       RubyLsp::Constant::CompletionItemKind::METHOD
     end
+
+    # All signatures collected across every definition (re-opens, RBS overloads, alias targets) of this method.
+    #: () -> Array[Rubydex::Signature]
+    def signatures
+      definitions.flat_map do |defn|
+        case defn
+        when Rubydex::MethodDefinition, Rubydex::MethodAliasDefinition
+          defn.signatures
+        else
+          []
+        end
+      end
+    end
+
+    # Decorated parameter list of the first signature, e.g. `(a, b = <default>, &block)`. Returns `()` when there are
+    # no signatures (e.g. an unresolved alias).
+    #: () -> String
+    def decorated_parameters
+      first = signatures.first
+      return "()" unless first
+
+      "(#{first.format})"
+    end
+
+    # Suffix line that hints at additional overloads beyond the first signature, matching the legacy index entry
+    # rendering used in hover.
+    #: () -> String
+    def formatted_signatures
+      count = signatures.size
+      case count
+      when 0, 1
+        ""
+      when 2
+        "\n(+1 overload)"
+      else
+        "\n(+#{count - 1} overloads)"
+      end
+    end
   end
 
   class InstanceVariable

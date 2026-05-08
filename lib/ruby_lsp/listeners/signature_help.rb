@@ -33,14 +33,7 @@ module RubyLsp
         target_method = owner.find_member("#{message}()")
         return unless target_method.is_a?(Rubydex::Method)
 
-        signatures = target_method.definitions.flat_map do |defn|
-          case defn
-          when Rubydex::MethodDefinition, Rubydex::MethodAliasDefinition
-            defn.signatures
-          else
-            []
-          end
-        end
+        signatures = target_method.signatures
 
         # If the method doesn't have any signatures, there's nothing to show
         return if signatures.empty?
