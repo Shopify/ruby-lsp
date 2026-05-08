@@ -11,7 +11,7 @@ module RubyLsp
         @sorbet_level = sorbet_level
         @response_builder = response_builder
         @global_state = global_state
-        @index = global_state.index #: RubyIndexer::Index
+        @graph = global_state.graph #: Rubydex::Graph
         @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @node_context = node_context
         dispatcher.register(self, :on_call_node_enter)
@@ -27,18 +27,24 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        methods = @index.resolve_method(message, type.name)
-        return unless methods
+        owner = @graph[type.name]
+        return unless owner.is_a?(Rubydex::Namespace)
 
-        target_method = methods.first
-        return unless target_method
+        target_method = owner.find_member("#{message}()")
+        return unless target_method.is_a?(Rubydex::Method)
 
-        signatures = target_method.signatures
+        signatures = target_method.definitions.flat_map do |defn|
+          case defn
+          when Rubydex::MethodDefinition, Rubydex::MethodAliasDefinition
+            defn.signatures
+          else
+            []
+          end
+        end
 
-        # If the method doesn't have any parameters, there's no need to show signature help
+        # If the method doesn't have any signatures, there's nothing to show
         return if signatures.empty?
 
-        name = target_method.name
         title = +""
 
         extra_links = if type.is_a?(TypeInferrer::GuessedType)
@@ -49,7 +55,7 @@ module RubyLsp
         active_signature, active_parameter = determine_active_signature_and_parameter(node, signatures)
 
         signature_help = Interface::SignatureHelp.new(
-          signatures: generate_signatures(signatures, name, methods, title, extra_links),
+          signatures: generate_signatures(signatures, message, target_method, title, extra_links),
           active_signature: active_signature,
           active_parameter: active_parameter,
         )
@@ -58,7 +64,7 @@ module RubyLsp
 
       private
 
-      #: (Prism::CallNode node, Array[RubyIndexer::Entry::Signature] signatures) -> [Integer, Integer]
+      #: (Prism::CallNode node, Array[Rubydex::Signature] signatures) -> [Integer, Integer]
       def determine_active_signature_and_parameter(node, signatures)
         arguments_node = node.arguments
         arguments = arguments_node&.arguments || []
@@ -86,15 +92,15 @@ module RubyLsp
         [active_sig_index, active_parameter]
       end
 
-      #: (Array[RubyIndexer::Entry::Signature] signatures, String method_name, Array[RubyIndexer::Entry] methods, String title, String? extra_links) -> Array[Interface::SignatureInformation]
-      def generate_signatures(signatures, method_name, methods, title, extra_links)
+      #: (Array[Rubydex::Signature] signatures, String method_name, Rubydex::Method method, String title, String? extra_links) -> Array[Interface::SignatureInformation]
+      def generate_signatures(signatures, method_name, method, title, extra_links)
         signatures.map do |signature|
           Interface::SignatureInformation.new(
             label:  "#{method_name}(#{signature.format})",
             parameters: signature.parameters.map { |param| Interface::ParameterInformation.new(label: param.name) },
             documentation: Interface::MarkupContent.new(
               kind: "markdown",
-              value: markdown_from_index_entries(title, methods, extra_links: extra_links),
+              value: markdown_from_definitions(title, method.definitions, extra_links: extra_links),
             ),
           )
         end
