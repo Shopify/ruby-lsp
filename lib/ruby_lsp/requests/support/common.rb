@@ -23,7 +23,7 @@ module RubyLsp
           )
         end
 
-        #: ((Prism::Location | RubyIndexer::Location) location) -> Interface::Range
+        #: ((Prism::Location | Rubydex::Location) location) -> Interface::Range
         def range_from_location(location)
           Interface::Range.new(
             start: Interface::Position.new(
@@ -98,7 +98,7 @@ module RubyLsp
         # `RubyIndexer::Entry::MethodAlias`. All respond to `public?`, `private?` and `owner` (an object with a
         # `name` attribute).
         #
-        #: ((Rubydex::Method | RubyIndexer::Entry::Member | RubyIndexer::Entry::MethodAlias) method_decl, TypeInferrer::Type? receiver_type, Rubydex::Graph graph, NodeContext node_context) -> bool
+        #: (Rubydex::Method method_decl, TypeInferrer::Type? receiver_type, Rubydex::Graph graph, NodeContext node_context) -> bool
         def method_reachable_from_call_site?(method_decl, receiver_type, graph, node_context)
           return true unless receiver_type
 
@@ -108,12 +108,10 @@ module RubyLsp
           return true if method_decl.public?
           return false if method_decl.private?
 
-          owner_name = method_decl.owner&.name
-          return false unless owner_name
-
           caller_declaration = graph[caller_namespace]
           return false unless caller_declaration.is_a?(Rubydex::Namespace)
 
+          owner_name = method_decl.owner.name
           caller_declaration.ancestors.any? { |ancestor| ancestor.name == owner_name }
         end
 
@@ -162,55 +160,6 @@ module RubyLsp
           }
         end
 
-        #: (String title, (Array[RubyIndexer::Entry] | RubyIndexer::Entry) entries, ?Integer? max_entries) -> Hash[Symbol, String]
-        def categorized_markdown_from_index_entries(title, entries, max_entries = nil)
-          markdown_title = "```ruby\n#{title}\n```"
-          definitions = []
-          content = +""
-          entries = Array(entries)
-          entries_to_format = max_entries ? entries.take(max_entries) : entries
-          entries_to_format.each do |entry|
-            loc = entry.location
-
-            # We always handle locations as zero based. However, for file links in Markdown we need them to be one
-            # based, which is why instead of the usual subtraction of 1 to line numbers, we are actually adding 1 to
-            # columns. The format for VS Code file URIs is
-            # `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
-            uri = "#{entry.uri}#L#{loc.start_line},#{loc.start_column + 1}-#{loc.end_line},#{loc.end_column + 1}"
-            definitions << "[#{entry.file_name}](#{uri})"
-            content << "\n\n#{entry.comments}" unless entry.comments.empty?
-          end
-
-          additional_entries_text = if max_entries && entries.length > max_entries
-            additional = entries.length - max_entries
-            " | #{additional} other#{additional > 1 ? "s" : ""}"
-          else
-            ""
-          end
-
-          {
-            title: markdown_title,
-            links: "**Definitions**: #{definitions.join(" | ")}#{additional_entries_text}",
-            documentation: content,
-          }
-        end
-
-        #: (String title, (Array[RubyIndexer::Entry] | RubyIndexer::Entry) entries, ?Integer? max_entries, ?extra_links: String?) -> String
-        def markdown_from_index_entries(title, entries, max_entries = nil, extra_links: nil)
-          categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
-
-          markdown = +(categorized_markdown[:title] || "")
-          markdown << "\n\n#{extra_links}" if extra_links
-
-          <<~MARKDOWN.chomp
-            #{markdown}
-
-            #{categorized_markdown[:links]}
-
-            #{categorized_markdown[:documentation]}
-          MARKDOWN
-        end
-
         #: (String title, Enumerable[Rubydex::Definition] definitions, ?Integer? max_entries, ?extra_links: String?) -> String
         def markdown_from_definitions(title, definitions, max_entries = nil, extra_links: nil)
           categorized_markdown = categorized_markdown_from_definitions(title, definitions, max_entries)
@@ -229,7 +178,20 @@ module RubyLsp
 
         #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String?
         def constant_name(node)
-          RubyIndexer::Index.constant_name(node)
+          Common.constant_name(node)
+        end
+
+        class << self
+          #: ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String?
+          def constant_name(node)
+            case node
+            when Prism::ConstantPathNode, Prism::ConstantReadNode, Prism::ConstantPathTargetNode
+              node.full_name
+            end
+          rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
+                 Prism::ConstantPathNode::MissingNodesInConstantPathError
+            nil
+          end
         end
 
         #: ((Prism::ModuleNode | Prism::ClassNode) node) -> String?
@@ -251,28 +213,6 @@ module RubyLsp
           while current.is_a?(Prism::ConstantPathNode)
             block.call(current)
             current = current.parent
-          end
-        end
-
-        #: (RubyIndexer::Entry entry) -> Integer
-        def kind_for_entry(entry)
-          case entry
-          when RubyIndexer::Entry::Class
-            Constant::SymbolKind::CLASS
-          when RubyIndexer::Entry::Module
-            Constant::SymbolKind::NAMESPACE
-          when RubyIndexer::Entry::Constant, RubyIndexer::Entry::UnresolvedConstantAlias, RubyIndexer::Entry::ConstantAlias
-            Constant::SymbolKind::CONSTANT
-          when RubyIndexer::Entry::Method, RubyIndexer::Entry::UnresolvedMethodAlias, RubyIndexer::Entry::MethodAlias
-            entry.name == "initialize" ? Constant::SymbolKind::CONSTRUCTOR : Constant::SymbolKind::METHOD
-          when RubyIndexer::Entry::Accessor
-            Constant::SymbolKind::PROPERTY
-          when RubyIndexer::Entry::InstanceVariable, RubyIndexer::Entry::ClassVariable
-            Constant::SymbolKind::FIELD
-          when RubyIndexer::Entry::GlobalVariable
-            Constant::SymbolKind::VARIABLE
-          else
-            Constant::SymbolKind::NULL
           end
         end
       end

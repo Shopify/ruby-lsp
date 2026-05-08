@@ -82,6 +82,25 @@ module RubyLsp
       end
     end
 
+    def test_minitest_with_compact_path_resolving_to_outer_namespace
+      source = <<~RUBY
+        module Foo
+        end
+
+        module Bar
+          class Foo::MyTest < Minitest::Test
+            def test_something; end
+          end
+        end
+      RUBY
+
+      with_minitest_test(source) do |items|
+        assert_equal(["Foo::MyTest"], items.map { |i| i[:id] })
+        assert_equal(["Foo::MyTest#test_something"], items[0][:children].map { |i| i[:id] })
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
     def test_minitest_with_dynamic_constant_path
       source = File.read("test/fixtures/minitest_with_dynamic_constant_path.rb")
 
@@ -144,13 +163,15 @@ module RubyLsp
       RUBY
 
       with_server(source, URI::Generic.from_path(path: "/test/foo_test.rb")) do |server, uri|
-        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+        graph = server.global_state.graph
+        graph.index_source(URI("/other_file.rb").to_s, <<~RUBY, "ruby")
           module Test
             module Unit
               class TestCase; end
             end
           end
         RUBY
+        graph.resolve
 
         server.global_state.stubs(:enabled_feature?).returns(true)
 
@@ -158,8 +179,6 @@ module RubyLsp
           textDocument: { uri: uri },
         })
 
-        # Discard the indexing log message
-        server.pop_response
         items = get_response(server)
         assert_equal(9, items.length)
 
@@ -228,13 +247,15 @@ module RubyLsp
       RUBY
 
       with_server(source, URI::Generic.from_path(path: "/test/foo_test.rb")) do |server, uri|
-        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+        graph = server.global_state.graph
+        graph.index_source(URI("/other_file.rb").to_s, <<~RUBY, "ruby")
           module Test
             module Unit
               class TestCase; end
             end
           end
         RUBY
+        graph.resolve
 
         state = server.global_state
         state.stubs(:enabled_feature?).returns(true)
@@ -252,8 +273,6 @@ module RubyLsp
           textDocument: { uri: uri },
         })
 
-        # Discard the indexing log message
-        server.pop_response
         items = get_response(server)
         assert_empty(items)
       end
@@ -271,13 +290,15 @@ module RubyLsp
       RUBY
 
       with_server(source, URI::Generic.from_path(path: "/tests/something.rb")) do |server, uri|
-        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+        graph = server.global_state.graph
+        graph.index_source(URI("/other_file.rb").to_s, <<~RUBY, "ruby")
           module Test
             module Unit
               class TestCase; end
             end
           end
         RUBY
+        graph.resolve
 
         server.global_state.stubs(:enabled_feature?).returns(true)
 
@@ -285,8 +306,6 @@ module RubyLsp
           textDocument: { uri: uri },
         })
 
-        # Discard the indexing log message
-        server.pop_response
         items = get_response(server)
         assert_empty(items)
       end

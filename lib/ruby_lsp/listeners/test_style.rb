@@ -220,7 +220,7 @@ module RubyLsp
         name = node.name.to_s
         return unless name.start_with?("test_")
 
-        current_group_name = RubyIndexer::Index.actual_nesting(@nesting, nil).join("::")
+        current_group_name = calc_fully_qualified_name(nil)
         parent = @parent_stack.last
         return unless parent.is_a?(Requests::Support::TestItem)
 

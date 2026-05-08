@@ -17,14 +17,6 @@ parser = OptionParser.new do |opts|
     options[:debug] = true
   end
 
-  opts.on("--time-index", "Measure the time it takes to index the project") do
-    options[:time_index] = true
-  end
-
-  opts.on("--doctor", "Run troubleshooting steps") do
-    options[:doctor] = true
-  end
-
   opts.on("--use-launcher", "[EXPERIMENTAL] Use launcher mechanism to handle missing dependencies gracefully") do
     options[:launcher] = true
   end
@@ -108,44 +100,6 @@ if options[:debug]
   rescue LoadError
     $stderr.puts("You need to install the debug gem to use the --debug flag")
   end
-end
-
-if options[:time_index]
-  index = RubyIndexer::Index.new
-
-  time_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-  index.index_all
-  elapsed_time = Process.clock_gettime(Process::CLOCK_MONOTONIC) - time_start
-
-  entries = index.instance_variable_get(:@entries)
-  entries_by_entry_type = entries.values.flatten.group_by(&:class)
-
-  puts <<~MSG
-    Ruby LSP v#{RubyLsp::VERSION}: Indexing took #{elapsed_time.round(5)} seconds and generated:
-    - #{entries_by_entry_type.sort_by { |k, _| k.to_s }.map { |k, v| "#{k.name.split("::").last}: #{v.size}" }.join("\n- ")}
-  MSG
-  return
-end
-
-if options[:doctor]
-  index = RubyIndexer::Index.new
-
-  if File.exist?(".index.yml")
-    begin
-      config = YAML.parse_file(".index.yml").to_ruby
-    rescue => e
-      abort("Error parsing config: #{e.message}")
-    end
-    index.configuration.apply_config(config)
-  end
-
-  puts "Globbing for indexable files"
-
-  index.configuration.indexable_uris.each do |uri|
-    puts "indexing: #{uri}"
-    index.index_file(uri)
-  end
-  return
 end
 
 server = RubyLsp::Server.new
