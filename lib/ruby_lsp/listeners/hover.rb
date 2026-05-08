@@ -15,7 +15,6 @@ module RubyLsp
       def initialize(response_builder, global_state, uri, node_context, dispatcher, sorbet_level, position) # rubocop:disable Metrics/ParameterLists
         @response_builder = response_builder
         @global_state = global_state
-        @index = global_state.index #: RubyIndexer::Index
         @graph = global_state.graph #: Rubydex::Graph
         @type_inferrer = global_state.type_inferrer #: TypeInferrer
         @path = uri.to_standardized_path #: String?
@@ -457,21 +456,22 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        methods = @index.resolve_method(message, type.name, inherited_only: inherited_only)
-        return unless methods
+        owner = @graph[type.name]
+        return unless owner.is_a?(Rubydex::Namespace)
 
-        first_method = methods.first #: as !nil
-        return unless method_reachable_from_call_site?(first_method, type, @graph, @node_context)
+        method = owner.find_member("#{message}()", only_inherited: inherited_only)
+        return unless method.is_a?(Rubydex::Method)
+        return unless method_reachable_from_call_site?(method, type, @graph, @node_context)
 
-        title = "#{message}#{first_method.decorated_parameters}"
-        title << first_method.formatted_signatures
+        title = +"#{message}#{method.decorated_parameters}"
+        title << method.formatted_signatures
 
         if type.is_a?(TypeInferrer::GuessedType)
           title << "\n\nGuessed receiver: #{type.name}"
           @response_builder.push("[Learn more about guessed types](#{GUESSED_TYPES_URL})\n", category: :links)
         end
 
-        categorized_markdown_from_index_entries(title, methods).each do |category, content|
+        categorized_markdown_from_definitions(title, method.definitions).each do |category, content|
           @response_builder.push(content, category: category)
         end
       end

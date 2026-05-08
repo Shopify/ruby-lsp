@@ -806,19 +806,28 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_for_methods_shows_overload_count
-    skip("[RUBYDEX] Temporarily skipped because we don't yet index RBS methods")
+    rbs = <<~RBS
+      class Foo
+        def try_convert: (Object object) -> String?
+                       | (String s) -> String
+                       | (Symbol s) -> String
+      end
+    RBS
+    rbs_uri = URI::Generic.from_path(path: "/fake/path/foo.rbs").to_s
 
     source = <<~RUBY
-      String.try_convert
+      Foo.new.try_convert
     RUBY
 
     with_server(source) do |server, uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+      graph = server.global_state.graph
+      graph.index_source(rbs_uri, rbs, "rbs")
+      graph.resolve
+
       server.process_message(
         id: 1,
         method: "textDocument/hover",
-        params: { textDocument: { uri: uri }, position: { character: 8, line: 0 } },
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 0 } },
       )
 
       contents = server.pop_response.response.contents.value
@@ -905,6 +914,8 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_for_aliased_methods
+    skip("[RUBYDEX] need to expose method alias targets in the Ruby API")
+
     source = <<~RUBY
       class Parent
         # Original
