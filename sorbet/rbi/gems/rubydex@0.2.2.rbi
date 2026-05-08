@@ -98,6 +98,9 @@ class Rubydex::ConstantReference < ::Rubydex::Reference
   def location; end
 
   class << self
+    private
+
+    # source://rubydex//lib/rubydex.rb#11
     def new(*args); end
   end
 end
@@ -289,43 +292,64 @@ class Rubydex::Graph
   # Returns completion candidates for an expression context. This includes all keywords, constants, methods, instance
   # variables, class variables and global variables reachable from the current lexical scope and self type.
   #
-  # The nesting array represents the lexical scope stack. The optional `self_receiver` keyword argument overrides the
+  # The nesting array represents the lexical scope stack. The required `self_receiver` keyword argument overrides the
   # self type independently of the lexical scope (e.g., `"Foo::<Foo>"` for `def Foo.bar`). This distinction is important
   # because constants and class variables are always attached to the lexical scope. Meanwhile, methods and instance
-  # variables are attached to the type of `self` and those don't always match.
+  # variables are attached to the type of `self` and those don't always match. Pass `nil` when the self type is unknown
   #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(nesting: T::Array[String], self_receiver: T.nilable(String)).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword)]) }
-  def complete_expression(nesting, self_receiver: T.unsafe(nil)); end
+  sig do
+    params(
+      nesting: T::Array[String],
+      self_receiver: T.nilable(String),
+    ).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword)])
+  end
+  def complete_expression(nesting, self_receiver:); end
 
   # Returns completion candidates inside a method call's argument list (e.g., `foo.bar(|)`). This includes everything
   # that expression completion provides plus keyword argument names of the method being called.
   #
-  # See `complete_expression` for the semantics of `nesting` and `self_receiver`.
+  # See `complete_expression` for the semantics of `nesting` and `self_receiver` (required, may be `nil`).
   #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String, nesting: T::Array[String], self_receiver: T.nilable(String)).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword, Rubydex::KeywordParameter)]) }
-  def complete_method_argument(name, nesting, self_receiver: T.unsafe(nil)); end
+  sig do
+    params(
+      name: String,
+      nesting: T::Array[String],
+      self_receiver: T.nilable(String),
+    ).returns(T::Array[T.any(Rubydex::Declaration, Rubydex::Keyword, Rubydex::KeywordParameter)])
+  end
+  def complete_method_argument(name, nesting, self_receiver:); end
 
   # Returns completion candidates after a method call operator (e.g., `foo.`). This includes all methods that exist on
   # the type of the receiver and its ancestors.
   #
-  # The optional `self_receiver` kwarg is the caller's runtime self type. It's used for visibility checks for `private`
-  # and `protected` methods. Pass `nil` (the default) for top-level/script scope.
+  # The required `self_receiver` kwarg is the caller's runtime self type. It's used for visibility checks for `private`
+  # and `protected` methods. Pass `nil` for top-level/script scope.
   #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Method]) }
-  def complete_method_call(name, self_receiver: T.unsafe(nil)); end
+  sig do
+    params(
+      name: String,
+      self_receiver: T.nilable(String),
+    ).returns(T::Array[Rubydex::Method])
+  end
+  def complete_method_call(name, self_receiver:); end
 
   # Returns completion candidates after a namespace access operator (e.g., `Foo::`). This includes all constants and
   # singleton methods for the namespace and its ancestors.
   #
-  # The optional `self_receiver` kwarg is the caller's runtime self type. It's used to filter visibility-restricted
-  # singleton methods (e.g., `private_class_method`). Pass `nil` (the default) for top-level/script scope.
+  # The required `self_receiver` kwarg is the caller's runtime self type. It's used to filter visibility-restricted
+  # singleton methods (e.g., `private_class_method`). Pass `nil` for top-level/script scope.
   #
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Declaration]) }
-  def complete_namespace_access(name, self_receiver: T.unsafe(nil)); end
+  sig do
+    params(
+      name: String,
+      self_receiver: T.nilable(String),
+    ).returns(T::Array[Rubydex::Declaration])
+  end
+  def complete_namespace_access(name, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::ConstantReference]) }
@@ -566,8 +590,15 @@ class Rubydex::Method < ::Rubydex::Declaration
   def visibility; end
 end
 
-class Rubydex::MethodAliasDefinition < ::Rubydex::Definition; end
-class Rubydex::MethodDefinition < ::Rubydex::Definition; end
+class Rubydex::MethodAliasDefinition < ::Rubydex::Definition
+  # source://rubydex//lib/rubydex.rb#11
+  def signatures; end
+end
+
+class Rubydex::MethodDefinition < ::Rubydex::Definition
+  # source://rubydex//lib/rubydex.rb#11
+  def signatures; end
+end
 
 class Rubydex::MethodReference < ::Rubydex::Reference
   # source://rubydex//lib/rubydex.rb#11
@@ -654,6 +685,7 @@ class Rubydex::Reference
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
 
+  # source://rubydex//lib/rubydex.rb#11
   sig { returns(Rubydex::Location) }
   def location; end
 
@@ -670,6 +702,94 @@ class Rubydex::ResolvedConstantReference < ::Rubydex::ConstantReference
   sig { returns(Rubydex::Declaration) }
   def declaration; end
 end
+
+# source://rubydex//lib/rubydex/signature.rb#4
+class Rubydex::Signature
+  # @return [Signature] a new instance of Signature
+  #
+  # source://rubydex//lib/rubydex/signature.rb#33
+  def initialize(parameters); end
+
+  # source://rubydex//lib/rubydex/signature.rb#128
+  def block_parameter; end
+
+  # source://rubydex//lib/rubydex/signature.rb#38
+  def deconstruct; end
+
+  # source://rubydex//lib/rubydex/signature.rb#80
+  def deconstruct_keys(keys); end
+
+  # source://rubydex//lib/rubydex/signature.rb#125
+  def forward_parameter; end
+
+  # source://rubydex//lib/rubydex/signature.rb#116
+  def keyword_parameters; end
+
+  # source://rubydex//lib/rubydex/signature.rb#119
+  def optional_keyword_parameters; end
+
+  # source://rubydex//lib/rubydex/signature.rb#107
+  def optional_positional_parameters; end
+
+  # source://rubydex//lib/rubydex/signature.rb#30
+  def parameters; end
+
+  # source://rubydex//lib/rubydex/signature.rb#104
+  def positional_parameters; end
+
+  # source://rubydex//lib/rubydex/signature.rb#113
+  def post_parameters; end
+
+  # source://rubydex//lib/rubydex/signature.rb#122
+  def rest_keyword_parameter; end
+
+  # source://rubydex//lib/rubydex/signature.rb#110
+  def rest_positional_parameter; end
+end
+
+# source://rubydex//lib/rubydex/signature.rb#27
+class Rubydex::Signature::BlockParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#66
+Rubydex::Signature::DECONSTRUCT_KEYS = T.let(T.unsafe(nil), Array)
+
+# source://rubydex//lib/rubydex/signature.rb#26
+class Rubydex::Signature::ForwardParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#23
+class Rubydex::Signature::KeywordParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#24
+class Rubydex::Signature::OptionalKeywordParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#20
+class Rubydex::Signature::OptionalPositionalParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#5
+class Rubydex::Signature::Parameter
+  # @return [Parameter] a new instance of Parameter
+  #
+  # source://rubydex//lib/rubydex/signature.rb#13
+  def initialize(name, location); end
+
+  # source://rubydex//lib/rubydex/signature.rb#10
+  def location; end
+
+  # source://rubydex//lib/rubydex/signature.rb#7
+  def name; end
+end
+
+# source://rubydex//lib/rubydex/signature.rb#19
+class Rubydex::Signature::PositionalParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#22
+class Rubydex::Signature::PostParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#25
+class Rubydex::Signature::RestKeywordParameter < ::Rubydex::Signature::Parameter; end
+
+# source://rubydex//lib/rubydex/signature.rb#21
+class Rubydex::Signature::RestPositionalParameter < ::Rubydex::Signature::Parameter; end
 
 class Rubydex::SingletonClass < ::Rubydex::Namespace; end
 
