@@ -53,9 +53,10 @@ module RubyLsp
         guessed_type = @item.dig(:data, :guessed_type)
         title = @item[:label].dup
 
-        # TODO: when Rubydex exposes method signatures via `Rubydex::MethodDefinition#signatures`, append the formatted
-        # parameter list and overload count to the title here (see the legacy `decorated_parameters` /
-        # `formatted_signatures` rendering on `RubyIndexer::Entry::Member`).
+        if declaration.is_a?(Rubydex::Method)
+          title << declaration.decorated_parameters
+          title << declaration.formatted_signatures
+        end
 
         extra_links = if guessed_type
           title << "\n\nGuessed receiver: #{guessed_type}"
