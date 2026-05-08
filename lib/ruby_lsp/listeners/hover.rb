@@ -461,6 +461,7 @@ module RubyLsp
         return unless methods
 
         first_method = methods.first #: as !nil
+        return unless method_reachable_from_call_site?(first_method, type, @graph, @node_context)
 
         title = "#{message}#{first_method.decorated_parameters}"
         title << first_method.formatted_signatures
@@ -513,6 +514,7 @@ module RubyLsp
       def generate_hover(name, location)
         declaration = @graph.resolve_constant(name, @node_context.nesting)
         return unless declaration
+        return unless constant_reachable_from_call_site?(declaration, name, @node_context)
 
         categorized_markdown_from_definitions(declaration.name, declaration.definitions).each do |category, content|
           @response_builder.push(content, category: category)
