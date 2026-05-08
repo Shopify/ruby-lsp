@@ -188,22 +188,6 @@ class ServerTest < Minitest::Test
     assert_equal("rubocop_internal", hash.dig("formatter"))
   end
 
-  def test_initialized_recovers_from_indexing_failures
-    @server.global_state.index.expects(:index_all).once.raises(StandardError, "boom!")
-    capture_subprocess_io do
-      @server.process_message({ method: "initialized" })
-    end
-
-    notification = find_message(RubyLsp::Notification, "window/showMessage")
-    expected_message = "Error while indexing (see [troubleshooting steps]" \
-      "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): boom!"
-    assert_equal(
-      expected_message,
-      notification.params #: as RubyLsp::Interface::ShowMessageParams
-        .message,
-    )
-  end
-
   def test_formatting_errors_push_window_notification
     @server.global_state.expects(:formatter).raises(StandardError, "boom").once
 
@@ -224,21 +208,6 @@ class ServerTest < Minitest::Test
       notification.params #: as RubyLsp::Interface::ShowMessageParams
         .message,
     )
-  end
-
-  def test_applies_workspace_uri_to_indexing_configs_even_if_no_configs_are_specified
-    @server.process_message({
-      id: 1,
-      method: "initialize",
-      params: {
-        initializationOptions: {},
-        capabilities: { general: { positionEncodings: ["utf-8"] } },
-        workspaceFolders: [{ uri: URI::Generic.from_path(path: "/fake").to_s }],
-      },
-    })
-
-    index = @server.instance_variable_get(:@global_state).index
-    assert_equal("/fake", index.configuration.instance_variable_get(:@workspace_path))
   end
 
   def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
@@ -291,23 +260,6 @@ class ServerTest < Minitest::Test
       notification.params #: as RubyLsp::Interface::PublishDiagnosticsParams
         .diagnostics,
     )
-  end
-
-  def test_handles_invalid_configuration
-    File.write(".index.yml", "} invalid yaml")
-
-    capture_subprocess_io do
-      @server.process_message(id: 1, method: "initialize", params: {})
-    end
-
-    notification = find_message(RubyLsp::Notification, "window/showMessage")
-    assert_match(
-      /Syntax error while loading configuration/,
-      notification.params #: as RubyLsp::Interface::ShowMessageParams
-        .message,
-    )
-  ensure
-    FileUtils.rm(".index.yml")
   end
 
   def test_shows_error_if_formatter_set_to_rubocop_but_rubocop_not_available
@@ -444,82 +396,6 @@ class ServerTest < Minitest::Test
     assert_equal(RubyLsp::Constant::MessageType::ERROR, log.params.type)
   end
 
-  def test_changed_file_only_indexes_ruby
-    path = File.join(Dir.pwd, "lib", "foo.rb")
-    File.write(path, "class Foo\nend")
-    uri = URI::Generic.from_path(path: path)
-
-    begin
-      @server.global_state.index.index_all(uris: [])
-      @server.global_state.index.expects(:index_single).once.with do |uri|
-        uri.full_path == path
-      end
-
-      @server.process_message({
-        method: "workspace/didChangeWatchedFiles",
-        params: {
-          changes: [
-            {
-              uri: uri,
-              type: RubyLsp::Constant::FileChangeType::CREATED,
-            },
-            {
-              uri: URI("file:///.rubocop.yml").to_s,
-              type: RubyLsp::Constant::FileChangeType::CREATED,
-            },
-          ],
-        },
-      })
-    ensure
-      FileUtils.rm(path)
-    end
-  end
-
-  def test_did_change_watched_files_does_not_fail_for_non_existing_files
-    @server.global_state.index.index_all(uris: [])
-    @server.process_message({
-      method: "workspace/didChangeWatchedFiles",
-      params: {
-        changes: [
-          {
-            uri: URI::Generic.from_path(path: File.join(Dir.pwd, "lib", "non_existing.rb")).to_s,
-            type: RubyLsp::Constant::FileChangeType::CREATED,
-          },
-        ],
-      },
-    })
-
-    assert_raises(Timeout::Error) do
-      Timeout.timeout(0.5) do
-        notification = find_message(RubyLsp::Notification, "window/logMessage")
-        flunk(notification.params.message)
-      end
-    end
-  end
-
-  def test_did_change_watched_files_handles_deletions
-    path = File.join(Dir.pwd, "lib", "foo.rb")
-
-    @server.global_state.index.expects(:delete).once.with do |uri|
-      uri.full_path == path
-    end
-
-    uri = URI::Generic.from_path(path: path).to_s
-
-    @server.global_state.index.index_all(uris: [])
-    @server.process_message({
-      method: "workspace/didChangeWatchedFiles",
-      params: {
-        changes: [
-          {
-            uri: uri,
-            type: RubyLsp::Constant::FileChangeType::DELETED,
-          },
-        ],
-      },
-    })
-  end
-
   def test_did_change_watched_files_reports_addon_errors
     Class.new(RubyLsp::Addon) do
       def activate(global_state, outgoing_queue); end
@@ -562,7 +438,6 @@ class ServerTest < Minitest::Test
     bar.expects(:workspace_did_change_watched_files).once
 
     begin
-      @server.global_state.index.index_all(uris: [])
       @server.process_message({
         method: "workspace/didChangeWatchedFiles",
         params: {
@@ -584,7 +459,6 @@ class ServerTest < Minitest::Test
   end
 
   def test_did_change_watched_files_processes_unique_change_entries
-    @server.global_state.index.index_all(uris: [])
     @server.expects(:handle_rubocop_config_change).once
     @server.process_message({
       method: "workspace/didChangeWatchedFiles",
@@ -669,26 +543,6 @@ class ServerTest < Minitest::Test
       "Gemfile",
       [],
     ))
-  end
-
-  def test_handles_editor_indexing_settings
-    capture_io do
-      @server.process_message({
-        id: 1,
-        method: "initialize",
-        params: {
-          initializationOptions: {
-            indexing: {
-              excludedGems: ["foo_gem"],
-              includedGems: ["bar_gem"],
-            },
-          },
-        },
-      })
-    end
-
-    assert_includes(@server.global_state.index.configuration.instance_variable_get(:@excluded_gems), "foo_gem")
-    assert_includes(@server.global_state.index.configuration.instance_variable_get(:@included_gems), "bar_gem")
   end
 
   def test_closing_document_before_computing_features_does_not_error
@@ -982,225 +836,44 @@ class ServerTest < Minitest::Test
     assert_empty(@server.instance_variable_get(:@cancelled_requests))
   end
 
-  def test_unsaved_changes_are_indexed_when_computing_automatic_features
+  def test_server_indexes_upon_edit
     uri = URI("file:///foo.rb")
-    index = @server.global_state.index
+    graph = @server.global_state.graph
+    initial_source = +"class Bar; end\nclass Foo\nend"
 
-    # Simulate opening a file. First, send the notification to open the file with a class inside
     @server.process_message({
       method: "textDocument/didOpen",
       params: {
         textDocument: {
           uri: uri,
-          text: +"class Foo\nend",
+          text: initial_source,
           version: 1,
           languageId: "ruby",
         },
       },
     })
-    # Fire the automatic features requests to trigger indexing
-    @server.process_message({
-      id: 1,
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: uri } },
-    })
+    graph.index_source(uri.to_s, initial_source, "ruby")
+    graph.resolve
 
-    entries = index["Foo"]
-    assert_equal(1, entries.length)
+    foo = graph["Foo"] #: as Rubydex::Class
+    refute_nil(foo)
+    refute_includes(foo.ancestors.map(&:name), "Bar")
 
-    # Modify the file without saving
+    # Modify the file without saving so that `Foo` inherits from `Bar`. The server reindexes the document on each
+    # change, so the graph should reflect the new ancestry without the file ever being saved to disk
     @server.process_message({
       method: "textDocument/didChange",
       params: {
         textDocument: { uri: uri, version: 2 },
         contentChanges: [
-          { text: "  def bar\n  end\n", range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } } },
+          { text: " < Bar", range: { start: { line: 1, character: 9 }, end: { line: 1, character: 9 } } },
         ],
       },
     })
 
-    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
-    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
-    # isn't reproduced here. Parsing manually matches what happens normally
-    store = @server.instance_variable_get(:@store)
-    store.get(uri).parse!
-
-    # Trigger the automatic features again
-    @server.process_message({
-      id: 2,
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: uri } },
-    })
-
-    # There should still only be one entry for each declaration, but we should have picked up the new ones
-    entries = index["Foo"]
-    assert_equal(1, entries.length)
-
-    entries = index["bar"]
-    assert_equal(1, entries.length)
-  end
-
-  def test_ancestors_are_recomputed_even_on_unsaved_changes
-    uri = URI("file:///foo.rb")
-    index = @server.global_state.index
-    source = +<<~RUBY
-      module Bar; end
-
-      class Foo
-        extend Bar
-      end
-    RUBY
-
-    # Simulate opening a file. First, send the notification to open the file with a class inside
-    @server.process_message({
-      method: "textDocument/didOpen",
-      params: {
-        textDocument: {
-          uri: uri,
-          text: source,
-          version: 1,
-          languageId: "ruby",
-        },
-      },
-    })
-    # Fire the automatic features requests to trigger indexing
-    @server.process_message({
-      id: 1,
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: uri } },
-    })
-
-    assert_equal(["Foo::<Foo>", "Bar"], index.linearized_ancestors_of("Foo::<Foo>"))
-
-    # Delete the extend
-    @server.process_message({
-      method: "textDocument/didChange",
-      params: {
-        textDocument: { uri: uri, version: 2 },
-        contentChanges: [
-          { text: "", range: { start: { line: 3, character: 0 }, end: { line: 3, character: 12 } } },
-        ],
-      },
-    })
-
-    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
-    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
-    # isn't reproduced here. Parsing manually matches what happens normally
-    store = @server.instance_variable_get(:@store)
-    document = store.get(uri)
-
-    assert_equal(<<~RUBY, document.source)
-      module Bar; end
-
-      class Foo
-
-      end
-    RUBY
-
-    document.parse!
-
-    # Trigger the automatic features again
-    @server.process_message({
-      id: 2,
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: uri } },
-    })
-
-    result = find_message(RubyLsp::Result, id: 2)
-    refute_nil(result)
-
-    assert_equal(["Foo::<Foo>"], index.linearized_ancestors_of("Foo::<Foo>"))
-  end
-
-  def test_edits_outside_of_declarations_do_not_trigger_indexing
-    uri = URI("file:///foo.rb")
-    index = @server.global_state.index
-
-    # Simulate opening a file. First, send the notification to open the file with a class inside
-    @server.process_message({
-      method: "textDocument/didOpen",
-      params: {
-        textDocument: {
-          uri: uri,
-          text: +"class Foo\n\nend",
-          version: 1,
-          languageId: "ruby",
-        },
-      },
-    })
-    # Fire the automatic features requests to trigger indexing
-    @server.process_message({
-      id: 1,
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: uri } },
-    })
-
-    entries = index["Foo"]
-    assert_equal(1, entries.length)
-
-    # Modify the file without saving
-    @server.process_message({
-      method: "textDocument/didChange",
-      params: {
-        textDocument: { uri: uri, version: 2 },
-        contentChanges: [
-          { text: "d", range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } } },
-        ],
-      },
-    })
-
-    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
-    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
-    # isn't reproduced here. Parsing manually matches what happens normally
-    store = @server.instance_variable_get(:@store)
-    store.get(uri).parse!
-
-    # Trigger the automatic features again
-    index.expects(:delete).never
-    @server.process_message({
-      id: 2,
-      method: "textDocument/documentSymbol",
-      params: { textDocument: { uri: uri } },
-    })
-
-    entries = index["Foo"]
-    assert_equal(1, entries.length)
-  end
-
-  def test_rubocop_config_changes_trigger_workspace_diagnostic_refresh
-    @server.process_message({
-      id: 1,
-      method: "initialize",
-      params: {
-        initializationOptions: {},
-        capabilities: {
-          general: {
-            positionEncodings: ["utf-8"],
-          },
-          workspace: { diagnostics: { refreshSupport: true } },
-        },
-      },
-    })
-    @server.global_state.index.index_all(uris: [])
-
-    [".rubocop.yml", ".rubocop", ".rubocop_todo.yml"].each do |config_file|
-      uri = URI::Generic.from_path(path: File.join(Dir.pwd, config_file)).to_s
-
-      @server.process_message({
-        method: "workspace/didChangeWatchedFiles",
-        params: {
-          changes: [
-            {
-              uri: uri,
-              type: RubyLsp::Constant::FileChangeType::CHANGED,
-            },
-          ],
-        },
-      })
-
-      request = find_message(RubyLsp::Request)
-      assert_equal("workspace/diagnostic/refresh", request.method)
-    end
+    foo = graph["Foo"] #: as Rubydex::Class
+    refute_nil(foo)
+    assert_includes(foo.ancestors.map(&:name), "Bar")
   end
 
   def test_compose_bundle_creates_file_to_skip_next_compose
@@ -1326,107 +999,6 @@ class ServerTest < Minitest::Test
     end
   end
 
-  def test_does_not_index_on_did_change_watched_files_if_document_is_managed_by_client
-    path = File.join(Dir.pwd, "lib", "foo.rb")
-    source = <<~RUBY
-      class Foo
-      end
-    RUBY
-    File.write(path, source)
-    uri = URI::Generic.from_path(path: path).to_s
-
-    begin
-      @server.process_message({
-        method: "textDocument/didOpen",
-        params: {
-          textDocument: {
-            uri: uri,
-            text: source,
-            version: 1,
-            languageId: "ruby",
-          },
-        },
-      })
-
-      @server.global_state.index.index_all(uris: [])
-      @server.global_state.index.expects(:handle_change).never
-      @server.process_message({
-        method: "workspace/didChangeWatchedFiles",
-        params: {
-          changes: [
-            {
-              uri: uri,
-              type: RubyLsp::Constant::FileChangeType::CHANGED,
-            },
-          ],
-        },
-      })
-
-      @server.global_state.index.expects(:handle_change).once
-      @server.process_message({
-        method: "textDocument/documentSymbol",
-        params: {
-          textDocument: {
-            uri: uri,
-          },
-        },
-      })
-    ensure
-      FileUtils.rm(path) if File.exist?(path)
-    end
-  end
-
-  def test_receiving_a_created_file_watch_notification_after_did_open_uses_handle_change
-    path = File.join(Dir.pwd, "lib", "foo.rb")
-    source = <<~RUBY
-      class Foo
-      end
-    RUBY
-    File.write(path, source)
-    uri = URI::Generic.from_path(path: path)
-
-    begin
-      # Simulate the editor opening a document and then immediately firing a document symbol request
-      @server.process_message({
-        method: "textDocument/didOpen",
-        params: {
-          textDocument: {
-            uri: uri,
-            text: source,
-            version: 1,
-            languageId: "ruby",
-          },
-        },
-      })
-      @server.process_message({
-        method: "textDocument/documentSymbol",
-        params: { textDocument: { uri: uri } },
-      })
-
-      @server.global_state.index.index_all(uris: [])
-      # Then send a late did change watched files notification for the creation of the file
-      @server.process_message({
-        method: "workspace/didChangeWatchedFiles",
-        params: {
-          changes: [
-            {
-              uri: uri,
-              type: RubyLsp::Constant::FileChangeType::CREATED,
-            },
-          ],
-        },
-      })
-
-      entries = @server.global_state.index["Foo"]
-      assert_equal(1, entries&.length)
-
-      uris = @server.global_state.index.search_require_paths("foo")
-      assert_equal(["foo"], uris.map(&:require_path))
-    ensure
-      FileUtils.rm(path) if File.exist?(path)
-    end
-  end
-
   def test_diagnose_state
     @server.process_message({
       method: "textDocument/didOpen",
@@ -1446,87 +1018,6 @@ class ServerTest < Minitest::Test
     assert_equal({ "file:///foo.rb" => "class Foo\nend" }, result.response[:documents])
     assert(result.response.key?(:backtrace))
     assert_equal(0, result.response[:incomingQueueSize])
-  end
-
-  def test_modifying_files_during_initial_indexing_does_not_duplicate_entries
-    path = File.join(Dir.pwd, "lib", "foo.rb")
-    uri = URI::Generic.from_path(path: path)
-
-    begin
-      @server.process_message({
-        id: 1,
-        method: "initialize",
-        params: {
-          initializationOptions: {},
-          capabilities: { general: { positionEncodings: ["utf-8"] }, window: { workDoneProgress: true } },
-        },
-      })
-
-      # Start indexing
-      File.write(path, "class Foo\nend")
-      @server.process_message({ method: "initialized", params: {} })
-
-      # Then immediately notify that a file was modified before indexing is finished
-      File.write(path, "class Foo\n  def bar\n  end\nend")
-      @server.process_message({
-        method: "workspace/didChangeWatchedFiles",
-        params: {
-          changes: [
-            {
-              uri: uri.to_s,
-              type: RubyLsp::Constant::FileChangeType::CHANGED,
-            },
-          ],
-        },
-      })
-
-      wait_for_indexing
-
-      # There should not be a duplicate declaration
-      index = @server.global_state.index
-      assert_equal(1, index["Foo"]&.length)
-    ensure
-      FileUtils.rm(path)
-    end
-  end
-
-  def test_requests_code_lens_refresh_after_indexing
-    @server.process_message({
-      id: 1,
-      method: "initialize",
-      params: {
-        initializationOptions: {},
-        capabilities: {
-          general: { positionEncodings: ["utf-8"] },
-          window: { workDoneProgress: true },
-          workspace: { codeLens: { refreshSupport: true } },
-        },
-      },
-    })
-
-    @server.process_message({ method: "initialized", params: {} })
-
-    wait_for_indexing
-
-    request = find_message(RubyLsp::Request, "workspace/codeLens/refresh")
-    refute_nil(request)
-  end
-
-  def test_busts_ancestor_cache_after_indexing
-    @server.process_message({
-      id: 1,
-      method: "initialize",
-      params: {
-        initializationOptions: {},
-        capabilities: { general: { positionEncodings: ["utf-8"] }, window: { workDoneProgress: true } },
-      },
-    })
-
-    @server.process_message({ method: "initialized", params: {} })
-
-    wait_for_indexing
-
-    assert_empty(@server.global_state.index.instance_variable_get(:@ancestors))
   end
 
   def test_code_lens_resolve_populates_run_test_command
@@ -1659,7 +1150,6 @@ class ServerTest < Minitest::Test
     @server.load_addons
 
     begin
-      @server.global_state.index.index_all(uris: [])
       @server.process_message({
         method: "workspace/didChangeWatchedFiles",
         params: {

@@ -27,9 +27,6 @@ module RubyLsp
     #: bool
     attr_reader :has_type_checker
 
-    #: RubyIndexer::Index
-    attr_reader :index
-
     #: Rubydex::Graph
     attr_reader :graph
 
@@ -60,7 +57,6 @@ module RubyLsp
       @linters = [] #: Array[String]
       @test_library = "minitest" #: String
       @has_type_checker = true #: bool
-      @index = RubyIndexer::Index.new #: RubyIndexer::Index
       @graph = Rubydex::Graph.new #: Rubydex::Graph
       @supported_formatters = {} #: Hash[String, Requests::Support::Formatter]
       @type_inferrer = TypeInferrer.new(@graph) #: TypeInferrer
@@ -206,7 +202,6 @@ module RubyLsp
         @graph.encoding = "utf32"
         Encoding::UTF_32LE
       end
-      @index.configuration.encoding = @encoding
 
       @client_capabilities.apply_client_capabilities(options[:capabilities]) if options[:capabilities]
 
