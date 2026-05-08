@@ -127,17 +127,22 @@ module RubyLsp
             # For Markdown links, we need 1 based display locations
             loc = definition.location.to_display
             uri = URI(loc.uri)
-            file_name = if uri.scheme == "untitled"
+
+            file_name = case uri.scheme
+            when "file"
+              full_path = uri.full_path #: as !nil
+              File.basename(full_path)
+            when "untitled"
               uri.opaque #: as !nil
-            else
-              File.basename(
-                uri.full_path, #: as !nil
-              )
             end
 
-            # The format for VS Code file URIs is `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
-            string_uri = "#{loc.uri}#L#{loc.start_line},#{loc.start_column}-#{loc.end_line},#{loc.end_column}"
-            file_links << "[#{file_name}](#{string_uri})"
+            # Omit the link for magic schemes like rubydex:built-in
+            if file_name
+              # The format for VS Code file URIs is `file:///path/to/file.rb#Lstart_line,start_column-end_line,end_column`
+              string_uri = "#{loc.uri}#L#{loc.start_line},#{loc.start_column}-#{loc.end_line},#{loc.end_column}"
+              file_links << "[#{file_name}](#{string_uri})"
+            end
+
             content << "\n\n#{definition.comments.map { |comment| comment.string.delete_prefix("# ") }.join("\n")}" unless definition.comments.empty?
           end
 
@@ -193,6 +198,22 @@ module RubyLsp
         #: (String title, (Array[RubyIndexer::Entry] | RubyIndexer::Entry) entries, ?Integer? max_entries, ?extra_links: String?) -> String
         def markdown_from_index_entries(title, entries, max_entries = nil, extra_links: nil)
           categorized_markdown = categorized_markdown_from_index_entries(title, entries, max_entries)
+
+          markdown = +(categorized_markdown[:title] || "")
+          markdown << "\n\n#{extra_links}" if extra_links
+
+          <<~MARKDOWN.chomp
+            #{markdown}
+
+            #{categorized_markdown[:links]}
+
+            #{categorized_markdown[:documentation]}
+          MARKDOWN
+        end
+
+        #: (String title, Enumerable[Rubydex::Definition] definitions, ?Integer? max_entries, ?extra_links: String?) -> String
+        def markdown_from_definitions(title, definitions, max_entries = nil, extra_links: nil)
+          categorized_markdown = categorized_markdown_from_definitions(title, definitions, max_entries)
 
           markdown = +(categorized_markdown[:title] || "")
           markdown << "\n\n#{extra_links}" if extra_links
