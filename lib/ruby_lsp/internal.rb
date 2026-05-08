@@ -35,6 +35,7 @@ require "set"
 require "ruby_lsp/rubydex/declaration"
 require "ruby_lsp/rubydex/definition"
 require "ruby_lsp/rubydex/reference"
+require "ruby_lsp/rubydex/signature"
 
 require "ruby-lsp"
 require "ruby_lsp/base_server"
