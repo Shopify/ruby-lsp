@@ -106,7 +106,7 @@ module RubyLsp
 
       #: (Prism::ConstantPathNode node) -> void
       def on_constant_path_node_enter(node)
-        name = RubyIndexer::Index.constant_name(node)
+        name = constant_name(node)
         return if name.nil?
 
         handle_constant_definition(name)
@@ -114,7 +114,7 @@ module RubyLsp
 
       #: (Prism::ConstantReadNode node) -> void
       def on_constant_read_node_enter(node)
-        name = RubyIndexer::Index.constant_name(node)
+        name = constant_name(node)
         return if name.nil?
 
         handle_constant_definition(name)

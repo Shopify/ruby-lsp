@@ -279,7 +279,7 @@ module RubyLsp
         when Prism::StringNode
           first_argument.content
         when Prism::ConstantReadNode, Prism::ConstantPathNode
-          RubyIndexer::Index.constant_name(first_argument)
+          constant_name(first_argument)
         end
 
         return unless name
