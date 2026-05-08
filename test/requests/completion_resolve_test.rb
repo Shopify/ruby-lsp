@@ -89,8 +89,6 @@ class CompletionResolveTest < Minitest::Test
   end
 
   def test_inserts_method_parameters_in_label_details
-    skip("[RUBYDEX] needs method signatures")
-
     source = +<<~RUBY
       class Bar
         def foo(a, b, c)
@@ -116,13 +114,24 @@ class CompletionResolveTest < Minitest::Test
   end
 
   def test_indicates_signature_count_in_label_details
-    skip("[RUBYDEX] needs method signatures. Change this test to index an RBS document with overloaded signatures")
+    rbs = <<~RBS
+      class Foo
+        def try_convert: (Object object) -> String?
+                       | (String s) -> String
+                       | (Symbol s) -> String
+      end
+    RBS
+    rbs_uri = URI::Generic.from_path(path: "/fake/path/foo.rbs").to_s
 
-    with_server("String.try_convert", stub_no_typechecker: true) do |server, _uri|
+    with_server("Foo.new.try_convert", stub_no_typechecker: true) do |server, _uri|
+      graph = server.global_state.graph
+      graph.index_source(rbs_uri, rbs, "rbs")
+      graph.resolve
+
       existing_item = {
         label: "try_convert",
         kind: RubyLsp::Constant::CompletionItemKind::METHOD,
-        data: { owner_name: "String::<String>" },
+        data: { owner_name: "Foo" },
       }
 
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
