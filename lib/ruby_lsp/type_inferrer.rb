@@ -78,7 +78,7 @@ module RubyLsp
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
         # class/module
-        receiver_name = RubyIndexer::Index.constant_name(receiver)
+        receiver_name = Requests::Support::Common.constant_name(receiver)
         return unless receiver_name
 
         resolved_receiver = @graph.resolve_constant(receiver_name, node_context.nesting)

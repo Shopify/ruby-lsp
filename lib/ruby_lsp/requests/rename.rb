@@ -54,7 +54,7 @@ module RubyLsp
 
         target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode
 
-        name = RubyIndexer::Index.constant_name(target)
+        name = constant_name(target)
         return unless name
 
         declaration = @graph.resolve_constant(name, node_context.nesting)

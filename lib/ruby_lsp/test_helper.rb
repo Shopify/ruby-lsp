@@ -29,7 +29,6 @@ module RubyLsp
           },
         })
 
-        server.global_state.index.index_single(uri, source)
         graph = server.global_state.graph
         graph.index_source(uri.to_s, source, "ruby")
         graph.resolve

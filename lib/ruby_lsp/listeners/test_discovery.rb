@@ -56,7 +56,23 @@ module RubyLsp
 
       #: (String? name) -> String
       def calc_fully_qualified_name(name)
-        RubyIndexer::Index.actual_nesting(@nesting, name).join("::")
+        parts = name ? @nesting + [name] : @nesting
+        return "" if parts.empty?
+
+        last = parts.last #: as !nil
+        rest = parts[0...-1] #: as !nil
+
+        resolved = @graph.resolve_constant(last, rest)
+        return resolved.name if resolved
+
+        # Fallback for unresolved constants (e.g. dynamic references): preserve top-level reset semantics by
+        # truncating at the first `::`-prefixed part when scanning from the innermost out.
+        corrected = []
+        parts.reverse_each do |part|
+          corrected.prepend(part.delete_prefix("::"))
+          break if part.start_with?("::")
+        end
+        corrected.join("::")
       end
 
       #: (Prism::ClassNode node, String fully_qualified_name) -> Array[String]
