@@ -77,6 +77,46 @@ module RubyLsp
           receiver.nil? || receiver.is_a?(Prism::SelfNode)
         end
 
+        # Returns true when a constant declaration is reachable from the call site. Private constants are only
+        # reachable from within the namespace where they are defined.
+        #
+        #: (Rubydex::Declaration declaration, String value, NodeContext node_context) -> bool
+        def constant_reachable_from_call_site?(declaration, value, node_context)
+          return true unless declaration.is_a?(Rubydex::Visibility) && declaration.private?
+
+          declaration.name == "#{node_context.fully_qualified_name}::#{value}"
+        end
+
+        # Returns true when a method is reachable from the call site, considering visibility and receiver type.
+        # A method is reachable when:
+        # - there's no concrete receiver type to compare against
+        # - the call site is inside the receiver's own namespace (implicit/self call)
+        # - it is public
+        # - it is protected and the call site's class is in the same hierarchy as the method's defining class
+        #
+        # The `method_decl` is duck-typed to support `Rubydex::Method`, `RubyIndexer::Entry::Member` and
+        # `RubyIndexer::Entry::MethodAlias`. All respond to `public?`, `private?` and `owner` (an object with a
+        # `name` attribute).
+        #
+        #: ((Rubydex::Method | RubyIndexer::Entry::Member | RubyIndexer::Entry::MethodAlias) method_decl, TypeInferrer::Type? receiver_type, Rubydex::Graph graph, NodeContext node_context) -> bool
+        def method_reachable_from_call_site?(method_decl, receiver_type, graph, node_context)
+          return true unless receiver_type
+
+          caller_namespace = node_context.fully_qualified_name
+          return true if caller_namespace == receiver_type.name
+
+          return true if method_decl.public?
+          return false if method_decl.private?
+
+          owner_name = method_decl.owner&.name
+          return false unless owner_name
+
+          caller_declaration = graph[caller_namespace]
+          return false unless caller_declaration.is_a?(Rubydex::Namespace)
+
+          caller_declaration.ancestors.any? { |ancestor| ancestor.name == owner_name }
+        end
+
         #: (String, Enumerable[Rubydex::Definition], ?Integer?) -> Hash[Symbol, String]
         def categorized_markdown_from_definitions(title, definitions, max_entries = nil)
           markdown_title = "```ruby\n#{title}\n```"

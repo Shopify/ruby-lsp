@@ -267,7 +267,7 @@ class HoverExpectationsTest < ExpectationsTestRunner
         private_constant(:CONST)
       end
 
-      A::CONST
+      A::CONST # invalid private reference
     RUBY
 
     with_server(source, stub_no_typechecker: true) do |server, uri|
@@ -277,8 +277,141 @@ class HoverExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
       )
 
-      # TODO: once we have visibility exposed from Rubydex, let's show that the constant is private
-      assert_match("A::CONST", server.pop_response.response.contents.value)
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hovering_over_private_method_with_implicit_self
+    source = <<~RUBY
+      class A
+        def bar
+          foo
+        end
+
+        private
+
+        # foo docs
+        def foo; end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 2 } },
+      )
+
+      assert_match("foo docs", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_does_not_hover_over_private_method_called_with_explicit_external_receiver
+    source = <<~RUBY
+      class A
+        private
+
+        # foo docs
+        def foo; end
+      end
+
+      class B
+        def bar
+          a = A.new
+          a.foo
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 10 } },
+      )
+
+      assert_nil(server.pop_response.response)
+    end
+  end
+
+  def test_hovers_protected_method_inside_same_class
+    source = <<~RUBY
+      class A
+        def bar
+          self.foo
+        end
+
+        protected
+
+        # foo docs
+        def foo; end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 2 } },
+      )
+
+      assert_match("foo docs", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_hovers_protected_method_called_from_subclass
+    source = <<~RUBY
+      class A
+        protected
+
+        # foo docs
+        def foo; end
+      end
+
+      class B < A
+        def bar
+          a = A.new
+          a.foo
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 10 } },
+      )
+
+      assert_match("foo docs", server.pop_response.response.contents.value)
+    end
+  end
+
+  def test_does_not_hover_protected_method_from_unrelated_class
+    source = <<~RUBY
+      class A
+        protected
+
+        # foo docs
+        def foo; end
+      end
+
+      class C
+        def bar
+          a = A.new
+          a.foo
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 10 } },
+      )
+
+      assert_nil(server.pop_response.response)
     end
   end
 
