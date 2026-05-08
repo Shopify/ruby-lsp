@@ -321,6 +321,28 @@ module RubyLsp
       assert_equal("User", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
+    def test_infer_guessed_types_returns_nil_when_resolved_constant_is_not_a_namespace
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        User = "guest"
+
+        user.name
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
+    def test_infer_guessed_types_returns_nil_when_search_fallback_finds_non_namespace
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 9 })
+        module Foo
+          SOMETHING = 1
+        end
+
+        something.bar
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
     def test_infer_guessed_types_inside_nesting
       node_context = index_and_locate(<<~RUBY, { line: 9, character: 9 })
         module Blog

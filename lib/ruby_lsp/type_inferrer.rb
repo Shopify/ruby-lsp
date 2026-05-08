@@ -124,7 +124,7 @@ module RubyLsp
 
       declaration = @graph.resolve_constant(guessed_name, nesting)
       declaration ||= @graph.search(guessed_name).first
-      return unless declaration
+      return unless declaration.is_a?(Rubydex::Namespace)
 
       GuessedType.new(declaration.name)
     end
