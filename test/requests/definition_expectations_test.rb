@@ -180,8 +180,6 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
   end
 
   def test_jumping_to_private_constant_from_different_namespace
-    skip("[RUBYDEX] Requires the visibility API")
-
     source = <<~RUBY
       class A
         CONST = 123
@@ -196,6 +194,136 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
         id: 1,
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 3, line: 5 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_jumping_to_private_method_with_implicit_self
+    source = <<~RUBY
+      class A
+        def bar
+          foo
+        end
+
+        private
+
+        def foo; end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 4, line: 2 } },
+      )
+      response = server.pop_response.response
+      refute_empty(response)
+      assert_equal(uri.to_s, response.first.attributes[:targetUri])
+    end
+  end
+
+  def test_does_not_jump_to_private_method_called_with_explicit_external_receiver
+    source = <<~RUBY
+      class A
+        private
+
+        def foo; end
+      end
+
+      class B
+        def bar
+          a = A.new
+          a.foo
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 9 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_jumps_to_protected_method_inside_same_class
+    source = <<~RUBY
+      class A
+        def bar
+          self.foo
+        end
+
+        protected
+
+        def foo; end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 9, line: 2 } },
+      )
+      response = server.pop_response.response
+      refute_empty(response)
+      assert_equal(uri.to_s, response.first.attributes[:targetUri])
+    end
+  end
+
+  def test_jumps_to_protected_method_called_from_subclass
+    source = <<~RUBY
+      class A
+        protected
+
+        def foo; end
+      end
+
+      class B < A
+        def bar
+          a = A.new
+          a.foo
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 9 } },
+      )
+      response = server.pop_response.response
+      refute_empty(response)
+      assert_equal(uri.to_s, response.first.attributes[:targetUri])
+    end
+  end
+
+  def test_does_not_jump_to_protected_method_from_unrelated_class
+    source = <<~RUBY
+      class A
+        protected
+
+        def foo; end
+      end
+
+      class C
+        def bar
+          a = A.new
+          a.foo
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 9 } },
       )
       assert_empty(server.pop_response.response)
     end
