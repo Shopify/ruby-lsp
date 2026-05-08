@@ -16,6 +16,12 @@ module RubyLsp
     class CompletionResolve < Request
       include Requests::Support::Common
 
+      METHOD_KINDS = [
+        Constant::CompletionItemKind::METHOD,
+        Constant::CompletionItemKind::CONSTRUCTOR,
+        Constant::CompletionItemKind::FUNCTION,
+      ].freeze #: Array[Integer]
+
       # set a limit on the number of documentation entries returned, to avoid rendering performance issues
       # https://github.com/Shopify/ruby-lsp/pull/1798
       MAX_DOCUMENTATION_ENTRIES = 10
@@ -23,7 +29,6 @@ module RubyLsp
       #: (GlobalState global_state, Hash[Symbol, untyped] item) -> void
       def initialize(global_state, item)
         super()
-        @index = global_state.index #: RubyIndexer::Index
         @graph = global_state.graph #: Rubydex::Graph
         @item = item
       end
@@ -32,6 +37,8 @@ module RubyLsp
       #: -> Hash[Symbol, untyped]
       def perform
         return @item if @item.dig(:data, :skip_resolve)
+        return keyword_resolve if @item.dig(:data, :keyword)
+        return @item if @item[:kind] == Constant::CompletionItemKind::FILE
 
         # Based on the spec https://microsoft.github.io/language-server-protocol/specification#textDocument_completion,
         # a completion resolve request must always return the original completion item without modifying ANY fields
@@ -40,48 +47,60 @@ module RubyLsp
         #
         # For example, forgetting to return the `insertText` included in the original item will make the editor use the
         # `label` for the text edit instead
-        label = @item[:label].dup
-        return keyword_resolve if @item.dig(:data, :keyword)
-
-        entries = @index[label] || []
-
-        owner_name = @item.dig(:data, :owner_name)
-
-        if owner_name
-          entries = entries.select do |entry|
-            (entry.is_a?(RubyIndexer::Entry::Member) || entry.is_a?(RubyIndexer::Entry::InstanceVariable) ||
-            entry.is_a?(RubyIndexer::Entry::MethodAlias) || entry.is_a?(RubyIndexer::Entry::ClassVariable)) &&
-              entry.owner&.name == owner_name
-          end
-        end
-
-        first_entry = entries.first #: as !nil
-
-        if first_entry.is_a?(RubyIndexer::Entry::Member)
-          label = +"#{label}#{first_entry.decorated_parameters}"
-          label << first_entry.formatted_signatures
-        end
+        declaration = resolve_declaration
+        return @item unless declaration
 
         guessed_type = @item.dig(:data, :guessed_type)
+        title = @item[:label].dup
+
+        # TODO: when Rubydex exposes method signatures via `Rubydex::MethodDefinition#signatures`, append the formatted
+        # parameter list and overload count to the title here (see the legacy `decorated_parameters` /
+        # `formatted_signatures` rendering on `RubyIndexer::Entry::Member`).
 
         extra_links = if guessed_type
-          label << "\n\nGuessed receiver: #{guessed_type}"
+          title << "\n\nGuessed receiver: #{guessed_type}"
           "[Learn more about guessed types](#{GUESSED_TYPES_URL})"
         end
 
-        unless @item[:kind] == Constant::CompletionItemKind::FILE
-          @item[:documentation] = Interface::MarkupContent.new(
-            kind: "markdown",
-            value: markdown_from_index_entries(label, entries, MAX_DOCUMENTATION_ENTRIES, extra_links: extra_links),
-          )
-        end
+        @item[:documentation] = Interface::MarkupContent.new(
+          kind: "markdown",
+          value: markdown_from_definitions(
+            title,
+            declaration.definitions,
+            MAX_DOCUMENTATION_ENTRIES,
+            extra_links: extra_links,
+          ),
+        )
 
         @item
       end
 
       private
 
-      #: () -> Hash[Symbol, untyped]
+      # Find the Rubydex declaration that matches the completion item. Constants are looked up by their fully qualified
+      # name (set when the completion was produced); members (methods, instance/class variables) are resolved by walking
+      # the owner namespace and its ancestors so that inherited and aliased members are surfaced correctly.
+      #: -> Rubydex::Declaration?
+      def resolve_declaration
+        data = @item[:data] || {}
+
+        if (fully_qualified_name = data[:fully_qualified_name])
+          @graph[fully_qualified_name]
+        elsif (owner_name = data[:owner_name])
+          owner = @graph[owner_name]
+          return unless owner.is_a?(Rubydex::Namespace)
+
+          member_name = if METHOD_KINDS.include?(@item[:kind])
+            "#{@item[:label]}()"
+          else
+            @item[:label]
+          end
+
+          owner.find_member(member_name)
+        end
+      end
+
+      #: -> Hash[Symbol, untyped]
       def keyword_resolve
         keyword = @graph.keyword(@item[:label])
 
