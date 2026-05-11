@@ -325,8 +325,6 @@ module RubyLsp
         ))
       end
 
-      process_indexing_configuration(options.dig(:initializationOptions, :indexing))
-
       begin_progress("indexing-progress", "Ruby LSP: indexing files")
 
       global_state_notifications.each { |notification| send_message(notification) }
@@ -429,7 +427,19 @@ module RubyLsp
       params = message[:params]
       text_document = params[:textDocument]
 
-      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+      document = @store.get(text_document[:uri])
+      document.push_edits(params[:contentChanges], version: text_document[:version])
+
+      language_id = document.language_id
+
+      if [:ruby, :rbs].include?(language_id)
+        graph = @global_state.graph
+
+        benchmark("index_source") do
+          graph.index_source(text_document[:uri].to_s, document.source, language_id.to_s)
+        end
+        benchmark("incremental_resolve") { graph.resolve }
+      end
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -487,39 +497,15 @@ module RubyLsp
         document,
         dispatcher,
       )
-
-      # The code lens listener requires the index to be populated, so the DeclarationListener must be inserted first in
-      # the dispatcher's state
-      code_lens = nil #: Requests::CodeLens?
-
-      if document.is_a?(RubyDocument) && document.should_index?
-        # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
-        # updated on save
-        @global_state.synchronize do
-          send_log_message("Determined that document should be indexed: #{uri}")
-
-          @global_state.index.handle_change(uri) do |index|
-            index.delete(uri, skip_require_paths_tree: true)
-            RubyIndexer::DeclarationListener.new(index, dispatcher, parse_result, uri, collect_comments: true)
-            code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
-            dispatcher.dispatch(document.ast)
-          end
-        end
-      else
-        code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
-        dispatcher.dispatch(document.ast)
-      end
+      code_lens = Requests::CodeLens.new(@global_state, document, dispatcher)
+      dispatcher.dispatch(document.ast)
 
       # Store all responses retrieve in this round of visits in the cache and then return the response for the request
       # we actually received
       document.cache_set("textDocument/foldingRange", folding_range.perform)
       document.cache_set("textDocument/documentSymbol", document_symbol.perform)
       document.cache_set("textDocument/documentLink", document_link.perform)
-      document.cache_set(
-        "textDocument/codeLens",
-        code_lens #: as !nil
-          .perform,
-      )
+      document.cache_set("textDocument/codeLens", code_lens.perform)
       document.cache_set("textDocument/inlayHint", inlay_hint.perform)
 
       send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
@@ -1026,38 +1012,34 @@ module RubyLsp
 
     #: (Hash[Symbol, untyped] message) -> void
     def workspace_did_change_watched_files(message)
-      # If indexing is not complete yet, delay processing did change watched file notifications. We need initial
-      # indexing to be in place so that we can handle file changes appropriately without risking duplicates. We also
-      # have to sleep before re-inserting the notification in the queue otherwise the worker can get stuck in its own
-      # loop of pushing and popping the same notification
-      unless @global_state.index.initial_indexing_completed
-        Thread.new do
-          sleep(2)
-          # We have to ensure that the queue is not closed yet, since nothing stops the user from saving a file and then
-          # immediately telling the LSP to shutdown
-          @incoming_queue << message unless @incoming_queue.closed?
-        end
-
-        return
-      end
-
       changes = message.dig(:params, :changes)
       # We allow add-ons to register for watching files and we have no restrictions for what they register for. If the
       # same pattern is registered more than once, the LSP will receive duplicate change notifications. Receiving them
       # is fine, but we shouldn't process the same file changes more than once
       changes.uniq!
 
-      index = @global_state.index
+      graph = @global_state.graph
+
+      # Handle deletions and accumulate additions and changes for indexing
+      additions_and_changes = changes.each_with_object([]) do |change, acc|
+        if change[:type] == Constant::FileChangeType::DELETED
+          graph.delete_document(change[:uri])
+        else
+          path = URI(change[:uri]).to_standardized_path
+          next if path.nil?
+          next unless File.directory?(path) || [".rb", ".rbs"].include?(File.extname(path))
+
+          acc << path
+        end
+      end
+      benchmark("index_all") { graph.index_all(additions_and_changes) }
+      benchmark("incremental_resolve") { graph.resolve }
+
       changes.each do |change|
         # File change events include folders, but we're only interested in files
         uri = URI(change[:uri])
         file_path = uri.to_standardized_path
         next if file_path.nil? || File.directory?(file_path)
-
-        if file_path.end_with?(".rb")
-          handle_ruby_file_change(index, file_path, change[:type])
-          next
-        end
 
         file_name = File.basename(file_path)
 
@@ -1074,33 +1056,6 @@ module RubyLsp
           "Error in #{addon.name} add-on while processing watched file notifications: #{e.full_message}",
           type: Constant::MessageType::ERROR,
         )
-      end
-    end
-
-    #: (RubyIndexer::Index index, String file_path, Integer change_type) -> void
-    def handle_ruby_file_change(index, file_path, change_type)
-      @global_state.synchronize do
-        load_path_entry = $LOAD_PATH.find { |load_path| file_path.start_with?(load_path) }
-        uri = URI::Generic.from_path(load_path_entry: load_path_entry, path: file_path)
-
-        case change_type
-        when Constant::FileChangeType::CREATED
-          content = File.read(file_path)
-          # If we receive a late created notification for a file that has already been claimed by the client, we want to
-          # handle change for that URI so that the require path tree is updated
-          @store.key?(uri) ? index.handle_change(uri, content) : index.index_single(uri, content)
-        when Constant::FileChangeType::CHANGED
-          content = File.read(file_path)
-          # We only handle changes on file watched notifications if the client is not the one managing this URI.
-          # Otherwise, these changes are handled when running the combined requests
-          index.handle_change(uri, content) unless @store.key?(uri)
-        when Constant::FileChangeType::DELETED
-          index.delete(uri)
-        end
-      rescue Errno::ENOENT
-        # If a file is created and then delete immediately afterwards, we will process the created notification before
-        # we receive the deleted one, but the file no longer exists. This may happen when running a test suite that
-        # creates and deletes files automatically.
       end
     end
 
@@ -1183,7 +1138,7 @@ module RubyLsp
 
       response = Requests::PrepareTypeHierarchy.new(
         document,
-        @global_state.index,
+        @global_state,
         params[:position],
       ).perform
 
@@ -1193,7 +1148,7 @@ module RubyLsp
     #: (Hash[Symbol, untyped] message) -> void
     def type_hierarchy_supertypes(message)
       response = Requests::TypeHierarchySupertypes.new(
-        @global_state.index,
+        @global_state,
         message.dig(:params, :item),
       ).perform
       send_message(Result.new(id: message[:id], response: response))
@@ -1242,50 +1197,16 @@ module RubyLsp
 
     #: -> void
     def perform_initial_indexing
-      # The begin progress invocation happens during `initialize`, so that the notification is sent before we are
-      # stuck indexing files
-      Thread.new do
-        begin
-          @global_state.index.index_all do |percentage|
-            progress("indexing-progress", percentage)
-            true
-          rescue ClosedQueueError
-            # Since we run indexing on a separate thread, it's possible to kill the server before indexing is complete.
-            # In those cases, the message queue will be closed and raise a ClosedQueueError. By returning `false`, we
-            # tell the index to stop working immediately
-            false
-          end
-        rescue StandardError => error
-          message = "Error while indexing (see [troubleshooting steps]" \
-            "(https://shopify.github.io/ruby-lsp/troubleshooting#indexing)): #{error.message}"
-          send_message(Notification.window_show_message(message, type: Constant::MessageType::ERROR))
-        end
+      # Index
+      progress("indexing-progress", message: "Indexing workspace...")
+      benchmark("index_workspace") { @global_state.graph.index_workspace }
 
-        # Indexing produces a high number of short lived object allocations. That might lead to some fragmentation and
-        # an unnecessarily expanded heap. Compacting ensures that the heap is as small as possible and that future
-        # allocations and garbage collections are faster
-        GC.compact unless @test_mode
+      # Resolve
+      progress("indexing-progress", message: "Resolving graph...")
+      benchmark("full_resolve") { @global_state.graph.resolve }
 
-        @global_state.synchronize do
-          # If we linearize ancestors while the index is not fully populated, we may end up caching incorrect results
-          # that were missing namespaces. After indexing is complete, we need to clear the ancestors cache and start
-          # again
-          @global_state.index.clear_ancestors
-
-          # The results for code lens depend on ancestor linearization, so we need to clear any previously computed
-          # responses
-          @store.each { |_uri, document| document.clear_cache("textDocument/codeLens") }
-        end
-
-        # Always end the progress notification even if indexing failed or else it never goes away and the user has no
-        # way of dismissing it
-        end_progress("indexing-progress")
-
-        # Request a code lens refresh if we populated them before all test parent classes were indexed
-        if @global_state.client_capabilities.supports_code_lens_refresh
-          send_message(Request.new(id: @current_request_id, method: "workspace/codeLens/refresh", params: nil))
-        end
-      end
+      # End
+      end_progress("indexing-progress")
     end
 
     #: (String id, String title, ?percentage: Integer) -> void
@@ -1301,11 +1222,13 @@ module RubyLsp
       send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
     end
 
-    #: (String id, Integer percentage) -> void
-    def progress(id, percentage)
+    #: (String, ?message: String?, ?percentage: Integer?) -> void
+    def progress(id, message: nil, percentage: nil)
       return unless @global_state.client_capabilities.supports_progress
 
-      send_message(Notification.progress_report(id, percentage: percentage, message: "#{percentage}% completed"))
+      message ||= "#{percentage}% completed" if percentage
+
+      send_message(Notification.progress_report(id, percentage: percentage, message: message))
     end
 
     #: (String id) -> void
@@ -1334,47 +1257,6 @@ module RubyLsp
           ),
         )
       end
-    end
-
-    #: (Hash[Symbol, untyped]? indexing_options) -> void
-    def process_indexing_configuration(indexing_options)
-      # Need to use the workspace URI, otherwise, this will fail for people working on a project that is a symlink.
-      index_path = File.join(@global_state.workspace_path, ".index.yml")
-
-      if File.exist?(index_path)
-        begin
-          @global_state.index.configuration.apply_config(YAML.parse_file(index_path).to_ruby)
-          send_message(
-            Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: "The .index.yml configuration file is deprecated. " \
-                  "Please use editor settings to configure the index",
-              ),
-            ),
-          )
-        rescue Psych::SyntaxError => e
-          message = "Syntax error while loading configuration: #{e.message}"
-          send_message(
-            Notification.new(
-              method: "window/showMessage",
-              params: Interface::ShowMessageParams.new(
-                type: Constant::MessageType::WARNING,
-                message: message,
-              ),
-            ),
-          )
-        end
-        return
-      end
-
-      configuration = @global_state.index.configuration
-      configuration.workspace_path = @global_state.workspace_path
-      return unless indexing_options
-
-      # The index expects snake case configurations, but VS Code standardizes on camel case settings
-      configuration.apply_config(indexing_options.transform_keys { |key| key.to_s.gsub(/([A-Z])/, "_\\1").downcase })
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1537,6 +1419,29 @@ module RubyLsp
         id: message[:id],
         response: code_lens,
       ))
+    end
+
+    #: [T] (String) { () -> T } -> T
+    def benchmark(label, &block)
+      start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
+      result = block.call
+      duration = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond) - start
+
+      send_message(Notification.telemetry({
+        type: "data",
+        eventName: "ruby_lsp.response_time",
+        data: {
+          type: "histogram",
+          value: duration,
+          attributes: {
+            message: label,
+            lspVersion: RubyLsp::VERSION,
+            rubyVersion: RUBY_VERSION,
+          },
+        },
+      }))
+
+      result
     end
   end
 end

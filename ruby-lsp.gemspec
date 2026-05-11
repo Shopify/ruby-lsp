@@ -13,9 +13,7 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/Shopify/ruby-lsp"
   s.license = "MIT"
 
-  s.files = Dir.glob("lib/**/*.rb").grep_v(%r{^lib/ruby_indexer/test/}) +
-    ["README.md", "VERSION", "LICENSE.txt"] +
-    Dir.glob("static_docs/**/*.md")
+  s.files = Dir.glob("lib/**/*.rb") + ["README.md", "VERSION", "LICENSE.txt"]
   s.bindir = "exe"
   s.executables = ["ruby-lsp", "ruby-lsp-check", "ruby-lsp-launcher", "ruby-lsp-test-exec"]
   s.require_paths = ["lib"]
@@ -24,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency("language_server-protocol", "~> 3.17.0")
   s.add_dependency("prism", ">= 1.2", "< 2.0")
   s.add_dependency("rbs", ">= 3", "< 5")
+  s.add_dependency("rubydex", "~> 0.2.0", "< 0.3.0")
 
   s.required_ruby_version = ">= 3.0"
 end
