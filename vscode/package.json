@@ -28,6 +28,18 @@
     "vscode.git"
   ],
   "main": "./out/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In untrusted workspaces, Ruby LSP ignores workspace-scoped overrides of settings that influence how the Ruby interpreter is located or invoked, to prevent arbitrary command execution. User and machine settings still apply.",
+      "restrictedConfigurations": [
+        "rubyLsp.rubyExecutablePath",
+        "rubyLsp.customRubyCommand",
+        "rubyLsp.rubyVersionManager",
+        "rubyLsp.bundleGemfile"
+      ]
+    }
+  },
   "contributes": {
     "chatParticipants": [
       {
@@ -397,23 +409,28 @@
             },
             "asdfExecutablePath": {
               "description": "The path to the asdf executable script, if not installed on one of the standard locations",
-              "type": "string"
+              "type": "string",
+              "scope": "machine"
             },
             "miseExecutablePath": {
               "description": "The path to the Mise executable, if not installed in ~/.local/bin/mise",
-              "type": "string"
+              "type": "string",
+              "scope": "machine"
             },
             "rbenvExecutablePath": {
               "description": "The path to the rbenv executable, if not installed on one of the standard locations",
-              "type": "string"
+              "type": "string",
+              "scope": "machine"
             },
             "rvExecutablePath": {
               "description": "The path to the rv executable, if not installed on one of the standard locations",
-              "type": "string"
+              "type": "string",
+              "scope": "machine"
             },
             "chrubyRubies": {
               "description": "An array of extra directories to search for Ruby installations when using chruby. Equivalent to the RUBIES environment variable",
-              "type": "array"
+              "type": "array",
+              "scope": "machine"
             }
           },
           "default": {
@@ -461,6 +478,7 @@
         "rubyLsp.bundleGemfile": {
           "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Do not use this if you're working on a monorepo or your project's Gemfile is in a subdirectory (look into multiroot workspaces instead). Only necessary when using a separate Gemfile for the Ruby LSP",
           "type": "string",
+          "scope": "machine",
           "default": ""
         },
         "rubyLsp.testTimeout": {
@@ -490,7 +508,8 @@
         },
         "rubyLsp.rubyExecutablePath": {
           "description": "Path to the Ruby installation. This is used as a fallback if version manager activation fails",
-          "type": "string"
+          "type": "string",
+          "scope": "machine"
         },
         "rubyLsp.indexing": {
           "description": "Indexing configurations. Modifying these will impact which declarations are available for definition, completion and other features",
