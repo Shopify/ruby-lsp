@@ -227,13 +227,14 @@ This command would generate the following configuration:
       "type": "ruby_lsp",
       "name": "Debug",
       "request": "launch",
-      "program": "ruby ${file}",
+      "command": "ruby",
     },
     {
       "type": "ruby_lsp",
       "request": "launch",
       "name": "Debug test file",
-      "program": "ruby -Itest ${relativeFile}",
+      "command": "ruby -Itest",
+      "file": "${relativeFile}",
     },
     {
       "type": "ruby_lsp",
