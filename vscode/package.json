@@ -851,11 +851,11 @@
     "eslint": "^9.30.1",
     "eslint-plugin-prettier": "^5.5.5",
     "mocha": "^11.7.5",
-    "ovsx": "^0.10.11",
+    "ovsx": "^0.10.12",
     "prettier": "^3.8.3",
     "sinon": "^21.1.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.0",
+    "typescript-eslint": "^8.59.3",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
