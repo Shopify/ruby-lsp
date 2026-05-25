@@ -81,5 +81,60 @@ module RubyIndexer
       assert_equal(path, uri.to_standardized_path)
       assert_equal("file:///path/with/unicode/%E6%96%87%E4%BB%B6.rb", uri.to_s)
     end
+
+    def test_from_path_with_brackets
+      uri = URI::Generic.from_path(path: "/some/path/[id].rb")
+      assert_equal("file:///some/path/%5Bid%5D.rb", uri.to_s)
+    end
+
+    def test_from_path_with_braces
+      uri = URI::Generic.from_path(path: "/some/path/{slug}.rb")
+      assert_equal("file:///some/path/%7Bslug%7D.rb", uri.to_s)
+    end
+
+    def test_round_trip_with_brackets
+      path = "/some/path/[id].rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+    end
+
+    def test_round_trip_with_braces
+      path = "/some/path/{slug}.rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+    end
+
+    def test_from_path_with_parentheses
+      uri = URI::Generic.from_path(path: "/some/path/(id).rb")
+      assert_equal("/some/path/(id).rb", uri.path)
+      assert_equal("file:///some/path/(id).rb", uri.to_s)
+    end
+
+    def test_round_trip_with_parentheses
+      path = "/some/path/(id).rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+    end
+
+    def test_round_trip_with_spaces_inside_brackets
+      path = "/some/path/[id page].rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+      assert_equal("file:///some/path/%5Bid%20page%5D.rb", uri.to_s)
+    end
+
+    def test_round_trip_with_spaces_inside_braces
+      path = "/some/path/{slug name}.rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+      assert_equal("file:///some/path/%7Bslug%20name%7D.rb", uri.to_s)
+    end
+
+    def test_round_trip_with_spaces_inside_parentheses
+      path = "/some/path/file (copy).rb"
+      uri = URI::Generic.from_path(path: path)
+      assert_equal(path, uri.to_standardized_path)
+      assert_equal("file:///some/path/file%20(copy).rb", uri.to_s)
+    end
   end
 end

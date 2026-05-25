@@ -18,7 +18,7 @@ module URI
         # This unsafe regex is the same one used in the URI::RFC2396_REGEXP class with the exception of the fact that we
         # do not include colon as a safe character. VS Code URIs always escape colons and we need to ensure we do the
         # same to avoid inconsistencies in our URIs, which are used to identify resources
-        unsafe_regex = %r{[^\-_.!~*'()a-zA-Z\d;/?@&=+$,\[\]]}
+        unsafe_regex = %r{[^\-_.!~*'()a-zA-Z\d;/?@&=+$,]}
 
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
