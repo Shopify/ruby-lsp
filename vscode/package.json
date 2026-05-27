@@ -131,7 +131,7 @@
       {
         "command": "rubyLsp.selectRubyVersionManager",
         "title": "Select Ruby version manager",
-        "category": "Ruby LSP"
+        "category": "Ruby LSP",
       },
       {
         "command": "rubyLsp.toggleFeatures",
@@ -389,6 +389,7 @@
         },
         "rubyLsp.rubyVersionManager": {
           "type": "object",
+          "scope": "window",
           "properties": {
             "identifier": {
               "description": "The Ruby version manager to use",
@@ -440,7 +441,7 @@
         "rubyLsp.customRubyCommand": {
           "description": "A shell command to activate the right Ruby version or add a custom Ruby bin folder to the PATH. Only used if rubyVersionManager is set to 'custom'",
           "type": "string",
-          "scope": "machine"
+          "scope": "window"
         },
         "rubyLsp.formatter": {
           "description": "Which tool the Ruby LSP should use for formatting files",
@@ -478,7 +479,7 @@
         "rubyLsp.bundleGemfile": {
           "description": "Relative or absolute path to the Gemfile to use for bundling the Ruby LSP server. Do not use this if you're working on a monorepo or your project's Gemfile is in a subdirectory (look into multiroot workspaces instead). Only necessary when using a separate Gemfile for the Ruby LSP",
           "type": "string",
-          "scope": "machine",
+          "scope": "window",
           "default": ""
         },
         "rubyLsp.testTimeout": {
@@ -509,7 +510,7 @@
         "rubyLsp.rubyExecutablePath": {
           "description": "Path to the Ruby installation. This is used as a fallback if version manager activation fails",
           "type": "string",
-          "scope": "machine"
+          "scope": "window"
         },
         "rubyLsp.indexing": {
           "description": "Indexing configurations. Modifying these will impact which declarations are available for definition, completion and other features",
