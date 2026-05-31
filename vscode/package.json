@@ -631,6 +631,14 @@
                 "additionalProperties": {
                   "type": "string"
                 }
+              },
+              "localfs": {
+                "type": "boolean",
+                "description": "Whether VS Code and the debuggee run on the same machine"
+              },
+              "localfsMap": {
+                "type": "string",
+                "description": "Pairs of remote and local root paths, written as remote:local (for example /remote_dir:/local_dir)"
               }
             }
           },
@@ -647,6 +655,14 @@
               "debugHost": {
                 "type": "string",
                 "description": "The host to use to connect to the debugger"
+              },
+              "localfs": {
+                "type": "boolean",
+                "description": "Whether VS Code and the debuggee run on the same machine"
+              },
+              "localfsMap": {
+                "type": "string",
+                "description": "Pairs of remote and local root paths, written as remote:local (for example /remote_dir:/local_dir)"
               }
             }
           }
