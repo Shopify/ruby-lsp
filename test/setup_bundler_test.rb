@@ -655,6 +655,38 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_installs_missing_bundler_with_env_shebang
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+        source "https://rubygems.org"
+      GEMFILE
+
+      File.write(File.join(dir, "Gemfile.lock"), <<~LOCKFILE)
+        GEM
+          remote: https://rubygems.org/
+          specs:
+
+        PLATFORMS
+          ruby
+
+        DEPENDENCIES
+
+        BUNDLED WITH
+          999.999.999
+      LOCKFILE
+
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          compose = RubyLsp::SetupBundler.new(dir, launcher: true)
+          compose.expects(:run_bundle_install_directly)
+          Gem.expects(:install).with("bundler", "999.999.999", env_shebang: true)
+
+          compose.setup!
+        end
+      end
+    end
+  end
+
   def test_invoke_cli_calls_bundler_directly_for_install
     in_temp_dir do |dir|
       File.write(File.join(dir, "gems.rb"), <<~GEMFILE)

@@ -445,7 +445,7 @@ module RubyLsp
       requirement = Gem::Requirement.new(@bundler_version.to_s)
       return if Gem::Specification.any? { |s| s.name == "bundler" && requirement =~ s.version }
 
-      Gem.install("bundler", @bundler_version.to_s)
+      Gem.install("bundler", @bundler_version.to_s, env_shebang: true)
     end
 
     #: -> bool

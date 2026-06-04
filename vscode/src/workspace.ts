@@ -241,8 +241,8 @@ export class Workspace implements WorkspaceInterface {
     await this.lspClient?.dispose();
   }
 
-  // Install or update the `ruby-lsp` gem globally with `gem install ruby-lsp` or `gem update ruby-lsp`. We only try to
-  // update on a daily basis, not every time the server boots
+  // Install or update the `ruby-lsp` gem globally with `gem install ruby-lsp --env-shebang` or
+  // `gem update ruby-lsp --env-shebang`. We only try to update on a daily basis, not every time the server boots
   async installOrUpdateServer(manualInvocation: boolean): Promise<void> {
     // If there's a user configured custom bundle to run the LSP, then we do not perform auto-updates and let the user
     // manage that custom bundle themselves
@@ -264,12 +264,13 @@ export class Workspace implements WorkspaceInterface {
     });
 
     const preFlag = featureEnabled("betaServer") ? " --pre" : "";
+    const gemFlags = `${preFlag} --env-shebang`;
 
     // If any of the Ruby LSP's dependencies are missing, we need to install them. For example, if the user runs `gem
     // uninstall prism`, then we must ensure it's installed or else rubygems will fail when trying to launch the
     // executable
     if (!dependencies.every((dep) => new RegExp(`${dep}\\s`).exec(stdout))) {
-      await asyncExec(`gem install ruby-lsp${preFlag}`, {
+      await asyncExec(`gem install ruby-lsp${gemFlags}`, {
         cwd: this.workspaceFolder.uri.fsPath,
         env: this.ruby.env,
       });
@@ -295,7 +296,7 @@ export class Workspace implements WorkspaceInterface {
     // If we haven't updated the gem in the last 24 hours or if the user manually asked for an update, update it
     if (manualInvocation || lastUpdatedAt === undefined || Date.now() - lastUpdatedAt > oneDayInMs) {
       try {
-        await asyncExec(`gem update ruby-lsp${preFlag}`, {
+        await asyncExec(`gem update ruby-lsp${gemFlags}`, {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });

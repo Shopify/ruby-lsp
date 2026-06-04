@@ -8,9 +8,10 @@ import * as vscode from "vscode";
 import { beforeEach, afterEach } from "mocha";
 
 import { Workspace } from "../../workspace";
+import * as common from "../../common";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
-import { createContext, FakeContext } from "./helpers";
+import { createContext, FakeContext, stubWorkspaceConfiguration } from "./helpers";
 
 suite("Workspace", () => {
   let workspacePath: string;
@@ -39,6 +40,50 @@ suite("Workspace", () => {
     sandbox.restore();
     fs.rmSync(workspacePath, { recursive: true, force: true });
     context.dispose();
+  });
+
+  test("installs ruby-lsp with env shebang", async () => {
+    stubWorkspaceConfiguration(sandbox, { rubyLsp: { bundleGemfile: "" } });
+    sandbox.stub(common, "featureEnabled").returns(false);
+
+    const execStub = sandbox.stub(common, "asyncExec");
+    execStub.onFirstCall().resolves({ stdout: "", stderr: "" });
+    execStub.onSecondCall().resolves({ stdout: "", stderr: "" });
+
+    await workspace.installOrUpdateServer(false);
+
+    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp language_server-protocol prism rbs");
+    assert.strictEqual(execStub.secondCall.args[0], "gem install ruby-lsp --env-shebang");
+  });
+
+  test("updates ruby-lsp with env shebang", async () => {
+    stubWorkspaceConfiguration(sandbox, { rubyLsp: { bundleGemfile: "" } });
+    sandbox.stub(common, "featureEnabled").returns(false);
+
+    const execStub = sandbox.stub(common, "asyncExec");
+    execStub.onFirstCall().resolves({
+      stdout: "ruby-lsp (0.1.0)\nlanguage_server-protocol (3.17.0)\nprism (1.2.0)\nrbs (3.0.0)\n",
+      stderr: "",
+    });
+    execStub.onSecondCall().resolves({ stdout: "", stderr: "" });
+
+    await workspace.installOrUpdateServer(false);
+
+    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp language_server-protocol prism rbs");
+    assert.strictEqual(execStub.secondCall.args[0], "gem update ruby-lsp --env-shebang");
+  });
+
+  test("installs beta ruby-lsp with prerelease and env shebang flags", async () => {
+    stubWorkspaceConfiguration(sandbox, { rubyLsp: { bundleGemfile: "" } });
+    sandbox.stub(common, "featureEnabled").returns(true);
+
+    const execStub = sandbox.stub(common, "asyncExec");
+    execStub.onFirstCall().resolves({ stdout: "", stderr: "" });
+    execStub.onSecondCall().resolves({ stdout: "", stderr: "" });
+
+    await workspace.installOrUpdateServer(false);
+
+    assert.strictEqual(execStub.secondCall.args[0], "gem install ruby-lsp --pre --env-shebang");
   });
 
   test("repeated rebase steps don't trigger multiple restarts", async () => {
