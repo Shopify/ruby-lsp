@@ -65,15 +65,15 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
         type: "ruby_lsp",
         name: "Debug script",
         request: "launch",
-        // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby ${file}",
+        command: "ruby",
       },
       {
         type: "ruby_lsp",
         name: "Debug test",
         request: "launch",
+        command: "ruby -Itest",
         // eslint-disable-next-line no-template-curly-in-string
-        program: "ruby -Itest ${relativeFile}",
+        file: "${relativeFile}",
       },
       {
         type: "ruby_lsp",
@@ -96,6 +96,11 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
 
     if (!workspace) {
       throw new Error(`Couldn't find a workspace for URI: ${uri?.toString()}`);
+    }
+
+    if (!debugConfiguration.program && debugConfiguration.command && !debugConfiguration.file) {
+      // eslint-disable-next-line no-template-curly-in-string
+      debugConfiguration.file = "${file}";
     }
 
     if (debugConfiguration.env) {
@@ -225,12 +230,23 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
     return new Promise((resolve, reject) => {
       const args = ["exec", "rdbg"];
 
+      const program =
+        configuration.program ??
+        (configuration.command
+          ? `${configuration.command} ${this.quoteForShell(String(configuration.file))}`
+          : undefined);
+
+      if (!program) {
+        reject(new Error("Either `program` or `command` must be configured in launch.json"));
+        return;
+      }
+
       // On Windows, we spawn the debugger with any available port. On Linux and macOS, we spawn it with a UNIX socket
       if (port) {
         args.push("--port", port.toString());
       }
 
-      args.push("--open", "--command", "--", configuration.program);
+      args.push("--open", "--command", "--", program);
 
       this.logDebuggerMessage(`Spawning debugger in directory ${cwd}`);
       this.logDebuggerMessage(`   Command bundle ${args.join(" ")}`);
@@ -323,5 +339,9 @@ export class Debugger implements vscode.DebugAdapterDescriptorFactory, vscode.De
     // Log to Debug Console: Unlike Output panel, this needs explicit newlines
     // so we preserve the original message format including any newlines
     this.console.append(message);
+  }
+
+  private quoteForShell(argument: string): string {
+    return `"${argument.replace(/["\\$`]/g, "\\$&")}"`;
   }
 }
