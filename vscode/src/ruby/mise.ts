@@ -9,10 +9,10 @@ import { VersionManager, ActivationResult, NonReportableError } from "./versionM
 // Learn more: https://github.com/jdx/mise
 export class Mise extends VersionManager {
   async activate(): Promise<ActivationResult> {
-    const miseUri = await this.findMiseUri();
+    const miseExec = await this.findMise();
 
     // The exec command in Mise is called `x`
-    const parsedResult = await this.runEnvActivationScript(`${miseUri.fsPath} x -- ruby`);
+    const parsedResult = await this.runEnvActivationScript(`${miseExec} x -- ruby`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
@@ -22,46 +22,37 @@ export class Mise extends VersionManager {
     };
   }
 
-  async findMiseUri(): Promise<vscode.Uri> {
+  async findMise(): Promise<string> {
     const config = vscode.workspace.getConfiguration("rubyLsp");
-    const misePath = config.get<string | undefined>("rubyVersionManager.miseExecutablePath");
+    const configuredMisePath = config.get<string | undefined>("rubyVersionManager.miseExecutablePath");
 
-    if (misePath) {
-      const configuredPath = vscode.Uri.file(misePath);
-
-      try {
-        await vscode.workspace.fs.stat(configuredPath);
-        return configuredPath;
-      } catch (_error: any) {
-        throw new NonReportableError(
-          `Mise executable configured as ${configuredPath.fsPath}, but that file doesn't exist`,
-        );
-      }
+    if (configuredMisePath) {
+      return this.ensureMiseExistsAt(configuredMisePath);
     }
 
-    // Possible mise installation paths
+    // Possible mise installation directories. If none match, fall back to the PATH.
     //
     // 1. Installation from curl | sh (per mise.jdx.dev Getting Started)
     // 2. Homebrew M series
-    // 3. Installation from `apt install mise`
+    // 3. Homebrew Intel / Linuxbrew
+    // 4. Linuxbrew (legacy)
+    // 5. Installation from `apt install mise`
     const possiblePaths = [
-      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin", "mise"),
-      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin", "mise"),
+      vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "opt", "homebrew", "bin"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "local", "bin"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "home", "linuxbrew", ".linuxbrew", "bin"),
+      vscode.Uri.joinPath(vscode.Uri.file("/"), "usr", "bin"),
     ];
+    return this.findExec(possiblePaths, "mise");
+  }
 
-    for (const possiblePath of possiblePaths) {
-      try {
-        await vscode.workspace.fs.stat(possiblePath);
-        return possiblePath;
-      } catch (_error: any) {
-        // Continue looking
-      }
+  private async ensureMiseExistsAt(path: string): Promise<string> {
+    try {
+      await vscode.workspace.fs.stat(vscode.Uri.file(path));
+      return path;
+    } catch (_error: any) {
+      throw new NonReportableError(`The Ruby LSP version manager is configured to be Mise, but ${path} does not exist`);
     }
-
-    throw new NonReportableError(
-      `The Ruby LSP version manager is configured to be Mise, but could not find Mise installation. Searched in
-        ${possiblePaths.join(", ")}`,
-    );
   }
 }

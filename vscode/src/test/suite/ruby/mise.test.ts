@@ -35,7 +35,7 @@ suite("Mise", () => {
     context.dispose();
   });
 
-  test("Finds Ruby only binary path is appended to PATH", async () => {
+  test("Activates with auto-detected mise", async () => {
     const workspacePath = process.env.PWD!;
     const workspaceFolder = {
       uri: vscode.Uri.from({ scheme: "file", path: workspacePath }),
@@ -51,31 +51,25 @@ suite("Mise", () => {
       stdout: "",
       stderr: `${ACTIVATION_SEPARATOR}${envStub}${ACTIVATION_SEPARATOR}`,
     });
-    const findStub = sandbox
-      .stub(mise, "findMiseUri")
-      .resolves(vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), ".local", "bin", "mise"));
+
+    // Stub findMise to return the executable name, simulating PATH fallback
+    sandbox.stub(mise, "findMise" as any).resolves("mise");
 
     const { env, version, yjit } = await mise.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(
-        `${os.homedir()}/.local/bin/mise x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
-        {
-          cwd: workspacePath,
-          shell: vscode.env.shell,
+      execStub.calledOnceWithExactly(`mise x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+        cwd: workspacePath,
+        shell: vscode.env.shell,
 
-          env: process.env,
-          encoding: "utf-8",
-        },
-      ),
+        env: process.env,
+        encoding: "utf-8",
+      }),
     );
 
     assert.strictEqual(version, "3.0.0");
     assert.strictEqual(yjit, true);
     assert.deepStrictEqual(env.ANY, "true");
-
-    execStub.restore();
-    findStub.restore();
   });
 
   test("Allows configuring where Mise is installed", async () => {
