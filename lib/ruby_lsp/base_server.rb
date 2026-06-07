@@ -74,6 +74,8 @@ module RubyLsp
                   )
                 end
               end
+            rescue URI::Error
+              # A client can send a document URI with a scheme Ruby's URI parser rejects, so we don't want to fail
             rescue Store::NonExistingDocumentError
               # If we receive a request for a file that no longer exists, we don't want to fail
             end
