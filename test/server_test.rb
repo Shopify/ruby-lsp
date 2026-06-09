@@ -1749,6 +1749,36 @@ class ServerTest < Minitest::Test
     assert_equal("Method not found: #{non_existent_method}", error.message)
   end
 
+  def test_does_not_crash_when_a_document_uri_cannot_be_parsed
+    # A document URI with a scheme Ruby's URI parser rejects must not crash the server
+    body = {
+      id: 1,
+      method: "textDocument/hover",
+      params: {
+        textDocument: { uri: "_diff_view:/path/to/file.rb" },
+        position: { line: 0, character: 0 },
+      },
+    }.to_json
+    server = RubyLsp::Server.new(
+      test_mode: true,
+      reader: StringIO.new("Content-Length: #{body.bytesize}\r\n\r\n#{body}"),
+      writer: StringIO.new,
+    )
+
+    error = nil #: StandardError?
+    capture_subprocess_io do
+      server.start
+    rescue StandardError => e
+      error = e
+    end
+
+    assert_nil(error, "server crashed on an unparseable document URI: #{error&.message}")
+    # The request still gets an error response instead of hanging
+    assert_instance_of(RubyLsp::Error, server.pop_response)
+  ensure
+    server&.run_shutdown
+  end
+
   private
 
   def run_initialize_server_with_setup_error(error)
