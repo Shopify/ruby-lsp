@@ -48,6 +48,34 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, edits.to_json)
   end
 
+  def test_adding_missing_ends_below_caret_for_snippetless_clients
+    # The caret sits on an already-indented body line (the editor auto-indents the new line on its own).
+    document = RubyLsp::RubyDocument.new(
+      source: +"class Foo\n  def bar\n    \nend",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 2, character: 4 },
+      "\n",
+      "Zed",
+    ).perform
+
+    # `end` is inserted on the line *below* the caret (pushing the enclosing `end` down). The caret's own line is
+    # left untouched so we don't fight the editor's indentation, and no `$0` anchor is emitted.
+    expected_edits = [
+      {
+        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
+        newText: "  end\n",
+      },
+    ]
+    assert_equal(expected_edits.to_json, edits.to_json)
+  end
+
   def test_adding_missing_curly_brace_in_string_interpolation
     document = RubyLsp::RubyDocument.new(
       source: +"",
@@ -860,8 +888,36 @@ class OnTypeFormattingTest < Minitest::Test
   end
 
   def test_no_snippet_if_not_vs_code
+    # Adding a method inside an existing class: there's a line below the caret (the class' `end`), so `end` is
+    # inserted there and the caret stays in the body. No `$0` anchor, since non-VS Code clients apply edits as text.
     document = RubyLsp::RubyDocument.new(
-      source: +"",
+      source: +"class Foo\n  def bar\n  \nend",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 2, character: 2 },
+      "\n",
+      "Foo",
+    ).perform
+    expected_edits = [
+      {
+        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
+        newText: "  end\n",
+      },
+    ]
+    assert_equal(expected_edits.to_json, edits.to_json)
+  end
+
+  def test_no_end_for_snippetless_clients_at_end_of_file
+    # At the end of the file there's no line below the caret to anchor `end` to, and a snippet-less client can't keep
+    # the caret in the body, so nothing is inserted (the one case we deliberately don't support).
+    document = RubyLsp::RubyDocument.new(
+      source: +"class Foo",
       version: 1,
       uri: URI("file:///fake.rb"),
       global_state: @global_state,
@@ -882,17 +938,86 @@ class OnTypeFormattingTest < Minitest::Test
       "\n",
       "Foo",
     ).perform
+    assert_empty(edits)
+  end
+
+  def test_adding_heredoc_delimiter_below_caret_for_snippetless_clients
+    document = RubyLsp::RubyDocument.new(
+      source: +"def foo\n  str = <<~STR\n  \nend",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 2, character: 2 },
+      "\n",
+      "Zed",
+    ).perform
+    # The closing delimiter is inserted on the line below the caret, with no `$0` anchor.
     expected_edits = [
       {
-        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
-        newText: "\n",
-      },
-      {
-        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
-        newText: "end",
+        range: { start: { line: 3, character: 0 }, end: { line: 3, character: 0 } },
+        newText: "  STR\n",
       },
     ]
     assert_equal(expected_edits.to_json, edits.to_json)
+  end
+
+  def test_curly_brace_not_added_for_snippetless_clients
+    # Inline closer: the editor (e.g. Zed) auto-closes `{` itself, and the caret can't be kept inside without `$0`.
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "\"something#\{\"",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 0, character: 11 },
+      "{",
+      "Zed",
+    ).perform
+    assert_empty(edits)
+  end
+
+  def test_pipe_not_added_for_snippetless_clients
+    # Inline closer: the caret can't be kept between the pipes without `$0`, so block parameters are left to the user.
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "[].each do |",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 0, character: 12 },
+      "|",
+      "Zed",
+    ).perform
+    assert_empty(edits)
   end
 
   def test_includes_snippets_on_vscode_insiders
