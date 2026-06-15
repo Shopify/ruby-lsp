@@ -25,6 +25,11 @@ export const FAKE_TELEMETRY = vscode.env.createTelemetryLogger(new FakeSender(),
 export class FakeLogger {
   receivedMessages = "";
 
+  logLevel = vscode.LogLevel.Info;
+
+  private readonly logLevelEmitter = new vscode.EventEmitter<vscode.LogLevel>();
+  readonly onDidChangeLogLevel = this.logLevelEmitter.event;
+
   trace(message: string, ..._args: any[]): void {
     this.receivedMessages += message;
   }

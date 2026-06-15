@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "node16",
+    "moduleResolution": "node16",
     "target": "ES2020",
     "outDir": "out",
     "lib": ["dom", "ESNext"],
+    "types": ["node", "mocha", "sinon", "vscode"],
     "sourceMap": true,
     "rootDir": "src",
     "strict": true,
