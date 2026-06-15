@@ -1209,8 +1209,8 @@ module RubyLsp
       end_progress("indexing-progress")
     end
 
-    #: (String id, String title, ?percentage: Integer) -> void
-    def begin_progress(id, title, percentage: 0)
+    #: (String id, String title, ?percentage: Integer?, ?message: String?) -> void
+    def begin_progress(id, title, percentage: nil, message: nil)
       return unless @global_state.client_capabilities.supports_progress
 
       send_message(Request.new(
@@ -1219,7 +1219,10 @@ module RubyLsp
         params: Interface::WorkDoneProgressCreateParams.new(token: id),
       ))
 
-      send_message(Notification.progress_begin(id, title, percentage: percentage, message: "#{percentage}% completed"))
+      # Omitting the percentage tells the client to show indefinite progress. Only fabricate a "% completed" message
+      # when a caller reports incremental percentages and didn't provide an explicit message
+      message ||= "#{percentage}% completed" if percentage
+      send_message(Notification.progress_begin(id, title, percentage: percentage, message: message))
     end
 
     #: (String, ?message: String?, ?percentage: Integer?) -> void
