@@ -435,10 +435,15 @@ module RubyLsp
       if [:ruby, :rbs].include?(language_id)
         graph = @global_state.graph
 
-        benchmark("index_source") do
-          graph.index_source(text_document[:uri].to_s, document.source, language_id.to_s)
-        end
+        begin_progress("incremental-indexing-progress", "Ruby LSP: indexing files")
+
+        progress("incremental-indexing-progress", message: "Indexing file...")
+        benchmark("index_source") { graph.index_source(text_document[:uri].to_s, document.source, language_id.to_s) }
+
+        progress("incremental-indexing-progress", message: "Resolving graph...")
         benchmark("incremental_resolve") { graph.resolve }
+
+        end_progress("incremental-indexing-progress")
       end
     end
 
@@ -1032,8 +1037,16 @@ module RubyLsp
           acc << path
         end
       end
+
+      begin_progress("incremental-indexing-progress", "Ruby LSP: indexing files")
+
+      progress("incremental-indexing-progress", message: "Indexing files...")
       benchmark("index_all") { graph.index_all(additions_and_changes) }
+
+      progress("incremental-indexing-progress", message: "Resolving graph...")
       benchmark("incremental_resolve") { graph.resolve }
+
+      end_progress("incremental-indexing-progress")
 
       changes.each do |change|
         # File change events include folders, but we're only interested in files
