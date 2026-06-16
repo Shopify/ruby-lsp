@@ -86,7 +86,7 @@ export class Workspace implements WorkspaceInterface {
     this.registerRestarts();
 
     // Eagerly calculate SHAs for the watched files to avoid unnecessary restarts
-    for (const file of WATCHED_FILES) {
+    for (const file of [...WATCHED_FILES, ...this.ruby.versionDefinitionFiles]) {
       const uri = vscode.Uri.joinPath(this.workspaceFolder.uri, file);
       const currentSha = await this.fileContentsSha(uri);
 
@@ -345,6 +345,7 @@ export class Workspace implements WorkspaceInterface {
 
   private registerRestarts() {
     this.createRestartWatcher(`{${WATCHED_FILES.join(",")}}`);
+    this.createRestartWatcher(`{${this.ruby.versionDefinitionFiles.join(",")}}`);
 
     // If a configuration that affects the Ruby LSP has changed, update the client options using the latest
     // configuration and restart the server
