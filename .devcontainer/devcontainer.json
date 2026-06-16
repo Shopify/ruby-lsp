@@ -9,7 +9,7 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/rails/devcontainer/features/ruby": {
-      "version": "4.0.1"
+      "version": "4.0.5"
     }
   },
 
