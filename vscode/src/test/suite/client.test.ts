@@ -535,7 +535,9 @@ suite("Client", () => {
         selector.find(
           (filter: TextDocumentFilter) =>
             filter.language === language &&
-            (typeof pattern === "string" ? pattern === filter.pattern : pattern.test(filter.pattern!)) &&
+            (typeof pattern === "string"
+              ? pattern === filter.pattern
+              : typeof filter.pattern === "string" && pattern.test(filter.pattern)) &&
             filter.scheme === scheme,
         ),
       );

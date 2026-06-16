@@ -294,7 +294,6 @@ export class StreamingRunner implements vscode.Disposable {
     };
 
     // Handle the JSON events being emitted by the tests
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this.disposables.push(this.connection.onNotification(NOTIFICATION_TYPES.finish, () => this.finalize(false)));
 
     this.disposables.push(
