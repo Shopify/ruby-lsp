@@ -75,6 +75,8 @@ module RubyLsp
 
       #: -> void
       def handle_pipe
+        return unless supports_snippet_anchor?
+
         current_line = @lines[@position[:line]]
         return unless /((?<=do)|(?<={))\s+\|/.match?(current_line)
 
@@ -106,6 +108,7 @@ module RubyLsp
 
       #: -> void
       def handle_curly_brace
+        return unless supports_snippet_anchor?
         return unless /".*#\{/.match?(@previous_line)
 
         add_edit_with_text("}")
@@ -129,9 +132,13 @@ module RubyLsp
         next_line = @lines[@position[:line] + 1]
 
         if current_line.nil? || current_line.strip.empty? || current_line.include?(")") || current_line.include?("]")
-          add_edit_with_text("\n")
-          add_edit_with_text("#{indents}end")
-          move_cursor_to(@position[:line], @indentation + 2)
+          if supports_snippet_anchor?
+            add_edit_with_text("\n")
+            add_edit_with_text("#{indents}end")
+            move_cursor_to(@position[:line], @indentation + 2)
+          elsif next_line
+            add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: 0 })
+          end
         elsif next_line.nil? || next_line.strip.empty?
           add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
           move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
@@ -141,9 +148,15 @@ module RubyLsp
       #: (String delimiter) -> void
       def handle_heredoc_end(delimiter)
         indents = " " * @indentation
-        add_edit_with_text("\n")
-        add_edit_with_text("#{indents}#{delimiter}")
-        move_cursor_to(@position[:line], @indentation + 2)
+        next_line = @lines[@position[:line] + 1]
+
+        if supports_snippet_anchor?
+          add_edit_with_text("\n")
+          add_edit_with_text("#{indents}#{delimiter}")
+          move_cursor_to(@position[:line], @indentation + 2)
+        elsif next_line
+          add_edit_with_text("#{indents}#{delimiter}\n", { line: @position[:line] + 1, character: 0 })
+        end
       end
 
       #: (String spaces) -> void
@@ -164,9 +177,16 @@ module RubyLsp
         )
       end
 
+      # Whether the client interprets the `$0` snippet anchor in on type formatting edits to reposition the caret.
+      # This is not part of the LSP specification, so it is only known to work in VS Code and its forks.
+      #: -> bool
+      def supports_snippet_anchor?
+        /Visual Studio Code|Cursor|VSCodium|Windsurf/.match?(@client_name)
+      end
+
       #: (Integer line, Integer character) -> void
       def move_cursor_to(line, character)
-        return unless /Visual Studio Code|Cursor|VSCodium|Windsurf/.match?(@client_name)
+        return unless supports_snippet_anchor?
 
         position = Interface::Position.new(
           line: line,
