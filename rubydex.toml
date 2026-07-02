@@ -1,0 +1,1 @@
+exclude = [".devcontainer", "bin", "test/fixtures", "vscode"]
