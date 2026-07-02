@@ -11,11 +11,16 @@
 # source://rubydex//lib/rubydex/version.rb#3
 module Rubydex; end
 
+# Raised when `MethodAliasDefinition#target` walks an alias chain that loops back on itself.
+#
+# source://rubydex//lib/rubydex/errors.rb#7
+class Rubydex::AliasCycleError < ::Rubydex::Error; end
+
 class Rubydex::AttrAccessorDefinition < ::Rubydex::Definition; end
 class Rubydex::AttrReaderDefinition < ::Rubydex::Definition; end
 class Rubydex::AttrWriterDefinition < ::Rubydex::Definition; end
 
-# source://rubydex//lib/rubydex/declaration.rb#23
+# source://rubydex//lib/rubydex/declaration.rb#30
 class Rubydex::Class < ::Rubydex::Namespace
   include ::Rubydex::Visibility
 
@@ -58,7 +63,12 @@ class Rubydex::Comment
   def string; end
 end
 
-# source://rubydex//lib/rubydex/declaration.rb#31
+# Raised by `Graph#load_config` when the requested config file does not exist, cannot be read, or is malformed
+#
+# source://rubydex//lib/rubydex/errors.rb#10
+class Rubydex::ConfigError < ::Rubydex::Error; end
+
+# source://rubydex//lib/rubydex/declaration.rb#43
 class Rubydex::Constant < ::Rubydex::Declaration
   include ::Rubydex::Visibility
 
@@ -70,7 +80,7 @@ class Rubydex::Constant < ::Rubydex::Declaration
   def visibility; end
 end
 
-# source://rubydex//lib/rubydex/declaration.rb#35
+# source://rubydex//lib/rubydex/declaration.rb#47
 class Rubydex::ConstantAlias < ::Rubydex::Declaration
   include ::Rubydex::Visibility
 
@@ -90,6 +100,8 @@ class Rubydex::ConstantAliasDefinition < ::Rubydex::Definition; end
 class Rubydex::ConstantDefinition < ::Rubydex::Definition; end
 
 class Rubydex::ConstantReference < ::Rubydex::Reference
+  abstract!
+
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
 
@@ -98,9 +110,6 @@ class Rubydex::ConstantReference < ::Rubydex::Reference
   def location; end
 
   class << self
-    private
-
-    # source://rubydex//lib/rubydex.rb#11
     def new(*args); end
   end
 end
@@ -109,6 +118,8 @@ class Rubydex::ConstantVisibilityDefinition < ::Rubydex::Definition; end
 
 # source://rubydex//lib/rubydex/declaration.rb#15
 class Rubydex::Declaration
+  abstract!
+
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
 
@@ -139,11 +150,13 @@ class Rubydex::Declaration
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*_arg0); end
+    def new(*args); end
   end
 end
 
 class Rubydex::Definition
+  abstract!
+
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
 
@@ -152,8 +165,20 @@ class Rubydex::Definition
   def comments; end
 
   # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T.nilable(Rubydex::Declaration)) }
+  def declaration; end
+
+  # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Boolean) }
   def deprecated?; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T::Array[Rubydex::Definition]) }
+  def lexical_nesting; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T.nilable(Rubydex::Definition)) }
+  def lexical_owner; end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(Rubydex::Location) }
@@ -171,7 +196,7 @@ class Rubydex::Definition
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*_arg0); end
+    def new(*args); end
   end
 end
 
@@ -199,25 +224,33 @@ end
 # A one based location intended for display purposes. This is what should be used when displaying a location to users,
 # like in CLIs
 #
-# source://rubydex//lib/rubydex/location.rb#70
+# source://rubydex//lib/rubydex/location.rb#83
 class Rubydex::DisplayLocation < ::Rubydex::Location
   # Normalize to zero-based for comparison with Location
   #
   #
-  # source://rubydex//lib/rubydex/location.rb#81
+  # source://rubydex//lib/rubydex/location.rb#105
   sig { returns([String, Integer, Integer, Integer, Integer]) }
   def comparable_values; end
 
   # Returns itself
   #
   #
-  # source://rubydex//lib/rubydex/location.rb#74
+  # source://rubydex//lib/rubydex/location.rb#98
   sig { returns(Rubydex::DisplayLocation) }
   def to_display; end
 
-  # source://rubydex//lib/rubydex/location.rb#86
+  # source://rubydex//lib/rubydex/location.rb#110
   sig { returns(String) }
   def to_s; end
+
+  class << self
+    # @raise [NotImplementedError]
+    #
+    # source://rubydex//lib/rubydex/location.rb#86
+    sig { params(prism_location: Prism::Location, uri: String).returns(T.noreturn) }
+    def from_prism(prism_location, uri:); end
+  end
 end
 
 class Rubydex::Document
@@ -229,6 +262,10 @@ class Rubydex::Document
   def definitions; end
 
   # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T::Enumerable[Rubydex::MethodReference]) }
+  def method_references; end
+
+  # source://rubydex//lib/rubydex.rb#11
   sig { returns(String) }
   def uri; end
 
@@ -236,11 +273,12 @@ class Rubydex::Document
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*_arg0); end
+    def new(*args); end
   end
 end
 
-class Rubydex::Error < StandardError; end
+# source://rubydex//lib/rubydex/errors.rb#4
+class Rubydex::Error < ::StandardError; end
 
 # Represents `extend SomeModule`
 #
@@ -277,7 +315,7 @@ class Rubydex::GlobalVariableDefinition < ::Rubydex::Definition; end
 class Rubydex::Graph
   # @return [Graph] a new instance of Graph
   #
-  # source://rubydex//lib/rubydex/graph.rb#24
+  # source://rubydex//lib/rubydex/graph.rb#11
   sig { params(workspace_path: T.nilable(String)).void }
   def initialize(workspace_path: T.unsafe(nil)); end
 
@@ -289,14 +327,6 @@ class Rubydex::Graph
   sig { returns(T::Array[Rubydex::Failure]) }
   def check_integrity; end
 
-  # Returns completion candidates for an expression context. This includes all keywords, constants, methods, instance
-  # variables, class variables and global variables reachable from the current lexical scope and self type.
-  #
-  # The nesting array represents the lexical scope stack. The required `self_receiver` keyword argument overrides the
-  # self type independently of the lexical scope (e.g., `"Foo::<Foo>"` for `def Foo.bar`). This distinction is important
-  # because constants and class variables are always attached to the lexical scope. Meanwhile, methods and instance
-  # variables are attached to the type of `self` and those don't always match. Pass `nil` when the self type is unknown
-  #
   # source://rubydex//lib/rubydex.rb#11
   sig do
     params(
@@ -306,11 +336,6 @@ class Rubydex::Graph
   end
   def complete_expression(nesting, self_receiver:); end
 
-  # Returns completion candidates inside a method call's argument list (e.g., `foo.bar(|)`). This includes everything
-  # that expression completion provides plus keyword argument names of the method being called.
-  #
-  # See `complete_expression` for the semantics of `nesting` and `self_receiver` (required, may be `nil`).
-  #
   # source://rubydex//lib/rubydex.rb#11
   sig do
     params(
@@ -321,12 +346,6 @@ class Rubydex::Graph
   end
   def complete_method_argument(name, nesting, self_receiver:); end
 
-  # Returns completion candidates after a method call operator (e.g., `foo.`). This includes all methods that exist on
-  # the type of the receiver and its ancestors.
-  #
-  # The required `self_receiver` kwarg is the caller's runtime self type. It's used for visibility checks for `private`
-  # and `protected` methods. Pass `nil` for top-level/script scope.
-  #
   # source://rubydex//lib/rubydex.rb#11
   sig do
     params(
@@ -336,12 +355,6 @@ class Rubydex::Graph
   end
   def complete_method_call(name, self_receiver:); end
 
-  # Returns completion candidates after a namespace access operator (e.g., `Foo::`). This includes all constants and
-  # singleton methods for the namespace and its ancestors.
-  #
-  # The required `self_receiver` kwarg is the caller's runtime self type. It's used to filter visibility-restricted
-  # singleton methods (e.g., `private_class_method`). Pass `nil` for top-level/script scope.
-  #
   # source://rubydex//lib/rubydex.rb#11
   sig do
     params(
@@ -399,15 +412,19 @@ class Rubydex::Graph
   sig { params(uri: String, source: String, language_id: String).void }
   def index_source(uri, source, language_id); end
 
-  # Index all files and dependencies of the workspace that exists in `@workspace_path`
+  # Index all files and dependencies of the workspace that exists in `workspace_path`
   #
-  # source://rubydex//lib/rubydex/graph.rb#32
-  # Index all files and dependencies of the workspace that exists in `@workspace_path`
+  # source://rubydex//lib/rubydex/graph.rb#17
+  # Index all files and dependencies of the workspace that exists in `workspace_path`
   sig { returns(T::Array[String]) }
   def index_workspace; end
 
   # source://rubydex//lib/rubydex.rb#11
   def keyword(_arg0); end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { params(config_path: T.nilable(String)).void }
+  def load_config(config_path = T.unsafe(nil)); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::MethodReference]) }
@@ -433,19 +450,18 @@ class Rubydex::Graph
   sig { params(query: String).returns(T::Enumerable[Rubydex::Declaration]) }
   def search(query); end
 
-  # source://rubydex//lib/rubydex/graph.rb#21
+  # source://rubydex//lib/rubydex.rb#11
   sig { returns(String) }
   def workspace_path; end
 
-  # source://rubydex//lib/rubydex/graph.rb#21
+  # source://rubydex//lib/rubydex.rb#11
   sig { params(workspace_path: String).returns(String) }
   def workspace_path=(workspace_path); end
 
-  # Returns all workspace paths that should be indexed, excluding directories that we don't need to descend into such
-  # as `.git`, `node_modules`. Also includes any top level Ruby files
+  # Returns all workspace paths that should be indexed
   #
   #
-  # source://rubydex//lib/rubydex/graph.rb#40
+  # source://rubydex//lib/rubydex/graph.rb#24
   sig { returns(T::Array[String]) }
   def workspace_paths; end
 
@@ -456,19 +472,19 @@ class Rubydex::Graph
   # latest installation of `rbs` exists in the system and fails silently if we can't find one
   #
   #
-  # source://rubydex//lib/rubydex/graph.rb#87
+  # source://rubydex//lib/rubydex/graph.rb#70
   sig { params(paths: T::Array[String]).void }
   def add_core_rbs_definition_paths(paths); end
 
   # Gathers the paths we have to index for all workspace dependencies
   #
-  # source://rubydex//lib/rubydex/graph.rb#63
+  # source://rubydex//lib/rubydex/graph.rb#46
   sig { params(paths: T::Array[String]).void }
   def add_workspace_dependency_paths(paths); end
 end
 
 # source://rubydex//lib/rubydex/graph.rb#8
-Rubydex::Graph::IGNORED_DIRECTORIES = T.let(T.unsafe(nil), Array)
+Rubydex::Graph::INDEXABLE_EXTENSIONS = T.let(T.unsafe(nil), Array)
 
 # Represents `include SomeModule`
 #
@@ -525,15 +541,15 @@ class Rubydex::Location
 
   # @return [Location] a new instance of Location
   #
-  # source://rubydex//lib/rubydex/location.rb#18
+  # source://rubydex//lib/rubydex/location.rb#31
   sig { params(uri: String, start_line: Integer, end_line: Integer, start_column: Integer, end_column: Integer).void }
   def initialize(uri:, start_line:, end_line:, start_column:, end_column:); end
 
-  # source://rubydex//lib/rubydex/location.rb#38
+  # source://rubydex//lib/rubydex/location.rb#51
   sig { params(other: T.untyped).returns(T.nilable(Integer)) }
   def <=>(other); end
 
-  # source://rubydex//lib/rubydex/location.rb#45
+  # source://rubydex//lib/rubydex/location.rb#58
   sig { returns([String, Integer, Integer, Integer, Integer]) }
   def comparable_values; end
 
@@ -556,29 +572,35 @@ class Rubydex::Location
   # Turns this zero based location into a one based location for display purposes.
   #
   #
-  # source://rubydex//lib/rubydex/location.rb#52
+  # source://rubydex//lib/rubydex/location.rb#65
   sig { returns(Rubydex::DisplayLocation) }
   def to_display; end
 
   # @raise [NotFileUriError]
   #
-  # source://rubydex//lib/rubydex/location.rb#27
+  # source://rubydex//lib/rubydex/location.rb#40
   sig { returns(String) }
   def to_file_path; end
 
-  # source://rubydex//lib/rubydex/location.rb#63
+  # source://rubydex//lib/rubydex/location.rb#76
   sig { returns(String) }
   def to_s; end
 
   # source://rubydex//lib/rubydex/location.rb#12
   sig { returns(String) }
   def uri; end
+
+  class << self
+    # source://rubydex//lib/rubydex/location.rb#19
+    sig { params(prism_location: Prism::Location, uri: String).returns(Rubydex::Location) }
+    def from_prism(prism_location, uri:); end
+  end
 end
 
 # source://rubydex//lib/rubydex/location.rb#7
 class Rubydex::Location::NotFileUriError < ::StandardError; end
 
-# source://rubydex//lib/rubydex/declaration.rb#39
+# source://rubydex//lib/rubydex/declaration.rb#51
 class Rubydex::Method < ::Rubydex::Declaration
   include ::Rubydex::Visibility
 
@@ -593,6 +615,10 @@ end
 class Rubydex::MethodAliasDefinition < ::Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
   def signatures; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T.nilable(Rubydex::Method)) }
+  def target; end
 end
 
 class Rubydex::MethodDefinition < ::Rubydex::Definition
@@ -621,6 +647,8 @@ class Rubydex::MethodVisibilityDefinition < ::Rubydex::Definition; end
 
 # source://rubydex//lib/rubydex/mixin.rb#4
 class Rubydex::Mixin
+  abstract!
+
   # @return [Mixin] a new instance of Mixin
   #
   # source://rubydex//lib/rubydex/mixin.rb#9
@@ -632,7 +660,7 @@ class Rubydex::Mixin
   def constant_reference; end
 end
 
-# source://rubydex//lib/rubydex/declaration.rb#27
+# source://rubydex//lib/rubydex/declaration.rb#34
 class Rubydex::Module < ::Rubydex::Namespace
   include ::Rubydex::Visibility
 
@@ -646,7 +674,10 @@ class Rubydex::ModuleDefinition < ::Rubydex::Definition
   def mixins; end
 end
 
+# source://rubydex//lib/rubydex/declaration.rb#23
 class Rubydex::Namespace < ::Rubydex::Declaration
+  abstract!
+
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Enumerable[Rubydex::Namespace]) }
   def ancestors; end
@@ -658,6 +689,12 @@ class Rubydex::Namespace < ::Rubydex::Declaration
   # source://rubydex//lib/rubydex.rb#11
   sig { params(name: String, only_inherited: T::Boolean).returns(T.nilable(Rubydex::Declaration)) }
   def find_member(name, only_inherited: false); end
+
+  # @return [Boolean]
+  #
+  # source://rubydex//lib/rubydex/declaration.rb#25
+  sig { params(ancestor_names: String).returns(T::Boolean) }
+  def has_ancestor?(*ancestor_names); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { params(name: String).returns(T.nilable(Rubydex::Declaration)) }
@@ -681,19 +718,23 @@ end
 # source://rubydex//lib/rubydex/mixin.rb#18
 class Rubydex::Prepend < ::Rubydex::Mixin; end
 
+# source://rubydex//lib/rubydex/reference.rb#4
 class Rubydex::Reference
+  abstract!
+
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
 
-  # source://rubydex//lib/rubydex.rb#11
-  sig { returns(Rubydex::Location) }
+  # @raise [NotImplementedError]
+  #
+  # source://rubydex//lib/rubydex/reference.rb#6
   def location; end
 
   class << self
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*_arg0); end
+    def new(*args); end
   end
 end
 
@@ -791,7 +832,12 @@ class Rubydex::Signature::RestKeywordParameter < ::Rubydex::Signature::Parameter
 # source://rubydex//lib/rubydex/signature.rb#21
 class Rubydex::Signature::RestPositionalParameter < ::Rubydex::Signature::Parameter; end
 
-class Rubydex::SingletonClass < ::Rubydex::Namespace; end
+# source://rubydex//lib/rubydex/declaration.rb#38
+class Rubydex::SingletonClass < ::Rubydex::Namespace
+  # source://rubydex//lib/rubydex/declaration.rb#40
+  sig { returns(Rubydex::Declaration) }
+  def attached_class; end
+end
 
 class Rubydex::SingletonClassDefinition < ::Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
