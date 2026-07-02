@@ -20,11 +20,65 @@ module RubyLsp
       when Prism::InstanceVariableReadNode, Prism::InstanceVariableAndWriteNode, Prism::InstanceVariableWriteNode,
         Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode,
         Prism::SuperNode, Prism::ForwardingSuperNode, Prism::DefNode
-        self_receiver_handling(node_context)
+        infer_self_type(node_context)
       when Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode, Prism::ClassVariableOperatorWriteNode,
         Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode, Prism::ClassVariableTargetNode
         infer_receiver_for_class_variables(node_context)
       end
+    end
+
+    # Infers the type of `self` in the given context. Unlike `infer_receiver_type`, this does not depend on the node
+    # being completed — it's derived purely from the lexical nesting and the surrounding method's receiver. This matters
+    # because methods and instance variables are attached to the type of `self`, which doesn't always match the lexical
+    # scope (e.g. inside `def self.foo` or a class/module body).
+    #
+    #: (NodeContext node_context) -> Type?
+    def infer_self_type(node_context)
+      nesting = node_context.nesting
+      # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
+      # inherits from Object
+      return Type.new("Object") if nesting.empty?
+
+      surrounding_method = node_context.surrounding_method
+
+      if surrounding_method
+        receiver_name = surrounding_method.receiver
+
+        case receiver_name
+        when "self"
+          # `def self.foo` — self is the singleton of the enclosing class/module
+          return resolve_singleton_type_from_nesting(nesting)
+        when "none"
+          # Instance method — self is an instance of the enclosing class/module
+          return resolve_type_from_nesting(nesting)
+        when nil
+          # Dynamic receiver that we cannot handle
+          return
+        else
+          # Explicit constant receiver (e.g. `def Bar.baz`) — self is that constant's singleton class
+          resolved = resolve_receiver_singleton_type(receiver_name, nesting)
+          return resolved if resolved
+
+          return resolve_type_from_nesting(nesting)
+        end
+      end
+
+      # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
+      # context. Resolve through the graph to get the correct fully qualified name
+      resolve_singleton_type_from_nesting(nesting)
+    end
+
+    # The type of `self`, which may or may not match the current lexical scope. For example, if we have `def Bar.foo` or
+    # if something else mutates the type
+    #
+    #: (NodeContext) -> String?
+    def self_receiver_name(node_context)
+      return if node_context.nesting.empty?
+
+      name = infer_self_type(node_context)&.name
+      return unless name
+
+      name if @graph[name]
     end
 
     private
@@ -49,7 +103,7 @@ module RubyLsp
 
       case receiver
       when Prism::SelfNode, nil
-        self_receiver_handling(node_context)
+        infer_self_type(node_context)
       when Prism::StringNode
         Type.new("String")
       when Prism::SymbolNode
@@ -127,42 +181,6 @@ module RubyLsp
       return unless declaration.is_a?(Rubydex::Namespace)
 
       GuessedType.new(declaration.name)
-    end
-
-    #: (NodeContext node_context) -> Type?
-    def self_receiver_handling(node_context)
-      nesting = node_context.nesting
-      # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
-      # inherits from Object
-      return Type.new("Object") if nesting.empty?
-
-      surrounding_method = node_context.surrounding_method
-
-      if surrounding_method
-        receiver_name = surrounding_method.receiver
-
-        case receiver_name
-        when "self"
-          # `def self.foo` — self is the singleton of the enclosing class/module
-          return resolve_singleton_type_from_nesting(nesting)
-        when "none"
-          # Instance method — self is an instance of the enclosing class/module
-          return resolve_type_from_nesting(nesting)
-        when nil
-          # Dynamic receiver that we cannot handle
-          return
-        else
-          # Explicit constant receiver (e.g. `def Bar.baz`) — self is that constant's singleton class
-          resolved = resolve_receiver_singleton_type(receiver_name, nesting)
-          return resolved if resolved
-
-          return resolve_type_from_nesting(nesting)
-        end
-      end
-
-      # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
-      # context. Resolve through the graph to get the correct fully qualified name
-      resolve_singleton_type_from_nesting(nesting)
     end
 
     # Resolves the fully qualified name of the innermost constant from the nesting and returns it as a type.

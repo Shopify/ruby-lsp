@@ -1551,6 +1551,34 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_instance_variables_in_explicit_receiver_method
+    source = +<<~RUBY
+      class Foo
+        @hello = 1
+      end
+
+      class Bar
+        @bye = 2
+
+        def Foo.something
+          @
+        end
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 8, character: 5 },
+      })
+
+      # Inside `def Foo.something`, `self` is `Foo`'s singleton, so only `@hello` should be offered - not `@bye`,
+      # which belongs to `Bar`'s singleton
+      result = server.pop_response.response
+      assert_equal(["@hello"], result.map(&:label))
+    end
+  end
+
   def test_completion_for_aliased_methods
     source = +<<~RUBY
       class Parent
