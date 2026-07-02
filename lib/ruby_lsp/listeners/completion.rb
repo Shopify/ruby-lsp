@@ -256,7 +256,7 @@ module RubyLsp
       #
       #: () -> Array[(Rubydex::Declaration | Rubydex::Keyword)]
       def expression_candidates
-        @graph.complete_expression(@node_context.nesting, self_receiver: nil)
+        @graph.complete_expression(@node_context.nesting, self_receiver: @type_inferrer.self_receiver_name(@node_context))
       end
 
       #: (Interface::Range range, String prefix) -> void
@@ -322,14 +322,14 @@ module RubyLsp
         end
 
         candidates = if namespace_prefix.empty?
-          @graph.complete_expression([], self_receiver: nil)
+          @graph.complete_expression([], self_receiver: @type_inferrer.self_receiver_name(@node_context))
         else
           # Rubydex's resolver handles a leading `::` on `namespace_prefix` by resolving from the top-level scope, so
           # we don't need to special-case top-level references here
           resolved = @graph.resolve_constant(namespace_prefix, @node_context.nesting)
           return unless resolved
 
-          @graph.complete_namespace_access(resolved.name, self_receiver: nil)
+          @graph.complete_namespace_access(resolved.name, self_receiver: @type_inferrer.self_receiver_name(@node_context))
         end
 
         candidates.each do |candidate|
@@ -378,7 +378,7 @@ module RubyLsp
 
         guessed_type = type.is_a?(TypeInferrer::GuessedType) && type.name
 
-        @graph.complete_method_call(type.name, self_receiver: nil).each do |candidate|
+        @graph.complete_method_call(type.name, self_receiver: @type_inferrer.self_receiver_name(@node_context)).each do |candidate|
           if method_name
             display_name = candidate.unqualified_name.delete_suffix("()")
             next unless display_name.start_with?(method_name)
@@ -390,16 +390,13 @@ module RubyLsp
 
       # Variable completion (instance, class, and global). The variable kind is selected by the prefix the user typed:
       # `$…` only matches globals, `@@…` only class variables, and `@…` matches both instance and class variables (since
-      # `@@foo`.start_with?("@") is true). Globals live at top-level, so they need an empty nesting; instance/class
-      # variables resolve through the type_inferrer to handle singleton methods and class bodies, where the receiver is
-      # the singleton class rather than the lexical nesting.
+      # `@@foo`.start_with?("@") is true). This uses the same query as expression completion: the lexical nesting drives
+      # constants and class variables, while the `self` type (which may differ from the nesting, e.g. inside
+      # `def self.foo` or `def Bar.baz`) drives instance variables.
       #
       #: (Interface::Range, String) -> void
       def complete_variable(range, prefix)
-        type = @type_inferrer.infer_receiver_type(@node_context)
-        nesting = type ? type.name.split("::") : []
-
-        @graph.complete_expression(nesting, self_receiver: nil).each do |candidate|
+        expression_candidates.each do |candidate|
           next unless candidate.is_a?(Rubydex::Declaration)
 
           variable_name = candidate.unqualified_name
