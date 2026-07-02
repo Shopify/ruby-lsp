@@ -120,6 +120,16 @@ module RubyLsp
           markdown_title = "```ruby\n#{title}\n```"
           file_links = []
           content = +""
+
+          # Include documentation for method alias targets
+          definitions = definitions.flat_map do |definition|
+            if definition.is_a?(Rubydex::MethodAliasDefinition) && (target = definition.target)
+              [definition, *target.definitions]
+            else
+              [definition]
+            end
+          end
+
           defs = max_entries ? definitions.take(max_entries) : definitions
           defs.each do |definition|
             # For Markdown links, we need 1 based display locations

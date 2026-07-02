@@ -914,8 +914,6 @@ class HoverExpectationsTest < ExpectationsTestRunner
   end
 
   def test_hover_for_aliased_methods
-    skip("[RUBYDEX] need to expose method alias targets in the Ruby API")
-
     source = <<~RUBY
       class Parent
         # Original
