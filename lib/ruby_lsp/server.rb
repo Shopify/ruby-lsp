@@ -371,6 +371,7 @@ module RubyLsp
         end
       end
 
+      load_rubydex_config
       perform_initial_indexing
       check_formatter_is_available
       update_server if @global_state.enabled_feature?(:launcher)
@@ -1458,6 +1459,16 @@ module RubyLsp
       }))
 
       result
+    end
+
+    #: () -> void
+    def load_rubydex_config
+      @global_state.graph.load_config
+    rescue Rubydex::ConfigError => e
+      send_message(Notification.window_show_message(
+        "Error loading rubydex config: #{e.message}",
+        type: Constant::MessageType::ERROR,
+      ))
     end
   end
 end
