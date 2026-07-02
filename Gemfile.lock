@@ -5,7 +5,7 @@ PATH
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 5)
-      rubydex (~> 0.2.0, < 0.3.0)
+      rubydex (>= 0.2.7, < 0.3.0)
 
 GEM
   remote: https://rubygems.org/
@@ -92,10 +92,10 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    rubydex (0.2.2-arm64-darwin)
-    rubydex (0.2.2-x64-mingw-ucrt)
-    rubydex (0.2.2-x86_64-darwin)
-    rubydex (0.2.2-x86_64-linux)
+    rubydex (0.2.7-arm64-darwin)
+    rubydex (0.2.7-x64-mingw-ucrt)
+    rubydex (0.2.7-x86_64-darwin)
+    rubydex (0.2.7-x86_64-linux)
     sorbet (0.6.13055)
       sorbet-static (= 0.6.13055)
     sorbet-runtime (0.6.13055)
@@ -205,10 +205,10 @@ CHECKSUMS
   ruby-lsp (0.27.0.beta3)
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
-  rubydex (0.2.2-arm64-darwin) sha256=9f8a65aef09f056ef5c9de5eef231c3f5a3c305a3e723951533223b40e7bd774
-  rubydex (0.2.2-x64-mingw-ucrt) sha256=40498e97f36c63f6afad6d72f7b38d4536f38b24cc26aec76967616d423dcbaf
-  rubydex (0.2.2-x86_64-darwin) sha256=2270f577fc9192e29111165ee7a51b692c05ede17972da389d1f0e9c2a8e6341
-  rubydex (0.2.2-x86_64-linux) sha256=b356fbd11401522dc6967637b3c0485827053e549303229eeb8aa669638b0885
+  rubydex (0.2.7-arm64-darwin) sha256=f0d28bbf4153568be79b671642424750053e0bea971b60ddf5cec19bf4563990
+  rubydex (0.2.7-x64-mingw-ucrt) sha256=12ba8d8be6e2410c473c8ad9b0b00429eccd88769b8ee8485d7c95dcdc042661
+  rubydex (0.2.7-x86_64-darwin) sha256=b002b259d118ac69de44470eff1597143318402c45630c47371f9542631447dc
+  rubydex (0.2.7-x86_64-linux) sha256=dacfade9fa42ce4469618da6dac07e69d5f3ac6a313b4caced5234c8f052419a
   sorbet (0.6.13055) sha256=5f5e8f37c13c281fa2b2f95e261d2e531d8331ddcc8e2dd8c4f16457935872ec
   sorbet-runtime (0.6.13055) sha256=c8ae8c81310e0a28d290b11f44ddca59659b7d7f13752c0ef5d16964bbb84d18
   sorbet-static (0.6.13055-universal-darwin) sha256=649c8e79a443be85318922f9ecbb46be72f6c585443f4440c4ec0fb1737c86e8
