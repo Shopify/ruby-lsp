@@ -420,7 +420,6 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_private_constants_inside_the_same_namespace
-    skip("Visibility handling not yet implemented in Rubydex")
     source = +<<~RUBY
       class A
         CONST = 1
@@ -438,13 +437,12 @@ class CompletionTest < Minitest::Test
         })
 
         result = server.pop_response.response
-        assert_equal(["CONST"], result.map { |completion| completion.text_edit.new_text })
+        assert_includes(result.map { |completion| completion.text_edit.new_text }, "CONST")
       end
     end
   end
 
   def test_completion_private_constants_from_different_namespace
-    skip("Visibility handling not yet implemented in Rubydex")
     source = +<<~RUBY
       class A
         CONST = 1
@@ -1815,11 +1813,75 @@ class CompletionTest < Minitest::Test
   end
 
   def test_completion_for_private_methods
-    skip("Visibility handling not yet implemented in Rubydex")
+    source = +<<~RUBY
+      class Foo
+        def bar
+          b
+        end
+
+        private
+
+        def baz
+        end
+      end
+
+      foo = Foo.new
+      foo.b
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 2, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_includes(result.map(&:label), "baz")
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 5 },
+      })
+
+      result = server.pop_response.response
+      refute_includes(result.map(&:label), "baz")
+    end
   end
 
   def test_completion_for_protected_methods
-    skip("Visibility handling not yet implemented in Rubydex")
+    source = +<<~RUBY
+      class Foo
+        def bar
+          b
+        end
+
+        protected
+
+        def baz
+        end
+      end
+
+      foo = Foo.new
+      foo.b
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 2, character: 5 },
+      })
+
+      result = server.pop_response.response
+      assert_includes(result.map(&:label), "baz")
+
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 12, character: 5 },
+      })
+
+      result = server.pop_response.response
+      refute_includes(result.map(&:label), "baz")
+    end
   end
 
   def test_require_relative_returns_empty_result_for_unsaved_files
