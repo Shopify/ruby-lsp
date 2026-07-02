@@ -143,8 +143,6 @@ class CompletionResolveTest < Minitest::Test
   end
 
   def test_resolve_handles_method_aliases
-    skip("[RUBYDEX] need to expose method alias targets in the Ruby API")
-
     source = +<<~RUBY
       class Bar
         # The original method
