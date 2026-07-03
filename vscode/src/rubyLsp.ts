@@ -395,7 +395,7 @@ export class RubyLsp {
           : this.testController.debugTest(path, name, command);
       }),
       vscode.commands.registerCommand(Command.RevealInExplorer, (target, name) => {
-        return this.testController.showInExplorer(target, name);
+        return this.testController.revealInExplorer(target, name);
       }),
       vscode.commands.registerCommand(Command.RunTask, async (command: string) => {
         let workspace = this.currentActiveWorkspace();

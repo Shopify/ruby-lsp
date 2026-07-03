@@ -957,37 +957,37 @@ suite("TestController", () => {
     assert.ok(runTestSpy.calledOnce);
   });
 
-  test("showInExplorer reveals discovered test item", async () => {
+  test("revealInExplorer reveals discovered test item", async () => {
     const uri = vscode.Uri.file("/fake/test_file_test.rb");
     const testItem = controller.testController.createTestItem("FakeTest#test_something", "test_something", uri);
 
     sandbox.stub(controller, "findTestItem").resolves(testItem);
     const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
 
-    await controller.showInExplorer(uri.fsPath, testItem.id);
+    await controller.revealInExplorer(uri.fsPath, testItem.id);
 
     assert.ok(executeCommandSpy.calledOnceWithExactly("vscode.revealTestInExplorer", testItem));
   });
 
-  test("showInExplorer accepts test items from the test explorer context menu", async () => {
+  test("revealInExplorer accepts test items from the test explorer context menu", async () => {
     const uri = vscode.Uri.file("/fake/test_file_test.rb");
     const testItem = controller.testController.createTestItem("FakeTest#test_something", "test_something", uri);
 
     const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
 
-    await controller.showInExplorer(testItem);
+    await controller.revealInExplorer(testItem);
 
     assert.ok(executeCommandSpy.calledOnceWithExactly("vscode.revealTestInExplorer", testItem));
   });
 
-  test("showInExplorer shows error when test item is missing", async () => {
+  test("revealInExplorer shows error when test item is missing", async () => {
     const uri = vscode.Uri.file("/fake/test_file_test.rb");
 
     sandbox.stub(controller, "findTestItem").resolves(undefined);
     const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
     const showErrorStub = sandbox.stub(vscode.window, "showErrorMessage").resolves(undefined);
 
-    await controller.showInExplorer(uri.fsPath, "FakeTest#missing");
+    await controller.revealInExplorer(uri.fsPath, "FakeTest#missing");
 
     assert.ok(executeCommandSpy.notCalled);
     assert.ok(showErrorStub.calledOnce);

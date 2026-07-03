@@ -391,7 +391,7 @@ export class TestController {
     return this.runTest(request, tokenSource.token);
   }
 
-  async showInExplorer(target: string | vscode.TestItem, name?: string) {
+  async revealInExplorer(target: string | vscode.TestItem, name?: string) {
     if (typeof target !== "string") {
       await vscode.commands.executeCommand("vscode.revealTestInExplorer", target);
       return;
