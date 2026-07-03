@@ -204,6 +204,14 @@ module RubyLsp
           arguments: arguments,
           data: { type: "debug", **grouping_data },
         )
+
+        @response_builder << create_code_lens(
+          node,
+          title: "🔎 Reveal In Explorer",
+          command_name: "rubyLsp.revealInExplorer",
+          arguments: arguments,
+          data: { type: "reveal_in_explorer", **grouping_data },
+        )
       end
 
       #: (?group_stack: Array[String], ?spec_name: String?, ?method_name: String?) -> String

@@ -13,6 +13,7 @@ import * as common from "../../common";
 import { Workspace } from "../../workspace";
 import { ManagerIdentifier } from "../../ruby";
 import { Debugger } from "../../debugger";
+import { Mode } from "../../streamingRunner";
 
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
 import {
@@ -926,5 +927,69 @@ suite("TestController", () => {
     await controller.testController.resolveHandler!(undefined);
 
     assert.ok(spy.calledOnce);
+  });
+
+  test("runViaCommand reveals test in explorer for run mode", async () => {
+    const uri = vscode.Uri.file("/fake/test_file_test.rb");
+    const testItem = controller.testController.createTestItem("FakeTest#test_something", "test_something", uri);
+
+    sandbox.stub(controller, "findTestItem").resolves(testItem);
+    const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
+    const runTestSpy = sandbox.stub(controller, "runTest").resolves();
+
+    await controller.runViaCommand(uri.fsPath, testItem.id, Mode.Run);
+
+    assert.ok(executeCommandSpy.calledOnceWithExactly("vscode.revealTestInExplorer", testItem));
+    assert.ok(runTestSpy.calledOnce);
+  });
+
+  test("runViaCommand does not reveal test in explorer for debug mode", async () => {
+    const uri = vscode.Uri.file("/fake/test_file_test.rb");
+    const testItem = controller.testController.createTestItem("FakeTest#test_something", "test_something", uri);
+
+    sandbox.stub(controller, "findTestItem").resolves(testItem);
+    const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
+    const runTestSpy = sandbox.stub(controller, "runTest").resolves();
+
+    await controller.runViaCommand(uri.fsPath, testItem.id, Mode.Debug);
+
+    assert.ok(executeCommandSpy.notCalled);
+    assert.ok(runTestSpy.calledOnce);
+  });
+
+  test("showInExplorer reveals discovered test item", async () => {
+    const uri = vscode.Uri.file("/fake/test_file_test.rb");
+    const testItem = controller.testController.createTestItem("FakeTest#test_something", "test_something", uri);
+
+    sandbox.stub(controller, "findTestItem").resolves(testItem);
+    const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
+
+    await controller.showInExplorer(uri.fsPath, testItem.id);
+
+    assert.ok(executeCommandSpy.calledOnceWithExactly("vscode.revealTestInExplorer", testItem));
+  });
+
+  test("showInExplorer accepts test items from the test explorer context menu", async () => {
+    const uri = vscode.Uri.file("/fake/test_file_test.rb");
+    const testItem = controller.testController.createTestItem("FakeTest#test_something", "test_something", uri);
+
+    const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
+
+    await controller.showInExplorer(testItem);
+
+    assert.ok(executeCommandSpy.calledOnceWithExactly("vscode.revealTestInExplorer", testItem));
+  });
+
+  test("showInExplorer shows error when test item is missing", async () => {
+    const uri = vscode.Uri.file("/fake/test_file_test.rb");
+
+    sandbox.stub(controller, "findTestItem").resolves(undefined);
+    const executeCommandSpy = sandbox.stub(vscode.commands, "executeCommand").resolves();
+    const showErrorStub = sandbox.stub(vscode.window, "showErrorMessage").resolves(undefined);
+
+    await controller.showInExplorer(uri.fsPath, "FakeTest#missing");
+
+    assert.ok(executeCommandSpy.notCalled);
+    assert.ok(showErrorStub.calledOnce);
   });
 });
