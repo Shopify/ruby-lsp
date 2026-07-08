@@ -150,7 +150,7 @@ class Rubydex::Declaration
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*args); end
+    def new(*_arg0); end
   end
 end
 
@@ -196,7 +196,7 @@ class Rubydex::Definition
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*args); end
+    def new(*_arg0); end
   end
 end
 
@@ -273,7 +273,7 @@ class Rubydex::Document
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*args); end
+    def new(*_arg0); end
   end
 end
 
@@ -347,21 +347,11 @@ class Rubydex::Graph
   def complete_method_argument(name, nesting, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig do
-    params(
-      name: String,
-      self_receiver: T.nilable(String),
-    ).returns(T::Array[Rubydex::Method])
-  end
+  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Method]) }
   def complete_method_call(name, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig do
-    params(
-      name: String,
-      self_receiver: T.nilable(String),
-    ).returns(T::Array[Rubydex::Declaration])
-  end
+  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Declaration]) }
   def complete_namespace_access(name, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
@@ -393,16 +383,8 @@ class Rubydex::Graph
   def encoding=(encoding); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(paths: T::Array[String]).void }
-  def exclude_paths(paths); end
-
-  # source://rubydex//lib/rubydex.rb#11
-  sig { returns(T::Array[String]) }
-  def excluded_paths; end
-
-  # source://rubydex//lib/rubydex.rb#11
-  sig { params(query: String).returns(T::Enumerable[Rubydex::Declaration]) }
-  def fuzzy_search(query); end
+  sig { params(queries: String).returns(T::Enumerable[Rubydex::Declaration]) }
+  def fuzzy_search(*queries); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { params(file_paths: T::Array[String]).returns(T::Array[String]) }
@@ -447,8 +429,8 @@ class Rubydex::Graph
   def resolve_require_path(require_path, load_paths); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(query: String).returns(T::Enumerable[Rubydex::Declaration]) }
-  def search(query); end
+  sig { params(queries: String).returns(T::Enumerable[Rubydex::Declaration]) }
+  def search(*queries); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(String) }
@@ -481,6 +463,14 @@ class Rubydex::Graph
   # source://rubydex//lib/rubydex/graph.rb#46
   sig { params(paths: T::Array[String]).void }
   def add_workspace_dependency_paths(paths); end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { params(paths: T::Array[String]).void }
+  def exclude_paths(paths); end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T::Array[String]) }
+  def excluded_paths; end
 end
 
 # source://rubydex//lib/rubydex/graph.rb#8
@@ -734,7 +724,7 @@ class Rubydex::Reference
     private
 
     # source://rubydex//lib/rubydex.rb#11
-    def new(*args); end
+    def new(*_arg0); end
   end
 end
 
