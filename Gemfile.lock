@@ -92,10 +92,10 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
-    rubydex (0.2.7-arm64-darwin)
-    rubydex (0.2.7-x64-mingw-ucrt)
-    rubydex (0.2.7-x86_64-darwin)
-    rubydex (0.2.7-x86_64-linux)
+    rubydex (0.2.8-arm64-darwin)
+    rubydex (0.2.8-x64-mingw-ucrt)
+    rubydex (0.2.8-x86_64-darwin)
+    rubydex (0.2.8-x86_64-linux)
     sorbet (0.6.13055)
       sorbet-static (= 0.6.13055)
     sorbet-runtime (0.6.13055)
@@ -205,10 +205,10 @@ CHECKSUMS
   ruby-lsp (0.27.0.beta4)
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
-  rubydex (0.2.7-arm64-darwin) sha256=f0d28bbf4153568be79b671642424750053e0bea971b60ddf5cec19bf4563990
-  rubydex (0.2.7-x64-mingw-ucrt) sha256=12ba8d8be6e2410c473c8ad9b0b00429eccd88769b8ee8485d7c95dcdc042661
-  rubydex (0.2.7-x86_64-darwin) sha256=b002b259d118ac69de44470eff1597143318402c45630c47371f9542631447dc
-  rubydex (0.2.7-x86_64-linux) sha256=dacfade9fa42ce4469618da6dac07e69d5f3ac6a313b4caced5234c8f052419a
+  rubydex (0.2.8-arm64-darwin) sha256=bb3da6bdc4848909142c259d8d128dc3223386fc3cd3f98c72381e54d67ba0e2
+  rubydex (0.2.8-x64-mingw-ucrt) sha256=db232bfda3e94aff21fd2de3e7652b80dae77f6d51ab6cb73f07cdba3febb0b3
+  rubydex (0.2.8-x86_64-darwin) sha256=971bb17e42150e534e444a244bf471285049da938d6d48fd30e21809d735de7e
+  rubydex (0.2.8-x86_64-linux) sha256=6d17a41f5b40f9dd117aa59f93e0421978517ec1f3d49c3c6d6513fd6d7cd18c
   sorbet (0.6.13055) sha256=5f5e8f37c13c281fa2b2f95e261d2e531d8331ddcc8e2dd8c4f16457935872ec
   sorbet-runtime (0.6.13055) sha256=c8ae8c81310e0a28d290b11f44ddca59659b7d7f13752c0ef5d16964bbb84d18
   sorbet-static (0.6.13055-universal-darwin) sha256=649c8e79a443be85318922f9ecbb46be72f6c585443f4440c4ec0fb1737c86e8
