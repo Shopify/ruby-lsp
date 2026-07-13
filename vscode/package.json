@@ -868,15 +868,15 @@
     "eslint-plugin-prettier": "^5.5.6",
     "mocha": "^11.7.6",
     "ovsx": "^1.0.2",
-    "prettier": "^3.9.1",
+    "prettier": "^3.9.4",
     "sinon": "^22.0.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.0",
+    "typescript-eslint": "^8.62.1",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
   "dependencies": {
-    "vscode-languageclient": "^10.0.1",
-    "vscode-jsonrpc": "^9.0.0"
+    "vscode-languageclient": "^10.1.0",
+    "vscode-jsonrpc": "^9.0.1"
   }
 }
