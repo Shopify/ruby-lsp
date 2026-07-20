@@ -853,6 +853,47 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_on_type_formatting_comment_continuation_can_be_disabled
+    uri = URI::Generic.from_path(path: "/fake.rb")
+
+    capture_io do
+      @server.process_message(id: 1, method: "initialize", params: {
+        initializationOptions: {
+          featuresConfiguration: {
+            onTypeFormatting: {
+              commentContinuation: false,
+            },
+          },
+        },
+      })
+
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: "# some comment",
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      @server.process_message({
+        id: 2,
+        method: "textDocument/onTypeFormatting",
+        params: {
+          textDocument: { uri: uri },
+          position: { line: 1, character: 0 },
+          ch: "\n",
+        },
+      })
+
+      result = find_message(RubyLsp::Result, id: 2)
+      assert_empty(result.response)
+    end
+  end
+
   def test_show_window_responses_are_redirected_to_addons
     klass = Class.new(RubyLsp::Addon) do
       def activate(global_state, outgoing_queue)
