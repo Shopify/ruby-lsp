@@ -157,6 +157,18 @@ Users see a dropdown with all the sources, along with a preview window on the si
 Sorry, your browser doesn't support embedded videos. This video demonstrates the go-to-definition feature when multiple definitions are found, showing the dropdown and preview window.
 </video>
 
+If a class or module is reopened in many files, jumping to it lists every file where it is defined. If you prefer to
+jump directly to the primary definition (the file whose path matches the fully qualified constant name following the
+Zeitwerk convention), enable the following setting:
+
+```jsonc
+{
+    "rubyLsp.featuresConfiguration.definition.preferPrimaryDefinition": true
+}
+```
+
+When no file matches the convention, all definitions are listed as usual.
+
 ### Completion
 
 The completion feature provides users with completion candidates when the text they type matches certain indexed components. This helps speed up coding by reducing the need to type out full method names or constants.

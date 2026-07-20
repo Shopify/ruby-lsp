@@ -368,6 +368,20 @@
                   "default": true
                 }
               }
+            },
+            "definition": {
+              "description": "Customize go to definition features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "preferPrimaryDefinition": {
+                  "description": "When a class or module is reopened in multiple files, jump directly to its primary definition (the file whose path matches the fully qualified constant name) instead of listing every definition",
+                  "type": "boolean",
+                  "default": false
+                }
+              }
             }
           }
         },

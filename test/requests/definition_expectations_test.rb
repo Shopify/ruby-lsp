@@ -136,6 +136,74 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_prefer_primary_definition_when_constant_is_reopened
+    source = <<~RUBY
+      RubyLsp::Server
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.global_state.feature_configuration(:definition)&.merge!(preferPrimaryDefinition: true)
+
+      index = server.global_state.index
+      primary_uri = URI::Generic.from_path(path: "/workspace/lib/ruby_lsp/server.rb")
+      index.index_single(primary_uri, <<~RUBY)
+        module RubyLsp
+          class Server
+          end
+        end
+      RUBY
+      index.index_single(URI::Generic.from_path(path: "/workspace/lib/ruby_lsp/patches.rb"), <<~RUBY)
+        module RubyLsp
+          class Server
+          end
+        end
+      RUBY
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 9 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(primary_uri.to_s, response[0].attributes[:targetUri])
+    end
+  end
+
+  def test_prefer_primary_definition_falls_back_to_all_entries_without_a_convention_match
+    source = <<~RUBY
+      RubyLsp::Server
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.global_state.feature_configuration(:definition)&.merge!(preferPrimaryDefinition: true)
+
+      index = server.global_state.index
+      index.index_single(URI::Generic.from_path(path: "/workspace/lib/one.rb"), <<~RUBY)
+        module RubyLsp
+          class Server
+          end
+        end
+      RUBY
+      index.index_single(URI::Generic.from_path(path: "/workspace/lib/two.rb"), <<~RUBY)
+        module RubyLsp
+          class Server
+          end
+        end
+      RUBY
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 9 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(2, response.length)
+    end
+  end
+
   def test_multibyte_character_precision
     source = <<~RUBY
       module Fほげ

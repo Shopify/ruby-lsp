@@ -81,6 +81,10 @@ module RubyLsp
           enableAll: false,
           enableTestCodeLens: true,
         }),
+        definition: RequestConfig.new({
+          enableAll: false,
+          preferPrimaryDefinition: false,
+        }),
       } #: Hash[Symbol, RequestConfig]
     end
 
