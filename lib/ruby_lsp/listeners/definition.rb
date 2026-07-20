@@ -405,6 +405,10 @@ module RubyLsp
         first_entry = entries.first #: as !nil
         return if first_entry.private? && first_entry.name != "#{@node_context.fully_qualified_name}::#{value}"
 
+        if entries.length > 1 && @global_state.feature_configuration(:definition)&.enabled?(:preferPrimaryDefinition)
+          entries = select_primary_definitions(entries)
+        end
+
         entries.each do |entry|
           # If the project has Sorbet, then we only want to handle go to definition for constants defined in gems, as an
           # additional behavior on top of jumping to RBIs. The only sigil where Sorbet cannot handle constants is typed
@@ -422,6 +426,32 @@ module RubyLsp
             target_selection_range: range_from_location(entry.name_location),
           )
         end
+      end
+
+      #: (Array[RubyIndexer::Entry] entries) -> Array[RubyIndexer::Entry]
+      def select_primary_definitions(entries)
+        primary_entries = entries.select do |entry|
+          next false unless entry.is_a?(RubyIndexer::Entry::Namespace)
+
+          full_path = entry.uri.full_path
+          next false unless full_path
+
+          full_path.end_with?(convention_based_path(entry.name))
+        end
+
+        primary_entries.empty? ? entries : primary_entries
+      end
+
+      #: (String name) -> String
+      def convention_based_path(name)
+        parts = name.split("::").map do |part|
+          part
+            .gsub(/([A-Z]+)([A-Z][a-z])/, "\\1_\\2")
+            .gsub(/([a-z\d])([A-Z])/, "\\1_\\2")
+            .downcase
+        end
+
+        "/#{parts.join("/")}.rb"
       end
     end
   end

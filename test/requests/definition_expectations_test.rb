@@ -136,6 +136,84 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_prefer_primary_definition_when_constant_is_reopened
+    source = <<~RUBY
+      Core::Flags
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.global_state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: { definition: { preferPrimaryDefinition: true } },
+        },
+      })
+      server.global_state.instance_variable_set(:@has_type_checker, false)
+
+      index = server.global_state.index
+      primary_uri = URI::Generic.from_path(path: "/workspace/packs/core/flags.rb")
+      index.index_single(primary_uri, <<~RUBY)
+        module Core
+          class Flags
+          end
+        end
+      RUBY
+      index.index_single(URI::Generic.from_path(path: "/workspace/packs/billing/lib/patches.rb"), <<~RUBY)
+        module Core
+          class Flags
+          end
+        end
+      RUBY
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 6 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal(primary_uri.to_s, response[0].attributes[:targetUri])
+    end
+  end
+
+  def test_prefer_primary_definition_falls_back_to_all_entries_without_a_convention_match
+    source = <<~RUBY
+      Core::Flags
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.global_state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: { definition: { preferPrimaryDefinition: true } },
+        },
+      })
+      server.global_state.instance_variable_set(:@has_type_checker, false)
+
+      index = server.global_state.index
+      index.index_single(URI::Generic.from_path(path: "/workspace/lib/one.rb"), <<~RUBY)
+        module Core
+          class Flags
+          end
+        end
+      RUBY
+      index.index_single(URI::Generic.from_path(path: "/workspace/lib/two.rb"), <<~RUBY)
+        module Core
+          class Flags
+          end
+        end
+      RUBY
+
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 0, character: 6 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(2, response.length)
+    end
+  end
+
   def test_multibyte_character_precision
     source = <<~RUBY
       module Fほげ
