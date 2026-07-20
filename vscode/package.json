@@ -868,10 +868,10 @@
     "eslint-plugin-prettier": "^5.5.6",
     "mocha": "^11.7.6",
     "ovsx": "^1.0.2",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.5",
     "sinon": "^22.0.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.1",
+    "typescript-eslint": "^8.63.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
