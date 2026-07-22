@@ -394,6 +394,9 @@ export class RubyLsp {
           ? this.testController.runViaCommand(path, name, Mode.Debug)
           : this.testController.debugTest(path, name, command);
       }),
+      vscode.commands.registerCommand(Command.RevealInExplorer, (target, name) => {
+        return this.testController.revealInExplorer(target, name);
+      }),
       vscode.commands.registerCommand(Command.RunTask, async (command: string) => {
         let workspace = this.currentActiveWorkspace();
 
@@ -500,14 +503,14 @@ export class RubyLsp {
           command: string;
           args: any[];
         } & vscode.QuickPickItem)[] = [
-          {
-            label: "Minitest test",
-            description: "Create a new Minitest test",
-            iconPath: new vscode.ThemeIcon("new-file"),
-            command: Command.NewMinitestFile,
-            args: [],
-          },
-        ];
+            {
+              label: "Minitest test",
+              description: "Create a new Minitest test",
+              iconPath: new vscode.ThemeIcon("new-file"),
+              command: Command.NewMinitestFile,
+              args: [],
+            },
+          ];
 
         if (workspace.lspClient?.addons?.some((addon) => addon.name === "Ruby LSP Rails")) {
           items.push(
@@ -772,11 +775,11 @@ export class RubyLsp {
 
     const response:
       | {
-          workerAlive: boolean;
-          backtrace: string[];
-          documents: { uri: string; source: string };
-          incomingQueueSize: number;
-        }
+        workerAlive: boolean;
+        backtrace: string[];
+        documents: { uri: string; source: string };
+        incomingQueueSize: number;
+      }
       | null
       | undefined = await workspace?.lspClient?.sendRequest("rubyLsp/diagnoseState");
 
