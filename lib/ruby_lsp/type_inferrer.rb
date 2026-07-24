@@ -5,9 +5,9 @@ module RubyLsp
   # A minimalistic type checker to try to resolve types that can be inferred without requiring a type system or
   # annotations
   class TypeInferrer
-    #: (RubyIndexer::Index index) -> void
-    def initialize(index)
-      @index = index
+    #: (Rubydex::Graph) -> void
+    def initialize(graph)
+      @graph = graph
     end
 
     #: (NodeContext node_context) -> Type?
@@ -19,12 +19,66 @@ module RubyLsp
         infer_receiver_for_call_node(node, node_context)
       when Prism::InstanceVariableReadNode, Prism::InstanceVariableAndWriteNode, Prism::InstanceVariableWriteNode,
         Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode,
-        Prism::SuperNode, Prism::ForwardingSuperNode
-        self_receiver_handling(node_context)
+        Prism::SuperNode, Prism::ForwardingSuperNode, Prism::DefNode
+        infer_self_type(node_context)
       when Prism::ClassVariableAndWriteNode, Prism::ClassVariableWriteNode, Prism::ClassVariableOperatorWriteNode,
         Prism::ClassVariableOrWriteNode, Prism::ClassVariableReadNode, Prism::ClassVariableTargetNode
         infer_receiver_for_class_variables(node_context)
       end
+    end
+
+    # Infers the type of `self` in the given context. Unlike `infer_receiver_type`, this does not depend on the node
+    # being completed — it's derived purely from the lexical nesting and the surrounding method's receiver. This matters
+    # because methods and instance variables are attached to the type of `self`, which doesn't always match the lexical
+    # scope (e.g. inside `def self.foo` or a class/module body).
+    #
+    #: (NodeContext node_context) -> Type?
+    def infer_self_type(node_context)
+      nesting = node_context.nesting
+      # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
+      # inherits from Object
+      return Type.new("Object") if nesting.empty?
+
+      surrounding_method = node_context.surrounding_method
+
+      if surrounding_method
+        receiver_name = surrounding_method.receiver
+
+        case receiver_name
+        when "self"
+          # `def self.foo` — self is the singleton of the enclosing class/module
+          return resolve_singleton_type_from_nesting(nesting)
+        when "none"
+          # Instance method — self is an instance of the enclosing class/module
+          return resolve_type_from_nesting(nesting)
+        when nil
+          # Dynamic receiver that we cannot handle
+          return
+        else
+          # Explicit constant receiver (e.g. `def Bar.baz`) — self is that constant's singleton class
+          resolved = resolve_receiver_singleton_type(receiver_name, nesting)
+          return resolved if resolved
+
+          return resolve_type_from_nesting(nesting)
+        end
+      end
+
+      # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
+      # context. Resolve through the graph to get the correct fully qualified name
+      resolve_singleton_type_from_nesting(nesting)
+    end
+
+    # The type of `self`, which may or may not match the current lexical scope. For example, if we have `def Bar.foo` or
+    # if something else mutates the type
+    #
+    #: (NodeContext) -> String?
+    def self_receiver_name(node_context)
+      return if node_context.nesting.empty?
+
+      name = infer_self_type(node_context)&.name
+      return unless name
+
+      name if @graph[name]
     end
 
     private
@@ -49,7 +103,7 @@ module RubyLsp
 
       case receiver
       when Prism::SelfNode, nil
-        self_receiver_handling(node_context)
+        infer_self_type(node_context)
       when Prism::StringNode
         Type.new("String")
       when Prism::SymbolNode
@@ -78,17 +132,16 @@ module RubyLsp
         # When the receiver is a constant reference, we have to try to resolve it to figure out the right
         # receiver. But since the invocation is directly on the constant, that's the singleton context of that
         # class/module
-        receiver_name = RubyIndexer::Index.constant_name(receiver)
+        receiver_name = Requests::Support::Common.constant_name(receiver)
         return unless receiver_name
 
-        resolved_receiver = @index.resolve(receiver_name, node_context.nesting)
-        name = resolved_receiver&.first&.name
-        return unless name
+        resolved_receiver = @graph.resolve_constant(receiver_name, node_context.nesting)
+        return unless resolved_receiver
 
-        *parts, last = name.split("::")
-        return Type.new("#{last}::<Class:#{last}>") if parts.empty?
+        *parts, last = resolved_receiver.name.split("::")
+        return Type.new("#{last}::<#{last}>") if parts.empty?
 
-        Type.new("#{parts.join("::")}::#{last}::<Class:#{last}>")
+        Type.new("#{parts.join("::")}::#{last}::<#{last}>")
       when Prism::CallNode
         raw_receiver = receiver.message
 
@@ -96,12 +149,14 @@ module RubyLsp
           # When invoking `new`, we recursively infer the type of the receiver to get the class type its being invoked
           # on and then return the attached version of that type, since it's being instantiated.
           type = infer_receiver_for_call_node(receiver, node_context)
-
           return unless type
 
           # If the method `new` was overridden, then we cannot assume that it will return a new instance of the class
-          new_method = @index.resolve_method("new", type.name)&.first
-          return if new_method && new_method.owner&.name != "Class"
+          declaration = @graph[type.name] #: as Rubydex::Namespace?
+          return unless declaration
+
+          new_method = declaration.find_member("new()")
+          return if new_method && new_method.owner.name != "Class"
 
           type.attached
         elsif raw_receiver
@@ -121,45 +176,88 @@ module RubyLsp
         .map(&:capitalize)
         .join
 
-      entries = @index.resolve(guessed_name, nesting) || @index.first_unqualified_const(guessed_name)
-      name = entries&.first&.name
-      return unless name
+      declaration = @graph.resolve_constant(guessed_name, nesting)
+      declaration ||= @graph.search(guessed_name).first
+      return unless declaration.is_a?(Rubydex::Namespace)
 
-      GuessedType.new(name)
+      GuessedType.new(declaration.name)
     end
 
-    #: (NodeContext node_context) -> Type
-    def self_receiver_handling(node_context)
-      nesting = node_context.nesting
-      # If we're at the top level, then the invocation is happening on `<main>`, which is a special singleton that
-      # inherits from Object
-      return Type.new("Object") if nesting.empty?
-      return Type.new(node_context.fully_qualified_name) if node_context.surrounding_method
+    # Resolves the fully qualified name of the innermost constant from the nesting and returns it as a type.
+    # For instance methods, the nesting won't have singleton markers, so the result is an instance type.
+    # For `def self.` methods, the nesting includes a singleton marker, which is preserved in the result.
+    #: (Array[String] nesting) -> Type
+    def resolve_type_from_nesting(nesting)
+      resolved_name = resolve_nesting_fully_qualified_name(nesting)
+      Type.new(resolved_name)
+    end
 
-      # If we're not inside a method, then we're inside the body of a class or module, which is a singleton
-      # context.
-      #
-      # If the class/module definition is using compact style (e.g.: `class Foo::Bar`), then we need to split the name
-      # into its individual parts to build the correct singleton name
-      parts = nesting.flat_map { |part| part.split("::") }
-      Type.new("#{parts.join("::")}::<Class:#{parts.last}>")
+    # Resolves the nesting and returns a singleton type (appends `::<Last>`)
+    #: (Array[String] nesting) -> Type
+    def resolve_singleton_type_from_nesting(nesting)
+      resolved_name = resolve_nesting_fully_qualified_name(nesting)
+      last_part = resolved_name.split("::").last #: as !nil
+      Type.new("#{resolved_name}::<#{last_part}>")
+    end
+
+    # Resolves the innermost constant in the nesting through the graph, handling compact-path definitions
+    # like `class Bar::Baz` inside a different module where the lexical nesting doesn't reflect the true
+    # constant hierarchy. Falls back to lexical joining if resolution fails.
+    #: (Array[String] nesting) -> String
+    def resolve_nesting_fully_qualified_name(nesting)
+      nesting_parts = nesting.dup
+      trailing_singletons = [] #: Array[String]
+
+      nesting_parts.reverse_each do |part|
+        break unless part.start_with?("<")
+
+        popped = nesting_parts.pop #: as !nil
+        trailing_singletons.unshift(popped)
+      end
+
+      if nesting_parts.any?
+        resolved = @graph.resolve_constant(
+          nesting_parts.last, #: as !nil
+          nesting_parts[0...-1], #: as !nil
+        )
+
+        if resolved
+          parts = resolved.name.split("::") + trailing_singletons
+          return parts.join("::")
+        end
+      end
+
+      # Fallback to lexical joining if resolution fails
+      nesting.flat_map { |part| part.split("::") }.join("::")
+    end
+
+    #: (String, Array[String]) -> Type?
+    def resolve_receiver_singleton_type(receiver_name, nesting)
+      receiver_declaration = @graph.resolve_constant(receiver_name, nesting)
+      return unless receiver_declaration.is_a?(Rubydex::Namespace)
+
+      singleton = receiver_declaration.singleton_class
+      return unless singleton
+
+      Type.new(singleton.name)
     end
 
     #: (NodeContext node_context) -> Type?
     def infer_receiver_for_class_variables(node_context)
       nesting_parts = node_context.nesting.dup
-
       return Type.new("Object") if nesting_parts.empty?
 
       nesting_parts.reverse_each do |part|
-        break unless part.include?("<Class:")
+        break unless part.start_with?("<")
 
         nesting_parts.pop
       end
 
-      receiver_name = nesting_parts.join("::")
-      resolved_receiver = @index.resolve(receiver_name, node_context.nesting)&.first
-      return unless resolved_receiver&.name
+      resolved_receiver = @graph.resolve_constant(
+        nesting_parts.last, #: as !nil
+        nesting_parts[0...-1], #: as !nil
+      )
+      return unless resolved_receiver
 
       Type.new(resolved_receiver.name)
     end
@@ -174,7 +272,7 @@ module RubyLsp
         @name = name
       end
 
-      # Returns the attached version of this type by removing the `<Class:...>` part from its name
+      # Returns the attached version of this type by removing the `<...>` part from its name
       #: -> Type
       def attached
         Type.new(
