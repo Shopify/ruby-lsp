@@ -106,6 +106,10 @@ class Rubydex::ConstantReference < ::Rubydex::Reference
   def initialize(_arg0, _arg1); end
 
   # source://rubydex//lib/rubydex.rb#11
+  sig { returns(Rubydex::Document) }
+  def document; end
+
+  # source://rubydex//lib/rubydex.rb#11
   sig { returns(Rubydex::Location) }
   def location; end
 
@@ -171,6 +175,10 @@ class Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Boolean) }
   def deprecated?; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(Rubydex::Document) }
+  def document; end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Array[Rubydex::Definition]) }
@@ -347,11 +355,21 @@ class Rubydex::Graph
   def complete_method_argument(name, nesting, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Method]) }
+  sig do
+    params(
+      name: String,
+      self_receiver: T.nilable(String),
+    ).returns(T::Array[Rubydex::Method])
+  end
   def complete_method_call(name, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(name: String, self_receiver: T.nilable(String)).returns(T::Array[Rubydex::Declaration]) }
+  sig do
+    params(
+      name: String,
+      self_receiver: T.nilable(String),
+    ).returns(T::Array[Rubydex::Declaration])
+  end
   def complete_namespace_access(name, self_receiver:); end
 
   # source://rubydex//lib/rubydex.rb#11
@@ -402,7 +420,8 @@ class Rubydex::Graph
   def index_workspace; end
 
   # source://rubydex//lib/rubydex.rb#11
-  def keyword(_arg0); end
+  sig { params(name: String).returns(T.nilable(Rubydex::Keyword)) }
+  def keyword(name); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { params(config_path: T.nilable(String)).void }
@@ -465,12 +484,18 @@ class Rubydex::Graph
   def add_workspace_dependency_paths(paths); end
 
   # source://rubydex//lib/rubydex.rb#11
-  sig { params(paths: T::Array[String]).void }
-  def exclude_paths(paths); end
+  sig { params(patterns: T::Array[String]).void }
+  def exclude_patterns(patterns); end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(T::Array[String]) }
-  def excluded_paths; end
+  def excluded_patterns; end
+
+  # source://rubydex//lib/rubydex.rb#11
+  def initialize_clone(_arg0); end
+
+  # source://rubydex//lib/rubydex.rb#11
+  def initialize_copy(_arg0); end
 end
 
 # source://rubydex//lib/rubydex/graph.rb#8
@@ -604,6 +629,7 @@ end
 
 class Rubydex::MethodAliasDefinition < ::Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T::Array[Rubydex::Signature]) }
   def signatures; end
 
   # source://rubydex//lib/rubydex.rb#11
@@ -613,12 +639,17 @@ end
 
 class Rubydex::MethodDefinition < ::Rubydex::Definition
   # source://rubydex//lib/rubydex.rb#11
+  sig { returns(T::Array[Rubydex::Signature]) }
   def signatures; end
 end
 
 class Rubydex::MethodReference < ::Rubydex::Reference
   # source://rubydex//lib/rubydex.rb#11
   def initialize(_arg0, _arg1); end
+
+  # source://rubydex//lib/rubydex.rb#11
+  sig { returns(Rubydex::Document) }
+  def document; end
 
   # source://rubydex//lib/rubydex.rb#11
   sig { returns(Rubydex::Location) }
@@ -708,6 +739,22 @@ end
 # source://rubydex//lib/rubydex/mixin.rb#18
 class Rubydex::Prepend < ::Rubydex::Mixin; end
 
+class Rubydex::Query
+  # source://rubydex//lib/rubydex.rb#11
+  sig { params(graph: Rubydex::Graph, format: T.any(String, Symbol)).returns(String) }
+  def render(graph, format = T.unsafe(nil)); end
+
+  class << self
+    # source://rubydex//lib/rubydex.rb#11
+    sig { params(query: String).returns(Rubydex::Query) }
+    def parse(query); end
+
+    # source://rubydex//lib/rubydex.rb#11
+    sig { params(format: T.any(String, Symbol)).returns(String) }
+    def schema(format = T.unsafe(nil)); end
+  end
+end
+
 # source://rubydex//lib/rubydex/reference.rb#4
 class Rubydex::Reference
   abstract!
@@ -739,42 +786,67 @@ class Rubydex::Signature
   # @return [Signature] a new instance of Signature
   #
   # source://rubydex//lib/rubydex/signature.rb#33
+  sig { params(parameters: T::Array[Rubydex::Signature::Parameter]).void }
   def initialize(parameters); end
 
   # source://rubydex//lib/rubydex/signature.rb#128
+  sig { returns(T.nilable(Rubydex::Signature::BlockParameter)) }
   def block_parameter; end
 
   # source://rubydex//lib/rubydex/signature.rb#38
+  sig do
+    returns([
+      T::Array[Rubydex::Signature::PositionalParameter],
+      T::Array[Rubydex::Signature::OptionalPositionalParameter],
+      T.nilable(Rubydex::Signature::RestPositionalParameter),
+      T::Array[Rubydex::Signature::PostParameter],
+      T::Array[Rubydex::Signature::KeywordParameter],
+      T::Array[Rubydex::Signature::OptionalKeywordParameter],
+      T.nilable(Rubydex::Signature::RestKeywordParameter),
+      T.nilable(Rubydex::Signature::ForwardParameter),
+      T.nilable(Rubydex::Signature::BlockParameter),
+    ])
+  end
   def deconstruct; end
 
   # source://rubydex//lib/rubydex/signature.rb#80
+  sig { params(keys: T.nilable(T::Array[Symbol])).returns(T::Hash[Symbol, T.untyped]) }
   def deconstruct_keys(keys); end
 
   # source://rubydex//lib/rubydex/signature.rb#125
+  sig { returns(T.nilable(Rubydex::Signature::ForwardParameter)) }
   def forward_parameter; end
 
   # source://rubydex//lib/rubydex/signature.rb#116
+  sig { returns(T::Array[Rubydex::Signature::KeywordParameter]) }
   def keyword_parameters; end
 
   # source://rubydex//lib/rubydex/signature.rb#119
+  sig { returns(T::Array[Rubydex::Signature::OptionalKeywordParameter]) }
   def optional_keyword_parameters; end
 
   # source://rubydex//lib/rubydex/signature.rb#107
+  sig { returns(T::Array[Rubydex::Signature::OptionalPositionalParameter]) }
   def optional_positional_parameters; end
 
   # source://rubydex//lib/rubydex/signature.rb#30
+  sig { returns(T::Array[Rubydex::Signature::Parameter]) }
   def parameters; end
 
   # source://rubydex//lib/rubydex/signature.rb#104
+  sig { returns(T::Array[Rubydex::Signature::PositionalParameter]) }
   def positional_parameters; end
 
   # source://rubydex//lib/rubydex/signature.rb#113
+  sig { returns(T::Array[Rubydex::Signature::PostParameter]) }
   def post_parameters; end
 
   # source://rubydex//lib/rubydex/signature.rb#122
+  sig { returns(T.nilable(Rubydex::Signature::RestKeywordParameter)) }
   def rest_keyword_parameter; end
 
   # source://rubydex//lib/rubydex/signature.rb#110
+  sig { returns(T.nilable(Rubydex::Signature::RestPositionalParameter)) }
   def rest_positional_parameter; end
 end
 
@@ -801,12 +873,15 @@ class Rubydex::Signature::Parameter
   # @return [Parameter] a new instance of Parameter
   #
   # source://rubydex//lib/rubydex/signature.rb#13
+  sig { params(name: Symbol, location: Rubydex::Location).void }
   def initialize(name, location); end
 
   # source://rubydex//lib/rubydex/signature.rb#10
+  sig { returns(Rubydex::Location) }
   def location; end
 
   # source://rubydex//lib/rubydex/signature.rb#7
+  sig { returns(Symbol) }
   def name; end
 end
 
