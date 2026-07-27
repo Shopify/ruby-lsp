@@ -191,6 +191,39 @@ module RubyLsp
       end
     end
 
+    def test_loading_project_addons_when_the_project_has_no_gemfile
+      Dir.mktmpdir do |dir|
+        addon_dir = File.join(dir, "lib", "ruby_lsp", "test_addon")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class NoGemfileProjectAddon < RubyLsp::Addon
+            def activate(global_state, outgoing_queue)
+            end
+
+            def name
+              "No Gemfile Project Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: dir).to_s }],
+        })
+
+        # Projects without a Gemfile have no bundle path at all and asking Bundler for one raises
+        Bundler.stubs(:bundle_path).raises(Bundler::GemfileNotFound)
+
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        addon = Addon.get("No Gemfile Project Addon", "0.1.0")
+        assert_equal("No Gemfile Project Addon", addon.name)
+      end
+    end
+
     def test_loading_project_addons_ignores_bundle_path
       Dir.mktmpdir do |dir|
         addon_dir = File.join(dir, "vendor", "bundle", "ruby_lsp", "test_addon")
