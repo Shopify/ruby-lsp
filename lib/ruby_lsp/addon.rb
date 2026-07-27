@@ -56,9 +56,16 @@ module RubyLsp
         addon_files = Gem.find_files("ruby_lsp/**/addon.rb")
 
         if include_project_addons
-          bundle_path = Bundler.bundle_path.to_s
+          bundle_path = begin
+            Bundler.bundle_path.to_s
+          rescue Bundler::GemfileNotFound
+            nil
+          end
+
           project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
-          project_addons.reject! { |path| path.start_with?(bundle_path) || gem_installation_path?(path) }
+          project_addons.reject! do |path|
+            (bundle_path && path.start_with?(bundle_path)) || gem_installation_path?(path)
+          end
 
           addon_files.concat(project_addons)
         end
