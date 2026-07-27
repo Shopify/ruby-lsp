@@ -871,7 +871,7 @@
     "prettier": "^3.9.5",
     "sinon": "^22.0.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.63.0",
+    "typescript-eslint": "^8.64.0",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.3.2"
   },
