@@ -378,7 +378,7 @@ module RubyLsp
         })
 
         expected_addon_path = File.join(dir, "vendor", "bundle", "rubocop-1.73.0", "lib", "ruby_lsp", "rubocop", "addon.rb")
-        Gem.stubs(:find_files).with("ruby_lsp/**/addon.rb").returns([expected_addon_path])
+        Gem.stubs(:find_latest_files).with("ruby_lsp/**/addon.rb").returns([expected_addon_path])
         Bundler.stubs(:bundle_path).returns(Pathname.new(File.join(dir, "vendor", "bundle")))
         Addon.load_addons(@global_state, @outgoing_queue)
 
