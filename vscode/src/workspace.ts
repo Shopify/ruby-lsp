@@ -9,6 +9,15 @@ import { asyncExec, LOG_CHANNEL, WorkspaceInterface, STATUS_EMITTER, debounce, f
 import { WorkspaceChannel } from "./workspaceChannel";
 
 const WATCHED_FILES = ["Gemfile.lock", "gems.locked"];
+const GEM_UPDATE_STATE_KEY = "rubyLsp.lastGemUpdateState";
+
+// The state we use to determine if the global installation of `ruby-lsp` has to be updated or re-installed.
+interface GemUpdateState {
+  timestamp: number;
+  // The Ruby version that was active when we last installed or updated the gem. If the Ruby version changes, we must
+  // re-generate the executable stubs to avoid issues for version managers that reuse the same path across versions.
+  rubyVersion?: string;
+}
 
 interface GitExtension {
   exports: {
@@ -253,7 +262,8 @@ export class Workspace implements WorkspaceInterface {
     }
 
     const oneDayInMs = 24 * 60 * 60 * 1000;
-    const lastUpdatedAt: number | undefined = this.context.workspaceState.get("rubyLsp.lastGemUpdate");
+    const lastUpdate = this.context.workspaceState.get<GemUpdateState>(GEM_UPDATE_STATE_KEY);
+    const executablesMayBeStale = lastUpdate === undefined || lastUpdate.rubyVersion !== this.ruby.rubyVersion;
 
     // Theses are the Ruby LSP's own dependencies, listed in `ruby-lsp.gemspec`
     const dependencies = ["ruby-lsp", "language_server-protocol", "prism", "rbs"];
@@ -275,7 +285,8 @@ export class Workspace implements WorkspaceInterface {
         env: this.ruby.env,
       });
 
-      await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+      // Installing generates fresh executable stubs for the current Ruby, so there's nothing to make pristine
+      await this.recordGemUpdate();
       return;
     }
 
@@ -294,18 +305,40 @@ export class Workspace implements WorkspaceInterface {
     }
 
     // If we haven't updated the gem in the last 24 hours or if the user manually asked for an update, update it
-    if (manualInvocation || lastUpdatedAt === undefined || Date.now() - lastUpdatedAt > oneDayInMs) {
+    if (manualInvocation || lastUpdate === undefined || Date.now() - lastUpdate.timestamp > oneDayInMs) {
       try {
         await asyncExec(`gem update ruby-lsp${gemFlags}`, {
           cwd: this.workspaceFolder.uri.fsPath,
           env: this.ruby.env,
         });
-        await this.context.workspaceState.update("rubyLsp.lastGemUpdate", Date.now());
+
+        await this.recordGemUpdate();
       } catch (error: any) {
         // If we fail to update the global installation of `ruby-lsp`, we don't want to prevent the server from starting
         this.outputChannel.error(`Failed to update global ruby-lsp gem: ${error}`);
       }
     }
+
+    // If gem executables are stale due to the Ruby version changing, we-regenerate the executable stubs.
+    if (executablesMayBeStale) {
+      try {
+        await asyncExec("gem pristine ruby-lsp --only-executables --env-shebang", {
+          cwd: this.workspaceFolder.uri.fsPath,
+          env: this.ruby.env,
+        });
+
+        await this.recordGemUpdate();
+      } catch (error: any) {
+        this.outputChannel.error(`Failed to regenerate the global ruby-lsp executables: ${error}`);
+      }
+    }
+  }
+
+  private async recordGemUpdate(): Promise<void> {
+    await this.context.workspaceState.update(GEM_UPDATE_STATE_KEY, {
+      timestamp: Date.now(),
+      rubyVersion: this.ruby.rubyVersion,
+    });
   }
 
   get error() {
