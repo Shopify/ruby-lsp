@@ -39,7 +39,15 @@ module RubyIndexer
 
       # We start the included patterns with only the non excluded directories so that we can avoid paying the price of
       # traversing large directories that don't include Ruby files like `node_modules`
-      @included_patterns = ["{#{top_level_directories.join(",")}}/**/*.rb", "*.rb"] #: Array[String]
+      #
+      # The empty case has to be handled separately. Joining an empty list yields `{}/**/*.rb`, and `Dir.glob` mishandles
+      # an empty brace group when it is given a `base:`, escaping the base and walking the file system from the root
+      indexable_directories = top_level_directories
+      @included_patterns = if indexable_directories.empty?
+        ["*.rb"]
+      else
+        ["{#{indexable_directories.join(",")}}/**/*.rb", "*.rb"]
+      end #: Array[String]
       @excluded_magic_comments = [
         "frozen_string_literal:",
         "typed:",
@@ -68,7 +76,12 @@ module RubyIndexer
       uris = @included_patterns.flat_map do |pattern|
         load_path_entry = nil #: String?
 
-        Dir.glob(File.join(@workspace_path, pattern), flags).map! do |path|
+        # The workspace path is passed as `base:` rather than interpolated into the pattern, so that a path containing
+        # glob metacharacters such as `[id]` or `{slug}` is treated as a literal directory rather than as a character
+        # class or an alternation
+        Dir.glob(pattern, flags, base: @workspace_path).map! do |relative_path|
+          path = File.join(@workspace_path, relative_path)
+
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every
           # entry is expensive, we memoize it until we find a path that doesn't belong to that $LOAD_PATH. This happens
           # on repositories that define multiple gems, like Rails. All frameworks are defined inside the current
@@ -81,15 +94,16 @@ module RubyIndexer
         end
       end
 
-      # If the patterns are relative, we make it relative to the workspace path. If they are absolute, then we shouldn't
-      # concatenate anything
-      excluded_patterns = @excluded_patterns.map do |pattern|
-        if File.absolute_path?(pattern)
-          pattern
-        else
-          File.join(@workspace_path, pattern)
-        end
+      # Absolute patterns are matched against the absolute path. Relative ones are matched against the path relative to
+      # the workspace, rather than concatenating the workspace path onto the pattern, because a workspace path holding
+      # glob metacharacters would turn into a character class or an alternation and silently match nothing
+      absolute_excluded_patterns, relative_excluded_patterns = @excluded_patterns.partition do |pattern|
+        File.absolute_path?(pattern)
       end
+
+      # The workspace path originates from a client supplied URI, which may carry a trailing slash, so normalize it
+      # before using it as a prefix
+      workspace_prefix = "#{@workspace_path.delete_suffix("/")}/"
 
       # Remove user specified patterns
       bundle_path = Bundler.settings["path"]&.gsub(/[\\]+/, "/")
@@ -97,7 +111,10 @@ module RubyIndexer
         path = indexable.full_path #: as !nil
         next false if test_files_ignored_from_exclusion?(path, bundle_path)
 
-        excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
+        next true if absolute_excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
+
+        relative_path = path.delete_prefix(workspace_prefix)
+        relative_excluded_patterns.any? { |pattern| File.fnmatch?(pattern, relative_path, flags) }
       end
 
       # Add default gems to the list of files to be indexed
@@ -151,8 +168,8 @@ module RubyIndexer
         uris.concat(
           spec.require_paths.flat_map do |require_path|
             load_path_entry = File.join(spec.full_gem_path, require_path)
-            Dir.glob(File.join(load_path_entry, "**", "*.rb")).map! do |path|
-              URI::Generic.from_path(path: path, load_path_entry: load_path_entry)
+            Dir.glob(File.join("**", "*.rb"), base: load_path_entry).map! do |relative_path|
+              URI::Generic.from_path(path: File.join(load_path_entry, relative_path), load_path_entry: load_path_entry)
             end
           end,
         )
@@ -265,9 +282,14 @@ module RubyIndexer
     def top_level_directories
       excluded_directories = ["tmp", "node_modules", "sorbet"]
 
-      Dir.glob("#{Dir.pwd}/*").filter_map do |path|
-        dir_name = File.basename(path)
-        next unless File.directory?(path) && !excluded_directories.include?(dir_name)
+      # The working directory is passed as `base:` so that it is treated literally. Interpolating it into the pattern
+      # makes a directory such as `[id]` a character class, which matches nothing and leaves the project with no
+      # included patterns at all
+      current_directory = Dir.pwd
+
+      Dir.glob("*", base: current_directory).filter_map do |dir_name|
+        next unless File.directory?(File.join(current_directory, dir_name))
+        next if excluded_directories.include?(dir_name)
 
         dir_name
       end
