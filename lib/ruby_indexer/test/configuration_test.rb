@@ -188,6 +188,88 @@ module RubyIndexer
       end
     end
 
+    # Routing conventions such as Rails' or Next.js' dynamic segments produce directory names like `[id]` or `{slug}`,
+    # and generated paths may contain them anywhere. They are `Dir.glob` metacharacters, so interpolating the workspace
+    # path into a pattern makes it match nothing at all and the whole project indexes empty
+    def test_indexable_uris_with_glob_metacharacters_in_the_workspace_path
+      Dir.mktmpdir do |dir|
+        workspace = File.join(dir, "[id]", "{slug}")
+        FileUtils.mkdir_p(File.join(workspace, "app"))
+        FileUtils.touch(File.join(workspace, "app", "nested.rb"))
+        FileUtils.touch(File.join(workspace, "top_level.rb"))
+
+        # `top_level_directories` reads `Dir.pwd`, so the working directory has to be the bracketed workspace for the
+        # included patterns to be built from it
+        Dir.chdir(workspace) do
+          config = Configuration.new
+          config.workspace_path = workspace
+
+          paths = config.indexable_uris.map(&:full_path)
+          assert_includes(paths, File.join(workspace, "app", "nested.rb"))
+          assert_includes(paths, File.join(workspace, "top_level.rb"))
+        end
+      end
+    end
+
+    def test_excluded_patterns_apply_when_the_workspace_path_has_glob_metacharacters
+      Dir.mktmpdir do |dir|
+        workspace = File.join(dir, "[id]", "{slug}")
+        FileUtils.mkdir_p(File.join(workspace, "ignore"))
+        FileUtils.touch(File.join(workspace, "ignore", "excluded.rb"))
+        FileUtils.touch(File.join(workspace, "kept.rb"))
+
+        Dir.chdir(workspace) do
+          config = Configuration.new
+          config.workspace_path = workspace
+          config.apply_config({ "excluded_patterns" => ["ignore/**/*.rb"] })
+
+          paths = config.indexable_uris.map(&:full_path)
+          assert_includes(paths, File.join(workspace, "kept.rb"))
+          refute_includes(paths, File.join(workspace, "ignore", "excluded.rb"))
+        end
+      end
+    end
+
+    # The workspace path comes from a client supplied URI, which may include a trailing slash. Exclusion patterns are
+    # matched against the workspace relative path, so the prefix has to be normalized before it is stripped
+    def test_excluded_patterns_apply_when_the_workspace_path_has_a_trailing_slash
+      Dir.mktmpdir do |dir|
+        FileUtils.mkdir_p(File.join(dir, "ignore"))
+        FileUtils.touch(File.join(dir, "ignore", "excluded.rb"))
+        FileUtils.touch(File.join(dir, "kept.rb"))
+
+        @config.workspace_path = "#{dir}/"
+        # The included pattern has to actually reach the file, otherwise the exclusion below is never exercised and the
+        # assertion passes for the wrong reason
+        @config.apply_config({ "included_patterns" => ["**/*.rb"], "excluded_patterns" => ["ignore/**/*.rb"] })
+
+        paths = @config.indexable_uris.map(&:full_path)
+        assert_includes(paths, File.join(dir, "kept.rb"))
+        refute_includes(paths, File.join(dir, "ignore", "excluded.rb"))
+      end
+    end
+
+    # A workspace with no indexable subdirectories makes `top_level_directories` return an empty array, so the included
+    # pattern degenerates to `{}/**/*.rb`. `Dir.glob` mishandles that with a `base:` argument, escaping the base and
+    # walking the file system from the root, so the empty case must never reach the glob
+    def test_indexable_uris_in_a_workspace_without_indexable_subdirectories
+      Dir.mktmpdir do |dir|
+        FileUtils.touch(File.join(dir, "only.rb"))
+
+        Dir.chdir(dir) do
+          config = Configuration.new
+          config.workspace_path = dir
+
+          paths = config.indexable_uris.map(&:full_path)
+          assert_includes(paths, File.join(dir, "only.rb"))
+          assert(
+            paths.compact.none? { |path| path.start_with?("/Library", "/System") },
+            "expected the glob to stay within the workspace and known gem paths",
+          )
+        end
+      end
+    end
+
     def test_transitive_dependencies_for_non_dev_gems_are_not_excluded
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
