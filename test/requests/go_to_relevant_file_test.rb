@@ -118,6 +118,58 @@ class GoToRelevantFileTest < Minitest::Test
     end
   end
 
+  def test_when_implementation_file_name_contains_glob_metacharacters
+    Dir.chdir(@workspace) do
+      # `[id].rb` is a routing convention, but `[id]` is also a `Dir.glob` character class matching "i" or "d"
+      lib_dir = File.join(@workspace, "app/models")
+      test_dir = File.join(@workspace, "test/models")
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_dir)
+
+      impl_file = File.join(lib_dir, "[id].rb")
+      test_file = File.join(test_dir, "[id]_test.rb")
+      FileUtils.touch(impl_file)
+      FileUtils.touch(test_file)
+
+      result = RubyLsp::Requests::GoToRelevantFile.new(impl_file, @workspace).perform
+      assert_equal([test_file], result)
+    end
+  end
+
+  def test_when_test_file_name_contains_glob_metacharacters
+    Dir.chdir(@workspace) do
+      lib_dir = File.join(@workspace, "app/models")
+      test_dir = File.join(@workspace, "test/models")
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_dir)
+
+      impl_file = File.join(lib_dir, "{slug}.rb")
+      test_file = File.join(test_dir, "{slug}_test.rb")
+      FileUtils.touch(impl_file)
+      FileUtils.touch(test_file)
+
+      result = RubyLsp::Requests::GoToRelevantFile.new(test_file, @workspace).perform
+      assert_equal([impl_file], result)
+    end
+  end
+
+  def test_when_a_parent_directory_contains_glob_metacharacters
+    Dir.chdir(@workspace) do
+      lib_dir = File.join(@workspace, "app/[id]/models")
+      test_dir = File.join(@workspace, "app/[id]/test")
+      FileUtils.mkdir_p(lib_dir)
+      FileUtils.mkdir_p(test_dir)
+
+      impl_file = File.join(lib_dir, "user.rb")
+      test_file = File.join(test_dir, "user_test.rb")
+      FileUtils.touch(impl_file)
+      FileUtils.touch(test_file)
+
+      result = RubyLsp::Requests::GoToRelevantFile.new(impl_file, @workspace).perform
+      assert_equal([test_file], result)
+    end
+  end
+
   def test_finds_tests_in_matching_subdirectory
     Dir.chdir(@workspace) do
       lib_dir = File.join(@workspace, "lib")
