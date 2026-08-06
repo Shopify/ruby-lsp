@@ -132,4 +132,22 @@ suite("Workspace", () => {
     assert.strictEqual(startStub.callCount, 0);
     assert.strictEqual(restartSpy.callCount, 0);
   }).timeout(10000);
+
+  test("restarts when the Ruby version file is modified", async () => {
+    const versionFileUri = vscode.Uri.file(path.join(workspacePath, ".ruby-version"));
+    await vscode.workspace.fs.writeFile(versionFileUri, Buffer.from("3.3.0"));
+
+    await workspace.activate();
+
+    const startStub = sandbox.stub(workspace, "start");
+    const restartSpy = sandbox.spy(workspace, "restart");
+
+    await vscode.workspace.fs.writeFile(versionFileUri, Buffer.from("3.4.0"));
+
+    // Give enough time for the watcher to fire and the debounce to run off
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
+    assert.strictEqual(startStub.callCount, 1);
+    assert.strictEqual(restartSpy.callCount, 1);
+  }).timeout(10000);
 });
