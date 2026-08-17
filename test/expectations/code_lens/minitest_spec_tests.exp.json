@@ -105,6 +105,40 @@
     {
       "range": {
         "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 14,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
+          {
+            "start_line": 0,
+            "start_column": 0,
+            "end_line": 14,
+            "end_column": 3
+          },
+          "Foo"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 1,
           "character": 2
         },
@@ -197,6 +231,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 1,
+          "character": 2
+        },
+        "end": {
+          "line": 1,
+          "character": 19
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo#test_0001_it_level_one",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
+          {
+            "start_line": 1,
+            "start_column": 2,
+            "end_line": 1,
+            "end_column": 19
+          },
+          "it_level_one"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 1,
         "kind": "example"
       }
@@ -306,6 +373,40 @@
     {
       "range": {
         "start": {
+          "line": 3,
+          "character": 2
+        },
+        "end": {
+          "line": 11,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::nested",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
+          {
+            "start_line": 3,
+            "start_column": 2,
+            "end_line": 11,
+            "end_column": 5
+          },
+          "nested"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": 1,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 4,
           "character": 4
         },
@@ -398,6 +499,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 4,
+          "character": 4
+        },
+        "end": {
+          "line": 4,
+          "character": 18
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::nested#test_0001_it_nested",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
+          {
+            "start_line": 4,
+            "start_column": 4,
+            "end_line": 4,
+            "end_column": 18
+          },
+          "it_nested"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 2,
         "kind": "example"
       }
@@ -507,6 +641,40 @@
     {
       "range": {
         "start": {
+          "line": 6,
+          "character": 4
+        },
+        "end": {
+          "line": 8,
+          "character": 7
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::nested::deep_nested",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
+          {
+            "start_line": 6,
+            "start_column": 4,
+            "end_line": 8,
+            "end_column": 7
+          },
+          "deep_nested"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": 2,
+        "kind": "group",
+        "id": 3
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 7,
           "character": 6
         },
@@ -606,6 +774,39 @@
     {
       "range": {
         "start": {
+          "line": 7,
+          "character": 6
+        },
+        "end": {
+          "line": 7,
+          "character": 25
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::nested::deep_nested#test_0001_it_deep_nested",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
+          {
+            "start_line": 7,
+            "start_column": 6,
+            "end_line": 7,
+            "end_column": 25
+          },
+          "it_deep_nested"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": 3,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 10,
           "character": 4
         },
@@ -698,6 +899,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 10,
+          "character": 4
+        },
+        "end": {
+          "line": 10,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::nested#test_0002_it_nested_again",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
+          {
+            "start_line": 10,
+            "start_column": 4,
+            "end_line": 10,
+            "end_column": 24
+          },
+          "it_nested_again"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 2,
         "kind": "example"
       }
@@ -797,6 +1031,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 13,
+          "character": 2
+        },
+        "end": {
+          "line": 13,
+          "character": 25
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo#test_0003_it_level_one_again",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
+          {
+            "start_line": 13,
+            "start_column": 2,
+            "end_line": 13,
+            "end_column": 25
+          },
+          "it_level_one_again"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 1,
         "kind": "example"
       }
@@ -898,6 +1165,40 @@
       },
       "data": {
         "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 4
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 16,
+          "character": 0
+        },
+        "end": {
+          "line": 18,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::Bar",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
+          {
+            "start_line": 16,
+            "start_column": 0,
+            "end_line": 18,
+            "end_column": 3
+          },
+          "Foo::Bar"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": null,
         "kind": "group",
         "id": 4
@@ -998,6 +1299,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 4,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 17,
+          "character": 2
+        },
+        "end": {
+          "line": 17,
+          "character": 29
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Foo::Bar#test_0001_it_class_constant_path",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
+          {
+            "start_line": 17,
+            "start_column": 2,
+            "end_line": 17,
+            "end_column": 29
+          },
+          "it_class_constant_path"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 4,
         "kind": "example"
       }
@@ -1099,6 +1433,40 @@
       },
       "data": {
         "type": "debug",
+        "group_id": null,
+        "kind": "group",
+        "id": 5
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 20,
+          "character": 0
+        },
+        "end": {
+          "line": 28,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Baz",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
+          {
+            "start_line": 20,
+            "start_column": 0,
+            "end_line": 28,
+            "end_column": 3
+          },
+          "Baz"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": null,
         "kind": "group",
         "id": 5
@@ -1201,6 +1569,40 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 5,
+        "kind": "group",
+        "id": 6
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 21,
+          "character": 2
+        },
+        "end": {
+          "line": 23,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Baz::#foo",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
+          {
+            "start_line": 21,
+            "start_column": 2,
+            "end_line": 23,
+            "end_column": 5
+          },
+          "#foo"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 5,
         "kind": "group",
         "id": 6
@@ -1301,6 +1703,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 6,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 4
+        },
+        "end": {
+          "line": 22,
+          "character": 14
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Baz::#foo#test_0001_works",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
+          {
+            "start_line": 22,
+            "start_column": 4,
+            "end_line": 22,
+            "end_column": 14
+          },
+          "works"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 6,
         "kind": "example"
       }
@@ -1402,6 +1837,40 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 5,
+        "kind": "group",
+        "id": 7
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 25,
+          "character": 2
+        },
+        "end": {
+          "line": 27,
+          "character": 5
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Baz::#bar",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
+          {
+            "start_line": 25,
+            "start_column": 2,
+            "end_line": 27,
+            "end_column": 5
+          },
+          "#bar"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 5,
         "kind": "group",
         "id": 7
@@ -1502,6 +1971,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 7,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 26,
+          "character": 4
+        },
+        "end": {
+          "line": 26,
+          "character": 14
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_spec_tests.rb",
+          "Baz::#bar#test_0001_works",
+          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
+          {
+            "start_line": 26,
+            "start_column": 4,
+            "end_line": 26,
+            "end_column": 14
+          },
+          "works"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 7,
         "kind": "example"
       }
