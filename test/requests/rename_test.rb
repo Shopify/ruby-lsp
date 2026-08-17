@@ -105,6 +105,47 @@ class RenameTest < Minitest::Test
     assert_equal("NewMe", untitled_change.edits[0].new_text)
   end
 
+  def test_collects_text_edits_in_a_workspace_path_with_glob_metacharacters
+    Dir.mktmpdir do |dir|
+      # `[id]` and `{slug}` are `Dir.glob` metacharacters, so interpolating the workspace path into the pattern
+      # silently matches nothing and references in other files are never renamed
+      workspace = File.join(dir, "[id]", "{slug}")
+      FileUtils.mkdir_p(workspace)
+
+      declaration_path = File.join(workspace, "article.rb")
+      reference_path = File.join(workspace, "consumer.rb")
+      File.write(declaration_path, "class Article\nend\n")
+      File.write(reference_path, "Article\n")
+
+      global_state = RubyLsp::GlobalState.new
+      global_state.apply_options({
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace).to_s }],
+      })
+
+      source = File.read(declaration_path)
+      uri = URI::Generic.from_path(path: declaration_path)
+      global_state.index.index_single(uri, source)
+
+      document = RubyLsp::RubyDocument.new(
+        source: source,
+        version: 1,
+        uri: uri,
+        global_state: global_state,
+      )
+
+      workspace_edit = RubyLsp::Requests::Rename.new(
+        global_state,
+        RubyLsp::Store.new(global_state),
+        document,
+        { position: { line: 0, character: 6 }, newName: "Post" },
+      ).perform #: as !nil
+
+      reference_uri = URI::Generic.from_path(path: reference_path).to_s
+      assert_includes(workspace_edit.changes.keys, reference_uri)
+      assert_equal("Post", workspace_edit.changes[reference_uri].first.new_text)
+    end
+  end
+
   private
 
   def expect_renames(fixture_path, new_fixture_path, expected, position, new_name)
