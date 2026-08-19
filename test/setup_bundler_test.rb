@@ -493,7 +493,7 @@ class SetupBundlerTest < Minitest::Test
       end
 
       assert_path_exists(".ruby-lsp/Gemfile")
-      assert_match('gem "ruby-lsp-rails"', File.read(".ruby-lsp/Gemfile"))
+      assert_match('gem "ruby-lsp-rails", require: false, group: :development', File.read(".ruby-lsp/Gemfile"))
     end
   end
 
@@ -1167,6 +1167,28 @@ class SetupBundlerTest < Minitest::Test
 
       gemfile_content = File.read(File.join(dir, ".ruby-lsp", "Gemfile"))
       refute_match(/gem "ruby-lsp", ">= 0.a", require: false, group: :development/, gemfile_content)
+    end
+  end
+
+  def test_beta_adds_prerelease_constraint_to_ruby_lsp_rails
+    in_temp_dir do |dir|
+      FileUtils.mkdir("#{dir}/config")
+      FileUtils.cp("#{__dir__}/fixtures/rails_application.rb", "#{dir}/config/application.rb")
+      File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
+        source "https://rubygems.org"
+        gem "rdoc"
+      GEMFILE
+
+      capture_subprocess_io do
+        Bundler.with_unbundled_env do
+          system("bundle install")
+          run_script(dir, beta: true)
+        end
+      end
+
+      gemfile_content = File.read(File.join(dir, ".ruby-lsp", "Gemfile"))
+      assert_match(/gem "ruby-lsp-rails", ">= 0.a", require: false, group: :development/, gemfile_content)
+      assert_valid_gemfile(File.join(dir, ".ruby-lsp", "Gemfile"))
     end
   end
 
