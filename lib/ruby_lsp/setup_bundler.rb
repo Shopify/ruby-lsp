@@ -191,7 +191,11 @@ module RubyLsp
       end
 
       if @rails_app && !@dependencies["ruby-lsp-rails"]
-        parts << 'gem "ruby-lsp-rails", require: false, group: :development'
+        parts << if @beta
+          'gem "ruby-lsp-rails", ">= 0.a", require: false, group: :development'
+        else
+          'gem "ruby-lsp-rails", require: false, group: :development'
+        end
       end
 
       content = parts.join("\n")
