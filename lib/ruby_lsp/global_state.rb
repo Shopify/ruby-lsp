@@ -117,7 +117,6 @@ module RubyLsp
       all_dependencies = gather_direct_and_indirect_dependencies
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
       @workspace_uri = URI(workspace_uri) if workspace_uri
-      @graph.workspace_path = workspace_path
 
       specified_formatter = options.dig(:initializationOptions, :formatter)
       rubocop_has_addon = defined?(::RuboCop::Version::STRING) &&

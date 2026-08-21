@@ -1463,7 +1463,7 @@ module RubyLsp
 
     #: () -> void
     def load_rubydex_config
-      @global_state.graph.load_config
+      @global_state.graph.load_config(Rubydex::Config.load(@global_state.workspace_path))
     rescue Rubydex::ConfigError => e
       send_message(Notification.window_show_message(
         "Error loading rubydex config: #{e.message}",
