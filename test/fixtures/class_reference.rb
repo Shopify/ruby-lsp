@@ -1,1 +1,4 @@
-example = RubyLsp::ExampleClass.new
+class Target
+end
+
+example = Target.new
