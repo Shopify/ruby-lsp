@@ -86,17 +86,10 @@ export class ChatAgent implements vscode.Disposable {
     }
 
     try {
-      // Prefer the model chosen for this chat so custom models work, not only Copilot gpt-4o.
-      let model = request.model;
-      if (!model) {
-        [model] = await vscode.lm.selectChatModels({
-          vendor: "copilot",
-          family: "gpt-4o",
-        });
-      }
+      const model = request.model;
       if (!model) {
         stream.markdown(
-          "No language model is available for this chat. Select a model in the chat picker and try again.",
+          "No language model selected. Select a model in the chat picker and try again.",
         );
         return { metadata: { command: "design" } };
       }
