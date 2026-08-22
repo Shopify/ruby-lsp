@@ -86,11 +86,13 @@ export class ChatAgent implements vscode.Disposable {
     }
 
     try {
-      // Select the LLM model
-      const [model] = await vscode.lm.selectChatModels({
-        vendor: "copilot",
-        family: "gpt-4o",
-      });
+      const model = request.model;
+      if (!model) {
+        stream.markdown(
+          "No language model selected. Select a model in the chat picker and try again.",
+        );
+        return { metadata: { command: "design" } };
+      }
 
       stream.progress("Designing the models for the requested concept...");
       const chatResponse = await model.sendRequest(messages, {}, token);
