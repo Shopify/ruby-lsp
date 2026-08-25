@@ -53,7 +53,7 @@ module RubyLsp
         # Require all add-ons entry points, which should be placed under
         # `some_gem/lib/ruby_lsp/your_gem_name/addon.rb` or in the workspace under
         # `your_project/ruby_lsp/project_name/addon.rb`
-        addon_files = Gem.find_files("ruby_lsp/**/addon.rb")
+        addon_files = Gem.find_latest_files("ruby_lsp/**/addon.rb")
 
         if include_project_addons
           bundle_path = begin
