@@ -88,9 +88,7 @@ export class ChatAgent implements vscode.Disposable {
     try {
       const model = request.model;
       if (!model) {
-        stream.markdown(
-          "No language model selected. Select a model in the chat picker and try again.",
-        );
+        stream.markdown("No language model selected. Select a model in the chat picker and try again.");
         return { metadata: { command: "design" } };
       }
 
