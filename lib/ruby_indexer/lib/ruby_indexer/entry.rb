@@ -3,6 +3,8 @@
 
 module RubyIndexer
   class Entry
+    class AbstractMethodInvokedError < StandardError; end
+
     #: Configuration
     attr_reader :configuration
 
