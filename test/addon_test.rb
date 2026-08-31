@@ -191,6 +191,38 @@ module RubyLsp
       end
     end
 
+    def test_project_specific_addons_in_a_workspace_path_with_glob_metacharacters
+      Dir.mktmpdir do |dir|
+        # Routing conventions like Rails or Next.js produce directory names such as `[id]` or `{slug}`, which are
+        # `Dir.glob` metacharacters. They must be treated as literal path segments
+        workspace = File.join(dir, "[id]", "{slug}")
+        addon_dir = File.join(workspace, "lib", "ruby_lsp", "test_addon")
+        FileUtils.mkdir_p(addon_dir)
+        File.write(File.join(addon_dir, "addon.rb"), <<~RUBY)
+          class GlobMetacharacterProjectAddon < RubyLsp::Addon
+            def activate(global_state, outgoing_queue)
+            end
+
+            def name
+              "Glob Metacharacter Project Addon"
+            end
+
+            def version
+              "0.1.0"
+            end
+          end
+        RUBY
+
+        @global_state.apply_options({
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace).to_s }],
+        })
+        Addon.load_addons(@global_state, @outgoing_queue)
+
+        addon = Addon.get("Glob Metacharacter Project Addon", "0.1.0") #: as untyped
+        assert_equal("Glob Metacharacter Project Addon", addon.name)
+      end
+    end
+
     def test_loading_project_addons_when_the_project_has_no_gemfile
       Dir.mktmpdir do |dir|
         addon_dir = File.join(dir, "lib", "ruby_lsp", "test_addon")
