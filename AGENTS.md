@@ -5,8 +5,6 @@ Its parts are:
 
 - `ruby-lsp` gem: language server implementation and extra custom functionality to support the VS Code extension. This
   is the top level of the repository
-- Ruby code indexer: static analysis engine to support features like go to definition, completion and workspace
-  symbols. This is entirely implemented inside `lib/ruby_indexer`
 - Companion VS Code extension that includes several integrations. The extension is entirely implemented in the `vscode`
   directory
 - Jekyll static documentation site. Fully implemented in `jekyll`

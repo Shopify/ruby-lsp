@@ -4,22 +4,6 @@
 module RubyLsp
   #: [ParseResultType = Prism::ParseLexResult]
   class RubyDocument < Document
-    METHODS_THAT_CHANGE_DECLARATIONS = [
-      :private_constant,
-      :attr_reader,
-      :attr_writer,
-      :attr_accessor,
-      :alias_method,
-      :include,
-      :prepend,
-      :extend,
-      :public,
-      :protected,
-      :private,
-      :module_function,
-      :private_class_method,
-    ].freeze
-
     class << self
       #: (Prism::Node node, Integer char_position, code_units_cache: (^(Integer arg0) -> Integer | Prism::CodeUnitsCache), ?node_types: Array[singleton(Prism::Node)]) -> NodeContext
       def locate(node, char_position, code_units_cache:, node_types: [])
@@ -189,63 +173,6 @@ module RubyLsp
         code_units_cache: @code_units_cache,
         node_types: node_types,
       )
-    end
-
-    #: -> bool
-    def should_index?
-      # This method controls when we should index documents. If there's no recent edit and the document has just been
-      # opened, we need to index it
-      return true unless @last_edit
-
-      last_edit_may_change_declarations?
-    end
-
-    private
-
-    #: -> bool
-    def last_edit_may_change_declarations?
-      case @last_edit
-      when Delete
-        # Not optimized yet. It's not trivial to identify that a declaration has been removed since the source is no
-        # longer there and we don't remember the deleted text
-        true
-      when Insert, Replace
-        position_may_impact_declarations?(@last_edit.range[:start])
-      else
-        false
-      end
-    end
-
-    #: (Hash[Symbol, Integer] position) -> bool
-    def position_may_impact_declarations?(position)
-      node_context = locate_node(position)
-      node_at_edit = node_context.node
-
-      # Adjust to the parent when editing the constant of a class/module declaration
-      if node_at_edit.is_a?(Prism::ConstantReadNode) || node_at_edit.is_a?(Prism::ConstantPathNode)
-        node_at_edit = node_context.parent
-      end
-
-      case node_at_edit
-      when Prism::ClassNode, Prism::ModuleNode, Prism::SingletonClassNode, Prism::DefNode,
-          Prism::ConstantPathWriteNode, Prism::ConstantPathOrWriteNode, Prism::ConstantPathOperatorWriteNode,
-          Prism::ConstantPathAndWriteNode, Prism::ConstantOrWriteNode, Prism::ConstantWriteNode,
-          Prism::ConstantAndWriteNode, Prism::ConstantOperatorWriteNode, Prism::GlobalVariableAndWriteNode,
-          Prism::GlobalVariableOperatorWriteNode, Prism::GlobalVariableOrWriteNode, Prism::GlobalVariableTargetNode,
-          Prism::GlobalVariableWriteNode, Prism::InstanceVariableWriteNode, Prism::InstanceVariableAndWriteNode,
-          Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableTargetNode, Prism::AliasMethodNode
-        true
-      when Prism::MultiWriteNode
-        [*node_at_edit.lefts, *node_at_edit.rest, *node_at_edit.rights].any? do |node|
-          node.is_a?(Prism::ConstantTargetNode) || node.is_a?(Prism::ConstantPathTargetNode)
-        end
-      when Prism::CallNode
-        receiver = node_at_edit.receiver
-        (!receiver || receiver.is_a?(Prism::SelfNode)) && METHODS_THAT_CHANGE_DECLARATIONS.include?(node_at_edit.name)
-      else
-        false
-      end
     end
   end
 end
