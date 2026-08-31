@@ -136,25 +136,26 @@ module RubyLsp
             add_edit_with_text("\n")
             add_edit_with_text("#{indents}end")
             move_cursor_to(@position[:line], @indentation + 2)
-          elsif next_line
+          elsif line_below_cursor?
             add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: 0 })
           end
         elsif next_line.nil? || next_line.strip.empty?
-          add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
-          move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
+          if supports_snippet_anchor? || line_below_cursor?
+            add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
+            move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
+          end
         end
       end
 
       #: (String delimiter) -> void
       def handle_heredoc_end(delimiter)
         indents = " " * @indentation
-        next_line = @lines[@position[:line] + 1]
 
         if supports_snippet_anchor?
           add_edit_with_text("\n")
           add_edit_with_text("#{indents}#{delimiter}")
           move_cursor_to(@position[:line], @indentation + 2)
-        elsif next_line
+        elsif line_below_cursor?
           add_edit_with_text("#{indents}#{delimiter}\n", { line: @position[:line] + 1, character: 0 })
         end
       end
@@ -175,6 +176,15 @@ module RubyLsp
           range: Interface::Range.new(start: pos, end: pos),
           new_text: text,
         )
+      end
+
+      # Whether the editor's document has a line below the cursor where edits can be anchored without disturbing the
+      # cursor. This cannot be answered by `@lines` alone: when the source ends with a newline, the editor has one
+      # more (empty) line than `String#lines` returns. So after breaking the last visible line of a file with a
+      # trailing newline, the line below the cursor exists in the editor even though `@lines` doesn't include it.
+      #: -> bool
+      def line_below_cursor?
+        @position[:line] + 1 <= @document.source.count("\n")
       end
 
       # Whether the client interprets the `$0` snippet anchor in on type formatting edits to reposition the caret.
