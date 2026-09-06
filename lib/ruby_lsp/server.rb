@@ -90,6 +90,8 @@ module RubyLsp
         workspace_did_change_watched_files(message)
       when "workspace/symbol"
         workspace_symbol(message)
+      when "workspace/executeCommand"
+        execute_command(message)
       when "rubyLsp/textDocument/showSyntaxTree"
         text_document_show_syntax_tree(message)
       when "rubyLsp/workspace/dependencies"
@@ -353,6 +355,7 @@ module RubyLsp
     #: -> void
     def run_initialized
       load_addons
+      register_addon_commands
       RubyVM::YJIT.enable if defined?(RubyVM::YJIT.enable)
 
       unless @setup_error
@@ -1518,6 +1521,30 @@ module RubyLsp
       ))
     end
 
+    # Executes a command provided by one of the loaded add-ons
+    #: (Hash[Symbol, untyped] message) -> void
+    def execute_command(message)
+      command = message.dig(:params, :command)
+      arguments = message.dig(:params, :arguments) || []
+      addon = Addon.addons.find do |candidate|
+        !candidate.error? && candidate.commands.include?(command)
+      end
+
+      unless addon
+        send_message(Error.new(
+          id: message[:id],
+          code: Constant::ErrorCodes::INVALID_PARAMS,
+          message: "Unknown command: #{command}",
+        ))
+        return
+      end
+
+      send_message(Result.new(
+        id: message[:id],
+        response: addon.execute_command(command, arguments),
+      ))
+    end
+
     #: (Hash[Symbol, untyped] message) -> void
     def code_lens_resolve(message)
       code_lens = message[:params]
@@ -1536,6 +1563,21 @@ module RubyLsp
       send_message(Result.new(
         id: message[:id],
         response: code_lens,
+      ))
+    end
+
+    # Add-ons are loaded after the initialize response is sent, so their commands need to be registered dynamically.
+    #: -> void
+    def register_addon_commands
+      return unless @global_state.client_capabilities.supports_execute_command_registration
+
+      commands = Addon.addons.reject(&:error?).flat_map(&:commands).uniq
+      return if commands.empty?
+
+      send_message(Request.register_execute_commands(
+        @current_request_id,
+        commands,
+        registration_id: "addon-commands",
       ))
     end
   end
