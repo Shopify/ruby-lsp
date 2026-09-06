@@ -24,6 +24,34 @@ module RubyIndexer
       assert(uris.none? { |uri| uri.full_path == __FILE__ })
     end
 
+    def test_excluded_reports_paths_matching_the_exclusion_patterns
+      @config.apply_config({ "excluded_patterns" => ["lib/ruby_indexer/**/*"] })
+
+      assert(@config.excluded?(File.join(@workspace_path, "lib", "ruby_indexer", "lib", "ruby_indexer.rb")))
+      refute(@config.excluded?(File.join(@workspace_path, "lib", "ruby_lsp", "server.rb")))
+    end
+
+    def test_excluded_accepts_absolute_patterns
+      @config.apply_config({ "excluded_patterns" => [File.join(@workspace_path, "lib", "**", "*")] })
+
+      assert(@config.excluded?(File.join(@workspace_path, "lib", "ruby_lsp", "server.rb")))
+    end
+
+    def test_excluded_handles_nil_paths
+      refute(@config.excluded?(nil))
+    end
+
+    def test_excluded_is_invalidated_when_the_workspace_path_changes
+      @config.apply_config({ "excluded_patterns" => ["ignored/**/*"] })
+
+      assert(@config.excluded?(File.join(@workspace_path, "ignored", "foo.rb")))
+
+      @config.workspace_path = File.join(@workspace_path, "other")
+
+      refute(@config.excluded?(File.join(@workspace_path, "ignored", "foo.rb")))
+      assert(@config.excluded?(File.join(@workspace_path, "other", "ignored", "foo.rb")))
+    end
+
     def test_indexable_uris_have_expanded_full_paths
       @config.apply_config({ "included_patterns" => ["**/*.rb"] })
       uris = @config.indexable_uris
