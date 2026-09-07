@@ -11,7 +11,8 @@ module RubyLsp
       :window_show_message_supports_extra_properties,
       :supports_progress,
       :supports_diagnostic_refresh,
-      :supports_code_lens_refresh
+      :supports_code_lens_refresh,
+      :supports_execute_command_registration
 
     #: -> void
     def initialize
@@ -38,6 +39,9 @@ module RubyLsp
 
       # The editor supports server initiated refresh for code lenses
       @supports_code_lens_refresh = false #: bool
+
+      # The editor supports dynamically registering commands
+      @supports_execute_command_registration = false #: bool
     end
 
     #: (Hash[Symbol, untyped] capabilities) -> void
@@ -66,6 +70,10 @@ module RubyLsp
 
       @supports_diagnostic_refresh = workspace_capabilities.dig(:diagnostics, :refreshSupport) || false
       @supports_code_lens_refresh = workspace_capabilities.dig(:codeLens, :refreshSupport) || false
+      @supports_execute_command_registration = workspace_capabilities.dig(
+        :executeCommand,
+        :dynamicRegistration,
+      ) || false
     end
 
     #: -> bool

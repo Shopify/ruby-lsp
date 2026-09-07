@@ -134,6 +134,50 @@ In this example, the listener is registered to the dispatcher to listen for the 
 
 This approach enables all add-on responses to be captured in a single round of AST visits, greatly improving performance.
 
+### Providing commands
+
+Add-ons can provide commands that are invoked by Code Lenses, Code Actions, or other editor features. The Ruby LSP
+registers these commands dynamically with clients that support `workspace/executeCommand` dynamic registration.
+
+Command identifiers should use an add-on-specific prefix to avoid collisions with commands from other add-ons. The
+return value from `execute_command` is returned to the client as the result of the `workspace/executeCommand` request.
+
+```ruby
+module RubyLsp
+  module MyGem
+    class Addon < ::RubyLsp::Addon
+      def activate(global_state, message_queue)
+        @message_queue = message_queue
+      end
+
+      def deactivate; end
+
+      def name
+        "Ruby LSP My Gem"
+      end
+
+      def version
+        "0.1.0"
+      end
+
+      def commands
+        ["myGem.insertType"]
+      end
+
+      def execute_command(command, arguments)
+        case command
+        when "myGem.insertType"
+          # Use @message_queue to send a workspace/applyEdit request to the client.
+        end
+      end
+    end
+  end
+end
+```
+
+The client may invoke a command without arguments, so add-ons should handle an empty arguments array. Clients that do
+not support dynamic command registration will not display add-on commands.
+
 ### Enhancing features
 
 There are two ways to enhance Ruby LSP features. One is handling DSLs that occur at a call site and that do not change

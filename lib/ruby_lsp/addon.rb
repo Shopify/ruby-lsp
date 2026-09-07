@@ -280,5 +280,17 @@ module RubyLsp
     def resolve_test_commands(items)
       []
     end
+
+    # Returns the commands provided by the add-on
+    # @overridable
+    #: -> Array[String]
+    def commands
+      []
+    end
+
+    # Executes a command provided by the add-on
+    # @overridable
+    #: (String command, Array[untyped] arguments) -> untyped
+    def execute_command(command, arguments); end
   end
 end
