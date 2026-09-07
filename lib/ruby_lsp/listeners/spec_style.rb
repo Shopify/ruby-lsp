@@ -34,7 +34,7 @@ module RubyLsp
       #: (Prism::ClassNode) -> void
       def on_class_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         with_test_ancestor_tracking(node) do |name, ancestors|
-          @spec_group_id_stack << (ancestors.include?("Minitest::Spec") ? ClassGroup.new(name) : nil)
+          @spec_group_id_stack << (spec_group?(ancestors, name) ? ClassGroup.new(name) : nil)
         end
       end
 
@@ -80,6 +80,11 @@ module RubyLsp
       end
 
       private
+
+      #: (Array[String], String) -> bool
+      def spec_group?(ancestors, fully_qualified_name)
+        fully_qualified_name != "Minitest::Spec" && ancestors.include?("Minitest::Spec")
+      end
 
       #: (Prism::CallNode) -> void
       def handle_describe(node)

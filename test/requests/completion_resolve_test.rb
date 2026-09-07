@@ -22,18 +22,21 @@ class CompletionResolveTest < Minitest::Test
       existing_item = {
         label: "Foo::Bar",
         insertText: "Bar",
+        data: { fully_qualified_name: "Foo::Bar" },
       }
 
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
 
       result = server.pop_response.response
 
+      declaration = server.global_state.graph["Foo::Bar"] #: as !nil
       expected = existing_item.merge(
         documentation: Interface::MarkupContent.new(
           kind: "markdown",
-          value: markdown_from_index_entries(
+          value: markdown_from_definitions(
             "Foo::Bar",
-            server.global_state.index["Foo::Bar"], #: as !nil
+            declaration.definitions,
+            RubyLsp::Requests::CompletionResolve::MAX_DOCUMENTATION_ENTRIES,
           ),
         ),
       )
@@ -90,7 +93,6 @@ class CompletionResolveTest < Minitest::Test
       class Bar
         def foo(a, b, c)
         end
-
         def bar
           f
         end
@@ -112,17 +114,24 @@ class CompletionResolveTest < Minitest::Test
   end
 
   def test_indicates_signature_count_in_label_details
-    source = +<<~RUBY
-      String.try_convert
-    RUBY
+    rbs = <<~RBS
+      class Foo
+        def try_convert: (Object object) -> String?
+                       | (String s) -> String
+                       | (Symbol s) -> String
+      end
+    RBS
+    rbs_uri = URI::Generic.from_path(path: "/fake/path/foo.rbs").to_s
 
-    with_server(source, stub_no_typechecker: true) do |server, _uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+    with_server("Foo.new.try_convert", stub_no_typechecker: true) do |server, _uri|
+      graph = server.global_state.graph
+      graph.index_source(rbs_uri, rbs, "rbs")
+      graph.resolve
+
       existing_item = {
         label: "try_convert",
         kind: RubyLsp::Constant::CompletionItemKind::METHOD,
-        data: { owner_name: "String::<Class:String>" },
+        data: { owner_name: "Foo" },
       }
 
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
@@ -134,24 +143,29 @@ class CompletionResolveTest < Minitest::Test
   end
 
   def test_resolve_handles_method_aliases
-    with_server("", stub_no_typechecker: true) do |server, _uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+    source = +<<~RUBY
+      class Bar
+        # The original method
+        def foo
+        end
 
-      # This is initially an unresolved method alias. In regular operations, completion runs first, resolves the alias
-      # and then completionResolve doesn't have to do it. For the test, we need to do it manually
-      index.resolve_method("kind_of?", "Kernel")
+        alias_method :baz, :foo
+      end
+    RUBY
 
+    with_server(source, stub_no_typechecker: true) do |server, _uri|
       existing_item = {
-        label: "kind_of?",
+        label: "baz",
         kind: RubyLsp::Constant::CompletionItemKind::METHOD,
-        data: { owner_name: "Kernel" },
+        data: { owner_name: "Bar" },
       }
 
       server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
 
       result = server.pop_response.response
-      assert_match("**Definitions**: [kernel.rbs]", result[:documentation].value)
+      docs = result[:documentation].value
+      assert_match("**Definitions**: [fake.rb]", docs)
+      assert_match("The original method", docs)
     end
   end
 
@@ -180,6 +194,23 @@ class CompletionResolveTest < Minitest::Test
     end
   end
 
+  def test_completion_resolve_for_built_in_constant
+    with_server("Object", stub_no_typechecker: true) do |server, _uri|
+      existing_item = {
+        label: "Object",
+        insertText: "Object",
+        data: { fully_qualified_name: "Object" },
+      }
+
+      server.process_message(id: 1, method: "completionItem/resolve", params: existing_item)
+
+      result = server.pop_response.response
+      contents = result[:documentation].value
+      refute_match("rubydex:built-in", contents)
+      refute_match("[built-in]", contents)
+    end
+  end
+
   def test_resolve_for_keywords
     source = +<<~RUBY
       def foo
@@ -199,13 +230,9 @@ class CompletionResolveTest < Minitest::Test
       result = server.pop_response.response
       contents = result[:documentation].value
 
+      keyword = server.global_state.graph.keyword("yield") #: as !nil
       assert_match("```ruby\nyield\n```", contents)
-      assert_match(
-        RubyLsp::KEYWORD_DOCS["yield"], #: as !nil
-        contents,
-      )
-      expected_uri = URI::Generic.from_path(path: File.join(RubyLsp::STATIC_DOCS_PATH, "yield.md"))
-      assert_match("[Read more](#{expected_uri})", contents)
+      assert_match(keyword.documentation, contents)
     end
   end
 

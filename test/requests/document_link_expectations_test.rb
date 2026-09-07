@@ -45,7 +45,6 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri } },
       )
 
-      server.pop_response
       assert_empty(server.pop_response.response)
     end
   end
@@ -64,7 +63,6 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri } },
       )
 
-      server.pop_response
       assert_empty(server.pop_response.response)
     end
   end
@@ -83,7 +81,6 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri } },
       )
 
-      server.pop_response
       assert_empty(server.pop_response.response)
     end
   end
@@ -143,7 +140,6 @@ class DocumentLinkExpectationsTest < ExpectationsTestRunner
         params: { textDocument: { uri: uri } },
       )
 
-      server.pop_response
       assert_empty(server.pop_response.response)
     end
   end

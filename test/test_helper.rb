@@ -24,5 +24,13 @@ module Minitest
     include RubyLsp::TestHelper
 
     Minitest::Test.make_my_diffs_pretty!
+
+    # Returns full path to the requested gem
+    #
+    #: (String) -> Pathname
+    def gem_path(gem_name)
+      spec = Gem::Specification.find_by_name(gem_name)
+      Pathname.new(spec.full_gem_path)
+    end
   end
 end

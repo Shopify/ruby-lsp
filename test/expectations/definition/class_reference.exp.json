@@ -1,33 +1,33 @@
 {
+    "params": [
+        {
+            "line": 3,
+            "character": 10
+        }
+    ],
     "result": [
         {
-            "targetUri": "file:///fixtures/class_reference_target.rb",
+            "targetUri": "file:////fake.rb",
             "targetSelectionRange": {
                 "start": {
-                    "line": 4,
-                    "character": 8
+                    "line": 0,
+                    "character": 6
                 },
                 "end": {
-                    "line": 4,
-                    "character": 20
+                    "line": 0,
+                    "character": 12
                 }
             },
             "targetRange": {
                 "start": {
-                    "line": 4,
-                    "character": 2
+                    "line": 0,
+                    "character": 0
                 },
                 "end": {
-                    "line": 7,
-                    "character": 5
+                    "line": 1,
+                    "character": 3
                 }
             }
-        }
-    ],
-    "params": [
-        {
-            "line": 0,
-            "character": 19
         }
     ]
 }

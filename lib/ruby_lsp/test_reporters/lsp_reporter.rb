@@ -5,7 +5,7 @@ require "English"
 require "json"
 require "socket"
 require "tmpdir"
-require_relative "../../ruby_indexer/lib/ruby_indexer/uri"
+require_relative "../uri"
 
 module RubyLsp
   class LspReporter

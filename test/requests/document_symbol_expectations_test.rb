@@ -90,9 +90,6 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
           params: { textDocument: { uri: uri } },
         })
 
-        # Pop the re-indexing notification
-        server.pop_response
-
         result = server.pop_response
         assert_instance_of(RubyLsp::Result, result)
 

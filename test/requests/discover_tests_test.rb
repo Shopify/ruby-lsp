@@ -82,6 +82,25 @@ module RubyLsp
       end
     end
 
+    def test_minitest_with_compact_path_resolving_to_outer_namespace
+      source = <<~RUBY
+        module Foo
+        end
+
+        module Bar
+          class Foo::MyTest < Minitest::Test
+            def test_something; end
+          end
+        end
+      RUBY
+
+      with_minitest_test(source) do |items|
+        assert_equal(["Foo::MyTest"], items.map { |i| i[:id] })
+        assert_equal(["Foo::MyTest#test_something"], items[0][:children].map { |i| i[:id] })
+        assert_all_items_tagged_with(items, :minitest)
+      end
+    end
+
     def test_minitest_with_dynamic_constant_path
       source = File.read("test/fixtures/minitest_with_dynamic_constant_path.rb")
 
@@ -144,13 +163,15 @@ module RubyLsp
       RUBY
 
       with_server(source, URI::Generic.from_path(path: "/test/foo_test.rb")) do |server, uri|
-        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+        graph = server.global_state.graph
+        graph.index_source(URI("/other_file.rb").to_s, <<~RUBY, "ruby")
           module Test
             module Unit
               class TestCase; end
             end
           end
         RUBY
+        graph.resolve
 
         server.global_state.stubs(:enabled_feature?).returns(true)
 
@@ -158,8 +179,6 @@ module RubyLsp
           textDocument: { uri: uri },
         })
 
-        # Discard the indexing log message
-        server.pop_response
         items = get_response(server)
         assert_equal(9, items.length)
 
@@ -228,13 +247,15 @@ module RubyLsp
       RUBY
 
       with_server(source, URI::Generic.from_path(path: "/test/foo_test.rb")) do |server, uri|
-        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+        graph = server.global_state.graph
+        graph.index_source(URI("/other_file.rb").to_s, <<~RUBY, "ruby")
           module Test
             module Unit
               class TestCase; end
             end
           end
         RUBY
+        graph.resolve
 
         state = server.global_state
         state.stubs(:enabled_feature?).returns(true)
@@ -252,8 +273,6 @@ module RubyLsp
           textDocument: { uri: uri },
         })
 
-        # Discard the indexing log message
-        server.pop_response
         items = get_response(server)
         assert_empty(items)
       end
@@ -271,13 +290,15 @@ module RubyLsp
       RUBY
 
       with_server(source, URI::Generic.from_path(path: "/tests/something.rb")) do |server, uri|
-        server.global_state.index.index_single(URI("/other_file.rb"), <<~RUBY)
+        graph = server.global_state.graph
+        graph.index_source(URI("/other_file.rb").to_s, <<~RUBY, "ruby")
           module Test
             module Unit
               class TestCase; end
             end
           end
         RUBY
+        graph.resolve
 
         server.global_state.stubs(:enabled_feature?).returns(true)
 
@@ -285,8 +306,6 @@ module RubyLsp
           textDocument: { uri: uri },
         })
 
-        # Discard the indexing log message
-        server.pop_response
         items = get_response(server)
         assert_empty(items)
       end
@@ -356,43 +375,6 @@ module RubyLsp
         assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
         assert_equal(["test_something"], items[1][:children].map { |i| i[:label] })
         assert_all_items_tagged_with(items, :test_unit)
-      end
-    end
-
-    def test_files_are_indexed_lazily_if_needed
-      path = File.join(Dir.pwd, "lib", "foo.rb")
-      File.write(path, <<~RUBY)
-        class FooTest < Test::Unit::TestCase
-          def test_something; end
-        end
-      RUBY
-
-      begin
-        with_server do |server, uri|
-          server.global_state.index.index_single(uri, <<~RUBY)
-            module Test
-              module Unit
-                class TestCase; end
-              end
-            end
-          RUBY
-
-          server.process_message(
-            id: 1,
-            method: "rubyLsp/discoverTests",
-            params: { textDocument: { uri: URI::Generic.from_path(path: path) } },
-          )
-
-          items = get_response(server)
-          assert_equal(
-            ["FooTest"],
-            items.map { |i| i[:label] },
-          )
-          assert_equal(["test_something"], items[0][:children].map { |i| i[:label] })
-          assert_all_items_tagged_with(items, :test_unit)
-        end
-      ensure
-        FileUtils.rm(path)
       end
     end
 
@@ -898,13 +880,15 @@ module RubyLsp
     end
 
     def with_minitest_test(source, &block)
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
-        RUBY
+      source_with_minitest = <<~RUBY
+        #{source}
 
+        module Minitest
+          class Test; end
+        end
+      RUBY
+
+      with_server(source_with_minitest) do |server, uri|
         server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
           textDocument: { uri: uri },
         })
@@ -916,15 +900,17 @@ module RubyLsp
     end
 
     def with_test_unit(source, &block)
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Test
-            module Unit
-              class TestCase; end
-            end
-          end
-        RUBY
+      source_with_test_unit = <<~RUBY
+        #{source}
 
+        module Test
+          module Unit
+            class TestCase; end
+          end
+        end
+      RUBY
+
+      with_server(source_with_test_unit) do |server, uri|
         server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
           textDocument: { uri: uri },
         })
@@ -936,24 +922,26 @@ module RubyLsp
     end
 
     def with_active_support_declarative_tests(source, &block)
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-          end
+      source_with_test_case = <<~RUBY
+        #{source}
 
-          module ActiveSupport
-            module Testing
-              module Declarative
-              end
-            end
+        module Minitest
+          class Test; end
+        end
 
-            class TestCase < Minitest::Test
-              extend Testing::Declarative
+        module ActiveSupport
+          module Testing
+            module Declarative
             end
           end
-        RUBY
 
+          class TestCase < Minitest::Test
+            extend Testing::Declarative
+          end
+        end
+      RUBY
+
+      with_server(source_with_test_case) do |server, uri|
         server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
           textDocument: { uri: uri },
         })
@@ -965,14 +953,16 @@ module RubyLsp
     end
 
     def with_minitest_spec_configured(source, &block)
-      with_server(source) do |server, uri|
-        server.global_state.index.index_single(uri, <<~RUBY)
-          module Minitest
-            class Test; end
-            class Spec < Test; end
-          end
-        RUBY
+      source_with_spec = <<~RUBY
+        #{source}
 
+        module Minitest
+          class Test; end
+          class Spec < Test; end
+        end
+      RUBY
+
+      with_server(source_with_spec) do |server, uri|
         server.process_message(id: 1, method: "rubyLsp/discoverTests", params: {
           textDocument: { uri: uri },
         })

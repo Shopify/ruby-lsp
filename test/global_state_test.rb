@@ -219,6 +219,22 @@ module RubyLsp
       global_state.supports_watching_files
     end
 
+    def test_utf32_negotiation_yields_encoding_compatible_with_prism_code_units_cache
+      state = GlobalState.new
+      state.apply_options(capabilities: { general: { positionEncodings: ["utf-32"] } })
+
+      source = "class Foo; end\n\"🙂\"; Foo\n"
+      result = Prism.parse(source)
+      cache = result.code_units_cache(state.encoding)
+      foo_ref = result.value.statements.body.last #: as !nil
+
+      # `Foo` on line 1 starts at byte 23 (`class Foo; end\n` = 15 bytes + `"🙂"; ` = 8 bytes).
+      # In UTF-32 code units that same position is codepoint 20 (15 + 5). If `state.encoding`
+      # returns the dummy `Encoding::UTF_32`, the cache cannot translate past `🙂` and this
+      # assertion fails with a non-20 value.
+      assert_equal(20, foo_ref.location.cached_start_code_units_offset(cache))
+    end
+
     def test_feature_flags_are_processed_by_apply_options
       state = GlobalState.new
 

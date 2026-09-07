@@ -25,15 +25,6 @@ class IntegrationTest < Minitest::Test
     assert_match(/invalid option/, stderr)
   end
 
-  def test_ruby_lsp_doctor_works
-    skip("CI only") unless ENV["CI"]
-
-    in_isolation do
-      system("bundle exec ruby-lsp --doctor")
-      assert_equal(0, $CHILD_STATUS)
-    end
-  end
-
   def test_ruby_lsp_check_works
     skip("CI only") unless ENV["CI"]
 

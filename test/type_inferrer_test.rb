@@ -6,8 +6,8 @@ require "test_helper"
 module RubyLsp
   class TypeInferrerTest < Minitest::Test
     def setup
-      @index = RubyIndexer::Index.new
-      @type_inferrer = TypeInferrer.new(@index)
+      @graph = Rubydex::Graph.new
+      @type_inferrer = TypeInferrer.new(@graph)
     end
 
     def test_infer_receiver_type_self_inside_method
@@ -29,7 +29,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_self_inside_singleton_method
@@ -41,7 +41,97 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_self_inside_method_with_constant_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        class Bar; end
+
+        class Foo
+          def Bar.baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_instance_variables_in_method_with_constant_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        class Bar; end
+
+        class Foo
+          def Bar.baz
+            @hello1
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_self_inside_method_with_dynamic_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 5, character: 4 })
+        class Bar; end
+        var = Bar
+
+        class Foo
+          def var.baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
+    def test_infer_receiver_inside_hoisted_parent_scope
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        module Bar; end
+
+        module Foo
+          class Bar::Baz
+            @var
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::Baz::<Baz>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_inside_inherited_parent_scope
+      node_context = index_and_locate(<<~RUBY, { line: 8, character: 4 })
+        module Bar
+          module Baz; end
+        end
+
+        module Foo
+          include Bar
+
+          class Baz::Qux
+            @var
+          end
+        end
+      RUBY
+
+      assert_equal("Bar::Baz::Qux::<Qux>", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_receiver_type_class_variables_in_method_with_constant_receiver
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 4 })
+        class Bar; end
+
+        class Foo
+          def Bar.baz
+            @@hello1
+          end
+        end
+      RUBY
+
+      # Class variables follow lexical scope, not the method receiver
+      assert_equal("Foo", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_self_inside_singleton_block_body
@@ -53,7 +143,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>::<<Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_self_inside_singleton_block_method
@@ -67,7 +157,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_constant
@@ -79,7 +169,7 @@ module RubyLsp
         Foo.bar
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_constant_path
@@ -93,7 +183,7 @@ module RubyLsp
         Foo::Bar.baz
       RUBY
 
-      assert_equal("Foo::Bar::<Class:Bar>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::Bar::<Bar>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_top_level_receiver
@@ -111,7 +201,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_instance_variables_in_singleton_method
@@ -123,7 +213,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_instance_variables_in_singleton_block_body
@@ -135,7 +225,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>::<Class:<Class:Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>::<<Foo>>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_in_namespaced_singleton_method
@@ -148,7 +238,7 @@ module RubyLsp
       RUBY
 
       result = @type_inferrer.infer_receiver_type(node_context).name
-      assert_equal("Foo::Bar::<Class:Bar>", result)
+      assert_equal("Foo::Bar::<Bar>", result)
     end
 
     def test_infer_receiver_type_instance_variables_in_singleton_block_method
@@ -162,7 +252,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Foo::<Class:Foo>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Foo::<Foo>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_instance_variables_in_instance_method
@@ -229,6 +319,28 @@ module RubyLsp
       RUBY
 
       assert_equal("User", @type_inferrer.infer_receiver_type(node_context).name)
+    end
+
+    def test_infer_guessed_types_returns_nil_when_resolved_constant_is_not_a_namespace
+      node_context = index_and_locate(<<~RUBY, { line: 2, character: 4 })
+        User = "guest"
+
+        user.name
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
+    end
+
+    def test_infer_guessed_types_returns_nil_when_search_fallback_finds_non_namespace
+      node_context = index_and_locate(<<~RUBY, { line: 4, character: 9 })
+        module Foo
+          SOMETHING = 1
+        end
+
+        something.bar
+      RUBY
+
+      assert_nil(@type_inferrer.infer_receiver_type(node_context))
     end
 
     def test_infer_guessed_types_inside_nesting
@@ -376,7 +488,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Admin::User::<User>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_self_type_for_compact_namespace_inside_method
@@ -400,7 +512,7 @@ module RubyLsp
         end
       RUBY
 
-      assert_equal("Admin::User::<Class:User>", @type_inferrer.infer_receiver_type(node_context).name)
+      assert_equal("Admin::User::<User>", @type_inferrer.infer_receiver_type(node_context).name)
     end
 
     def test_infer_receiver_type_class_variables_in_class_body
@@ -499,7 +611,9 @@ module RubyLsp
     private
 
     def index_and_locate(source, position)
-      @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), source)
+      @graph.index_source(URI::Generic.from_path(path: "/fake/path/foo.rb").to_s, source, "ruby")
+      @graph.resolve
+
       document = RubyLsp::RubyDocument.new(
         source: source,
         version: 1,

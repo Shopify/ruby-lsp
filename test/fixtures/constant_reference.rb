@@ -1,1 +1,3 @@
-example = Foo
+TARGET = 1
+
+example = TARGET

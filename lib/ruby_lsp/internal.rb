@@ -20,6 +20,7 @@ if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.5")
 end
 require "set"
 require "strscan"
+require "rubydex"
 require "prism"
 require "prism/visitor"
 require "language_server-protocol"
@@ -30,11 +31,16 @@ require "securerandom"
 require "shellwords"
 require "set"
 
+# Rubydex LSP additions
+require "ruby_lsp/rubydex/declaration"
+require "ruby_lsp/rubydex/definition"
+require "ruby_lsp/rubydex/reference"
+require "ruby_lsp/rubydex/signature"
+
 require "ruby-lsp"
 require "ruby_lsp/base_server"
-require "ruby_indexer/ruby_indexer"
+require "ruby_lsp/uri"
 require "ruby_lsp/utils"
-require "ruby_lsp/static_docs"
 require "ruby_lsp/scope"
 require "ruby_lsp/client_capabilities"
 require "ruby_lsp/global_state"

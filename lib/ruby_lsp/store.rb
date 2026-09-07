@@ -53,12 +53,6 @@ module RubyLsp
       end
     end
 
-    #: (uri: URI::Generic, edits: Array[Hash[Symbol, untyped]], version: Integer) -> void
-    def push_edits(uri:, edits:, version:)
-      @state[uri.to_s] #: as !nil
-        .push_edits(edits, version: version)
-    end
-
     #: -> void
     def clear
       @state.clear
