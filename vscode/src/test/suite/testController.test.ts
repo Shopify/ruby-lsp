@@ -147,21 +147,48 @@ suite("TestController", () => {
     );
   }
 
-  function createWorkspaceWithTestFile() {
+  function createWorkspaceWithTestFile(
+    options: {
+      testDir?: string;
+      testFileName?: string;
+      testContent?: string;
+      index?: number;
+      additionalFiles?: Array<{ path: string; content: string }>;
+    } = {},
+  ) {
+    const {
+      testDir = "test",
+      testFileName = "foo_test.rb",
+      testContent = "require 'test_helper'\n\nclass FooTest < Minitest::Test; def test_foo; end; end",
+      index = 1,
+      additionalFiles = [],
+    } = options;
+
     const workspacePath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-controller-"));
     const workspaceUri = vscode.Uri.file(workspacePath);
 
-    fs.mkdirSync(path.join(workspaceUri.fsPath, "test"));
-    const testFilePath = path.join(workspaceUri.fsPath, "test", "foo_test.rb");
-    fs.writeFileSync(testFilePath, "require 'test_helper'\n\nclass FooTest < Minitest::Test; def test_foo; end; end");
+    fs.mkdirSync(path.join(workspaceUri.fsPath, testDir), { recursive: true });
+    const testFilePath = path.join(workspaceUri.fsPath, testDir, testFileName);
+    fs.writeFileSync(testFilePath, testContent);
+
+    // Create additional files if specified
+    additionalFiles.forEach(({ path: filePath, content }) => {
+      const fullPath = path.join(workspaceUri.fsPath, filePath);
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, content);
+    });
 
     const workspaceFolder: vscode.WorkspaceFolder = {
       uri: workspaceUri,
       name: path.basename(workspacePath),
-      index: 1,
+      index,
     };
 
     return { workspaceFolder, testFileUri: vscode.Uri.file(testFilePath) };
+  }
+
+  function cleanupWorkspace(workspaceFolder: vscode.WorkspaceFolder) {
+    fs.rmSync(workspaceFolder.uri.fsPath, { recursive: true, force: true });
   }
 
   function stubWorkspaceOperations(...workspaces: vscode.WorkspaceFolder[]) {
@@ -926,5 +953,131 @@ suite("TestController", () => {
     await controller.testController.resolveHandler!(undefined);
 
     assert.ok(spy.calledOnce);
+  });
+
+  test("does not discover tests in .bundle directory", async () => {
+    const { workspaceFolder, testFileUri } = createWorkspaceWithTestFile({
+      testFileName: "my_test.rb",
+      testContent: "class MyTest < Minitest::Test; end",
+      index: 0,
+      additionalFiles: [
+        {
+          path: ".bundle/gems/test/gem_test.rb",
+          content: "class GemTest < Minitest::Test; end",
+        },
+      ],
+    });
+
+    stubWorkspaceOperations(workspaceFolder);
+
+    await controller.testController.resolveHandler!(undefined);
+
+    const collection = controller.testController.items;
+    const testDir = collection.get(vscode.Uri.joinPath(workspaceFolder.uri, "test").toString());
+
+    // Should find the regular test file
+    assert.ok(testDir);
+    const regularTest = testDir.children.get(testFileUri.toString());
+    assert.ok(regularTest, "Regular test file should be discovered");
+
+    // Should NOT find the test file in ignored directory
+    const ignoredTestDir = collection.get(
+      vscode.Uri.joinPath(workspaceFolder.uri, ".bundle", "gems", "test").toString(),
+    );
+    assert.strictEqual(ignoredTestDir, undefined, "Ignored directory should not be discovered");
+
+    cleanupWorkspace(workspaceFolder);
+  });
+
+  test("does not discover tests in vendor/bundle directory", async () => {
+    const { workspaceFolder, testFileUri } = createWorkspaceWithTestFile({
+      testDir: "spec",
+      testFileName: "my_spec.rb",
+      testContent: "RSpec.describe 'MySpec' do; end",
+      index: 0,
+      additionalFiles: [
+        {
+          path: "vendor/bundle/gems/spec/gem_spec.rb",
+          content: "RSpec.describe 'GemSpec' do; end",
+        },
+      ],
+    });
+
+    stubWorkspaceOperations(workspaceFolder);
+
+    await controller.testController.resolveHandler!(undefined);
+
+    const collection = controller.testController.items;
+    const specDir = collection.get(vscode.Uri.joinPath(workspaceFolder.uri, "spec").toString());
+
+    // Should find the regular spec file
+    assert.ok(specDir);
+    const regularSpec = specDir.children.get(testFileUri.toString());
+    assert.ok(regularSpec, "Regular spec file should be discovered");
+
+    // Should NOT find the test file in ignored directory
+    const ignoredTestDir = collection.get(
+      vscode.Uri.joinPath(workspaceFolder.uri, "vendor", "bundle", "gems", "test").toString(),
+    );
+    assert.strictEqual(ignoredTestDir, undefined, "Ignored directory should not be discovered");
+
+    cleanupWorkspace(workspaceFolder);
+  });
+
+  suite("isInIgnoredFolder", () => {
+    test("detects files in .bundle directory", () => {
+      const uri = vscode.Uri.file("/workspace/.bundle/gems/ruby/3.3.0/gems/rspec-core-3.12.0/spec/rspec_spec.rb");
+      assert.ok((controller as any).isInIgnoredFolder(uri));
+    });
+
+    test("detects files in vendor/bundle directory", () => {
+      const uri = vscode.Uri.file("/workspace/vendor/bundle/ruby/3.3.0/gems/rspec-core-3.12.0/spec/rspec_spec.rb");
+      assert.ok((controller as any).isInIgnoredFolder(uri));
+    });
+
+    test("detects files in nested .bundle paths", () => {
+      const uri = vscode.Uri.file("/workspace/subfolder/.bundle/ruby/3.3.0/gems/minitest-5.0.0/test/minitest_test.rb");
+      assert.ok((controller as any).isInIgnoredFolder(uri));
+    });
+
+    test("detects files in node_modules directory", () => {
+      const uri = vscode.Uri.file("/workspace/node_modules/@types/node/test/test.rb");
+      assert.ok((controller as any).isInIgnoredFolder(uri));
+    });
+
+    test("detects files in tmp directory", () => {
+      const uri = vscode.Uri.file("/workspace/tmp/cache/test_file.rb");
+      assert.ok((controller as any).isInIgnoredFolder(uri));
+    });
+
+    test("detects files in log directory", () => {
+      const uri = vscode.Uri.file("/workspace/log/test/test_spec.rb");
+      assert.ok((controller as any).isInIgnoredFolder(uri));
+    });
+
+    test("does not detect regular test files", () => {
+      const uri = vscode.Uri.file("/workspace/test/models/user_test.rb");
+      assert.strictEqual((controller as any).isInIgnoredFolder(uri), false);
+    });
+
+    test("does not detect spec files in regular paths", () => {
+      const uri = vscode.Uri.file("/workspace/spec/models/user_spec.rb");
+      assert.strictEqual((controller as any).isInIgnoredFolder(uri), false);
+    });
+
+    test("does not detect files with 'bundle' in name but not in ignored directory", () => {
+      const uri = vscode.Uri.file("/workspace/test/bundle_test.rb");
+      assert.strictEqual((controller as any).isInIgnoredFolder(uri), false);
+    });
+
+    test("does not detect files with 'vendor' in name but not in vendor/bundle", () => {
+      const uri = vscode.Uri.file("/workspace/test/vendor_test.rb");
+      assert.strictEqual((controller as any).isInIgnoredFolder(uri), false);
+    });
+
+    test("does not detect files in vendor directory that are not in vendor/bundle", () => {
+      const uri = vscode.Uri.file("/workspace/vendor/plugins/my_plugin/test/plugin_test.rb");
+      assert.strictEqual((controller as any).isInIgnoredFolder(uri), false);
+    });
   });
 });
