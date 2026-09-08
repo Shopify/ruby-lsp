@@ -236,35 +236,47 @@ module RubyLsp
           dynamic_stack = group_stack[last_dynamic_reference_index + 1..] #: as !nil
 
           if method_name
-            " --name " + "/::#{Shellwords.escape(dynamic_stack.join("::")) + "#" + Shellwords.escape(method_name)}$/"
+            " --name " + "/::#{escape_for_shell(dynamic_stack.join("::")) + "#" + escape_for_shell(method_name)}$/"
           else
             # When clicking on a CodeLens for `Test`, `(#|::)` will match all tests
             # that are registered on the class itself (matches after `#`) and all tests
             # that are nested inside of that class in other modules/classes (matches after `::`)
-            " --name " + "\"/::#{Shellwords.escape(dynamic_stack.join("::"))}(#|::)/\""
+            " --name " + "\"/::#{escape_for_shell(dynamic_stack.join("::"))}(#|::)/\""
           end
         elsif method_name
           # We know the entire path, do an exact match
-          " --name " + Shellwords.escape(group_stack.join("::")) + "#" + Shellwords.escape(method_name)
+          " --name " + escape_for_shell(group_stack.join("::")) + "#" + escape_for_shell(method_name)
         elsif spec_name
-          " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}##{Shellwords.escape(spec_name)}$/\""
+          " --name " + "\"/^#{escape_for_shell(group_stack.join("::"))}##{escape_for_shell(spec_name)}$/\""
         else
           # Execute all tests of the selected class and tests in
           # modules/classes nested inside of that class
-          " --name " + "\"/^#{Shellwords.escape(group_stack.join("::"))}(#|::)/\""
+          " --name " + "\"/^#{escape_for_shell(group_stack.join("::"))}(#|::)/\""
         end
       end
 
       #: (Array[String] group_stack, String? method_name) -> String
       def generate_test_unit_command(group_stack, method_name)
         group_name = group_stack.last #: as !nil
-        command = " --testcase " + "/#{Shellwords.escape(group_name)}/"
+        command = " --testcase " + "/#{escape_for_shell(group_name)}/"
 
         if method_name
-          command += " --name " + Shellwords.escape(method_name)
+          command += " --name " + escape_for_shell(method_name)
         end
 
         command
+      end
+
+      #: (String text) -> String
+      def escape_for_shell(text)
+        if Gem.win_platform?
+          # On Windows, Shellwords.escape incorrectly escapes characters like `$`
+          # which breaks regex patterns. Windows doesn't need the same escaping
+          # as Unix shells for these characters.
+          text
+        else
+          Shellwords.escape(text)
+        end
       end
 
       #: (Prism::CallNode node, kind: Symbol) -> void
