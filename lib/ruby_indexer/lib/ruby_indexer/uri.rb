@@ -15,10 +15,14 @@ module URI
     class << self
       #: (path: String, ?fragment: String?, ?scheme: String, ?load_path_entry: String?) -> URI::Generic
       def from_path(path:, fragment: nil, scheme: "file", load_path_entry: nil)
-        # This unsafe regex is the same one used in the URI::RFC2396_REGEXP class with the exception of the fact that we
-        # do not include colon as a safe character. VS Code URIs always escape colons and we need to ensure we do the
-        # same to avoid inconsistencies in our URIs, which are used to identify resources
-        unsafe_regex = %r{[^\-_.!~*'()a-zA-Z\d;/?@&=+$,\[\]]}
+        # Our URIs are used to identify resources, so they must be escaped exactly the way the editor escapes them.
+        # Otherwise the same file ends up tracked under two different URIs: one built here during indexing and one
+        # received from the editor, which results in duplicate index entries (see Shopify/ruby-lsp#3639).
+        #
+        # VS Code's `vscode-uri` only leaves the RFC 3986 unreserved characters unescaped (`A-Za-z0-9-._~`), plus the
+        # forward slash in paths. Everything else, including characters that RFC 2396 considers safe such as `(`, `)`,
+        # `!`, `'`, `*`, `$`, `&`, `+`, `,`, `;`, `=`, `@`, `[`, `]` and `:`, is percent-encoded
+        unsafe_regex = %r{[^\-_.~a-zA-Z\d/]}
 
         # On Windows, if the path begins with the disk name, we need to add a leading slash to make it a valid URI
         escaped_path = if /^[A-Z]:/i.match?(path)
