@@ -223,7 +223,7 @@ module RubyLsp
 
     def test_resolve_test_command_entire_directories
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/test/fake_test.rb", "/other/test/fake_test2.rb"])
+        Dir.stubs(:glob).returns(["fake_test.rb", "fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -539,7 +539,7 @@ module RubyLsp
 
     def test_resolve_test_command_mix_of_directories_and_examples
       with_server do |server|
-        Dir.stubs(:glob).returns(["/test/unit/fake_test.rb", "/test/unit/fake_test2.rb"])
+        Dir.stubs(:glob).returns(["fake_test.rb", "fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -637,7 +637,7 @@ module RubyLsp
 
     def test_resolve_test_command_for_minitest_spec_directory
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/spec/fake_spec.rb", "/other/spec/fake2_spec.rb"])
+        Dir.stubs(:glob).returns(["fake_spec.rb", "fake2_spec.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -782,7 +782,7 @@ module RubyLsp
 
     def test_resolve_properly_escapes_file_paths_within_directories
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/test/fake(v2)_test.rb"])
+        Dir.stubs(:glob).returns(["fake(v2)_test.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -834,6 +834,43 @@ module RubyLsp
           ["#{COMMAND} -Itest /test/server\\(v2\\)_test.rb --name \"/^ServerTest(#|::)/\""],
           result[:commands],
         )
+      end
+    end
+
+    # Unlike the other directory tests, this one hits the real file system instead of stubbing `Dir.glob`, so that the
+    # expansion of a `test_dir` item is actually exercised against a path holding glob metacharacters
+    def test_resolve_test_command_entire_directory_with_glob_metacharacters_in_the_path
+      Dir.mktmpdir do |dir|
+        test_dir = File.join(dir, "[id]", "test")
+        FileUtils.mkdir_p(test_dir)
+        FileUtils.touch(File.join(test_dir, "fake_test.rb"))
+
+        with_server do |server|
+          server.process_message({
+            id: 1,
+            method: "rubyLsp/resolveTestCommands",
+            params: {
+              items: [
+                {
+                  id: URI::Generic.from_path(path: test_dir).to_s,
+                  uri: URI::Generic.from_path(path: test_dir).to_s,
+                  label: test_dir,
+                  tags: ["test_dir", "framework:minitest"],
+                  children: [],
+                },
+              ],
+            },
+          })
+
+          result = server.pop_response.response
+          assert_equal(
+            [
+              "#{COMMAND} -Itest -e \"ARGV.each { |f| require f }\" " \
+                "#{Shellwords.escape(File.join(test_dir, "fake_test.rb"))}",
+            ],
+            result[:commands],
+          )
+        end
       end
     end
   end
@@ -1298,7 +1335,7 @@ module RubyLsp
 
     def test_resolve_test_command_mix_of_directories_and_examples
       with_server do |server|
-        Dir.stubs(:glob).returns(["/test/unit/fake_test.rb", "/test/unit/fake_test2.rb"])
+        Dir.stubs(:glob).returns(["fake_test.rb", "fake_test2.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",
@@ -1366,7 +1403,7 @@ module RubyLsp
 
     def test_resolve_properly_escapes_file_paths_within_directories
       with_server do |server|
-        Dir.stubs(:glob).returns(["/other/test/fake(v2)_test.rb"])
+        Dir.stubs(:glob).returns(["fake(v2)_test.rb"])
         server.process_message({
           id: 1,
           method: "rubyLsp/resolveTestCommands",

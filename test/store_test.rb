@@ -64,6 +64,23 @@ class StoreTest < Minitest::Test
     )
   end
 
+  # The editor percent-encodes brackets and braces, so a document opened by the client must resolve to the same key
+  # the server builds from the file path. Otherwise the same file is tracked under two different URIs
+  def test_handling_uris_with_glob_metacharacters
+    {
+      "/foo/[id].rb" => "file:///foo/%5Bid%5D.rb",
+      "/foo/{slug}.rb" => "file:///foo/%7Bslug%7D.rb",
+    }.each do |path, client_uri_string|
+      server_uri = URI::Generic.from_path(path: path)
+      assert_equal(client_uri_string, server_uri.to_s)
+
+      @store.set(uri: URI(client_uri_string), source: "def foo; end", version: 1, language_id: :ruby)
+
+      assert(@store.key?(server_uri), "expected the store to find #{path} under the URI built from its path")
+      assert_equal("def foo; end", @store.get(server_uri).source)
+    end
+  end
+
   def test_handling_uris_for_unsaved_files
     uri = URI("untitled:Untitled-1")
     @store.set(uri: uri, source: "def foo; end", version: 1, language_id: :ruby)

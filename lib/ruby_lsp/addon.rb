@@ -62,7 +62,9 @@ module RubyLsp
             nil
           end
 
-          project_addons = Dir.glob("#{global_state.workspace_path}/**/ruby_lsp/**/addon.rb")
+          project_addons = Dir.glob("**/ruby_lsp/**/addon.rb", base: global_state.workspace_path).map! do |relative_path|
+            File.join(global_state.workspace_path, relative_path)
+          end
           project_addons.reject! do |path|
             (bundle_path && path.start_with?(bundle_path)) || gem_installation_path?(path)
           end
