@@ -41,6 +41,8 @@ module RubyIndexer
         case node
         when Prism::ConstantPathNode, Prism::ConstantReadNode, Prism::ConstantPathTargetNode
           node.full_name
+        when Prism::ConstantWriteNode, Prism::ConstantTargetNode
+          node.name.to_s
         end
       rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError,
              Prism::ConstantPathNode::MissingNodesInConstantPathError
