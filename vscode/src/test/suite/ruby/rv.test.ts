@@ -59,7 +59,7 @@ suite("Rv", () => {
     const { env, version, yjit } = await rv.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`rv ruby run -- -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`rv run -- -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
@@ -109,7 +109,7 @@ suite("Rv", () => {
     const { env, version, yjit } = await rv.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`${rvPath} ruby run -- -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`${rvPath} run -- -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
