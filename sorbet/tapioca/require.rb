@@ -8,6 +8,7 @@
 yarp_require_paths = Gem.loaded_specs["yarp"]&.full_require_paths
 $LOAD_PATH.delete_if { |path| yarp_require_paths.include?(path) } if yarp_require_paths
 
+require "rubydex"
 require "language_server-protocol"
 require "prism"
 require "prism/visitor"

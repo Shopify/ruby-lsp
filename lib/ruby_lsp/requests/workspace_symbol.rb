@@ -12,54 +12,32 @@ module RubyLsp
       #: (GlobalState global_state, String? query) -> void
       def initialize(global_state, query)
         super()
-        @global_state = global_state
         @query = query
-        @index = global_state.index #: RubyIndexer::Index
+        @graph = global_state.graph #: Rubydex::Graph
       end
 
       # @override
       #: -> Array[Interface::WorkspaceSymbol]
       def perform
-        fuzzy_search.filter_map do |entry|
-          kind = kind_for_entry(entry)
-          loc = entry.location
+        response = []
 
-          # We use the namespace as the container name, but we also use the full name as the regular name. The reason we
-          # do this is to allow people to search for fully qualified names (e.g.: `Foo::Bar`). If we only included the
-          # short name `Bar`, then searching for `Foo::Bar` would not return any results
-          *container, _short_name = entry.name.split("::")
+        @graph.fuzzy_search(@query || "").each do |declaration|
+          name = declaration.name
 
-          Interface::WorkspaceSymbol.new(
-            name: entry.name,
-            container_name: container.join("::"),
-            kind: kind,
-            location: Interface::Location.new(
-              uri: entry.uri.to_s,
-              range:  Interface::Range.new(
-                start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column),
-                end: Interface::Position.new(line: loc.end_line - 1, character: loc.end_column),
-              ),
-            ),
-          )
+          declaration.definitions.each do |definition|
+            location = definition.location
+            uri = URI(location.uri)
+            file_path = uri.full_path
+
+            # We only show symbols declared in the workspace
+            in_dependencies = file_path && !not_in_dependencies?(file_path)
+            next if in_dependencies
+
+            response << definition.to_lsp_workspace_symbol(name)
+          end
         end
-      end
 
-      private
-
-      #: -> Array[RubyIndexer::Entry]
-      def fuzzy_search
-        @index.fuzzy_search(@query) do |entry|
-          file_path = entry.uri.full_path
-
-          # We only show symbols declared in the workspace
-          in_dependencies = file_path && !not_in_dependencies?(file_path)
-          next if in_dependencies
-
-          # We should never show private symbols when searching the entire workspace
-          next if entry.private?
-
-          true
-        end
+        response
       end
     end
   end

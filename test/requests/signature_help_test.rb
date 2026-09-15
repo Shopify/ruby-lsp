@@ -397,64 +397,75 @@ class SignatureHelpTest < Minitest::Test
   end
 
   def test_automatically_detects_active_overload
+    rbs = <<~RBS
+      class Foo
+        def step: (?Integer limit, ?Integer step) { (Integer) -> void } -> void
+                | (?by: Integer, ?to: Integer) { (Integer) -> void } -> void
+      end
+    RBS
+    rbs_uri = URI::Generic.from_path(path: "/fake/path/foo.rbs").to_s
+
     # First step overload: just a block
     source = <<~RUBY
-      5.step()
+      Foo.new.step()
     RUBY
 
     with_server(source) do |server, uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+      graph = server.global_state.graph
+      graph.index_source(rbs_uri, rbs, "rbs")
+      graph.resolve
 
       server.process_message(id: 1, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
-        position: { line: 0, character: 7 },
+        position: { line: 0, character: 13 },
         context: {},
       })
 
       result = server.pop_response.response
       signature = result.signatures[result.active_signature]
-      assert_equal("step(limit = <default>, step = <default>, &<anonymous block>)", signature.label)
+      assert_equal("step(limit = <default>, step = <default>, &block)", signature.label)
     end
 
     # Second step overload: with positional arguments
     source = <<~RUBY
-      5.step(1)
+      Foo.new.step(1)
     RUBY
 
     with_server(source) do |server, uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+      graph = server.global_state.graph
+      graph.index_source(rbs_uri, rbs, "rbs")
+      graph.resolve
 
       server.process_message(id: 2, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
-        position: { line: 0, character: 8 },
+        position: { line: 0, character: 14 },
         context: {},
       })
 
       result = server.pop_response.response
       signature = result.signatures[result.active_signature]
-      assert_equal("step(limit = <default>, step = <default>, &<anonymous block>)", signature.label)
+      assert_equal("step(limit = <default>, step = <default>, &block)", signature.label)
     end
 
     # Third step overload: with keyword arguments
     source = <<~RUBY
-      5.step(to: 5)
+      Foo.new.step(to: 5)
     RUBY
 
     with_server(source) do |server, uri|
-      index = server.instance_variable_get(:@global_state).index
-      RubyIndexer::RBSIndexer.new(index).index_ruby_core
+      graph = server.global_state.graph
+      graph.index_source(rbs_uri, rbs, "rbs")
+      graph.resolve
 
       server.process_message(id: 2, method: "textDocument/signatureHelp", params: {
         textDocument: { uri: uri },
-        position: { line: 0, character: 8 },
+        position: { line: 0, character: 14 },
         context: {},
       })
 
       result = server.pop_response.response
       signature = result.signatures[result.active_signature]
-      assert_equal("step(by: <default>, to: <default>, &<anonymous block>)", signature.label)
+      assert_equal("step(by: <default>, to: <default>, &block)", signature.label)
     end
   end
 end

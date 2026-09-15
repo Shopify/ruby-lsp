@@ -5,6 +5,8 @@ module RubyLsp
   module Requests
     # @abstract
     class Request
+      include Support::Common
+
       class InvalidFormatter < StandardError; end
 
       # @abstract
@@ -26,24 +28,6 @@ module RubyLsp
         end
       end
 
-      # Checks if a location covers a position
-      #: (Prism::Location location, untyped position) -> bool
-      def cover?(location, position)
-        start_covered =
-          location.start_line - 1 < position[:line] ||
-          (
-            location.start_line - 1 == position[:line] &&
-              location.start_column <= position[:character]
-          )
-        end_covered =
-          location.end_line - 1 > position[:line] ||
-          (
-            location.end_line - 1 == position[:line] &&
-              location.end_column >= position[:character]
-          )
-        start_covered && end_covered
-      end
-
       # Based on a constant node target, a constant path node parent and a position, this method will find the exact
       # portion of the constant path that matches the requested position, for higher precision in hover and
       # definition. For example:
@@ -62,26 +46,12 @@ module RubyLsp
         parent = target #: as Prism::ConstantPathNode
           .parent #: Prism::Node?
 
-        while parent && cover?(parent.location, position)
+        while parent && covers_position?(parent.location, position)
           target = parent
           parent = target.is_a?(Prism::ConstantPathNode) ? target.parent : nil
         end
 
         target
-      end
-
-      # Checks if a given location covers the position requested
-      #: (Prism::Location? location, Hash[Symbol, untyped] position) -> bool
-      def covers_position?(location, position)
-        return false unless location
-
-        start_line = location.start_line - 1
-        end_line = location.end_line - 1
-        line = position[:line]
-        character = position[:character]
-
-        (start_line < line || (start_line == line && location.start_column <= character)) &&
-          (end_line > line || (end_line == line && location.end_column >= character))
       end
     end
   end
