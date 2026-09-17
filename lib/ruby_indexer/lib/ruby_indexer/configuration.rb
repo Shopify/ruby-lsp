@@ -79,7 +79,11 @@ module RubyIndexer
         # The workspace path is passed as `base:` rather than interpolated into the pattern, so that a path containing
         # glob metacharacters such as `[id]` or `{slug}` is treated as a literal directory rather than as a character
         # class or an alternation
-        Dir.glob(pattern, flags, base: @workspace_path).map! do |relative_path|
+        #
+        # A leading separator has to be stripped first. Interpolating through `File.join` squeezed it away, which made
+        # an included pattern like `/bin/*` workspace relative, but `Dir.glob` ignores `base:` for an absolute pattern
+        # and would search the root of the file system instead
+        Dir.glob(pattern.sub(%r{\A/+}, ""), flags, base: @workspace_path).map! do |relative_path|
           path = File.join(@workspace_path, relative_path)
 
           # All entries for the same pattern match the same $LOAD_PATH entry. Since searching the $LOAD_PATH for every

@@ -249,6 +249,26 @@ module RubyIndexer
       end
     end
 
+    # `File.join(@workspace_path, pattern)` squeezed the separator, so an included pattern written with a leading slash
+    # has always been workspace relative. `Dir.glob` ignores `base:` for an absolute pattern, so the pattern has to be
+    # made relative explicitly. Otherwise the glob searches the real `/bin`, misses the workspace script entirely, and
+    # every system path it does find is prefixed with the workspace path into a file that does not exist
+    def test_included_patterns_with_a_leading_slash_are_workspace_relative
+      Dir.mktmpdir do |dir|
+        FileUtils.mkdir_p(File.join(dir, "bin"))
+        FileUtils.touch(File.join(dir, "bin", "custom-script"))
+
+        @config.workspace_path = dir
+        @config.apply_config({ "included_patterns" => ["/bin/*"] })
+
+        paths = @config.indexable_uris.map(&:full_path).compact
+        assert_includes(paths, File.join(dir, "bin", "custom-script"))
+
+        fabricated = paths.select { |path| path.start_with?(File.join(dir, "bin")) && !File.exist?(path) }
+        assert_empty(fabricated, "expected the pattern to only produce paths that exist inside the workspace")
+      end
+    end
+
     # A workspace with no indexable subdirectories makes `top_level_directories` return an empty array, so the included
     # pattern degenerates to `{}/**/*.rb`. `Dir.glob` mishandles that with a `base:` argument, escaping the base and
     # walking the file system from the root, so the empty case must never reach the glob
