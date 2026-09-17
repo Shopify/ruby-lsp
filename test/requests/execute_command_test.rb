@@ -7,6 +7,13 @@ module RubyLsp
   class ExecuteCommandTest < Minitest::Test
     def setup
       @addon_class = Class.new(Addon) do
+        attr_reader :identifier
+
+        def initialize(identifier = nil)
+          @identifier = identifier
+          super()
+        end
+
         def activate(global_state, outgoing_queue); end
         def deactivate; end
 
@@ -23,7 +30,7 @@ module RubyLsp
         end
 
         def execute_command(command, arguments)
-          { command: command, arguments: arguments }
+          { identifier: @identifier, command: command, arguments: arguments }
         end
       end
 
@@ -36,14 +43,15 @@ module RubyLsp
     end
 
     def test_executes_an_addon_command
-      Addon.addons << @addon_class.new
+      addon = @addon_class.new("first")
+      Addon.addons << addon
 
       with_server(load_addons: false) do |server, _uri|
         server.process_message(
           id: 1,
           method: "workspace/executeCommand",
           params: {
-            command: "commandAddon.echo",
+            command: addon.command_id("commandAddon.echo"),
             arguments: ["hello"],
           },
         )
@@ -51,9 +59,41 @@ module RubyLsp
         result = server.pop_response
         assert_instance_of(Result, result)
         assert_equal(
-          { command: "commandAddon.echo", arguments: ["hello"] },
+          { identifier: "first", command: "commandAddon.echo", arguments: ["hello"] },
           result.response,
         )
+      end
+    end
+
+    def test_command_ids_are_unique_per_addon_instance
+      first_addon = @addon_class.new
+      second_addon = @addon_class.new
+
+      first_command = first_addon.command_id("commandAddon.echo")
+      second_command = second_addon.command_id("commandAddon.echo")
+
+      refute_equal(first_command, second_command)
+      assert_equal(first_command, first_addon.command_id("commandAddon.echo"))
+    end
+
+    def test_executes_the_command_on_the_addon_that_owns_the_command_id
+      first_addon = @addon_class.new("first")
+      second_addon = @addon_class.new("second")
+      Addon.addons.push(first_addon, second_addon)
+
+      with_server(load_addons: false) do |server, _uri|
+        server.process_message(
+          id: 1,
+          method: "workspace/executeCommand",
+          params: {
+            command: second_addon.command_id("commandAddon.echo"),
+            arguments: [],
+          },
+        )
+
+        result = server.pop_response
+        assert_instance_of(Result, result)
+        assert_equal("second", result.response[:identifier])
       end
     end
 
@@ -78,7 +118,8 @@ module RubyLsp
     end
 
     def test_registers_addon_commands_after_initialization
-      Addon.addons << @addon_class.new
+      addon = @addon_class.new
+      Addon.addons << addon
 
       server = Server.new(test_mode: true)
       server.global_state.apply_options({
@@ -101,7 +142,7 @@ module RubyLsp
       registered_capability = registration.params.registrations.first
       assert_equal("addon-commands", registered_capability.id)
       assert_equal("workspace/executeCommand", registered_capability.method)
-      assert_equal(["commandAddon.echo"], registered_capability.register_options.commands)
+      assert_equal([addon.command_id("commandAddon.echo")], registered_capability.register_options.commands)
     ensure
       server&.run_shutdown
     end

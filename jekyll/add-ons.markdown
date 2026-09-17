@@ -139,8 +139,10 @@ This approach enables all add-on responses to be captured in a single round of A
 Add-ons can provide commands that are invoked by Code Lenses, Code Actions, or other editor features. The Ruby LSP
 registers these commands dynamically with clients that support `workspace/executeCommand` dynamic registration.
 
-Command identifiers should use an add-on-specific prefix to avoid collisions with commands from other add-ons. The
-return value from `execute_command` is returned to the client as the result of the `workspace/executeCommand` request.
+Add-ons should use an add-on-specific prefix for their logical command identifiers. When creating a Code Lens, Code
+Action, or another editor feature that invokes a command, use `command_id` to obtain an identifier that is unique to the
+Ruby LSP server instance. The original command identifier is passed to `execute_command`, and its return value is
+returned to the client as the result of the `workspace/executeCommand` request.
 
 ```ruby
 module RubyLsp
@@ -163,6 +165,13 @@ module RubyLsp
       def commands
         ["myGem.insertType"]
       end
+
+      # For example, a Code Lens can refer to this command with:
+      #
+      # Interface::Command.new(
+      #   title: "Insert inferred type",
+      #   command: command_id("myGem.insertType"),
+      # )
 
       def execute_command(command, arguments)
         case command

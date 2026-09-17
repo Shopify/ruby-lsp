@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "securerandom"
+
 module RubyLsp
   # To register an add-on, inherit from this class and implement both `name` and `activate`
   #
@@ -174,6 +176,7 @@ module RubyLsp
     #: -> void
     def initialize
       @errors = [] #: Array[StandardError]
+      @ruby_lsp_command_id = SecureRandom.uuid #: String
     end
 
     #: (StandardError error) -> self
@@ -286,6 +289,13 @@ module RubyLsp
     #: -> Array[String]
     def commands
       []
+    end
+
+    # Returns a command identifier scoped to this add-on instance. Add-ons should use this identifier when creating
+    # Code Lenses, Code Actions, or other editor features that invoke one of their commands.
+    #: (String command) -> String
+    def command_id(command)
+      "#{command}-#{@ruby_lsp_command_id}"
     end
 
     # Executes a command provided by the add-on

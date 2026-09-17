@@ -1526,11 +1526,9 @@ module RubyLsp
     def execute_command(message)
       command = message.dig(:params, :command)
       arguments = message.dig(:params, :arguments) || []
-      addon = Addon.addons.find do |candidate|
-        !candidate.error? && candidate.commands.include?(command)
-      end
+      addon_command = find_addon_command(command)
 
-      unless addon
+      unless addon_command
         send_message(Error.new(
           id: message[:id],
           code: Constant::ErrorCodes::INVALID_PARAMS,
@@ -1539,10 +1537,24 @@ module RubyLsp
         return
       end
 
+      addon, original_command = addon_command
       send_message(Result.new(
         id: message[:id],
-        response: addon.execute_command(command, arguments),
+        response: addon.execute_command(original_command, arguments),
       ))
+    end
+
+    #: (String command) -> [Addon, String]?
+    def find_addon_command(command)
+      Addon.addons.each do |addon|
+        next if addon.error?
+
+        addon.commands.each do |original_command|
+          return [addon, original_command] if addon.command_id(original_command) == command
+        end
+      end
+
+      nil
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -1571,7 +1583,9 @@ module RubyLsp
     def register_addon_commands
       return unless @global_state.client_capabilities.supports_execute_command_registration
 
-      commands = Addon.addons.reject(&:error?).flat_map(&:commands).uniq
+      commands = Addon.addons.reject(&:error?).flat_map do |addon|
+        addon.commands.map { |command| addon.command_id(command) }
+      end.uniq
       return if commands.empty?
 
       send_message(Request.register_execute_commands(
