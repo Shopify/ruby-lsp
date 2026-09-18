@@ -78,6 +78,9 @@ configuration languages (JSON, Lua, ELisp, etc.).
       "inlayHint": {
         "implicitHashValue": true,
         "implicitRescue": true
+      },
+      "onTypeFormatting": {
+        "commentContinuation": true
       }
     },
     "indexing": {

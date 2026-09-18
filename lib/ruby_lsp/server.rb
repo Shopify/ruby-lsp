@@ -715,6 +715,7 @@ module RubyLsp
             params[:position],
             params[:ch],
             @store.client_name,
+            @global_state.feature_configuration(:onTypeFormatting),
           ).perform,
         ),
       )
