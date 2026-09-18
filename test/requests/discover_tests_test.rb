@@ -161,7 +161,7 @@ module RubyLsp
         # Discard the indexing log message
         server.pop_response
         items = get_response(server)
-        assert_equal(9, items.length)
+        assert_equal(12, items.length)
 
         # MyTest
         assert_equal("run_test", items[0].data[:kind])
@@ -179,39 +179,54 @@ module RubyLsp
           { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
           JSON.parse(items[2].range.to_json, symbolize_names: true),
         )
-
-        # test_something
-        assert_equal("run_test", items[3].data[:kind])
+        assert_equal("reveal_in_explorer", items[3].data[:kind])
         assert_equal(
-          { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
+          { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } },
           JSON.parse(items[3].range.to_json, symbolize_names: true),
         )
-        assert_equal("run_test_in_terminal", items[4].data[:kind])
+
+        # test_something
+        assert_equal("run_test", items[4].data[:kind])
         assert_equal(
           { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[4].range.to_json, symbolize_names: true),
         )
-        assert_equal("debug_test", items[5].data[:kind])
+        assert_equal("run_test_in_terminal", items[5].data[:kind])
         assert_equal(
           { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[5].range.to_json, symbolize_names: true),
         )
-
-        # test_something_else
-        assert_equal("run_test", items[6].data[:kind])
+        assert_equal("debug_test", items[6].data[:kind])
         assert_equal(
-          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[6].range.to_json, symbolize_names: true),
         )
-        assert_equal("run_test_in_terminal", items[7].data[:kind])
+        assert_equal("reveal_in_explorer", items[7].data[:kind])
         assert_equal(
-          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          { start: { line: 2, character: 4 }, end: { line: 2, character: 5 } },
           JSON.parse(items[7].range.to_json, symbolize_names: true),
         )
-        assert_equal("debug_test", items[8].data[:kind])
+
+        # test_something_else
+        assert_equal("run_test", items[8].data[:kind])
         assert_equal(
           { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
           JSON.parse(items[8].range.to_json, symbolize_names: true),
+        )
+        assert_equal("run_test_in_terminal", items[9].data[:kind])
+        assert_equal(
+          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          JSON.parse(items[9].range.to_json, symbolize_names: true),
+        )
+        assert_equal("debug_test", items[10].data[:kind])
+        assert_equal(
+          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          JSON.parse(items[10].range.to_json, symbolize_names: true),
+        )
+        assert_equal("reveal_in_explorer", items[11].data[:kind])
+        assert_equal(
+          { start: { line: 4, character: 4 }, end: { line: 4, character: 5 } },
+          JSON.parse(items[11].range.to_json, symbolize_names: true),
         )
       end
     end

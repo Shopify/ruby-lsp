@@ -63,6 +63,18 @@ module RubyLsp
       )
     end
 
+    def test_adds_all_test_code_lenses
+      builder = ResponseBuilders::TestCollection.new
+      item = Requests::Support::TestItem.new("my-id", "Test label", @uri, @range, framework: :minitest)
+
+      builder.add_code_lens(item)
+
+      assert_equal(
+        ["run_test", "run_test_in_terminal", "debug_test", "reveal_in_explorer"],
+        builder.code_lens.map { |code_lens| code_lens.data[:kind] },
+      )
+    end
+
     private
 
     def assert_expected_fields(hash)
