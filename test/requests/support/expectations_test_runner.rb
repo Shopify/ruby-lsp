@@ -50,16 +50,21 @@ class ExpectationsTestRunner < Minitest::Test
           raise "Expectations directory #{expectations_dir} does not exist"
         end
 
-        expectation_glob = Dir.glob(File.join(expectations_dir, "#{test_name}.exp.{rb,json}"))
-        if expectation_glob.size == 1
-          expectation_path = expectation_glob.first
-        elsif expectation_glob.size > 1
+        json_path = File.join(expectations_dir, "#{test_name}.exp.json")
+        rb_path = File.join(expectations_dir, "#{test_name}.exp.rb")
+        if File.file?(json_path) && File.file?(rb_path)
           raise "multiple expectations for #{test_name}"
+        elsif File.file?(json_path)
+          expectation_path = json_path
+        elsif File.file?(rb_path)
+          expectation_path = rb_path
         end
+
+        sanitized_name = test_name.gsub(/[^\w]/, "_")
 
         if expectation_path && File.file?(expectation_path)
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}__#{test_name}
+            def test_#{expectation_suffix}__#{sanitized_name}
               @_path = "#{path}"
               @_expectation_path = "#{expectation_path}"
               source = File.read(@_path)
@@ -70,7 +75,7 @@ class ExpectationsTestRunner < Minitest::Test
           RB
         else
           class_eval(<<~RB, __FILE__, __LINE__ + 1)
-            def test_#{expectation_suffix}__#{test_name}__does_not_raise
+            def test_#{expectation_suffix}__#{sanitized_name}__does_not_raise
               @_path = "#{path}"
               source = File.read(@_path)
               run_expectations(source)

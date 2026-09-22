@@ -15,9 +15,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -49,9 +49,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -83,9 +83,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -117,9 +117,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
           {
             "start_line": 1,
             "start_column": 2,
@@ -150,9 +150,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
           {
             "start_line": 1,
             "start_column": 2,
@@ -183,9 +183,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest#test_public",
           {
             "start_line": 1,
             "start_column": 2,
@@ -216,9 +216,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::FirstChildTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
           {
             "start_line": 5,
             "start_column": 2,
@@ -250,9 +250,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::FirstChildTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
           {
             "start_line": 5,
             "start_column": 2,
@@ -284,9 +284,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::FirstChildTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest::FirstChildTest(#|::)/\"",
           {
             "start_line": 5,
             "start_column": 2,
@@ -318,9 +318,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::FirstChildTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
           {
             "start_line": 6,
             "start_column": 4,
@@ -351,9 +351,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::FirstChildTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
           {
             "start_line": 6,
             "start_column": 4,
@@ -384,9 +384,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::FirstChildTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest::FirstChildTest#test_public",
           {
             "start_line": 6,
             "start_column": 4,
@@ -417,9 +417,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::SecondChildTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
           {
             "start_line": 13,
             "start_column": 2,
@@ -451,9 +451,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::SecondChildTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
           {
             "start_line": 13,
             "start_column": 2,
@@ -485,9 +485,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::SecondChildTest",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name \"/^ParentTest::SecondChildTest(#|::)/\"",
           {
             "start_line": 13,
             "start_column": 2,
@@ -519,9 +519,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::SecondChildTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
           {
             "start_line": 14,
             "start_column": 4,
@@ -552,9 +552,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::SecondChildTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
           {
             "start_line": 14,
             "start_column": 4,
@@ -585,9 +585,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest::SecondChildTest#test_public",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest::SecondChildTest#test_public",
           {
             "start_line": 14,
             "start_column": 4,
@@ -618,9 +618,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest#test_public_again",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
           {
             "start_line": 19,
             "start_column": 2,
@@ -651,9 +651,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest#test_public_again",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
           {
             "start_line": 19,
             "start_column": 2,
@@ -684,9 +684,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/nested_minitest_tests.rb",
+          "/test/fixtures/nested_minitest_tests.rb",
           "ParentTest#test_public_again",
-          "bundle exec ruby /fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
+          "bundle exec ruby -Itest /test/fixtures/nested_minitest_tests.rb --name ParentTest#test_public_again",
           {
             "start_line": 19,
             "start_column": 2,
