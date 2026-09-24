@@ -121,30 +121,29 @@ module RubyLsp
       addon = @addon_class.new
       Addon.addons << addon
 
-      server = Server.new(test_mode: true)
-      server.global_state.apply_options({
-        capabilities: {
-          workspace: {
-            executeCommand: {
-              dynamicRegistration: true,
+      with_server(load_addons: false) do |server, _uri|
+        server.global_state.apply_options({
+          capabilities: {
+            workspace: {
+              executeCommand: {
+                dynamicRegistration: true,
+              },
             },
           },
-        },
-      })
-      server.stubs(:load_addons)
-      server.stubs(:perform_initial_indexing)
-      server.process_message(method: "initialized")
+        })
+        server.stubs(:load_addons)
+        server.stubs(:perform_initial_indexing)
+        server.process_message(method: "initialized")
 
-      registration = server.pop_response
-      assert_instance_of(Request, registration)
-      assert_equal("client/registerCapability", registration.method)
+        registration = server.pop_response
+        assert_instance_of(Request, registration)
+        assert_equal("client/registerCapability", registration.method)
 
-      registered_capability = registration.params.registrations.first
-      assert_equal("addon-commands", registered_capability.id)
-      assert_equal("workspace/executeCommand", registered_capability.method)
-      assert_equal([addon.command_id("commandAddon.echo")], registered_capability.register_options.commands)
-    ensure
-      server&.run_shutdown
+        registered_capability = registration.params.registrations.first
+        assert_equal("addon-commands", registered_capability.id)
+        assert_equal("workspace/executeCommand", registered_capability.method)
+        assert_equal([addon.command_id("commandAddon.echo")], registered_capability.register_options.commands)
+      end
     end
   end
 end
