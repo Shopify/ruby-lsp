@@ -130,11 +130,13 @@ module RubyLsp
             command = +"#{COMMAND} -Itest #{Shellwords.escape(file_path)} --testcase \"/^#{group_regex}\\$/\""
 
             unless examples.empty?
-              command << if examples.length == 1
-                " --name \"/#{examples[0]}\\$/\""
+              name_pattern = if examples.length == 1
+                examples[0]
               else
-                " --name \"/(#{examples.join("|")})\\$/\""
+                "(#{examples.join("|")})"
               end
+
+              command << %Q( --name "/#{name_pattern}$/")
             end
 
             command
