@@ -149,6 +149,30 @@ module RubyLsp
       refute(state.client_capabilities.supports_watching_files)
     end
 
+    def test_execute_command_registration_if_supported
+      state = GlobalState.new
+      state.apply_options({
+        capabilities: {
+          workspace: {
+            executeCommand: {
+              dynamicRegistration: true,
+            },
+          },
+        },
+      })
+      assert(state.client_capabilities.supports_execute_command_registration)
+    end
+
+    def test_execute_command_registration_if_not_supported
+      state = GlobalState.new
+      state.apply_options({
+        capabilities: {
+          workspace: {},
+        },
+      })
+      refute(state.client_capabilities.supports_execute_command_registration)
+    end
+
     def test_linter_specification
       ::RuboCop::Version.const_set(:STRING, "1.68.0")
       state = GlobalState.new

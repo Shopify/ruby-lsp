@@ -174,6 +174,7 @@ module RubyLsp
     #: -> void
     def initialize
       @errors = [] #: Array[StandardError]
+      @ruby_lsp_command_id = SecureRandom.uuid #: String
     end
 
     #: (StandardError error) -> self
@@ -280,5 +281,24 @@ module RubyLsp
     def resolve_test_commands(items)
       []
     end
+
+    # Returns the commands provided by the add-on
+    # @overridable
+    #: -> Array[String]
+    def commands
+      []
+    end
+
+    # Returns a command identifier scoped to this add-on instance. Add-ons should use this identifier when creating
+    # Code Lenses, Code Actions, or other editor features that invoke one of their commands.
+    #: (String command) -> String
+    def command_id(command)
+      "#{command}-#{@ruby_lsp_command_id}"
+    end
+
+    # Executes a command provided by the add-on
+    # @overridable
+    #: (String command, Array[untyped] arguments) -> untyped
+    def execute_command(command, arguments); end
   end
 end
