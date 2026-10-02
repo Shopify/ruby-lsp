@@ -15,6 +15,7 @@ const asyncExec = promisify(exec);
 
 const NESTED_TEST_DIR_PATTERN = "**/{test,spec,features}/**/";
 const TEST_FILE_PATTERN = `${NESTED_TEST_DIR_PATTERN}{*_test.rb,test_*.rb,*_spec.rb,*.feature}`;
+const TEST_FILE_EXCLUDE_PATTERN = "**/{.bundle,vendor/bundle}/**";
 
 interface CodeLensData {
   type: string;
@@ -981,7 +982,8 @@ export class TestController {
       for (const workspaceFolder of workspaceFolders) {
         // Check if there is at least one Ruby test file in the workspace, otherwise we don't consider it
         const pattern = this.testPattern(workspaceFolder);
-        const files = await vscode.workspace.findFiles(pattern, undefined, 1);
+        const excludePattern = this.testExcludePattern(workspaceFolder);
+        const files = await vscode.workspace.findFiles(pattern, excludePattern, 1);
         if (files.length === 0) {
           continue;
         }
@@ -1002,7 +1004,8 @@ export class TestController {
   ) {
     const initialCollection = item ? item.children : this.testController.items;
     const pattern = this.testPattern(workspaceFolder);
-    const filePaths = await vscode.workspace.findFiles(pattern);
+    const excludePattern = this.testExcludePattern(workspaceFolder);
+    const filePaths = await vscode.workspace.findFiles(pattern, excludePattern);
     const increment = Math.floor(filePaths.length / 100);
 
     for (const uri of filePaths) {
@@ -1143,11 +1146,21 @@ export class TestController {
       return true;
     }
 
+    // Bundler can install gems into `.bundle/gems` or `vendor/bundle`. Tests inside those gem directories
+    // must not be discovered as workspace tests.
+    if (pathParts.includes(".bundle") || (pathParts.includes("vendor") && pathParts.includes("bundle"))) {
+      return true;
+    }
+
     return false;
   }
 
   private testPattern(workspaceFolder: vscode.WorkspaceFolder) {
     return new vscode.RelativePattern(workspaceFolder, TEST_FILE_PATTERN);
+  }
+
+  private testExcludePattern(workspaceFolder: vscode.WorkspaceFolder) {
+    return new vscode.RelativePattern(workspaceFolder, TEST_FILE_EXCLUDE_PATTERN);
   }
 
   private testDirectoryPosition(pathParts: string[]) {
