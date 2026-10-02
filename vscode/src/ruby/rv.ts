@@ -8,7 +8,7 @@ import { VersionManager, ActivationResult, NonReportableError } from "./versionM
 export class Rv extends VersionManager {
   async activate(): Promise<ActivationResult> {
     const rvExec = await this.findRv();
-    const parsedResult = await this.runEnvActivationScript(`${rvExec} ruby run --`);
+    const parsedResult = await this.runEnvActivationScript(`${rvExec} run --`);
 
     return {
       env: { ...process.env, ...parsedResult.env },
