@@ -26,7 +26,7 @@ class ServerTest < Minitest::Test
 
     result = find_message(RubyLsp::Result, id: 1)
     hash = JSON.parse(result.response.to_json)
-    capabilities = hash["capabilities"]
+    capabilities = hash["capabilities"].select { _2 }
 
     # TextSynchronization + encodings + semanticHighlighting + range formatting + experimental
     assert_equal(5, capabilities.length)
