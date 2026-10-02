@@ -82,6 +82,7 @@ module RubyLsp
         @ruby = +"" #: String
         @current_pos = 0 #: Integer
         @inside_ruby = false #: bool
+        @inside_erb_comment = false #: bool
       end
 
       #: -> void
@@ -100,12 +101,16 @@ module RubyLsp
 
         case char
         when "<"
-          if next_char == "%"
+          if !@inside_erb_comment && next_char == "%"
             @inside_ruby = true
             @current_pos += 1
             push_char("  ")
 
-            if next_char == "=" && @source[@current_pos + 2] == "="
+            if next_char == "#"
+              @inside_erb_comment = true
+              @current_pos += 1
+              push_char(" ")
+            elsif next_char == "=" && @source[@current_pos + 2] == "="
               @current_pos += 2
               push_char("  ")
             elsif next_char == "=" || next_char == "-"
@@ -121,6 +126,7 @@ module RubyLsp
           if @inside_ruby && next_char == "%" &&
               @source[@current_pos + 2] == ">"
             @current_pos += 2
+            @inside_erb_comment = false
             push_char("   ")
             @inside_ruby = false
           else
@@ -130,9 +136,10 @@ module RubyLsp
           end
         when "%"
           if @inside_ruby && next_char == ">"
-            @inside_ruby = false
             @current_pos += 1
+            @inside_erb_comment = false
             push_char("  ")
+            @inside_ruby = false
           else
             push_char(
               char, #: as !nil
@@ -159,7 +166,10 @@ module RubyLsp
 
       #: (String char) -> void
       def push_char(char)
-        if @inside_ruby
+        if @inside_erb_comment
+          @ruby << " " * char.length
+          @host_language << " " * char.length
+        elsif @inside_ruby
           @ruby << char
           @host_language << " " * char.length
         else
