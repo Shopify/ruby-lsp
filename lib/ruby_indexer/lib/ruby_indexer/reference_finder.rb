@@ -282,16 +282,52 @@ module RubyIndexer
 
     #: (Prism::CallNode node) -> void
     def on_call_node_enter(node)
-      if @target.is_a?(MethodTarget) && (name = node.name.to_s) == @target.method_name
-        @references << Reference.new(
-          name,
-          node.message_loc, #: as !nil
-          declaration: false,
-        )
+      return unless @target.is_a?(MethodTarget)
+
+      if (name = node.name.to_s) == @target.method_name
+        @references << Reference.new(name, node.message_loc, declaration: false)
+      elsif attr_method_references?(node)
+        @references << Reference.new(@target.method_name, node.message_loc, declaration: true)
       end
     end
 
     private
+
+    #: (Prism::CallNode node) -> bool
+    def attr_method_references?(node)
+      case node.name
+      when :attr_reader
+        attr_reader_references?(unescaped_argument_names(node))
+      when :attr_writer
+        attr_writer_references?(unescaped_argument_names(node))
+      when :attr_accessor
+        attr_accessor_references?(unescaped_argument_names(node))
+      else
+        false
+      end
+    end
+
+    #: (Prism::CallNode node) -> Array[String]
+    def unescaped_argument_names(node)
+      return [] if node.arguments&.arguments.nil?
+
+      node.arguments.arguments.select { |arg| arg.respond_to?(:unescaped) }.map(&:unescaped)
+    end
+
+    #: (Array[String] argument_names) -> bool
+    def attr_reader_references?(argument_names)
+      argument_names.include?(@target.method_name)
+    end
+
+    #: (Array[String] argument_names) -> bool
+    def attr_writer_references?(argument_names)
+      argument_names.any? { |arg| "#{arg}=" == @target.method_name }
+    end
+
+    #: (Array[String] argument_names) -> bool
+    def attr_accessor_references?(argument_names)
+      argument_names.any? { |arg| ["#{arg}=", arg].include?(@target.method_name) }
+    end
 
     #: (String name, Prism::Location location) -> void
     def collect_constant_references(name, location)
