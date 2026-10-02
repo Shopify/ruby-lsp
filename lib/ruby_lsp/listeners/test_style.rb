@@ -35,9 +35,10 @@ module RubyLsp
               if children.empty?
                 full_files.concat(
                   Dir.glob(
-                    "#{path}/**/{*_test,test_*,*_spec}.rb",
+                    "**/{*_test,test_*,*_spec}.rb",
                     File::Constants::FNM_EXTGLOB | File::Constants::FNM_PATHNAME,
-                  ).map! { |p| Shellwords.escape(p) },
+                    base: path,
+                  ).map! { |p| Shellwords.escape(File.join(path, p)) },
                 )
               end
             elsif tags.include?("test_file")
