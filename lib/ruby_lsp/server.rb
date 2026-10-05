@@ -492,7 +492,11 @@ module RubyLsp
       # the dispatcher's state
       code_lens = nil #: Requests::CodeLens?
 
-      if document.is_a?(RubyDocument) && document.should_index?
+      # Documents excluded from indexing must not be indexed when the editor opens them either. Otherwise, in
+      # multi-root setups where a parent workspace overlaps a nested one, both language servers end up indexing the
+      # same document and every request that reads the index (go to definition, for example) returns duplicate results
+      if document.is_a?(RubyDocument) && document.should_index? &&
+          !@global_state.index.configuration.excluded?(uri.to_standardized_path)
         # Re-index the file as it is modified. This mode of indexing updates entries only. Require path trees are only
         # updated on save
         @global_state.synchronize do
