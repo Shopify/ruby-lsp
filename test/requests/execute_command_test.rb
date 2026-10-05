@@ -1,0 +1,149 @@
+# typed: true
+# frozen_string_literal: true
+
+require "test_helper"
+
+module RubyLsp
+  class ExecuteCommandTest < Minitest::Test
+    def setup
+      @addon_class = Class.new(Addon) do
+        attr_reader :identifier
+
+        def initialize(identifier = nil)
+          @identifier = identifier
+          super()
+        end
+
+        def activate(global_state, outgoing_queue); end
+        def deactivate; end
+
+        def name
+          "Command Add-on"
+        end
+
+        def version
+          "0.1.0"
+        end
+
+        def commands
+          ["commandAddon.echo"]
+        end
+
+        def execute_command(command, arguments)
+          { identifier: @identifier, command: command, arguments: arguments }
+        end
+      end
+
+      Addon.addon_classes.delete(@addon_class)
+    end
+
+    def teardown
+      Addon.addons.select { |addon| addon.is_a?(@addon_class) }.each(&:deactivate)
+      Addon.addons.delete_if { |addon| addon.is_a?(@addon_class) }
+    end
+
+    def test_executes_an_addon_command
+      addon = @addon_class.new("first")
+      Addon.addons << addon
+
+      with_server(load_addons: false) do |server, _uri|
+        server.process_message(
+          id: 1,
+          method: "workspace/executeCommand",
+          params: {
+            command: addon.command_id("commandAddon.echo"),
+            arguments: ["hello"],
+          },
+        )
+
+        result = server.pop_response
+        assert_instance_of(Result, result)
+        assert_equal(
+          { identifier: "first", command: "commandAddon.echo", arguments: ["hello"] },
+          result.response,
+        )
+      end
+    end
+
+    def test_command_ids_are_unique_per_addon_instance
+      first_addon = @addon_class.new
+      second_addon = @addon_class.new
+
+      first_command = first_addon.command_id("commandAddon.echo")
+      second_command = second_addon.command_id("commandAddon.echo")
+
+      refute_equal(first_command, second_command)
+      assert_equal(first_command, first_addon.command_id("commandAddon.echo"))
+    end
+
+    def test_executes_the_command_on_the_addon_that_owns_the_command_id
+      first_addon = @addon_class.new("first")
+      second_addon = @addon_class.new("second")
+      Addon.addons.push(first_addon, second_addon)
+
+      with_server(load_addons: false) do |server, _uri|
+        server.process_message(
+          id: 1,
+          method: "workspace/executeCommand",
+          params: {
+            command: second_addon.command_id("commandAddon.echo"),
+            arguments: [],
+          },
+        )
+
+        result = server.pop_response
+        assert_instance_of(Result, result)
+        assert_equal("second", result.response[:identifier])
+      end
+    end
+
+    def test_returns_an_error_for_an_unknown_command
+      Addon.addons << @addon_class.new
+
+      with_server(load_addons: false) do |server, _uri|
+        server.process_message(
+          id: 1,
+          method: "workspace/executeCommand",
+          params: {
+            command: "commandAddon.missing",
+            arguments: [],
+          },
+        )
+
+        error = server.pop_response
+        assert_instance_of(Error, error)
+        assert_equal(Constant::ErrorCodes::INVALID_PARAMS, error.code)
+        assert_equal("Unknown command: commandAddon.missing", error.message)
+      end
+    end
+
+    def test_registers_addon_commands_after_initialization
+      addon = @addon_class.new
+      Addon.addons << addon
+
+      with_server(load_addons: false) do |server, _uri|
+        server.global_state.apply_options({
+          capabilities: {
+            workspace: {
+              executeCommand: {
+                dynamicRegistration: true,
+              },
+            },
+          },
+        })
+        server.stubs(:load_addons)
+        server.stubs(:perform_initial_indexing)
+        server.process_message(method: "initialized")
+
+        registration = server.pop_response
+        assert_instance_of(Request, registration)
+        assert_equal("client/registerCapability", registration.method)
+
+        registered_capability = registration.params.registrations.first
+        assert_equal("addon-commands", registered_capability.id)
+        assert_equal("workspace/executeCommand", registered_capability.method)
+        assert_equal([addon.command_id("commandAddon.echo")], registered_capability.register_options.commands)
+      end
+    end
+  end
+end

@@ -175,6 +175,23 @@ module RubyLsp
           ),
         )
       end
+
+      #: (Integer id, Array[String] commands, ?registration_id: String?) -> Request
+      def register_execute_commands(id, commands, registration_id: nil)
+        new(
+          id: id,
+          method: "client/registerCapability",
+          params: Interface::RegistrationParams.new(
+            registrations: [
+              Interface::Registration.new(
+                id: registration_id || SecureRandom.uuid,
+                method: "workspace/executeCommand",
+                register_options: Interface::ExecuteCommandRegistrationOptions.new(commands: commands),
+              ),
+            ],
+          ),
+        )
+      end
     end
 
     #: (id: (Integer | String), method: String, params: Object) -> void
