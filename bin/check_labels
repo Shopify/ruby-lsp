@@ -20,7 +20,8 @@ exit(0) if (pr_labels & ignored_labels).any?
 type_labels = ["bugfix", "enhancement", "breaking-change", "other"]
 
 if (pr_labels & type_labels).empty?
-  warn("PR must be labeled with one of the following change types: #{type_labels.join(", ")}")
+  warn("PRs requiring release notes must have a change type label: #{type_labels.join(", ")}")
+  warn("For changes that do not require release notes, use one of: #{ignored_labels.join(", ")}")
   exit(1)
 end
 
@@ -28,6 +29,7 @@ end
 category_labels = ["server", "vscode"]
 
 if (pr_labels & category_labels).empty?
-  warn("PR must be labeled with the category to be included in the right release notes: #{category_labels.join(", ")}")
+  warn("PRs requiring release notes must have a category label: #{category_labels.join(", ")}")
+  warn("For changes that do not require release notes, use one of: #{ignored_labels.join(", ")}")
   exit(1)
 end
