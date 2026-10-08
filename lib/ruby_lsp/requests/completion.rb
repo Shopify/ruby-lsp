@@ -70,6 +70,7 @@ module RubyLsp
           sorbet_level,
           dispatcher,
           document.uri,
+          document.code_units_cache,
           params.dig(:context, :triggerCharacter),
         )
 
