@@ -11,13 +11,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Check for Pull Request Labels
-        env:
-          PR_URL: ${{ github.event.pull_request.url }}
-        shell: bash
-        run: |
-          # Read public PR data without authentication to avoid organization IP restrictions.
-          pull_request=$(curl --fail --silent --show-error --location \
-            --header "Accept: application/vnd.github+json" \
-            "$PR_URL")
-          bin/check_labels "$pull_request"
+      - name: Check for required Pull Request Labels
+        run: bin/check_labels "${{ github.event.pull_request.url }}"

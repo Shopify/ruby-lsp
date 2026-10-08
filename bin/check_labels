@@ -2,14 +2,17 @@
 # frozen_string_literal: true
 
 require "json"
+require "open-uri"
 
-label_info = ARGV.first
+pull_request_url = ARGV.first
 
-unless label_info
-  warn("Missing argument for label information")
+unless pull_request_url
+  warn("Missing argument for pull request URL")
   exit(1)
 end
 
+# Read public PR data without authentication to avoid organization IP restrictions.
+label_info = URI.parse(pull_request_url).read("Accept" => "application/vnd.github+json")
 pr_labels = JSON.parse(label_info, symbolize_names: true)[:labels].map { |label| label[:name] }
 
 # If the PR includes at least one of the labels ignored for release notes, then exit successfully
