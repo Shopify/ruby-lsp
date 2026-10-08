@@ -4,6 +4,63 @@
 require "test_helper"
 
 class RenameTest < Minitest::Test
+  def test_renaming_a_class_updates_require_relative_paths
+    Dir.mktmpdir do |workspace|
+      lib_dir = File.join(workspace, "lib")
+      FileUtils.mkdir_p(lib_dir)
+
+      store_path = File.join(lib_dir, "store.rb")
+      store_source = "class Store; end\n"
+      File.write(store_path, store_source)
+
+      use_path = File.join(lib_dir, "use.rb")
+      use_source = <<~RUBY
+        require_relative "store"
+        Store.new
+        "require_relative 'store'"
+      RUBY
+      File.write(use_path, use_source)
+
+      global_state = RubyLsp::GlobalState.new
+      global_state.apply_options({
+        workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace).to_s }],
+        capabilities: {
+          workspace: {
+            workspaceEdit: {
+              resourceOperations: ["rename"],
+            },
+          },
+        },
+      })
+
+      store_uri = URI::Generic.from_path(path: store_path)
+      use_uri = URI::Generic.from_path(path: use_path)
+      global_state.index.index_single(store_uri, store_source)
+      global_state.index.index_single(use_uri, use_source)
+
+      document = RubyLsp::RubyDocument.new(
+        source: store_source,
+        version: 1,
+        uri: store_uri,
+        global_state: global_state,
+      )
+
+      workspace_edit = RubyLsp::Requests::Rename.new(
+        global_state,
+        RubyLsp::Store.new(global_state),
+        document,
+        { position: { line: 0, character: 7 }, newName: "Shop" },
+      ).perform #: as !nil
+
+      use_edit = workspace_edit.document_changes.find do |change|
+        change.is_a?(RubyLsp::Interface::TextDocumentEdit) && change.text_document.uri == use_uri.to_s
+      end
+
+      assert_includes(use_edit.edits.map(&:new_text), "Shop")
+      assert_equal(1, use_edit.edits.count { |edit| edit.new_text == "shop" })
+    end
+  end
+
   def test_empty_diagnostics_for_ignored_file
     expected = <<~RUBY
       class Article
