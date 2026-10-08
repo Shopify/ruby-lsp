@@ -9,11 +9,7 @@ on:
 jobs:
   check-labels:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Check for Pull Request Labels
-        shell: bash
-        run: |
-          bin/check_labels "$(gh pr view --json labels ${{ github.event.pull_request.number }})"
+      - name: Check for required Pull Request Labels
+        run: bin/check_labels "${{ github.event.pull_request.url }}"
