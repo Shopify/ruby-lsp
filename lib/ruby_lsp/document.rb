@@ -6,6 +6,7 @@ module RubyLsp
   #: [ParseResultType]
   class Document
     class InvalidLocationError < StandardError; end
+    class MissingRangeError < StandardError; end
 
     # This maximum number of characters for providing expensive features, like semantic highlighting and diagnostics.
     # This is the same number used by the TypeScript extension in VS Code
@@ -91,6 +92,11 @@ module RubyLsp
 
     #: (Array[Hash[Symbol, untyped]] edits, version: Integer) -> void
     def push_edits(edits, version:)
+      if edits.any? { |edit| edit[:range].nil? }
+        raise MissingRangeError,
+          "Content change is missing a range. The Ruby LSP only supports incremental text document synchronization"
+      end
+
       edits.each do |edit|
         range = edit[:range]
         scanner = create_scanner
