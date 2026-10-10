@@ -96,6 +96,11 @@ export class DependenciesTree implements vscode.TreeDataProvider<BundlerTreeNode
       return;
     }
 
+    if (uri.scheme !== "file") {
+      this.currentVisibleItem = undefined;
+      return;
+    }
+
     // In case the tree view is not visible, we need to remember the current
     // visible item, so that we can reveal it when the tree view becomes visible.
     this.currentVisibleItem = new GemFilePath(uri);
