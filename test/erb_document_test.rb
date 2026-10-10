@@ -73,6 +73,32 @@ class ERBDocumentTest < Minitest::Test
     assert_equal("   \r\nbar   ", document.parse_result.source.source)
   end
 
+  def test_erb_comments_are_not_parsed_as_ruby
+    source = <<~ERB
+      <%# A comment with a first line,
+          followed by prose that must not become Ruby method calls %>
+      <%#- A second comment with a trimmed closing tag -%>
+      <%= visible_method_call %>
+    ERB
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    ruby_source = document.parse_result.source.source
+    refute_includes(ruby_source, "followed by prose")
+    assert_includes(ruby_source, "visible_method_call")
+    assert_equal(source.length, ruby_source.length)
+    assert_equal(source.lines.length, ruby_source.lines.length)
+    assert_equal(
+      [:visible_method_call],
+      document.ast.statements.body.grep(Prism::CallNode).map(&:name),
+    )
+  end
+
   def test_erb_syntax_error_does_not_cause_crash
     [
       "<%=",
