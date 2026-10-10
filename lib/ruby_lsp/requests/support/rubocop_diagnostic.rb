@@ -123,14 +123,40 @@ module RubyLsp
 
         #: -> Array[Interface::TextEdit]
         def offense_replacements
+          source_lines = @document.cache_fetch("rubocop_source_lines") { @document.source.lines } #: Array[String]
+
           @offense.corrector.as_replacements.map do |range, replacement|
             Interface::TextEdit.new(
               range: Interface::Range.new(
-                start: Interface::Position.new(line: range.line - 1, character: range.column),
-                end: Interface::Position.new(line: range.last_line - 1, character: range.last_column),
+                start: position(range.line, range.column, source_lines.fetch(range.line - 1)),
+                end: position(range.last_line, range.last_column, source_lines.fetch(range.last_line - 1)),
               ),
               new_text: replacement,
             )
+          end
+        end
+
+        #: (Integer line, Integer column, String source_line) -> Interface::Position
+        def position(line, column, source_line)
+          Interface::Position.new(
+            line: line - 1,
+            character: position_column(column, source_line),
+          )
+        end
+
+        #: (Integer column, String source_line) -> Integer
+        def position_column(column, source_line)
+          # RuboCop columns count codepoints, while LSP columns use the negotiated encoding.
+          prefix = source_line.slice(0, column) || ""
+          case @document.encoding
+          when Encoding::UTF_8
+            prefix.bytesize
+          when Encoding::UTF_16LE
+            prefix.codepoints.sum do |codepoint|
+              codepoint > RubyLsp::Document::Scanner::SURROGATE_PAIR_START ? 2 : 1
+            end
+          else
+            prefix.length
           end
         end
 
