@@ -56,6 +56,8 @@ To discover all test files in the workspace with decent performance, the Ruby LS
 conventions. For a test file to be discovered, the file path must match this glob:
 `**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}`
 
+Tests in certain directories are automatically excluded from discovery: `.bundle`, `vendor/bundle`, `node_modules`, `tmp`, and `log`.
+
 ### Dynamically defined tests
 
 There is limited support for tests defined via meta-programming. Initially, they will not be present in the test
