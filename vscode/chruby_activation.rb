@@ -8,12 +8,10 @@ user_dir = Gem.user_dir
 paths = Gem.path
 default_dir = Gem.default_dir
 
-if paths.length > 2
-  paths.delete(default_dir)
-  paths.delete(user_dir)
-  first_path = paths[0]
-  user_dir = first_path if first_path && Dir.exist?(first_path)
-end
+paths.delete(default_dir)
+paths.delete(user_dir)
+first_path = paths[0]
+user_dir = first_path if first_path && Dir.exist?(first_path)
 
 newer_gem_home = File.join(File.dirname(user_dir), ARGV.first)
 gems = Dir.exist?(newer_gem_home) ? newer_gem_home : user_dir
