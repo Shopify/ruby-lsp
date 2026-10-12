@@ -105,6 +105,40 @@
     {
       "range": {
         "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 22,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "Test",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^Test(#|::)/\"",
+          {
+            "start_line": 0,
+            "start_column": 0,
+            "end_line": 22,
+            "end_column": 3
+          },
+          "Test"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": null,
+        "kind": "group",
+        "id": 1
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 5,
           "character": 2
         },
@@ -197,6 +231,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 5,
+          "character": 2
+        },
+        "end": {
+          "line": 5,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "Test#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public",
+          {
+            "start_line": 5,
+            "start_column": 2,
+            "end_line": 5,
+            "end_column": 22
+          },
+          "test_public"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 1,
         "kind": "example"
       }
@@ -303,6 +370,39 @@
     {
       "range": {
         "start": {
+          "line": 9,
+          "character": 9
+        },
+        "end": {
+          "line": 9,
+          "character": 37
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "Test#test_public_command",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_command",
+          {
+            "start_line": 9,
+            "start_column": 9,
+            "end_line": 9,
+            "end_column": 37
+          },
+          "test_public_command"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 11,
           "character": 9
         },
@@ -395,6 +495,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 11,
+          "character": 9
+        },
+        "end": {
+          "line": 11,
+          "character": 37
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "Test#test_another_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_another_public",
+          {
+            "start_line": 11,
+            "start_column": 9,
+            "end_line": 11,
+            "end_column": 37
+          },
+          "test_another_public"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 1,
         "kind": "example"
       }
@@ -501,6 +634,39 @@
     {
       "range": {
         "start": {
+          "line": 17,
+          "character": 2
+        },
+        "end": {
+          "line": 17,
+          "character": 28
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "Test#test_public_vcall",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_public_vcall",
+          {
+            "start_line": 17,
+            "start_column": 2,
+            "end_line": 17,
+            "end_column": 28
+          },
+          "test_public_vcall"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 19,
           "character": 2
         },
@@ -593,6 +759,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 1,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 19,
+          "character": 2
+        },
+        "end": {
+          "line": 19,
+          "character": 23
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "Test#test_with_q?",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name Test#test_with_q\\?",
+          {
+            "start_line": 19,
+            "start_column": 2,
+            "end_line": 19,
+            "end_column": 23
+          },
+          "test_with_q?"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 1,
         "kind": "example"
       }
@@ -702,6 +901,40 @@
     {
       "range": {
         "start": {
+          "line": 24,
+          "character": 0
+        },
+        "end": {
+          "line": 32,
+          "character": 3
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "AnotherTest",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name \"/^AnotherTest(#|::)/\"",
+          {
+            "start_line": 24,
+            "start_column": 0,
+            "end_line": 32,
+            "end_column": 3
+          },
+          "AnotherTest"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": null,
+        "kind": "group",
+        "id": 2
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 25,
           "character": 2
         },
@@ -801,6 +1034,39 @@
     {
       "range": {
         "start": {
+          "line": 25,
+          "character": 2
+        },
+        "end": {
+          "line": 25,
+          "character": 22
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "AnotherTest#test_public",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public",
+          {
+            "start_line": 25,
+            "start_column": 2,
+            "end_line": 25,
+            "end_column": 22
+          },
+          "test_public"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
           "line": 31,
           "character": 2
         },
@@ -893,6 +1159,39 @@
       },
       "data": {
         "type": "debug",
+        "group_id": 2,
+        "kind": "example"
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 31,
+          "character": 2
+        },
+        "end": {
+          "line": 31,
+          "character": 24
+        }
+      },
+      "command": {
+        "title": "🔎 Reveal In Explorer",
+        "command": "rubyLsp.revealInExplorer",
+        "arguments": [
+          "/fixtures/minitest_tests.rb",
+          "AnotherTest#test_public_2",
+          "bundle exec ruby /fixtures/minitest_tests.rb --name AnotherTest#test_public_2",
+          {
+            "start_line": 31,
+            "start_column": 2,
+            "end_line": 31,
+            "end_column": 24
+          },
+          "test_public_2"
+        ]
+      },
+      "data": {
+        "type": "reveal_in_explorer",
         "group_id": 2,
         "kind": "example"
       }

@@ -95,6 +95,19 @@
           "when": "rubyLsp.activated",
           "group": "2_workspace"
         }
+      ],
+      "testing/item/context": [
+        {
+          "command": "rubyLsp.revealInExplorer",
+          "when": "controllerId == rubyTests && testItemHasUri",
+          "group": "inline"
+        }
+      ],
+      "testing/item/gutter": [
+        {
+          "command": "rubyLsp.revealInExplorer",
+          "when": "controllerId == rubyTests && testItemHasUri"
+        }
       ]
     },
     "commands": [
@@ -160,6 +173,12 @@
         "title": "Debug current test",
         "category": "Ruby LSP",
         "when": "editorActive && editorLangId == ruby"
+      },
+      {
+        "command": "rubyLsp.revealInExplorer",
+        "title": "Reveal In Explorer",
+        "category": "Ruby LSP",
+        "icon": "$(list-tree)"
       },
       {
         "command": "rubyLsp.showSyntaxTree",
