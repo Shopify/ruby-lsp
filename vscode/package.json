@@ -368,6 +368,20 @@
                   "default": true
                 }
               }
+            },
+            "onTypeFormatting": {
+              "description": "Customize on type formatting features",
+              "type": "object",
+              "properties": {
+                "enableAll": {
+                  "type": "boolean"
+                },
+                "commentContinuation": {
+                  "description": "Automatically continue comments when breaking lines inside a comment",
+                  "type": "boolean",
+                  "default": true
+                }
+              }
             }
           }
         },

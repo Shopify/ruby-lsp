@@ -292,6 +292,76 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, edits.to_json)
   end
 
+  def test_comment_continuation_applies_with_default_configuration
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "    #    something",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 0, character: 14 },
+      "\n",
+      "Visual Studio Code",
+      @global_state.feature_configuration(:onTypeFormatting),
+    ).perform
+    expected_edits = [
+      {
+        range: { start: { line: 0, character: 14 }, end: { line: 0, character: 14 } },
+        newText: "#    ",
+      },
+    ]
+    assert_equal(expected_edits.to_json, edits.to_json)
+  end
+
+  def test_comment_continuation_can_be_disabled_through_configuration
+    @global_state.apply_options({
+      initializationOptions: {
+        featuresConfiguration: {
+          onTypeFormatting: {
+            commentContinuation: false,
+          },
+        },
+      },
+    })
+
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "    #    something",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 0, character: 14 },
+      "\n",
+      "Visual Studio Code",
+      @global_state.feature_configuration(:onTypeFormatting),
+    ).perform
+    assert_empty(edits)
+  end
+
   def test_comment_continuation_does_not_apply_to_rbs_signatures
     document = RubyLsp::RubyDocument.new(
       source: +"",
