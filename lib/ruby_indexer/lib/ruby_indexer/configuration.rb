@@ -12,7 +12,7 @@ module RubyIndexer
     }.freeze #: Hash[String, untyped]
 
     #: String
-    attr_writer :workspace_path
+    attr_reader :workspace_path
 
     #: Encoding
     attr_accessor :encoding
@@ -29,9 +29,13 @@ module RubyIndexer
         "**/fixtures/**/*",
       ] #: Array[String]
 
+      @absolute_excluded_patterns = nil #: Array[String]?
+
+      # Substitute Windows backslashes into forward slashes, which are used in glob patterns
       path = Bundler.settings["path"]
+      @bundle_path = path&.gsub(/[\\]+/, "/") #: String?
+
       if path
-        # Substitute Windows backslashes into forward slashes, which are used in glob patterns
         glob = path.gsub(/[\\]+/, "/")
         glob.delete_suffix!("/")
         @excluded_patterns << "#{glob}/**/*.rb"
@@ -53,6 +57,14 @@ module RubyIndexer
         "coding:",
         "warn_past_scope:",
       ] #: Array[String]
+    end
+
+    # Changing the workspace path changes what the relative exclusion patterns resolve to, so the memoized absolute
+    # patterns have to be discarded
+    #: (String path) -> void
+    def workspace_path=(path)
+      @workspace_path = path
+      @absolute_excluded_patterns = nil
     end
 
     #: -> Array[URI::Generic]
@@ -81,24 +93,8 @@ module RubyIndexer
         end
       end
 
-      # If the patterns are relative, we make it relative to the workspace path. If they are absolute, then we shouldn't
-      # concatenate anything
-      excluded_patterns = @excluded_patterns.map do |pattern|
-        if File.absolute_path?(pattern)
-          pattern
-        else
-          File.join(@workspace_path, pattern)
-        end
-      end
-
       # Remove user specified patterns
-      bundle_path = Bundler.settings["path"]&.gsub(/[\\]+/, "/")
-      uris.reject! do |indexable|
-        path = indexable.full_path #: as !nil
-        next false if test_files_ignored_from_exclusion?(path, bundle_path)
-
-        excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
-      end
+      uris.reject! { |indexable| excluded?(indexable.full_path) }
 
       # Add default gems to the list of files to be indexed
       Dir.glob(File.join(RbConfig::CONFIG["rubylibdir"], "*")).each do |default_path|
@@ -166,6 +162,20 @@ module RubyIndexer
       uris
     end
 
+    # Whether `path` is excluded from indexing by the configured patterns. Note that this only takes the exclusion
+    # patterns into account. Files that are simply not covered by the inclusion patterns (like a Ruby file in a
+    # directory that is never traversed) are not considered excluded by this method
+    #: (String? path) -> bool
+    def excluded?(path)
+      return false unless path
+
+      return false if test_files_ignored_from_exclusion?(path, @bundle_path)
+
+      flags = File::FNM_PATHNAME | File::FNM_EXTGLOB
+
+      absolute_excluded_patterns.any? { |pattern| File.fnmatch?(pattern, path, flags) }
+    end
+
     #: -> Regexp
     def magic_comment_regex
       @magic_comment_regex ||= /^#\s*#{@excluded_magic_comments.join("|")}/ #: Regexp?
@@ -177,12 +187,28 @@ module RubyIndexer
 
       @excluded_gems.concat(config["excluded_gems"]) if config["excluded_gems"]
       @included_gems.concat(config["included_gems"]) if config["included_gems"]
-      @excluded_patterns.concat(config["excluded_patterns"]) if config["excluded_patterns"]
+      if config["excluded_patterns"]
+        @excluded_patterns.concat(config["excluded_patterns"])
+        @absolute_excluded_patterns = nil
+      end
       @included_patterns.concat(config["included_patterns"]) if config["included_patterns"]
       @excluded_magic_comments.concat(config["excluded_magic_comments"]) if config["excluded_magic_comments"]
     end
 
     private
+
+    # If the patterns are relative, we make them relative to the workspace path. If they are absolute, then we
+    # shouldn't concatenate anything. Memoized because exclusion is checked once per indexable file
+    #: -> Array[String]
+    def absolute_excluded_patterns
+      @absolute_excluded_patterns ||= @excluded_patterns.map do |pattern|
+        if File.absolute_path?(pattern)
+          pattern
+        else
+          File.join(@workspace_path, pattern)
+        end
+      end
+    end
 
     #: (Hash[String, untyped] config) -> void
     def validate_config!(config)
