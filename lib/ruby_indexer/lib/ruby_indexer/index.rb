@@ -60,13 +60,16 @@ module RubyIndexer
       # Holds all entries in the index using a prefix tree for searching based on prefixes to provide autocompletion
       @entries_tree = PrefixTree.new #: PrefixTree[Array[Entry]]
 
-      # Holds references to where entries where discovered so that we can easily delete them
+      # Holds references to where entries were discovered so that we can easily delete them. URIs with no declarations
+      # are stored with an empty array so they are not indexed again during initial indexing.
       # {
       #  "file:///my/project/foo.rb" => [#<Entry::Class>, #<Entry::Class>],
       #  "file:///my/project/bar.rb" => [#<Entry::Class>],
       #  "untitled:Untitled-1" => [#<Entry::Class>],
       # }
       @uris_to_entries = {} #: Hash[String, Array[Entry]]
+      # Indexing runs on a background thread while document requests can update the same index.
+      @indexing_mutex = Mutex.new #: Thread::Mutex
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = PrefixTree.new #: PrefixTree[URI::Generic]
@@ -363,7 +366,7 @@ module RubyIndexer
           "The index is not empty. To prevent invalid entries, `index_all` can only be called once."
       end
 
-      RBSIndexer.new(self).index_ruby_core
+      @indexing_mutex.synchronize { RBSIndexer.new(self).index_ruby_core }
       # Calculate how many paths are worth 1% of progress
       progress_step = (uris.length / 100.0).ceil
 
@@ -381,6 +384,13 @@ module RubyIndexer
 
     #: (URI::Generic uri, String source, ?collect_comments: bool) -> void
     def index_single(uri, source, collect_comments: true)
+      @indexing_mutex.synchronize do
+        index_single_unlocked(uri, source, collect_comments: collect_comments)
+      end
+    end
+
+    #: (URI::Generic uri, String source, ?collect_comments: bool) -> void
+    def index_single_unlocked(uri, source, collect_comments: true)
       dispatcher = Prism::Dispatcher.new
 
       result = Prism.parse(source)
@@ -392,6 +402,7 @@ module RubyIndexer
 
       indexing_errors = listener.indexing_errors.uniq
       indexing_errors.each { |error| $stderr.puts(error) } if indexing_errors.any?
+      @uris_to_entries[uri.to_s] ||= []
     rescue SystemStackError => e
       if e.backtrace&.first&.include?("prism")
         $stderr.puts "Prism error indexing #{uri}: #{e.message}"
@@ -403,8 +414,12 @@ module RubyIndexer
     # Indexes a File URI by reading the contents from disk
     #: (URI::Generic uri, ?collect_comments: bool) -> void
     def index_file(uri, collect_comments: true)
-      path = uri.full_path #: as !nil
-      index_single(uri, File.read(path), collect_comments: collect_comments)
+      @indexing_mutex.synchronize do
+        return if @uris_to_entries.key?(uri.to_s)
+
+        path = uri.full_path #: as !nil
+        index_single_unlocked(uri, File.read(path), collect_comments: collect_comments)
+      end
     rescue Errno::EISDIR, Errno::ENOENT
       # If `path` is a directory, just ignore it and continue indexing. If the file doesn't exist, then we also ignore
       # it
@@ -648,14 +663,22 @@ module RubyIndexer
     # document's source (used to handle unsaved changes to files)
     #: (URI::Generic uri, ?String? source) ?{ (Index index) -> void } -> void
     def handle_change(uri, source = nil, &block)
+      @indexing_mutex.synchronize do
+        handle_change_unlocked(uri, source, &block)
+      end
+    end
+
+    #: (URI::Generic uri, ?String? source) ?{ (Index index) -> void } -> void
+    def handle_change_unlocked(uri, source = nil, &block)
       key = uri.to_s
       original_entries = @uris_to_entries[key]
 
       if block
         block.call(self)
+        @uris_to_entries[key] ||= []
       else
         delete(uri)
-        index_single(
+        index_single_unlocked(
           uri,
           source, #: as !nil
         )
@@ -731,12 +754,30 @@ module RubyIndexer
     #: [T] (String uri, ?Class[(T & Entry)]? type) -> (Array[Entry] | Array[T])?
     def entries_for(uri, type = nil)
       entries = @uris_to_entries[uri.to_s]
+      return if entries&.empty?
+
       return entries unless type
 
       entries&.grep(type)
     end
 
+    #: -> Hash[Symbol, untyped]
+    def marshal_dump
+      # Mutex is not marshalable; it is recreated when the index is loaded.
+      instance_variables.reject { |name| name == :@indexing_mutex }.to_h do |name|
+        [name, instance_variable_get(name)]
+      end
+    end
+
+    #: (Hash[Symbol, untyped] data) -> void
+    def marshal_load(data)
+      data.each { |name, value| instance_variable_set(name, value) }
+      @indexing_mutex = Mutex.new
+    end
+
     private
+
+    private :index_single_unlocked, :handle_change_unlocked
 
     # Always returns the linearized ancestors for the attached class, regardless of whether `name` refers to a singleton
     # or attached namespace
