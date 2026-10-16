@@ -70,6 +70,18 @@ module RubyIndexer
       assert_equal(8, refs[2].location.start_line)
     end
 
+    def test_finds_constant_or_write_references_once
+      refs = find_const_references("Foo::BAR", <<~RUBY)
+        module Foo
+          BAR ||= 1
+        end
+      RUBY
+
+      assert_equal(1, refs.length)
+      assert_equal("BAR", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+    end
+
     def test_finds_method_references
       refs = find_method_references("foo", <<~RUBY)
         class Bar
