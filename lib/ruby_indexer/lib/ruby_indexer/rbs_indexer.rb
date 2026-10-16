@@ -107,19 +107,31 @@ module RubyIndexer
       location = to_ruby_indexer_location(member.location)
       comments = comments_to_string(member)
 
-      real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
       signatures = signatures(member)
-      @index.add(Entry::Method.new(
-        @index.configuration,
-        name,
-        uri,
-        location,
-        location,
-        comments,
-        signatures,
-        member.visibility || :public,
-        real_owner,
-      ))
+
+      method_owners = if member.kind == :singleton_instance
+        [
+          [owner, :private],
+          [@index.existing_or_new_singleton_class(owner.name), :public],
+        ]
+      else
+        real_owner = member.singleton? ? @index.existing_or_new_singleton_class(owner.name) : owner
+        [[real_owner, member.visibility || :public]]
+      end
+
+      method_owners.each do |method_owner, visibility|
+        @index.add(Entry::Method.new(
+          @index.configuration,
+          name,
+          uri,
+          location,
+          location,
+          comments,
+          signatures,
+          visibility,
+          method_owner,
+        ))
+      end
     end
 
     #: (RBS::AST::Members::MethodDefinition member) -> Array[Entry::Signature]

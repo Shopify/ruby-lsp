@@ -8,8 +8,8 @@ module RubyIndexer
     def test_index_core_classes
       entries = @index["Array"] #: as !nil
       refute_nil(entries)
-      # Array is a class but also an instance method on Kernel
-      assert_equal(2, entries.length)
+      # Array is a class and a module function on Kernel, so it is indexed with both singleton and instance methods.
+      assert_equal(3, entries.length)
       entry = entries.find { |entry| entry.is_a?(Entry::Class) } #: as Entry::Class
       assert_match(%r{/gems/rbs-.*/core/array.rbs}, entry.file_path)
       assert_equal("array.rbs", entry.file_name)
@@ -338,6 +338,25 @@ module RubyIndexer
       assert_kind_of(Entry::BlockParameter, parameters[3])
     end
 
+    def test_rbs_self_question_method_is_indexed_as_singleton_and_private_instance
+      rbs = <<~RBS
+        module Foo
+          def self?.bar: (String) -> void
+        end
+      RBS
+
+      entries = parse_rbs_method_entries(rbs, "bar")
+
+      assert_equal(2, entries.length)
+
+      instance_method = entries.find { |entry| entry.owner&.name == "Foo" } #: as !nil
+      assert_equal(:private, instance_method.visibility)
+
+      singleton_method = entries.find { |entry| entry.owner&.name == "Foo::<Class:Foo>" } #: as !nil
+      assert_equal(:public, singleton_method.visibility)
+      assert_equal(instance_method.signatures, singleton_method.signatures)
+    end
+
     def test_signature_alias
       # In RBS, an alias means that two methods have the same signature.
       # It does not mean the same thing as a Ruby alias.
@@ -365,16 +384,20 @@ module RubyIndexer
 
     private
 
-    def parse_rbs_methods(rbs, method_name)
+    def parse_rbs_method_entries(rbs, method_name)
       buffer = RBS::Buffer.new(content: rbs, name: "")
       _, _, declarations = RBS::Parser.parse_signature(buffer)
       index = RubyIndexer::Index.new
       indexer = RubyIndexer::RBSIndexer.new(index)
       pathname = Pathname.new("/file.rbs")
       indexer.process_signature(pathname, declarations)
-      entry = index[method_name] #: as !nil
-        .first #: as Entry::Method
+      index[method_name] #: as !nil
+        .grep(Entry::Method)
+    end
 
+    def parse_rbs_methods(rbs, method_name)
+      entry = parse_rbs_method_entries(rbs, method_name)
+        .first #: as !nil
       entry.signatures
     end
   end
