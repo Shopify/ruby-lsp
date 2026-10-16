@@ -30,14 +30,8 @@
   "main": "./out/extension.js",
   "capabilities": {
     "untrustedWorkspaces": {
-      "supported": "limited",
-      "description": "In untrusted workspaces, Ruby LSP ignores workspace-scoped overrides of settings that influence how the Ruby interpreter is located or invoked, to prevent arbitrary command execution. User and machine settings still apply.",
-      "restrictedConfigurations": [
-        "rubyLsp.rubyExecutablePath",
-        "rubyLsp.customRubyCommand",
-        "rubyLsp.rubyVersionManager",
-        "rubyLsp.bundleGemfile"
-      ]
+      "supported": false,
+      "description": "Ruby LSP may execute project code through Bundler and add-ons. Trust this workspace to enable the extension."
     }
   },
   "contributes": {
