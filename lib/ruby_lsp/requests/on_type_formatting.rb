@@ -148,6 +148,11 @@ module RubyLsp
 
       #: (String spaces) -> void
       def handle_comment_line(spaces)
+        # Some editors continue comments natively (e.g.: Zed's `extend_comment_on_newline`), so the comment prefix may
+        # already be present before the cursor. Adding another one would result in `# # `
+        current_line = @lines[@position[:line]]
+        return if current_line && current_line[0...@position[:character]]&.match?(/\A\s*#\s*\z/)
+
         add_edit_with_text("##{spaces}")
       end
 

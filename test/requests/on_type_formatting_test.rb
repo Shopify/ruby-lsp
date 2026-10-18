@@ -439,6 +439,65 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, edits.to_json)
   end
 
+  def test_comment_continuation_skips_prefix_already_inserted_by_the_editor
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    # Editors like Zed continue the comment on their own before sending the request
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "  # something\n  # ",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 4 },
+      "\n",
+      "Zed",
+    ).perform
+    assert_empty(edits)
+  end
+
+  def test_comment_continuation_on_new_line_without_prefix
+    document = RubyLsp::RubyDocument.new(
+      source: +"",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+
+    document.push_edits(
+      [{
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        text: "  # something\n  ",
+      }],
+      version: 2,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 2 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 2 }, end: { line: 1, character: 2 } },
+        newText: "# ",
+      },
+    ]
+    assert_equal(expected_edits.to_json, edits.to_json)
+  end
+
   def test_breaking_line_between_keyword_and_more_content
     document = RubyLsp::RubyDocument.new(
       source: +"",
