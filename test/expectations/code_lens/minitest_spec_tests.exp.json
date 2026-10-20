@@ -15,9 +15,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -49,9 +49,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -83,9 +83,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo(#|::)/\"",
           {
             "start_line": 0,
             "start_column": 0,
@@ -117,9 +117,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo#test_0001_it_level_one",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
           {
             "start_line": 1,
             "start_column": 2,
@@ -150,9 +150,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo#test_0001_it_level_one",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
           {
             "start_line": 1,
             "start_column": 2,
@@ -183,9 +183,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo#test_0001_it_level_one",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0001_it_level_one$/\"",
           {
             "start_line": 1,
             "start_column": 2,
@@ -216,9 +216,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
           {
             "start_line": 3,
             "start_column": 2,
@@ -250,9 +250,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
           {
             "start_line": 3,
             "start_column": 2,
@@ -284,9 +284,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested(#|::)/\"",
           {
             "start_line": 3,
             "start_column": 2,
@@ -318,9 +318,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested#test_0001_it_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
           {
             "start_line": 4,
             "start_column": 4,
@@ -351,9 +351,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested#test_0001_it_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
           {
             "start_line": 4,
             "start_column": 4,
@@ -384,9 +384,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested#test_0001_it_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0001_it_nested$/\"",
           {
             "start_line": 4,
             "start_column": 4,
@@ -417,9 +417,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested::deep_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
           {
             "start_line": 6,
             "start_column": 4,
@@ -451,9 +451,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested::deep_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
           {
             "start_line": 6,
             "start_column": 4,
@@ -485,9 +485,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested::deep_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested(#|::)/\"",
           {
             "start_line": 6,
             "start_column": 4,
@@ -519,9 +519,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested::deep_nested#test_0001_it_deep_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
           {
             "start_line": 7,
             "start_column": 6,
@@ -552,9 +552,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested::deep_nested#test_0001_it_deep_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
           {
             "start_line": 7,
             "start_column": 6,
@@ -585,9 +585,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested::deep_nested#test_0001_it_deep_nested",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested::deep_nested#test_0001_it_deep_nested$/\"",
           {
             "start_line": 7,
             "start_column": 6,
@@ -618,9 +618,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested#test_0002_it_nested_again",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
           {
             "start_line": 10,
             "start_column": 4,
@@ -651,9 +651,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested#test_0002_it_nested_again",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
           {
             "start_line": 10,
             "start_column": 4,
@@ -684,9 +684,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::nested#test_0002_it_nested_again",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::nested#test_0002_it_nested_again$/\"",
           {
             "start_line": 10,
             "start_column": 4,
@@ -717,9 +717,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo#test_0003_it_level_one_again",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
           {
             "start_line": 13,
             "start_column": 2,
@@ -750,9 +750,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo#test_0003_it_level_one_again",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
           {
             "start_line": 13,
             "start_column": 2,
@@ -783,9 +783,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo#test_0003_it_level_one_again",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo#test_0003_it_level_one_again$/\"",
           {
             "start_line": 13,
             "start_column": 2,
@@ -816,9 +816,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::Bar",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
           {
             "start_line": 16,
             "start_column": 0,
@@ -850,9 +850,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::Bar",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
           {
             "start_line": 16,
             "start_column": 0,
@@ -884,9 +884,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::Bar",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar(#|::)/\"",
           {
             "start_line": 16,
             "start_column": 0,
@@ -918,9 +918,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::Bar#test_0001_it_class_constant_path",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
           {
             "start_line": 17,
             "start_column": 2,
@@ -951,9 +951,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::Bar#test_0001_it_class_constant_path",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
           {
             "start_line": 17,
             "start_column": 2,
@@ -984,9 +984,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Foo::Bar#test_0001_it_class_constant_path",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Foo::Bar#test_0001_it_class_constant_path$/\"",
           {
             "start_line": 17,
             "start_column": 2,
@@ -1017,9 +1017,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
           {
             "start_line": 20,
             "start_column": 0,
@@ -1051,9 +1051,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
           {
             "start_line": 20,
             "start_column": 0,
@@ -1085,9 +1085,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz(#|::)/\"",
           {
             "start_line": 20,
             "start_column": 0,
@@ -1119,9 +1119,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#foo",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
           {
             "start_line": 21,
             "start_column": 2,
@@ -1153,9 +1153,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#foo",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
           {
             "start_line": 21,
             "start_column": 2,
@@ -1187,9 +1187,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#foo",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo(#|::)/\"",
           {
             "start_line": 21,
             "start_column": 2,
@@ -1221,9 +1221,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#foo#test_0001_works",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
           {
             "start_line": 22,
             "start_column": 4,
@@ -1254,9 +1254,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#foo#test_0001_works",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
           {
             "start_line": 22,
             "start_column": 4,
@@ -1287,9 +1287,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#foo#test_0001_works",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#foo#test_0001_works$/\"",
           {
             "start_line": 22,
             "start_column": 4,
@@ -1320,9 +1320,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#bar",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
           {
             "start_line": 25,
             "start_column": 2,
@@ -1354,9 +1354,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#bar",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
           {
             "start_line": 25,
             "start_column": 2,
@@ -1388,9 +1388,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#bar",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar(#|::)/\"",
           {
             "start_line": 25,
             "start_column": 2,
@@ -1422,9 +1422,9 @@
         "title": "▶ Run",
         "command": "rubyLsp.runTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#bar#test_0001_works",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
           {
             "start_line": 26,
             "start_column": 4,
@@ -1455,9 +1455,9 @@
         "title": "▶ Run In Terminal",
         "command": "rubyLsp.runTestInTerminal",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#bar#test_0001_works",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
           {
             "start_line": 26,
             "start_column": 4,
@@ -1488,9 +1488,9 @@
         "title": "Debug",
         "command": "rubyLsp.debugTest",
         "arguments": [
-          "/fixtures/minitest_spec_tests.rb",
+          "/test/fixtures/minitest_spec_tests.rb",
           "Baz::#bar#test_0001_works",
-          "bundle exec ruby /fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
+          "bundle exec ruby -Itest /test/fixtures/minitest_spec_tests.rb --name \"/^Baz::\\#bar#test_0001_works$/\"",
           {
             "start_line": 26,
             "start_column": 4,

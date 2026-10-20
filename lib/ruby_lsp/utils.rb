@@ -21,6 +21,21 @@ module RubyLsp
   GUESSED_TYPES_URL = "https://shopify.github.io/ruby-lsp/#guessed-types"
   TEST_PATH_PATTERN = "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"
 
+  class << self
+    # Escape characters that have special meaning in Dir.glob patterns. The comma is included because callers may
+    # interpolate the result into a brace group, where an unescaped comma would split the alternation
+    #
+    # This only takes effect on POSIX. `Dir.glob` does not support backslash escaping on Windows, where the backslash
+    # is a path separator, so there a path containing metacharacters still fails to match. Nothing regresses because
+    # of it, since the substitution is a no-op for the metacharacter-free paths that are the common case. Prefer
+    # `Dir.glob`'s `base:` parameter whenever the value is a path rather than a fragment interpolated into a pattern,
+    # because that treats the path literally on every platform
+    #: (String str) -> String
+    def escape_glob_metacharacters(str)
+      str.gsub(/[\[\]{}*?,\\]/) { |c| "\\#{c}" }
+    end
+  end
+
   # Request delegation for embedded languages is not yet standardized into the language server specification. Here we
   # use this custom error class as a way to return a signal to the client that the request should be delegated to the
   # language server for the host language. The support for delegation is custom built on the client side, so each editor

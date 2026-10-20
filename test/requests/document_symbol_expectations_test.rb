@@ -110,7 +110,7 @@ class DocumentSymbolExpectationsTest < ExpectationsTestRunner
   end
 
   def run_expectations(source)
-    uri = URI("file://#{@_path}")
+    uri = URI::Generic.from_path(path: File.join("/", @_path.to_s))
     document = RubyLsp::RubyDocument.new(source: source, version: 1, uri: uri, global_state: @global_state)
 
     dispatcher = Prism::Dispatcher.new
