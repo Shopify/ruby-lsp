@@ -1535,6 +1535,29 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_completion_for_locals_with_unicode_before_cursor
+    source = +<<~'RUBY'
+      test = "moo"
+      "🐮 says #{te}"
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(id: 1, method: "textDocument/completion", params: {
+        textDocument: { uri: uri },
+        position: { line: 1, character: 13 },
+      })
+
+      result = server.pop_response.response
+      item = result.find { |completion| completion.label == "test" } #: as !nil
+
+      assert_equal("test", item.text_edit.new_text)
+      assert_equal(
+        { start: { line: 1, character: 11 }, end: { line: 1, character: 13 } },
+        item.text_edit.range.to_hash.transform_values(&:to_hash),
+      )
+    end
+  end
+
   def test_completion_for_locals_only_happens_when_there_is_no_receiver
     source = +<<~RUBY
       class Child
