@@ -37,6 +37,24 @@ module RubyLsp
         zero_based_line = line ? line - 1 : nil
         [uri, zero_based_line]
       end
+
+      # VS Code stores uri.fsPath keys; Dir.pwd may differ in separators / drive case (#3881).
+      #: (String) -> String
+      def normalize_path(path)
+        path.tr("\\", "/").sub(/\A([A-Za-z]):/) { "#{Regexp.last_match(1).downcase}:" }
+      end
+
+      #: (Hash[String, String], ?String) -> String?
+      def resolve_reporter_port(db, working_directory = Dir.pwd)
+        return db[working_directory] if db.key?(working_directory)
+
+        normalized_pwd = normalize_path(working_directory)
+        db.each do |stored_path, port|
+          return port if normalize_path(stored_path) == normalized_pwd
+        end
+
+        nil
+      end
     end
 
     # https://code.visualstudio.com/api/references/vscode-api#Position
@@ -64,8 +82,11 @@ module RubyLsp
         if port
           socket(port)
         elsif File.exist?(port_db_path)
-          db = JSON.load_file(port_db_path)
-          socket(db[Dir.pwd])
+          db = JSON.load_file(port_db_path) #: Hash[String, String]
+          resolved_port = self.class.resolve_reporter_port(db)
+          raise "No reporter port for #{Dir.pwd}" unless resolved_port
+
+          socket(resolved_port)
         else
           # For tests that don't spawn the TCP server
           require "stringio"
