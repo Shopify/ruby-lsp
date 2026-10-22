@@ -22,6 +22,7 @@ module RubyLsp
         dispatcher.register(
           self,
           :on_call_node_enter,
+          :on_def_node_enter,
           :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
@@ -67,6 +68,20 @@ module RubyLsp
         end
 
         handle_method_definition(message, inferrer_receiver_type)
+      end
+
+      # On the name of a method declaration, the declaration itself is the definition. Returning it lets editors fall
+      # back to their alternative action, such as showing references in VS Code
+      #: (Prism::DefNode node) -> void
+      def on_def_node_enter(node)
+        # Sorbet can handle go to definition for methods declared on typed true or higher
+        return if @sorbet_level.true_or_higher?
+
+        @response_builder << Interface::LocationLink.new(
+          target_uri: @uri.to_s,
+          target_range: range_from_location(node.location),
+          target_selection_range: range_from_location(node.name_loc),
+        )
       end
 
       #: (Prism::StringNode node) -> void
