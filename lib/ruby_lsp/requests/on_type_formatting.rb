@@ -132,31 +132,30 @@ module RubyLsp
         next_line = @lines[@position[:line] + 1]
 
         if current_line.nil? || current_line.strip.empty? || current_line.include?(")") || current_line.include?("]")
-          if supports_snippet_anchor?
-            add_edit_with_text("\n")
-            add_edit_with_text("#{indents}end")
-            move_cursor_to(@position[:line], @indentation + 2)
-          elsif line_below_cursor?
-            add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: 0 })
-          end
-        elsif next_line.nil? || next_line.strip.empty?
-          if supports_snippet_anchor? || line_below_cursor?
-            add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
-            move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
-          end
+          add_closing_line("#{indents}end")
+        elsif line_below_cursor? && (next_line.nil? || next_line.strip.empty?)
+          add_edit_with_text("#{indents}end\n", { line: @position[:line] + 1, character: @position[:character] })
+          move_cursor_to(@position[:line] - 1, @indentation + @previous_line.size + 1)
         end
       end
 
       #: (String delimiter) -> void
       def handle_heredoc_end(delimiter)
-        indents = " " * @indentation
+        add_closing_line("#{" " * @indentation}#{delimiter}")
+      end
 
+      # Adds `text` on a new line after the cursor, keeping the cursor in place
+      #
+      #: (String text) -> void
+      def add_closing_line(text)
         if supports_snippet_anchor?
           add_edit_with_text("\n")
-          add_edit_with_text("#{indents}#{delimiter}")
+          add_edit_with_text(text)
           move_cursor_to(@position[:line], @indentation + 2)
-        elsif line_below_cursor?
-          add_edit_with_text("#{indents}#{delimiter}\n", { line: @position[:line] + 1, character: 0 })
+        elsif line_below_cursor? && @lines[@position[:line]]&.strip&.empty?
+          # Without the anchor, the cursor would end up after text inserted at its position, so we insert at the start of
+          # the next line instead. The cursor's line has to be blank, otherwise its content would end up before `text`
+          add_edit_with_text("#{text}\n", { line: @position[:line] + 1, character: 0 })
         end
       end
 
@@ -178,13 +177,11 @@ module RubyLsp
         )
       end
 
-      # Whether the editor's document has a line below the cursor where edits can be anchored without disturbing the
-      # cursor. This cannot be answered by `@lines` alone: when the source ends with a newline, the editor has one
-      # more (empty) line than `String#lines` returns. So after breaking the last visible line of a file with a
-      # trailing newline, the line below the cursor exists in the editor even though `@lines` doesn't include it.
+      # The editor has one line more than the source has line breaks. Unlike `@lines`, this includes the empty last line
+      # of a source ending with a line break
       #: -> bool
       def line_below_cursor?
-        @position[:line] + 1 <= @document.source.count("\n")
+        @position[:line] < @document.source.count("\n")
       end
 
       # Whether the client interprets the `$0` snippet anchor in on type formatting edits to reposition the caret.

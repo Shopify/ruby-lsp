@@ -545,7 +545,7 @@ class OnTypeFormattingTest < Minitest::Test
     document.push_edits(
       [{
         range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
-        text: "  def\nfoo",
+        text: "  def\nfoo\n",
       }],
       version: 2,
     )
@@ -991,12 +991,31 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, edits.to_json)
   end
 
-  def test_no_end_for_snippetless_clients_when_breaking_line_at_end_of_file_without_trailing_newline
+  def test_no_end_when_breaking_line_at_end_of_file_without_trailing_newline
     # Breaking a line in the middle (content after the caret) on the last line of a file without a trailing newline:
     # there's no editor line below the caret's line to place `end` on, so we don't emit an out-of-bounds edit, which
     # clients would clamp to the end of the content line, corrupting it.
     document = RubyLsp::RubyDocument.new(
       source: +"def foo\nbar",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 0 },
+      "\n",
+      "Visual Studio Code",
+    ).perform
+    assert_empty(edits)
+  end
+
+  def test_no_end_for_snippetless_clients_when_caret_is_before_closing_paren
+    # `end` must be inserted before the `)` that follows the caret, which requires moving the caret back afterwards
+    document = RubyLsp::RubyDocument.new(
+      source: +"foo(bar do\n)\nbaz\n",
       version: 1,
       uri: URI("file:///fake.rb"),
       global_state: @global_state,
