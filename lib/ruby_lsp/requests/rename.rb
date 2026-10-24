@@ -66,11 +66,14 @@ module RubyLsp
         fully_qualified_name = entries.first #: as !nil
           .name
         reference_target = RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
-        changes = collect_text_edits(reference_target, name)
+        supports_rename = @global_state.client_capabilities.supports_rename?
+        file_renames = [] #: Array[[String, String]]
+        file_renames = collect_file_renames(fully_qualified_name) if supports_rename
+        changes = collect_text_edits(reference_target, name, file_renames)
 
         # If the client doesn't support resource operations, such as renaming files, then we can only return the basic
         # text changes
-        unless @global_state.client_capabilities.supports_rename?
+        unless supports_rename
           return Interface::WorkspaceEdit.new(changes: changes)
         end
 
@@ -81,16 +84,25 @@ module RubyLsp
             text_document: Interface::VersionedTextDocumentIdentifier.new(uri: uri, version: nil),
             edits: edits,
           )
+        end #: Array[(Interface::RenameFile | Interface::TextDocumentEdit)]
+
+        file_renames.each do |old_path, new_path|
+          document_changes << Interface::RenameFile.new(
+            kind: "rename",
+            old_uri: URI::Generic.from_path(path: old_path).to_s,
+            new_uri: URI::Generic.from_path(path: new_path).to_s,
+          )
         end
 
-        collect_file_renames(fully_qualified_name, document_changes)
         Interface::WorkspaceEdit.new(document_changes: document_changes)
       end
 
       private
 
-      #: (String fully_qualified_name, Array[(Interface::RenameFile | Interface::TextDocumentEdit)] document_changes) -> void
-      def collect_file_renames(fully_qualified_name, document_changes)
+      #: (String fully_qualified_name) -> Array[[String, String]]
+      def collect_file_renames(fully_qualified_name)
+        file_renames = [] #: Array[[String, String]]
+
         # Check if the declarations of the symbol being renamed match the file name. In case they do, we automatically
         # rename the files for the user.
         #
@@ -114,20 +126,23 @@ module RubyLsp
                 @new_name.split("::").last, #: as !nil
               )
 
-              new_uri = URI::Generic.from_path(path: File.join(
+              new_file_path = File.join(
                 File.dirname(file_path),
                 "#{new_file_name}.rb",
-              )).to_s
+              )
 
-              document_changes << Interface::RenameFile.new(kind: "rename", old_uri: uri.to_s, new_uri: new_uri)
+              file_renames << [file_path, new_file_path]
             end
           end
         end
+
+        file_renames
       end
 
-      #: (RubyIndexer::ReferenceFinder::Target target, String name) -> Hash[String, Array[Interface::TextEdit]]
-      def collect_text_edits(target, name)
+      #: (RubyIndexer::ReferenceFinder::Target target, String name, Array[[String, String]] file_renames) -> Hash[String, Array[Interface::TextEdit]]
+      def collect_text_edits(target, name, file_renames)
         changes = {}
+        file_renames_by_path = file_renames.to_h
 
         Dir.glob(File.join(@global_state.workspace_path, "**/*.rb")).each do |path|
           uri = URI::Generic.from_path(path: path)
@@ -137,6 +152,7 @@ module RubyLsp
 
           parse_result = Prism.parse_file(path)
           edits = collect_changes(target, parse_result.value, name, uri)
+          edits.concat(collect_require_relative_edits(parse_result.value, path, file_renames_by_path))
           changes[uri.to_s] = edits unless edits.empty?
         rescue Errno::EISDIR, Errno::ENOENT
           # If `path` is a directory, just ignore it and continue. If the file doesn't exist, then we also ignore it.
@@ -146,10 +162,25 @@ module RubyLsp
           next unless document.is_a?(RubyDocument) || document.is_a?(ERBDocument)
 
           edits = collect_changes(target, document.ast, name, document.uri)
+          if (path = document.uri.full_path)
+            edits.concat(collect_require_relative_edits(document.ast, path, file_renames_by_path))
+          end
           changes[uri] = edits unless edits.empty?
         end
 
         changes
+      end
+
+      #: (Prism::Node ast, String source_path, Hash[String, String] file_renames) -> Array[Interface::TextEdit]
+      def collect_require_relative_edits(ast, source_path, file_renames)
+        workspace_path = @global_state.workspace_path
+        return [] if file_renames.empty? || !source_path.start_with?("#{workspace_path}#{File::SEPARATOR}")
+
+        visitor = RequireRelativeVisitor.new(source_path, file_renames)
+        visitor.visit(ast)
+        visitor.edits.map do |location, new_path|
+          Interface::TextEdit.new(range: range_from_location(location), new_text: new_path)
+        end
       end
 
       #: (RubyIndexer::ReferenceFinder::Target target, Prism::Node ast, String name, URI::Generic uri) -> Array[Interface::TextEdit]
@@ -178,6 +209,45 @@ module RubyLsp
         constant_name
           .gsub(/([a-z])([A-Z])|([A-Z])([A-Z][a-z])/, '\1\3_\2\4')
           .downcase
+      end
+
+      class RequireRelativeVisitor < Prism::Visitor
+        #: Array[[Prism::Location, String]]
+        attr_reader :edits
+
+        #: (String source_path, Hash[String, String] file_renames) -> void
+        def initialize(source_path, file_renames)
+          super()
+          @source_path = source_path
+          @file_renames = file_renames
+          @edits = [] #: Array[[Prism::Location, String]]
+        end
+
+        #: (Prism::CallNode node) -> void
+        def visit_call_node(node)
+          return super unless node.receiver.nil? && node.name == :require_relative
+
+          arguments = node.arguments&.arguments
+          return super unless arguments && arguments.length == 1
+
+          argument = arguments.first
+          return super unless argument.is_a?(Prism::StringNode)
+
+          relative_path = argument.unescaped
+          required_path = File.expand_path(relative_path, File.dirname(@source_path))
+          required_path = "#{required_path}.rb" unless required_path.end_with?(".rb")
+          new_file_path = @file_renames[required_path]
+
+          if new_file_path
+            new_relative_path = Pathname.new(new_file_path)
+              .relative_path_from(Pathname.new(File.dirname(@source_path)))
+              .to_s
+            new_relative_path = new_relative_path.delete_suffix(".rb") unless relative_path.end_with?(".rb")
+            @edits << [argument.content_loc, new_relative_path]
+          end
+
+          super
+        end
       end
     end
   end
