@@ -266,7 +266,7 @@ export class Workspace implements WorkspaceInterface {
     const executablesMayBeStale = lastUpdate === undefined || lastUpdate.rubyVersion !== this.ruby.rubyVersion;
 
     // Theses are the Ruby LSP's own dependencies, listed in `ruby-lsp.gemspec`
-    const dependencies = ["ruby-lsp", "language_server-protocol", "prism", "rbs"];
+    const dependencies = ["ruby-lsp", "bundler", "language_server-protocol", "prism", "rbs"];
 
     const { stdout } = await asyncExec(`gem list ${dependencies.join(" ")}`, {
       cwd: this.workspaceFolder.uri.fsPath,
