@@ -101,12 +101,12 @@ export class TestController {
       this.fullDiscovery
         ? this.runTest.bind(this)
         : async () => {
-            await vscode.window.showInformationMessage(
-              `Running tests with coverage requires the new explorer implementation,
+          await vscode.window.showInformationMessage(
+            `Running tests with coverage requires the new explorer implementation,
                which is currently under development.
                If you wish to enable it, set the "fullTestDiscovery" feature flag to "true"`,
-            );
-          },
+          );
+        },
       false,
     );
 
@@ -391,6 +391,34 @@ export class TestController {
     return this.runTest(request, tokenSource.token);
   }
 
+  async revealInExplorer(target: string | vscode.TestItem, name?: string) {
+    if (typeof target !== "string") {
+      await vscode.commands.executeCommand("vscode.revealTestInExplorer", target);
+      return;
+    }
+
+    if (!name) {
+      await vscode.window.showErrorMessage("No test name was provided to reveal in the Test Explorer.");
+      return;
+    }
+
+    const uri = vscode.Uri.file(target);
+    const testItem = this.fullDiscovery ? await this.findTestItem(name, uri) : this.findTestById(name);
+
+    if (!testItem) {
+      await vscode.window.showErrorMessage(
+        `Attempted to reveal "${name}" defined in "${target}", but that test has not been discovered.
+        Does the file path match the expected glob pattern?
+        [Read more](https://shopify.github.io/ruby-lsp/test_explorer.html)
+
+        Expected pattern: "**/{test,spec,features}/**/{*_test.rb,test_*.rb,*_spec.rb,*.feature}"`,
+      );
+      return;
+    }
+
+    await vscode.commands.executeCommand("vscode.revealTestInExplorer", testItem);
+  }
+
   async runTest(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
     this.telemetry.logUsage("ruby_lsp.test_explorer", {
       type: "counter",
@@ -402,21 +430,41 @@ export class TestController {
     });
     if (request.continuous) {
       const disposables: vscode.Disposable[] = [];
+      const targetWorkspaceUris = new Set<string>();
 
-      const testFileWatcher = vscode.workspace.createFileSystemWatcher(TEST_FILE_PATTERN, true, false, true);
+      if (request.include) {
+        request.include.forEach((item) => {
+          if (!item.uri) {
+            return;
+          }
+
+          const workspaceFolder = vscode.workspace.getWorkspaceFolder(item.uri);
+          if (workspaceFolder) {
+            targetWorkspaceUris.add(workspaceFolder.uri.toString());
+          }
+        });
+      } else {
+        vscode.workspace.workspaceFolders?.forEach((folder) => {
+          targetWorkspaceUris.add(folder.uri.toString());
+        });
+      }
 
       disposables.push(
-        testFileWatcher,
-        testFileWatcher.onDidChange(async () => {
-          const continuousRequest = new vscode.TestRunRequest(
-            request.include,
-            request.exclude,
-            request.profile,
-            false,
-            request.preserveFocus,
-          );
+        vscode.workspace.onDidSaveTextDocument(async (document) => {
+          if (document.uri.scheme !== "file") {
+            return;
+          }
 
-          await this.handleTests(continuousRequest, token);
+          const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+          if (!workspaceFolder) {
+            return;
+          }
+
+          if (!targetWorkspaceUris.has(workspaceFolder.uri.toString())) {
+            return;
+          }
+
+          await this.rerunContinuousTests(request, token);
         }),
       );
 
@@ -756,8 +804,8 @@ export class TestController {
     return previousTerminal
       ? previousTerminal
       : vscode.window.createTerminal({
-          name,
-        });
+        name,
+      });
   }
 
   private async debugHandler(request: vscode.TestRunRequest, _token: vscode.CancellationToken) {
@@ -1346,5 +1394,20 @@ export class TestController {
     } catch (error: any) {
       run.appendOutput(`Failed to process coverage results: ${error.message}`);
     }
+  }
+
+  private async rerunContinuousTests(
+    request: vscode.TestRunRequest,
+    token: vscode.CancellationToken,
+  ) {
+    const continuousRequest = new vscode.TestRunRequest(
+      request.include,
+      request.exclude,
+      request.profile,
+      false,
+      request.preserveFocus,
+    );
+
+    await this.handleTests(continuousRequest, token);
   }
 }
