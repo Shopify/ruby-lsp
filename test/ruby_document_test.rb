@@ -127,6 +127,24 @@ class RubyDocumentTest < Minitest::Test
     end
   end
 
+  def test_pushing_edit_without_range
+    document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+        def bar; end
+      end
+    RUBY
+
+    assert_raises(RubyLsp::Document::MissingRangeError) do
+      document.push_edits([{ text: "class Qux; end\n" }], version: 2)
+    end
+
+    assert_equal(<<~RUBY, document.source)
+      class Foo
+        def bar; end
+      end
+    RUBY
+  end
+
   def test_multibyte_character_offsets_are_bytes_in_utf8
     document = RubyLsp::RubyDocument.new(source: +<<~RUBY, version: 1, uri: @uri, global_state: @global_state)
       bá
