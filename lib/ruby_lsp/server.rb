@@ -1110,14 +1110,7 @@ module RubyLsp
 
       # Register a new runner to reload configurations
       @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
-
-      # Clear all document caches for pull diagnostics
-      @store.each { |_uri, document| document.clear_cache("textDocument/diagnostic") }
-
-      # Request a pull diagnostic refresh from the editor
-      if @global_state.client_capabilities.supports_diagnostic_refresh
-        send_message(Request.new(id: @current_request_id, method: "workspace/diagnostic/refresh", params: nil))
-      end
+      @global_state.refresh_diagnostics
     end
 
     #: (Hash[Symbol, untyped] message) -> void
