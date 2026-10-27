@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, spawn, SpawnOptions } from "child_process";
 import { createHash } from "crypto";
 import { promisify } from "util";
 
@@ -69,6 +69,13 @@ export interface WorkspaceInterface {
 export const STATUS_EMITTER = new vscode.EventEmitter<WorkspaceInterface | undefined>();
 
 export const asyncExec = promisify(exec);
+export function asyncSpawn(command: string, args: string[], options: SpawnOptions): Promise<boolean> {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, options);
+    child.once("error", () => resolve(false));
+    child.once("close", (code) => resolve(code === 0));
+  });
+}
 export const LSP_NAME = "Ruby LSP";
 export const LOG_CHANNEL = vscode.window.createOutputChannel(LSP_NAME, {
   log: true,
