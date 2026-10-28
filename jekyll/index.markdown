@@ -290,7 +290,7 @@ Sorry, your browser doesn't support embedded videos. This video demonstrates app
 
 **Refactors**
 
-The Ruby LSP supports some code refactorings, like extract to variable, extract to method and switch block style.
+The Ruby LSP supports some code refactorings, like extract to variable, extract to method, inline variable and switch block style.
 
 <video src="images/refactors.mp4" width="100%" controls>
 Sorry, your browser doesn't support embedded videos. This video illustrates code refactorings such as extract to variable or method.
