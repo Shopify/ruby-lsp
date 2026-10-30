@@ -82,6 +82,7 @@ module RubyLsp
         @ruby = +"" #: String
         @current_pos = 0 #: Integer
         @inside_ruby = false #: bool
+        @inside_erb_comment = false #: bool
       end
 
       #: -> void
@@ -98,9 +99,53 @@ module RubyLsp
       def scan_char
         char = @source[@current_pos]
 
+        if @inside_erb_comment
+          case char
+          when "-"
+            if next_char == "%" && @source[@current_pos + 2] == ">"
+              @inside_erb_comment = false
+              @current_pos += 2
+              push_char("   ")
+            else
+              push_char(" ")
+            end
+          when "%"
+            if next_char == ">"
+              @inside_erb_comment = false
+              @current_pos += 1
+              push_char("  ")
+            else
+              push_char(" ")
+            end
+          when "\r"
+            @ruby << char
+            @host_language << char
+
+            if next_char == "\n"
+              @ruby << next_char
+              @host_language << next_char
+              @current_pos += 1
+            end
+          when "\n"
+            @ruby << char
+            @host_language << char
+          else
+            push_char(" ")
+          end
+
+          return
+        end
+
         case char
         when "<"
           if next_char == "%"
+            if @source[@current_pos + 2] == "#"
+              @inside_erb_comment = true
+              @current_pos += 2
+              push_char("   ")
+              return
+            end
+
             @inside_ruby = true
             @current_pos += 1
             push_char("  ")
