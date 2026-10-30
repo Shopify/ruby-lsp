@@ -24,8 +24,14 @@ module RubyLsp
           char_position,
           node_types: [
             Prism::CallNode,
+            Prism::DefNode,
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
+            Prism::ConstantWriteNode,
+            Prism::ConstantOrWriteNode,
+            Prism::ConstantAndWriteNode,
+            Prism::ConstantOperatorWriteNode,
+            Prism::ConstantTargetNode,
             Prism::BlockArgumentNode,
             Prism::GlobalVariableAndWriteNode,
             Prism::GlobalVariableOperatorWriteNode,
@@ -109,7 +115,12 @@ module RubyLsp
           Prism::InstanceVariableAndWriteNode,
           Prism::InstanceVariableOperatorWriteNode,
           Prism::InstanceVariableOrWriteNode,
-          Prism::InstanceVariableWriteNode
+          Prism::InstanceVariableWriteNode,
+          Prism::ConstantWriteNode,
+          Prism::ConstantOrWriteNode,
+          Prism::ConstantAndWriteNode,
+          Prism::ConstantOperatorWriteNode,
+          Prism::DefNode
 
           !covers_position?(target.name_loc, position)
         when Prism::CallNode
