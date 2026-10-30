@@ -5,6 +5,14 @@ require_relative "test_case"
 
 module RubyIndexer
   class IndexTest < TestCase
+    def test_entries_for_returns_nil_when_uri_has_no_declarations
+      uri = URI::Generic.from_path(path: "/fake/path/foo.rb")
+
+      @index.index_single(uri, "# no declarations")
+
+      assert_nil(@index.entries_for(uri.to_s))
+    end
+
     def test_deleting_one_entry_for_a_class
       @index.index_single(URI::Generic.from_path(path: "/fake/path/foo.rb"), <<~RUBY)
         class Foo
