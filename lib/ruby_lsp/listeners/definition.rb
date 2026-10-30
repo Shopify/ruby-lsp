@@ -26,6 +26,11 @@ module RubyLsp
           :on_block_argument_node_enter,
           :on_constant_read_node_enter,
           :on_constant_path_node_enter,
+          :on_constant_write_node_enter,
+          :on_constant_or_write_node_enter,
+          :on_constant_and_write_node_enter,
+          :on_constant_operator_write_node_enter,
+          :on_constant_target_node_enter,
           :on_global_variable_and_write_node_enter,
           :on_global_variable_operator_write_node_enter,
           :on_global_variable_or_write_node_enter,
@@ -133,6 +138,31 @@ module RubyLsp
         return if name.nil?
 
         find_in_index(name)
+      end
+
+      #: (Prism::ConstantWriteNode node) -> void
+      def on_constant_write_node_enter(node)
+        handle_constant_declaration_definition(node, node.name_loc)
+      end
+
+      #: (Prism::ConstantOrWriteNode node) -> void
+      def on_constant_or_write_node_enter(node)
+        handle_constant_declaration_definition(node, node.name_loc)
+      end
+
+      #: (Prism::ConstantAndWriteNode node) -> void
+      def on_constant_and_write_node_enter(node)
+        handle_constant_declaration_definition(node, node.name_loc)
+      end
+
+      #: (Prism::ConstantOperatorWriteNode node) -> void
+      def on_constant_operator_write_node_enter(node)
+        handle_constant_declaration_definition(node, node.name_loc)
+      end
+
+      #: (Prism::ConstantTargetNode node) -> void
+      def on_constant_target_node_enter(node)
+        handle_constant_declaration_definition(node, node.location)
       end
 
       #: (Prism::GlobalVariableAndWriteNode node) -> void
@@ -253,6 +283,19 @@ module RubyLsp
         method_name = block.call
 
         handle_method_definition(method_name, nil)
+      end
+
+      # On the name of a constant declaration, the declaration itself is the definition, the same as for methods
+      #: (Prism::Node node, Prism::Location name_location) -> void
+      def handle_constant_declaration_definition(node, name_location)
+        # Sorbet can handle go to definition for constants on every sigil except typed ignore
+        return unless @sorbet_level.ignore?
+
+        @response_builder << Interface::LocationLink.new(
+          target_uri: @uri.to_s,
+          target_range: range_from_location(node.location),
+          target_selection_range: range_from_location(name_location),
+        )
       end
 
       #: -> void

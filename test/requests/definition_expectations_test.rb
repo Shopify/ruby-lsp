@@ -1426,6 +1426,73 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_on_constant_declaration_name_returns_the_declaration_itself
+    source = <<~RUBY
+      class Foo
+        BAR = 1
+        BAZ ||= 2
+        QUX, QUUX = 3, 4
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      selection_ranges = [{ character: 3, line: 1 }, { character: 3, line: 2 }, { character: 8, line: 3 }]
+        .map do |position|
+          server.process_message(
+            id: 1,
+            method: "textDocument/definition",
+            params: { textDocument: { uri: uri }, position: position },
+          )
+
+          response = server.pop_response.response
+          assert_equal(1, response.length)
+          assert_equal(uri.to_s, response.first.target_uri)
+
+          selection_range = response.first.target_selection_range
+          [selection_range.start, selection_range.end].map { |p| [p.line, p.character] }
+        end
+
+      assert_equal([[[1, 2], [1, 5]], [[2, 2], [2, 5]], [[3, 7], [3, 11]]], selection_ranges)
+    end
+  end
+
+  def test_definition_on_constant_declaration_outside_its_name_returns_nothing
+    source = <<~RUBY
+      class Foo
+        BAR = 1
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 1 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_on_constant_declaration_name_is_disabled_with_sorbet
+    source = <<~RUBY
+      # typed: false
+      class Foo
+        BAR = 1
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 2 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   def test_definition_for_instance_variables_is_disabled_on_typed_strict
     source = <<~RUBY
       # typed: strict
