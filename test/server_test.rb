@@ -1424,6 +1424,42 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_opening_an_excluded_document_does_not_index_it
+    path = File.join(Dir.pwd, "lib", "excluded_from_indexing.rb")
+    source = <<~RUBY
+      class ExcludedFromIndexing
+      end
+    RUBY
+    File.write(path, source)
+    uri = URI::Generic.from_path(path: path)
+
+    begin
+      @server.global_state.index.configuration.apply_config({ "excluded_patterns" => ["lib/**/*"] })
+
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: source,
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+
+      # The editor fires a document symbol request right after opening, which is what triggers indexing the document
+      @server.process_message({
+        method: "textDocument/documentSymbol",
+        params: { textDocument: { uri: uri } },
+      })
+
+      assert_nil(@server.global_state.index["ExcludedFromIndexing"])
+    ensure
+      FileUtils.rm(path) if File.exist?(path)
+    end
+  end
+
   def test_diagnose_state
     @server.process_message({
       method: "textDocument/didOpen",
