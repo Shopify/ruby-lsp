@@ -1078,6 +1078,109 @@ class RubyDocumentTest < Minitest::Test
     assert_predicate(document, :should_index?)
   end
 
+  def test_locate_returns_nesting_nodes_for_class_and_module
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      module Foo
+        class Bar
+          def baz
+            hello
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 6 })
+    nesting_nodes = node_context.nesting_nodes
+
+    assert_equal(4, nesting_nodes.length)
+    assert_instance_of(Prism::ProgramNode, nesting_nodes[0])
+    assert_instance_of(Prism::ModuleNode, nesting_nodes[1])
+    assert_instance_of(Prism::ClassNode, nesting_nodes[2])
+    assert_instance_of(Prism::DefNode, nesting_nodes[3])
+
+    module_node = nesting_nodes[1] #: as Prism::ModuleNode
+    assert_equal("Foo", module_node.constant_path.slice)
+
+    class_node = nesting_nodes[2] #: as Prism::ClassNode
+    assert_equal("Bar", class_node.constant_path.slice)
+
+    def_node = nesting_nodes[3] #: as Prism::DefNode
+    assert_equal(:baz, def_node.name)
+  end
+
+  def test_locate_returns_nesting_nodes_for_singleton_class
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+        class << self
+          def bar
+            hello
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 6 })
+    nesting_nodes = node_context.nesting_nodes
+
+    assert_equal(4, nesting_nodes.length)
+    assert_instance_of(Prism::ProgramNode, nesting_nodes[0])
+    assert_instance_of(Prism::ClassNode, nesting_nodes[1])
+    assert_instance_of(Prism::SingletonClassNode, nesting_nodes[2])
+    assert_instance_of(Prism::DefNode, nesting_nodes[3])
+  end
+
+  def test_locate_returns_nesting_nodes_for_blocks
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+        def bar
+          items.each do |item|
+            process(item)
+          end
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 3, character: 6 })
+    nesting_nodes = node_context.nesting_nodes
+
+    assert_equal(4, nesting_nodes.length)
+    assert_instance_of(Prism::ProgramNode, nesting_nodes[0])
+    assert_instance_of(Prism::ClassNode, nesting_nodes[1])
+    assert_instance_of(Prism::DefNode, nesting_nodes[2])
+    assert_instance_of(Prism::BlockNode, nesting_nodes[3])
+  end
+
+  def test_locate_returns_nesting_nodes_for_lambdas
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      class Foo
+        def bar
+          processor = ->(item) { process(item) }
+        end
+      end
+    RUBY
+
+    node_context = document.locate_node({ line: 2, character: 37 })
+    nesting_nodes = node_context.nesting_nodes
+
+    assert_equal(4, nesting_nodes.length)
+    assert_instance_of(Prism::ProgramNode, nesting_nodes[0])
+    assert_instance_of(Prism::ClassNode, nesting_nodes[1])
+    assert_instance_of(Prism::DefNode, nesting_nodes[2])
+    assert_instance_of(Prism::LambdaNode, nesting_nodes[3])
+  end
+
+  def test_nesting_nodes_at_top_level
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY, version: 1, uri: @uri, global_state: @global_state)
+      puts "Hello, World!"
+    RUBY
+
+    node_context = document.locate_node({ line: 0, character: 5 })
+    nesting_nodes = node_context.nesting_nodes
+
+    assert_equal(1, nesting_nodes.length)
+    assert_instance_of(Prism::ProgramNode, nesting_nodes[0])
+  end
+
   private
 
   def assert_error_edit(actual, error_range)
