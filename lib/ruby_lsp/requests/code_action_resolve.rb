@@ -12,6 +12,55 @@ module RubyLsp
       NEW_VARIABLE_NAME = "new_variable"
       NEW_METHOD_NAME = "new_method"
 
+      # The nodes that start a new local variable scope
+      SCOPE_NODES = [
+        Prism::ProgramNode,
+        Prism::DefNode,
+        Prism::ClassNode,
+        Prism::ModuleNode,
+        Prism::SingletonClassNode,
+        Prism::BlockNode,
+        Prism::LambdaNode,
+      ] #: Array[singleton(Prism::Node)]
+
+      # Binding strength of the operators an inlined value can contain, from loosest to tightest. Operators that are
+      # methods are keyed by name
+      OPERATOR_PRECEDENCE = {
+        ternary: 0,
+        range: 1,
+        "||": 2,
+        "&&": 3,
+        "<=>": 4,
+        "==": 4,
+        "===": 4,
+        "!=": 4,
+        "=~": 4,
+        "!~": 4,
+        ">": 5,
+        ">=": 5,
+        "<": 5,
+        "<=": 5,
+        "|": 6,
+        "^": 6,
+        "&": 7,
+        "<<": 8,
+        ">>": 8,
+        "+": 9,
+        "-": 9,
+        "*": 10,
+        "/": 10,
+        "%": 10,
+        "-@": 11,
+        "**": 12,
+        "!": 13,
+        "~": 13,
+        "+@": 13,
+      } #: Hash[Symbol, Integer]
+
+      # Operators an inlined value may repeat without changing what the code does. `<<` is left out because it appends
+      # to its receiver
+      PURE_OPERATORS = (OPERATOR_PRECEDENCE.keys - [:ternary, :range, :"||", :"&&", :<<]).freeze #: Array[Symbol]
+
       class CodeActionError < StandardError; end
       class EmptySelectionError < CodeActionError; end
       class InvalidTargetRangeError < CodeActionError; end
@@ -37,6 +86,8 @@ module RubyLsp
           refactor_method
         when CodeActions::TOGGLE_BLOCK_STYLE_TITLE
           switch_block_style
+        when CodeActions::INLINE_VARIABLE_TITLE
+          inline_variable
         when CodeActions::CREATE_ATTRIBUTE_READER,
              CodeActions::CREATE_ATTRIBUTE_WRITER,
              CodeActions::CREATE_ATTRIBUTE_ACCESSOR
@@ -295,6 +346,401 @@ module RubyLsp
         )
       end
 
+      #: -> (Interface::CodeAction)
+      def inline_variable
+        source_range = @code_action.dig(:data, :range)
+        target = CodeActions.local_variable_at(@document, source_range)
+        raise InvalidTargetRangeError, "Inline variable needs the cursor on a local variable" unless target
+
+        scope = declaring_scope(target)
+        raise InvalidTargetRangeError, "Couldn't find where the variable is defined" unless scope
+
+        references = LocalVariableReferences.new(target.name)
+        references.collect(scope)
+
+        writes = references.writes
+        if writes.size != 1 || references.other_writes > 0
+          raise InvalidTargetRangeError, "Only a variable assigned once can be inlined"
+        end
+
+        write, write_ancestors = writes.first #: as !nil
+
+        statements = write_ancestors.last
+        unless statements.is_a?(Prism::StatementsNode)
+          raise InvalidTargetRangeError, "Only a variable assigned in a statement of its own can be inlined"
+        end
+
+        reads = references.reads
+        raise InvalidTargetRangeError, "The variable is never read" if reads.empty?
+
+        value = write.value
+        raise InvalidTargetRangeError, "Values with heredocs can't be inlined" if contains_heredoc?(value)
+
+        write_end = write.location.end_offset
+        statements_end = statements.location.end_offset
+        unless reads.all? { |read, _| read.location.start_offset >= write_end && read.location.end_offset <= statements_end }
+          raise InvalidTargetRangeError, "The variable is read where its assignment may not have run"
+        end
+
+        if pure_value?(value)
+          # A read inside a block can run any time later, so the value has to hold until the end of the scope
+          deferred = reads.any? { |_, ancestors| deferred_read?(ancestors, statements) }
+          last_use = deferred ? scope.location.end_offset : reads.map { |read, _| read.location.start_offset }.max #: as !nil
+          if reassigned_between?(scope, variable_names(value), write_end, last_use)
+            raise InvalidTargetRangeError, "A variable the value uses is reassigned before the value is read"
+          end
+        else
+          read, ancestors = reads.first #: as !nil
+          unless reads.size == 1 && evaluated_once_after?(read, ancestors, statements, write)
+            raise InvalidTargetRangeError,
+              "A value that calls methods or builds objects can only be inlined once, into the next statement"
+          end
+        end
+
+        edits = reads.map do |read, ancestors|
+          source = value.slice
+          source = "(#{source})" if needs_parentheses?(value, read, ancestors)
+          Interface::TextEdit.new(range: range_from_location(read.location), new_text: source)
+        end
+        edits.unshift(Interface::TextEdit.new(range: assignment_removal_range(write), new_text: ""))
+
+        Interface::CodeAction.new(
+          title: CodeActions::INLINE_VARIABLE_TITLE,
+          edit: Interface::WorkspaceEdit.new(
+            document_changes: [
+              Interface::TextDocumentEdit.new(
+                text_document: Interface::OptionalVersionedTextDocumentIdentifier.new(
+                  uri: @code_action.dig(:data, :uri),
+                  version: nil,
+                ),
+                edits: edits,
+              ),
+            ],
+          ),
+        )
+      end
+
+      # The scope a local variable belongs to: the enclosing scope node as many block levels up as the variable's depth
+      #: ((Prism::LocalVariableWriteNode | Prism::LocalVariableReadNode) target) -> Prism::Node?
+      def declaring_scope(target)
+        scopes = enclosing_scopes(@document.ast, target, [])
+        return unless scopes
+
+        index = scopes.size - 1 - target.depth
+        scopes[index] if index >= 0
+      end
+
+      #: (Prism::Node node, Prism::Node target, Array[Prism::Node] scopes) -> Array[Prism::Node]?
+      def enclosing_scopes(node, target, scopes)
+        return scopes if node.equal?(target)
+
+        scopes = [*scopes, node] if SCOPE_NODES.any? { |type| node.is_a?(type) }
+        target_location = target.location
+
+        node.compact_child_nodes.each do |child|
+          location = child.location
+          next if location.start_offset > target_location.start_offset
+          next if location.end_offset < target_location.end_offset
+
+          found = enclosing_scopes(child, target, scopes)
+          return found if found
+        end
+
+        nil
+      end
+
+      # Whether a read inside a block or lambda may run after the statements the assignment is part of
+      #: (Array[Prism::Node] ancestors, Prism::StatementsNode statements) -> bool
+      def deferred_read?(ancestors, statements)
+        index = ancestors.index { |node| node.equal?(statements) } || 0
+        ancestors.drop(index).any? { |node| node.is_a?(Prism::BlockNode) || node.is_a?(Prism::LambdaNode) }
+      end
+
+      # Whether the read is in the statement right after the assignment, where it is evaluated exactly once whenever
+      # that statement runs
+      #: (Prism::LocalVariableReadNode read, Array[Prism::Node] ancestors, Prism::StatementsNode statements, Prism::LocalVariableWriteNode write) -> bool
+      def evaluated_once_after?(read, ancestors, statements, write)
+        body = statements.body
+        index = body.index { |node| node.equal?(write) } #: as !nil
+        next_statement = body[index + 1]
+        return false unless next_statement
+
+        path = [*ancestors, read]
+        start = path.index { |node| node.equal?(next_statement) }
+        return false unless start
+
+        path.drop(start).each_cons(2).all? { |node, child| node && child && evaluated_once_with?(node, child) }
+      end
+
+      # Whether `child` is evaluated exactly once each time `node` is
+      #: (Prism::Node node, Prism::Node child) -> bool
+      def evaluated_once_with?(node, child)
+        case node
+        when Prism::IfNode, Prism::UnlessNode, Prism::CaseNode, Prism::CaseMatchNode
+          node.predicate.equal?(child)
+        when Prism::AndNode, Prism::OrNode
+          node.left.equal?(child)
+        when Prism::ForNode
+          node.collection.equal?(child)
+        when Prism::RescueModifierNode
+          node.expression.equal?(child)
+        when Prism::CallNode
+          !node.safe_navigation? || node.receiver.equal?(child)
+        when Prism::BlockNode, Prism::LambdaNode, Prism::WhileNode, Prism::UntilNode, Prism::BeginNode,
+          Prism::DefinedNode
+          false
+        else
+          true
+        end
+      end
+
+      # Whether evaluating the value again, or later, gives the same result as long as the variables it reads keep
+      # their values: literals that don't create objects, variables, constants and operators over them
+      #: (Prism::Node node) -> bool
+      def pure_value?(node)
+        pure = case node
+        when Prism::IntegerNode, Prism::FloatNode, Prism::RationalNode, Prism::ImaginaryNode, Prism::SymbolNode,
+          Prism::NilNode, Prism::TrueNode, Prism::FalseNode, Prism::SelfNode, Prism::LocalVariableReadNode,
+          Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode,
+          Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ParenthesesNode, Prism::StatementsNode,
+          Prism::ArgumentsNode
+          true
+        when Prism::CallNode
+          operator_call?(node) && PURE_OPERATORS.include?(node.name)
+        else
+          false
+        end
+
+        pure && node.compact_child_nodes.all? { |child| pure_value?(child) }
+      end
+
+      #: (Prism::Node node) -> Array[Symbol]
+      def variable_names(node)
+        names = case node
+        when Prism::LocalVariableReadNode, Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode,
+          Prism::GlobalVariableReadNode
+          [node.name]
+        else
+          []
+        end
+
+        node.compact_child_nodes.each { |child| names.concat(variable_names(child)) }
+        names
+      end
+
+      # Whether any of the variables is assigned between the two offsets
+      #: (Prism::Node node, Array[Symbol] names, Integer from, Integer to) -> bool
+      def reassigned_between?(node, names, from, to)
+        return false if names.empty?
+
+        case node
+        when Prism::LocalVariableWriteNode, Prism::LocalVariableOperatorWriteNode, Prism::LocalVariableAndWriteNode,
+          Prism::LocalVariableOrWriteNode, Prism::LocalVariableTargetNode, Prism::InstanceVariableWriteNode,
+          Prism::InstanceVariableOperatorWriteNode, Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOrWriteNode, Prism::InstanceVariableTargetNode, Prism::ClassVariableWriteNode,
+          Prism::ClassVariableOperatorWriteNode, Prism::ClassVariableAndWriteNode, Prism::ClassVariableOrWriteNode,
+          Prism::ClassVariableTargetNode, Prism::GlobalVariableWriteNode, Prism::GlobalVariableOperatorWriteNode,
+          Prism::GlobalVariableAndWriteNode, Prism::GlobalVariableOrWriteNode, Prism::GlobalVariableTargetNode
+          offset = node.location.start_offset
+          return true if offset > from && offset < to && names.include?(node.name)
+        end
+
+        node.compact_child_nodes.any? { |child| reassigned_between?(child, names, from, to) }
+      end
+
+      #: (Prism::Node node) -> bool
+      def contains_heredoc?(node)
+        heredoc = case node
+        when Prism::StringNode, Prism::InterpolatedStringNode, Prism::XStringNode, Prism::InterpolatedXStringNode
+          node.heredoc?
+        else
+          false
+        end
+
+        heredoc || node.compact_child_nodes.any? { |child| contains_heredoc?(child) }
+      end
+
+      # Whether the value needs parentheses to keep its meaning where the read was
+      #: (Prism::Node value, Prism::LocalVariableReadNode read, Array[Prism::Node] ancestors) -> bool
+      def needs_parentheses?(value, read, ancestors)
+        parent = ancestors.last
+        owner = ancestors[-2]
+
+        # `puts { a: 1 }` would pass a block
+        if value.is_a?(Prism::HashNode) && parent.is_a?(Prism::ArgumentsNode) &&
+            !(owner.is_a?(Prism::CallNode) && owner.opening_loc)
+          return true
+        end
+
+        return false if atomic?(value)
+
+        case parent
+        when Prism::StatementsNode
+          loose?(value)
+        when Prism::LocalVariableWriteNode, Prism::InstanceVariableWriteNode, Prism::ClassVariableWriteNode,
+          Prism::GlobalVariableWriteNode, Prism::ConstantWriteNode
+          loose?(value)
+        when Prism::AssocNode
+          loose?(value) || command_call?(value)
+        when Prism::ArrayNode
+          parent.opening_loc.nil? || loose?(value) || command_call?(value)
+        when Prism::IfNode, Prism::UnlessNode, Prism::WhileNode, Prism::UntilNode
+          return true unless parent.predicate.equal?(read)
+
+          if parent.is_a?(Prism::IfNode) && parent.if_keyword_loc.nil?
+            # A ternary's condition
+            value_precedence = precedence(value)
+            value_precedence.nil? || value_precedence <= OPERATOR_PRECEDENCE.fetch(:ternary)
+          else
+            value.is_a?(Prism::RescueModifierNode)
+          end
+        when Prism::ArgumentsNode
+          if owner.is_a?(Prism::CallNode) && operator_call?(owner)
+            operator_needs_parentheses?(value, owner, receiver: false)
+          elsif owner.is_a?(Prism::CallNode) && owner.opening_loc
+            loose?(value) || command_call?(value)
+          else
+            # Arguments without parentheses: `puts a`
+            loose?(value) || command_call?(value) || do_block_call?(value)
+          end
+        when Prism::CallNode
+          # The read is the receiver
+          operator_call?(parent) ? operator_needs_parentheses?(value, parent, receiver: true) : true
+        else
+          true
+        end
+      end
+
+      # Whether the value, placed as an operand of the operator call, would bind to its neighbours differently
+      #: (Prism::Node value, Prism::CallNode call, receiver: bool) -> bool
+      def operator_needs_parentheses?(value, call, receiver:)
+        value_precedence = precedence(value)
+        return true unless value_precedence
+
+        call_precedence = OPERATOR_PRECEDENCE.fetch(call.name)
+        return value_precedence < call_precedence if value_precedence != call_precedence
+
+        # At the same precedence, `**` groups to the right, `==` and its peers don't group at all, and the others
+        # group to the left
+        return receiver if call.name == :**
+        return true if call_precedence == OPERATOR_PRECEDENCE.fetch(:==)
+
+        !receiver
+      end
+
+      #: (Prism::Node node) -> Integer?
+      def precedence(node)
+        case node
+        when Prism::CallNode
+          OPERATOR_PRECEDENCE[node.name] if operator_call?(node) && !loose?(node)
+        when Prism::AndNode, Prism::OrNode
+          OPERATOR_PRECEDENCE[node.operator_loc.slice.to_sym] unless loose?(node)
+        when Prism::RangeNode
+          OPERATOR_PRECEDENCE[:range]
+        when Prism::IfNode
+          OPERATOR_PRECEDENCE[:ternary] if node.if_keyword_loc.nil?
+        when Prism::IntegerNode, Prism::FloatNode, Prism::RationalNode, Prism::ImaginaryNode
+          OPERATOR_PRECEDENCE[:-@]
+        end
+      end
+
+      # Values that read the same wherever they are placed
+      #: (Prism::Node node) -> bool
+      def atomic?(node)
+        case node
+        when Prism::IntegerNode, Prism::FloatNode, Prism::RationalNode, Prism::ImaginaryNode
+          !node.slice.start_with?("-")
+        when Prism::StringNode, Prism::InterpolatedStringNode, Prism::SymbolNode, Prism::InterpolatedSymbolNode,
+          Prism::RegularExpressionNode, Prism::InterpolatedRegularExpressionNode, Prism::XStringNode,
+          Prism::NilNode, Prism::TrueNode, Prism::FalseNode, Prism::SelfNode, Prism::LocalVariableReadNode,
+          Prism::InstanceVariableReadNode, Prism::ClassVariableReadNode, Prism::GlobalVariableReadNode,
+          Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ParenthesesNode, Prism::ArrayNode,
+          Prism::HashNode
+          true
+        when Prism::CallNode
+          !operator_call?(node) && !command_call?(node) && !do_block_call?(node)
+        else
+          false
+        end
+      end
+
+      # Method calls with a `do...end` block, which binds to an enclosing call without parentheses
+      #: (Prism::Node node) -> bool
+      def do_block_call?(node)
+        return false unless node.is_a?(Prism::CallNode)
+
+        block = node.block
+        block.is_a?(Prism::BlockNode) && block.opening_loc.slice == "do"
+      end
+
+      # Operator calls written as operators: `a + b`, `-a`, `!a`, but not `a.+(b)`
+      #: (Prism::CallNode node) -> bool
+      def operator_call?(node)
+        OPERATOR_PRECEDENCE.key?(node.name) && node.call_operator_loc.nil? && node.message != "not"
+      end
+
+      # Method calls with arguments but no parentheses, like `foo bar`
+      #: (Prism::Node node) -> bool
+      def command_call?(node)
+        node.is_a?(Prism::CallNode) && !operator_call?(node) && !node.arguments.nil? && node.opening_loc.nil?
+      end
+
+      # Expressions that bind looser than assignment and argument lists
+      #: (Prism::Node node) -> bool
+      def loose?(node)
+        case node
+        when Prism::AndNode, Prism::OrNode
+          ["and", "or"].include?(node.operator_loc.slice)
+        when Prism::CallNode
+          node.message == "not"
+        when Prism::RescueModifierNode
+          true
+        when Prism::DefinedNode
+          node.lparen_loc.nil?
+        else
+          false
+        end
+      end
+
+      #: (Prism::IfNode | Prism::UnlessNode | Prism::WhileNode | Prism::UntilNode node) -> bool
+      def keyword_predicate?(node)
+        case node
+        when Prism::IfNode
+          !node.if_keyword_loc.nil? && !node.end_keyword_loc.nil?
+        when Prism::UnlessNode
+          !node.end_keyword_loc.nil?
+        else
+          !node.closing_loc.nil?
+        end
+      end
+
+      # The range that removes the assignment: its whole lines when nothing else is on them, or the assignment and
+      # the semicolon that follows it
+      #: (Prism::LocalVariableWriteNode write) -> Interface::Range
+      def assignment_removal_range(write)
+        location = write.location
+        lines = @document.source.lines
+        first_line = lines[location.start_line - 1] || ""
+        last_line = lines[location.end_line - 1] || ""
+        before = first_line.byteslice(0, location.start_column) || ""
+        after = last_line.byteslice(location.end_column..) || ""
+
+        if before.strip.empty? && after.strip.empty?
+          return Interface::Range.new(
+            start: Interface::Position.new(line: location.start_line - 1, character: 0),
+            end: Interface::Position.new(line: location.end_line, character: 0),
+          )
+        end
+
+        separator = after[/\A\s*;[ \t]*/]
+        return range_from_location(location) unless separator
+
+        Interface::Range.new(
+          start: Interface::Position.new(line: location.start_line - 1, character: location.start_column),
+          end: Interface::Position.new(line: location.end_line - 1, character: location.end_column + separator.bytesize),
+        )
+      end
+
       #: (Hash[Symbol, untyped] range, String new_text) -> Interface::TextEdit
       def create_text_edit(range, new_text)
         Interface::TextEdit.new(
@@ -438,6 +884,78 @@ module RubyLsp
             ],
           ),
         )
+      end
+
+      # Collects the assignments and reads of a local variable in the scope that declares it, with the nodes that
+      # enclose each one
+      class LocalVariableReferences
+        #: Array[[Prism::LocalVariableWriteNode, Array[Prism::Node]]]
+        attr_reader :writes
+
+        #: Array[[Prism::LocalVariableReadNode, Array[Prism::Node]]]
+        attr_reader :reads
+
+        # Other ways the variable gets a value: parameters, operator assignments and multiple assignment targets
+        #: Integer
+        attr_reader :other_writes
+
+        #: (Symbol name) -> void
+        def initialize(name)
+          @name = name
+          @writes = [] #: Array[[Prism::LocalVariableWriteNode, Array[Prism::Node]]]
+          @reads = [] #: Array[[Prism::LocalVariableReadNode, Array[Prism::Node]]]
+          @other_writes = 0 #: Integer
+        end
+
+        #: (Prism::Node scope) -> void
+        def collect(scope)
+          scope.compact_child_nodes.each { |child| visit(child, [scope], 0) }
+        end
+
+        private
+
+        # `depth` counts the blocks between the node and the scope, matching the depth Prism gives references to the
+        # variable from inside them
+        #: (Prism::Node node, Array[Prism::Node] ancestors, Integer depth) -> void
+        def visit(node, ancestors, depth)
+          record(node, ancestors, depth)
+          ancestors = [*ancestors, node]
+
+          case node
+          when Prism::DefNode
+            # A method body has its own variables, but its receiver is evaluated in the enclosing scope
+            receiver = node.receiver
+            visit(receiver, ancestors, depth) if receiver
+          when Prism::ClassNode
+            superclass = node.superclass
+            visit(superclass, ancestors, depth) if superclass
+          when Prism::SingletonClassNode
+            visit(node.expression, ancestors, depth)
+          when Prism::ModuleNode
+            nil
+          else
+            depth += 1 if node.is_a?(Prism::BlockNode) || node.is_a?(Prism::LambdaNode)
+            node.compact_child_nodes.each { |child| visit(child, ancestors, depth) }
+          end
+        end
+
+        #: (Prism::Node node, Array[Prism::Node] ancestors, Integer depth) -> void
+        def record(node, ancestors, depth)
+          case node
+          when Prism::LocalVariableReadNode
+            @reads << [node, ancestors] if node.name == @name && node.depth == depth
+          when Prism::LocalVariableWriteNode
+            @writes << [node, ancestors] if node.name == @name && node.depth == depth
+          when Prism::LocalVariableOperatorWriteNode, Prism::LocalVariableAndWriteNode, Prism::LocalVariableOrWriteNode,
+            Prism::LocalVariableTargetNode
+            @other_writes += 1 if node.name == @name && node.depth == depth
+          when Prism::RequiredParameterNode, Prism::OptionalParameterNode, Prism::RestParameterNode,
+            Prism::RequiredKeywordParameterNode, Prism::OptionalKeywordParameterNode, Prism::KeywordRestParameterNode,
+            Prism::BlockParameterNode, Prism::BlockLocalVariableNode
+            # Parameters of the scope itself; those of nested blocks declare variables of their own
+            @other_writes += 1 if node.name == @name && depth.zero?
+          end
+        end
       end
     end
   end
