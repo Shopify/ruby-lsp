@@ -278,6 +278,86 @@ class ServerTest < Minitest::Test
     assert_nil(result.response)
   end
 
+  def test_diagnostics_parse_after_a_queued_document_change
+    release_worker = Queue.new
+    pipe_reader = nil #: IO?
+    pipe_writer = nil #: IO?
+    reader_thread = nil #: Thread?
+
+    source = <<~RUBY.dup
+      def foo
+        x = 1
+        x
+      end
+    RUBY
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "diagnostics.rb"))
+    @server.global_state.apply_options({
+      workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
+      initializationOptions: { linters: [] },
+      capabilities: { general: { positionEncodings: ["utf-8"] } },
+    })
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: { uri: uri, text: source, version: 1, languageId: "ruby" },
+      },
+    })
+
+    worker_started = Queue.new
+    original_process_message = @server.method(:process_message)
+    @server.define_singleton_method(:process_message) do |message|
+      if message[:method] == "textDocument/didChange"
+        worker_started << true
+        release_worker.pop
+      end
+      original_process_message.call(message)
+    end
+
+    messages = [
+      {
+        method: "textDocument/didChange",
+        params: {
+          textDocument: { uri: uri.to_s, version: 2 },
+          contentChanges: [
+            {
+              range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+              text: "  y = \"abc\"\n",
+            },
+          ],
+        },
+      },
+      {
+        id: 2,
+        method: "textDocument/diagnostic",
+        params: { textDocument: { uri: uri.to_s } },
+      },
+    ].map do |message|
+      json = message.to_json
+      "Content-Length: #{json.bytesize}\r\n\r\n#{json}"
+    end.join
+    pipe_reader, pipe_writer = IO.pipe
+    pipe_writer.write(messages)
+    pipe_writer.close
+    @server.instance_variable_set(:@reader, RubyLsp::MessageReader.new(pipe_reader))
+
+    reader_thread = Thread.new { @server.start }
+    assert(worker_started.pop(timeout: 20), "worker did not receive the document change")
+    reader_thread.value
+    release_worker << true
+
+    result = @server.pop_response
+    result = @server.pop_response until result.is_a?(RubyLsp::Result) && result.id == 2
+    assert_includes(
+      result.response.items.map(&:message),
+      "assigned but unused variable - y",
+    )
+  ensure
+    release_worker&.close
+    reader_thread&.join
+    pipe_reader&.close unless pipe_reader&.closed?
+    pipe_writer&.close unless pipe_writer&.closed?
+  end
+
   def test_did_close_clears_diagnostics
     @server.process_message({
       method: "textDocument/didClose",
