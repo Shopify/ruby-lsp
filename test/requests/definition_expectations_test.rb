@@ -136,6 +136,54 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_go_to_definition_when_cursor_is_after_reference
+    source = <<~RUBY
+      class Foo; end
+
+      Foo
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 2, character: 3 } },
+      )
+
+      response = server.pop_response.response
+
+      refute_empty(response)
+      assert_equal(uri.to_s, response.first.attributes[:targetUri])
+      target_range = response.first.attributes[:targetRange].attributes
+      assert_equal(0, target_range[:start].to_hash[:line])
+    end
+  end
+
+  def test_go_to_definition_when_cursor_is_after_method_reference
+    source = <<~RUBY
+      class Bar
+        def self.something; end
+      end
+
+      Bar.something
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 4, character: 13 } },
+      )
+
+      response = server.pop_response.response
+
+      refute_empty(response)
+      assert_equal(uri.to_s, response.first.attributes[:targetUri])
+      target_range = response.first.attributes[:targetRange].attributes
+      assert_equal(1, target_range[:start].to_hash[:line])
+    end
+  end
+
   def test_multibyte_character_precision
     source = <<~RUBY
       module Fほげ
