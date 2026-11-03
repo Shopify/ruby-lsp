@@ -1487,6 +1487,75 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_opening_file_during_initial_indexing_does_not_duplicate_entries
+    Dir.mktmpdir do |workspace|
+      path = File.join(workspace, "foo.rb")
+      disk_source = "class Foo\nend\nclass OnDiskOnly\nend"
+      editor_source = "class Foo\nend\nclass EditorOnly\nend"
+      File.write(path, disk_source)
+      uri = URI::Generic.from_path(path: path)
+
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: {},
+          capabilities: { general: { positionEncodings: ["utf-8"] }, window: { workDoneProgress: true } },
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace).to_s }],
+        },
+      })
+
+      index = @server.global_state.index
+      original_index_all = index.method(:index_all)
+      original_index_file = index.method(:index_file)
+      indexing_started = Queue.new
+      continue_indexing = Queue.new
+
+      # Limit the initial index to this file and pause before it is indexed so the document request can win the race.
+      index.define_singleton_method(:index_all) do |**_kwargs, &block|
+        original_index_all.call(uris: [uri], &block)
+      end
+      index.define_singleton_method(:index_file) do |candidate_uri, **kwargs|
+        if candidate_uri == uri
+          indexing_started << true
+          continue_indexing.pop
+        end
+        original_index_file.call(candidate_uri, **kwargs)
+      end
+
+      @server.process_message({ method: "initialized", params: {} })
+      indexing_started.pop
+
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: editor_source,
+            version: 1,
+            languageId: "ruby",
+          },
+        },
+      })
+      @server.process_message({
+        id: 2,
+        method: "textDocument/documentSymbol",
+        params: { textDocument: { uri: uri } },
+      })
+
+      continue_indexing << true
+      wait_for_indexing
+
+      assert_equal(1, index["Foo"]&.length)
+      assert_equal(1, index["EditorOnly"]&.length)
+      assert_nil(index["OnDiskOnly"])
+    ensure
+      continue_indexing << true if continue_indexing && continue_indexing.empty?
+      index.singleton_class.remove_method(:index_all) if index&.singleton_class&.instance_methods(false)&.include?(:index_all)
+      index.singleton_class.remove_method(:index_file) if index&.singleton_class&.instance_methods(false)&.include?(:index_file)
+    end
+  end
+
   def test_requests_code_lens_refresh_after_indexing
     @server.process_message({
       id: 1,
