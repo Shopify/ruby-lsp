@@ -55,7 +55,8 @@ module RubyLsp
           code_units_cache: document.code_units_cache,
         )
 
-        if char_position.positive? && node_context.node.is_a?(Prism::ProgramNode)
+        if char_position.positive? &&
+            (node_context.node.is_a?(Prism::ProgramNode) || position_outside_target?(position, node_context.node))
           previous_node_context = RubyDocument.locate(
             document.ast,
             char_position - 1,
@@ -121,7 +122,7 @@ module RubyLsp
         when Prism::CallNode
           node.message_loc
         when Prism::ConstantPathNode
-          node.child_nodes.last&.location
+          node.name_loc
         else
           node.location
         end

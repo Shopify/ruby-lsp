@@ -184,6 +184,76 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_go_to_definition_at_reference_boundaries
+    constants = "module Foo\n  class Bar; end\nend\n"
+    method = "def consume(value); end\n"
+    cases = {
+      "bare constant" => ["class Foo; end\nFoo|\n", 0],
+      "method reference" => ["class Bar\n  def self.something; end\nend\nBar.something|\n", 1],
+      "qualified constant" => [constants + "Foo::Bar|\n", 1],
+      "absolute constant" => ["class Foo; end\n::Foo|\n", 0],
+      "absolute qualified constant" => [constants + "::Foo::Bar|\n", 1],
+      "deep qualified constant" => [
+        "module Outer\n  module Inner\n    class Leaf; end\n  end\nend\nOuter::Inner::Leaf|\n", 2,
+      ],
+      "lexically nested constant" => ["module Foo\n  class Bar; end\n  Bar|\nend\n", 1],
+      "qualified argument" => [method + constants + "consume(Foo::Bar|)\n", 2],
+      "bare argument" => ["class Foo; end\n" + method + "consume(Foo|)\n", 0],
+      "array element" => [constants + "[Foo::Bar|]\n", 1],
+      "before whitespace" => [constants + "Foo::Bar| \n", 1],
+      "after whitespace" => [constants + "Foo::Bar |\n", nil],
+      "unknown constant" => [constants + "Foo::Missing|\n", nil],
+      "partial constant" => [constants + "Foo::Ba|\n", nil],
+      "inside a constant" => [constants + "Foo::Ba|r\n", 1],
+      "start of terminal constant" => [constants + "Foo::|Bar\n", 1],
+      "preserves the current namespace separator target" => [constants + "Foo|::Bar\n", 1],
+      "incomplete constant path" => [constants + "Foo::|\n", nil],
+      "line start" => [constants + "|Foo::Bar\n", 0],
+      "multibyte constant" => ["module Fほげ\n  class Bar; end\nend\nFほげ::Bar|\n", 1],
+      "surrogate pair before reference" => [constants + '"😀"; Foo::Bar|' + "\n", 1],
+      "argument after whitespace" => ["class Foo; end\n" + method + "consume(Foo |)\n", nil],
+      "unknown argument" => ["class Foo; end\n" + method + "consume(Missing|)\n", nil],
+      "call name" => ["class Host\n  def self.consume(value); end\nend\nHost.consume|(1)\n", 1],
+      "after call parentheses" => [method + "consume(1)|\n", nil],
+      "after a constant argument call" => [method + constants + "consume(Foo::Bar)|\n", nil],
+      "numeric argument" => [method + "consume(1|)\n", nil],
+      "string argument" => [method + 'consume("Foo"|)' + "\n", nil],
+      "symbol argument" => [method + "consume(:Foo|)\n", nil],
+      "inside a comment" => [constants + "Foo::Bar # comment|\n", nil],
+      "after array delimiter" => [constants + "[Foo::Bar]|\n", nil],
+      "write target" => [constants + "Foo::Bar| = nil\n", 1],
+      "assignment value" => [constants + "value = Foo::Bar|\n", 1],
+      "next argument" => [method + constants + "consume(Foo::Bar, |1)\n", nil],
+    }
+
+    cases.each do |name, (marked_source, expected_line)|
+      before_cursor, after_cursor = marked_source.split("|", 2)
+      source = before_cursor + after_cursor
+      position = {
+        line: before_cursor.count("\n"),
+        character: before_cursor.split("\n", -1).last.encode(Encoding::UTF_16LE).bytesize / 2,
+      }
+
+      with_server(source, stub_no_typechecker: true) do |server, uri|
+        server.process_message(
+          id: 1,
+          method: "textDocument/definition",
+          params: { textDocument: { uri: uri }, position: position },
+        )
+        response = server.pop_response.response
+
+        if expected_line
+          refute_empty(response, name)
+          assert_equal(uri.to_s, response.first.attributes[:targetUri], name)
+          target_range = response.first.attributes[:targetSelectionRange].attributes
+          assert_equal(expected_line, target_range[:start].to_hash[:line], name)
+        else
+          assert_empty(response, name)
+        end
+      end
+    end
+  end
+
   def test_multibyte_character_precision
     source = <<~RUBY
       module Fほげ
