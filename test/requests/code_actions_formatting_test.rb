@@ -25,6 +25,38 @@ class CodeActionsFormattingTest < Minitest::Test
     assert_string_literal_autocorrected("utf-32")
   end
 
+  def test_autocorrect_trailing_empty_lines_utf8
+    assert_trailing_empty_lines_autocorrected("utf-8")
+  end
+
+  def test_autocorrect_trailing_empty_lines_utf16
+    assert_trailing_empty_lines_autocorrected("utf-16")
+  end
+
+  def test_autocorrect_trailing_empty_lines_utf32
+    assert_trailing_empty_lines_autocorrected("utf-32")
+  end
+
+  def test_autocorrect_empty_document
+    document = RubyLsp::RubyDocument.new(
+      source: "",
+      version: 1,
+      uri: URI::Generic.from_path(path: __FILE__),
+      global_state: RubyLsp::GlobalState.new,
+    )
+    range = stub(line: 1, column: 0, last_line: 1, last_column: 0)
+    offense = stub(corrector: stub(as_replacements: [[range, "# comment"]]))
+    diagnostic = RubyLsp::Requests::Support::RuboCopDiagnostic.new(document, offense, document.uri)
+
+    edit = diagnostic.send(:offense_replacements).first
+    assert_equal(0, edit.range.start.line)
+    assert_equal(0, edit.range.start.character)
+    assert_equal(0, edit.range.end.character)
+
+    range.stubs(:last_line).returns(2)
+    assert_raises(IndexError) { diagnostic.send(:offense_replacements) }
+  end
+
   def test_disable_line__lambda_indentation
     assert_disable_line("lambda_indentation", "Layout/IndentationConsistency")
   end
@@ -61,6 +93,28 @@ class CodeActionsFormattingTest < Minitest::Test
   end
 
   private
+
+  def assert_trailing_empty_lines_autocorrected(position_encoding)
+    ["\n", "\r\n"].each do |newline|
+      source = "value = \"こんにちは 😀\"#{newline}#{newline}"
+      expected = "value = \"こんにちは 😀\"\n"
+      assert_corrects_to_expected(
+        "Layout/TrailingEmptyLines",
+        "Autocorrect Layout/TrailingEmptyLines",
+        source,
+        expected,
+        position_encoding: position_encoding,
+      )
+    end
+
+    assert_corrects_to_expected(
+      "Layout/TrailingEmptyLines",
+      "Autocorrect Layout/TrailingEmptyLines",
+      "\n\n",
+      "\n",
+      position_encoding: position_encoding,
+    )
+  end
 
   def assert_string_literal_autocorrected(position_encoding)
     source = <<~RUBY

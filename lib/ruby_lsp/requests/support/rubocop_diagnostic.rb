@@ -123,7 +123,12 @@ module RubyLsp
 
         #: -> Array[Interface::TextEdit]
         def offense_replacements
-          source_lines = @document.cache_fetch("rubocop_source_lines") { @document.source.lines } #: Array[String]
+          source_lines = @document.cache_fetch("rubocop_source_lines") do
+            lines = @document.source.lines
+            # String#lines omits the empty logical line at the end of a newline-terminated document.
+            lines << "" if lines.empty? || @document.source.end_with?("\n")
+            lines
+          end #: Array[String]
 
           @offense.corrector.as_replacements.map do |range, replacement|
             Interface::TextEdit.new(
