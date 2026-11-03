@@ -233,6 +233,10 @@ module RubyLsp
           argument = arguments.first
           return super unless argument.is_a?(Prism::StringNode)
 
+          closing = argument.closing_loc
+          return super unless closing
+          return super if argument.opening_loc&.slice&.start_with?("<<")
+
           relative_path = argument.unescaped
           required_path = File.expand_path(relative_path, File.dirname(@source_path))
           required_path = "#{required_path}.rb" unless required_path.end_with?(".rb")
@@ -243,7 +247,16 @@ module RubyLsp
               .relative_path_from(Pathname.new(File.dirname(@source_path)))
               .to_s
             new_relative_path = new_relative_path.delete_suffix(".rb") unless relative_path.end_with?(".rb")
-            @edits << [argument.content_loc, new_relative_path]
+            opening = argument.opening_loc&.slice
+            case opening
+            when "'"
+              escaped_path = new_relative_path.gsub(/[\\']/) { |character| "\\#{character}" }
+              @edits << [argument.content_loc, escaped_path]
+            when '"'
+              @edits << [argument.content_loc, new_relative_path.dump.delete_prefix('"').delete_suffix('"')]
+            else
+              @edits << [argument.location, new_relative_path.dump]
+            end
           end
 
           super

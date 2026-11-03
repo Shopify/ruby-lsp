@@ -5,17 +5,30 @@ require "test_helper"
 
 class RenameTest < Minitest::Test
   def test_renaming_a_class_updates_require_relative_paths
+    assert_rename_updates_require_relative("lib", '"store"', "shop", same_directory: true)
+  end
+
+  def test_renaming_a_class_updates_nested_require_relative_paths
+    assert_rename_updates_require_relative("lib", '"lib/store"', "lib/shop")
+  end
+
+  def test_renaming_a_class_preserves_escaped_require_relative_paths
+    assert_rename_updates_require_relative("dir's", "'dir\\'s/store'", "dir\\'s/shop")
+  end
+
+  #: (String directory, String literal, String expected_content, ?same_directory: bool) -> void
+  def assert_rename_updates_require_relative(directory, literal, expected_content, same_directory: false)
     Dir.mktmpdir do |workspace|
-      lib_dir = File.join(workspace, "lib")
+      lib_dir = File.join(workspace, directory)
       FileUtils.mkdir_p(lib_dir)
 
       store_path = File.join(lib_dir, "store.rb")
       store_source = "class Store; end\n"
       File.write(store_path, store_source)
 
-      use_path = File.join(lib_dir, "use.rb")
+      use_path = File.join(same_directory ? lib_dir : workspace, "use.rb")
       use_source = <<~RUBY
-        require_relative "store"
+        require_relative #{literal}
         Store.new
         "require_relative 'store'"
       RUBY
@@ -57,7 +70,64 @@ class RenameTest < Minitest::Test
       end
 
       assert_includes(use_edit.edits.map(&:new_text), "Shop")
-      assert_equal(1, use_edit.edits.count { |edit| edit.new_text == "shop" })
+      assert_equal(1, use_edit.edits.count { |edit| edit.new_text == expected_content })
+      use_document = RubyLsp::RubyDocument.new(
+        source: use_source, version: 1, uri: use_uri, global_state: global_state,
+      )
+      use_document.push_edits(
+        use_edit.edits.sort_by { |edit| [-edit.range.start.line, -edit.range.start.character] }.map do |edit|
+          { range: edit.range.to_hash.transform_values(&:to_hash), text: edit.new_text }
+        end,
+        version: 2,
+      )
+      parsed = Prism.parse(use_document.source)
+      assert_empty(parsed.errors)
+      expected_path = same_directory ? "shop" : "#{directory}/shop"
+      assert_equal(expected_path, parsed.value.statements.body.first.arguments.arguments.first.unescaped)
+    end
+  end
+
+  def test_require_relative_edits_preserve_static_string_values
+    paths_and_literals = [
+      ["dir's/store", %q{'dir\'s/store'}],
+      ['dir"s/store', %q{"dir\"s/store"}],
+      ['dir\\name/store', "'dir\\\\name/store'"],
+      ['dir#{name}/store', %q{'dir#{name}/store'}],
+      ["dir}/store", "%q{dir\\}/store}"],
+      ['dir#{name}/store', '%Q{dir\\#{name}/store}'],
+      ["日本語/store", "'日本語/store'"],
+    ]
+
+    paths_and_literals.each do |path, literal|
+      source = "require_relative #{literal}"
+      old_path = File.expand_path(path, "/workspace") + ".rb"
+      new_path = old_path.sub(/store\.rb\z/, "shop.rb")
+      visitor = RubyLsp::Requests::Rename::RequireRelativeVisitor.new(
+        "/workspace/use.rb", { old_path => new_path }
+      )
+      parsed = Prism.parse(source)
+      assert_empty(parsed.errors, source)
+      visitor.visit(parsed.value)
+      refute_empty(visitor.edits, source)
+      visitor.edits.sort_by { |location, _| -location.start_offset }.each do |location, replacement|
+        source.bytesplice(location.start_offset, location.length, replacement)
+      end
+      parsed = Prism.parse(source)
+      assert_empty(parsed.errors, source)
+      argument = parsed.value.statements.body.first.arguments.arguments.first
+      assert_equal(path.sub(/store\z/, "shop"), argument.unescaped)
+    end
+  end
+
+  def test_require_relative_edits_leave_heredocs_and_dynamic_paths_unchanged
+    ["require_relative <<~PATH\n  store\nPATH\n", 'require_relative "#{directory}/store"'].each do |source|
+      visitor = RubyLsp::Requests::Rename::RequireRelativeVisitor.new(
+        "/workspace/use.rb", { "/workspace/store.rb" => "/workspace/shop.rb" }
+      )
+      parsed = Prism.parse(source)
+      assert_empty(parsed.errors)
+      visitor.visit(parsed.value)
+      assert_empty(visitor.edits)
     end
   end
 
