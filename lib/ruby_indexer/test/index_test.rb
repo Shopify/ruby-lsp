@@ -5,6 +5,64 @@ require_relative "test_case"
 
 module RubyIndexer
   class IndexTest < TestCase
+    def test_handle_change_can_index_from_its_block
+      uri = URI::Generic.from_path(path: "/fake/path/foo.rb")
+      @index.index_single(uri, "class Foo; end")
+
+      @index.handle_change(uri) do |index|
+        index.delete(uri)
+        index.index_single(uri, "class Bar; end")
+      end
+
+      assert_nil(@index["Foo"])
+      assert_equal(1, @index["Bar"]&.length)
+    end
+
+    def test_nested_indexing_keeps_other_threads_excluded
+      uri = URI::Generic.from_path(path: "/fake/path/foo.rb")
+      other_uri = URI::Generic.from_path(path: "/fake/path/other.rb")
+      started = Queue.new
+      worker = nil #: Thread?
+
+      @index.handle_change(uri) do |index|
+        index.index_single(uri, "class Foo; end")
+        worker = Thread.new do
+          started << true
+          index.index_single(other_uri, "class Other; end")
+        end
+        started.pop
+        assert_nil(worker.join(0.05), "another writer entered the outer change transaction")
+      end
+
+      worker = worker #: as !nil
+      refute_nil(worker.join(5), "writer did not resume after the change transaction")
+      worker.value
+      assert_equal(1, @index["Other"]&.length)
+    ensure
+      worker.kill if worker&.alive?
+    end
+
+    def test_indexing_lock_survives_marshalling_and_releases_on_exceptions
+      uri = URI::Generic.from_path(path: "/fake/path/foo.rb")
+      worker = nil #: Thread?
+      index = Marshal.load(Marshal.dump(@index)) #: as RubyIndexer::Index
+
+      assert_raises(RuntimeError) do
+        index.handle_change(uri) do |nested_index|
+          nested_index.index_single(uri, "class Foo; end")
+          raise "interrupted change"
+        end
+      end
+
+      worker = Thread.new { index.handle_change(uri, "class Bar; end") }
+      refute_nil(worker.join(5), "writer remained locked after an exception")
+      worker.value
+      assert_nil(index["Foo"])
+      assert_equal(1, index["Bar"]&.length)
+    ensure
+      worker.kill if worker&.alive?
+    end
+
     def test_entries_for_returns_nil_when_uri_has_no_declarations
       uri = URI::Generic.from_path(path: "/fake/path/foo.rb")
 

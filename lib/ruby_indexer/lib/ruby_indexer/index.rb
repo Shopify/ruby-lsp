@@ -1,6 +1,8 @@
 # typed: strict
 # frozen_string_literal: true
 
+require "monitor"
+
 module RubyIndexer
   class Index
     class UnresolvableAliasError < StandardError; end
@@ -69,7 +71,7 @@ module RubyIndexer
       # }
       @uris_to_entries = {} #: Hash[String, Array[Entry]]
       # Indexing runs on a background thread while document requests can update the same index.
-      @indexing_mutex = Mutex.new #: Thread::Mutex
+      @indexing_mutex = Monitor.new #: Monitor
 
       # Holds all require paths for every indexed item so that we can provide autocomplete for requires
       @require_paths_tree = PrefixTree.new #: PrefixTree[URI::Generic]
@@ -763,7 +765,7 @@ module RubyIndexer
 
     #: -> Hash[Symbol, untyped]
     def marshal_dump
-      # Mutex is not marshalable; it is recreated when the index is loaded.
+      # Monitor is not marshalable; it is recreated when the index is loaded.
       instance_variables.reject { |name| name == :@indexing_mutex }.to_h do |name|
         [name, instance_variable_get(name)]
       end
@@ -772,7 +774,7 @@ module RubyIndexer
     #: (Hash[Symbol, untyped] data) -> void
     def marshal_load(data)
       data.each { |name, value| instance_variable_set(name, value) }
-      @indexing_mutex = Mutex.new
+      @indexing_mutex = Monitor.new
     end
 
     private
