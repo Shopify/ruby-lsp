@@ -13,7 +13,13 @@ import { LOG_CHANNEL } from "../../common";
 import * as common from "../../common";
 import { Shadowenv, UntrustedWorkspaceError } from "../../ruby/shadowenv";
 import { Chruby } from "../../ruby/chruby";
-import { ACTIVATION_SEPARATOR, FIELD_SEPARATOR, MissingRubyError, VALUE_SEPARATOR } from "../../ruby/versionManager";
+import {
+  ACTIVATION_SEPARATOR,
+  ActivationResult,
+  FIELD_SEPARATOR,
+  MissingRubyError,
+  VALUE_SEPARATOR,
+} from "../../ruby/versionManager";
 
 import { createContext, FakeContext, stubWorkspaceConfiguration } from "./helpers";
 import { FAKE_TELEMETRY } from "./fakeTelemetry";
@@ -105,6 +111,63 @@ suite("Ruby environment activation", () => {
     assert.strictEqual(ruby.env.VERBOSE, undefined);
     assert.strictEqual(ruby.env.DEBUG, undefined);
     assert.strictEqual(ruby.env.RUBY_GC_HEAP_GROWTH_FACTOR, undefined);
+  });
+
+  test("Does not leak rbenv state into the extension host", async () => {
+    const rbenvVariables = ["RBENV_VERSION", "RBENV_DIR", "RBENV_HOOK_PATH", "RBENV_ORIG_PATH"] as const;
+    const originalEnv = process.env;
+    const originalRbenvValues = rbenvVariables.map((key) => process.env[key]);
+    try {
+      rbenvVariables.forEach((key) => {
+        process.env[key] = `host-${key}`;
+      });
+
+      const activatedEnv: NodeJS.ProcessEnv = {
+        ...process.env,
+        PATH: "/rbenv/shims:/usr/bin",
+        GEM_HOME: "/rubies/3.4.1/lib/ruby/gems/3.4.0",
+        RBENV_VERSION: "3.4.1",
+        RBENV_DIR: "/first/workspace",
+        RBENV_HOOK_PATH: "/rbenv/hooks",
+        RBENV_ORIG_PATH: "/usr/bin",
+      };
+      Object.defineProperty(context, "extensionMode", { value: vscode.ExtensionMode.Development });
+
+      const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
+      const manager = {
+        activate: (): Promise<ActivationResult> =>
+          Promise.resolve({
+            env: activatedEnv,
+            version: "3.4.1",
+            yjit: false,
+            gemPath: [],
+          }),
+      };
+
+      await (
+        ruby as unknown as {
+          runActivation: (manager: { activate: () => Promise<ActivationResult> }) => Promise<void>;
+        }
+      ).runActivation(manager);
+
+      assert.strictEqual(process.env.RBENV_VERSION, undefined);
+      assert.strictEqual(process.env.RBENV_DIR, undefined);
+      assert.strictEqual(process.env.RBENV_HOOK_PATH, undefined);
+      assert.strictEqual(process.env.RBENV_ORIG_PATH, undefined);
+      assert.strictEqual(process.env.PATH, activatedEnv.PATH);
+      assert.strictEqual(process.env.GEM_HOME, activatedEnv.GEM_HOME);
+      assert.strictEqual(ruby.env.RBENV_VERSION, "3.4.1");
+    } finally {
+      rbenvVariables.forEach((key, index) => {
+        const originalValue = originalRbenvValues[index];
+        if (originalValue === undefined) {
+          delete originalEnv[key];
+        } else {
+          originalEnv[key] = originalValue;
+        }
+      });
+      process.env = originalEnv;
+    }
   });
 
   test("Sets gem path for version managers based on shims", async () => {
