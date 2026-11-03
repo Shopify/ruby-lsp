@@ -16,7 +16,7 @@ module RubyLsp
       @cancelled_requests = [] #: Array[Integer]
       @worker = new_worker #: Thread
       @current_request_id = 1 #: Integer
-      @global_state = GlobalState.new #: GlobalState
+      @global_state = GlobalState.new(diagnostics_refresh_callback: -> { refresh_diagnostics }) #: GlobalState
       @store = Store.new(@global_state) #: Store
       @outgoing_dispatcher = Thread.new do
         unless @test_mode
@@ -192,6 +192,17 @@ module RubyLsp
 
       @outgoing_queue << message
       @current_request_id += 1 if message.is_a?(Request)
+    end
+
+    #: -> void
+    def refresh_diagnostics
+      @global_state.synchronize do
+        @store.each { |_uri, document| document.clear_cache("textDocument/diagnostic") }
+
+        if @global_state.client_capabilities.supports_diagnostic_refresh
+          send_message(Request.new(id: @current_request_id, method: "workspace/diagnostic/refresh", params: nil))
+        end
+      end
     end
 
     #: (Integer id) -> void
