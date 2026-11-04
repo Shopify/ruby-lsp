@@ -168,5 +168,47 @@ module RubyLsp
 
       assert_equal(one_based_line - 1, line)
     end
+
+    def test_resolve_reporter_port_matches_windows_path_variants
+      db = { "d:\\source\\repos\\myproject" => "12345" }
+
+      assert_equal(
+        "12345",
+        LspReporter.resolve_reporter_port(db, "D:/source/repos/myproject"),
+      )
+      assert_equal(
+        "12345",
+        LspReporter.resolve_reporter_port(db, "d:\\source\\repos\\myproject"),
+      )
+      assert_nil(LspReporter.resolve_reporter_port(db, "D:/other/project"))
+    end
+
+    def test_socket_connects_using_port_db_despite_windows_path_mismatch
+      server = TCPServer.new("127.0.0.1", 0)
+      port = server.addr[1].to_s
+      thread = Thread.new { server.accept }
+      io = nil #: Socket?
+
+      Dir.mktmpdir("ruby-lsp-3881-") do |tmpdir|
+        ENV.delete("RUBY_LSP_REPORTER_PORT")
+        Dir.stubs(:tmpdir).returns(tmpdir)
+        Dir.stubs(:pwd).returns("D:/source/repos/myproject")
+
+        port_db_path = File.join(tmpdir, "ruby-lsp", "test_reporter_port_db.json")
+        FileUtils.mkdir_p(File.dirname(port_db_path))
+        File.write(port_db_path, { "d:\\source\\repos\\myproject" => port }.to_json)
+
+        reporter = LspReporter.new
+        io = reporter.instance_variable_get(:@io)
+
+        assert_kind_of(Socket, io)
+
+        accepted = thread.join(1)&.value #: untyped
+        accepted&.close
+      end
+    ensure
+      io&.close
+      server.close
+    end
   end
 end
