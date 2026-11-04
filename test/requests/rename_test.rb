@@ -105,7 +105,64 @@ class RenameTest < Minitest::Test
     assert_equal("NewMe", untitled_change.edits[0].new_text)
   end
 
+  def test_renaming_from_constant_definition
+    source = <<~RUBY
+      Foo = 1
+      Foo
+    RUBY
+    expected = <<~RUBY
+      Renamed = 1
+      Renamed
+    RUBY
+
+    assert_equal(expected, rename_source(source, { line: 0, character: 1 }))
+  end
+
+  def test_renaming_from_constant_target
+    source = <<~RUBY
+      Foo, Bar = 1, 2
+      Foo
+      Bar
+    RUBY
+    expected = <<~RUBY
+      Renamed, Bar = 1, 2
+      Renamed
+      Bar
+    RUBY
+
+    assert_equal(expected, rename_source(source, { line: 0, character: 1 }))
+  end
+
   private
+
+  def rename_source(source, position)
+    source = source.dup
+    global_state = RubyLsp::GlobalState.new
+    uri = URI("untitled:constant-definition")
+    global_state.index.index_single(uri, source)
+    store = RubyLsp::Store.new(global_state)
+    document = store.set(
+      uri: uri,
+      source: source,
+      version: 1,
+      language_id: :ruby,
+    )
+
+    workspace_edit = RubyLsp::Requests::Rename.new(
+      global_state,
+      store,
+      document,
+      { position: position, newName: "Renamed" },
+    ).perform #: as !nil
+
+    document.push_edits(
+      workspace_edit.changes.fetch(uri.to_s).map do |edit|
+        { range: edit.range.to_hash.transform_values(&:to_hash), text: edit.new_text }
+      end,
+      version: 2,
+    )
+    document.source
+  end
 
   def expect_renames(fixture_path, new_fixture_path, expected, position, new_name)
     source = File.read(fixture_path)

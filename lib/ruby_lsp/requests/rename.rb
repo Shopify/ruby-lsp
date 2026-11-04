@@ -36,7 +36,13 @@ module RubyLsp
         node_context = RubyDocument.locate(
           @document.ast,
           char_position,
-          node_types: [Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode],
+          node_types: [
+            Prism::ConstantReadNode,
+            Prism::ConstantPathNode,
+            Prism::ConstantPathTargetNode,
+            Prism::ConstantWriteNode,
+            Prism::ConstantTargetNode,
+          ],
           code_units_cache: @document.code_units_cache,
         )
         target = node_context.node
@@ -51,7 +57,7 @@ module RubyLsp
           )
         end
 
-        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode
+        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::ConstantWriteNode | Prism::ConstantTargetNode
 
         name = RubyIndexer::Index.constant_name(target)
         return unless name
