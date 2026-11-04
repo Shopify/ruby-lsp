@@ -60,7 +60,8 @@ module RubyLsp
         reference_target = create_reference_target(target, node_context)
         return @locations unless reference_target
 
-        Dir.glob(File.join(@global_state.workspace_path, "**/*.rb")).each do |path|
+        Dir.glob("**/*.rb", base: @global_state.workspace_path).each do |relative_path|
+          path = File.join(@global_state.workspace_path, relative_path)
           uri = URI::Generic.from_path(path: path)
           # If the document is being managed by the client, then we should use whatever is present in the store instead
           # of reading from disk

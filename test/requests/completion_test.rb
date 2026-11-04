@@ -1761,6 +1761,94 @@ class CompletionTest < Minitest::Test
     end
   end
 
+  def test_relative_completion_with_a_comma_in_the_typed_path
+    # A prefix without a trailing slash is interpolated into a brace group, so an unescaped comma splits the
+    # alternation and the pattern silently matches nothing
+    prefix = "a,b"
+    source = <<~RUBY
+      require_relative "#{prefix}"
+    RUBY
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
+    end_position = { line: 0, character: end_char }
+
+    with_server(source) do |server|
+      Dir.mktmpdir("path_completion_comma_test") do |tmpdir|
+        FileUtils.mkdir_p(File.join(tmpdir, "foo"))
+        FileUtils.touch(File.join(tmpdir, "foo", "a,b.rb"))
+
+        uri = URI("file://#{tmpdir}/foo/fake.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          [path_completion("a,b", start_position, end_position)].to_json,
+          result.to_json,
+        )
+      end
+    end
+  end
+
+  def test_relative_completion_with_glob_metacharacters_in_the_typed_path
+    prefix = "[id]/"
+    source = <<~RUBY
+      require_relative "#{prefix}"
+    RUBY
+    start_char = source.index('"') #: as !nil
+    end_char = source.rindex('"') #: as !nil
+    start_position = { line: 0, character: start_char + 1 }
+    end_position = { line: 0, character: end_char }
+
+    with_server(source) do |server|
+      Dir.mktmpdir("path_completion_metacharacters_test") do |tmpdir|
+        # `[id]` is a `Dir.glob` character class, so without escaping the typed content it matches "i" or "d" rather
+        # than the literal directory name and no completion is offered
+        FileUtils.mkdir_p(File.join(tmpdir, "foo", "[id]"))
+        FileUtils.touch(File.join(tmpdir, "foo", "[id]", "bar.rb"))
+
+        uri = URI("file://#{tmpdir}/foo/fake.rb")
+        server.process_message({
+          method: "textDocument/didOpen",
+          params: {
+            textDocument: {
+              uri: uri,
+              text: source,
+              version: 1,
+              languageId: "ruby",
+            },
+          },
+        })
+
+        server.process_message(id: 1, method: "textDocument/completion", params: {
+          textDocument: { uri: uri },
+          position: { line: 0, character: end_char },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          [path_completion("[id]/bar", start_position, end_position)].to_json,
+          result.to_json,
+        )
+      end
+    end
+  end
+
   def test_require_relative_returns_empty_result_for_unsaved_files
     prefix = "support/"
     source = <<~RUBY
