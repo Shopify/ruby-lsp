@@ -73,6 +73,53 @@ class ERBDocumentTest < Minitest::Test
     assert_equal("   \r\nbar   ", document.parse_result.source.source)
   end
 
+  def test_multiline_erb_comments_are_excluded_from_virtual_sources
+    source = +"<%# first line\ncomment_method(:argument)\n-%>\n<%= visible_call %>"
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
+
+    document.parse!
+
+    expected_ruby = source.gsub(/[^\r\n]/, " ")
+    visible_call = "visible_call"
+    visible_call_start = source.index(visible_call)
+    expected_ruby[visible_call_start, visible_call.length] = visible_call
+
+    refute_predicate(document, :syntax_error?)
+    assert_equal(expected_ruby, document.parse_result.source.source)
+    assert_equal(source.gsub(/[^\r\n]/, " "), document.host_language_source)
+  end
+
+  def test_multiline_erb_comments_preserve_windows_newlines_and_resume_scanning
+    source = +"<%# first line\r\ncomment_method(:argument) %>\r\n<p>visible</p>\r\n<%= another_call %>"
+    document = RubyLsp::ERBDocument.new(
+      source: source,
+      version: 1,
+      uri: URI("file:///foo.erb"),
+      global_state: @global_state,
+    )
+
+    document.parse!
+
+    expected_ruby = source.gsub(/[^\r\n]/, " ")
+    another_call = "another_call"
+    another_call_start = source.index(another_call)
+    expected_ruby[another_call_start, another_call.length] = another_call
+
+    expected_host = source.gsub(/[^\r\n]/, " ")
+    visible_html = "<p>visible</p>"
+    visible_html_start = source.index(visible_html)
+    expected_host[visible_html_start, visible_html.length] = visible_html
+
+    refute_predicate(document, :syntax_error?)
+    assert_equal(expected_ruby, document.parse_result.source.source)
+    assert_equal(expected_host, document.host_language_source)
+  end
+
   def test_erb_syntax_error_does_not_cause_crash
     [
       "<%=",
