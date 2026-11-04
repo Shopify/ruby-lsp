@@ -50,7 +50,7 @@ module RubyLsp
         "__LINE__",
       ].freeze
 
-      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, String? trigger_character) -> void
+      #: (ResponseBuilders::CollectionResponseBuilder[Interface::CompletionItem] response_builder, GlobalState global_state, NodeContext node_context, SorbetLevel sorbet_level, Prism::Dispatcher dispatcher, URI::Generic uri, (^(Integer arg0) -> Integer | Prism::CodeUnitsCache) code_units_cache, String? trigger_character) -> void
       def initialize( # rubocop:disable Metrics/ParameterLists
         response_builder,
         global_state,
@@ -58,6 +58,7 @@ module RubyLsp
         sorbet_level,
         dispatcher,
         uri,
+        code_units_cache,
         trigger_character
       )
         @response_builder = response_builder
@@ -67,6 +68,7 @@ module RubyLsp
         @node_context = node_context
         @sorbet_level = sorbet_level
         @uri = uri
+        @code_units_cache = code_units_cache
         @trigger_character = trigger_character
 
         dispatcher.register(
@@ -105,7 +107,7 @@ module RubyLsp
         name = RubyIndexer::Index.constant_name(node)
         return if name.nil?
 
-        range = range_from_location(node.location)
+        range = range_from_prism_location(node.location)
         candidates = @index.constant_completion_candidates(name, @node_context.nesting)
         candidates.each do |entries|
           complete_name = entries.first #: as !nil
@@ -136,7 +138,7 @@ module RubyLsp
         end
         return if name.nil?
 
-        constant_path_completion(name, range_from_location(node.location))
+        constant_path_completion(name, range_from_prism_location(node.location))
       end
 
       #: (Prism::CallNode node) -> void
@@ -161,8 +163,14 @@ module RubyLsp
               constant_path_completion(
                 "#{name}::",
                 Interface::Range.new(
-                  start: Interface::Position.new(line: start_loc.start_line - 1, character: start_loc.start_column),
-                  end: Interface::Position.new(line: end_loc.end_line - 1, character: end_loc.end_column),
+                  start: Interface::Position.new(
+                    line: start_loc.start_line - 1,
+                    character: start_loc.cached_start_code_units_column(@code_units_cache),
+                  ),
+                  end: Interface::Position.new(
+                    line: end_loc.end_line - 1,
+                    character: end_loc.cached_end_code_units_column(@code_units_cache),
+                  ),
                 ),
               )
               return
@@ -275,6 +283,20 @@ module RubyLsp
 
       private
 
+      #: (Prism::Location location) -> Interface::Range
+      def range_from_prism_location(location)
+        Interface::Range.new(
+          start: Interface::Position.new(
+            line: location.start_line - 1,
+            character: location.cached_start_code_units_column(@code_units_cache),
+          ),
+          end: Interface::Position.new(
+            line: location.end_line - 1,
+            character: location.cached_end_code_units_column(@code_units_cache),
+          ),
+        )
+      end
+
       #: (String name, Interface::Range range) -> void
       def constant_path_completion(name, range)
         top_level_reference = if name.start_with?("::")
@@ -338,7 +360,7 @@ module RubyLsp
 
         return if candidates.none?
 
-        range = range_from_location(location)
+        range = range_from_prism_location(location)
 
         candidates.flatten.uniq(&:name).each do |entry|
           entry_name = entry.name
@@ -360,7 +382,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        range = range_from_location(location)
+        range = range_from_prism_location(location)
 
         @index.class_variable_completion_candidates(name, type.name).each do |entry|
           variable_name = entry.name
@@ -395,7 +417,7 @@ module RubyLsp
         type = @type_inferrer.infer_receiver_type(@node_context)
         return unless type
 
-        range = range_from_location(location)
+        range = range_from_prism_location(location)
         @index.instance_variable_completion_candidates(name, type.name).each do |entry|
           variable_name = entry.name
 
@@ -495,16 +517,16 @@ module RubyLsp
         method_name = @trigger_character == "." ? nil : name
 
         range = if method_name
-          range_from_location(
-            node.message_loc, #: as !nil
-          )
+          location = node.message_loc #: as !nil
+          range_from_prism_location(location)
         else
           loc = node.call_operator_loc
 
           if loc
+            character = loc.cached_start_code_units_column(@code_units_cache) + 1
             Interface::Range.new(
-              start: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
-              end: Interface::Position.new(line: loc.start_line - 1, character: loc.start_column + 1),
+              start: Interface::Position.new(line: loc.start_line - 1, character: character),
+              end: Interface::Position.new(line: loc.start_line - 1, character: character),
             )
           end
         end
@@ -550,7 +572,7 @@ module RubyLsp
 
       #: (Prism::CallNode node, String name) -> void
       def add_local_completions(node, name)
-        range = range_from_location(
+        range = range_from_prism_location(
           node.message_loc, #: as !nil
         )
 
@@ -572,7 +594,7 @@ module RubyLsp
 
       #: (Prism::CallNode node, String name) -> void
       def add_keyword_completions(node, name)
-        range = range_from_location(
+        range = range_from_prism_location(
           node.message_loc, #: as !nil
         )
 
@@ -598,7 +620,7 @@ module RubyLsp
         Interface::CompletionItem.new(
           label: label,
           text_edit: Interface::TextEdit.new(
-            range: range_from_location(loc),
+            range: range_from_prism_location(loc),
             new_text: label,
           ),
           kind: Constant::CompletionItemKind::FILE,
