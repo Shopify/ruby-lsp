@@ -927,4 +927,15 @@ suite("TestController", () => {
 
     assert.ok(spy.calledOnce);
   });
+
+  test("findFiles excludes .bundle and vendor/bundle from test discovery", async () => {
+    const spy = sandbox.spy(vscode.workspace, "findFiles");
+    await controller.testController.resolveHandler!(undefined);
+
+    assert.ok(spy.called);
+    const excludeArg = spy.firstCall.args[1] as vscode.RelativePattern;
+    assert.ok(excludeArg);
+    assert.match(excludeArg.pattern, /\.bundle/);
+    assert.match(excludeArg.pattern, /vendor\/bundle/);
+  });
 });
