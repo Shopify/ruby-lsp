@@ -19,6 +19,25 @@ module RubyLsp
         char_position, _ = document.find_index_by_position(position)
         delegate_request_if_needed!(global_state, document, char_position)
 
+        # Sorbet already handles local variables in typed files
+        local_variable = unless sorbet_level.true_or_higher?
+          Support::LocalVariableFinder.new(document.ast).variable_at(char_position, document.code_units_cache)
+        end
+
+        if local_variable
+          declaration = local_variable.first.declaration
+
+          if declaration
+            @response_builder << Interface::Location.new(
+              uri: document.uri.to_s,
+              range: Support::LocalVariableFinder.range_for(declaration.location, document.code_units_cache),
+            )
+          end
+
+          @target = nil #: Prism::Node?
+          return
+        end
+
         node_context = RubyDocument.locate(
           document.ast,
           char_position,
