@@ -909,6 +909,50 @@ module RubyLsp
       end
     end
 
+    def test_test_unit_examples_do_not_shell_escape_name_patterns
+      with_server do |server|
+        server.process_message({
+          id: 1,
+          method: "rubyLsp/resolveTestCommands",
+          params: {
+            items: [
+              {
+                id: "ServerTest",
+                uri: "file:///test/server_test.rb",
+                label: "ServerTest",
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 30, character: 3 },
+                },
+                tags: ["framework:test_unit", "test_group"],
+                children: [
+                  {
+                    id: "ServerTest#test_server",
+                    uri: "file:///test/server_test.rb",
+                    label: "test_server",
+                    range: {
+                      start: { line: 1, character: 2 },
+                      end: { line: 10, character: 3 },
+                    },
+                    tags: ["framework:test_unit"],
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        result = server.pop_response.response
+        assert_equal(
+          [
+            "#{COMMAND} -Itest /test/server_test.rb --testcase \"/^ServerTest\\$/\" --name \"/test_server$/\"",
+          ],
+          result[:commands],
+        )
+      end
+    end
+
     def test_resolve_test_command_group_mixed_with_examples
       with_server do |server|
         server.process_message({
