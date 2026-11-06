@@ -21,8 +21,10 @@ export class Custom extends VersionManager {
 
   customCommand() {
     const configuration = vscode.workspace.getConfiguration("rubyLsp");
-    const customCommand: string | undefined = configuration.get("customRubyCommand");
-
+    const inspectedCustomRubyCommand = configuration.inspect("customRubyCommand");
+    const customCommand = inspectedCustomRubyCommand.globalValue
+      ?? inspectedCustomRubyCommand.workspaceValue
+      ?? inspectedCustomRubyCommand.workspaceFolderValue
     if (customCommand === undefined) {
       throw new NonReportableError(
         "The customRubyCommand configuration must be set when 'custom' is selected as the version manager. \
