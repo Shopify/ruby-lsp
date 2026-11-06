@@ -84,6 +84,11 @@ module RubyLsp
         end
 
         collect_file_renames(fully_qualified_name, document_changes)
+
+        Addon.addons.each do |addon|
+          addon.collect_file_renames(fully_qualified_name, @new_name, document_changes)
+        end
+
         Interface::WorkspaceEdit.new(document_changes: document_changes)
       end
 
