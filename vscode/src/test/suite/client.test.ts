@@ -80,7 +80,7 @@ async function launchClient(workspaceUri: vscode.Uri) {
     },
   });
 
-  const client = new Client(context, FAKE_TELEMETRY, ruby, () => {}, workspaceFolder, outputChannel, virtualDocuments);
+  const client = new Client(context, FAKE_TELEMETRY, ruby, () => { }, workspaceFolder, outputChannel, virtualDocuments);
 
   client.clientOptions.initializationFailedHandler = (error) => {
     assert.fail(`Failed to start server ${error.message}\n${fakeLogger.receivedMessages}`);
@@ -321,8 +321,8 @@ suite("Client", () => {
       },
     });
 
-    // 3 for the class, 3 for the example
-    assert.strictEqual(response.length, 6);
+    // 4 for the class, 4 for the example (run, run in terminal, debug, reveal in explorer)
+    assert.strictEqual(response.length, 8);
   }).timeout(20000);
 
   test("diagnostic", async () => {
