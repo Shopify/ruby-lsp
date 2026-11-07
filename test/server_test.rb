@@ -188,6 +188,39 @@ class ServerTest < Minitest::Test
     assert_equal("rubocop_internal", hash.dig("formatter"))
   end
 
+  def test_applies_editor_indexing_exclusions_with_rubydex
+    Dir.mktmpdir do |workspace|
+      excluded_file = File.join(workspace, "excluded.rb")
+      included_file = File.join(workspace, "included.rb")
+      File.write(excluded_file, "class ExcludedFromIndex; end\n")
+      File.write(included_file, "class IncludedInIndex; end\n")
+      minitest_file = gem_path("minitest").join("lib", "minitest.rb").to_s
+
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: {
+            indexing: {
+              excludedPatterns: ["excluded.rb"],
+              excludedGems: ["minitest"],
+            },
+          },
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: workspace).to_s }],
+        },
+      })
+
+      @server.send(:load_rubydex_config)
+      graph = @server.global_state.graph
+      graph.index_all([excluded_file, included_file, minitest_file])
+      graph.resolve
+
+      assert_empty(graph.search("ExcludedFromIndex").to_a)
+      assert_equal(["IncludedInIndex"], graph.search("IncludedInIndex").map(&:name).to_a)
+      assert_empty(graph.search("Minitest").to_a)
+    end
+  end
+
   def test_formatting_errors_push_window_notification
     @server.global_state.expects(:formatter).raises(StandardError, "boom").once
 

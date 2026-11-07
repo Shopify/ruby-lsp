@@ -1464,11 +1464,55 @@ module RubyLsp
     #: () -> void
     def load_rubydex_config
       @global_state.graph.load_config(Rubydex::Config.load(@global_state.workspace_path))
+      apply_editor_indexing_exclusions
     rescue Rubydex::ConfigError => e
       send_message(Notification.window_show_message(
         "Error loading rubydex config: #{e.message}",
         type: Constant::MessageType::ERROR,
       ))
+    end
+
+    #: -> void
+    def apply_editor_indexing_exclusions
+      options = @global_state.indexing_options
+      return unless options
+
+      excluded_patterns = options[:excludedPatterns]
+      excluded_patterns = [] unless excluded_patterns.is_a?(Array)
+
+      excluded_gems = options[:excludedGems]
+      excluded_gems = [] unless excluded_gems.is_a?(Array)
+      included_gems = options[:includedGems]
+      included_gems = [] unless included_gems.is_a?(Array)
+
+      patterns = excluded_patterns.grep(String).map { |pattern| normalize_indexing_pattern(pattern) }
+      patterns.concat(excluded_gem_patterns(excluded_gems.grep(String) - included_gems.grep(String)))
+
+      if patterns.any?
+        # Rubydex exposes this C API publicly, but its generated RBI marks it private.
+        @global_state.graph.send(:exclude_patterns, patterns)
+      end
+    end
+
+    #: (Array[String] gem_names) -> Array[String]
+    def excluded_gem_patterns(gem_names)
+      locked_gems = Bundler.locked_gems&.specs
+      return [] unless locked_gems
+
+      gem_names.filter_map do |gem_name|
+        locked_spec = locked_gems.find { |spec| spec.name == gem_name }
+        next unless locked_spec
+
+        spec = Gem::Specification.find_by_name(locked_spec.name, "= #{locked_spec.version}")
+        normalize_indexing_pattern(File.join(spec.full_gem_path, "**"))
+      rescue Gem::MissingSpecError
+        nil
+      end
+    end
+
+    #: (String pattern) -> String
+    def normalize_indexing_pattern(pattern)
+      File.expand_path(pattern.tr("\\", "/"), @global_state.workspace_path).tr("\\", "/")
     end
   end
 end
