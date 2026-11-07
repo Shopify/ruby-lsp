@@ -48,6 +48,9 @@ module RubyLsp
     #: String?
     attr_reader :telemetry_machine_id
 
+    #: Hash[Symbol, untyped]?
+    attr_reader :indexing_options
+
     #: -> void
     def initialize
       @workspace_uri = URI::Generic.from_path(path: Dir.pwd) #: URI::Generic
@@ -71,6 +74,7 @@ module RubyLsp
       @enabled_feature_flags = {} #: Hash[Symbol, bool]
       @mutex = Mutex.new #: Mutex
       @telemetry_machine_id = nil #: String?
+      @indexing_options = nil #: Hash[Symbol, untyped]?
       @feature_configuration = {
         inlayHint: RequestConfig.new({
           enableAll: false,
@@ -113,6 +117,7 @@ module RubyLsp
     #: (Hash[Symbol, untyped] options) -> Array[Notification]
     def apply_options(options)
       notifications = []
+      @indexing_options = options.dig(:initializationOptions, :indexing)
       direct_dependencies = gather_direct_dependencies
       all_dependencies = gather_direct_and_indirect_dependencies
       workspace_uri = options.dig(:workspaceFolders, 0, :uri)
