@@ -892,7 +892,12 @@ module RubyLsp
       uri = message.dig(:params, :textDocument, :uri)
       path = uri.to_standardized_path
       unless path.nil? || path.start_with?(@global_state.workspace_path)
-        send_empty_response(message[:id])
+        send_message(
+          Result.new(
+            id: message[:id],
+            response: Interface::FullDocumentDiagnosticReport.new(kind: "full", items: []),
+          ),
+        )
         return
       end
 
@@ -908,16 +913,17 @@ module RubyLsp
       send_message(
         Result.new(
           id: message[:id],
-          response: response && Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response),
+          response: Interface::FullDocumentDiagnosticReport.new(kind: "full", items: response || []),
         ),
       )
     rescue Requests::Request::InvalidFormatter => error
+      send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::REQUEST_FAILED, message: error.message))
       send_message(Notification.window_show_message(
         "Configuration error: #{error.message}",
         type: Constant::MessageType::ERROR,
       ))
-      send_empty_response(message[:id])
     rescue StandardError, LoadError => error
+      send_message(Error.new(id: message[:id], code: Constant::ErrorCodes::REQUEST_FAILED, message: error.message))
       send_message(Notification.window_show_message(
         "Error running diagnostics: #{error.message}",
         type: Constant::MessageType::ERROR,
@@ -926,7 +932,6 @@ module RubyLsp
         "Diagnostics failed with\r\n: #{error.full_message}",
         type: Constant::MessageType::ERROR,
       ))
-      send_empty_response(message[:id])
     end
 
     #: (Hash[Symbol, untyped] message) -> void
