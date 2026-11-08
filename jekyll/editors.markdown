@@ -122,6 +122,46 @@ When you run `eglot` command it will run `ruby-lsp` process for you.
 
 **Note**: Ensure that you are using Neovim 0.10 or newer.
 
+### ruby-lsp.nvim
+
+[ruby-lsp.nvim](https://github.com/wassimk/ruby-lsp.nvim) is a more opinionated plugin that configures and starts
+the Ruby LSP for you, so you don't need nvim-lspconfig or a `ruby_lsp` config of your own. It also implements the
+client-side commands that the Ruby LSP's code lenses call, such as `rubyLsp.runTest` and `rubyLsp.debugTest`. Without
+them, Neovim shows "Language server does not support command" when you choose the **Run**, **Run In Terminal**, or
+**Debug** code lens.
+
+Tests run in a terminal split by default. When these plugins are installed, ruby-lsp.nvim can also use them:
+
+- [neotest](https://github.com/nvim-neotest/neotest), through a neotest adapter that discovers and runs tests with the Ruby LSP
+- [nvim-dap](https://github.com/mfussenegger/nvim-dap), through an rdbg debug adapter for the **Debug** code lens
+- [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim), to run tests in toggleterm instead of a split
+
+Install `wassimk/ruby-lsp.nvim` with your plugin manager of choice, without lazy-loading it, and call `setup()`.
+For example, with Neovim's built-in `vim.pack`:
+
+```lua
+vim.pack.add({
+  {
+    src = "https://github.com/wassimk/ruby-lsp.nvim",
+    version = vim.version.range("*"), -- latest release instead of main
+  },
+})
+require("ruby-lsp").setup()
+```
+
+Settings such as `init_options` merge on top of the plugin's configuration:
+
+```lua
+vim.lsp.config("ruby_lsp", {
+  init_options = {
+    formatter = "standard",
+  },
+})
+```
+
+See the [ruby-lsp.nvim README](https://github.com/wassimk/ruby-lsp.nvim#readme) for the neotest and nvim-dap setup,
+the full list of options, and other advanced configuration.
+
 ### nvim-lspconfig
 
 The [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/configs/ruby_lsp.lua) plugin has
@@ -234,6 +274,7 @@ vim.lsp.enable("ruby-lsp")
 
 `rubyLsp/workspace/dependencies` is a custom method currently supported only in the VS Code plugin.
 The following snippet adds `ShowRubyDeps` command to show dependencies in the quickfix list.
+If you use ruby-lsp.nvim, set `user_commands = true` to get a `:RubyLspShowDependencies` command instead.
 
 ```lua
 local function add_ruby_deps_command(client, bufnr)
