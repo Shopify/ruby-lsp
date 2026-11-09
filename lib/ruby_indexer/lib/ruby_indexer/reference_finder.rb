@@ -85,7 +85,6 @@ module RubyIndexer
         :on_constant_path_or_write_node_enter,
         :on_constant_path_operator_write_node_enter,
         :on_constant_path_and_write_node_enter,
-        :on_constant_or_write_node_enter,
         :on_constant_path_node_enter,
         :on_constant_read_node_enter,
         :on_constant_write_node_enter,
