@@ -33,6 +33,10 @@ module RubyLsp
       def perform
         char_position, _ = @document.find_index_by_position(@position)
 
+        local_variable_finder = Support::LocalVariableFinder.new(@document.ast)
+        local_variable = local_variable_finder.variable_at(char_position, @document.code_units_cache)
+        return rename_local_variable(local_variable_finder, local_variable.first) if local_variable
+
         node_context = RubyDocument.locate(
           @document.ast,
           char_position,
@@ -88,6 +92,59 @@ module RubyLsp
       end
 
       private
+
+      #: (Support::LocalVariableFinder finder, Support::LocalVariableFinder::Variable variable) -> Interface::WorkspaceEdit
+      def rename_local_variable(finder, variable)
+        if variable.occurrences.any? { |occurrence| occurrence.kind == :keyword_parameter }
+          raise InvalidNameError, "Keyword parameters can't be renamed because callers refer to them by name"
+        end
+
+        unless valid_local_variable_name?(@new_name)
+          raise InvalidNameError, "`#{@new_name}` is not a valid local variable name"
+        end
+
+        old_name = variable.name.to_s
+        return Interface::WorkspaceEdit.new(changes: {}) if old_name == @new_name
+
+        if finder.name_in_use?(variable, @new_name.to_sym)
+          raise InvalidNameError, "The new name is already in use by a local variable or method call in the same scope"
+        end
+
+        code_units_cache = @document.code_units_cache
+        edits = variable.occurrences.map do |occurrence|
+          location = occurrence.location
+
+          if occurrence.kind == :shorthand
+            # `{ name: }` has to become `{ name: new_name }`, otherwise the key would change too
+            key_location = location.copy(length: location.length + 1)
+            Interface::TextEdit.new(
+              range: Support::LocalVariableFinder.range_for(key_location, code_units_cache),
+              new_text: "#{old_name}: #{@new_name}",
+            )
+          else
+            Interface::TextEdit.new(
+              range: Support::LocalVariableFinder.range_for(location, code_units_cache),
+              new_text: @new_name,
+            )
+          end
+        end
+
+        Interface::WorkspaceEdit.new(changes: { @document.uri.to_s => edits })
+      end
+
+      #: (String name) -> bool
+      def valid_local_variable_name?(name)
+        result = Prism.parse("#{name} = nil")
+        return false unless result.success?
+
+        statements = result.value.statements.body
+        return false unless statements.length == 1
+
+        node = statements.first
+        return false unless node.is_a?(Prism::LocalVariableWriteNode)
+
+        node.name.to_s == name
+      end
 
       #: (String fully_qualified_name, Array[(Interface::RenameFile | Interface::TextDocumentEdit)] document_changes) -> void
       def collect_file_renames(fully_qualified_name, document_changes)

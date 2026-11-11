@@ -133,7 +133,8 @@ Sorry, your browser doesn't support embedded videos. This video demonstrates the
 ### Go-to-Definition
 
 Go-to-definition allows users to navigate to the target constant or method's definition,
-whether they're defined in your project or its dependencies.
+whether they're defined in your project or its dependencies. For local variables, it jumps to the parameter or the first
+assignment that declares the variable in the current scope.
 
 In VS Code this feature can be triggered by one of the following methods:
 
@@ -479,7 +480,14 @@ Rename allows developers to rename all occurrences of the entity under the curso
 renaming can be triggered by right clicking the entity to rename or by pressing F2 on it. You can also preview the
 edits that will be applied by pressing CTRL/CMD + Enter after typing the desired new name.
 
-Rename is currently only supported for constants, module names and class names.
+Rename is currently supported for constants, module names, class names and local variables (including method and
+block parameters).
+
+Local variables are renamed only within the scope that declares them, so a variable with the same name in another method
+or block is left untouched. When the variable is used as a shorthand hash value or keyword argument (`{ name: }` or
+`foo(name:)`), the key is kept and only the value is renamed (`{ name: new_name }`). Renaming is rejected if the new name
+is already used by another local or by a method call in the same scope, since that would change the program's behavior.
+Keyword parameters can't be renamed because callers refer to them by name.
 
 <video src="images/rename.mp4" width="100%" controls>
 Sorry, your browser doesn't support embedded videos. This video shows renaming a symbol across the project.
@@ -487,8 +495,9 @@ Sorry, your browser doesn't support embedded videos. This video shows renaming a
 
 ### Find references
 
-The find references request allows users to both see a list of references or jump to reference locations. Note that
-only constants are currently supported, but support for methods, instance variables and local variables is planned.
+The find references request allows users to both see a list of references or jump to reference locations. It supports
+constants, methods, instance variables and local variables. Local variable references are resolved from the current file
+only, taking scopes into account, so a local with the same name in another method or block is not included.
 
 <video src="images/references.mp4" width="100%" controls>
 Sorry, your browser doesn't support embedded videos. This video demonstrates finding references to a constant.
