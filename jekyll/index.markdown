@@ -329,6 +329,18 @@ On type formatting applies changes to the code as the user is typing. For exampl
 {: .note }
 In VS Code, format on type is disabled by default. You can enable it with `"editor.formatOnType": true`
 
+By default, breaking a line inside a comment continues the comment on the next line. VS Code users can turn this
+behavior off with the following setting:
+
+```jsonc
+{
+  // Disable comment continuation when breaking lines inside a comment (defaults to true)
+  "rubyLsp.featuresConfiguration.onTypeFormatting.commentContinuation": false
+}
+```
+
+To configure other editors, see the [initialization options](editors#all-initialization-options).
+
 <video src="images/on_type_formatting.mp4" width="100%" controls>
 Sorry, your browser doesn't support embedded videos. This video demonstrates on-type formatting that auto-completes `end` tokens as you type.
 </video>

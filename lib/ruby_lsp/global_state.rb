@@ -81,6 +81,10 @@ module RubyLsp
           enableAll: false,
           enableTestCodeLens: true,
         }),
+        onTypeFormatting: RequestConfig.new({
+          enableAll: false,
+          commentContinuation: true,
+        }),
       } #: Hash[Symbol, RequestConfig]
     end
 

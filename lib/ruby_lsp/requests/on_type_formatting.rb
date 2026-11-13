@@ -23,8 +23,8 @@ module RubyLsp
         /.*\s\bdo\b($|\s)/,
       ] #: Array[Regexp]
 
-      #: (RubyDocument document, Hash[Symbol, untyped] position, String trigger_character, String client_name) -> void
-      def initialize(document, position, trigger_character, client_name)
+      #: (RubyDocument document, Hash[Symbol, untyped] position, String trigger_character, String client_name, ?RequestConfig? config) -> void
+      def initialize(document, position, trigger_character, client_name, config = nil)
         super()
         @document = document
         @lines = @document.source.lines #: Array[String]
@@ -36,6 +36,7 @@ module RubyLsp
         @edits = [] #: Array[Interface::TextEdit]
         @trigger_character = trigger_character
         @client_name = client_name
+        @config = config
       end
 
       # @override
@@ -51,9 +52,11 @@ module RubyLsp
           # But if it's a RBS signature starting with `#:`, we'll ignore it
           # so users can immediately continue typing the method definition
           if (comment_match = @previous_line.match(/^#(?!:)(\s*)/))
-            handle_comment_line(
-              comment_match[1], #: as !nil
-            )
+            if comment_continuation_enabled?
+              handle_comment_line(
+                comment_match[1], #: as !nil
+              )
+            end
           elsif @document.syntax_error?
             match = /(<<((-|~)?))(?<quote>['"`]?)(?<delimiter>\w+)\k<quote>/.match(@previous_line)
             heredoc_delimiter = match && match.named_captures["delimiter"]
@@ -72,6 +75,14 @@ module RubyLsp
       end
 
       private
+
+      #: -> bool
+      def comment_continuation_enabled?
+        config = @config
+        return true unless config
+
+        config.enabled?(:commentContinuation) || false
+      end
 
       #: -> void
       def handle_pipe
