@@ -32,6 +32,11 @@ module RubyLsp
             Prism::ConstantReadNode,
             Prism::ConstantPathNode,
             Prism::ConstantPathTargetNode,
+            Prism::ConstantWriteNode,
+            Prism::ConstantOrWriteNode,
+            Prism::ConstantAndWriteNode,
+            Prism::ConstantOperatorWriteNode,
+            Prism::ConstantTargetNode,
             Prism::InstanceVariableAndWriteNode,
             Prism::InstanceVariableOperatorWriteNode,
             Prism::InstanceVariableOrWriteNode,
@@ -53,9 +58,11 @@ module RubyLsp
             parent,
             position,
           )
+        elsif position_outside_target?(position, target)
+          return @locations
         end
 
-        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode,
+        target = target #: as Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::ConstantWriteNode | Prism::ConstantOrWriteNode | Prism::ConstantAndWriteNode | Prism::ConstantOperatorWriteNode | Prism::ConstantTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode,
 
         reference_target = create_reference_target(target, node_context)
         return @locations unless reference_target
@@ -81,19 +88,21 @@ module RubyLsp
 
       private
 
-      #: ((Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode) target_node, NodeContext node_context) -> RubyIndexer::ReferenceFinder::Target?
+      #: ((Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::ConstantWriteNode | Prism::ConstantOrWriteNode | Prism::ConstantAndWriteNode | Prism::ConstantOperatorWriteNode | Prism::ConstantTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode) target_node, NodeContext node_context) -> RubyIndexer::ReferenceFinder::Target?
       def create_reference_target(target_node, node_context)
         case target_node
         when Prism::ConstantReadNode, Prism::ConstantPathNode, Prism::ConstantPathTargetNode
           name = RubyIndexer::Index.constant_name(target_node)
           return unless name
 
-          entries = @global_state.index.resolve(name, node_context.nesting)
-          return unless entries
+          resolve_const_reference_target(name, node_context)
+        when Prism::ConstantWriteNode,
+          Prism::ConstantOrWriteNode,
+          Prism::ConstantAndWriteNode,
+          Prism::ConstantOperatorWriteNode,
+          Prism::ConstantTargetNode
 
-          fully_qualified_name = entries.first #: as !nil
-            .name
-          RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
+          resolve_const_reference_target(target_node.name.to_s, node_context)
         when
           Prism::InstanceVariableAndWriteNode,
           Prism::InstanceVariableOperatorWriteNode,
@@ -108,6 +117,30 @@ module RubyLsp
           RubyIndexer::ReferenceFinder::InstanceVariableTarget.new(target_node.name.to_s, ancestors)
         when Prism::CallNode, Prism::DefNode
           RubyIndexer::ReferenceFinder::MethodTarget.new(target_node.name.to_s)
+        end
+      end
+
+      #: (String name, NodeContext node_context) -> RubyIndexer::ReferenceFinder::ConstTarget?
+      def resolve_const_reference_target(name, node_context)
+        entries = @global_state.index.resolve(name, node_context.nesting)
+        return unless entries
+
+        fully_qualified_name = entries.first #: as !nil
+          .name
+        RubyIndexer::ReferenceFinder::ConstTarget.new(fully_qualified_name)
+      end
+
+      #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool
+      def position_outside_target?(position, target)
+        case target
+        when Prism::ConstantWriteNode,
+          Prism::ConstantOrWriteNode,
+          Prism::ConstantAndWriteNode,
+          Prism::ConstantOperatorWriteNode
+
+          !covers_position?(target.name_loc, position)
+        else
+          false
         end
       end
 

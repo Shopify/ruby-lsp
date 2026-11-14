@@ -27,6 +27,21 @@ module RubyIndexer
       assert_equal(8, refs[2].location.start_line)
     end
 
+    def test_does_not_duplicate_references_for_or_write_constants
+      refs = find_const_references("Foo::BAR", <<~RUBY)
+        module Foo
+          BAR ||= 1
+          BAR
+        end
+      RUBY
+
+      assert_equal(2, refs.size)
+      assert_equal("BAR", refs[0].name)
+      assert_equal(2, refs[0].location.start_line)
+      assert_equal("BAR", refs[1].name)
+      assert_equal(3, refs[1].location.start_line)
+    end
+
     def test_finds_constant_references_inside_singleton_contexts
       refs = find_const_references("Foo::<Class:Foo>::Bar", <<~RUBY)
         class Foo
