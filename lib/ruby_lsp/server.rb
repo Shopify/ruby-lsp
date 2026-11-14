@@ -428,8 +428,22 @@ module RubyLsp
     def text_document_did_change(message)
       params = message[:params]
       text_document = params[:textDocument]
+      uri = text_document[:uri]
 
-      @store.push_edits(uri: text_document[:uri], edits: params[:contentChanges], version: text_document[:version])
+      # Text synchronization notifications are normally not parsed by the main thread. Parse here so we can determine
+      # whether the edit affects declarations before an editor sends another request.
+      document = @global_state.synchronize do
+        @store.push_edits(uri: uri, edits: params[:contentChanges], version: text_document[:version])
+        updated_document = @store.get(uri)
+        updated_document.parse! if updated_document.is_a?(RubyDocument)
+        updated_document
+      end
+
+      return unless document.is_a?(RubyDocument) && document.should_index?
+
+      # Populate the same request caches as run_combined_requests while indexing. If the editor asks for one of these
+      # features after the edit, it can use the results from this traversal instead of traversing the AST again.
+      compute_combined_requests(uri, document)
     end
 
     #: (Hash[Symbol, untyped] message) -> void
@@ -475,6 +489,13 @@ module RubyLsp
         return
       end
 
+      compute_combined_requests(uri, document)
+
+      send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
+    end
+
+    #: (URI::Generic uri, RubyDocument | ERBDocument document) -> void
+    def compute_combined_requests(uri, document)
       parse_result = document.parse_result
 
       # Run requests for the document
@@ -521,8 +542,6 @@ module RubyLsp
           .perform,
       )
       document.cache_set("textDocument/inlayHint", inlay_hint.perform)
-
-      send_message(Result.new(id: message[:id], response: document.cache_get(message[:method])))
     end
 
     alias_method :text_document_document_symbol, :run_combined_requests

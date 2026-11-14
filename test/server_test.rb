@@ -423,10 +423,11 @@ class ServerTest < Minitest::Test
     content = log.params.message
 
     assert_match(/boom/, content)
+    server_path = Regexp.escape(File.expand_path("../lib/ruby_lsp/server.rb", __dir__))
     if RUBY_VERSION >= "3.4"
-      assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in 'RubyLsp::Server#process_message'}, content)
+      assert_match(/#{server_path}:\d+:in 'RubyLsp::Server#process_message'/, content)
     else
-      assert_match(%r{ruby-lsp/lib/ruby_lsp/server\.rb:\d+:in `process_message'}, content)
+      assert_match(/#{server_path}:\d+:in `process_message'/, content)
     end
   end
 
@@ -979,7 +980,7 @@ class ServerTest < Minitest::Test
     assert_empty(@server.instance_variable_get(:@cancelled_requests))
   end
 
-  def test_unsaved_changes_are_indexed_when_computing_automatic_features
+  def test_unsaved_changes_are_indexed_without_combined_requests
     uri = URI("file:///foo.rb")
     index = @server.global_state.index
 
@@ -1016,25 +1017,23 @@ class ServerTest < Minitest::Test
       },
     })
 
-    # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
-    # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
-    # isn't reproduced here. Parsing manually matches what happens normally
-    store = @server.instance_variable_get(:@store)
-    store.get(uri).parse!
+    # The edit should update the index without waiting for a combined feature request.
+    entries = index["Foo"]
+    assert_equal(1, entries.length)
 
-    # Trigger the automatic features again
+    entries = index["bar"]
+    assert_equal(1, entries.length)
+
+    # A combined request should be served from the results computed during didChange.
+    index.expects(:handle_change).never
     @server.process_message({
       id: 2,
       method: "textDocument/documentSymbol",
       params: { textDocument: { uri: uri } },
     })
 
-    # There should still only be one entry for each declaration, but we should have picked up the new ones
-    entries = index["Foo"]
-    assert_equal(1, entries.length)
-
-    entries = index["bar"]
-    assert_equal(1, entries.length)
+    result = find_message(RubyLsp::Result, id: 2)
+    assert_equal(1, result.response.length)
   end
 
   def test_ancestors_are_recomputed_even_on_unsaved_changes
@@ -1079,6 +1078,8 @@ class ServerTest < Minitest::Test
         ],
       },
     })
+
+    assert_equal(["Foo::<Class:Foo>"], index.linearized_ancestors_of("Foo::<Class:Foo>"))
 
     # Parse the document after it was modified. This occurs automatically when we receive a text document request, to
     # avoid parsing the document multiple times, but that depends on request coming in through the STDIN pipe, which
