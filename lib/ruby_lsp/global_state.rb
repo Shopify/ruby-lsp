@@ -48,8 +48,8 @@ module RubyLsp
     #: String?
     attr_reader :telemetry_machine_id
 
-    #: -> void
-    def initialize
+    #: (?diagnostics_refresh_callback: (^() -> void)?) -> void
+    def initialize(diagnostics_refresh_callback: nil)
       @workspace_uri = URI::Generic.from_path(path: Dir.pwd) #: URI::Generic
       @encoding = Encoding::UTF_8 #: Encoding
 
@@ -71,6 +71,7 @@ module RubyLsp
       @enabled_feature_flags = {} #: Hash[Symbol, bool]
       @mutex = Mutex.new #: Mutex
       @telemetry_machine_id = nil #: String?
+      @diagnostics_refresh_callback = diagnostics_refresh_callback #: (^() -> void)?
       @feature_configuration = {
         inlayHint: RequestConfig.new({
           enableAll: false,
@@ -92,6 +93,13 @@ module RubyLsp
     #: (String addon_name) -> Hash[Symbol, untyped]?
     def settings_for_addon(addon_name)
       @addon_settings[addon_name]
+    end
+
+    # Clear cached diagnostics and ask the client to pull fresh ones. Add-ons should call this after changing state
+    # used by their diagnostic runner.
+    #: -> void
+    def refresh_diagnostics
+      @diagnostics_refresh_callback&.call
     end
 
     #: (String identifier, Requests::Support::Formatter instance) -> void

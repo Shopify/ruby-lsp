@@ -409,6 +409,9 @@ By default, the Ruby LSP listens for changes to files ending in `.rb` to continu
 code is modified. If your add-on uses a tool that is configured through a file (like RuboCop and its `.rubocop.yml`)
 you can register for changes to these files and react when the configuration changes.
 
+After reloading configuration used by a diagnostic runner, call `global_state.refresh_diagnostics`. This clears cached
+diagnostics for open documents and asks the editor to pull them again when it supports diagnostic refresh.
+
 **Note**: you will receive events from `ruby-lsp` and other add-ons as well, in addition to your own registered ones.
 
 
@@ -417,6 +420,7 @@ module RubyLsp
   module MyGem
     class Addon < ::RubyLsp::Addon
       def activate(global_state, message_queue)
+        @global_state = global_state
         register_additional_file_watchers(global_state, message_queue)
       end
 
@@ -443,7 +447,8 @@ module RubyLsp
 
       def workspace_did_change_watched_files(changes)
         if changes.any? { |change| change[:uri].end_with?(".my-config.yml") }
-          # Do something to reload the config here
+          # Reload the configuration here, then clear cached diagnostics and ask the editor to pull them again
+          @global_state.refresh_diagnostics
         end
       end
     end

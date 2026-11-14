@@ -1200,6 +1200,73 @@ class ServerTest < Minitest::Test
     end
   end
 
+  def test_addons_can_refresh_diagnostics
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: {
+          general: { positionEncodings: ["utf-8"] },
+          workspace: { diagnostics: { refreshSupport: true } },
+        },
+      },
+    })
+    find_message(RubyLsp::Result, id: 1)
+
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "addon.rb"))
+    store = @server.instance_variable_get(:@store)
+    document = store.set(uri: uri, source: "# frozen_string_literal: true\n", version: 1, language_id: :ruby)
+    document.cache_set("textDocument/diagnostic", [:stale])
+    outgoing_queue = @server.instance_variable_get(:@outgoing_queue)
+    outgoing_queue.clear
+
+    @server.global_state.refresh_diagnostics
+
+    recomputed = 0
+    diagnostics = document.cache_fetch("textDocument/diagnostic") do
+      recomputed += 1
+      [:fresh]
+    end
+
+    assert_equal([:fresh], diagnostics)
+    assert_equal(1, recomputed, "Expected cached diagnostics to be cleared")
+
+    request = find_message(RubyLsp::Request, "workspace/diagnostic/refresh")
+    assert_nil(request.params)
+  end
+
+  def test_refresh_diagnostics_clears_cache_without_client_support
+    @server.process_message({
+      id: 1,
+      method: "initialize",
+      params: {
+        initializationOptions: {},
+        capabilities: { general: { positionEncodings: ["utf-8"] } },
+      },
+    })
+    find_message(RubyLsp::Result, id: 1)
+
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "addon.rb"))
+    store = @server.instance_variable_get(:@store)
+    document = store.set(uri: uri, source: "# frozen_string_literal: true\n", version: 1, language_id: :ruby)
+    document.cache_set("textDocument/diagnostic", [:stale])
+    outgoing_queue = @server.instance_variable_get(:@outgoing_queue)
+    outgoing_queue.clear
+
+    @server.global_state.refresh_diagnostics
+
+    recomputed = 0
+    diagnostics = document.cache_fetch("textDocument/diagnostic") do
+      recomputed += 1
+      [:fresh]
+    end
+
+    assert_equal([:fresh], diagnostics)
+    assert_equal(1, recomputed, "Expected cached diagnostics to be cleared")
+    assert_predicate(outgoing_queue, :empty?, "Expected no refresh request without client support")
+  end
+
   def test_compose_bundle_creates_file_to_skip_next_compose
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
