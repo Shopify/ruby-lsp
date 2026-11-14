@@ -126,6 +126,32 @@ suite("Ruby environment activation", () => {
     assert.deepStrictEqual(ruby.gemPath, ["~/.gem/ruby/3.3.5", "/opt/rubies/3.3.5/lib/ruby/gems/3.3.0"]);
   });
 
+  test("Checks for version managers in a detached shell process", async () => {
+    stubWorkspaceConfiguration(sandbox, {
+      rubyLsp: {
+        rubyVersionManager: { identifier: ManagerIdentifier.Auto },
+        bundleGemfile: "",
+      },
+    });
+
+    const asyncSpawnStub = sandbox.stub(common, "asyncSpawn").resolves(true);
+
+    const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
+    const toolExists = (ruby as any).toolExists.bind(ruby) as (tool: string) => Promise<boolean>;
+
+    assert.strictEqual(await toolExists("rbenv"), true);
+    assert.deepStrictEqual(asyncSpawnStub.firstCall.args, [
+      vscode.env.shell,
+      ["-i", "-c", "rbenv --version"],
+      {
+        cwd: workspacePath,
+        detached: os.platform() !== "win32",
+        stdio: "ignore",
+        timeout: 1000,
+      },
+    ]);
+  });
+
   test("mergeComposedEnv merges environment variables", () => {
     const ruby = new Ruby(context, workspaceFolder, outputChannel, FAKE_TELEMETRY);
 

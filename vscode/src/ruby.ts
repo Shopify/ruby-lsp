@@ -3,7 +3,7 @@ import os from "os";
 
 import * as vscode from "vscode";
 
-import { asyncExec, RubyInterface } from "./common";
+import { asyncSpawn, RubyInterface } from "./common";
 import { WorkspaceChannel } from "./workspaceChannel";
 import { Shadowenv } from "./ruby/shadowenv";
 import { Chruby } from "./ruby/chruby";
@@ -378,16 +378,17 @@ export class Ruby implements RubyInterface {
 
   private async toolExists(tool: string) {
     try {
-      const shell = vscode.env.shell.replace(/(\s+)/g, "\\$1");
-      const command = `${shell} -i -c '${tool} --version'`;
+      const shell = vscode.env.shell;
+      const args = ["-i", "-c", `${tool} --version`];
 
-      this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${command}`);
+      this.outputChannel.info(`Checking if ${tool} is available on the path with command: ${shell} ${args.join(" ")}`);
 
-      await asyncExec(command, {
+      return await asyncSpawn(shell, args, {
         cwd: this.workspaceFolder.uri.fsPath,
+        detached: os.platform() !== "win32",
+        stdio: "ignore",
         timeout: 1000,
       });
-      return true;
     } catch {
       return false;
     }
