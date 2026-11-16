@@ -88,10 +88,15 @@ configuration languages (JSON, Lua, ELisp, etc.).
     },
     "formatter": "auto",
     "linters": [],
-    "experimentalFeaturesEnabled": false
+    "experimentalFeaturesEnabled": false,
+    "bypassTypechecker": false
   }
 }
 ```
+
+When `sorbet-static` is part of the bundle, the Ruby LSP assumes the Sorbet LSP is running and defers definition,
+references, rename and workspace symbols to it. Set `bypassTypechecker` to `true` to keep those features enabled when no
+Sorbet LSP is running for the workspace.
 
 <!-- When adding a new editor to the list, either link directly to a website containing the instructions or link to a
 new H2 header in this file containing the instructions. -->

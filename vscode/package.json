@@ -496,7 +496,7 @@
           "default": false
         },
         "rubyLsp.bypassTypechecker": {
-          "description": "Ignores if the project uses a typechecker. Only intended to be used while working on the Ruby LSP itself",
+          "description": "Skip Sorbet detection and keep definition, references, rename and workspace symbol features enabled. Useful when sorbet-static is in the bundle, but no Sorbet LSP runs for this workspace",
           "type": "boolean",
           "default": false
         },
