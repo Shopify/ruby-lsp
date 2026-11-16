@@ -342,6 +342,18 @@ suite("TestController", () => {
     );
   });
 
+  test("discovers tests when the testing.clearTestResults command is not available", async () => {
+    const executeCommandStub = sandbox.stub(vscode.commands, "executeCommand").callThrough();
+    executeCommandStub
+      .withArgs("testing.clearTestResults")
+      .rejects(new Error("command 'testing.clearTestResults' not found"));
+
+    await controller.testController.resolveHandler!(undefined);
+
+    assert.ok(executeCommandStub.calledWith("testing.clearTestResults"));
+    assert.ok(controller.testController.items.get(testDirUri.toString()));
+  });
+
   test("takes inclusions and exclusions into account", async () => {
     await controller.testController.resolveHandler!(undefined);
 
