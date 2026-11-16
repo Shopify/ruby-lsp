@@ -25,6 +25,13 @@ module RubyLsp
         position = @params[:position]
         char_position, _ = @document.find_index_by_position(position)
 
+        # Local variables can only be referenced in the current document, so there's no need to search the workspace
+        local_variable = Support::LocalVariableFinder.new(@document.ast).variable_at(
+          char_position,
+          @document.code_units_cache,
+        )
+        return collect_local_variable_references(local_variable.first) if local_variable
+
         node_context = RubyDocument.locate(
           @document.ast,
           char_position,
@@ -80,6 +87,22 @@ module RubyLsp
       end
 
       private
+
+      #: (Support::LocalVariableFinder::Variable variable) -> Array[Interface::Location]
+      def collect_local_variable_references(variable)
+        include_declaration = @params.dig(:context, :includeDeclaration) != false
+        declaration = variable.declaration
+        code_units_cache = @document.code_units_cache
+
+        variable.occurrences.filter_map do |occurrence|
+          next if !include_declaration && occurrence.equal?(declaration)
+
+          Interface::Location.new(
+            uri: @document.uri.to_s,
+            range: Support::LocalVariableFinder.range_for(occurrence.location, code_units_cache),
+          )
+        end
+      end
 
       #: ((Prism::ConstantReadNode | Prism::ConstantPathNode | Prism::ConstantPathTargetNode | Prism::InstanceVariableAndWriteNode | Prism::InstanceVariableOperatorWriteNode | Prism::InstanceVariableOrWriteNode | Prism::InstanceVariableReadNode | Prism::InstanceVariableTargetNode | Prism::InstanceVariableWriteNode | Prism::CallNode | Prism::DefNode) target_node, NodeContext node_context) -> RubyIndexer::ReferenceFinder::Target?
       def create_reference_target(target_node, node_context)

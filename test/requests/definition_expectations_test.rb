@@ -136,6 +136,55 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_for_local_variables
+    source = <<~RUBY
+      def foo(items)
+        total = 0
+        items.each { |item| total += item }
+        total
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 3, character: 2 } },
+      )
+      location = server.pop_response.response.first
+      assert_equal(uri.to_s, location.uri)
+      assert_equal({ line: 1, character: 2 }, location.range.start.to_hash)
+      assert_equal({ line: 1, character: 7 }, location.range.end.to_hash)
+
+      # Parameters are the declaration of the local
+      server.process_message(
+        id: 2,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 2, character: 35 } },
+      )
+      location = server.pop_response.response.first
+      assert_equal({ line: 2, character: 16 }, location.range.start.to_hash)
+      assert_equal({ line: 2, character: 20 }, location.range.end.to_hash)
+    end
+  end
+
+  def test_definition_for_local_variables_defers_to_sorbet_in_typed_files
+    source = <<~RUBY
+      # typed: true
+      value = 1
+      value
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 2, character: 0 } },
+      )
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   def test_multibyte_character_precision
     source = <<~RUBY
       module Fほげ
@@ -1374,13 +1423,15 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     RUBY
 
     with_server(source) do |server, uri|
-      # On the `foo` receiver, we should not show any results
+      # On the `foo` receiver, we should jump to the parameter and not to any methods
       server.process_message(
         id: 1,
         method: "textDocument/definition",
         params: { textDocument: { uri: uri }, position: { character: 19, line: 8 } },
       )
-      assert_empty(server.pop_response.response)
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+      assert_equal({ line: 7, character: 15 }, response.first.range.start.to_hash)
 
       # On `message`, we should
       server.process_message(

@@ -21,6 +21,19 @@ module RubyLsp
       def perform
         char_position, _ = @document.find_index_by_position(@position)
 
+        local_variable = Support::LocalVariableFinder.new(@document.ast).variable_at(
+          char_position,
+          @document.code_units_cache,
+        )
+
+        if local_variable
+          variable, occurrence = local_variable
+          # Renaming a keyword parameter would break every caller passing it by name
+          return if variable.occurrences.any? { |o| o.kind == :keyword_parameter }
+
+          return Support::LocalVariableFinder.range_for(occurrence.location, @document.code_units_cache)
+        end
+
         node_context = RubyDocument.locate(
           @document.ast,
           char_position,
