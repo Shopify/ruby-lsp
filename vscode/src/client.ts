@@ -30,7 +30,7 @@ import {
   ErrorCodes,
 } from "vscode-languageclient/node";
 
-import { LSP_NAME, ClientInterface, Addon, SUPPORTED_LANGUAGE_IDS, FEATURE_FLAGS, featureEnabled } from "./common";
+import { LSP_NAME, ClientInterface, Addon, supportedLanguageIds, FEATURE_FLAGS, featureEnabled } from "./common";
 import { Ruby } from "./ruby";
 import { WorkspaceChannel } from "./workspaceChannel";
 
@@ -169,14 +169,15 @@ function collectClientOptions(
   // 1. Files inside of the workspace itself
   // 2. Bundled gems
   // 3. Default gems
-  let documentSelector: DocumentSelector = SUPPORTED_LANGUAGE_IDS.flatMap((language) => {
+  const languageIds = supportedLanguageIds();
+  let documentSelector: DocumentSelector = languageIds.flatMap((language) => {
     return { scheme: "file", language, pattern: `${fsPath}/**/*` };
   });
 
   // Only the first language server we spawn should handle unsaved files, otherwise requests will be duplicated across
   // all workspaces
   if (isMainWorkspace) {
-    SUPPORTED_LANGUAGE_IDS.forEach((language) => {
+    languageIds.forEach((language) => {
       documentSelector.push({
         language,
         scheme: "untitled",

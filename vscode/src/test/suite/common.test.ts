@@ -3,7 +3,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 import sinon from "sinon";
 
-import { featureEnabled, FEATURE_FLAGS } from "../../common";
+import { featureEnabled, FEATURE_FLAGS, supportedLanguageIds } from "../../common";
 
 suite("featureEnabled", () => {
   let sandbox: sinon.SinonSandbox;
@@ -129,5 +129,33 @@ suite("featureEnabled", () => {
 
     assert.strictEqual(featureEnabled("fakeFeature" as any), true);
     secondStub.restore();
+  });
+});
+
+suite("supportedLanguageIds", () => {
+  let sandbox: sinon.SinonSandbox;
+
+  setup(() => {
+    sandbox = sinon.createSandbox();
+  });
+
+  teardown(() => {
+    sandbox.restore();
+  });
+
+  test("returns Ruby and ERB by default", () => {
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: () => undefined,
+    } as any);
+
+    assert.deepStrictEqual(supportedLanguageIds(), ["ruby", "erb"]);
+  });
+
+  test("includes the language IDs configured for add-ons", () => {
+    sandbox.stub(vscode.workspace, "getConfiguration").returns({
+      get: (key: string) => (key === "addonLanguageIds" ? ["slim"] : undefined),
+    } as any);
+
+    assert.deepStrictEqual(supportedLanguageIds(), ["ruby", "erb", "slim"]);
   });
 });

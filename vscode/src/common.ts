@@ -75,6 +75,13 @@ export const LOG_CHANNEL = vscode.window.createOutputChannel(LSP_NAME, {
 });
 export const SUPPORTED_LANGUAGE_IDS = ["ruby", "erb"];
 
+// Add-ons can make the server understand other languages, such as Slim templates. Users opt into sending those files to
+// the server, since without a matching add-on it would treat them as Ruby
+export function supportedLanguageIds(): string[] {
+  const addonLanguageIds = vscode.workspace.getConfiguration("rubyLsp").get<string[]>("addonLanguageIds") ?? [];
+  return [...SUPPORTED_LANGUAGE_IDS, ...addonLanguageIds];
+}
+
 // A list of feature flags where the key is the name and the value is the rollout percentage.
 //
 // Note: names added here should also be added to the `rubyLsp.optedOutFeatureFlags` enum in the `package.json` file
