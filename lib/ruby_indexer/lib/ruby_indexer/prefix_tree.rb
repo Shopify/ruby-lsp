@@ -3,7 +3,9 @@
 
 module RubyIndexer
   # A PrefixTree is a data structure that allows searching for partial strings fast. The tree is similar to a nested
-  # hash structure, where the keys are the characters of the inserted strings.
+  # hash structure, where the keys are the characters of the inserted strings. Chains of nodes that have a single child
+  # and no value of their own are compressed into a single node (a radix tree), which drastically reduces the number of
+  # objects needed to represent large sets of keys.
   #
   # ## Example
   # ```ruby
@@ -13,11 +15,9 @@ module RubyIndexer
   # tree.insert("baz", "baz")
   # # Internally, the structure is analogous to this, but using nodes:
   # # {
-  # #   "b" => {
-  # #     "a" => {
-  # #       "r" => "bar",
-  # #       "z" => "baz"
-  # #     }
+  # #   "ba" => {
+  # #     "r" => "bar",
+  # #     "z" => "baz"
   # #   }
   # # }
   # # When we search it, it finds all possible values based on partial (or complete matches):
@@ -36,10 +36,7 @@ module RubyIndexer
   class PrefixTree
     #: -> void
     def initialize
-      @root = Node.new(
-        "",
-        "", #: as untyped
-      ) #: Node[Value]
+      @root = Node.new("") #: Node[Value]
     end
 
     # Search the PrefixTree based on a given `prefix`. If `foo` is an entry in the tree, then searching for `fo` will
@@ -57,11 +54,7 @@ module RubyIndexer
     # Inserts a `value` using the given `key`
     #: (String key, Value value) -> void
     def insert(key, value)
-      node = @root
-
-      key.each_char do |char|
-        node = node.children[char] ||= Node.new(char, value, node)
-      end
+      node = find_or_create_node(key)
 
       # This line is to allow a value to be overridden. When we are indexing files, we want to be able to update entries
       # for a given fully qualified name if we find more occurrences of it. Without being able to override, that would
@@ -81,7 +74,9 @@ module RubyIndexer
       parent = node.parent #: Node[Value]?
 
       while parent
-        parent.children.delete(node.key)
+        parent.children.delete(
+          node.key[0], #: as !nil
+        )
         return if parent.children.any? || parent.leaf
 
         node = parent
@@ -91,28 +86,92 @@ module RubyIndexer
 
     private
 
-    # Find a node that matches the given `key`
-    #: (String key) -> Node[Value]?
-    def find_node(key)
+    # Walks the tree following `key`, creating (or splitting) nodes as needed, and returns the node where `key` ends
+    #: (String key) -> Node[Value]
+    def find_or_create_node(key)
       node = @root
+      remaining = key
 
-      key.each_char do |char|
-        snode = node.children[char]
-        return nil unless snode
+      until remaining.empty?
+        first_char = remaining[0] #: as !nil
+        child = node.child(first_char)
 
-        node = snode
+        unless child
+          # No edge starts with this character, so the entire remainder of the key becomes a single new node
+          new_node = Node.new(remaining, node)
+          node.children[first_char] = new_node
+          return new_node
+        end
+
+        label = child.key
+        common = common_prefix_length(label, remaining)
+
+        if common < label.length
+          # The key diverges in the middle of an existing edge, so we split it. The new intermediate node takes the place
+          # of the existing child (keeping its position among its siblings) and the existing child is pushed down
+          intermediate = Node.new(
+            label[0, common], #: as !nil
+            node,
+          )
+          node.children[first_char] = intermediate
+
+          remainder = label[common..] #: as !nil
+          child.key = remainder
+          child.parent = intermediate
+          intermediate.children[
+            remainder[0], #: as !nil
+          ] = child
+
+          child = intermediate
+        end
+
+        node = child
+        remaining = remaining[common..] #: as !nil
       end
 
       node
     end
 
+    # Find the node that contains all keys starting with the given `key`. Because edges are compressed, the match may
+    # end in the middle of an edge, in which case the node at the end of that edge is returned
+    #: (String key) -> Node[Value]?
+    def find_node(key)
+      node = @root
+      remaining = key
+
+      until remaining.empty?
+        child = node.child(
+          remaining[0], #: as !nil
+        )
+        return unless child
+
+        label = child.key
+
+        if remaining.length <= label.length
+          return label.start_with?(remaining) ? child : nil
+        end
+
+        return unless remaining.start_with?(label)
+
+        remaining = remaining[label.length..] #: as !nil
+        node = child
+      end
+
+      node
+    end
+
+    #: (String a, String b) -> Integer
+    def common_prefix_length(a, b)
+      max = [a.length, b.length].min
+      i = 0
+      i += 1 while i < max && a[i] == b[i]
+      i
+    end
+
     #: [Value]
     class Node
-      #: Hash[String, Node[Value]]
-      attr_reader :children
-
       #: String
-      attr_reader :key
+      attr_accessor :key
 
       #: Value
       attr_accessor :value
@@ -121,15 +180,27 @@ module RubyIndexer
       attr_accessor :leaf
 
       #: Node[Value]?
-      attr_reader :parent
+      attr_accessor :parent
 
-      #: (String key, Value value, ?Node[Value]? parent) -> void
-      def initialize(key, value, parent = nil)
+      #: (String key, ?Node[Value]? parent) -> void
+      def initialize(key, parent = nil)
         @key = key
-        @value = value
+        @value = nil #: untyped
         @parent = parent
-        @children = {}
+        # Most nodes are leaves, so we lazily allocate the children hash to avoid paying for an empty hash per node
+        @children = nil #: Hash[String, Node[Value]]?
         @leaf = false
+      end
+
+      # Children indexed by the first character of their edge label
+      #: -> Hash[String, Node[Value]]
+      def children
+        @children ||= {}
+      end
+
+      #: (String char) -> Node[Value]?
+      def child(char)
+        @children&.[](char)
       end
 
       #: -> Array[Value]
@@ -139,10 +210,16 @@ module RubyIndexer
 
         while (node = stack.pop)
           result << node.value if node.leaf
-          stack.concat(node.children.values)
+          children = node.child_nodes
+          stack.concat(children) if children
         end
 
         result
+      end
+
+      #: -> Array[Node[Value]]?
+      def child_nodes
+        @children&.values
       end
     end
   end
