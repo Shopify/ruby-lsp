@@ -115,6 +115,16 @@ export function debounce(fn: (...args: any[]) => Promise<void>, delay: number) {
   };
 }
 
+// Clear the results of previous test runs. Some VS Code forks (e.g.: Cursor's Agents Window) do not register the
+// `testing.clearTestResults` command, so we ignore failures to avoid breaking activation or test discovery
+export async function clearTestResults() {
+  try {
+    await vscode.commands.executeCommand("testing.clearTestResults");
+  } catch (_error: any) {
+    // The command is not available in this editor
+  }
+}
+
 // Check if the given feature is enabled for the current user given the configured rollout percentage
 export function featureEnabled(feature: keyof typeof FEATURE_FLAGS): boolean {
   const flagConfiguration = vscode.workspace

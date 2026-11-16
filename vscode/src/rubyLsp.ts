@@ -6,7 +6,14 @@ import { Range } from "vscode-languageclient/node";
 
 import DocumentProvider from "./documentProvider";
 import { Workspace } from "./workspace";
-import { Command, featureEnabled, LOG_CHANNEL, STATUS_EMITTER, SUPPORTED_LANGUAGE_IDS } from "./common";
+import {
+  clearTestResults,
+  Command,
+  featureEnabled,
+  LOG_CHANNEL,
+  STATUS_EMITTER,
+  SUPPORTED_LANGUAGE_IDS,
+} from "./common";
 import { ManagerIdentifier, ManagerConfiguration } from "./ruby";
 import { StatusItems } from "./status";
 import { TestController } from "./testController";
@@ -112,7 +119,7 @@ export class RubyLsp {
   // Activate the extension. This method should perform all actions necessary to start the extension, such as booting
   // all language servers for each existing workspace
   async activate() {
-    await vscode.commands.executeCommand("testing.clearTestResults");
+    await clearTestResults();
 
     const firstWorkspace = vscode.workspace.workspaceFolders?.[0];
 

@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { CodeLens } from "vscode-languageclient/node";
 
 import { Workspace } from "./workspace";
-import { featureEnabled } from "./common";
+import { clearTestResults, featureEnabled } from "./common";
 import { LspTestItem, ResolvedCommands, ServerTestItem } from "./client";
 import { LinkedCancellationSource } from "./linkedCancellationSource";
 import { Mode, StreamingRunner } from "./streamingRunner";
@@ -973,11 +973,11 @@ export class TestController {
       }
     } else if (workspaceFolders.length === 1) {
       // If there's only one workspace, there's no point in nesting the tests under the workspace name
-      await vscode.commands.executeCommand("testing.clearTestResults");
+      await clearTestResults();
       await this.gatherWorkspaceTests(workspaceFolders[0], undefined, progress);
     } else {
       // If there's more than one workspace, we use them as the top level items
-      await vscode.commands.executeCommand("testing.clearTestResults");
+      await clearTestResults();
       for (const workspaceFolder of workspaceFolders) {
         // Check if there is at least one Ruby test file in the workspace, otherwise we don't consider it
         const pattern = this.testPattern(workspaceFolder);
