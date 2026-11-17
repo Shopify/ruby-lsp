@@ -242,7 +242,7 @@ class ServerTest < Minitest::Test
     assert_equal("/fake", index.configuration.instance_variable_get(:@workspace_path))
   end
 
-  def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
+  def test_returns_empty_diagnostics_and_nil_formatting_for_files_outside_workspace
     capture_subprocess_io do
       @server.process_message({
         id: 1,
@@ -275,7 +275,89 @@ class ServerTest < Minitest::Test
     })
 
     result = find_message(RubyLsp::Result, id: 3)
-    assert_nil(result.response)
+    assert_instance_of(RubyLsp::Interface::FullDocumentDiagnosticReport, result.response)
+    assert_equal("full", result.response.kind)
+    assert_empty(result.response.items)
+  end
+
+  def test_returns_empty_diagnostic_reports_for_unsupported_document_types
+    capture_subprocess_io do
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: { enabledFeatures: ["diagnostics"] },
+          capabilities: { general: { positionEncodings: ["utf-8"] } },
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
+        },
+      })
+    end
+
+    ["erb", "rbs"].each_with_index do |language_id, index|
+      uri = URI::Generic.from_path(path: File.join(Dir.pwd, "unsupported.#{language_id}"))
+      request_id = index + 2
+
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: "class Example\nend",
+            version: 1,
+            languageId: language_id,
+          },
+        },
+      })
+      @server.process_message({
+        id: request_id,
+        method: "textDocument/diagnostic",
+        params: { textDocument: { uri: uri } },
+      })
+
+      result = find_message(RubyLsp::Result, id: request_id)
+      assert_instance_of(RubyLsp::Interface::FullDocumentDiagnosticReport, result.response)
+      assert_equal("full", result.response.kind)
+      assert_empty(result.response.items)
+    end
+  end
+
+  def test_diagnostic_computation_errors_return_json_rpc_errors
+    capture_subprocess_io do
+      @server.process_message({
+        id: 1,
+        method: "initialize",
+        params: {
+          initializationOptions: { enabledFeatures: ["diagnostics"] },
+          capabilities: { general: { positionEncodings: ["utf-8"] } },
+          workspaceFolders: [{ uri: URI::Generic.from_path(path: Dir.pwd).to_s }],
+        },
+      })
+    end
+
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "diagnostic-error.rb"))
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "class Example\nend",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    RubyLsp::Requests::Diagnostics.any_instance.expects(:perform).raises(StandardError, "boom")
+
+    @server.process_message({
+      id: 2,
+      method: "textDocument/diagnostic",
+      params: { textDocument: { uri: uri } },
+    })
+
+    error = find_message(RubyLsp::Error)
+    assert_equal(2, error.to_hash[:id])
+    assert_equal(RubyLsp::Constant::ErrorCodes::INTERNAL_ERROR, error.code)
+    assert_match("boom", error.message)
   end
 
   def test_did_close_clears_diagnostics
