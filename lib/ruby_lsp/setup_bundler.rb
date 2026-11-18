@@ -437,7 +437,7 @@ module RubyLsp
         .reject { |setting| ignored_settings.include?(setting) }
         .to_h do |e|
         key = settings.key_for(e)
-        value = Array(settings[e]).join(":").tr(" ", ":")
+        value = Array(settings[e]).join(":")
 
         [key, value]
       end
