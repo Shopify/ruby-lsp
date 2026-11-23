@@ -710,6 +710,55 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_bundle_install_uses_a_composed_bin_directory
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), 'source "https://rubygems.org"')
+
+      Bundler.with_unbundled_env do
+        system("bundle", "config", "set", "--local", "bin", "exe")
+        Bundler.reset!
+
+        expected_bin = File.join(dir, ".ruby-lsp", "bin")
+        mock_install = mock("install")
+        mock_install.expects(:run).with do
+          assert_equal(expected_bin, Bundler.settings[:bin])
+        end
+        Bundler::CLI::Install.expects(:new).with({ "no-cache" => true }).returns(mock_install)
+
+        RubyLsp::SetupBundler.new(dir, launcher: true).send(:bundle_install)
+
+        assert_equal("exe", Bundler.settings[:bin])
+      end
+    end
+  end
+
+  def test_bundle_update_uses_a_composed_bin_directory
+    in_temp_dir do |dir|
+      File.write(File.join(dir, "Gemfile"), 'source "https://rubygems.org"')
+      FileUtils.mkdir_p(File.join(dir, ".ruby-lsp"))
+
+      Bundler.with_unbundled_env do
+        system("bundle", "config", "set", "--local", "bin", "exe")
+        Bundler.reset!
+
+        expected_bin = File.join(dir, ".ruby-lsp", "bin")
+        mock_update = mock("update")
+        mock_update.expects(:run).with do
+          assert_equal(expected_bin, Bundler.settings[:bin])
+        end
+        Bundler::CLI::Update.expects(:new).with(
+          { conservative: true },
+          ["ruby-lsp", "debug", "prism", "rbs"],
+        ).returns(mock_update)
+
+        setup = RubyLsp::SetupBundler.new(dir, launcher: true)
+        setup.send(:update, {})
+
+        assert_equal("exe", Bundler.settings[:bin])
+      end
+    end
+  end
+
   def test_invoke_cli_calls_bundler_directly_for_update
     in_temp_dir do |dir|
       File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
