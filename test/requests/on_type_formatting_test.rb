@@ -320,6 +320,52 @@ class OnTypeFormattingTest < Minitest::Test
     assert_equal(expected_edits.to_json, edits.to_json)
   end
 
+  def test_comment_continuation_is_not_sent_for_clients_that_cannot_place_the_caret
+    # Clients that do not move the caret to the end of text inserted at its position (e.g. Emacs)
+    # would end up with a stray `#` ahead of the cursor, so no continuation edit is sent
+    document = RubyLsp::RubyDocument.new(
+      source: +"#",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 0 },
+      "\n",
+      "Emacs",
+    ).perform
+    assert_empty(edits)
+  end
+
+  def test_comment_continuation_for_snippetless_clients_that_place_the_caret_after_inserts
+    # Zed moves the caret to the end of text inserted at its position, so comment continuation
+    # works without a `$0` anchor
+    document = RubyLsp::RubyDocument.new(
+      source: +"# something",
+      version: 1,
+      uri: URI("file:///fake.rb"),
+      global_state: @global_state,
+    )
+    document.parse!
+
+    edits = RubyLsp::Requests::OnTypeFormatting.new(
+      document,
+      { line: 1, character: 0 },
+      "\n",
+      "Zed",
+    ).perform
+    expected_edits = [
+      {
+        range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } },
+        newText: "# ",
+      },
+    ]
+    assert_equal(expected_edits.to_json, edits.to_json)
+  end
+
   def test_comment_continuation_does_not_apply_to_rbs_signatures
     document = RubyLsp::RubyDocument.new(
       source: +"",
