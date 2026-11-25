@@ -52,6 +52,7 @@ module RubyLsp
             target,
             parent,
             position,
+            @document,
           )
         end
 
@@ -123,10 +124,13 @@ module RubyLsp
         )
         dispatcher.visit(parse_result.value.first)
 
+        encoding = @global_state.encoding
+        code_units_cache = parse_result.code_units_cache(encoding)
+
         finder.references.each do |reference|
           @locations << Interface::Location.new(
             uri: uri.to_s,
-            range: range_from_location(reference.location),
+            range: range_in_encoding(reference.location, encoding, code_units_cache),
           )
         end
       end

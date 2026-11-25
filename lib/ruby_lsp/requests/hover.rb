@@ -37,8 +37,9 @@ module RubyLsp
             target, #: as !nil
             parent, #: as !nil
             position,
+            document,
           )
-        elsif position_outside_target?(position, target)
+        elsif position_outside_target?(position, target, document)
           target = nil
         end
 
@@ -82,16 +83,16 @@ module RubyLsp
           (parent.is_a?(Prism::ConstantPathNode) && target.is_a?(Prism::ConstantReadNode))
       end
 
-      #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool
-      def position_outside_target?(position, target)
+      #: (Hash[Symbol, untyped] position, Prism::Node? target, (RubyDocument | ERBDocument) document) -> bool
+      def position_outside_target?(position, target, document)
         case target
         when Prism::GlobalVariableAndWriteNode,
           Prism::GlobalVariableOperatorWriteNode,
           Prism::GlobalVariableOrWriteNode,
           Prism::GlobalVariableWriteNode
-          !covers_position?(target.name_loc, position)
+          !covers_position?(target.name_loc, position, document)
         when Prism::CallNode
-          !covers_position?(target.message_loc, position)
+          !covers_position?(target.message_loc, position, document)
         else
           false
         end

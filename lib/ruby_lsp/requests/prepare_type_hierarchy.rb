@@ -43,7 +43,7 @@ module RubyLsp
         parent = context.parent
         return unless node && parent
 
-        target = determine_target(node, parent, @position)
+        target = determine_target(node, parent, @position, @document)
         entries = @index.resolve(target.slice, context.nesting)
         return unless entries
 

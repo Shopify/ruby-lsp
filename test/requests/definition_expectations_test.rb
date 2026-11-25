@@ -161,6 +161,38 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_with_utf16_positions_after_multibyte_characters
+    # `é` takes 2 bytes and 1 UTF-16 code unit. `😀` takes 4 bytes and 2 UTF-16 code units, so on the last line `Foo`
+    # starts at UTF-16 character 11 (byte 14) and `helper` at UTF-16 character 20 (byte 23)
+    source = <<~RUBY
+      module Foo
+        class Bar
+          def self.helper; end
+        end
+      end
+
+      s = "é😀"; Foo::Bar.helper
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # On `helper`
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 6, character: 21 } },
+      )
+      assert_equal(2, server.pop_response.response.first&.target_range&.start&.line)
+
+      # On `Foo`, which is part of the constant path `Foo::Bar`
+      server.process_message(
+        id: 2,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { line: 6, character: 12 } },
+      )
+      assert_equal(0, server.pop_response.response.first&.target_range&.start&.line)
+    end
+  end
+
   def test_jumping_to_default_require_of_a_gem
     with_server("require \"bundler\"") do |server, uri|
       index = server.global_state.index
