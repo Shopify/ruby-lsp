@@ -63,8 +63,9 @@ module RubyLsp
             target,
             parent,
             position,
+            document,
           )
-        elsif position_outside_target?(position, target)
+        elsif position_outside_target?(position, target, document)
           target = nil
         # For methods with block arguments using symbol-to-proc
         elsif target.is_a?(Prism::SymbolNode) && parent.is_a?(Prism::BlockArgumentNode)
@@ -99,8 +100,8 @@ module RubyLsp
 
       private
 
-      #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool
-      def position_outside_target?(position, target)
+      #: (Hash[Symbol, untyped] position, Prism::Node? target, (RubyDocument | ERBDocument) document) -> bool
+      def position_outside_target?(position, target, document)
         case target
         when Prism::GlobalVariableAndWriteNode,
           Prism::GlobalVariableOperatorWriteNode,
@@ -111,9 +112,9 @@ module RubyLsp
           Prism::InstanceVariableOrWriteNode,
           Prism::InstanceVariableWriteNode
 
-          !covers_position?(target.name_loc, position)
+          !covers_position?(target.name_loc, position, document)
         when Prism::CallNode
-          !covers_position?(target.message_loc, position)
+          !covers_position?(target.message_loc, position, document)
         else
           false
         end

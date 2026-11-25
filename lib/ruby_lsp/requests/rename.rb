@@ -48,6 +48,7 @@ module RubyLsp
             target,
             parent,
             @position,
+            @document,
           )
         end
 

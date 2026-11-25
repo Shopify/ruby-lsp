@@ -172,6 +172,39 @@ class HoverExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_hovering_with_utf16_positions_after_multibyte_characters
+    # `é` takes 2 bytes and 1 UTF-16 code unit. `😀` takes 4 bytes and 2 UTF-16 code units, so on the last line `Foo`
+    # starts at UTF-16 character 11 (byte 14) and `helper` at UTF-16 character 20 (byte 23)
+    source = <<~RUBY
+      module Foo
+        class Bar
+          # Hello from `helper`
+          def self.helper; end
+        end
+      end
+
+      s = "é😀"; Foo::Bar.helper
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      # On `helper`
+      server.process_message(
+        id: 1,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 21 } },
+      )
+      assert_match("Hello from `helper`", server.pop_response.response&.contents&.value)
+
+      # On `Foo`, which is part of the constant path `Foo::Bar`
+      server.process_message(
+        id: 2,
+        method: "textDocument/hover",
+        params: { textDocument: { uri: uri }, position: { line: 7, character: 12 } },
+      )
+      assert_match(/\A```ruby\nFoo\n```/, server.pop_response.response&.contents&.value)
+    end
+  end
+
   def test_hovering_methods_invoked_on_implicit_self
     source = <<~RUBY
       # typed: false

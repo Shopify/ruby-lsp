@@ -134,6 +134,28 @@ class DiagnosticsTest < Minitest::Test
     assert_equal("END in method; use at_exit", diagnostics[0]&.message)
   end
 
+  def test_syntax_diagnostics_with_utf16_positions_after_multibyte_characters
+    # `é` takes 2 bytes and 1 UTF-16 code unit. `😀` takes 4 bytes and 2 UTF-16 code units, so `1 +` starts at UTF-16
+    # character 11 (byte 14) and `]` at UTF-16 character 15 (byte 18)
+    document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
+      s = "é😀"; 1 + ]
+    RUBY
+
+    diagnostics = RubyLsp::Requests::Diagnostics.new(@global_state, document).perform #: as !nil
+    ranges = diagnostics.to_h do |diagnostic|
+      [diagnostic.message, { start: diagnostic.range.start.to_hash, end: diagnostic.range.end.to_hash }]
+    end
+
+    assert_equal(
+      { start: { line: 0, character: 15 }, end: { line: 0, character: 16 } },
+      ranges["unexpected ']'; expected an expression after the operator"],
+    )
+    assert_equal(
+      { start: { line: 0, character: 11 }, end: { line: 0, character: 14 } },
+      ranges["possibly useless use of + in void context"],
+    )
+  end
+
   def test_syntax_error_diagnostic
     document = RubyLsp::RubyDocument.new(source: <<~RUBY.chomp, version: 1, uri: @uri, global_state: @global_state)
       def foo

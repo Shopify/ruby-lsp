@@ -56,16 +56,7 @@ module RubyLsp
             source: "Prism",
             message: warning.message,
             severity: Constant::DiagnosticSeverity::WARNING,
-            range: Interface::Range.new(
-              start: Interface::Position.new(
-                line: location.start_line - 1,
-                character: location.start_column,
-              ),
-              end: Interface::Position.new(
-                line: location.end_line - 1,
-                character: location.end_column,
-              ),
-            ),
+            range: range_in_encoding(location, @document.encoding, @document.code_units_cache),
           )
         end
       end
@@ -76,16 +67,7 @@ module RubyLsp
           location = error.location
 
           Interface::Diagnostic.new(
-            range: Interface::Range.new(
-              start: Interface::Position.new(
-                line: location.start_line - 1,
-                character: location.start_column,
-              ),
-              end: Interface::Position.new(
-                line: location.end_line - 1,
-                character: location.end_column,
-              ),
-            ),
+            range: range_in_encoding(location, @document.encoding, @document.code_units_cache),
             message: error.message,
             severity: Constant::DiagnosticSeverity::ERROR,
             source: "Prism",
