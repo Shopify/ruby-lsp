@@ -1,0 +1,40 @@
+{
+  "params": {
+    "range": {
+      "start": {
+        "line": 1,
+        "character": 2
+      },
+      "end": {
+        "line": 1,
+        "character": 2
+      }
+    },
+    "textDocument": {
+      "uri": "file:///fake",
+      "version": null
+    },
+    "context": {
+      "diagnostics": []
+    }
+  },
+  "result": [
+    {
+      "title": "Refactor: Inline Variable",
+      "kind": "refactor.inline",
+      "data": {
+        "range": {
+          "start": {
+            "line": 1,
+            "character": 2
+          },
+          "end": {
+            "line": 1,
+            "character": 2
+          }
+        },
+        "uri": "file:///fake"
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ module RubyLsp
     class CodeActions < Request
       EXTRACT_TO_VARIABLE_TITLE = "Refactor: Extract Variable"
       EXTRACT_TO_METHOD_TITLE = "Refactor: Extract Method"
+      INLINE_VARIABLE_TITLE = "Refactor: Inline Variable"
       TOGGLE_BLOCK_STYLE_TITLE = "Refactor: Toggle block style"
       CREATE_ATTRIBUTE_READER = "Create Attribute Reader"
       CREATE_ATTRIBUTE_WRITER = "Create Attribute Writer"
@@ -30,6 +31,33 @@ module RubyLsp
             document_selector: nil,
             resolve_provider: true,
           )
+        end
+
+        # Returns the local variable assignment or read whose name the range is on, if any
+        #: ((RubyDocument | ERBDocument) document, Hash[Symbol, untyped] range) -> (Prism::LocalVariableWriteNode | Prism::LocalVariableReadNode)?
+        def local_variable_at(document, range)
+          return unless document.is_a?(RubyDocument)
+
+          node = document.locate_node(
+            range[:start],
+            node_types: [Prism::LocalVariableWriteNode, Prism::LocalVariableReadNode],
+          ).node
+
+          name_loc = case node
+          when Prism::LocalVariableWriteNode
+            node.name_loc
+          when Prism::LocalVariableReadNode
+            node.location
+          else
+            return
+          end
+
+          start_index, end_index = document.find_index_by_position(range[:start], range[:end])
+          code_units_cache = document.code_units_cache
+          return if start_index < name_loc.cached_start_code_units_offset(code_units_cache)
+          return if end_index && end_index > name_loc.cached_end_code_units_offset(code_units_cache)
+
+          node
         end
       end
 
@@ -66,6 +94,7 @@ module RubyLsp
         end
         code_actions.concat(toggle_block_style_action)
         code_actions.concat(attribute_actions)
+        code_actions.concat(inline_variable_action)
 
         code_actions
       end
@@ -105,6 +134,19 @@ module RubyLsp
           Interface::CodeAction.new(
             title: CREATE_ATTRIBUTE_ACCESSOR,
             kind: Constant::CodeActionKind::EMPTY,
+            data: { range: @range, uri: @uri.to_s },
+          ),
+        ]
+      end
+
+      #: -> Array[Interface::CodeAction]
+      def inline_variable_action
+        return [] unless CodeActions.local_variable_at(@document, @range)
+
+        [
+          Interface::CodeAction.new(
+            title: INLINE_VARIABLE_TITLE,
+            kind: Constant::CodeActionKind::REFACTOR_INLINE,
             data: { range: @range, uri: @uri.to_s },
           ),
         ]
