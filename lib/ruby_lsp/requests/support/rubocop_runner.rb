@@ -67,6 +67,12 @@ module RubyLsp
         #: ::RuboCop::Config
         attr_reader :config_for_working_directory
 
+        #: Rubydex::Graph?
+        attr_reader :shared_project_index
+
+        #: String?
+        attr_reader :workspace_path
+
         begin
           ::RuboCop::Options.new.parse(["--raise-cop-error"])
           DEFAULT_ARGS << "--raise-cop-error"
@@ -75,12 +81,15 @@ module RubyLsp
         end
         DEFAULT_ARGS.freeze
 
-        #: (*String args) -> void
-        def initialize(*args)
+        #: (*String args, ?project_index: Rubydex::Graph?, ?workspace_path: String?) -> void
+        def initialize(*args, project_index: nil, workspace_path: nil)
           @options = {} #: Hash[Symbol, untyped]
           @offenses = [] #: Array[::RuboCop::Cop::Offense]
           @errors = [] #: Array[String]
           @warnings = [] #: Array[String]
+          @shared_project_index = project_index
+          @workspace_path = workspace_path
+          @project_index = nil #: Rubydex::Graph?
           # @prism_result = nil #: Prism::ParseLexResult?
 
           args += DEFAULT_ARGS
@@ -144,6 +153,34 @@ module RubyLsp
         end
 
         private
+
+        #: (Array[String] target_files) -> void
+        def build_project_index(target_files)
+          if shared_project_index_enabled?
+            # Ruby LSP keeps this graph current as documents and watched files change. Reusing it avoids having
+            # RuboCop rebuild a second project-wide index for every diagnostic and formatting request.
+            @project_index = shared_project_index
+          else
+            # This hook only exists in RuboCop versions that support UseProjectIndex.
+            parent_method = method(:build_project_index).super_method
+            parent_method&.call(target_files)
+          end
+        end
+
+        #: -> bool
+        def shared_project_index_enabled?
+          shared_workspace_path = workspace_path
+          return false unless shared_project_index && shared_workspace_path
+
+          rubocop_options = config_for_working_directory.for_all_cops
+          return false unless rubocop_options["UseProjectIndex"]
+          # The Ruby LSP graph currently covers workspace files, not the bundled gem sources RuboCop can optionally add.
+          return false if rubocop_options["ProjectIndexIncludesGems"]
+
+          File.realpath(config_for_working_directory.base_dir_for_path_parameters) == File.realpath(shared_workspace_path)
+        rescue SystemCallError
+          false
+        end
 
         #: (String _file, Array[::RuboCop::Cop::Offense] offenses) -> void
         def file_finished(_file, offenses)
