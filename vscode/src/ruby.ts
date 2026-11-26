@@ -228,7 +228,17 @@ export class Ruby implements RubyInterface {
 
     if (this.context.extensionMode !== vscode.ExtensionMode.Test) {
       // We need to set the process environment too to make other extensions such as Sorbet find the right Ruby paths
-      process.env = env;
+      const extensionHostEnv = { ...env };
+      delete extensionHostEnv.RBENV_VERSION;
+      delete extensionHostEnv.RBENV_DIR;
+      delete extensionHostEnv.RBENV_HOOK_PATH;
+      delete extensionHostEnv.RBENV_ORIG_PATH;
+      process.env = extensionHostEnv;
+      // Assigning to process.env does not remove variables that were already present in the host.
+      delete process.env.RBENV_VERSION;
+      delete process.env.RBENV_DIR;
+      delete process.env.RBENV_HOOK_PATH;
+      delete process.env.RBENV_ORIG_PATH;
     }
 
     this._env = env;
