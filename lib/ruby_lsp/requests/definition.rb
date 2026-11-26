@@ -19,39 +19,54 @@ module RubyLsp
         char_position, _ = document.find_index_by_position(position)
         delegate_request_if_needed!(global_state, document, char_position)
 
+        node_types = [
+          Prism::CallNode,
+          Prism::ConstantReadNode,
+          Prism::ConstantPathNode,
+          Prism::BlockArgumentNode,
+          Prism::GlobalVariableAndWriteNode,
+          Prism::GlobalVariableOperatorWriteNode,
+          Prism::GlobalVariableOrWriteNode,
+          Prism::GlobalVariableReadNode,
+          Prism::GlobalVariableTargetNode,
+          Prism::GlobalVariableWriteNode,
+          Prism::InstanceVariableReadNode,
+          Prism::InstanceVariableAndWriteNode,
+          Prism::InstanceVariableOperatorWriteNode,
+          Prism::InstanceVariableOrWriteNode,
+          Prism::InstanceVariableTargetNode,
+          Prism::InstanceVariableWriteNode,
+          Prism::SymbolNode,
+          Prism::StringNode,
+          Prism::SuperNode,
+          Prism::ForwardingSuperNode,
+          Prism::ClassVariableAndWriteNode,
+          Prism::ClassVariableOperatorWriteNode,
+          Prism::ClassVariableOrWriteNode,
+          Prism::ClassVariableReadNode,
+          Prism::ClassVariableTargetNode,
+          Prism::ClassVariableWriteNode,
+        ]
+
         node_context = RubyDocument.locate(
           document.ast,
           char_position,
-          node_types: [
-            Prism::CallNode,
-            Prism::ConstantReadNode,
-            Prism::ConstantPathNode,
-            Prism::BlockArgumentNode,
-            Prism::GlobalVariableAndWriteNode,
-            Prism::GlobalVariableOperatorWriteNode,
-            Prism::GlobalVariableOrWriteNode,
-            Prism::GlobalVariableReadNode,
-            Prism::GlobalVariableTargetNode,
-            Prism::GlobalVariableWriteNode,
-            Prism::InstanceVariableReadNode,
-            Prism::InstanceVariableAndWriteNode,
-            Prism::InstanceVariableOperatorWriteNode,
-            Prism::InstanceVariableOrWriteNode,
-            Prism::InstanceVariableTargetNode,
-            Prism::InstanceVariableWriteNode,
-            Prism::SymbolNode,
-            Prism::StringNode,
-            Prism::SuperNode,
-            Prism::ForwardingSuperNode,
-            Prism::ClassVariableAndWriteNode,
-            Prism::ClassVariableOperatorWriteNode,
-            Prism::ClassVariableOrWriteNode,
-            Prism::ClassVariableReadNode,
-            Prism::ClassVariableTargetNode,
-            Prism::ClassVariableWriteNode,
-          ],
+          node_types: node_types,
           code_units_cache: document.code_units_cache,
         )
+
+        if char_position.positive? &&
+            (node_context.node.is_a?(Prism::ProgramNode) || position_outside_target?(position, node_context.node))
+          previous_node_context = RubyDocument.locate(
+            document.ast,
+            char_position - 1,
+            node_types: node_types,
+            code_units_cache: document.code_units_cache,
+          )
+          if reference_ends_at_position?(previous_node_context.node, char_position, document)
+            node_context = previous_node_context
+          end
+        end
 
         target = node_context.node
         parent = node_context.parent
@@ -98,6 +113,22 @@ module RubyLsp
       end
 
       private
+
+      #: (Prism::Node?, Integer, RubyDocument | ERBDocument) -> bool
+      def reference_ends_at_position?(node, char_position, document)
+        return false unless node && !node.is_a?(Prism::ProgramNode)
+
+        location = case node
+        when Prism::CallNode
+          node.message_loc
+        when Prism::ConstantPathNode
+          node.name_loc
+        else
+          node.location
+        end
+
+        location&.cached_end_code_units_offset(document.code_units_cache) == char_position
+      end
 
       #: (Hash[Symbol, untyped] position, Prism::Node? target) -> bool
       def position_outside_target?(position, target)
