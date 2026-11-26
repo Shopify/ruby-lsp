@@ -161,6 +161,8 @@ module RubyLsp
 
       #: (String spaces) -> void
       def handle_comment_line(spaces)
+        return unless supports_comment_continuation?
+
         add_edit_with_text("##{spaces}")
       end
 
@@ -189,6 +191,15 @@ module RubyLsp
       #: -> bool
       def supports_snippet_anchor?
         /Visual Studio Code|Cursor|VSCodium|Windsurf/.match?(@client_name)
+      end
+
+      # Whether the client moves the caret to the end of text inserted at the caret position, which comment
+      # continuation relies on to keep typing after the inserted `#`. This is not part of the LSP specification, so
+      # it is only known to work in VS Code, its forks and Zed. Clients that leave the caret before the inserted
+      # text (e.g. Emacs) end up with a stray `#` ahead of the cursor
+      #: -> bool
+      def supports_comment_continuation?
+        supports_snippet_anchor? || @client_name == "Zed"
       end
 
       #: (Integer line, Integer character) -> void
