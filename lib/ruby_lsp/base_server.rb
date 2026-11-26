@@ -39,46 +39,13 @@ module RubyLsp
       @reader.each_message do |message|
         method = message[:method]
 
-        # We must parse the document under a mutex lock or else we might switch threads and accept text edits in the
-        # source. Altering the source reference during parsing will put the parser in an invalid internal state, since
-        # it started parsing with one source but then it changed in the middle. We don't want to do this for text
-        # synchronization notifications
-        @global_state.synchronize do
-          uri = message.dig(:params, :textDocument, :uri)
+        uri = message.dig(:params, :textDocument, :uri)
 
-          if uri
-            begin
-              parsed_uri = URI(uri)
-              message[:params][:textDocument][:uri] = parsed_uri
-
-              # We don't want to try to parse documents on text synchronization notifications
-              unless method.start_with?("textDocument/did")
-                document = @store.get(parsed_uri)
-
-                # If the client supports request delegation and we're working with an ERB document and there was
-                # something to parse, then we have to maintain the client updated about the virtual state of the host
-                # language source
-                if document.parse! && @global_state.client_capabilities.supports_request_delegation &&
-                    document.is_a?(ERBDocument)
-
-                  send_message(
-                    Notification.new(
-                      method: "delegate/textDocument/virtualState",
-                      params: {
-                        textDocument: {
-                          uri: uri,
-                          text: document.host_language_source,
-                        },
-                      },
-                    ),
-                  )
-                end
-              end
-            rescue URI::Error
-              # A client can send a document URI with a scheme Ruby's URI parser rejects, so we don't want to fail
-            rescue Store::NonExistingDocumentError
-              # If we receive a request for a file that no longer exists, we don't want to fail
-            end
+        if uri
+          begin
+            message[:params][:textDocument][:uri] = URI(uri)
+          rescue URI::Error
+            # A client can send a document URI with a scheme Ruby's URI parser rejects, so we don't want to fail
           end
         end
 
@@ -178,9 +145,46 @@ module RubyLsp
         end
       end
 
+      parse_document(message)
       process_message(message)
       # Ensure we remove the request if it got cancelled while it was being processed
       @cancelled_requests.delete(id)
+    end
+
+    # Parse the document targeted by a request right before processing it. This must happen in the worker thread, after
+    # any text synchronization notifications that were queued ahead of the request have been applied. Parsing when the
+    # message is read would use the source from before those edits, and the request would then compute (and cache) its
+    # response from an outdated parse result
+    #: (Hash[Symbol, untyped] message) -> void
+    def parse_document(message)
+      method = message[:method]
+      uri = message.dig(:params, :textDocument, :uri)
+      return if method.nil? || method.start_with?("textDocument/did") || !uri.is_a?(URI::Generic)
+
+      @global_state.synchronize do
+        document = @store.get(uri)
+
+        # If the client supports request delegation and we're working with an ERB document and there was
+        # something to parse, then we have to maintain the client updated about the virtual state of the host
+        # language source
+        if document.parse! && @global_state.client_capabilities.supports_request_delegation &&
+            document.is_a?(ERBDocument)
+
+          send_message(
+            Notification.new(
+              method: "delegate/textDocument/virtualState",
+              params: {
+                textDocument: {
+                  uri: uri.to_s,
+                  text: document.host_language_source,
+                },
+              },
+            ),
+          )
+        end
+      rescue Store::NonExistingDocumentError
+        # If we receive a request for a file that no longer exists, we don't want to fail
+      end
     end
 
     #: ((Result | Error | Notification | Request) message) -> void

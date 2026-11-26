@@ -1779,6 +1779,43 @@ class ServerTest < Minitest::Test
     server&.run_shutdown
   end
 
+  def test_requests_parse_the_document_after_queued_edits_are_applied
+    # Text synchronization notifications are processed in the worker thread. A request read right after an edit must
+    # not be computed (and cached) from a parse result that predates that edit
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "fake.rb")).to_s
+    messages = [
+      {
+        method: "textDocument/didOpen",
+        params: { textDocument: { uri: uri, text: "def foo", version: 1, languageId: "ruby" } },
+      },
+      {
+        method: "textDocument/didChange",
+        params: {
+          textDocument: { uri: uri, version: 2 },
+          contentChanges: [
+            { range: { start: { line: 0, character: 7 }, end: { line: 0, character: 7 } }, text: "\nend" },
+          ],
+        },
+      },
+      { id: 1, method: "textDocument/diagnostic", params: { textDocument: { uri: uri } } },
+    ]
+    input = messages.map do |message|
+      body = message.to_json
+      "Content-Length: #{body.bytesize}\r\n\r\n#{body}"
+    end.join
+
+    @server.run_shutdown
+    @server = RubyLsp::Server.new(test_mode: true, reader: StringIO.new(input), writer: StringIO.new)
+    @server.global_state.stubs(:active_linters).returns([])
+
+    capture_subprocess_io { @server.start }
+
+    result = find_message(RubyLsp::Result, id: 1)
+    items = result.response #: as RubyLsp::Interface::FullDocumentDiagnosticReport
+      .items
+    assert_empty(items.map(&:message))
+  end
+
   private
 
   def run_initialize_server_with_setup_error(error)
