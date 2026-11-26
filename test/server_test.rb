@@ -242,7 +242,7 @@ class ServerTest < Minitest::Test
     assert_equal("/fake", index.configuration.instance_variable_get(:@workspace_path))
   end
 
-  def test_returns_nil_diagnostics_and_formatting_for_files_outside_workspace
+  def test_returns_nil_formatting_and_empty_diagnostics_for_files_outside_workspace
     capture_subprocess_io do
       @server.process_message({
         id: 1,
@@ -275,7 +275,97 @@ class ServerTest < Minitest::Test
     })
 
     result = find_message(RubyLsp::Result, id: 3)
-    assert_nil(result.response)
+    assert_equal("full", result.response.kind)
+    assert_empty(result.response.items)
+  end
+
+  def test_returns_empty_diagnostics_for_erb_and_rbs_documents
+    ["erb", "rbs"].each_with_index do |language_id, index|
+      uri = URI::Generic.from_path(path: File.join(Dir.pwd, "file.#{language_id}"))
+      @server.process_message({
+        method: "textDocument/didOpen",
+        params: {
+          textDocument: {
+            uri: uri,
+            text: "",
+            version: 1,
+            languageId: language_id,
+          },
+        },
+      })
+
+      request_id = index + 1
+      @server.process_message({
+        id: request_id,
+        method: "textDocument/diagnostic",
+        params: { textDocument: { uri: uri } },
+      })
+
+      report = find_message(RubyLsp::Result, id: request_id).response
+      assert_equal("full", report.kind)
+      assert_empty(report.items)
+    end
+  end
+
+  def test_returns_error_when_diagnostics_fail
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "file.rb"))
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    RubyLsp::Requests::Diagnostics.any_instance.expects(:perform).raises(StandardError, "boom")
+
+    capture_subprocess_io do
+      @server.process_message({
+        id: 1,
+        method: "textDocument/diagnostic",
+        params: { textDocument: { uri: uri } },
+      })
+    end
+
+    error = @server.pop_response
+    assert_instance_of(RubyLsp::Error, error)
+    assert_equal(RubyLsp::Constant::ErrorCodes::REQUEST_FAILED, error.code)
+    assert_equal("boom", error.message)
+  end
+
+  def test_returns_error_when_diagnostics_fail_with_invalid_formatter
+    uri = URI::Generic.from_path(path: File.join(Dir.pwd, "file.rb"))
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "",
+          version: 1,
+          languageId: "ruby",
+        },
+      },
+    })
+    RubyLsp::Requests::Diagnostics.any_instance.expects(:perform).raises(
+      RubyLsp::Requests::Request::InvalidFormatter,
+      "invalid formatter",
+    )
+
+    capture_subprocess_io do
+      @server.process_message({
+        id: 1,
+        method: "textDocument/diagnostic",
+        params: { textDocument: { uri: uri } },
+      })
+    end
+
+    error = @server.pop_response
+    assert_instance_of(RubyLsp::Error, error)
+    assert_equal(RubyLsp::Constant::ErrorCodes::REQUEST_FAILED, error.code)
+    assert_equal("invalid formatter", error.message)
   end
 
   def test_did_close_clears_diagnostics
