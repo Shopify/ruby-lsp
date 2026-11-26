@@ -619,6 +619,21 @@ class SetupBundlerTest < Minitest::Test
     end
   end
 
+  def test_preserves_spaces_in_bundle_setting_values
+    in_temp_dir do |dir|
+      Bundler.with_unbundled_env do
+        assert(system("bundle", "config", "set", "--local", "path", "vendor/my bundle"))
+        assert(system("bundle", "config", "set", "--local", "with", "production staging"))
+
+        setup = RubyLsp::SetupBundler.new(dir, launcher: true)
+        env = setup.send(:bundler_settings_as_env)
+
+        assert_equal("vendor/my bundle", env["BUNDLE_PATH"])
+        assert_equal("production:staging", env["BUNDLE_WITH"])
+      end
+    end
+  end
+
   def test_sets_bundler_version_to_avoid_reloads
     in_temp_dir do |dir|
       # Write the main Gemfile and lockfile with valid versions
