@@ -339,7 +339,9 @@ module RubyLsp
 
     #: -> void
     def bundle_install
-      Bundler::CLI::Install.new({ "no-cache" => true }).run
+      Bundler.settings.temporary(bin: @custom_dir.join("bin").to_s) do
+        Bundler::CLI::Install.new({ "no-cache" => true }).run
+      end
       correct_relative_remote_paths if @custom_lockfile.exist?
     end
 
@@ -350,7 +352,9 @@ module RubyLsp
       gems = GEMS_TO_UPDATE.reject { |dep| @dependencies[dep] }
       gems << "ruby-lsp-rails" if @rails_app && !@dependencies["ruby-lsp-rails"]
 
-      Bundler::CLI::Update.new({ conservative: true }, gems).run
+      Bundler.settings.temporary(bin: @custom_dir.join("bin").to_s) do
+        Bundler::CLI::Update.new({ conservative: true }, gems).run
+      end
       correct_relative_remote_paths if @custom_lockfile.exist?
       @needs_update_path.delete if @needs_update_path.exist?
       @last_updated_path.write(Time.now.iso8601)
