@@ -356,7 +356,13 @@ module RubyLsp
       unless @setup_error
         if defined?(Requests::Support::RuboCopFormatter)
           begin
-            @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
+            @global_state.register_formatter(
+              "rubocop_internal",
+              Requests::Support::RuboCopFormatter.new(
+                project_index: @global_state.graph,
+                workspace_path: @global_state.workspace_path,
+              ),
+            )
           rescue ::RuboCop::Error => e
             # The user may have provided unknown config switches in .rubocop or
             # is trying to load a non-existent config file.
@@ -1078,7 +1084,13 @@ module RubyLsp
       return unless defined?(Requests::Support::RuboCopFormatter)
 
       # Register a new runner to reload configurations
-      @global_state.register_formatter("rubocop_internal", Requests::Support::RuboCopFormatter.new)
+      @global_state.register_formatter(
+        "rubocop_internal",
+        Requests::Support::RuboCopFormatter.new(
+          project_index: @global_state.graph,
+          workspace_path: @global_state.workspace_path,
+        ),
+      )
 
       # Clear all document caches for pull diagnostics
       @store.each { |_uri, document| document.clear_cache("textDocument/diagnostic") }

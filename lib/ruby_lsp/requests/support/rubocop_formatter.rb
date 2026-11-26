@@ -11,11 +11,18 @@ module RubyLsp
       class RuboCopFormatter
         include Formatter
 
-        #: -> void
-        def initialize
-          @diagnostic_runner = RuboCopRunner.new #: RuboCopRunner
+        #: (?project_index: Rubydex::Graph?, ?workspace_path: String?) -> void
+        def initialize(project_index: nil, workspace_path: nil)
+          @diagnostic_runner = RuboCopRunner.new(
+            project_index: project_index,
+            workspace_path: workspace_path,
+          ) #: RuboCopRunner
           # -a is for "--auto-correct" (or "--autocorrect" on newer versions of RuboCop)
-          @format_runner = RuboCopRunner.new("-a") #: RuboCopRunner
+          @format_runner = RuboCopRunner.new(
+            "-a",
+            project_index: project_index,
+            workspace_path: workspace_path,
+          ) #: RuboCopRunner
         end
 
         # @override
