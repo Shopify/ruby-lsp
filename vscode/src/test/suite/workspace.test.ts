@@ -52,11 +52,11 @@ suite("Workspace", () => {
 
     await workspace.installOrUpdateServer(false);
 
-    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp language_server-protocol prism rbs");
+    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp bundler language_server-protocol prism rbs");
     assert.strictEqual(execStub.secondCall.args[0], "gem install ruby-lsp --env-shebang");
   });
 
-  test("updates ruby-lsp with env shebang", async () => {
+  test("installs ruby-lsp if bundler is missing", async () => {
     stubWorkspaceConfiguration(sandbox, { rubyLsp: { bundleGemfile: "" } });
     sandbox.stub(common, "featureEnabled").returns(false);
 
@@ -69,7 +69,24 @@ suite("Workspace", () => {
 
     await workspace.installOrUpdateServer(false);
 
-    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp language_server-protocol prism rbs");
+    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp bundler language_server-protocol prism rbs");
+    assert.strictEqual(execStub.secondCall.args[0], "gem install ruby-lsp --env-shebang");
+  });
+
+  test("updates ruby-lsp with env shebang", async () => {
+    stubWorkspaceConfiguration(sandbox, { rubyLsp: { bundleGemfile: "" } });
+    sandbox.stub(common, "featureEnabled").returns(false);
+
+    const execStub = sandbox.stub(common, "asyncExec");
+    execStub.onFirstCall().resolves({
+      stdout: "ruby-lsp (0.1.0)\nbundler (4.0.3)\nlanguage_server-protocol (3.17.0)\nprism (1.2.0)\nrbs (3.0.0)\n",
+      stderr: "",
+    });
+    execStub.onSecondCall().resolves({ stdout: "", stderr: "" });
+
+    await workspace.installOrUpdateServer(false);
+
+    assert.strictEqual(execStub.firstCall.args[0], "gem list ruby-lsp bundler language_server-protocol prism rbs");
     assert.strictEqual(execStub.secondCall.args[0], "gem update ruby-lsp --env-shebang");
   });
 
