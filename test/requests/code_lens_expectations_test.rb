@@ -34,7 +34,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
-    assert_equal(6, response.size)
+    assert_equal(8, response.size)
 
     assert_equal("▶ Run In Terminal", response[1]&.command&.title)
     assert_equal(
@@ -42,10 +42,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       response[1] #: as !nil
         .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", response[4]&.command&.title)
+    assert_equal("▶ Run In Terminal", response[5]&.command&.title)
     assert_equal(
       "bundle exec ruby -Itest /test/fake.rb --name FooTest#test_bar",
-      response[4] #: as !nil
+      response[5] #: as !nil
         .command.arguments[2],
     )
   end
@@ -68,7 +68,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
-    assert_equal(9, response.size)
+    assert_equal(12, response.size)
 
     assert_equal("▶ Run In Terminal", response[1]&.command&.title)
     assert_equal(
@@ -76,16 +76,16 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       response[1] #: as !nil
         .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", response[4]&.command&.title)
+    assert_equal("▶ Run In Terminal", response[5]&.command&.title)
     assert_equal(
       "bundle exec ruby -Ispec /spec/fake.rb --name \"/^FooTest::a(#|::)/\"",
-      response[4] #: as !nil
+      response[5] #: as !nil
         .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", response[7]&.command&.title)
+    assert_equal("▶ Run In Terminal", response[9]&.command&.title)
     assert_equal(
       "bundle exec ruby -Ispec /spec/fake.rb --name \"/^FooTest::a#test_0001_b$/\"",
-      response[7] #: as !nil
+      response[9] #: as !nil
         .command.arguments[2],
     )
   end
@@ -106,8 +106,8 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
-    # 3 for the describe, 3 for the specify
-    assert_equal(6, response.size)
+    # 4 for the describe, 4 for the specify
+    assert_equal(8, response.size)
   end
 
   def test_command_generation_for_test_unit
@@ -126,7 +126,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
-    assert_equal(6, response.size)
+    assert_equal(8, response.size)
 
     assert_equal("▶ Run In Terminal", response[1]&.command&.title)
     assert_equal(
@@ -134,10 +134,10 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
       response[1] #: as !nil
         .command.arguments[2],
     )
-    assert_equal("▶ Run In Terminal", response[4]&.command&.title)
+    assert_equal("▶ Run In Terminal", response[5]&.command&.title)
     assert_equal(
       "bundle exec ruby -Itest /test/fake.rb --testcase /FooTest/ --name test_bar",
-      response[4] #: as !nil
+      response[5] #: as !nil
         .command.arguments[2],
     )
   end
@@ -241,11 +241,12 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
 
         response = result.response
 
-        assert_equal(response.size, 4)
+        assert_equal(response.size, 5)
         assert_match("▶ Run", response[0].command.title)
         assert_match("▶ Run In Terminal", response[1].command.title)
         assert_match("Debug", response[2].command.title)
-        assert_match("Run Test", response[3].command.title)
+        assert_match("🔎 Reveal In Explorer", response[3].command.title)
+        assert_match("Run Test", response[4].command.title)
       ensure
         RubyLsp::Addon.addon_classes.clear
       end
@@ -270,7 +271,7 @@ class CodeLensExpectationsTest < ExpectationsTestRunner
     dispatcher.dispatch(document.ast)
     response = listener.perform
 
-    assert_equal(6, response.size)
+    assert_equal(8, response.size)
   end
 
   private

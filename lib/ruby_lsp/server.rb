@@ -9,6 +9,16 @@ module RubyLsp
       Bundler::Dsl::DSLError,
     ].freeze #: Array[singleton(StandardError)]
 
+    CODE_LENS_COMMANDS = {
+      "run_test" => { title: "▶ Run", command: "rubyLsp.runTest" },
+      "run_test_in_terminal" => { title: "▶ Run in terminal", command: "rubyLsp.runTestInTerminal" },
+      "debug_test" => { title: "⚙ Debug", command: "rubyLsp.debugTest" },
+      "reveal_in_explorer" => {
+        title: "🔎 Reveal In Explorer",
+        command: "rubyLsp.revealInExplorer",
+      },
+    }.freeze
+
     # Only for testing
     #: GlobalState
     attr_reader :global_state
@@ -1523,14 +1533,13 @@ module RubyLsp
       code_lens = message[:params]
       args = code_lens.dig(:data, :arguments)
 
-      case code_lens.dig(:data, :kind)
-      when "run_test"
-        code_lens[:command] = Interface::Command.new(title: "▶ Run", command: "rubyLsp.runTest", arguments: args)
-      when "run_test_in_terminal"
-        code_lens[:command] =
-          Interface::Command.new(title: "▶ Run in terminal", command: "rubyLsp.runTestInTerminal", arguments: args)
-      when "debug_test"
-        code_lens[:command] = Interface::Command.new(title: "⚙ Debug", command: "rubyLsp.debugTest", arguments: args)
+      command_data = CODE_LENS_COMMANDS[code_lens.dig(:data, :kind)]
+      if command_data
+        code_lens[:command] = Interface::Command.new(
+          title: command_data[:title],
+          command: command_data[:command],
+          arguments: args,
+        )
       end
 
       send_message(Result.new(

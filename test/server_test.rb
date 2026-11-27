@@ -1592,6 +1592,28 @@ class ServerTest < Minitest::Test
     assert_equal(arguments, command.arguments)
   end
 
+  def test_code_lens_resolve_populates_reveal_in_explorer_command
+    arguments = ["/workspace/test/foo_test.rb", "FooTest#test_something"]
+    @server.process_message({
+      id: 1,
+      method: "codeLens/resolve",
+      params: {
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
+        data: {
+          kind: "reveal_in_explorer",
+          arguments: arguments,
+        },
+      },
+    })
+
+    result = find_message(RubyLsp::Result, id: 1)
+    command = result.response[:command]
+
+    assert_equal("🔎 Reveal In Explorer", command.title)
+    assert_equal("rubyLsp.revealInExplorer", command.command)
+    assert_equal(arguments, command.arguments)
+  end
+
   def test_code_lens_caches_discovered_tests
     uri = URI::Generic.from_path(path: "/foo.rb")
     text = <<~RUBY
@@ -1622,7 +1644,7 @@ class ServerTest < Minitest::Test
     })
 
     result = find_message(RubyLsp::Result, id: 1)
-    assert_equal(6, result.response.length)
+    assert_equal(8, result.response.length)
 
     RubyLsp::Requests::DiscoverTests.any_instance.expects(:perform).never
     @server.process_message({

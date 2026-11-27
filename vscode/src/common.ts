@@ -19,6 +19,7 @@ export enum Command {
   RunTest = "rubyLsp.runTest",
   RunTestInTerminal = "rubyLsp.runTestInTerminal",
   DebugTest = "rubyLsp.debugTest",
+  RevealInExplorer = "rubyLsp.revealInExplorer",
   ShowSyntaxTree = "rubyLsp.showSyntaxTree",
   DiagnoseState = "rubyLsp.diagnoseState",
   DisplayAddons = "rubyLsp.displayAddons",
