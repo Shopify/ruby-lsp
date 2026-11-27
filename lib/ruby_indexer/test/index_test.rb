@@ -2262,6 +2262,12 @@ module RubyIndexer
       node = Prism.parse("class Foo; end").value.statements.body.first.constant_path
       assert_equal("Foo", Index.constant_name(node))
 
+      node = Prism.parse("Foo = 1").value.statements.body.first
+      assert_equal("Foo", Index.constant_name(node))
+
+      node = Prism.parse("Foo, Bar = 1, 2").value.statements.body.first.lefts.first
+      assert_equal("Foo", Index.constant_name(node))
+
       node = Prism.parse(<<~RUBY).value.statements.body.first.constant_path
         class class Foo
         end
