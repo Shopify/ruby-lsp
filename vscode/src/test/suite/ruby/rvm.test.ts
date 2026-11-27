@@ -59,7 +59,7 @@ suite("RVM", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
+        `${path.join(os.homedir(), ".rvm", "bin", "rvm-auto-ruby")} -E UTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: vscode.env.shell,

@@ -55,7 +55,7 @@ suite("Rbenv", () => {
     const { env, version, yjit } = await rbenv.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`rbenv exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`rbenv exec ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
@@ -101,7 +101,7 @@ suite("Rbenv", () => {
     const { env, version, yjit } = await rbenv.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`${rbenvPath} exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`${rbenvPath} exec ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
