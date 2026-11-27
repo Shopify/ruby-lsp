@@ -26,6 +26,7 @@ module RubyLsp
         register_events(
           dispatcher,
           :on_class_node_enter,
+          :on_def_node_enter,
           :on_call_node_enter,
           :on_call_node_leave,
         )
@@ -54,6 +55,31 @@ module RubyLsp
       def on_module_node_leave(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
         @spec_group_id_stack.pop
         super
+      end
+
+      #: (Prism::DefNode) -> void
+      def on_def_node_enter(node) # rubocop:disable RubyLsp/UseRegisterWithHandlerMethod
+        name = node.name.to_s
+        return unless name.start_with?("test_")
+
+        current_group = @spec_group_id_stack.last
+        return unless current_group.is_a?(DescribeGroup)
+
+        parent = latest_group
+        return unless parent.is_a?(Requests::Support::TestItem)
+
+        id = "#{parent.id}##{name}"
+
+        test_item = Requests::Support::TestItem.new(
+          id,
+          name,
+          @uri,
+          range_from_node(node),
+          framework: :minitest,
+        )
+
+        parent.add(test_item)
+        @response_builder.add_code_lens(test_item)
       end
 
       #: (Prism::CallNode) -> void
