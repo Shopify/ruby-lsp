@@ -551,6 +551,14 @@
           "type": "boolean",
           "default": true
         },
+        "rubyLsp.addonLanguageIds": {
+          "description": "Language IDs of other files to send to the server, for languages that an installed add-on supports (for example, `slim`). Without such an add-on, the server treats these files as Ruby",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
         "rubyLsp.featureFlags": {
           "description": "Allows opting in or out of feature flags",
           "type": "object",
