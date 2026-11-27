@@ -84,6 +84,11 @@ export class Ruby implements RubyInterface {
     }
   }
 
+  // Files watched to restart the server when the project's Ruby version changes.
+  get versionDefinitionFiles(): string[] {
+    return [".ruby-version", ".tool-versions", "mise.toml", ".mise.toml"];
+  }
+
   get env() {
     return this._env;
   }
