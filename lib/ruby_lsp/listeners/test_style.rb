@@ -152,7 +152,7 @@ module RubyLsp
       rescue Bundler::GemfileNotFound
         "ruby"
       end #: String
-      COMMAND = "#{BASE_COMMAND} -r#{MINITEST_REPORTER_PATH} -r#{TEST_UNIT_REPORTER_PATH}" #: String
+      COMMAND = "#{BASE_COMMAND} -r\"#{Shellwords.escape(MINITEST_REPORTER_PATH)}\" -r\"#{Shellwords.escape(TEST_UNIT_REPORTER_PATH)}\"" #: String
       ACCESS_MODIFIERS = [:public, :private, :protected].freeze
 
       #: (ResponseBuilders::TestCollection, GlobalState, Prism::Dispatcher, URI::Generic) -> void
