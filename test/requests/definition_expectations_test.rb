@@ -1333,6 +1333,166 @@ class DefinitionExpectationsTest < ExpectationsTestRunner
     end
   end
 
+  def test_definition_on_method_name_returns_the_method_itself
+    source = <<~RUBY
+      class Foo
+        def bar(baz)
+          baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 7, line: 1 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+
+      link = response.first
+      assert_equal(uri.to_s, link.target_uri)
+
+      selection_range = link.target_selection_range
+      assert_equal([[1, 6], [1, 9]], [selection_range.start, selection_range.end].map { |p| [p.line, p.character] })
+      assert_equal([1, 3], [link.target_range.start.line, link.target_range.end.line])
+    end
+  end
+
+  def test_definition_on_singleton_method_name_returns_the_method_itself
+    source = <<~RUBY
+      class Foo
+        def self.bar; end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 12, line: 1 } },
+      )
+
+      response = server.pop_response.response
+      assert_equal(1, response.length)
+
+      selection_range = response.first.target_selection_range
+      assert_equal([[1, 11], [1, 14]], [selection_range.start, selection_range.end].map { |p| [p.line, p.character] })
+    end
+  end
+
+  def test_definition_inside_method_declaration_outside_its_name_returns_nothing
+    source = <<~RUBY
+      class Foo
+        def bar(baz)
+          baz
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      # The `def` keyword, the parameter and the local variable in the body
+      [{ character: 3, line: 1 }, { character: 11, line: 1 }, { character: 5, line: 2 }].each do |position|
+        server.process_message(
+          id: 1,
+          method: "textDocument/definition",
+          params: { textDocument: { uri: uri }, position: position },
+        )
+
+        assert_empty(server.pop_response.response)
+      end
+    end
+  end
+
+  def test_definition_on_method_name_is_disabled_for_typed_true
+    source = <<~RUBY
+      # typed: true
+      class Foo
+        def bar
+        end
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 7, line: 2 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_on_constant_declaration_name_returns_the_declaration_itself
+    source = <<~RUBY
+      class Foo
+        BAR = 1
+        BAZ ||= 2
+        QUX, QUUX = 3, 4
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      selection_ranges = [{ character: 3, line: 1 }, { character: 3, line: 2 }, { character: 8, line: 3 }]
+        .map do |position|
+          server.process_message(
+            id: 1,
+            method: "textDocument/definition",
+            params: { textDocument: { uri: uri }, position: position },
+          )
+
+          response = server.pop_response.response
+          assert_equal(1, response.length)
+          assert_equal(uri.to_s, response.first.target_uri)
+
+          selection_range = response.first.target_selection_range
+          [selection_range.start, selection_range.end].map { |p| [p.line, p.character] }
+        end
+
+      assert_equal([[[1, 2], [1, 5]], [[2, 2], [2, 5]], [[3, 7], [3, 11]]], selection_ranges)
+    end
+  end
+
+  def test_definition_on_constant_declaration_outside_its_name_returns_nothing
+    source = <<~RUBY
+      class Foo
+        BAR = 1
+      end
+    RUBY
+
+    with_server(source, stub_no_typechecker: true) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 6, line: 1 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
+  def test_definition_on_constant_declaration_name_is_disabled_with_sorbet
+    source = <<~RUBY
+      # typed: false
+      class Foo
+        BAR = 1
+      end
+    RUBY
+
+    with_server(source) do |server, uri|
+      server.process_message(
+        id: 1,
+        method: "textDocument/definition",
+        params: { textDocument: { uri: uri }, position: { character: 3, line: 2 } },
+      )
+
+      assert_empty(server.pop_response.response)
+    end
+  end
+
   def test_definition_for_instance_variables_is_disabled_on_typed_strict
     source = <<~RUBY
       # typed: strict
