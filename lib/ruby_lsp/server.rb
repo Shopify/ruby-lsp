@@ -413,6 +413,21 @@ module RubyLsp
           ),
         )
       end
+
+      # Documents are parsed on creation, so the virtual state would otherwise only be sent after the first edit
+      if document.is_a?(ERBDocument) && @global_state.client_capabilities.supports_request_delegation
+        send_message(
+          Notification.new(
+            method: "delegate/textDocument/virtualState",
+            params: {
+              textDocument: {
+                uri: text_document[:uri].to_s,
+                text: document.host_language_source,
+              },
+            },
+          ),
+        )
+      end
     end
 
     #: (Hash[Symbol, untyped] message) -> void

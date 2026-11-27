@@ -1779,6 +1779,28 @@ class ServerTest < Minitest::Test
     server&.run_shutdown
   end
 
+  def test_did_open_sends_the_virtual_state_of_erb_documents
+    @server.global_state.apply_options({ capabilities: { experimental: { requestDelegation: true } } })
+    uri = URI("file:///foo.html.erb")
+
+    @server.process_message({
+      method: "textDocument/didOpen",
+      params: {
+        textDocument: {
+          uri: uri,
+          text: "<div><%= foo %></div>",
+          version: 1,
+          languageId: "erb",
+        },
+      },
+    })
+
+    notification = find_message(RubyLsp::Notification, "delegate/textDocument/virtualState")
+    document = @server.instance_variable_get(:@store).get(uri)
+    assert_equal(uri.to_s, notification.params[:textDocument][:uri])
+    assert_equal(document.host_language_source, notification.params[:textDocument][:text])
+  end
+
   private
 
   def run_initialize_server_with_setup_error(error)
