@@ -146,5 +146,84 @@ module RubyIndexer
       tree.insert("foo/bar", 456)
       assert_equal([456], tree.search("foo/bar"))
     end
+
+    def test_inserting_diverging_keys_splits_the_shared_edge
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("foobar", "foobar")
+      tree.insert("foobaz", "foobaz")
+
+      assert_equal(["foobar", "foobaz"], tree.search("").sort)
+      assert_equal(["foobar", "foobaz"], tree.search("f").sort)
+      assert_equal(["foobar", "foobaz"], tree.search("fooba").sort)
+      assert_equal(["foobar"], tree.search("foobar"))
+      assert_equal(["foobaz"], tree.search("foobaz"))
+    end
+
+    def test_inserting_a_key_that_ends_in_the_middle_of_an_existing_edge
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("foobar", "foobar")
+      tree.insert("foo", "foo")
+
+      assert_equal(["foo", "foobar"], tree.search("foo").sort)
+      assert_equal(["foobar"], tree.search("foob"))
+      assert_equal(["foobar"], tree.search("foobar"))
+    end
+
+    def test_searching_for_prefixes_that_end_in_the_middle_of_an_edge
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("foobar", "foobar")
+
+      assert_equal(["foobar"], tree.search("f"))
+      assert_equal(["foobar"], tree.search("fooba"))
+      assert_empty(tree.search("foox"))
+      assert_empty(tree.search("foobarx"))
+      assert_empty(tree.search("x"))
+    end
+
+    def test_keys_without_a_shared_prefix
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("abc", "abc")
+      tree.insert("xyz", "xyz")
+
+      assert_equal(["abc", "xyz"], tree.search("").sort)
+      assert_equal(["abc"], tree.search("a"))
+      assert_equal(["xyz"], tree.search("x"))
+    end
+
+    def test_deleting_after_an_edge_was_split
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("foobar", "foobar")
+      tree.insert("foobaz", "foobaz")
+
+      tree.delete("foobar")
+      assert_empty(tree.search("foobar"))
+      assert_equal(["foobaz"], tree.search("foo"))
+      assert_equal(["foobaz"], tree.search("foobaz"))
+
+      tree.insert("foobar", "again")
+      assert_equal(["again"], tree.search("foobar"))
+      assert_equal(["again", "foobaz"], tree.search("foo").sort)
+    end
+
+    def test_deleting_with_a_key_that_ends_in_the_middle_of_an_edge
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("foobar", "foobar")
+
+      tree.delete("foo")
+      assert_empty(tree.search("foobar"))
+      assert_empty(tree.search(""))
+    end
+
+    def test_deleting_keeps_the_ancestor_key_when_a_longer_key_is_removed
+      tree = PrefixTree.new #: PrefixTree[String]
+      tree.insert("foo", "foo")
+      tree.insert("foobar", "foobar")
+      tree.insert("foobaz", "foobaz")
+
+      tree.delete("foobar")
+      tree.delete("foobaz")
+      assert_equal(["foo"], tree.search(""))
+      assert_equal(["foo"], tree.search("foo"))
+    end
   end
 end
