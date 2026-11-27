@@ -357,6 +357,24 @@ module RubyLsp
       assert(inlay_hint_config.enabled?(:implicitHashValue))
     end
 
+    def test_on_type_formatting_comment_continuation_configuration
+      state = GlobalState.new
+      on_type_formatting_config = state.feature_configuration(:onTypeFormatting) #: as !nil
+      assert(on_type_formatting_config.enabled?(:commentContinuation))
+
+      state.apply_options({
+        initializationOptions: {
+          featuresConfiguration: {
+            onTypeFormatting: {
+              commentContinuation: false,
+            },
+          },
+        },
+      })
+
+      refute(on_type_formatting_config.enabled?(:commentContinuation))
+    end
+
     def test_initialize_features_with_enable_all_configuration
       state = GlobalState.new
       state.apply_options({
