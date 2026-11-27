@@ -58,7 +58,7 @@ suite("Mise", () => {
     const { env, version, yjit } = await mise.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`mise x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`mise x -- ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
@@ -104,7 +104,7 @@ suite("Mise", () => {
     const { env, version, yjit } = await mise.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`${misePath} x -- ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`${misePath} x -- ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 

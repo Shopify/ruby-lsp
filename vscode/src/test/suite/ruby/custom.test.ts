@@ -54,7 +54,7 @@ suite("Custom", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `my_version_manager activate_env && ruby -EUTF-8:UTF-8 '${activationUri.fsPath}'`,
+        `my_version_manager activate_env && ruby -E UTF-8:UTF-8 '${activationUri.fsPath}'`,
         {
           cwd: uri.fsPath,
           shell,

@@ -57,7 +57,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
+        `. ${os.homedir()}/.asdf/asdf.sh && asdf exec ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: "/bin/bash",
@@ -89,7 +89,7 @@ suite("Asdf", () => {
 
     assert.ok(
       execStub.calledOnceWithExactly(
-        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`,
+        `. ${os.homedir()}/.asdf/asdf.fish && asdf exec ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`,
         {
           cwd: workspacePath,
           shell: "/opt/homebrew/bin/fish",
@@ -123,7 +123,7 @@ suite("Asdf", () => {
     const { env, version, yjit } = await asdf.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`/opt/homebrew/bin/asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`/opt/homebrew/bin/asdf exec ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 
@@ -151,7 +151,7 @@ suite("Asdf", () => {
     const { env, version, yjit } = await asdf.activate();
 
     assert.ok(
-      execStub.calledOnceWithExactly(`asdf exec ruby -EUTF-8:UTF-8 '${activationPath.fsPath}'`, {
+      execStub.calledOnceWithExactly(`asdf exec ruby -E UTF-8:UTF-8 '${activationPath.fsPath}'`, {
         cwd: workspacePath,
         shell: vscode.env.shell,
 

@@ -27,7 +27,7 @@ suite("None", () => {
     context.dispose();
   });
 
-  test("Invokes Ruby directly", async () => {
+  test("Invokes Ruby directly with a separated encoding option", async () => {
     const workspacePath = fs.mkdtempSync(path.join(os.tmpdir(), "ruby-lsp-test-"));
     const uri = vscode.Uri.file(workspacePath);
     const workspaceFolder = {
@@ -52,7 +52,7 @@ suite("None", () => {
     const shell = os.platform() === "win32" ? undefined : vscode.env.shell;
 
     assert.ok(
-      execStub.calledOnceWithExactly(`ruby -EUTF-8:UTF-8 '${activationUri.fsPath}'`, {
+      execStub.calledOnceWithExactly(`ruby -E UTF-8:UTF-8 '${activationUri.fsPath}'`, {
         cwd: uri.fsPath,
         shell,
         env: process.env,

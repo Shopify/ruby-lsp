@@ -54,7 +54,7 @@ export abstract class VersionManager {
   protected async runEnvActivationScript(activatedRuby: string): Promise<ActivationResult> {
     const activationUri = vscode.Uri.joinPath(this.context.extensionUri, "activation.rb");
 
-    const result = await this.runScript(`${activatedRuby} -EUTF-8:UTF-8 '${activationUri.fsPath}'`);
+    const result = await this.runScript(`${activatedRuby} -E UTF-8:UTF-8 '${activationUri.fsPath}'`);
 
     const activationContent = new RegExp(`${ACTIVATION_SEPARATOR}([^]*)${ACTIVATION_SEPARATOR}`).exec(result.stderr);
 
