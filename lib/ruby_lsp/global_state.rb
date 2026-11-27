@@ -178,9 +178,14 @@ module RubyLsp
         "Detected test library: #{@test_library} (#{test_library_result.reason})",
       )
 
-      typechecker_result = detect_typechecker(all_dependencies)
+      bypass_typechecker = options.dig(:initializationOptions, :bypassTypechecker) == true ||
+        ENV["RUBY_LSP_BYPASS_TYPECHECKER"] == "true"
+
+      typechecker_result = bypass_typechecker ? nil : detect_typechecker(all_dependencies)
       @has_type_checker = !typechecker_result.nil?
-      if typechecker_result
+      if bypass_typechecker
+        notifications << Notification.window_log_message("Type checker integration disabled by user")
+      elsif typechecker_result
         notifications << Notification.window_log_message(
           "Ruby LSP detected this is a Sorbet project (#{typechecker_result.reason}) and will defer to the " \
             "Sorbet LSP for some functionality",
@@ -308,7 +313,6 @@ module RubyLsp
 
     #: (Array[String] dependencies) -> DetectionResult?
     def detect_typechecker(dependencies)
-      return if ENV["RUBY_LSP_BYPASS_TYPECHECKER"]
       return if dependencies.none?(/^sorbet-static/)
 
       DetectionResult.new("sorbet", "sorbet-static in dependencies")
